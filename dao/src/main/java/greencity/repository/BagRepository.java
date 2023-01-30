@@ -88,4 +88,13 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Oleg Vatuliak
      */
     List<Bag> getBagsByTariffsInfoAndMinAmountOfBags(TariffsInfo tariffId, MinAmountOfBag minAmountOfBag);
+
+    /**
+     * method, that returns {@link List} of {@link Bag} by Tariff id.
+     *
+     * @param tariffId {@link Long} - tariff id.
+     * @return {@link List}of{@link Bag}.
+     * @author Julia Seti
+     */
+    List<Bag> getAllByTariffsInfoId(Long tariffId);
 }

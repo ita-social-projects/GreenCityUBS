@@ -18,17 +18,14 @@ import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagMappingDto;
-import greencity.dto.bag.BagTransDto;
 import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagDto;
-import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
@@ -40,7 +37,6 @@ import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.employee.EmployeePositionDtoResponse;
-import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
@@ -105,6 +101,7 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.dto.tariff.TariffTranslationDto;
@@ -990,14 +987,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static EmployeeSignUpDto getEmployeeSignUpDto() {
-        return EmployeeSignUpDto.builder()
-            .name("testname")
-            .email("test@gmail.com")
-            .isUbs(true)
-            .build();
-    }
-
     public static TariffsInfoDto getTariffsInfoDto() {
         return TariffsInfoDto.builder()
             .id(1L)
@@ -1166,16 +1155,6 @@ public class ModelUtils {
             .lastName("B")
             .phoneNumber("09443332")
             .email("dsd@gmail.com")
-            .build();
-    }
-
-    public static PersonalDataDto getPersonalDataDto2() {
-        return PersonalDataDto.builder()
-            .id(1L)
-            .firstName("Dima")
-            .lastName("Petrov")
-            .phoneNumber("0666051373")
-            .email("mail@mail.ua")
             .build();
     }
 
@@ -1502,17 +1481,6 @@ public class ModelUtils {
                 .recipientName("Yuriy")
                 .recipientSurname("Gerasum")
                 .build())
-            .build();
-    }
-
-    public static BagOrderDto getBagOrderDto() {
-        return BagOrderDto.builder()
-            .bagId(1)
-            .price(350)
-            .capacity(120)
-            .bagAmount(1)
-            .name("Useless paper")
-            .nameEng("a")
             .build();
     }
 
@@ -2098,6 +2066,22 @@ public class ModelUtils {
             .build();
     }
 
+    public static GetTariffServiceDto getTariffServiceDto() {
+        return GetTariffServiceDto.builder()
+            .id(1)
+            .capacity(20)
+            .price(100)
+            .commission(50)
+            .fullPrice(150)
+            .capacity(100)
+            .minAmountOfBags(MinAmountOfBag.INCLUDE.name())
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("name")
+            .nameEng("nameEng")
+            .build();
+    }
+
     public static AssignEmployeesForOrderDto assignEmployeesForOrderDto() {
         return AssignEmployeesForOrderDto.builder()
             .orderId(1L)
@@ -2129,7 +2113,6 @@ public class ModelUtils {
             .commission(50)
             .price(120)
             .fullPrice(170)
-            .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
             .editedBy(getEmployee())
@@ -2206,18 +2189,20 @@ public class ModelUtils {
     }
 
     public static Bag getTariffBag() {
-        return Bag.builder().price(100)
+        return Bag.builder()
+            .capacity(20)
+            .price(100)
             .commission(50)
             .fullPrice(150)
             .capacity(100)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
-            .location(getLocation())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("name")
-            .nameEng("nameEng").build();
+            .nameEng("nameEng")
+            .build();
     }
 
     public static AdminCommentDto getAdminCommentDto() {
@@ -2418,37 +2403,6 @@ public class ModelUtils {
                 .name("name")
                 .nameEng("nameEng")
                 .limitIncluded(false)
-                .build());
-    }
-
-    public static List<Bag> getBag5list() {
-        return List.of(Bag.builder()
-            .id(1)
-            .price(100)
-            .capacity(10)
-            .commission(21)
-            .fullPrice(20)
-            .location(Location.builder().id(1L).build())
-            .name("name")
-            .nameEng("nameEng")
-            .limitIncluded(false)
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .createdBy(getEmployee())
-            .editedBy(getEmployee())
-            .build(),
-            Bag.builder()
-                .id(2)
-                .price(100)
-                .capacity(10)
-                .commission(21)
-                .fullPrice(21)
-                .location(Location.builder().id(1L).build())
-                .name("name")
-                .nameEng("nameEng")
-                .limitIncluded(false)
-                .minAmountOfBags(MinAmountOfBag.INCLUDE)
-                .createdBy(getEmployee())
-                .editedBy(getEmployee())
                 .build());
     }
 
@@ -3692,13 +3646,6 @@ public class ModelUtils {
             .expirationDate(LocalDate.now())
             .code("200")
             .certificateStatus("ACTIVE")
-            .build();
-    }
-
-    public static CourierTranslationDto getCourierTranslationDto() {
-        return CourierTranslationDto.builder()
-            .nameUk("Тест")
-            .nameEn("Test")
             .build();
     }
 

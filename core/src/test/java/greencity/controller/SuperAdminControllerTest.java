@@ -49,6 +49,7 @@ import org.springframework.validation.Validator;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -143,10 +144,30 @@ class SuperAdminControllerTest {
 
     @Test
     void getTariffService() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getTariffService"))
+        mockMvc.perform(get(ubsLink + "/{tariffId}/getTariffService", 1L)
+            .principal(principal)
+            .param("tariffId", "1L"))
             .andExpect(status().isOk())
             .andReturn();
-        verify(superAdminService).getTariffService();
+
+        verify(superAdminService).getTariffService(1L);
+        verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
+    void getTariffServiceIfTariffNotFoundException() throws Exception {
+        when(superAdminService.getTariffService(1L))
+            .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND));
+
+        mockMvc.perform(get(ubsLink + "/{tariffId}/getTariffService", 1L)
+            .principal(principal)
+            .param("tariffId", "1L"))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).getTariffService(1L);
         verifyNoMoreInteractions(superAdminService);
     }
 

@@ -38,12 +38,13 @@ public interface SuperAdminService {
     AddServiceDto addTariffService(AddServiceDto dto, String uuid);
 
     /**
-     * Method return All Tariff Service.
-     *
+     * Method return All Tariff Service by Tariff id.
+     * 
+     * @param id {@link Long} - selected tariff id.
      * @return {@link GetTariffServiceDto} - returned list of Tariff Service.
      * @author Vadym Makitra
      */
-    List<GetTariffServiceDto> getTariffService();
+    List<GetTariffServiceDto> getTariffService(long id);
 
     /**
      * Method for delete tariff service by Id.
@@ -158,7 +159,7 @@ public interface SuperAdminService {
      * @return {@link CourierDto}
      * @author Max Bohonko
      */
-    public CourierDto updateCourier(CourierUpdateDto dto);
+    CourierDto updateCourier(CourierUpdateDto dto);
 
     /**
      * Method for getting all couriers.
