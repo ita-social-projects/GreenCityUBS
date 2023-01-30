@@ -14,7 +14,6 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
-import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
@@ -97,13 +96,14 @@ public interface SuperAdminService {
     /**
      * Method for editing service by id.
      *
-     * @param dto  - entered info about field that need to edit.
+     * @param dto  {@link ServiceDto} - entered info about field that need to edit.
+     * @param id   {@link Long} - service id.
      * @param uuid - employee uuid.
      * @return {@link ServiceDto} - info about edited service.
      * @author Vadym Makitra
      * @author Julia Seti
      */
-    ServiceDto editService(EditServiceDto dto, Long id, String uuid);
+    ServiceDto editService(ServiceDto dto, Long id, String uuid);
 
     /**
      * Method for get all info about location.

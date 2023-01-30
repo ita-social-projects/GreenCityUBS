@@ -6,7 +6,6 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import greencity.dto.DetailsOfDeactivateTariffsDto;
-import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
@@ -228,7 +227,7 @@ class SuperAdminController {
      * @author Julia Seti
      */
 
-    @ApiOperation(value = "Edit service")
+    @ApiOperation(value = "Edit service by id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = ServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
@@ -238,7 +237,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PutMapping("/editService/{id}")
     public ResponseEntity<ServiceDto> editService(
-        @RequestBody @Valid EditServiceDto dto,
+        @RequestBody @Valid ServiceDto dto,
         @Valid @PathVariable Long id,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(dto, id, uuid));
