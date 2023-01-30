@@ -22,6 +22,7 @@ public class OrderStatusScheduler {
      */
     @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Kiev")
     public void autoChangeOrderStatusOnTheDayOfExport() {
+        log.info("Changing order status where status = \"CONFIRMED\" and date of export = day of order fulfillment");
         ubsManagementService.updateOrderStatusOnTheDayOfExport();
     }
 }
