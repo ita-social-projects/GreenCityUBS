@@ -1,0 +1,113 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - dev
+  paths:
+    exclude:
+    - README.md
+
+
+variables:
+  agentOS: ubuntu-latest
+  
+  azKeyVault: key-vault-greencity
+  jsonSecret: google-credentials
+  jsonFile: google-creds.json
+  jsonLocation: /site/wwwroot
+  
+  artifactName: drop
+  userRepoName: core
+  onbootJarName: app.jar
+  
+  azureSub: GreenCity2022
+  resourceGroup: GreenCity
+  userServiceName: greencity-ubs
+
+stages:
+- stage: Build
+  jobs: 
+  - job: Build
+    pool:
+      vmImage: $(agentOS)
+    steps:
+    - task: Maven@3
+      displayName: Maven package
+      inputs:
+        mavenPomFile: 'pom.xml'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.11'
+        mavenVersionOption: 'Default'
+        options: '-Dmaven.test.skip=true'
+        
+    - script: mv $(userRepoName)/target/*.jar $(userRepoName)/target/$(onbootJarName)
+      displayName: Rename user jar to app
+
+    - task: CopyFiles@2
+      displayName: Copy Files
+      inputs:
+        SourceFolder: '$(system.defaultworkingdirectory)'
+        Contents: '**/target/*.jar'
+        TargetFolder: '$(build.artifactstagingdirectory)'
+    
+    - task: CopyFiles@2
+      displayName: Copy Files
+      inputs:
+        SourceFolder: '$(system.defaultworkingdirectory)/greencity-ubs-chart'
+        Contents: '**'
+        TargetFolder: '$(build.artifactstagingdirectory)/greencity-ubs-chart'
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Artifact
+      inputs:
+        PathtoPublish: '$(build.artifactstagingdirectory)'
+        artifactName: '$(artifactName)'
+    
+    - task: Docker@2
+      displayName: Build image
+      inputs:
+        containerRegistry: 'Dockerhub_Skyere'
+        repository: 'skyere/greencityubs'
+        command: 'buildAndPush'
+        Dockerfile: 'Dockerfile'
+        tags: |
+          $(Build.BuildId)
+          latest
+
+- stage: Deploy
+  jobs:
+    - deployment: DeployUbs
+      displayName: Deploy UBS
+      pool:
+        vmImage: $(agentOS)
+      environment: 'production'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - download: none
+            
+            - task: DownloadBuildArtifacts@0
+              inputs:
+                buildType: 'current'
+                downloadType: 'single'
+                artifactName: '$(artifactName)'
+                downloadPath: '$(System.ArtifactsDirectory)'
+                
+            - task: HelmInstaller@0
+              inputs:
+                helmVersion: '3.9.0'
+                installKubectl: true
+                
+            - task: HelmDeploy@0
+              inputs:
+                connectionType: 'Kubernetes Service Connection'
+                kubernetesServiceConnection: 'production'
+                namespace: 'default'
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(System.ArtifactsDirectory)/drop/greencity-ubs-chart'
+                releaseName: 'ubs'
+                overrideValues: 'ingress.hostname=greencity-ubs.pick-up.city,deployment.image=skyere/greencityubs:$(Build.BuildId)'
+                arguments: ''
+                
