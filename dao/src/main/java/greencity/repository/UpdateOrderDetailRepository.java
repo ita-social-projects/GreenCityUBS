@@ -27,8 +27,8 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
      * @param bagId   bag id {@link Long}
      * @author Lilia Mokhnatska
      */
-    @Query(value = "SELECT AMOUNT FROM ORDER_BAG_MAPPING "
-        + "WHERE ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
+    @Query(value = "SELECT obm.amount FROM order_bag_mapping as obm "
+        + "WHERE obm.order_id = :orderId AND obm.bag_id = :bagId", nativeQuery = true)
     Long getAmount(Long orderId, Long bagId);
 
     /**

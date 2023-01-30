@@ -660,12 +660,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
             if (bagOptional.isPresent() && checkOrderStatusAboutConfirmWaste(order)) {
                 Optional<Long> confirmWasteWas = Optional.empty();
-                Optional<Long> startAmount = Optional.empty();
+                Optional<Long> initialAmount = Optional.empty();
                 Bag bag = bagOptional.get();
                 if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     confirmWasteWas =
                         Optional.ofNullable(updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue()));
-                    startAmount =
+                    initialAmount =
                         Optional.ofNullable(updateOrderRepository.getAmount(orderId, entry.getKey().longValue()));
                 }
                 if (entry.getValue().longValue() != confirmWasteWas.orElse(0L)) {
@@ -673,7 +673,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
                     values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
-                        .append(confirmWasteWas.orElse(startAmount.orElse(0L)))
+                        .append(confirmWasteWas.orElse(initialAmount.orElse(0L)))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
