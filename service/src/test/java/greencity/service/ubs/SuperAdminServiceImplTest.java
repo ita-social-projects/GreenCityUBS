@@ -148,7 +148,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void addTariffServiceTest() {
-        Bag bag = ModelUtils.getTariffBag();
+        Bag bag = ModelUtils.getNewBag();
         Employee employee = ModelUtils.getEmployee();
         String uuid = UUID.randomUUID().toString();
         Location location = ModelUtils.getLocation();

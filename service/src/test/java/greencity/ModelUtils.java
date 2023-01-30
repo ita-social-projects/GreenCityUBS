@@ -2190,6 +2190,7 @@ public class ModelUtils {
 
     public static Bag getTariffBag() {
         return Bag.builder()
+            .id(1)
             .capacity(20)
             .price(100)
             .commission(50)
@@ -2202,6 +2203,25 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
+            .location(getLocation())
+            .build();
+    }
+
+    public static Bag getNewBag() {
+        return Bag.builder()
+            .capacity(20)
+            .price(100)
+            .commission(50)
+            .fullPrice(150)
+            .capacity(100)
+            .createdAt(LocalDate.now())
+            .createdBy(getEmployee())
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("name")
+            .nameEng("nameEng")
+            .location(getLocation())
             .build();
     }
 
