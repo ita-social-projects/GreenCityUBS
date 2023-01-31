@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
@@ -196,6 +197,25 @@ class UBSManagementEmployeeServiceImplTest {
 
         verify(repository).findById(anyLong());
         verify(repository).findEmployeesByEmailAndIdNot(anyString(), anyLong());
+    }
+
+    @Test
+    void updateEmployeeEmailThrowsExceptionWhenUserWithSuchEmailIsAlreadyExistsTest() {
+        Employee employee = getEmployeeForUpdateEmailCheck();
+        EmployeeDto dto = getEmployeeDto();
+        Position position = ModelUtils.getPosition();
+
+        MockMultipartFile file = new MockMultipartFile("employeeDto",
+            "", "application/json", "random Bytes".getBytes());
+
+        when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
+        doThrow(HystrixRuntimeException.class).when(userRemoteClient).updateEmployeeEmail(dto.getEmail(), null);
+
+        assertThrows(BadRequestException.class, () -> employeeService.update(dto, file));
+        verify(positionRepository).existsPositionByIdAndName(position.getId(), position.getName());
+        verify(repository, times(2)).findById(anyLong());
+        verify(userRemoteClient).updateEmployeeEmail(dto.getEmail(), null);
     }
 
     @Test

@@ -118,7 +118,8 @@ public interface UserRemoteClient {
     /**
      * Update authorities in chosen employee.
      *
-     * @param dto contains email and list of positions.
+     * @param dto {@link UpdateEmployeeAuthoritiesDto} contains email and list of
+     *            positions.
      */
     @PutMapping("/user/authorities")
     void updateAuthorities(@RequestBody UpdateEmployeeAuthoritiesDto dto);
