@@ -17,9 +17,9 @@ class GetTariffInfoForEmployeeDtoMapperTest {
     GetTariffInfoForEmployeeDtoMapper mapper;
 
     @Test
-    void convertTariffsInfoToGetTariffInfoForEmployeeDtoTest() {
+    void convertTariffsInfoToGetTariffInfoForEmployeeDtoWithNotNullTariffLocationsTest() {
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
         GetTariffInfoForEmployeeDto dto = ModelUtils.getTariffInfoForEmployeeDto();
-        assertEquals(mapper.convert(tariffsInfo).getId(), dto.getId());
+        assertEquals(mapper.convert(tariffsInfo), dto);
     }
 }

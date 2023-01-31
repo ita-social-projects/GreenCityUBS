@@ -7,7 +7,13 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
-import greencity.dto.*;
+import greencity.dto.AddNewTariffDto;
+import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.LocationsDtos;
+import greencity.dto.OptionForColumnDTO;
+import greencity.dto.RegionDto;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
@@ -997,9 +1003,25 @@ public class ModelUtils {
                 .nameEn("Kyiv region")
                 .nameUk("Київська область")
                 .build())
-            .locationsDtos(List.of(new LocationsDtos()))
-            .receivingStationDtos(List.of(new GetReceivingStationDto()))
-            .courier(new CourierTranslationDto())
+            .locationsDtos(List.of(getLocationsDtos()))
+            .receivingStationDtos(List.of(getGetReceivingStationDto()))
+            .courier(getCourierTranslationDto())
+            .build();
+    }
+
+    public static LocationsDtos getLocationsDtos() {
+        return LocationsDtos
+            .builder()
+            .locationId(1L)
+            .nameUk("Київ")
+            .nameEn("Kyiv")
+            .build();
+    }
+
+    public static GetReceivingStationDto getGetReceivingStationDto() {
+        return GetReceivingStationDto
+            .builder()
+            .name("receivingStation")
             .build();
     }
 
@@ -3784,6 +3806,7 @@ public class ModelUtils {
 
     public static CourierTranslationDto getCourierTranslationDto() {
         return CourierTranslationDto.builder()
+            .id(1L)
             .nameUk("Тест")
             .nameEn("Test")
             .build();
