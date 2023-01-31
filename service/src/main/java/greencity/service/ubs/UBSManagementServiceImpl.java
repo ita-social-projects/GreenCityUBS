@@ -78,7 +78,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final BagRepository bagRepository;
-    private final UpdateOrderDetailRepository updateOrderRepository;
+    private final OrderDetailRepository orderDetailRepository;
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
     private final ReceivingStationRepository receivingStationRepository;
@@ -563,11 +563,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
                 if (Boolean.TRUE
-                    .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
-                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
-                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
+                    .equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
+                    orderDetailRepository.insertNewRecord(orderId, entry.getKey().longValue());
+                    orderDetailRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
-                updateOrderRepository
+                orderDetailRepository
                     .updateConfirm(entry.getValue(), orderId,
                         entry.getKey().longValue());
             }
@@ -576,11 +576,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
                 if (Boolean.TRUE
-                    .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
-                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
-                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
+                    .equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
+                    orderDetailRepository.insertNewRecord(orderId, entry.getKey().longValue());
+                    orderDetailRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
-                updateOrderRepository
+                orderDetailRepository
                     .updateExporter(entry.getValue(), orderId,
                         entry.getKey().longValue());
             }
@@ -658,20 +658,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
             Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
-
             if (bagOptional.isPresent() && checkOrderStatusAboutConfirmWaste(order)) {
                 Optional<Long> confirmWasteWas = Optional.empty();
+                Optional<Long> initialAmount = Optional.empty();
                 Bag bag = bagOptional.get();
-                if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
+                if (Boolean.TRUE.equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     confirmWasteWas =
-                        Optional.ofNullable(updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue()));
+                        Optional.ofNullable(orderDetailRepository.getConfirmWaste(orderId, entry.getKey().longValue()));
+                    initialAmount =
+                        Optional.ofNullable(orderDetailRepository.getAmount(orderId, entry.getKey().longValue()));
                 }
                 if (entry.getValue().longValue() != confirmWasteWas.orElse(0L)) {
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
                     values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
-                        .append(confirmWasteWas.orElse(0L))
+                        .append(confirmWasteWas.orElse(initialAmount.orElse(0L)))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
@@ -686,10 +688,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             if (bagOptional.isPresent() && checkOrderStatusAboutExportedWaste(order)) {
                 Optional<Long> exporterWasteWas = Optional.empty();
                 Bag bag = bagOptional.get();
-                if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
+                if (Boolean.TRUE.equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     exporterWasteWas =
                         Optional
-                            .ofNullable(updateOrderRepository.getExporterWaste(orderId, entry.getKey().longValue()));
+                            .ofNullable(orderDetailRepository.getExporterWaste(orderId, entry.getKey().longValue()));
                 }
                 if (entry.getValue().longValue() != exporterWasteWas.orElse(0L)) {
                     if (countOfChanges == 0) {
