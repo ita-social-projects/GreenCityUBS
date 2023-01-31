@@ -80,6 +80,16 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
     List<Bag> findAllByOrder(@Param("orderId") Long orderId);
 
     /**
+     * method, that returns {@link List} of {@link Bag} by tariff id.
+     *
+     * @param tariffInfoId tariff id {@link Long}
+     * @return {@link List} of {@link Bag} by tariffInfoId.
+     * @author Safarov Renat
+     */
+    @Query(value = "SELECT b FROM Bag as b where b.tariffsInfo.id =:tariffInfoId")
+    List<Bag> findBagsByTariffInfoId(@Param("tariffInfoId") Long tariffInfoId);
+
+    /**
      * method, that returns {@link List} of {@link Bag}'s that matches by
      * {@link TariffsInfo} and {@link MinAmountOfBag}.
      *
