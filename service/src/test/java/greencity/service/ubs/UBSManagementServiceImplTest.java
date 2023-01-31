@@ -1409,6 +1409,106 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void updateOrderAdminPageInfoWithStatusFormedTest() {
+        Order order = ModelUtils.getOrder();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(getTariffsInfo());
+        order.setOrderStatus(OrderStatus.FORMED);
+        EmployeeOrderPosition employeeOrderPosition = ModelUtils.getEmployeeOrderPosition();
+        Employee employee = ModelUtils.getEmployee();
+        List<Long> tariffsInfoIds = new ArrayList<>();
+        tariffsInfoIds.add(1L);
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDtoWithStatusFormed();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(order)).thenReturn(order);
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
+        when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(receivingStationRepository.findAll()).thenReturn(List.of(ModelUtils.getReceivingStation()));
+        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(List.of(employeeOrderPosition));
+
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
+
+        verify(orderRepository, times(3)).findById(1L);
+        verify(orderRepository, times(2)).save(order);
+        verify(employeeRepository, times(1)).findByEmail("test@gmail.com");
+        verify(employeeRepository).findTariffsInfoForEmployee(employee.getId());
+        verify(paymentRepository).findAllByOrderId(1L);
+        verify(receivingStationRepository).findAll();
+        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
+        verify(employeeOrderPositionRepository).deleteAll(List.of(employeeOrderPosition));
+        verifyNoMoreInteractions(orderRepository, employeeRepository, paymentRepository, receivingStationRepository,
+                employeeOrderPositionRepository);
+    }
+
+    @Test
+    void updateOrderAdminPageInfoWithStatusCanceledTest() {
+        Order order = ModelUtils.getOrder();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(getTariffsInfo());
+        order.setOrderStatus(OrderStatus.CANCELED);
+        EmployeeOrderPosition employeeOrderPosition = ModelUtils.getEmployeeOrderPosition();
+        Employee employee = ModelUtils.getEmployee();
+        List<Long> tariffsInfoIds = new ArrayList<>();
+        tariffsInfoIds.add(1L);
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDtoWithStatusCanceled();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(order)).thenReturn(order);
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
+        when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(receivingStationRepository.findAll()).thenReturn(List.of(ModelUtils.getReceivingStation()));
+        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(List.of(employeeOrderPosition));
+
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
+
+        verify(orderRepository, times(3)).findById(1L);
+        verify(orderRepository, times(2)).save(order);
+        verify(employeeRepository, times(1)).findByEmail("test@gmail.com");
+        verify(employeeRepository).findTariffsInfoForEmployee(employee.getId());
+        verify(paymentRepository).findAllByOrderId(1L);
+        verify(receivingStationRepository).findAll();
+        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
+        verify(employeeOrderPositionRepository).deleteAll(List.of(employeeOrderPosition));
+        verifyNoMoreInteractions(orderRepository, employeeRepository, paymentRepository, receivingStationRepository,
+                employeeOrderPositionRepository);
+    }
+
+    @Test
+    void updateOrderAdminPageInfoWithStatusBroughtItHimselfTest() {
+        Order order = ModelUtils.getOrder();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(getTariffsInfo());
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        EmployeeOrderPosition employeeOrderPosition = ModelUtils.getEmployeeOrderPosition();
+        Employee employee = ModelUtils.getEmployee();
+        List<Long> tariffsInfoIds = new ArrayList<>();
+        tariffsInfoIds.add(1L);
+        UpdateOrderPageAdminDto updateOrderPageAdminDto =
+            ModelUtils.updateOrderPageAdminDtoWithStatusBroughtItHimself();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(order)).thenReturn(order);
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
+        when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(receivingStationRepository.findAll()).thenReturn(List.of(ModelUtils.getReceivingStation()));
+        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(List.of(employeeOrderPosition));
+
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
+
+        verify(orderRepository, times(3)).findById(1L);
+        verify(orderRepository, times(2)).save(order);
+        verify(employeeRepository, times(1)).findByEmail("test@gmail.com");
+        verify(employeeRepository).findTariffsInfoForEmployee(employee.getId());
+        verify(paymentRepository).findAllByOrderId(1L);
+        verify(receivingStationRepository).findAll();
+        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
+        verify(employeeOrderPositionRepository).deleteAll(List.of(employeeOrderPosition));
+        verifyNoMoreInteractions(orderRepository, employeeRepository, paymentRepository, receivingStationRepository,
+                employeeOrderPositionRepository);
+    }
+
+    @Test
     void updateOrderAdminPageInfoTestThrowsException() {
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         Order order = ModelUtils.getOrder();
@@ -1700,7 +1800,6 @@ class UBSManagementServiceImplTest {
         Order order = getOrder();
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
         var receivingStation = ModelUtils.getReceivingStation();
-        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(Collections.emptyList());
         assertThrows(NotFoundException.class,

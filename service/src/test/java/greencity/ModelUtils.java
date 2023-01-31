@@ -18,7 +18,6 @@ import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagMappingDto;
-import greencity.dto.bag.BagTransDto;
 import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagOrderDto;
@@ -2583,6 +2582,54 @@ public class ModelUtils {
                 .positionId(2L)
                 .employeeId(2L)
                 .build()))
+            .build();
+    }
+
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDtoWithStatusCanceled() {
+        return UpdateOrderPageAdminDto.builder()
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.FORMED))
+                .build())
+            .exportDetailsDto(ExportDetailsDtoUpdate
+                .builder()
+                .dateExport(null)
+                .timeDeliveryFrom(null)
+                .timeDeliveryTo(null)
+                .receivingStationId(null)
+                .build())
+            .build();
+    }
+
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDtoWithStatusBroughtItHimself() {
+        return UpdateOrderPageAdminDto.builder()
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.BROUGHT_IT_HIMSELF))
+                .build())
+            .exportDetailsDto(ExportDetailsDtoUpdate
+                .builder()
+                .dateExport(null)
+                .timeDeliveryFrom(null)
+                .timeDeliveryTo(null)
+                .receivingStationId(null)
+                .build())
+            .build();
+    }
+
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDtoWithStatusFormed() {
+        return UpdateOrderPageAdminDto.builder()
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.FORMED))
+                .build())
+            .exportDetailsDto(ExportDetailsDtoUpdate
+                .builder()
+                .dateExport(null)
+                .timeDeliveryFrom(null)
+                .timeDeliveryTo(null)
+                .receivingStationId(null)
+                .build())
             .build();
     }
 
