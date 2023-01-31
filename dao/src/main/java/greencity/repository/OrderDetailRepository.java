@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UpdateOrderDetailRepository extends JpaRepository<Order, Integer> {
+public interface OrderDetailRepository extends JpaRepository<Order, Integer> {
     /**
      * Method for update Exported value.
      *
