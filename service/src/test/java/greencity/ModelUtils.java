@@ -2560,6 +2560,70 @@ public class ModelUtils {
             .build();
     }
 
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDtoWithNullFields() {
+        return UpdateOrderPageAdminDto.builder()
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
+                .build())
+            .exportDetailsDto(ExportDetailsDtoUpdate
+                .builder()
+                .dateExport(null)
+                .timeDeliveryFrom(null)
+                .timeDeliveryTo(null)
+                .receivingStationId(null)
+                .build())
+            .build();
+    }
+
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDtoWithStatusCanceled() {
+        return UpdateOrderPageAdminDto.builder()
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.FORMED))
+                .build())
+            .exportDetailsDto(ExportDetailsDtoUpdate
+                .builder()
+                .dateExport(null)
+                .timeDeliveryFrom(null)
+                .timeDeliveryTo(null)
+                .receivingStationId(null)
+                .build())
+            .build();
+    }
+
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDtoWithStatusBroughtItHimself() {
+        return UpdateOrderPageAdminDto.builder()
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.BROUGHT_IT_HIMSELF))
+                .build())
+            .exportDetailsDto(ExportDetailsDtoUpdate
+                .builder()
+                .dateExport(null)
+                .timeDeliveryFrom(null)
+                .timeDeliveryTo(null)
+                .receivingStationId(null)
+                .build())
+            .build();
+    }
+
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDtoWithStatusFormed() {
+        return UpdateOrderPageAdminDto.builder()
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.FORMED))
+                .build())
+            .exportDetailsDto(ExportDetailsDtoUpdate
+                .builder()
+                .dateExport(null)
+                .timeDeliveryFrom(null)
+                .timeDeliveryTo(null)
+                .receivingStationId(null)
+                .build())
+            .build();
+    }
+
     public static Location getLocationDto() {
         return Location.builder()
             .id(1L)
