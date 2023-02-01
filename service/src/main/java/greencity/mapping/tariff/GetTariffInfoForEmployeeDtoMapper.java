@@ -17,11 +17,13 @@ import java.util.stream.Collectors;
 public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<TariffsInfo, GetTariffInfoForEmployeeDto> {
     @Override
     protected GetTariffInfoForEmployeeDto convert(TariffsInfo source) {
-        Region region = source.getTariffLocations() != null
-            ? source.getTariffLocations().iterator().next().getLocation().getRegion()
-            : null;
-        RegionDto regionDto = region != null ? RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName())
-            .nameUk(region.getUkrName()).build() : null;
+        RegionDto regionDto = source.getTariffLocations().stream().map(
+            tariffLocation -> RegionDto.builder()
+                .regionId(tariffLocation.getLocation().getRegion().getId())
+                .nameUk(tariffLocation.getLocation().getRegion().getUkrName())
+                .nameEn(tariffLocation.getLocation().getRegion().getEnName())
+                .build())
+            .collect(Collectors.toList()).get(0);
 
         List<LocationsDtos> locationsDtos = source.getTariffLocations().stream()
             .map(tariffLocation -> LocationsDtos.builder()

@@ -69,7 +69,6 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
             }
 
-            @PostMapping("/ownSecurity/sign-up-employee")
             @Override
             public void signUpEmployee(EmployeeSignUpDto dto) {
                 log.error(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED, throwable);

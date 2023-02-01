@@ -19,7 +19,6 @@ public class UpdateEmployeeDtoMapper extends AbstractConverter<EmployeeDto, Empl
             .lastName(employeeDto.getLastName())
             .email(employeeDto.getEmail())
             .phoneNumber(employeeDto.getPhoneNumber())
-            .employeeStatus(EmployeeStatus.ACTIVE)
             .employeePosition(employeeDto.getEmployeePositions().stream().map(
                 positionDto -> Position.builder()
                     .id(positionDto.getId())

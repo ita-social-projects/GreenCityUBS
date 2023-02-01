@@ -120,8 +120,6 @@ public final class ErrorMessage {
         "Limits are not inputted properly. You should only input AmountOfBags or PriceOfOrder.";
     public static final String MAX_BAG_VALUE_IS_INCORRECT = "Max bag value should be greater than min";
     public static final String MAX_PRICE_VALUE_IS_INCORRECT = "Max price value should be greater than min";
-    public static final String USER_NOT_FOUND = "User with current email doesn't exist: ";
-    public static final String USER_NOT_FOUND_BY_PHONE = "User with current phone number doesn't exist: ";
 
     /**
      * Constructor.

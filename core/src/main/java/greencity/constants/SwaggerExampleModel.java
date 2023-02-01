@@ -48,7 +48,6 @@ public final class SwaggerExampleModel {
             + "{\n"
             + "  \"id\": 0,\n"
             + EMPLOYEE_BEGIN
-            + " \"image\": \"string\",\n"
             + EMPLOYEE_END
             + AFTER_EXAMPLE;
 }

@@ -68,6 +68,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee employee = modelMapper.map(dto, Employee.class);
         employee.setUuid(UUID.randomUUID().toString());
         employee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
+        employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
         if (image != null) {
             employee.setImagePath(fileService.upload(image));
         } else {
@@ -137,6 +138,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee updatedEmployee = modelMapper.map(dto, Employee.class);
         updatedEmployee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
         updatedEmployee.setUuid(upEmployee.getUuid());
+        updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
         if (image != null) {
             if (!updatedEmployee.getImagePath().equals(defaultImagePath)) {
                 fileService.delete(updatedEmployee.getImagePath());
