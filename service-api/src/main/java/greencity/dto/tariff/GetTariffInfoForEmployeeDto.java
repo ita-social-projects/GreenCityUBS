@@ -4,7 +4,12 @@ import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.GetReceivingStationDto;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
