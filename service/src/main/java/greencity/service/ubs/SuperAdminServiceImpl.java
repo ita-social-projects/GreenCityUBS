@@ -128,31 +128,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<GetTariffServiceDto> getTariffService() {
-        return bagRepository.findAll()
-            .stream()
-            .map(this::getTariffService)
-            .collect(Collectors.toList());
-    }
-
-    private GetTariffServiceDto getTariffService(Bag bag) {
-        return GetTariffServiceDto.builder()
-            .description(bag.getDescription())
-            .descriptionEng(bag.getDescriptionEng())
-            .price(bag.getPrice())
-            .capacity(bag.getCapacity())
-            .name(bag.getName())
-            .commission(bag.getCommission())
-            .nameEng(bag.getNameEng())
-            .fullPrice(bag.getFullPrice())
-            .id(bag.getId())
-            .createdAt(bag.getCreatedAt())
-            .createdBy(bag.getCreatedBy().getId())
-            .editedAt(bag.getEditedAt())
-            .editedBy(bag.getEditedBy() != null ? bag.getEditedBy().getId() : null)
-            .locationId(bag.getLocation().getId())
-            .minAmountOfBag(bag.getMinAmountOfBags().toString())
-            .build();
+    public List<GetTariffServiceDto> getTariffService(long tariffId) {
+        if (tariffsInfoRepository.existsById(tariffId)) {
+            return bagRepository.getAllByTariffsInfoId(tariffId)
+                .stream()
+                .map(it -> modelMapper.map(it, GetTariffServiceDto.class))
+                .collect(Collectors.toList());
+        } else {
+            throw new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId);
+        }
     }
 
     @Override
@@ -175,7 +159,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setName(dto.getName());
         bag.setDescription(dto.getDescription());
         bagRepository.save(bag);
-        return getTariffService(bag);
+        return modelMapper.map(bag, GetTariffServiceDto.class);
     }
 
     @Override
@@ -408,7 +392,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setMinAmountOfBags(MinAmountOfBag.INCLUDE);
         bagRepository.save(bag);
-        return getTariffService(bag);
+        return modelMapper.map(bag, GetTariffServiceDto.class);
     }
 
     @Override
@@ -420,7 +404,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
         bagRepository.save(bag);
-        return getTariffService(bag);
+        return modelMapper.map(bag, GetTariffServiceDto.class);
     }
 
     @Override
