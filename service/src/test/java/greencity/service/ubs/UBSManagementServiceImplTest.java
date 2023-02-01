@@ -50,11 +50,13 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static greencity.ModelUtils.*;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -250,16 +252,15 @@ class UBSManagementServiceImplTest {
 
     @Test
     void checkDeleteManualPayment() {
-        User user = ModelUtils.getTestUser();
-        Order order = ModelUtils.getFormedOrder();
-        user.setRecipientName("Yuriy");
-        user.setRecipientSurname("Gerasum");
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        Employee employee = getEmployee();
+        Order order = getFormedOrder();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         doNothing().when(paymentRepository).deletePaymentById(1L);
         doNothing().when(fileService).delete("");
-        doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum",
+        doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + getManualPayment().getPaymentId(),
+            employee.getFirstName() + "  " + employee.getLastName(),
             getOrder());
         ubsManagementService.deleteManualPayment(1L, "abc");
         verify(paymentRepository, times(1)).findById(1L);
@@ -268,15 +269,14 @@ class UBSManagementServiceImplTest {
 
     @Test
     void checkUpdateManualPayment() {
-        User user = ModelUtils.getTestUser();
+        Employee employee = getEmployee();
         Order order = ModelUtils.getFormedOrder();
-        user.setRecipientName("Yuriy");
-        user.setRecipientSurname("Gerasum");
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
-        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum",
+        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
+            employee.getFirstName() + "  " + employee.getLastName(),
             getOrder());
         ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
         verify(paymentRepository, times(1)).findById(1L);
@@ -287,11 +287,11 @@ class UBSManagementServiceImplTest {
 
     @Test
     void checkUpdateManualPaymentWithImage() {
-        User user = ModelUtils.getTestUser();
+        Employee employee = getEmployee();
         Order order = ModelUtils.getFormedHalfPaidOrder();
-        user.setRecipientName("Yuriy");
-        user.setRecipientSurname("Gerasum");
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        employee.setFirstName("Yuriy");
+        employee.setLastName("Gerasum");
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         MockMultipartFile file = new MockMultipartFile("manualPaymentDto",
             "", "application/json", "random Bytes".getBytes());
@@ -308,10 +308,8 @@ class UBSManagementServiceImplTest {
 
     @Test
     void checkManualPaymentNotFound() {
-        User user = ModelUtils.getTestUser();
-        user.setRecipientName("Yuriy");
-        user.setRecipientSurname("Gerasum");
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        Employee employee = getEmployee();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         ManualPaymentRequestDto manualPaymentRequestDto = getManualPaymentRequestDto();
         when(paymentRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
@@ -1759,7 +1757,7 @@ class UBSManagementServiceImplTest {
 
     @Test
     void updateManualPayment() {
-        User user = getUser();
+        Employee employee = getEmployee();
         Order order = getOrderUserFirst();
         Payment payment = getPayment();
         ManualPaymentRequestDto requestDto = getManualPaymentRequestDto();
@@ -1768,12 +1766,12 @@ class UBSManagementServiceImplTest {
         MockMultipartFile file = new MockMultipartFile("manualPaymentDto",
             "", "application/json", "random Bytes".getBytes());
 
-        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(employeeRepository.findByUuid(employee.getUuid())).thenReturn(Optional.of(employee));
         when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
         when(paymentRepository.save(any())).thenReturn(payment);
         when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.of(order));
 
-        ubsManagementService.updateManualPayment(payment.getId(), requestDto, file, user.getUuid());
+        ubsManagementService.updateManualPayment(payment.getId(), requestDto, file, employee.getUuid());
 
         verify(paymentRepository).save(any(Payment.class));
         verify(eventService).save(any(), any(), any());
@@ -1781,14 +1779,14 @@ class UBSManagementServiceImplTest {
 
     @Test
     void updateManualPaymentUserNotFoundExceptionTest() {
-        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class,
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.empty());
+        assertThrows(EntityNotFoundException.class,
             () -> ubsManagementService.updateManualPayment(1L, null, null, "abc"));
     }
 
     @Test
     void updateManualPaymentPaymentNotFoundExceptionTest() {
-        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(getUser()));
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.of(getEmployee()));
         when(paymentRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
             () -> ubsManagementService.updateManualPayment(1L, null, null, "abc"));
@@ -2042,56 +2040,58 @@ class UBSManagementServiceImplTest {
 
     @Test
     void deleteManualPaymentTest() {
-        Payment payment = ModelUtils.getManualPayment();
-        User user = ModelUtils.getTestUser();
+        Payment payment = getManualPayment();
+        Employee employee = getEmployee();
         Order order = getFormedOrder();
 
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
 
         ubsManagementService.deleteManualPayment(1L, "abc");
 
-        verify(userRepository).findUserByUuid("abc");
+        verify(employeeRepository).findByUuid("abc");
         verify(paymentRepository).findById(1L);
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService).delete(payment.getImagePath());
-        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + 1L,
-            user.getRecipientName() + "  " + user.getRecipientSurname(), payment.getOrder());
+        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
 
     }
 
     @Test
     void deleteManualTestWithoutImage() {
-        Payment payment = ModelUtils.getManualPayment();
-        User user = ModelUtils.getTestUser();
+        Payment payment = getManualPayment();
+        Employee employee = getEmployee();
         Order order = getFormedOrder();
         payment.setImagePath(null);
 
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
 
         ubsManagementService.deleteManualPayment(1L, "abc");
 
-        verify(userRepository).findUserByUuid("abc");
+        verify(employeeRepository).findByUuid("abc");
         verify(paymentRepository).findById(1L);
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService, times(0)).delete(payment.getImagePath());
-        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + 1L,
-            user.getRecipientName() + "  " + user.getRecipientSurname(), payment.getOrder());
+        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
     }
 
     @Test
     void deleteManualTestWithoutUser() {
-        when(userRepository.findUserByUuid("uuid25")).thenReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class, () -> ubsManagementService.deleteManualPayment(1L, "uuid25"));
+        when(employeeRepository.findByUuid("uuid25")).thenReturn(Optional.empty());
+        EntityNotFoundException ex =
+            assertThrows(EntityNotFoundException.class, () -> ubsManagementService.deleteManualPayment(1L, "uuid25"));
+        assertEquals(EMPLOYEE_NOT_FOUND, ex.getMessage());
     }
 
     @Test
     void deleteManualTestWithoutPayment() {
-        User user = getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        Employee employee = getEmployee();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         when(paymentRepository.findById(25L)).thenReturn(Optional.empty());
         assertThrows(ResponseStatusException.class, () -> ubsManagementService.deleteManualPayment(25L, "abc"));
     }
