@@ -1,6 +1,6 @@
 package greencity.filters;
 
-import greencity.enums.LocationStatus;
+import greencity.enums.TariffStatus;
 import greencity.entity.order.Courier;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
@@ -25,7 +25,7 @@ public class TariffsInfoSpecification implements Specification<TariffsInfo> {
         Path<Region> region = location.get("region");
         Path<Courier> courier = root.get("courier");
         Path<ReceivingStation> receivingStation = root.join("receivingStationList");
-        Path<LocationStatus> status = root.get("locationStatus");
+        Path<TariffStatus> status = root.get("tariffStatus");
 
         List<Predicate> predicates = new ArrayList<>();
 

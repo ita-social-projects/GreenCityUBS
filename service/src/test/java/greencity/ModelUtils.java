@@ -160,6 +160,7 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.TariffStatus;
 import greencity.util.Bot;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -3449,7 +3450,7 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .maxAmountOfBigBags(100L)
@@ -3477,7 +3478,7 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .maxAmountOfBigBags(100L)

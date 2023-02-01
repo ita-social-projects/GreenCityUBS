@@ -38,6 +38,7 @@ import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.MinAmountOfBag;
 import greencity.enums.StationStatus;
+import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -569,7 +570,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .createdAt(LocalDate.now())
             .courier(courier)
             .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
-            .locationStatus(LocationStatus.NEW)
+            .tariffStatus(TariffStatus.NEW)
             .creator(employeeRepository.findByUuid(uuid)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid)))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
@@ -608,7 +609,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfo.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBags());
         tariffsInfo.setMinAmountOfBigBags(dto.getMinAmountOfBigBags());
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
-        tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+        tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
         tariffsInfoRepository.save(tariffsInfo);
     }
 
@@ -618,7 +619,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
         tariffsInfo.setMaxPriceOfOrder(dto.getMaxPriceOfOrder());
         tariffsInfo.setMinPriceOfOrder(dto.getMinPriceOfOrder());
-        tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+        tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
         tariffsInfoRepository.save(tariffsInfo);
     }
 
@@ -646,7 +647,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             tariffsInfo.setMinAmountOfBigBags(setTariffLimitsDto.getMinAmountOfBigBags());
             tariffsInfo.setMaxAmountOfBigBags(setTariffLimitsDto.getMaxAmountOfBigBags());
             tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
-            tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+            tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
         }
 
         if (setTariffLimitsDto.getMinPriceOfOrder() > 0L && setTariffLimitsDto.getMinAmountOfBigBags() == 0L) {
@@ -660,7 +661,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             tariffsInfo.setMinPriceOfOrder(setTariffLimitsDto.getMinPriceOfOrder());
             tariffsInfo.setMaxPriceOfOrder(setTariffLimitsDto.getMaxPriceOfOrder());
             tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-            tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+            tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
         }
 
         tariffsInfoRepository.save(tariffsInfo);
@@ -675,7 +676,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             tariffsInfo.getTariffLocations());
 
         tariffsInfo.setTariffLocations(tariffLocations);
-        tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED);
+        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
 
         tariffsInfoRepository.save(tariffsInfo);
     }

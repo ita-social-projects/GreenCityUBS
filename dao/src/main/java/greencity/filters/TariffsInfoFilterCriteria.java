@@ -1,6 +1,6 @@
 package greencity.filters;
 
-import greencity.enums.LocationStatus;
+import greencity.enums.TariffStatus;
 import lombok.*;
 
 import java.io.Serializable;
@@ -14,5 +14,5 @@ public class TariffsInfoFilterCriteria implements Serializable {
     private Integer[] location;
     private Integer courier;
     private Integer[] receivingStation;
-    private LocationStatus status;
+    private TariffStatus status;
 }
