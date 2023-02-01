@@ -27,19 +27,46 @@ public class GoogleApiService {
      * @param searchRequest - address for search
      * @return GeocodingResults - return result from geocoding service
      */
-    public List<GeocodingResult> getResultFromGeoCode(String searchRequest) {
+//    public List<GeocodingResult> getResultFromGeoCode(String searchRequest) {
+//        List<GeocodingResult> geocodingResults = new ArrayList<>();
+//
+//        locales.forEach(locale -> {
+//            try {
+//                GeocodingResult[] results = GeocodingApi.newRequest(context)
+//                    .address(searchRequest).language(locale.getLanguage()).await();
+//                Collections.addAll(geocodingResults, results);
+//            } catch (IOException | InterruptedException | ApiException e) {
+//                Thread.currentThread().interrupt();
+//                throw new GoogleApiException(e.getMessage());
+//            }
+//        });
+//        return geocodingResults;
+//    }
+    public List<GeocodingResult> getResultFromGeoCodeEn(String searchRequest) {
         List<GeocodingResult> geocodingResults = new ArrayList<>();
 
-        locales.forEach(locale -> {
             try {
                 GeocodingResult[] results = GeocodingApi.newRequest(context)
-                    .address(searchRequest).language(locale.getLanguage()).await();
+                        .address(searchRequest).language(locales.get(1).getLanguage()).await();
                 Collections.addAll(geocodingResults, results);
             } catch (IOException | InterruptedException | ApiException e) {
                 Thread.currentThread().interrupt();
                 throw new GoogleApiException(e.getMessage());
             }
-        });
+        return geocodingResults;
+    }
+
+    public List<GeocodingResult> getResultFromGeoCodeUa(String searchRequest) {
+        List<GeocodingResult> geocodingResults = new ArrayList<>();
+
+            try {
+                GeocodingResult[] results = GeocodingApi.newRequest(context)
+                        .address(searchRequest).language(locales.get(0).getLanguage()).await();
+                Collections.addAll(geocodingResults, results);
+            } catch (IOException | InterruptedException | ApiException e) {
+                Thread.currentThread().interrupt();
+                throw new GoogleApiException(e.getMessage());
+            }
         return geocodingResults;
     }
 }
