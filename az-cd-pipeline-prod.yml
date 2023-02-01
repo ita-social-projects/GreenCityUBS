@@ -1,14 +1,13 @@
 trigger:
+  batch: true
   branches:
     include:
-    - dev, master
+    - dev
   paths:
     exclude:
     - README.md
-    
-pr: none
-    
-    
+
+
 variables:
   agentOS: ubuntu-latest
   
@@ -109,6 +108,6 @@ stages:
                 chartType: 'FilePath'
                 chartPath: '$(System.ArtifactsDirectory)/drop/greencity-ubs-chart'
                 releaseName: 'ubs'
-                overrideValues: 'deployment.image=skyere/greencityubs:$(Build.BuildId)'
+                overrideValues: 'ingress.hostname=greencity-ubs.pick-up.city,deployment.image=skyere/greencityubs:$(Build.BuildId)'
                 arguments: ''
                 
