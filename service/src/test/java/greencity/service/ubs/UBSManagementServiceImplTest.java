@@ -1438,7 +1438,7 @@ class UBSManagementServiceImplTest {
         verify(employeeOrderPositionRepository).findAllByOrderId(1L);
         verify(employeeOrderPositionRepository).deleteAll(List.of(employeeOrderPosition));
         verifyNoMoreInteractions(orderRepository, employeeRepository, paymentRepository, receivingStationRepository,
-                employeeOrderPositionRepository);
+            employeeOrderPositionRepository);
     }
 
     @Test
@@ -1471,7 +1471,7 @@ class UBSManagementServiceImplTest {
         verify(employeeOrderPositionRepository).findAllByOrderId(1L);
         verify(employeeOrderPositionRepository).deleteAll(List.of(employeeOrderPosition));
         verifyNoMoreInteractions(orderRepository, employeeRepository, paymentRepository, receivingStationRepository,
-                employeeOrderPositionRepository);
+            employeeOrderPositionRepository);
     }
 
     @Test
@@ -1505,7 +1505,7 @@ class UBSManagementServiceImplTest {
         verify(employeeOrderPositionRepository).findAllByOrderId(1L);
         verify(employeeOrderPositionRepository).deleteAll(List.of(employeeOrderPosition));
         verifyNoMoreInteractions(orderRepository, employeeRepository, paymentRepository, receivingStationRepository,
-                employeeOrderPositionRepository);
+            employeeOrderPositionRepository);
     }
 
     @Test
