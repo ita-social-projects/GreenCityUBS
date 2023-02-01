@@ -1509,6 +1509,36 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void updateOrderAdminPageInfoWithNullFieldsTest() {
+        Order order = ModelUtils.getOrder();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(getTariffsInfo());
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        EmployeeOrderPosition employeeOrderPosition = ModelUtils.getEmployeeOrderPosition();
+        Employee employee = ModelUtils.getEmployee();
+        List<Long> tariffsInfoIds = new ArrayList<>();
+        tariffsInfoIds.add(1L);
+        UpdateOrderPageAdminDto updateOrderPageAdminDto =
+            ModelUtils.updateOrderPageAdminDtoWithNullFields();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(order)).thenReturn(order);
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
+        when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(receivingStationRepository.findAll()).thenReturn(List.of(ModelUtils.getReceivingStation()));
+
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
+
+        verify(orderRepository, times(3)).findById(1L);
+        verify(orderRepository, times(2)).save(order);
+        verify(employeeRepository, times(1)).findByEmail("test@gmail.com");
+        verify(employeeRepository).findTariffsInfoForEmployee(employee.getId());
+        verify(paymentRepository).findAllByOrderId(1L);
+        verify(receivingStationRepository).findAll();
+        verifyNoMoreInteractions(orderRepository, employeeRepository, paymentRepository, receivingStationRepository);
+    }
+
+    @Test
     void updateOrderAdminPageInfoTestThrowsException() {
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         Order order = ModelUtils.getOrder();

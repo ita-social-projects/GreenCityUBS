@@ -2585,6 +2585,22 @@ public class ModelUtils {
             .build();
     }
 
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDtoWithNullFields() {
+        return UpdateOrderPageAdminDto.builder()
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
+                .build())
+            .exportDetailsDto(ExportDetailsDtoUpdate
+                .builder()
+                .dateExport(null)
+                .timeDeliveryFrom(null)
+                .timeDeliveryTo(null)
+                .receivingStationId(null)
+                .build())
+            .build();
+    }
+
     public static UpdateOrderPageAdminDto updateOrderPageAdminDtoWithStatusCanceled() {
         return UpdateOrderPageAdminDto.builder()
             .generalOrderInfo(OrderDetailStatusRequestDto
