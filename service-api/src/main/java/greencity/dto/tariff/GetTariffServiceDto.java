@@ -3,7 +3,6 @@ package greencity.dto.tariff;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -14,21 +13,23 @@ import java.time.LocalDate;
 @EqualsAndHashCode
 public class GetTariffServiceDto {
     @NotNull
-    private String name;
+    private Integer id;
     @NotNull
     private Integer capacity;
     @NotNull
     private Integer price;
+    @NotNull
     private Integer commission;
-    private String description;
-    private String descriptionEng;
-    private String nameEng;
+    @NotNull
     private Integer fullPrice;
-    private Integer id;
-    private LocalDate createdAt;
-    private Long createdBy;
-    private LocalDate editedAt;
-    private Long editedBy;
-    private Long locationId;
-    private String minAmountOfBag;
+    @NotNull
+    private String name;
+    @NotNull
+    private String nameEng;
+    @NotNull
+    private String description;
+    @NotNull
+    private String descriptionEng;
+    @NotNull
+    private String minAmountOfBags;
 }
