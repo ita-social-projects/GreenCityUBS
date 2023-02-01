@@ -6,7 +6,6 @@ import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.GetReceivingStationDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.user.Region;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 

@@ -3,7 +3,6 @@ package greencity.mapping.employee;
 import greencity.dto.employee.EmployeeDto;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
-import greencity.enums.EmployeeStatus;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
