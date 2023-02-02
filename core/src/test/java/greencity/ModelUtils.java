@@ -11,7 +11,6 @@ import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -183,23 +182,6 @@ public class ModelUtils {
         return NotificationDto.builder()
             .title("Test")
             .body("Test")
-            .build();
-    }
-
-    public static AddEmployeeDto getAddEmployeeDto() {
-        return AddEmployeeDto.builder()
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .employeePositions(List.of(PositionDto.builder()
-                .id(1L)
-                .name("Водій")
-                .build()))
-            .receivingStations(List.of(ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
             .build();
     }
 
@@ -412,6 +394,7 @@ public class ModelUtils {
 
     public static GetTariffServiceDto getTariffServiceDto() {
         return GetTariffServiceDto.builder()
+            .id(1)
             .name("Бавовняна сумка")
             .capacity(120)
             .price(120)
