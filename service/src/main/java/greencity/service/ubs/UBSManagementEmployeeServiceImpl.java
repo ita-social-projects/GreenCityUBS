@@ -91,7 +91,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
                 .collect(Collectors.toList()))
             .isUbs(true)
             .build();
-        userRemoteClient.signUpEmployee(signUpDto);
+        try {
+            userRemoteClient.signUpEmployee(signUpDto);
+        } catch (HystrixRuntimeException e) {
+            throw new BadRequestException("User with this email already exists: " + signUpDto.getEmail());
+        }
     }
 
     /**

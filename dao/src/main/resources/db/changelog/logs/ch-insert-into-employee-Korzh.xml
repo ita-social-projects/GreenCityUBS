@@ -11,16 +11,6 @@
             <column name="email">adminubs@starmaker.email</column>
             <column name="status">ACTIVE</column>
         </insert>
-        
-        <insert tableName="tariff_infos_receiving_employee_mapping">
-            <column name="employee_id">1</column>
-            <column name ="tariffs_info_id">1</column>
-        </insert>
-
-        <insert tableName="tariff_infos_receiving_employee_mapping">
-            <column name="employee_id">1</column>
-            <column name ="tariffs_info_id">2</column>
-        </insert>
     </changeSet>
     
 </databaseChangeLog>
