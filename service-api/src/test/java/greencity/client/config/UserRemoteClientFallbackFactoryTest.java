@@ -80,7 +80,7 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
-    void updateEmployeeEmail() {
+    void updateEmployeeEmailTest() {
         String newEmail = "new@mail.com";
         assertThrows(RemoteServerUnavailableException.class, () -> client.updateEmployeeEmail(newEmail, USER_UUID));
     }

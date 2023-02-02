@@ -78,20 +78,21 @@ class ManagementEmployeeControllerTest {
             .build();
     }
 
-//    @Test
-//    void saveEmployeeTest() throws Exception {
-//        SaveEmployeeDto dto = new SaveEmployeeDto();
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        String responseJSON = objectMapper.writeValueAsString(dto);
-//        MockMultipartFile jsonFile = new MockMultipartFile("employeeDto",
-//            "", "application/json", responseJSON.getBytes());
-//
-//        mockMvc.perform(multipart(UBS_LINK + SAVE_LINK)
-//            .file(jsonFile)
-//            .principal(principal)
-//            .contentType(MediaType.APPLICATION_JSON))
-//            .andExpect(status().isCreated());
-//    }
+    @Test
+    void saveEmployeeTest() throws Exception {
+        EmployeeDto dto = new EmployeeDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        MockMultipartFile jsonFile = new MockMultipartFile("employeeDto",
+            "", "application/json", responseJSON.getBytes());
+
+        mockMvc.perform(multipart(UBS_LINK + SAVE_LINK)
+            .file(jsonFile)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+        verify(service).save(dto, null);
+    }
 
     @Test
     void saveBadRequestTest() throws Exception {
