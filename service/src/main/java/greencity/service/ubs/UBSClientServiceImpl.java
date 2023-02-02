@@ -1160,8 +1160,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         for (Address address : addressList) {
             address.setUser(user);
-            addressRepo.save(address);
         }
+        user.setAddresses(addressList);
         User savedUser = userRepository.save(user);
         List<AddressDto> mapperAddressDto =
             addressList.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
