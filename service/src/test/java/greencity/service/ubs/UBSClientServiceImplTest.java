@@ -651,9 +651,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(addressDto.get(0), Address.class)).thenReturn(address.get(0));
         when(modelMapper.map(addressDto.get(1), Address.class)).thenReturn(address.get(1));
         when(userRepository.save(user)).thenReturn(user);
-        for (Address address1 : address) {
-            when(addressRepository.save(address1)).thenReturn(address1);
-        }
         when(modelMapper.map(address.get(0), AddressDto.class)).thenReturn(addressDto.get(0));
         when(modelMapper.map(address.get(1), AddressDto.class)).thenReturn(addressDto.get(1));
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
