@@ -429,7 +429,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadRequestException(ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED);
         }
 
-        OrderAddressDtoRequest dtoRequest = retrieveCorrectDtoRequest(getLocationDto(addressRequestDto.getSearchAddress()), addressRequestDto);
+        OrderAddressDtoRequest dtoRequest = retrieveCorrectDtoRequest(getLocationDto(addressRequestDto.getSearchAddress()), addressRequestDto.getDistrict());
 
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
             modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
@@ -464,46 +464,46 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
         OrderAddressDtoRequest dtoRequest;
-//        if (addressRequestDto.getSearchAddress() != null) {
-//            dtoRequest = getLocationDto(googleApiService.getResultFromGeoCode(addressRequestDto.getSearchAddress()));
-//            checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
-//        } else {
-//            dtoRequest = addressRequestDto;
-//        }
-//
-//        if (addresses != null) {
-//            checkIfAddressExist(addresses, dtoRequest);
-//        }
-//
-//        Address address = addressRepo.findById(dtoRequest.getId())
-//            .orElseThrow(() -> new NotFoundException(
-//                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
-//        if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
-//            address = null;
-//        }
-//
-//        final AddressStatus addressStatus = address != null ? address.getAddressStatus() : null;
-//        final User addressUser = address != null ? address.getUser() : null;
-//        final Boolean addressActual = address != null ? address.getActual() : null;
+        if (addressRequestDto.getSearchAddress() != null) {
+            dtoRequest = retrieveCorrectDtoRequest(getLocationDto(addressRequestDto.getSearchAddress()), addressRequestDto.getDistrict());
+            checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
+        } else {
+            dtoRequest = addressRequestDto;
+        }
 
-//        address = modelMapper.map(dtoRequest, Address.class);
-//
-//        if (!currentUser.equals(addressUser)) {
-//            address.setId(null);
-//        }
-//
-//        address.setUser(addressUser);
-//        address.setActual(true);
-//        address.setAddressStatus(addressStatus);
-//        address.setActual(addressActual);
-//        addressRepo.save(address);
+        if (addresses != null) {
+            checkIfAddressExist(addresses, dtoRequest);
+        }
+
+        Address address = addressRepo.findById(dtoRequest.getId())
+            .orElseThrow(() -> new NotFoundException(
+                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
+        if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
+            address = null;
+        }
+
+        final AddressStatus addressStatus = address != null ? address.getAddressStatus() : null;
+        final User addressUser = address != null ? address.getUser() : null;
+        final Boolean addressActual = address != null ? address.getActual() : null;
+
+        address = modelMapper.map(dtoRequest, Address.class);
+
+        if (!currentUser.equals(addressUser)) {
+            address.setId(null);
+        }
+
+        address.setUser(addressUser);
+        address.setActual(true);
+        address.setAddressStatus(addressStatus);
+        address.setActual(addressActual);
+        addressRepo.save(address);
 
         return findAllAddressesForCurrentOrder(uuid);
     }
 
-    private OrderAddressDtoRequest retrieveCorrectDtoRequest(List<OrderAddressDtoRequest> dtoRequests, CreateAddressRequestDto addressRequestDto){
+    private OrderAddressDtoRequest retrieveCorrectDtoRequest(List<OrderAddressDtoRequest> dtoRequests, String district){
         return dtoRequests.stream()
-                .filter(a -> a.getDistrict() != null && a.getDistrict().equals(addressRequestDto.getDistrict()))
+                .filter(a -> a.getDistrict() != null && a.getDistrict().equals(district))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Address not found"));
     }
@@ -1177,7 +1177,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         for (Address address : addressList) {
             address.setUser(user);
-//            addressRepo.save(address);
         }
         user.setAddresses(addressList);
         User savedUser = userRepository.save(user);
