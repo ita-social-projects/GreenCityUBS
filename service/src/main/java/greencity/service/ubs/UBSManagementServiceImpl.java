@@ -1851,4 +1851,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .build());
         notificationService.notifyBonuses(order, (long) points);
     }
+
+    @Override
+    public void updateOrderStatusToExpected() {
+        orderRepository.updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
+            OrderStatus.ON_THE_ROUTE.name(),
+            LocalDate.now());
+    }
 }
