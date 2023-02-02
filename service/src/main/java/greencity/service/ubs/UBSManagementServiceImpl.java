@@ -1810,7 +1810,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public void updateOrderStatusOnTheDayOfExport() {
-        orderRepository.updateOrderStatusOnTheDayOfExport(OrderStatus.ON_THE_ROUTE.name(), LocalDate.now());
+    public void updateOrderStatusToExpected() {
+        orderRepository.updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
+            OrderStatus.ON_THE_ROUTE.name(),
+            LocalDate.now());
     }
 }

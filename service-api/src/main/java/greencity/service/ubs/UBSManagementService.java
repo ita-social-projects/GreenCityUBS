@@ -301,5 +301,5 @@ public interface UBSManagementService {
      *
      * @author Anatolii Shapiro.
      */
-    void updateOrderStatusOnTheDayOfExport();
+    void updateOrderStatusToExpected();
 }

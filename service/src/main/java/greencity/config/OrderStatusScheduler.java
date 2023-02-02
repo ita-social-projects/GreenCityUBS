@@ -14,15 +14,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 @NoArgsConstructor
 public class OrderStatusScheduler {
     @Autowired
-    UBSManagementServiceImpl ubsManagementService;
+    private UBSManagementServiceImpl ubsManagementService;
 
     /**
-     * System checks BD at 00.00 daily and sends a message if the status of the
-     * order has changed to "ON_THE_ROUTE" on the day of export.
+     * Method auto update the orders status from "CONFIRMED" to "ON_THE_ROUTE" on
+     * the day of export.
      */
     @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Kiev")
-    public void autoChangeOrderStatusOnTheDayOfExport() {
-        log.info("Changing order status where status = \"CONFIRMED\" and date of export = day of order fulfillment");
-        ubsManagementService.updateOrderStatusOnTheDayOfExport();
+    public void autoUpdateOrderStatus() {
+        log.info("Update order status from actual status to expected status by the day of export");
+        ubsManagementService.updateOrderStatusToExpected();
     }
 }

@@ -2115,8 +2115,9 @@ class UBSManagementServiceImplTest {
 
     @Test
     void updateOrderStatusOnTheDayOfExportTest() {
-        ubsManagementService.updateOrderStatusOnTheDayOfExport();
-        verify(orderRepository).updateOrderStatusOnTheDayOfExport(OrderStatus.ON_THE_ROUTE.name(),
+        ubsManagementService.updateOrderStatusToExpected();
+        verify(orderRepository).updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
+            OrderStatus.ON_THE_ROUTE.name(),
             LocalDate.now());
     }
 }
