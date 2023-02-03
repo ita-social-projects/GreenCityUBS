@@ -22,51 +22,42 @@ public class GoogleApiService {
     private static final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
 
     /**
-     * Send request to the google and receive response with geocoding.
+     * Send request to the google and receive response with geocoding in english.
      *
      * @param searchRequest - address for search
      * @return GeocodingResults - return result from geocoding service
      */
-//    public List<GeocodingResult> getResultFromGeoCode(String searchRequest) {
-//        List<GeocodingResult> geocodingResults = new ArrayList<>();
-//
-//        locales.forEach(locale -> {
-//            try {
-//                GeocodingResult[] results = GeocodingApi.newRequest(context)
-//                    .address(searchRequest).language(locale.getLanguage()).await();
-//                Collections.addAll(geocodingResults, results);
-//            } catch (IOException | InterruptedException | ApiException e) {
-//                Thread.currentThread().interrupt();
-//                throw new GoogleApiException(e.getMessage());
-//            }
-//        });
-//        return geocodingResults;
-//    }
     public List<GeocodingResult> getResultFromGeoCodeEn(String searchRequest) {
         List<GeocodingResult> geocodingResults = new ArrayList<>();
 
-            try {
-                GeocodingResult[] results = GeocodingApi.newRequest(context)
-                        .address(searchRequest).language(locales.get(1).getLanguage()).await();
-                Collections.addAll(geocodingResults, results);
-            } catch (IOException | InterruptedException | ApiException e) {
-                Thread.currentThread().interrupt();
-                throw new GoogleApiException(e.getMessage());
-            }
+        try {
+            GeocodingResult[] results = GeocodingApi.newRequest(context)
+                .address(searchRequest).language(locales.get(1).getLanguage()).await();
+            Collections.addAll(geocodingResults, results);
+        } catch (IOException | InterruptedException | ApiException e) {
+            Thread.currentThread().interrupt();
+            throw new GoogleApiException(e.getMessage());
+        }
         return geocodingResults;
     }
 
+    /**
+     * Send request to the google and receive response with geocoding in ukrainian.
+     *
+     * @param searchRequest - address for search
+     * @return GeocodingResults - return result from geocoding service
+     */
     public List<GeocodingResult> getResultFromGeoCodeUa(String searchRequest) {
         List<GeocodingResult> geocodingResults = new ArrayList<>();
 
-            try {
-                GeocodingResult[] results = GeocodingApi.newRequest(context)
-                        .address(searchRequest).language(locales.get(0).getLanguage()).await();
-                Collections.addAll(geocodingResults, results);
-            } catch (IOException | InterruptedException | ApiException e) {
-                Thread.currentThread().interrupt();
-                throw new GoogleApiException(e.getMessage());
-            }
+        try {
+            GeocodingResult[] results = GeocodingApi.newRequest(context)
+                .address(searchRequest).language(locales.get(0).getLanguage()).await();
+            Collections.addAll(geocodingResults, results);
+        } catch (IOException | InterruptedException | ApiException e) {
+            Thread.currentThread().interrupt();
+            throw new GoogleApiException(e.getMessage());
+        }
         return geocodingResults;
     }
 }

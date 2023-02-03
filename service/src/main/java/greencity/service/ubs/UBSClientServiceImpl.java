@@ -502,15 +502,14 @@ public class UBSClientServiceImpl implements UBSClientService {
         return findAllAddressesForCurrentOrder(uuid);
     }
 
-    private OrderAddressDtoRequest retrieveCorrectDtoRequest(String searchRequest){
-
+    private OrderAddressDtoRequest retrieveCorrectDtoRequest(String searchRequest) {
         String[] search = searchRequest.split(", ");
 
         return getLocationDto(searchRequest).stream()
-                .filter(a -> a.getCityEn() != null && a.getCityEn().equals(search[2]))
-                .filter(a -> a.getHouseNumber() != null && a.getHouseNumber().equals(search[1]))
-                .findFirst()
-                .orElseThrow(() -> new AddressNotFoundException("Address not found"));
+            .filter(a -> a.getCityEn() != null && a.getCityEn().equals(search[2]))
+            .filter(a -> a.getHouseNumber() != null && a.getHouseNumber().equals(search[1]))
+            .findFirst()
+            .orElseThrow(() -> new AddressNotFoundException("Address not found"));
     }
 
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
@@ -552,13 +551,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private List<OrderAddressDtoRequest> getLocationDto(String searchRequest) {
-
         List<GeocodingResult> resultsUa = googleApiService.getResultFromGeoCodeUa(searchRequest);
         List<GeocodingResult> resultsEn = googleApiService.getResultFromGeoCodeEn(searchRequest);
 
         List<OrderAddressDtoRequest> result = new ArrayList<>();
 
-        for(int i = 0; i < resultsEn.size() || i < resultsUa.size(); i++) {
+        for (int i = 0; i < resultsEn.size() || i < resultsUa.size(); i++) {
             OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
             initializeGeoCodingResults(initializeUkrainianGeoCodingResult(orderAddressDtoRequest), resultsUa.get(i));
             initializeGeoCodingResults(initializeEnglishGeoCodingResult(orderAddressDtoRequest), resultsEn.get(i));
