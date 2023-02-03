@@ -84,22 +84,26 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for get all info about tariff.
+     * Controller for get info about tariff services.
      *
-     * @return {@link GetTariffServiceDto} list of all tariff service.
-     * @author Vadym Makitra.
+     * @param tariffId {@link Long} tariff id.
+     * @return {@link GetTariffServiceDto} list of all tariff services for tariff
+     *         with id = tariffId.
+     * @author Vadym Makitra
+     * @author Julia Seti
      */
 
-    @ApiOperation(value = "Get all info about tariff")
+    @ApiOperation(value = "Get info about tariff services")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_PRICING_CARD', authentication)")
-    @GetMapping("/getTariffService")
-    public ResponseEntity<List<GetTariffServiceDto>> getTariffService() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffService());
+    @GetMapping("/{tariffId}/getTariffService")
+    public ResponseEntity<List<GetTariffServiceDto>> getTariffService(
+        @PathVariable long tariffId) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffService(tariffId));
     }
 
     /**
