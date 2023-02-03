@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
-import greencity.constant.OrderHistory;
 import greencity.dto.bag.BagOrderDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.entity.order.*;
