@@ -221,4 +221,23 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(nativeQuery = true,
         value = "UPDATE orders SET cancellation_reason = :cancellationReason WHERE id = :orderId")
     void updateCancelingReason(Long orderId, String cancellationReason);
+
+    /**
+     * Method update orders status from actual status to expected status by specific
+     * date.
+     *
+     * @param actualStatus   - update from order status
+     * @param expectedStatus - update to order status
+     * @param currentDate    - order date of export
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+        value = "UPDATE orders "
+            + "SET order_status = :expected_status "
+            + "WHERE order_status = :actual_status "
+            + "AND date_of_export = :currentDate")
+    void updateOrderStatusToExpected(@Param("actual_status") String actualStatus,
+        @Param("expected_status") String expectedStatus,
+        @Param("currentDate") LocalDate currentDate);
 }
