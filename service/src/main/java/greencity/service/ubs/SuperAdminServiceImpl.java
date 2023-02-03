@@ -96,6 +96,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private static final String RECEIVING_STATIONS_OR_COURIER_EXIST_MESSAGE =
         "Current receiving stations: %s or courier: %s don't exist.";
     private static final String REGION_OR_COURIER_EXIST_MESSAGE = "Current region: %s or courier: %s don't exist.";
+    private static final String REGION_OR_RECEIVING_STATIONS_EXIST_MESSAGE =
+        "Current region: %s or receiving stations: %s don't exist.";
+    private static final String REGION_OR_CITIES_OR_COURIER_EXIST_MESSAGE =
+        "Current region: %s or cities: %s or courier: %s don't exist.";
+
+    private static final String REGION_OR_RECEIVING_STATIONS_OR_COURIER_EXIST_MESSAGE =
+        "Current region: %s or receiving stations: %s or courier: %s don't exist.";
     private static final String REGION_OR_CITIES_OR_RECEIVING_STATIONS_EXIST_MESSAGE =
         "Current region: %s or cities: %s or receiving stations: %s don't exist.";
     private static final String REGION_OR_CITIES_OR_RECEIVING_STATIONS_OR_COURIER_EXIST_MESSAGE =
@@ -726,6 +733,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByAllParam(
                 details.getRegionsId().get().get(0), details.getCitiesId().get(),
                 details.getStationsId().get(), details.getCourierId().get());
+        } else if (shouldDeactivateTariffsByRegionAndReceivingStations(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByRegionAndReceivingStations(
+                details.getRegionsId().get().get(0), details.getStationsId().get());
+        } else if (shouldDeactivateTariffsByCourierAndRegionAndCities(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByCourierAndRegionAndCities(
+                details.getRegionsId().get().get(0), details.getCitiesId().get(), details.getCourierId().get());
+        } else if (shouldDeactivateTariffsByCourierAndRegionAndReceivingStations(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByCourierAndRegionAndReceivingStations(
+                details.getRegionsId().get().get(0), details.getStationsId().get(), details.getCourierId().get());
         } else {
             throw new BadRequestException("Bad request. Please choose another combination of parameters");
         }
@@ -832,8 +848,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
      *
      * @param details - contains regions id, cities id, receiving stations id and
      *                courier id.
-     * @return true if you have to deactivate tariff by region id and courier id and
-     *         false if not.
+     * @return true if you have to deactivate tariff by receiving stations id and
+     *         courier id and false if not.
      * @author Nikita Korzh.
      */
     private boolean shouldDeactivateTariffsByCourierAndReceivingStations(DetailsOfDeactivateTariffsDto details) {
@@ -846,6 +862,101 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             } else {
                 throw new NotFoundException(String.format(RECEIVING_STATIONS_OR_COURIER_EXIST_MESSAGE,
                     details.getStationsId().get(), details.getCourierId().get()));
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by regions id and
+     * receiving stations id. In this case size of RegionsList should be one because
+     * we choose more than one param.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by regions id and receiving
+     *         stations id and false if not.
+     * @author Lilia Mokhnatska.
+     */
+    private boolean shouldDeactivateTariffsByRegionAndReceivingStations(DetailsOfDeactivateTariffsDto details) {
+        if (details.getRegionsId().isPresent() && details.getCourierId().isEmpty()
+            && details.getCitiesId().isEmpty() && details.getStationsId().isPresent()) {
+            if (details.getRegionsId().get().size() == 1) {
+                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
+                    && deactivateTariffsForChosenParamRepository
+                        .isReceivingStationsExists(details.getStationsId().get())) {
+                    return true;
+                } else {
+                    throw new NotFoundException(String.format(REGION_OR_RECEIVING_STATIONS_EXIST_MESSAGE,
+                        details.getRegionsId().get(), details.getStationsId().get()));
+                }
+            } else {
+                throw new BadRequestException(BAD_SIZE_OF_REGIONS_MESSAGE);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by courier id, regions
+     * id and cities. In this case size of RegionsList should be one because we
+     * choose more than one param.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by courier id, regions id and
+     *         cities id false if not.
+     * @author Lilia Mokhnatska.
+     */
+    private boolean shouldDeactivateTariffsByCourierAndRegionAndCities(DetailsOfDeactivateTariffsDto details) {
+        if (details.getRegionsId().isPresent() && details.getCitiesId().isPresent()
+            && details.getStationsId().isEmpty() && details.getCourierId().isPresent()) {
+            if (details.getRegionsId().get().size() == 1) {
+                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
+                    && deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(details.getCitiesId().get(),
+                        details.getRegionsId().get().get(0))
+                    && courierRepository.existsCourierById(details.getCourierId().get())) {
+                    return true;
+                } else {
+                    throw new NotFoundException(String.format(
+                        REGION_OR_CITIES_OR_COURIER_EXIST_MESSAGE,
+                        details.getRegionsId().get(), details.getCitiesId().get(),
+                        details.getCourierId().get()));
+                }
+            } else {
+                throw new BadRequestException(BAD_SIZE_OF_REGIONS_MESSAGE);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by courier id, regions
+     * id and receiving stations id. In this case size of RegionsList should be one
+     * because we choose more than one param.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by details and false if not.
+     * @author Lilia Mokhnatska.
+     */
+    private boolean shouldDeactivateTariffsByCourierAndRegionAndReceivingStations(
+        DetailsOfDeactivateTariffsDto details) {
+        if (details.getRegionsId().isPresent() && details.getCitiesId().isEmpty()
+            && details.getStationsId().isPresent() && details.getCourierId().isPresent()) {
+            if (details.getRegionsId().get().size() == 1) {
+                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
+                    && deactivateTariffsForChosenParamRepository
+                        .isReceivingStationsExists(details.getStationsId().get())
+                    && courierRepository.existsCourierById(details.getCourierId().get())) {
+                    return true;
+                } else {
+                    throw new NotFoundException(String.format(
+                        REGION_OR_RECEIVING_STATIONS_OR_COURIER_EXIST_MESSAGE,
+                        details.getRegionsId().get(), details.getStationsId().get(), details.getCourierId().get()));
+                }
+            } else {
+                throw new BadRequestException(BAD_SIZE_OF_REGIONS_MESSAGE);
             }
         }
         return false;

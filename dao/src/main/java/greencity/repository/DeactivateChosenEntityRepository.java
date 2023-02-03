@@ -193,6 +193,71 @@ public class DeactivateChosenEntityRepository {
      * station id and courier id.
      *
      * @param regionId   - region id.
+     * @param stationsId - list of receiving stations id.
+     * @author Lilia Mokhnatska.
+     */
+    public void deactivateTariffsByRegionAndReceivingStations(Long regionId, List<Long> stationsId) {
+        entityManager.createQuery("select ti from TariffsInfo ti left join ti.receivingStationList rs "
+            + "left join ti.tariffLocations tl left join tl.location l"
+            + " where l.region.id =: regionId and "
+            + "rs.id in(:stationsId)", TariffsInfo.class)
+            .setParameter(REGION_ID, regionId)
+            .setParameter(STATIONS_ID, stationsId)
+            .getResultList()
+            .forEach(tariffsInfo -> tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED));
+    }
+
+    /**
+     * Method that deactivate tariffs for region id, list of cities id and courier
+     * id.
+     *
+     * @param regionId  - region id.
+     * @param citiesId  - list of cities id
+     * @param courierId - courier id.
+     * @author Lilia Mokhnatska.
+     */
+    public void deactivateTariffsByCourierAndRegionAndCities(Long regionId, List<Long> citiesId, Long courierId) {
+        entityManager.createQuery("select ti from TariffsInfo ti "
+            + "left join ti.tariffLocations tl  left join tl.location l"
+            + " where l.region.id =: regionId and "
+            + "tl.location.id in (:citiesId) and "
+            + "ti.courier.id =: courierId",
+            TariffsInfo.class)
+            .setParameter(REGION_ID, regionId)
+            .setParameter(CITIES_ID, citiesId)
+            .setParameter(COURIER_ID, courierId)
+            .getResultList()
+            .forEach(tariffsInfo -> tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED));
+    }
+
+    /**
+     * Method that deactivate tariffs for region id, list of station id and courier
+     * id.
+     *
+     * @param regionId   - region id.
+     * @param stationsId - list of receiving stations id.
+     * @param courierId  - courier id.
+     * @author Lilia Mokhnatska.
+     */
+    public void deactivateTariffsByCourierAndRegionAndReceivingStations(Long regionId,
+        List<Long> stationsId, Long courierId) {
+        entityManager.createQuery("select ti from TariffsInfo ti left join ti.receivingStationList rs "
+            + "left join ti.tariffLocations tl  left join tl.location l"
+            + " where l.region.id =: regionId and "
+            + "rs.id in(:stationsId) and ti.courier.id =: courierId",
+            TariffsInfo.class)
+            .setParameter(REGION_ID, regionId)
+            .setParameter(STATIONS_ID, stationsId)
+            .setParameter(COURIER_ID, courierId)
+            .getResultList()
+            .forEach(tariffsInfo -> tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED));
+    }
+
+    /**
+     * Method that deactivate tariffs for region id, list of cities id , list of
+     * station id and courier id.
+     *
+     * @param regionId   - region id.
      * @param citiesId   - list of cities id
      * @param stationsId - list of receiving stations id.
      * @param courierId  - courier id.

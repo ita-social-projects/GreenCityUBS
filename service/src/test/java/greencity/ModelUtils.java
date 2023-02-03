@@ -3857,6 +3857,33 @@ public class ModelUtils {
             .build();
     }
 
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegionAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.of(List.of(1L)))
+            .citiesId(Optional.empty())
+            .stationsId(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndRegionAndCities() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.of(List.of(1L)))
+            .citiesId(Optional.of(List.of(1L, 11L)))
+            .stationsId(Optional.empty())
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndRegionAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.of(List.of(1L)))
+            .citiesId(Optional.empty())
+            .stationsId(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
     public static SetTariffLimitsDto setTariffLimitsWithAmountOfBigBags() {
         return SetTariffLimitsDto.builder()
             .min(1L)
