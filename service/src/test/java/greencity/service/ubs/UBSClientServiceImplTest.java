@@ -651,9 +651,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(addressDto.get(0), Address.class)).thenReturn(address.get(0));
         when(modelMapper.map(addressDto.get(1), Address.class)).thenReturn(address.get(1));
         when(userRepository.save(user)).thenReturn(user);
-        for (Address address1 : address) {
-            when(addressRepository.save(address1)).thenReturn(address1);
-        }
         when(modelMapper.map(address.get(0), AddressDto.class)).thenReturn(addressDto.get(0));
         when(modelMapper.map(address.get(1), AddressDto.class)).thenReturn(addressDto.get(1));
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
@@ -747,7 +744,8 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000")).thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000")).thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
                 .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
@@ -781,8 +779,10 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address"))
+        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000"))
             .thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000"))
+                .thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
                 .thenReturn(dtoRequest);
@@ -827,7 +827,8 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000")).thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000")).thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
                 .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
@@ -846,8 +847,8 @@ class UBSClientServiceImplTest {
         Assertions.assertNotNull(updateAddressRequestDto.getSearchAddress());
         Assertions.assertNull(dtoRequest.getSearchAddress());
         Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithSearchAddress);
-        verify(googleApiService).getResultFromGeoCode("fake address");
-
+        verify(googleApiService).getResultFromGeoCodeUa("fake street name, 13, fake street, 02000");
+        verify(googleApiService).getResultFromGeoCodeEn("fake street name, 13, fake street, 02000");
         updateAddressRequestDto.setSearchAddress(null);
         OrderWithAddressesResponseDto actualWithoutSearchAddress =
             ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
@@ -869,7 +870,9 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
-        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000")).thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000")).thenReturn(ModelUtils.getGeocodingResult());
+
 
         when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
         when(modelMapper.map(dtoRequest,
@@ -885,7 +888,8 @@ class UBSClientServiceImplTest {
         Assertions.assertEquals(OrderWithAddressesResponseDto.builder().addressList(Collections.emptyList()).build(),
             actualWithSearchAddress);
 
-        verify(googleApiService).getResultFromGeoCode("fake address");
+        verify(googleApiService).getResultFromGeoCodeUa("fake street name, 13, fake street, 02000");
+        verify(googleApiService).getResultFromGeoCodeEn("fake street name, 13, fake street, 02000");
         verify(addressRepository, times(1)).save(addresses.get(0));
         verify(addressRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(any(), eq(Address.class));
@@ -906,7 +910,9 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000")).thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000")).thenReturn(ModelUtils.getGeocodingResult());
+
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
                 .thenReturn(dtoRequest);
@@ -930,7 +936,9 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000")).thenReturn(ModelUtils.getGeocodingResult());
+        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000")).thenReturn(ModelUtils.getGeocodingResult());
+
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
                 .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);

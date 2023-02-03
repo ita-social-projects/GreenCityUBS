@@ -21,6 +21,7 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.OrderAddress;
+import greencity.exceptions.address.AddressNotFoundException;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -429,7 +430,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadRequestException(ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED);
         }
 
-        OrderAddressDtoRequest dtoRequest = retrieveCorrectDtoRequest(getLocationDto(addressRequestDto.getSearchAddress()), addressRequestDto.getDistrict());
+        OrderAddressDtoRequest dtoRequest = retrieveCorrectDtoRequest(addressRequestDto.getSearchAddress());
 
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
             modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
@@ -465,7 +466,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         OrderAddressDtoRequest dtoRequest;
         if (addressRequestDto.getSearchAddress() != null) {
-            dtoRequest = retrieveCorrectDtoRequest(getLocationDto(addressRequestDto.getSearchAddress()), addressRequestDto.getDistrict());
+            dtoRequest = retrieveCorrectDtoRequest(addressRequestDto.getSearchAddress());
             checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
         } else {
             dtoRequest = addressRequestDto;
@@ -501,11 +502,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         return findAllAddressesForCurrentOrder(uuid);
     }
 
-    private OrderAddressDtoRequest retrieveCorrectDtoRequest(List<OrderAddressDtoRequest> dtoRequests, String district){
-        return dtoRequests.stream()
-                .filter(a -> a.getDistrict() != null && a.getDistrict().equals(district))
+    private OrderAddressDtoRequest retrieveCorrectDtoRequest(String searchRequest){
+
+        String[] search = searchRequest.split(", ");
+
+        return getLocationDto(searchRequest).stream()
+                .filter(a -> a.getCityEn() != null && a.getCityEn().equals(search[2]))
+                .filter(a -> a.getHouseNumber() != null && a.getHouseNumber().equals(search[1]))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Address not found"));
+                .orElseThrow(() -> new AddressNotFoundException("Address not found"));
     }
 
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
@@ -553,7 +558,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         List<OrderAddressDtoRequest> result = new ArrayList<>();
 
-        for(int i = 0; i < resultsEn.size(); i++) {
+        for(int i = 0; i < resultsEn.size() || i < resultsUa.size(); i++) {
             OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
             initializeGeoCodingResults(initializeUkrainianGeoCodingResult(orderAddressDtoRequest), resultsUa.get(i));
             initializeGeoCodingResults(initializeEnglishGeoCodingResult(orderAddressDtoRequest), resultsEn.get(i));
