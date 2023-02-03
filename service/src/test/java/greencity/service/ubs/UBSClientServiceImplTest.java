@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
+import greencity.constant.OrderHistory;
 import greencity.dto.bag.BagOrderDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.entity.order.*;
@@ -1044,6 +1045,8 @@ class UBSClientServiceImplTest {
         when(orderRepository.save(any())).thenReturn(orderDto);
         OrderCancellationReasonDto result = ubsService.updateOrderCancellationReason(1L, dto, anyString());
 
+        verify(eventService, times(1))
+            .saveEvent("Статус Замовлення - Скасовано", "", orderDto);
         assertEquals(dto.getCancellationReason(), result.getCancellationReason());
         assertEquals(dto.getCancellationComment(), result.getCancellationComment());
         verify(orderRepository).save(orderDto);

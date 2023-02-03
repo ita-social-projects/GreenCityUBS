@@ -1236,6 +1236,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
         }
+        eventService.saveEvent(OrderHistory.ORDER_CANCELLED, uuid, order);
         order.setCancellationReason(dto.getCancellationReason());
         order.setCancellationComment(dto.getCancellationComment());
         order.setId(id);
