@@ -283,7 +283,7 @@ public interface UBSManagementService {
      *
      * @author Pavlo Hural.
      */
-    AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId);
+    AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId, String email);
 
     /**
      * Method returns employee's access status to order.

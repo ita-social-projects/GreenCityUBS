@@ -1802,7 +1802,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
-        Long orderId) {
+        Long orderId, String email) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
@@ -1825,6 +1825,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         orderRepository.save(order);
         userRepository.save(currentUser);
+        eventService.saveEvent(OrderHistory.ADDED_BONUSES, email, order);
 
         return AddBonusesToUserDto.builder()
             .amount(addBonusesToUserDto.getAmount())
