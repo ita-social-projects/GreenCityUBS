@@ -1,20 +1,21 @@
 package greencity.dto.tariff;
 
+import greencity.enums.CourierLimit;
 import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 @Builder
 @Data
 public class SetTariffLimitsDto {
     @Min(0)
-    private Long minAmountOfBigBags;
-    @Min(0)
-    private Long maxAmountOfBigBags;
+    private Long min;
 
     @Min(0)
-    private Long minPriceOfOrder;
-    @Min(0)
-    private Long maxPriceOfOrder;
+    private Long max;
+
+    @NotNull
+    private CourierLimit courierLimit;
 }
