@@ -202,6 +202,7 @@ public class ModelUtils {
                 .build()))
             .build();
     }
+
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()
             .customerName("customer name")
@@ -393,16 +394,14 @@ public class ModelUtils {
 
     public static GetTariffServiceDto getTariffServiceDto() {
         return GetTariffServiceDto.builder()
-                .id(1)
-                .name("Бавовняна сумка")
-                .capacity(120)
-                .price(120)
-                .commission(50)
-                .description("Description")
-                .build();
+            .id(1)
+            .name("Бавовняна сумка")
+            .capacity(120)
+            .price(120)
+            .commission(50)
+            .description("Description")
+            .build();
     }
-
-
 
     public static AdminCommentDto getAdminComment() {
         return AdminCommentDto.builder()

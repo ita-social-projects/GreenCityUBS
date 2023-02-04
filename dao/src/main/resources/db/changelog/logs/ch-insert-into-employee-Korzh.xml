@@ -5,11 +5,12 @@
     <changeSet id="Korzh-2" author="Korzh Nikita">
         <insert tableName="employees">
             <column name="id">1</column>
-            <column name="first_name">UBSADMIN</column>
-            <column name="last_name">UBSADMIN</column>
+            <column name="first_name">UBS</column>
+            <column name="last_name">ADMIN</column>
             <column name="phone_number">+380675554433</column>
-            <column name="email">adminubs@starmaker.email</column>
+            <column name="email">green.city.ubs@gmail.coml</column>
             <column name="status">ACTIVE</column>
+            <column name="uuid">d0840b34-3f17-4820-a375-305b855dff8b</column>
         </insert>
     </changeSet>
     
