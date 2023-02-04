@@ -81,7 +81,6 @@ import greencity.dto.order.OrderDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.ReadAddressByOrderDto;
@@ -98,14 +97,12 @@ import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.service.AddServiceDto;
+import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.tariff.TariffTranslationDto;
 import greencity.dto.tariff.TariffsInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -2047,33 +2044,25 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffTranslationDto getTariffTranslationDto() {
-        return TariffTranslationDto.builder()
+    public static TariffServiceDto TariffServiceDto() {
+        return TariffServiceDto.builder()
+            .capacity(20)
+            .price(100)
+            .commission(50)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .nameEng("nameEng")
             .name("name")
+            .nameEng("nameEng")
             .build();
     }
 
-    public static AddServiceDto addServiceDto() {
-        return AddServiceDto.builder()
-            .commission(50)
-            .capacity(100)
-            .price(100)
-            .tariffTranslationDto(getTariffTranslationDto())
-            .locationId(1L)
-            .build();
-    }
-
-    public static GetTariffServiceDto getTariffServiceDto() {
+    public static GetTariffServiceDto getGetTariffServiceDto() {
         return GetTariffServiceDto.builder()
             .id(1)
             .capacity(20)
             .price(100)
             .commission(50)
             .fullPrice(150)
-            .capacity(100)
             .minAmountOfBags(MinAmountOfBag.INCLUDE.name())
             .description("Description")
             .descriptionEng("DescriptionEng")
@@ -2122,14 +2111,13 @@ public class ModelUtils {
             .build());
     }
 
-    public static EditTariffServiceDto getEditTariffServiceDto() {
-        return EditTariffServiceDto.builder()
+    public static TariffServiceDto getTariffServiceDto() {
+        return TariffServiceDto.builder()
             .name("Бавовняна сумка")
             .capacity(120)
             .price(120)
             .commission(50)
             .description("Description")
-            .langCode("ua")
             .build();
 
     }
@@ -2195,7 +2183,6 @@ public class ModelUtils {
             .price(100)
             .commission(50)
             .fullPrice(150)
-            .capacity(100)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
@@ -2203,7 +2190,18 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
-            .location(getLocation())
+            .limitIncluded(false)
+            .build();
+    }
+
+    public static BagTranslationDto getBagTranslationDto() {
+        return BagTranslationDto.builder()
+            .id(1)
+            .capacity(20)
+            .price(150)
+            .name("name")
+            .nameEng("nameEng")
+            .limitedIncluded(false)
             .build();
     }
 
@@ -2213,15 +2211,14 @@ public class ModelUtils {
             .price(100)
             .commission(50)
             .fullPrice(150)
-            .capacity(100)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .limitIncluded(false)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
-            .location(getLocation())
             .build();
     }
 
@@ -2357,6 +2354,19 @@ public class ModelUtils {
 
     }
 
+    public static List<Bag> getBag1list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(20)
+            .commission(50)
+            .fullPrice(1500)
+            .name("name")
+            .nameEng("nameEng")
+            .limitIncluded(false)
+            .build());
+    }
+
     public static List<Bag> getBaglist() {
         return List.of(Bag.builder()
             .id(1)
@@ -2408,7 +2418,6 @@ public class ModelUtils {
             .capacity(10)
             .commission(21)
             .fullPrice(20)
-            .location(Location.builder().id(1L).build())
             .name("name")
             .nameEng("nameEng")
             .limitIncluded(false)
@@ -2419,7 +2428,6 @@ public class ModelUtils {
                 .capacity(10)
                 .commission(21)
                 .fullPrice(21)
-                .location(Location.builder().id(1L).build())
                 .name("name")
                 .nameEng("nameEng")
                 .limitIncluded(false)
@@ -2637,11 +2645,6 @@ public class ModelUtils {
         return Bag.builder()
             .id(1)
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .location(Location
-                .builder()
-                .id(1L)
-                .locationStatus(LocationStatus.ACTIVE)
-                .build())
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("Test")
@@ -2655,11 +2658,6 @@ public class ModelUtils {
         return Bag.builder()
             .id(1)
             .minAmountOfBags(MinAmountOfBag.EXCLUDE)
-            .location(Location
-                .builder()
-                .id(1L)
-                .locationStatus(LocationStatus.ACTIVE)
-                .build())
             .build();
     }
 
@@ -2707,10 +2705,6 @@ public class ModelUtils {
             .price(1)
             .fullPrice(1)
             .commission(2)
-            .location(Location
-                .builder()
-                .id(1L)
-                .build())
             .build();
     }
 
@@ -3899,23 +3893,13 @@ public class ModelUtils {
 
     public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDto() {
         return new UserPointsAndAllBagsDto(
-            Arrays.asList(
+            List.of(
                 BagTranslationDto.builder()
                     .id(1)
                     .name("name")
-                    .capacity(10)
-                    .price(20)
+                    .capacity(20)
+                    .price(150)
                     .nameEng("nameEng")
-                    .locationId(1L)
-                    .limitedIncluded(false)
-                    .build(),
-                BagTranslationDto.builder()
-                    .id(2)
-                    .name("name")
-                    .capacity(10)
-                    .price(21)
-                    .nameEng("nameEng")
-                    .locationId(1L)
                     .limitedIncluded(false)
                     .build()),
             600);
@@ -3925,13 +3909,6 @@ public class ModelUtils {
         return TariffsInfoDto.builder()
             .limitDescription("Description")
             .id(1L)
-            .build();
-    }
-
-    public static OrderStatusPageDto getOrderStatusData() {
-        return OrderStatusPageDto.builder()
-            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-            .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
             .build();
     }
 }

@@ -41,10 +41,12 @@ import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.position.PositionDto;
-import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
-import greencity.dto.tariff.*;
+import greencity.dto.service.TariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.TariffsInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -337,21 +339,15 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffTranslationDto getTariffTranslationDto() {
-        return TariffTranslationDto.builder()
+    public static TariffServiceDto getTariffServiceDto() {
+        return TariffServiceDto.builder()
+            .capacity(120)
+            .commission(10)
+            .price(100)
             .name("Test")
             .nameEng("a")
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .build();
-    }
-
-    public static AddServiceDto getAddServiceDto() {
-        return AddServiceDto.builder()
-            .capacity(120)
-            .commission(10)
-            .price(100)
-            .tariffTranslationDto(getTariffTranslationDto())
             .build();
     }
 
@@ -381,18 +377,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static EditTariffServiceDto getEditTariffServiceDto() {
-        return EditTariffServiceDto.builder()
-            .name("Бавовняна сумка")
-            .capacity(120)
-            .price(120)
-            .commission(50)
-            .description("Description")
-            .langCode("ua")
-            .build();
-    }
-
-    public static GetTariffServiceDto getTariffServiceDto() {
+    public static GetTariffServiceDto getGetTariffServiceDto() {
         return GetTariffServiceDto.builder()
             .id(1)
             .name("Бавовняна сумка")

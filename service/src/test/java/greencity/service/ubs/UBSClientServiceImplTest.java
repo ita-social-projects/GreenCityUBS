@@ -16,14 +16,34 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
-import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagOrderDto;
+import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.order.OrderStatusPageDto;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.repository.*;
+import greencity.repository.AddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.EventRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UBSuserRepository;
+import greencity.repository.UserRepository;
 import greencity.service.google.GoogleApiService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -91,33 +111,38 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
-import static greencity.ModelUtils.*;
+
+import static greencity.ModelUtils.TEST_BAG_LIST;
+import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
+import static greencity.ModelUtils.TEST_PAYMENT_LIST;
+import static greencity.ModelUtils.getAddress;
+import static greencity.ModelUtils.getCertificate;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getMaximumAmountOfAddresses;
+import static greencity.ModelUtils.getOrder;
+import static greencity.ModelUtils.getOrderClientDto;
+import static greencity.ModelUtils.getOrderDetails;
+import static greencity.ModelUtils.getOrderDoneByUser;
+import static greencity.ModelUtils.getOrderFondyClientDto;
+import static greencity.ModelUtils.getOrderPaymentDetailDto;
+import static greencity.ModelUtils.getOrderResponseDto;
+import static greencity.ModelUtils.getOrderTest;
+import static greencity.ModelUtils.getPayment;
+import static greencity.ModelUtils.getSuccessfulFondyResponse;
+import static greencity.ModelUtils.getTestUser;
+import static greencity.ModelUtils.getUBSuser;
+import static greencity.ModelUtils.getUbsCustomersDto;
+import static greencity.ModelUtils.getUser;
+import static greencity.ModelUtils.getUserWithLastLocation;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -212,13 +237,15 @@ class UBSClientServiceImplTest {
     @Test
     void getFirstPageData() {
         Long locationId = 1L;
-
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = ModelUtils.getUserPointsAndAllBagsDto();
-
+        List<Bag> bagList = ModelUtils.getBag1list();
         User user = ModelUtils.getUserWithLastLocation();
+        BagTranslationDto dto = ModelUtils.getBagTranslationDto();
         user.setCurrentPoints(600);
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag4list());
+        when(locationRepository.existsById(locationId)).thenReturn(true);
+        when(userRepository.findUserByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.of(user));
+        when(bagRepository.findBagsByLocationIdAndLocationStatusIsActive(locationId)).thenReturn(bagList);
+        when(modelMapper.map(bagList.get(0), BagTranslationDto.class)).thenReturn(dto);
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(locationId));
@@ -227,27 +254,49 @@ class UBSClientServiceImplTest {
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
         assertEquals(userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
             userPointsAndAllBagsDtoActual.getBags().get(0).getId());
+
+        verify(locationRepository).existsById(locationId);
+        verify(userRepository).findUserByUuid("35467585763t4sfgchjfuyetf");
+        verify(bagRepository).findBagsByLocationIdAndLocationStatusIsActive(locationId);
+        verify(modelMapper).map(bagList.get(0), BagTranslationDto.class);
+
     }
 
     @Test
-    void getFirstPageDataWithOutLocationId() {
-        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = ModelUtils.getUserPointsAndAllBagsDto();
+    void getFirstPageDataBadRequestException() {
+        assertThrows(BadRequestException.class,
+            () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.empty()));
 
-        User user = ModelUtils.getUserWithLastLocation();
-        user.setCurrentPoints(600);
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag4list());
+        verify(locationRepository, never()).existsById(anyLong());
+        verify(userRepository, never()).findUserByUuid("35467585763t4sfgchjfuyetf");
+        verify(bagRepository, never()).findBagsByLocationIdAndLocationStatusIsActive(anyLong());
+    }
 
-        UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.empty());
+    @Test
+    void getFirstPageDataLocationNotFoundException() {
+        when(locationRepository.existsById(1L)).thenReturn(false);
 
-        assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
-        assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
-        assertEquals(userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
-            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
+        assertThrows(NotFoundException.class,
+            () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(1L)));
 
-        verify(userRepository, times(1)).findByUuid(anyString());
-        verify(bagRepository, times(1)).findAll();
+        verify(locationRepository).existsById(1L);
+        verify(userRepository, never()).findUserByUuid("35467585763t4sfgchjfuyetf");
+        verify(bagRepository, never()).findBagsByLocationIdAndLocationStatusIsActive(anyLong());
+
+    }
+
+    @Test
+    void getFirstPageDataUserNotFoundException() {
+        when(locationRepository.existsById(1L)).thenReturn(true);
+        when(userRepository.findUserByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(1L)));
+
+        verify(locationRepository).existsById(1L);
+        verify(userRepository).findUserByUuid("35467585763t4sfgchjfuyetf");
+        verify(bagRepository, never()).findBagsByLocationIdAndLocationStatusIsActive(anyLong());
+
     }
 
     @Test
