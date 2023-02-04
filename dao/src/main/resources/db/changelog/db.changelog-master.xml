@@ -134,6 +134,7 @@
     <include file="db/changelog/logs/ch-add-table-tariff_infos_receiving_employee_mapping-Hlazova.xml"/>
     <include file="db/changelog/logs/сg-change-constraint-for-user-Korzh.xml"/>
     <include file="db/changelog/logs/ch-add-column-uuid-to-employees-Korzh.xml"/>
+    <include file="db/changelog/logs/ch-drop-table-employee-receiving-station-mapping-Korzh.xml"/>
     <include file="db/changelog/logs/ch-insert-into-employee-Korzh.xml"/>
     <include file="db/changelog/logs/ch-insert-into-employee-position-Korzh.xml"/>
     <include file="db/changelog/logs/ch-insert-into-receiving-stations-Makitra.xml"/>
