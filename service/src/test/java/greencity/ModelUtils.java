@@ -3470,6 +3470,7 @@ public class ModelUtils {
                 .build()))
             .receivingStationList(Set.of(getReceivingStation()))
             .courier(getCourier())
+            .service(getService())
             .build();
     }
 
