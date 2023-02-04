@@ -23,7 +23,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
     @Query(value = "SELECT * FROM ORDER_BAG_MAPPING as OBM "
         + "JOIN BAG AS B ON OBM.ORDER_ID = :orderId and OBM.BAG_ID = B.ID "
         + "ORDER BY B.ID", nativeQuery = true)
-    List<Bag> findBagByOrderId(@Param("orderId") Long id);
+    List<Bag> findBagsByOrderId(@Param("orderId") Long id);
 
     /**
      * This is method which find capacity by id.
@@ -59,10 +59,10 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * 
      * @param orderId order id {@link Long}
      * @author Nazar Struk
+     * @author José Castellanos
      */
     @Query(value = "SELECT name, b.capacity, b.price, obm.amount, (b.price * obm.amount) AS summ "
-        + "FROM bag_translations "
-        + "JOIN bag b on bag_translations.bag_id = b.id "
+        + "FROM bag b "
         + "JOIN order_bag_mapping obm on b.id = obm.bag_id "
         + "WHERE obm.ORDER_ID = :orderId", nativeQuery = true)
     List<Map<String, Object>> getBagInfo(Long orderId);
@@ -80,6 +80,16 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
     List<Bag> findAllByOrder(@Param("orderId") Long orderId);
 
     /**
+     * method, that returns {@link List} of {@link Bag} by tariff id.
+     *
+     * @param tariffInfoId tariff id {@link Long}
+     * @return {@link List} of {@link Bag} by tariffInfoId.
+     * @author Safarov Renat
+     */
+    @Query(value = "SELECT b FROM Bag as b where b.tariffsInfo.id =:tariffInfoId")
+    List<Bag> findBagsByTariffInfoId(@Param("tariffInfoId") Long tariffInfoId);
+
+    /**
      * method, that returns {@link List} of {@link Bag}'s that matches by
      * {@link TariffsInfo} and {@link MinAmountOfBag}.
      *
@@ -88,4 +98,13 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Oleg Vatuliak
      */
     List<Bag> getBagsByTariffsInfoAndMinAmountOfBags(TariffsInfo tariffId, MinAmountOfBag minAmountOfBag);
+
+    /**
+     * method, that returns {@link List} of {@link Bag} by Tariff id.
+     *
+     * @param tariffId {@link Long} - tariff id.
+     * @return {@link List}of{@link Bag}.
+     * @author Julia Seti
+     */
+    List<Bag> getAllByTariffsInfoId(Long tariffId);
 }

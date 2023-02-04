@@ -31,7 +31,6 @@ import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierLimit;
@@ -65,7 +64,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -98,14 +102,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         "Current region: %s or cities: %s or receiving stations: %s or courier: %s don't exist.";
 
     @Override
-    public AddServiceDto addTariffService(AddServiceDto dto, String uuid) {
-        User user = userRepository.findByUuid(uuid);
-        Bag bag = createBagWithFewTranslation(dto, user);
+    public AddServiceDto addTariffService(AddServiceDto dto, String employeeUuid) {
+        Employee employee = getEmployeeByUuid(employeeUuid);
+        Bag bag = createBagWithFewTranslation(dto, employee);
         bagRepository.save(bag);
         return modelMapper.map(bag, AddServiceDto.class);
     }
 
-    private Bag createBagWithFewTranslation(AddServiceDto dto, User user) {
+    private Bag createBagWithFewTranslation(AddServiceDto dto, Employee employee) {
         final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
             () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         return Bag.builder().price(dto.getPrice())
@@ -113,7 +117,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .location(location)
             .commission(dto.getCommission())
             .fullPrice(getFullPrice(dto.getPrice(), dto.getCommission()))
-            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
+            .createdBy(employee)
             .createdAt(LocalDate.now())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .name(dto.getTariffTranslationDto().getName())
@@ -124,31 +128,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<GetTariffServiceDto> getTariffService() {
-        return bagRepository.findAll()
-            .stream()
-            .map(this::getTariffService)
-            .collect(Collectors.toList());
-    }
-
-    private GetTariffServiceDto getTariffService(Bag bag) {
-        return GetTariffServiceDto.builder()
-            .description(bag.getDescription())
-            .descriptionEng(bag.getDescriptionEng())
-            .price(bag.getPrice())
-            .capacity(bag.getCapacity())
-            .name(bag.getName())
-            .commission(bag.getCommission())
-            .nameEng(bag.getNameEng())
-            .fullPrice(bag.getFullPrice())
-            .id(bag.getId())
-            .createdAt(bag.getCreatedAt())
-            .createdBy(bag.getCreatedBy())
-            .editedAt(bag.getEditedAt())
-            .editedBy(bag.getEditedBy())
-            .locationId(bag.getLocation().getId())
-            .minAmountOfBag(bag.getMinAmountOfBags().toString())
-            .build();
+    public List<GetTariffServiceDto> getTariffService(long tariffId) {
+        if (tariffsInfoRepository.existsById(tariffId)) {
+            return bagRepository.getAllByTariffsInfoId(tariffId)
+                .stream()
+                .map(it -> modelMapper.map(it, GetTariffServiceDto.class))
+                .collect(Collectors.toList());
+        } else {
+            throw new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId);
+        }
     }
 
     @Override
@@ -159,19 +147,19 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id, String uuid) {
-        User user = userRepository.findByUuid(uuid);
+    public GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id, String employeeUuid) {
+        Employee employee = getEmployeeByUuid(employeeUuid);
         Bag bag = bagRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
         bag.setPrice(dto.getPrice());
         bag.setCapacity(dto.getCapacity());
         bag.setCommission(dto.getCommission());
         bag.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
         bag.setEditedAt(LocalDate.now());
-        bag.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
+        bag.setEditedBy(employee);
         bag.setName(dto.getName());
         bag.setDescription(dto.getDescription());
         bagRepository.save(bag);
-        return getTariffService(bag);
+        return modelMapper.map(bag, GetTariffServiceDto.class);
     }
 
     @Override
@@ -201,10 +189,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<ServiceDto> getService(long tariffId) {
+    public ServiceDto getService(long tariffId) {
         return getServiceByTariffsInfoId(tariffId)
-            .map(it -> List.of(modelMapper.map(it, ServiceDto.class)))
-            .orElse(Collections.emptyList());
+            .map(it -> modelMapper.map(it, ServiceDto.class))
+            .orElse(null);
     }
 
     @Override
@@ -404,7 +392,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setMinAmountOfBags(MinAmountOfBag.INCLUDE);
         bagRepository.save(bag);
-        return getTariffService(bag);
+        return modelMapper.map(bag, GetTariffServiceDto.class);
     }
 
     @Override
@@ -416,7 +404,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
         bagRepository.save(bag);
-        return getTariffService(bag);
+        return modelMapper.map(bag, GetTariffServiceDto.class);
     }
 
     @Override
@@ -601,8 +589,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public void setTariffLimitByAmountOfBags(Long tariffId, EditAmountOfBagDto dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
-        tariffsInfo.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBags());
-        tariffsInfo.setMinAmountOfBigBags(dto.getMinAmountOfBigBags());
+        tariffsInfo.setMin(dto.getMin());
+        tariffsInfo.setMax(dto.getMax());
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         tariffsInfoRepository.save(tariffsInfo);
@@ -612,8 +600,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void setTariffLimitBySumOfOrder(Long tariffId, EditPriceOfOrder dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        tariffsInfo.setMaxPriceOfOrder(dto.getMaxPriceOfOrder());
-        tariffsInfo.setMinPriceOfOrder(dto.getMinPriceOfOrder());
+        tariffsInfo.setMin(dto.getMin());
+        tariffsInfo.setMax(dto.getMax());
         tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         tariffsInfoRepository.save(tariffsInfo);
     }
@@ -622,39 +610,32 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimitsDto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
 
+        if (setTariffLimitsDto.getMin().equals(setTariffLimitsDto.getMax())) {
+            throw new BadRequestException(ErrorMessage.MIN_MAX_VALUE_RESTRICTION);
+        }
+
         if (bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(tariffsInfo, MinAmountOfBag.INCLUDE).isEmpty()) {
             throw new BadRequestException(ErrorMessage.BAGS_WITH_MIN_AMOUNT_OF_BIG_BAGS_NOT_FOUND);
         }
 
-        if ((setTariffLimitsDto.getMinAmountOfBigBags() == 0L && setTariffLimitsDto.getMinPriceOfOrder() == 0L)
-            || setTariffLimitsDto.getMinAmountOfBigBags() > 0L && setTariffLimitsDto.getMinPriceOfOrder() > 0L) {
-            throw new BadRequestException(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY);
-        }
-
-        if (setTariffLimitsDto.getMinAmountOfBigBags() > 0L && setTariffLimitsDto.getMinPriceOfOrder() == 0L) {
-            if (setTariffLimitsDto.getMinAmountOfBigBags() > setTariffLimitsDto.getMaxAmountOfBigBags()) {
+        if (setTariffLimitsDto.getCourierLimit() == CourierLimit.LIMIT_BY_AMOUNT_OF_BAG) {
+            if (setTariffLimitsDto.getMin() > setTariffLimitsDto.getMax()) {
                 throw new BadRequestException(ErrorMessage.MAX_BAG_VALUE_IS_INCORRECT);
             }
 
-            tariffsInfo.setMinPriceOfOrder(null);
-            tariffsInfo.setMaxPriceOfOrder(null);
-
-            tariffsInfo.setMinAmountOfBigBags(setTariffLimitsDto.getMinAmountOfBigBags());
-            tariffsInfo.setMaxAmountOfBigBags(setTariffLimitsDto.getMaxAmountOfBigBags());
+            tariffsInfo.setMin(setTariffLimitsDto.getMin());
+            tariffsInfo.setMax(setTariffLimitsDto.getMax());
             tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
             tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         }
 
-        if (setTariffLimitsDto.getMinPriceOfOrder() > 0L && setTariffLimitsDto.getMinAmountOfBigBags() == 0L) {
-            if (setTariffLimitsDto.getMinPriceOfOrder() > setTariffLimitsDto.getMaxPriceOfOrder()) {
+        if (setTariffLimitsDto.getCourierLimit() == CourierLimit.LIMIT_BY_SUM_OF_ORDER) {
+            if (setTariffLimitsDto.getMin() > setTariffLimitsDto.getMax()) {
                 throw new BadRequestException(ErrorMessage.MAX_PRICE_VALUE_IS_INCORRECT);
             }
 
-            tariffsInfo.setMinAmountOfBigBags(null);
-            tariffsInfo.setMaxAmountOfBigBags(null);
-
-            tariffsInfo.setMinPriceOfOrder(setTariffLimitsDto.getMinPriceOfOrder());
-            tariffsInfo.setMaxPriceOfOrder(setTariffLimitsDto.getMaxPriceOfOrder());
+            tariffsInfo.setMin(setTariffLimitsDto.getMin());
+            tariffsInfo.setMax(setTariffLimitsDto.getMax());
             tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
             tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         }

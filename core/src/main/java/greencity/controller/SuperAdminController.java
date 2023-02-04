@@ -70,35 +70,40 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Create new tariff")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddServiceDto.class),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = AddServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/createTariffService")
     public ResponseEntity<AddServiceDto> createTariffService(
         @RequestBody @Valid AddServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addTariffService(dto, uuid));
+        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addTariffService(dto, uuid));
     }
 
     /**
-     * Controller for get all info about tariff.
+     * Controller for get info about tariff services.
      *
-     * @return {@link GetTariffServiceDto} list of all tariff service.
-     * @author Vadym Makitra.
+     * @param tariffId {@link Long} tariff id.
+     * @return {@link GetTariffServiceDto} list of all tariff services for tariff
+     *         with id = tariffId.
+     * @author Vadym Makitra
+     * @author Julia Seti
      */
 
-    @ApiOperation(value = "Get all info about tariff")
+    @ApiOperation(value = "Get info about tariff services")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_PRICING_CARD', authentication)")
-    @GetMapping("/getTariffService")
-    public ResponseEntity<List<GetTariffServiceDto>> createService() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffService());
+    @GetMapping("/{tariffId}/getTariffService")
+    public ResponseEntity<List<GetTariffServiceDto>> getTariffService(
+        @PathVariable long tariffId) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffService(tariffId));
     }
 
     /**
@@ -112,7 +117,8 @@ class SuperAdminController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @DeleteMapping("/deleteTariffService/{id}")
@@ -133,7 +139,8 @@ class SuperAdminController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @PutMapping("/editTariffService/{id}")
@@ -187,7 +194,7 @@ class SuperAdminController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/{tariffId}/getService")
-    public ResponseEntity<List<ServiceDto>> getService(
+    public ResponseEntity<ServiceDto> getService(
         @Valid @PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService(tariffId));
     }
@@ -578,7 +585,8 @@ class SuperAdminController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 409, message = HttpStatuses.CONFLICT)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/add-new-tariff")

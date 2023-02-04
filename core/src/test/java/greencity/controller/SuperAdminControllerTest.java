@@ -49,6 +49,7 @@ import org.springframework.validation.Validator;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -97,38 +98,146 @@ class SuperAdminControllerTest {
     @Test
     void createTariffServiceTest() throws Exception {
         AddServiceDto dto = ModelUtils.getAddServiceDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
+        String ServiceResponceDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(superAdminService.addTariffService(dto, uuid)).thenReturn(dto);
 
         mockMvc.perform(post(ubsLink + "/createTariffService")
             .principal(principal)
+            .param("uuid", uuid)
             .content(ServiceResponceDtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated())
+            .andReturn();
+
+        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(superAdminService).addTariffService(any(AddServiceDto.class), anyString());
+    }
+
+    @Test
+    void createTariffServiceNotFoundException() throws Exception {
+        AddServiceDto dto = ModelUtils.getAddServiceDto();
+        String ServiceResponceDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(superAdminService.addTariffService(any(AddServiceDto.class), anyString()))
+            .thenThrow(new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+
+        mockMvc.perform(post(ubsLink + "/createTariffService")
+            .principal(principal)
+            .param("uuid", uuid)
+            .content(ServiceResponceDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.LOCATION_DOESNT_FOUND,
+                result.getResolvedException().getMessage()));
+
+        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(superAdminService).addTariffService(any(AddServiceDto.class), anyString());
+        verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 
     @Test
     void getTariffService() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getTariffService")).andExpect(status().isOk());
+        mockMvc.perform(get(ubsLink + "/{tariffId}/getTariffService", 1L)
+            .principal(principal)
+            .param("tariffId", "1L"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        verify(superAdminService).getTariffService(1L);
+        verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
+    void getTariffServiceIfTariffNotFoundException() throws Exception {
+        when(superAdminService.getTariffService(1L))
+            .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND));
+
+        mockMvc.perform(get(ubsLink + "/{tariffId}/getTariffService", 1L)
+            .principal(principal)
+            .param("tariffId", "1L"))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).getTariffService(1L);
+        verifyNoMoreInteractions(superAdminService);
     }
 
     @Test
     void deleteTariffService() throws Exception {
         mockMvc.perform(delete(ubsLink + "/deleteTariffService/" + 1L))
             .andExpect(status().isOk());
+        verify(superAdminService).deleteTariffService(1);
+        verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
+    void deleteTariffServiceNotFoundException() throws Exception {
+        doThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND))
+            .when(superAdminService).deleteTariffService(1);
+
+        mockMvc.perform(delete(ubsLink + "/deleteTariffService/" + 1L))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
+                result.getResolvedException().getMessage()));
+
+        verify(superAdminService).deleteTariffService(1);
+        verifyNoMoreInteractions(superAdminService);
     }
 
     @Test
     void editTariffService() throws Exception {
         EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String ServiceResponseDtoJSON = objectMapper.writeValueAsString(dto);
+        String ServiceResponseDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(superAdminService.editTariffService(dto, 1, uuid)).thenReturn(ModelUtils.getTariffServiceDto());
 
         mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
             .content(ServiceResponseDtoJSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .principal(principal))
-            .andExpect(status().isOk());
+            .principal(principal)
+            .param("uuid", uuid))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(superAdminService).editTariffService(any(EditTariffServiceDto.class), anyInt(), anyString());
+        verifyNoMoreInteractions(superAdminService, userRemoteClient);
+    }
+
+    @Test
+    void editTariffServiceNotFoundException() throws Exception {
+        EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
+        String ServiceResponseDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(superAdminService.editTariffService(dto, 1, uuid))
+            .thenThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
+
+        mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
+            .content(ServiceResponseDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal)
+            .param("uuid", uuid))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
+                result.getResolvedException().getMessage()));
+
+        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(superAdminService).editTariffService(any(EditTariffServiceDto.class), anyInt(), anyString());
+        verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 
     @Test
@@ -227,10 +336,29 @@ class SuperAdminControllerTest {
 
     @Test
     void getService() throws Exception {
+        ServiceDto dto = ModelUtils.getServiceDto();
+
+        when(superAdminService.getService(1L)).thenReturn(dto);
+
         mockMvc.perform(get(ubsLink + "/1/getService")
             .principal(principal)
             .param("tariffId", "1L"))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andReturn();
+
+        verify(superAdminService).getService(1L);
+        verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
+    void getServiceIfServiceNotExists() throws Exception {
+        when(superAdminService.getService(1L)).thenReturn(null);
+
+        mockMvc.perform(get(ubsLink + "/1/getService")
+            .principal(principal)
+            .param("tariffId", "1L"))
+            .andExpect(status().isOk())
+            .andReturn();
 
         Mockito.verify(superAdminService).getService(1L);
         Mockito.verifyNoMoreInteractions(superAdminService);
@@ -582,7 +710,7 @@ class SuperAdminControllerTest {
     @Test
     @SneakyThrows
     void editInfoAboutTariff() {
-        var dto = EditPriceOfOrder.builder().maxPriceOfOrder(10000L).minPriceOfOrder(1000L).build();
+        var dto = EditPriceOfOrder.builder().max(10000L).min(1000L).build();
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
         mockMvc.perform(patch(ubsLink + "/setLimitsBySumOfOrder/{tariffId}", 1L)

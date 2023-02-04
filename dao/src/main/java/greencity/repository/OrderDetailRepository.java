@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UpdateOrderDetailRepository extends JpaRepository<Order, Integer> {
+public interface OrderDetailRepository extends JpaRepository<Order, Integer> {
     /**
      * Method for update Exported value.
      *
@@ -19,6 +19,17 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
     @Query(value = "UPDATE ORDER_BAG_MAPPING SET EXPORTED_QUANTITY = :valueExported "
         + "WHERE ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
     void updateExporter(Integer valueExported, Long orderId, Long bagId);
+
+    /**
+     * Method for get Amount value.
+     *
+     * @param orderId order id {@link Long}
+     * @param bagId   bag id {@link Long}
+     * @author Lilia Mokhnatska
+     */
+    @Query(value = "SELECT obm.amount FROM order_bag_mapping as obm "
+        + "WHERE obm.order_id = :orderId AND obm.bag_id = :bagId", nativeQuery = true)
+    Long getAmount(Long orderId, Long bagId);
 
     /**
      * Method for update Amount value.

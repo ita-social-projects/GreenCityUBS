@@ -167,8 +167,8 @@
     <include file="db/changelog/logs/ch-fk_ubs_users_and_order_address-Safarov.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table-view-Safarov.xml"/>
     <include file="db/changelog/logs/ch-drop-column_address_id-in-ubs_user-Safarov.xml"/>
-    <include file="db/changelog/logs/ch-drop-table-employee-receiving-station-mapping-Korzh.xml"/>
+    <include file="db/changelog/logs/сh-add-column-min-max-delete-min-max-amount-and-price-again.xml"/>
     <include file="db/changelog/logs/ch-alter-table-service-add-columns-service-translations-drop-columns-Seti.xml"/>
     <include file="db/changelog/logs/ch-drop-table-service-translations-Seti.xml"/>
+    <include file="/db/changelog/logs/ch-change-columns-createdby-editedby-in-table-bag-Seti.xml"/>
 </databaseChangeLog>
-

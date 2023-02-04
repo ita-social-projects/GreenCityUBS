@@ -3,7 +3,11 @@ package greencity.service;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.bag.EditAmountOfBagDto;
-import greencity.dto.courier.*;
+import greencity.dto.courier.AddingReceivingStationDto;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierUpdateDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
@@ -11,7 +15,12 @@ import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
-import greencity.dto.tariff.*;
+import greencity.dto.tariff.AddNewTariffResponseDto;
+import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
 import greencity.filters.TariffsInfoFilterCriteria;
 
@@ -29,12 +38,13 @@ public interface SuperAdminService {
     AddServiceDto addTariffService(AddServiceDto dto, String uuid);
 
     /**
-     * Method return All Tariff Service.
-     *
+     * Method return All Tariff Service by Tariff id.
+     * 
+     * @param id {@link Long} - selected tariff id.
      * @return {@link GetTariffServiceDto} - returned list of Tariff Service.
      * @author Vadym Makitra
      */
-    List<GetTariffServiceDto> getTariffService();
+    List<GetTariffServiceDto> getTariffService(long id);
 
     /**
      * Method for delete tariff service by Id.
@@ -74,7 +84,7 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      * @author Julia Seti
      */
-    List<ServiceDto> getService(long tariffId);
+    ServiceDto getService(long tariffId);
 
     /**
      * Method for delete service by id.
@@ -149,7 +159,7 @@ public interface SuperAdminService {
      * @return {@link CourierDto}
      * @author Max Bohonko
      */
-    public CourierDto updateCourier(CourierUpdateDto dto);
+    CourierDto updateCourier(CourierUpdateDto dto);
 
     /**
      * Method for getting all couriers.

@@ -94,7 +94,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/getActiveLocations",
                 SUPER_ADMIN_LINK + "/getCouriers",
                 SUPER_ADMIN_LINK + "/tariffs",
-                SUPER_ADMIN_LINK + "/getTariffService",
+                SUPER_ADMIN_LINK + "/{tariffId}/getTariffService",
                 SUPER_ADMIN_LINK + "/{tariffId}/getService",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
@@ -167,7 +167,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/accountinfo",
                 "/removewebhook",
                 "/setwebhook")
-            .hasAnyRole(ADMIN)
+            .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
                 UBS_MANAG_LINK + "/**",
                 SUPER_ADMIN_LINK + "/**",

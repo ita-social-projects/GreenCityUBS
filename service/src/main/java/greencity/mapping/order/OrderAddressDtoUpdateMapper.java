@@ -1,14 +1,14 @@
 package greencity.mapping.order;
 
 import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.OrderAddress;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OrderAddressDtoUpdateMapper extends AbstractConverter<Address, OrderAddressDtoResponse> {
+public class OrderAddressDtoUpdateMapper extends AbstractConverter<OrderAddress, OrderAddressDtoResponse> {
     @Override
-    protected OrderAddressDtoResponse convert(Address dtoUpdate) {
+    protected OrderAddressDtoResponse convert(OrderAddress dtoUpdate) {
         return OrderAddressDtoResponse.builder()
             .district(dtoUpdate.getDistrict())
             .districtEng(dtoUpdate.getDistrictEn())

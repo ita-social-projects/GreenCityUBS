@@ -1,14 +1,14 @@
 trigger:
+  batch: true
   branches:
     include:
-    - dev, master
+    - prod
   paths:
     exclude:
     - README.md
-    
+
 pr: none
-    
-    
+
 variables:
   agentOS: ubuntu-latest
   
@@ -32,22 +32,6 @@ stages:
     pool:
       vmImage: $(agentOS)
     steps:
-    - task: AzureCLI@2
-      displayName: Get GOOGLE_APPLICATION_CREDENTIALS from Azure Key Vault
-      inputs:
-        azureSubscription: '$(azureSub)'
-        scriptType: 'bash'
-        scriptLocation: inlineScript
-        inlineScript: |
-          az keyvault secret download --name $(jsonSecret) --vault-name $(azKeyVault) --file $(jsonFile)
-          
-    - task: AzureKeyVault@1
-      displayName: Get FTP credentials from Azure Key Vault
-      inputs:
-        azureSubscription: '$(azureSub)'
-        KeyVaultName: '$(azKeyVault)'
-        SecretsFilter: 'ftpHost, ftpUser, ftpPass'
-
     - task: Maven@3
       displayName: Maven package
       inputs:
@@ -89,14 +73,15 @@ stages:
         Dockerfile: 'Dockerfile'
         tags: |
           $(Build.BuildId)
+          latest
 
 - stage: Deploy
   jobs:
     - deployment: DeployUbs
-      displayName: Deploy UBS app service
+      displayName: Deploy UBS
       pool:
         vmImage: $(agentOS)
-      environment: 'prod'
+      environment: 'production'
       strategy:
         runOnce:
           deploy:
@@ -109,7 +94,7 @@ stages:
                 downloadType: 'single'
                 artifactName: '$(artifactName)'
                 downloadPath: '$(System.ArtifactsDirectory)'
-
+                
             - task: HelmInstaller@0
               inputs:
                 helmVersion: '3.9.0'
@@ -118,12 +103,12 @@ stages:
             - task: HelmDeploy@0
               inputs:
                 connectionType: 'Kubernetes Service Connection'
-                kubernetesServiceConnection: 'k8s-stage'
+                kubernetesServiceConnection: 'production'
                 namespace: 'default'
                 command: 'upgrade'
                 chartType: 'FilePath'
                 chartPath: '$(System.ArtifactsDirectory)/drop/greencity-ubs-chart'
                 releaseName: 'ubs'
-                overrideValues: 'deployment.image=skyere/greencityubs:$(Build.BuildId)'
+                overrideValues: 'ingress.hostname=greencity-ubs.pick-up.city,deployment.image=skyere/greencityubs:$(Build.BuildId)'
                 arguments: ''
                 
