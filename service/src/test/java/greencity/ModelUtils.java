@@ -26,10 +26,7 @@ import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
-import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierUpdateDto;
-import greencity.dto.courier.CreateCourierDto;
-import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.courier.*;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
@@ -60,39 +57,8 @@ import greencity.dto.notification.NotificationTemplateLocalizedDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.notification.TitleDto;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
-import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.AssignEmployeesForOrderDto;
-import greencity.dto.order.AssignForOrderEmployee;
-import greencity.dto.order.BigOrderTableDTO;
-import greencity.dto.order.CounterOrderDetailsDto;
+import greencity.dto.order.*;
 import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.EditPriceOfOrder;
-import greencity.dto.order.EmployeeOrderPositionDTO;
-import greencity.dto.order.ExportDetailsDto;
-import greencity.dto.order.ExportDetailsDtoUpdate;
-import greencity.dto.order.GroupedOrderDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderDetailInfoDto;
-import greencity.dto.order.OrderDetailStatusDto;
-import greencity.dto.order.OrderDetailStatusRequestDto;
-import greencity.dto.order.OrderDto;
-import greencity.dto.order.OrderFondyClientDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.order.ReadAddressByOrderDto;
-import greencity.dto.order.RequestToChangeOrdersDataDto;
-import greencity.dto.order.SenderLocation;
-import greencity.dto.order.UpdateAllOrderPageDto;
-import greencity.dto.order.UpdateOrderDetailDto;
-import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.OverpaymentInfoRequestDto;
@@ -965,30 +931,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Петрівка")
                 .build()))
-            .build();
-    }
-
-    public static EmployeeDto getEmployeeDto() {
-        return EmployeeDto.builder()
-            .id(1L)
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .employeePositions(List.of(PositionDto.builder()
-                .id(1L)
-                .name("Водій")
-                .build()))
-            .receivingStations(List.of(ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
-            .courier(getCourierDto())
-            .location(LocationsDtos.builder()
-                .locationId(1L)
-                .nameEn("location")
-                .nameUk("локація")
-                .build())
             .build();
     }
 
