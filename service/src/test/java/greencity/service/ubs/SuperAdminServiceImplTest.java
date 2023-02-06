@@ -1502,6 +1502,40 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.deactivateTariffForChosenParam(details));
     }
 
+    @Test
+    void deactivateTariffByCities() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithCities();
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+    }
+
+    @Test
+    void deactivateTariffByCitiesAndCourier() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithCitiesAndCourier();
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+    }
+
+    @Test
+    void deactivateTariffByCitiesAndReceivingStations() {
+        DetailsOfDeactivateTariffsDto details =
+            ModelUtils.getDetailsOfDeactivateTariffsDtoWithCitiesAndReceivingStations();
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+    }
+
+    @Test
+    void deactivateTariffByCitiesAndCourierAndReceivingStations() {
+        DetailsOfDeactivateTariffsDto details =
+            ModelUtils.getDetailsOfDeactivateTariffsDtoWithCitiesAndCourierAndReceivingStations();
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+    }
+
     @ParameterizedTest
     @MethodSource("deactivateTariffByDifferentParamWithTwoRegionsProvider")
     void deactivateTariffByDifferentParamWithTwoRegionsThrows(DetailsOfDeactivateTariffsDto details) {

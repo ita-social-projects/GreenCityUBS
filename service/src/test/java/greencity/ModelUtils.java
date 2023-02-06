@@ -3884,6 +3884,42 @@ public class ModelUtils {
             .build();
     }
 
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCities() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.empty())
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCitiesAndCourier() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.empty())
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCitiesAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCitiesAndCourierAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
     public static SetTariffLimitsDto setTariffLimitsWithAmountOfBigBags() {
         return SetTariffLimitsDto.builder()
             .min(1L)
