@@ -51,6 +51,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -2278,5 +2279,13 @@ class UBSManagementServiceImplTest {
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
         assertEquals(true, ubsManagementService.checkEmployeeForOrder(order.getId(), "test@gmail.com"));
+    }
+
+    @Test
+    void updateOrderStatusToExpected() {
+        ubsManagementService.updateOrderStatusToExpected();
+        verify(orderRepository).updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
+            OrderStatus.ON_THE_ROUTE.name(),
+            LocalDate.now());
     }
 }
