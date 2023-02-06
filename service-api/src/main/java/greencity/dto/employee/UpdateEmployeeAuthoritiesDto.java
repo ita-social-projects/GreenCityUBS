@@ -17,6 +17,6 @@ import java.util.List;
 @ToString
 @Builder
 public class UpdateEmployeeAuthoritiesDto {
-    String email;
-    List<PositionDto> positions;
+    private String email;
+    private List<PositionDto> positions;
 }
