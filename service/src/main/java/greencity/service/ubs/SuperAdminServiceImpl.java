@@ -762,20 +762,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private boolean shouldDeactivateTariffsByAll(DetailsOfDeactivateTariffsDto details) {
         if (details.getRegionsIds().isPresent() && details.getCitiesIds().isPresent()
             && details.getStationsIds().isPresent() && details.getCourierId().isPresent()) {
-            if (details.getRegionsIds().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsIds().get().get(0))
+            if (details.getRegionsIds().orElseThrow().size() == 1) {
+                if (regionRepository.existsRegionById(details.getRegionsIds().orElseThrow().get(0))
                     && deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(
-                        details.getCitiesIds().get(),
-                        details.getRegionsIds().get().get(0))
+                        details.getCitiesIds().orElseThrow(),
+                        details.getRegionsIds().orElseThrow().get(0))
                     && deactivateTariffsForChosenParamRepository
-                        .isReceivingStationsExists(details.getStationsIds().get())
-                    && courierRepository.existsCourierById(details.getCourierId().get())) {
+                        .isReceivingStationsExists(details.getStationsIds().orElseThrow())
+                    && courierRepository.existsCourierById(details.getCourierId().orElseThrow())) {
                     return true;
                 } else {
                     throw new NotFoundException(String.format(
                         REGION_OR_CITIES_OR_RECEIVING_STATIONS_OR_COURIER_NOT_EXIST_MESSAGE,
-                        details.getRegionsIds().get(), details.getCitiesIds().get(),
-                        details.getStationsIds().get(), details.getCourierId().get()));
+                        details.getRegionsIds().orElseThrow(), details.getCitiesIds().orElseThrow(),
+                        details.getStationsIds().orElseThrow(), details.getCourierId().orElseThrow()));
                 }
             } else {
                 throw new BadRequestException(BAD_SIZE_OF_REGIONS_MESSAGE);
