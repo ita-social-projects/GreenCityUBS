@@ -785,7 +785,7 @@ public class ManagementOrderController {
     @PostMapping(value = "/add-manual-payment/{id}",
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@PathVariable(name = "id") Long orderId,
-        @RequestPart ManualPaymentRequestDto manualPaymentDto,
+        @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.saveNewManualPayment(orderId, manualPaymentDto, image, principal.getName()));
@@ -832,7 +832,7 @@ public class ManagementOrderController {
     @PutMapping(value = "/update-manual-payment/{id}",
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> updateManualPayment(@PathVariable(name = "id") Long paymentId,
-        @RequestPart ManualPaymentRequestDto manualPaymentDto,
+        @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image, @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));

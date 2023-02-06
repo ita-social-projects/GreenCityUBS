@@ -284,12 +284,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkSumIfCourierLimitBySumOfOrder(TariffsInfo courierLocation, Integer sumWithoutDiscount) {
         if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(courierLocation.getCourierLimit())
-            && sumWithoutDiscount < courierLocation.getMinPriceOfOrder()) {
-            throw new BadRequestException(PRICE_OF_ORDER_LOWER_THAN_LIMIT + courierLocation.getMinPriceOfOrder());
+            && sumWithoutDiscount < courierLocation.getMin()) {
+            throw new BadRequestException(PRICE_OF_ORDER_LOWER_THAN_LIMIT + courierLocation.getMin());
         } else if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(courierLocation.getCourierLimit())
-            && sumWithoutDiscount > courierLocation.getMaxPriceOfOrder()) {
+            && sumWithoutDiscount > courierLocation.getMax()) {
             throw new BadRequestException(
-                ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT + courierLocation.getMaxPriceOfOrder());
+                ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT + courierLocation.getMax());
         }
     }
 
@@ -1052,12 +1052,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkAmountOfBagsIfCourierLimitByAmountOfBag(TariffsInfo courierLocation, Integer countOfBigBag) {
         if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
-            && courierLocation.getMinAmountOfBigBags() > countOfBigBag) {
+            && courierLocation.getMin() > countOfBigBag) {
             throw new BadRequestException(
-                NOT_ENOUGH_BIG_BAGS_EXCEPTION + courierLocation.getMinAmountOfBigBags());
+                NOT_ENOUGH_BIG_BAGS_EXCEPTION + courierLocation.getMin());
         } else if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
-            && courierLocation.getMaxAmountOfBigBags() < countOfBigBag) {
-            throw new BadRequestException(TO_MUCH_BIG_BAG_EXCEPTION + courierLocation.getMaxAmountOfBigBags());
+            && courierLocation.getMax() < countOfBigBag) {
+            throw new BadRequestException(TO_MUCH_BIG_BAG_EXCEPTION + courierLocation.getMax());
         }
     }
 
@@ -1160,8 +1160,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         for (Address address : addressList) {
             address.setUser(user);
-            addressRepo.save(address);
         }
+        user.setAddresses(addressList);
         User savedUser = userRepository.save(user);
         List<AddressDto> mapperAddressDto =
             addressList.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
@@ -1241,19 +1241,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setId(id);
         orderRepository.save(order);
         return dto;
-    }
-
-    @Override
-    public PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto) {
-        PersonalDataDto personalDataDto = PersonalDataDto.builder().firstName(userProfileDto.getRecipientName())
-            .lastName(userProfileDto.getRecipientSurname())
-            .email(userProfileDto.getRecipientEmail()).phoneNumber(userProfileDto.getRecipientPhone()).build();
-
-        Long ubsUserId = ubsUserRepository.findByEmail(userProfileDto.getRecipientEmail())
-            .map(UBSuser::getId).orElse(null);
-
-        personalDataDto.setId(ubsUserId);
-        return personalDataDto;
     }
 
     /**

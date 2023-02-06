@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Jose-10" author="José Castellanos">
+        <addColumn tableName="tariffs_info">
+            <column name="min" type="int8"/>
+            <column name="max" type="int8"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="Jose-11" author="José Castellanos">
+        <dropColumn tableName="tariffs_info">
+            <column name="min_amount_of_big_bags"/>
+            <column name="max_amount_of_big_bags"/>
+            <column name="min_price_of_order"/>
+            <column name="max_price_of_order"/>
+        </dropColumn>
+    </changeSet>
+
+</databaseChangeLog>
