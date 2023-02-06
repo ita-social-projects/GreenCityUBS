@@ -709,46 +709,36 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     @Transactional
     public void deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto details) {
-        if (shouldDeactivateTariffsByRegions(details) && details.getRegionsIds().isPresent()) {
+        if (shouldDeactivateTariffsByRegions(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByRegions(details.getRegionsIds().get());
-        } else if (shouldDeactivateTariffsByRegionsAndCities(details) && details.getRegionsIds().isPresent()
-            && details.getCitiesIds().isPresent()) {
+        } else if (shouldDeactivateTariffsByRegionsAndCities(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByRegionsAndCities(details.getCitiesIds().get(),
                 details.getRegionsIds().get().get(0));
-        } else if (shouldDeactivateTariffsByCourier(details) && details.getCourierId().isPresent()) {
+        } else if (shouldDeactivateTariffsByCourier(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(details.getCourierId().get());
-        } else if (shouldDeactivateTariffsByReceivingStations(details) && details.getStationsIds().isPresent()) {
+        } else if (shouldDeactivateTariffsByReceivingStations(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByReceivingStations(
                 details.getStationsIds().get());
-        } else if (shouldDeactivateTariffsByCourierAndReceivingStations(details) && details.getCourierId().isPresent()
-            && details.getStationsIds().isPresent()) {
+        } else if (shouldDeactivateTariffsByCourierAndReceivingStations(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByCourierAndReceivingStations(
                 details.getCourierId().get(), details.getStationsIds().get());
-        } else if (shouldDeactivateTariffsByCourierAndRegion(details) && details.getCourierId().isPresent()
-            && details.getRegionsIds().isPresent()) {
+        } else if (shouldDeactivateTariffsByCourierAndRegion(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByCourierAndRegion(
                 details.getRegionsIds().get().get(0), details.getCourierId().get());
-        } else if (shouldDeactivateTariffsByRegionAndCityAndStation(details) && details.getRegionsIds().isPresent()
-            && details.getCitiesIds().isPresent() && details.getStationsIds().isPresent()) {
+        } else if (shouldDeactivateTariffsByRegionAndCityAndStation(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByRegionAndCitiesAndStations(
                 details.getRegionsIds().get().get(0), details.getCitiesIds().get(), details.getStationsIds().get());
-        } else if (shouldDeactivateTariffsByAll(details) && details.getCitiesIds().isPresent()
-            && details.getCourierId().isPresent() && details.getRegionsIds().isPresent()
-            && details.getStationsIds().isPresent()) {
+        } else if (shouldDeactivateTariffsByAll(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByAllParam(
                 details.getRegionsIds().get().get(0), details.getCitiesIds().get(),
                 details.getStationsIds().get(), details.getCourierId().get());
-        } else if (shouldDeactivateTariffsByRegionAndReceivingStations(details)
-            && details.getRegionsIds().isPresent() && details.getStationsIds().isPresent()) {
+        } else if (shouldDeactivateTariffsByRegionAndReceivingStations(details)) {
             tariffsInfoRepository.deactivateTariffsByRegionAndReceivingStations(
                 details.getRegionsIds().get().get(0), details.getStationsIds().get());
-        } else if (shouldDeactivateTariffsByCourierAndRegionAndCities(details) && details.getCitiesIds().isPresent()
-            && details.getCourierId().isPresent() && details.getRegionsIds().isPresent()) {
+        } else if (shouldDeactivateTariffsByCourierAndRegionAndCities(details)) {
             tariffsInfoRepository.deactivateTariffsByCourierAndRegionAndCities(
                 details.getRegionsIds().get().get(0), details.getCitiesIds().get(), details.getCourierId().get());
-        } else if (shouldDeactivateTariffsByCourierAndRegionAndReceivingStations(details)
-            && details.getCourierId().isPresent() && details.getRegionsIds().isPresent()
-            && details.getStationsIds().isPresent()) {
+        } else if (shouldDeactivateTariffsByCourierAndRegionAndReceivingStations(details)) {
             tariffsInfoRepository.deactivateTariffsByCourierAndRegionAndReceivingStations(
                 details.getRegionsIds().get().get(0), details.getStationsIds().get(), details.getCourierId().get());
         } else {
