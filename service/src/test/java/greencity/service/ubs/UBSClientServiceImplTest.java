@@ -259,13 +259,13 @@ class UBSClientServiceImplTest {
         verify(userRepository).findUserByUuid("35467585763t4sfgchjfuyetf");
         verify(bagRepository).findBagsByLocationIdAndLocationStatusIsActive(locationId);
         verify(modelMapper).map(bagList.get(0), BagTranslationDto.class);
-
     }
 
     @Test
     void getFirstPageDataBadRequestException() {
+        Optional<Long> locationId = Optional.empty();
         assertThrows(BadRequestException.class,
-            () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.empty()));
+            () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", locationId));
 
         verify(locationRepository, never()).existsById(anyLong());
         verify(userRepository, never()).findUserByUuid("35467585763t4sfgchjfuyetf");
@@ -274,29 +274,29 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageDataLocationNotFoundException() {
+        Optional<Long> locationId = Optional.of(1L);
         when(locationRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(NotFoundException.class,
-            () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(1L)));
+            () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", locationId));
 
         verify(locationRepository).existsById(1L);
         verify(userRepository, never()).findUserByUuid("35467585763t4sfgchjfuyetf");
         verify(bagRepository, never()).findBagsByLocationIdAndLocationStatusIsActive(anyLong());
-
     }
 
     @Test
     void getFirstPageDataUserNotFoundException() {
+        Optional<Long> locationId = Optional.of(1L);
         when(locationRepository.existsById(1L)).thenReturn(true);
         when(userRepository.findUserByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(1L)));
+            () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", locationId));
 
         verify(locationRepository).existsById(1L);
         verify(userRepository).findUserByUuid("35467585763t4sfgchjfuyetf");
         verify(bagRepository, never()).findBagsByLocationIdAndLocationStatusIsActive(anyLong());
-
     }
 
     @Test
