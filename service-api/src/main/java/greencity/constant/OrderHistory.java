@@ -37,7 +37,7 @@ public final class OrderHistory {
     public static final String ADD_NEW_ECO_NUMBER = "Додано номер замовлення з магазину";
     public static final String DELETED_ECO_NUMBER = "Видалено номер замовлення з магазину";
     public static final String CHANGED_SENDER = "Змінено дані Відправника";
-    public static final String ADDED_BONUSES = "Зарахування на бонусний рахунок";
+    public static final String ADDED_BONUSES = "Зараховано кошти на бонусний рахунок клієнта";
 
     /**
      * Constructor.
