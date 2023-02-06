@@ -732,10 +732,10 @@ class SuperAdminController {
     /**
      * Controller for deactivation tariff with chosen parameters.
      *
-     * @param regionsId  - list of regions ids.
-     * @param citiesId   - list of cities ids.
-     * @param stationsId - list of receiving stations ids.
-     * @param courierId  - courier id.
+     * @param regionsIds  - list of regions ids.
+     * @param citiesIds   - list of cities ids.
+     * @param stationsIds - list of receiving stations ids.
+     * @param courierId   - courier id.
      * @author Nikita Korzh.
      */
     @ApiOperation(value = "Deactivation tariff with chosen parameters.")
@@ -749,15 +749,15 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_TARIFF', authentication)")
     @PostMapping("/deactivate")
     public ResponseEntity<HttpStatus> deactivateTariffForChosenParam(
-        @RequestParam(name = "regionsId", required = false) Optional<List<Long>> regionsId,
-        @RequestParam(name = "citiesId", required = false) Optional<List<Long>> citiesId,
-        @RequestParam(name = "stationsId", required = false) Optional<List<Long>> stationsId,
+        @RequestParam(name = "regionsIds", required = false) Optional<List<Long>> regionsIds,
+        @RequestParam(name = "citiesIds", required = false) Optional<List<Long>> citiesIds,
+        @RequestParam(name = "stationsIds", required = false) Optional<List<Long>> stationsIds,
         @RequestParam(name = "courierId", required = false) Optional<Long> courierId) {
-        if (regionsId.isPresent() || citiesId.isPresent() || stationsId.isPresent() || courierId.isPresent()) {
+        if (regionsIds.isPresent() || citiesIds.isPresent() || stationsIds.isPresent() || courierId.isPresent()) {
             superAdminService.deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto.builder()
-                .regionsId(regionsId)
-                .citiesId(citiesId)
-                .stationsId(stationsId)
+                .regionsIds(regionsIds)
+                .citiesIds(citiesIds)
+                .stationsIds(stationsIds)
                 .courierId(courierId)
                 .build());
             return ResponseEntity.status(HttpStatus.OK).build();
