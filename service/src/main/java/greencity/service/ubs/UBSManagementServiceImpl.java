@@ -1070,11 +1070,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         final List<ReceivingStation> receivingStation = getAllReceivingStations();
         String action;
-        if (order.getReceivingStation() != null || order.getDateOfExport() != null
-            || order.getDeliverFrom() != null || order.getDeliverTo() != null) {
-            action = OrderHistory.UPDATE_EXPORT_DETAILS;
-        } else {
+        if (order.getReceivingStation() == null && order.getDateOfExport() == null
+            && order.getDeliverFrom() == null && order.getDeliverTo() == null) {
             action = OrderHistory.SET_EXPORT_DETAILS;
+        } else {
+            action = OrderHistory.UPDATE_EXPORT_DETAILS;
         }
         order.setReceivingStation(getUpdatedReceivingStation(dto.getReceivingStationId(), order));
         order.setDateOfExport(getUpdatedDateExport(dto.getDateExport(), order));
