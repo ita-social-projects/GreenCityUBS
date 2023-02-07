@@ -31,7 +31,7 @@
             <column name="created_at" value="2023-02-07"/>
             <column name="created_by_id" value="1"/>
             <column name="description" value="Послуга 'Мікс відходів' - 120 за тарифом 2"/>
-            <column name="description_eng" value="TService 'Mix waste' - 120 by tariff 2"/>
+            <column name="description_eng" value="Service 'Mix waste' - 120 by tariff 2"/>
             <where>id=4</where>
         </update>
 
