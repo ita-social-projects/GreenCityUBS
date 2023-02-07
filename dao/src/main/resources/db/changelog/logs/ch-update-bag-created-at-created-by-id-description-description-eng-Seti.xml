@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Seti-5" author="Julia Seti">
+        <update tableName="bag">
+            <column name="created_at" value="2023-01-26"/>
+            <column name="created_by_id" value="1"/>
+            <column name="description" value="Тариф на послугу 'Мікс відходів' - 120"/>
+            <column name="description_eng" value="Tariff for Service 'Mix waste' - 120"/>
+            <where>id=1</where>
+        </update>
+
+        <update tableName="bag">
+            <column name="created_at" value="2023-01-26"/>
+            <column name="created_by_id" value="1"/>
+            <column name="description" value="Тариф на послугу 'Текстильні відходи' - 20"/>
+            <column name="description_eng" value="Tariff for Service 'Textile waste' - 20"/>
+            <where>id=2</where>
+        </update>
+
+        <update tableName="bag">
+            <column name="created_at" value="2023-01-26"/>
+            <column name="created_by_id" value="1"/>
+            <column name="description" value="Тариф на послугу 'Текстильні відходи' - 60"/>
+            <column name="description_eng" value="Tariff for Service 'Textile waste' - 60"/>
+            <where>id=3</where>
+        </update>
+
+        <update tableName="bag">
+            <column name="created_at" value="2023-01-26"/>
+            <column name="created_by_id" value="1"/>
+            <column name="description" value="Тариф на послугу 'Мікс відходів' - 120"/>
+            <column name="description_eng" value="Tariff for Service 'Mix waste' - 120"/>
+            <where>id=4</where>
+        </update>
+
+        <update tableName="bag">
+            <column name="created_at" value="2023-01-26"/>
+            <column name="created_by_id" value="1"/>
+            <column name="description" value="Тариф на послугу 'Текстильні відходи' - 20"/>
+            <column name="description_eng" value="Tariff for Service 'Textile waste' - 20"/>
+            <where>id=5</where>
+        </update>
+
+        <update tableName="bag">
+            <column name="created_at" value="2023-01-26"/>
+            <column name="created_by_id" value="1"/>
+            <column name="description" value="Тариф на послугу 'Текстильні відходи' - 60"/>
+            <column name="description_eng" value="Tariff for Service 'Textile waste' - 60"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>
