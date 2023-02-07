@@ -280,10 +280,11 @@ public interface UBSManagementService {
      *
      * @param addBonusesToUserDto {@link AddBonusesToUserDto}.
      * @param orderId             {@link Long}.
+     * @param email               {@link String}.
      *
      * @author Pavlo Hural.
      */
-    AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId);
+    AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId, String email);
 
     /**
      * Method returns employee's access status to order.
