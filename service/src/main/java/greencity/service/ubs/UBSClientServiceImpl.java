@@ -57,8 +57,8 @@ import greencity.repository.RegionRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
-import greencity.exceptions.address.
-;
+import greencity.exceptions.address.AddressNotFoundException;
+
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
