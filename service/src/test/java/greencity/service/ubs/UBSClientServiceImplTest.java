@@ -110,6 +110,7 @@ import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
@@ -870,9 +871,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000"))
-            .thenReturn(ModelUtils.getGeocodingResult());
-        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000"))
+        when(googleApiService.getResultFromGeoCode(eq("fake street name, 13, fake street, 02000"), anyInt()))
             .thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
@@ -907,9 +906,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000"))
-            .thenReturn(ModelUtils.getGeocodingResult());
-        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000"))
+        when(googleApiService.getResultFromGeoCode(eq("fake street name, 13, fake street, 02000"), anyInt()))
             .thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
@@ -955,9 +952,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000"))
-            .thenReturn(ModelUtils.getGeocodingResult());
-        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000"))
+        when(googleApiService.getResultFromGeoCode(eq("fake street name, 13, fake street, 02000"), anyInt()))
             .thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
@@ -977,8 +972,8 @@ class UBSClientServiceImplTest {
         Assertions.assertNotNull(updateAddressRequestDto.getSearchAddress());
         Assertions.assertNull(dtoRequest.getSearchAddress());
         Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithSearchAddress);
-        verify(googleApiService).getResultFromGeoCodeUa("fake street name, 13, fake street, 02000");
-        verify(googleApiService).getResultFromGeoCodeEn("fake street name, 13, fake street, 02000");
+        verify(googleApiService, times(2)).getResultFromGeoCode(eq("fake street name, 13, fake street, 02000"),
+            anyInt());
         updateAddressRequestDto.setSearchAddress(null);
         OrderWithAddressesResponseDto actualWithoutSearchAddress =
             ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
@@ -1000,9 +995,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
-        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000"))
-            .thenReturn(ModelUtils.getGeocodingResult());
-        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000"))
+        when(googleApiService.getResultFromGeoCode(eq("fake street name, 13, fake street, 02000"), anyInt()))
             .thenReturn(ModelUtils.getGeocodingResult());
 
         when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
@@ -1019,8 +1012,8 @@ class UBSClientServiceImplTest {
         Assertions.assertEquals(OrderWithAddressesResponseDto.builder().addressList(Collections.emptyList()).build(),
             actualWithSearchAddress);
 
-        verify(googleApiService).getResultFromGeoCodeUa("fake street name, 13, fake street, 02000");
-        verify(googleApiService).getResultFromGeoCodeEn("fake street name, 13, fake street, 02000");
+        verify(googleApiService, times(2)).getResultFromGeoCode(eq("fake street name, 13, fake street, 02000"),
+            anyInt());
         verify(addressRepository, times(1)).save(addresses.get(0));
         verify(addressRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(any(), eq(Address.class));
@@ -1041,9 +1034,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000"))
-            .thenReturn(ModelUtils.getGeocodingResult());
-        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000"))
+        when(googleApiService.getResultFromGeoCode(eq("fake street name, 13, fake street, 02000"), anyInt()))
             .thenReturn(ModelUtils.getGeocodingResult());
 
         when(modelMapper.map(any(),
@@ -1069,9 +1060,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCodeUa("fake street name, 13, fake street, 02000"))
-            .thenReturn(ModelUtils.getGeocodingResult());
-        when(googleApiService.getResultFromGeoCodeEn("fake street name, 13, fake street, 02000"))
+        when(googleApiService.getResultFromGeoCode(eq("fake street name, 13, fake street, 02000"), anyInt()))
             .thenReturn(ModelUtils.getGeocodingResult());
 
         when(modelMapper.map(any(),

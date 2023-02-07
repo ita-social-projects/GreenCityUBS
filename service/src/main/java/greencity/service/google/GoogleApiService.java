@@ -7,6 +7,7 @@ import com.google.maps.model.GeocodingResult;
 
 import greencity.exceptions.api.GoogleApiException;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -22,37 +23,17 @@ public class GoogleApiService {
     private static final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
 
     /**
-     * Send request to the google and receive response with geocoding in english.
+     * Send request to the google and receive response with geocoding.
      *
      * @param searchRequest - address for search
      * @return GeocodingResults - return result from geocoding service
      */
-    public List<GeocodingResult> getResultFromGeoCodeEn(String searchRequest) {
+    public List<GeocodingResult> getResultFromGeoCode(String searchRequest, Integer langCode) {
         List<GeocodingResult> geocodingResults = new ArrayList<>();
 
         try {
             GeocodingResult[] results = GeocodingApi.newRequest(context)
-                .address(searchRequest).language(locales.get(1).getLanguage()).await();
-            Collections.addAll(geocodingResults, results);
-        } catch (IOException | InterruptedException | ApiException e) {
-            Thread.currentThread().interrupt();
-            throw new GoogleApiException(e.getMessage());
-        }
-        return geocodingResults;
-    }
-
-    /**
-     * Send request to the google and receive response with geocoding in ukrainian.
-     *
-     * @param searchRequest - address for search
-     * @return GeocodingResults - return result from geocoding service
-     */
-    public List<GeocodingResult> getResultFromGeoCodeUa(String searchRequest) {
-        List<GeocodingResult> geocodingResults = new ArrayList<>();
-
-        try {
-            GeocodingResult[] results = GeocodingApi.newRequest(context)
-                .address(searchRequest).language(locales.get(0).getLanguage()).await();
+                .address(searchRequest).language(locales.get(langCode).getLanguage()).await();
             Collections.addAll(geocodingResults, results);
         } catch (IOException | InterruptedException | ApiException e) {
             Thread.currentThread().interrupt();

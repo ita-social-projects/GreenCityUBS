@@ -509,7 +509,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .filter(a -> a.getCityEn() != null && a.getCityEn().equals(search[2]))
             .filter(a -> a.getHouseNumber() != null && a.getHouseNumber().equals(search[1]))
             .findFirst()
-            .orElseThrow(() -> new AddressNotFoundException("Address not found"));
+            .orElseThrow(() -> new AddressNotFoundException(ADDRESS_NOT_FOUND));
     }
 
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
@@ -551,8 +551,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private List<OrderAddressDtoRequest> getLocationDto(String searchRequest) {
-        List<GeocodingResult> resultsUa = googleApiService.getResultFromGeoCodeUa(searchRequest);
-        List<GeocodingResult> resultsEn = googleApiService.getResultFromGeoCodeEn(searchRequest);
+        List<GeocodingResult> resultsUa = googleApiService.getResultFromGeoCode(searchRequest, 0);
+        List<GeocodingResult> resultsEn = googleApiService.getResultFromGeoCode(searchRequest, 1);
 
         List<OrderAddressDtoRequest> result = new ArrayList<>();
 
