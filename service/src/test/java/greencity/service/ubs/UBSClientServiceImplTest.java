@@ -262,40 +262,55 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getFirstPageDataBadRequestException() {
+    void getFirstPageDataWithoutLocationId() {
         Optional<Long> locationId = Optional.empty();
-        assertThrows(BadRequestException.class,
-            () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", locationId));
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = ModelUtils.getUserPointsAndAllBagsDto();
+        List<Bag> bagList = ModelUtils.getBag1list();
+        User user = ModelUtils.getUserWithLastLocation();
+        BagTranslationDto dto = ModelUtils.getBagTranslationDto();
+        user.setCurrentPoints(600);
+        when(userRepository.findUserByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.of(user));
+        when(bagRepository.findAll()).thenReturn(bagList);
+        when(modelMapper.map(bagList.get(0), BagTranslationDto.class)).thenReturn(dto);
 
-        verify(locationRepository, never()).existsById(anyLong());
-        verify(userRepository, never()).findUserByUuid("35467585763t4sfgchjfuyetf");
-        verify(bagRepository, never()).findBagsByLocationIdAndLocationStatusIsActive(anyLong());
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
+            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", locationId);
+
+        assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
+        assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
+        assertEquals(userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
+
+        verify(userRepository).findUserByUuid("35467585763t4sfgchjfuyetf");
+        verify(bagRepository).findAll();
+        verify(modelMapper).map(bagList.get(0), BagTranslationDto.class);
     }
 
     @Test
     void getFirstPageDataLocationNotFoundException() {
         Optional<Long> locationId = Optional.of(1L);
+        User user = ModelUtils.getUserWithLastLocation();
+        when(userRepository.findUserByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.of(user));
         when(locationRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(NotFoundException.class,
             () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", locationId));
 
         verify(locationRepository).existsById(1L);
-        verify(userRepository, never()).findUserByUuid("35467585763t4sfgchjfuyetf");
+        verify(userRepository).findUserByUuid("35467585763t4sfgchjfuyetf");
         verify(bagRepository, never()).findBagsByLocationIdAndLocationStatusIsActive(anyLong());
     }
 
     @Test
     void getFirstPageDataUserNotFoundException() {
         Optional<Long> locationId = Optional.of(1L);
-        when(locationRepository.existsById(1L)).thenReturn(true);
         when(userRepository.findUserByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", locationId));
 
-        verify(locationRepository).existsById(1L);
         verify(userRepository).findUserByUuid("35467585763t4sfgchjfuyetf");
+        verify(locationRepository, never()).existsById(1L);
         verify(bagRepository, never()).findBagsByLocationIdAndLocationStatusIsActive(anyLong());
     }
 

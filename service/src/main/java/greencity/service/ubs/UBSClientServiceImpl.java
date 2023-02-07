@@ -258,25 +258,31 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> optionalLocationId) {
-        long locationId = checkAndGetLocationId(optionalLocationId);
         User user = userRepository.findUserByUuid(uuid).orElseThrow(
             () -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-        List<BagTranslationDto> btdList = bagRepository
-            .findBagsByLocationIdAndLocationStatusIsActive(locationId)
+        List<BagTranslationDto> btdList = getBagList(optionalLocationId)
             .stream()
             .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
             .collect(Collectors.toList());
+
         return new UserPointsAndAllBagsDto(btdList, user.getCurrentPoints());
     }
 
-    private long checkAndGetLocationId(Optional<Long> optionalLocationId) {
+    private List<Bag> getBagList(Optional<Long> optionalLocationId) {
         if (optionalLocationId.isPresent()) {
-            if (locationRepository.existsById(optionalLocationId.get())) {
-                return optionalLocationId.get();
-            }
-            throw new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID + optionalLocationId.get());
+            long locationId = checkAndGetLocationId(optionalLocationId.get());
+            return bagRepository
+                .findBagsByLocationIdAndLocationStatusIsActive(locationId);
         }
-        throw new BadRequestException(ErrorMessage.LOCATION_DOESNT_FOUND);
+        return bagRepository
+            .findAll();
+    }
+
+    private long checkAndGetLocationId(Long locationId) {
+        if (locationRepository.existsById(locationId)) {
+            return locationId;
+        }
+        throw new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID + locationId);
     }
 
     /**
