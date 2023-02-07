@@ -1069,12 +1069,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         final List<ReceivingStation> receivingStation = getAllReceivingStations();
+        String action;
+        if (order.getReceivingStation() != null || order.getDateOfExport() != null
+            || order.getDeliverFrom() != null || order.getDeliverTo() != null) {
+            action = OrderHistory.UPDATE_EXPORT_DETAILS;
+        } else {
+            action = OrderHistory.SET_EXPORT_DETAILS;
+        }
         order.setReceivingStation(getUpdatedReceivingStation(dto.getReceivingStationId(), order));
         order.setDateOfExport(getUpdatedDateExport(dto.getDateExport(), order));
         order.setDeliverFrom(getUpdatedDeliveryFrom(dto.getTimeDeliveryFrom(), order));
         order.setDeliverTo(getUpdatedDeliveryTo(dto.getTimeDeliveryTo(), order));
         orderRepository.save(order);
-        collectEventsAboutOrderExportDetails(order.getReceivingStation(), order.getDeliverFrom(), order, email);
+        eventService.saveEvent(action, email, order);
         return buildExportDto(order, receivingStation);
     }
 
@@ -1134,12 +1141,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param email            {@link String}.
      * @author Yuriy Bahlay.
      */
-    private void collectEventsAboutOrderExportDetails(ReceivingStation receivingStation, LocalDateTime deliverFrom,
-        Order order, String email) {
-        if (receivingStation != null || deliverFrom != null) {
-            eventService.saveEvent(OrderHistory.UPDATE_EXPORT_DETAILS, email, order);
-        }
-    }
 
     private ExportDetailsDto buildExportDto(Order order, List<ReceivingStation> receivingStations) {
         return ExportDetailsDto.builder()

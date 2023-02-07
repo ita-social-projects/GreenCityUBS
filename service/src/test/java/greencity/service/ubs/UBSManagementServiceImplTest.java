@@ -31,7 +31,6 @@ import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
 import greencity.service.notification.NotificationServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -2287,5 +2286,41 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
             OrderStatus.ON_THE_ROUTE.name(),
             LocalDate.now());
+    }
+
+    @Test
+    void updateOrderExportDetailsFirstDetailsSettingUp() {
+        Employee employee = getEmployee();
+        Order order = getOrder();
+        order.setDateOfExport(null);
+        order.setDeliverFrom(null);
+        order.setDeliverTo(null);
+        order.setReceivingStation(null);
+        List<ReceivingStation> receivingStations = List.of(getReceivingStation());
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(receivingStations);
+
+        ubsManagementService.updateOrderExportDetails(order.getId(), testDetails, employee.getEmail());
+        verify(orderRepository, times(1)).save(order);
+        verify(eventService, times(1)).saveEvent(OrderHistory.SET_EXPORT_DETAILS, employee.getEmail(), order);
+    }
+
+    @Test
+    void updateOrderExportDetailsChangingExistingExportDetails() {
+        Employee employee = getEmployee();
+        Order order = getOrder();
+        List<ReceivingStation> receivingStations = List.of(getReceivingStation());
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(receivingStations);
+
+        ubsManagementService.updateOrderExportDetails(order.getId(), testDetails, employee.getEmail());
+        verify(orderRepository, times(1)).save(order);
+        verify(eventService, times(1)).saveEvent(OrderHistory.UPDATE_EXPORT_DETAILS, employee.getEmail(), order);
     }
 }
