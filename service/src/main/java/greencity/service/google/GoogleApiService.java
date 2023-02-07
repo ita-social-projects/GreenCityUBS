@@ -7,7 +7,6 @@ import com.google.maps.model.GeocodingResult;
 
 import greencity.exceptions.api.GoogleApiException;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
