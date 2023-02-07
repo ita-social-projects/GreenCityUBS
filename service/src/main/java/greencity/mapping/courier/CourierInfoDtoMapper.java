@@ -9,10 +9,8 @@ public class CourierInfoDtoMapper extends AbstractConverter<TariffsInfo, Courier
     protected CourierInfoDto convert(TariffsInfo courierLocation) {
         return CourierInfoDto.builder()
             .courierLimit(courierLocation.getCourierLimit())
-            .maxAmountOfBigBags(courierLocation.getMaxAmountOfBigBags())
-            .maxPriceOfOrder(courierLocation.getMaxPriceOfOrder())
-            .minAmountOfBigBags(courierLocation.getMinAmountOfBigBags())
-            .minPriceOfOrder(courierLocation.getMinPriceOfOrder())
+            .max(courierLocation.getMax())
+            .min(courierLocation.getMin())
             .build();
     }
 }

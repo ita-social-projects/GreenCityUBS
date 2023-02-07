@@ -35,23 +35,6 @@ spec:
           periodSeconds: 10
           failureThreshold: 20
         env:
-        - name: API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: API-KEY
-
-        - name: API_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: API-SECRET
-
-        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: APPLICATIONINSIGHTS-CONNECTION-STRING
 
         - name: AZURE_CONNECTION_STRING
           valueFrom:
@@ -65,12 +48,6 @@ spec:
               name: {{ .Values.externalSecret.secretName }}
               key: AZURE-CONTAINER-NAME
 
-        - name: BUCKET_NAME
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: BUCKET-NAME
-
         - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -83,12 +60,6 @@ spec:
               name: {{ .Values.externalSecret.secretName }}
               key: DATABASE-USER
 
-        # - name: DATASOURCE_URL
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: {{ .Values.externalSecret.secretName }}
-        #       key: API-KEY
-
         - name: DIALECT
           valueFrom:
             secretKeyRef:
@@ -100,12 +71,6 @@ spec:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
               key: DRIVER
-
-        # - name: EMAIL_TOPIC
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: {{ .Values.externalSecret.secretName }}
-        #       key: EMAIL-TOPIC
 
         - name: GREENCITYUSER_SERVER_ADDRESS
           valueFrom:
@@ -142,12 +107,6 @@ spec:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
               key: LIQUIBASE-LOG
-
-        # - name: MAX_FILE_SIZE
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: {{ .Values.externalSecret.secretName }}
-        #       key: API-KEY
 
         - name: POOL_SIZE
           valueFrom:

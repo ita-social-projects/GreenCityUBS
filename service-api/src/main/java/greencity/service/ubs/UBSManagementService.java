@@ -280,10 +280,11 @@ public interface UBSManagementService {
      *
      * @param addBonusesToUserDto {@link AddBonusesToUserDto}.
      * @param orderId             {@link Long}.
+     * @param email               {@link String}.
      *
      * @author Pavlo Hural.
      */
-    AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId);
+    AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId, String email);
 
     /**
      * Method returns employee's access status to order.
@@ -294,4 +295,12 @@ public interface UBSManagementService {
      * @author Hlazova Nataliia.
      */
     Boolean checkEmployeeForOrder(Long orderId, String email);
+
+    /**
+     * This is method which is updates orders status at 00:00 everyday where date of
+     * export equals current date.
+     *
+     * @author Anatolii Shapiro.
+     */
+    void updateOrderStatusToExpected();
 }
