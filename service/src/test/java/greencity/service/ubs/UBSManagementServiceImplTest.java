@@ -51,6 +51,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -2229,36 +2230,41 @@ class UBSManagementServiceImplTest {
     void addBonusesToUserTest() {
         Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
         User user = order.getUser();
+        Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(bagRepository.findBagsByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
 
-        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
+        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L, employee.getEmail());
 
         verify(orderRepository).findById(1L);
         verify(orderRepository).save(order);
         verify(userRepository).save(user);
         verify(notificationService).notifyBonuses(order, 859L);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
     }
 
     @Test
     void addBonusesToUserWithoutOrderTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         AddBonusesToUserDto dto = getAddBonusesToUserDto();
-        assertThrows(NotFoundException.class, () -> ubsManagementService.addBonusesToUser(dto, 1L));
+        String email = getEmployee().getEmail();
+        assertThrows(NotFoundException.class, () -> ubsManagementService.addBonusesToUser(dto, 1L, email));
     }
 
     @Test
     void addBonusesToUserWithNoOverpaymentTest() {
-        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        Order order = getOrderForGetOrderStatusData2Test();
+        String email = getEmployee().getEmail();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(bagRepository.findBagsByOrderId(1L)).thenReturn(ModelUtils.getBag3list());
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
 
         AddBonusesToUserDto addBonusesToUserDto = ModelUtils.getAddBonusesToUserDto();
-        assertThrows(BadRequestException.class, () -> ubsManagementService.addBonusesToUser(addBonusesToUserDto, 1L));
+        assertThrows(BadRequestException.class,
+            () -> ubsManagementService.addBonusesToUser(addBonusesToUserDto, 1L, email));
     }
 
     @Test
@@ -2273,5 +2279,13 @@ class UBSManagementServiceImplTest {
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
         assertEquals(true, ubsManagementService.checkEmployeeForOrder(order.getId(), "test@gmail.com"));
+    }
+
+    @Test
+    void updateOrderStatusToExpected() {
+        ubsManagementService.updateOrderStatusToExpected();
+        verify(orderRepository).updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
+            OrderStatus.ON_THE_ROUTE.name(),
+            LocalDate.now());
     }
 }
