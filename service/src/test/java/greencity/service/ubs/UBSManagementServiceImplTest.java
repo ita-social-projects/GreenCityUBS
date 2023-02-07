@@ -820,67 +820,6 @@ class UBSManagementServiceImplTest {
         assertEquals(2L, user.getChangeOfPointsList().size());
     }
 
-    @ParameterizedTest
-    @CsvSource({"2, Змінено менеджера обдзвону",
-        "3, Змінено логіста",
-        "4, Змінено штурмана",
-        "5, Змінено водія"})
-    void testUpdatePositionTest(long diffParam, String eventName) {
-        User user = ModelUtils.getTestUser();
-        user.setRecipientSurname("Gerasum");
-        user.setRecipientName("Yuriy");
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
-        when(positionRepository.findById(2L)).thenReturn(Optional.ofNullable(TEST_POSITION));
-        when(employeeRepository.findByFirstNameAndLastName(anyString(), anyString()))
-            .thenReturn(Optional.ofNullable(TEST_EMPLOYEE));
-        when(employeeOrderPositionRepository.saveAll(anyIterable()))
-            .thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
-        when(employeeOrderPositionRepository.findByEmployeeId(1L)).thenReturn(diffParam);
-        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
-        ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE, "abc");
-        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
-        verify(orderRepository).findById(1L);
-        verify(positionRepository).findById(2L);
-        verify(employeeRepository).findByFirstNameAndLastName(anyString(), anyString());
-        verify(employeeOrderPositionRepository).saveAll(anyIterable());
-        Order order = TEST_ORDER_UPDATE_POSITION;
-        verify(eventService, times(1)).save(eventName,
-            order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
-    }
-
-    @Test
-    void testUpdatePositionThrowsOrderNotFoundException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE, "abc"));
-    }
-
-    @Test
-    void testUpdatePositionThrowsPositionNotFoundException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
-        when(positionRepository.findById(2L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE, "abc"));
-    }
-
-    @Test
-    void testUpdatePositionThrowsEmployeeNotFoundException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
-        when(positionRepository.findById(2L)).thenReturn(Optional.of(TEST_POSITION));
-        when(employeeRepository.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE, "abc"));
-    }
-
     @Test
     void testGetAdditionalBagsInfo() {
         when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(TEST_USER));

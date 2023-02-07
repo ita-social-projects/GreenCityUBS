@@ -30,7 +30,6 @@ import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderResponseDto;
@@ -232,19 +231,6 @@ public class ModelUtils {
             .name("Ivan Petyrov")
             .email("lipa@gmail.com")
             .phoneNumber("096765432")
-            .build();
-    }
-
-    public static OrderDetailInfoDto getOrderDetailInfoDto() {
-        return OrderDetailInfoDto.builder()
-            .orderId(1L)
-            .capacity(10)
-            .price(400)
-            .amount(100)
-            .exportedQuantity(100)
-            .confirmedQuantity(200)
-            .name("test")
-            .bagId(3)
             .build();
     }
 
