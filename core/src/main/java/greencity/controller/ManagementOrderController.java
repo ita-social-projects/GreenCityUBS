@@ -1062,8 +1062,8 @@ public class ManagementOrderController {
     })
     @PostMapping(value = "/add-bonuses-user/{id}")
     public ResponseEntity<AddBonusesToUserDto> addBonusesToUser(@PathVariable(name = "id") Long orderId,
-        @RequestBody @Valid AddBonusesToUserDto addBonusesToUserDto) {
+        @RequestBody @Valid AddBonusesToUserDto addBonusesToUserDto, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId));
+            .body(ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId, principal.getName()));
     }
 }

@@ -50,6 +50,7 @@ public final class ErrorMessage {
     public static final String CANNOT_DELETE_DEFAULT_IMAGE = "You can't delete default image.";
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
+    public static final String ADDRESS_NOT_FOUND = "Address not found";
     public static final String LOCATION_DOESNT_FOUND = "Location does not found";
     public static final String LOCATION_DOESNT_FOUND_BY_ID = "Location does not exist by id: ";
     public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown ";

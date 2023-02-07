@@ -57,6 +57,8 @@ import greencity.repository.RegionRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
+import greencity.exceptions.address.
+;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -463,8 +465,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadRequestException(ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED);
         }
 
-        OrderAddressDtoRequest dtoRequest =
-            getLocationDto(googleApiService.getResultFromGeoCode(addressRequestDto.getSearchAddress()));
+        OrderAddressDtoRequest dtoRequest = retrieveCorrectDtoRequest(addressRequestDto.getSearchAddress());
+
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
             modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
         addressRequestDtoForNullCheck.setId(0L);
@@ -499,7 +501,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         OrderAddressDtoRequest dtoRequest;
         if (addressRequestDto.getSearchAddress() != null) {
-            dtoRequest = getLocationDto(googleApiService.getResultFromGeoCode(addressRequestDto.getSearchAddress()));
+            dtoRequest = retrieveCorrectDtoRequest(addressRequestDto.getSearchAddress());
             checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
         } else {
             dtoRequest = addressRequestDto;
@@ -533,6 +535,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         addressRepo.save(address);
 
         return findAllAddressesForCurrentOrder(uuid);
+    }
+
+    private OrderAddressDtoRequest retrieveCorrectDtoRequest(String searchRequest) {
+        String[] search = searchRequest.split(", ");
+
+        return getLocationDto(searchRequest).stream()
+            .filter(a -> a.getCityEn() != null && a.getCityEn().equals(search[2]))
+            .filter(a -> a.getHouseNumber() != null && a.getHouseNumber().equals(search[1]))
+            .findFirst()
+            .orElseThrow(() -> new AddressNotFoundException(ADDRESS_NOT_FOUND));
     }
 
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
@@ -573,16 +585,25 @@ public class UBSClientServiceImpl implements UBSClientService {
                     .forEach(componentType -> value.accept(addressComponent.longName))));
     }
 
-    private OrderAddressDtoRequest getLocationDto(List<GeocodingResult> geocodingResults) {
-        OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
-        initializeGeoCodingResults(initializeUkrainianGeoCodingResult(orderAddressDtoRequest), geocodingResults.get(0));
-        initializeGeoCodingResults(initializeEnglishGeoCodingResult(orderAddressDtoRequest), geocodingResults.get(1));
+    private List<OrderAddressDtoRequest> getLocationDto(String searchRequest) {
+        List<GeocodingResult> resultsUa = googleApiService.getResultFromGeoCode(searchRequest, 0);
+        List<GeocodingResult> resultsEn = googleApiService.getResultFromGeoCode(searchRequest, 1);
 
-        double latitude = geocodingResults.get(0).geometry.location.lat;
-        double longitude = geocodingResults.get(0).geometry.location.lng;
-        orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
+        List<OrderAddressDtoRequest> result = new ArrayList<>();
 
-        return orderAddressDtoRequest;
+        for (int i = 0; i < resultsEn.size() || i < resultsUa.size(); i++) {
+            OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
+            initializeGeoCodingResults(initializeUkrainianGeoCodingResult(orderAddressDtoRequest), resultsUa.get(i));
+            initializeGeoCodingResults(initializeEnglishGeoCodingResult(orderAddressDtoRequest), resultsEn.get(i));
+
+            double latitude = resultsEn.get(i).geometry.location.lat;
+            double longitude = resultsEn.get(i).geometry.location.lng;
+            orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
+
+            result.add(orderAddressDtoRequest);
+        }
+
+        return result;
     }
 
     private void checkNullFieldsOnGoogleResponse(OrderAddressDtoRequest dtoRequest,

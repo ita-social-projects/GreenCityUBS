@@ -3634,7 +3634,7 @@ public class ModelUtils {
     public static CreateAddressRequestDto getAddressRequestDto() {
         return CreateAddressRequestDto.builder()
             .addressComment("fdsfs")
-            .searchAddress("fake address")
+            .searchAddress("fake street name, 13, fake street, 02000")
             .district("fdsfds")
             .districtEn("dsadsad")
             .region("regdsad")
@@ -3649,7 +3649,7 @@ public class ModelUtils {
         return OrderAddressDtoRequest.builder()
             .id(0L)
             .region("fake region")
-            .searchAddress("fake address")
+            .searchAddress("fake street name, 13, fake street, 02000")
             .city("fake street")
             .district("fake district")
             .entranceNumber("1")
