@@ -773,19 +773,19 @@ class SuperAdminControllerTest {
 
     @Test
     void deactivateTariffFotChosenParam() throws Exception {
-        Optional<List<Long>> regionsId = Optional.of(List.of(1L));
-        Optional<List<Long>> citiesId = Optional.empty();
-        Optional<List<Long>> stationsId = Optional.empty();
+        Optional<List<Long>> regionsIds = Optional.of(List.of(1L));
+        Optional<List<Long>> citiesIds = Optional.empty();
+        Optional<List<Long>> stationsIds = Optional.empty();
         Optional<Long> courierId = Optional.empty();
         DetailsOfDeactivateTariffsDto details = DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(regionsId)
-            .citiesId(citiesId)
-            .stationsId(stationsId)
+            .regionsIds(regionsIds)
+            .citiesIds(citiesIds)
+            .stationsIds(stationsIds)
             .courierId(courierId)
             .build();
 
         mockMvc.perform(post(ubsLink + "/deactivate/")
-            .param("regionsId", "1")).andExpect(status().isOk());
+            .param("regionsIds", "1")).andExpect(status().isOk());
         verify(superAdminService).deactivateTariffForChosenParam(details);
     }
 
