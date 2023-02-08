@@ -22,7 +22,6 @@ import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.TariffsInfoDto;
-import greencity.enums.MinAmountOfBag;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -771,7 +770,6 @@ class SuperAdminControllerTest {
     @Test
     void includeBag() throws Exception {
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
-        dto.setMinAmountOfBags(MinAmountOfBag.INCLUDE.name());
 
         when(superAdminService.includeBag(1)).thenReturn(dto);
 
@@ -819,7 +817,6 @@ class SuperAdminControllerTest {
     @Test
     void excludeBag() throws Exception {
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
-        dto.setMinAmountOfBags(MinAmountOfBag.EXCLUDE.name());
 
         when(superAdminService.excludeBag(1)).thenReturn(dto);
 

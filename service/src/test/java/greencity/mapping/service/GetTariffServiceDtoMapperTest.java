@@ -29,6 +29,6 @@ class GetTariffServiceDtoMapperTest {
         Assertions.assertEquals(dto.getDescription(), convertDto.getDescription());
         Assertions.assertEquals(dto.getNameEng(), convertDto.getNameEng());
         Assertions.assertEquals(dto.getDescriptionEng(), convertDto.getDescriptionEng());
-        Assertions.assertEquals(dto.getMinAmountOfBags(), convertDto.getMinAmountOfBags());
+        Assertions.assertEquals(dto.getLimitIncluded(), convertDto.getLimitIncluded());
     }
 }

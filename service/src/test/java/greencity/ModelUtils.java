@@ -2063,7 +2063,7 @@ public class ModelUtils {
             .price(100)
             .commission(50)
             .fullPrice(150)
-            .minAmountOfBags(MinAmountOfBag.INCLUDE.name())
+            .limitIncluded(false)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("name")

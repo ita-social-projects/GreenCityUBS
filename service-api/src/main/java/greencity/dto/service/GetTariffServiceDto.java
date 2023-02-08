@@ -37,5 +37,5 @@ public class GetTariffServiceDto {
     @NotNull
     private String descriptionEng;
     @NotNull
-    private String minAmountOfBags;
+    private Boolean limitIncluded;
 }

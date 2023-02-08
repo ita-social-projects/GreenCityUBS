@@ -19,7 +19,7 @@ public class GetTariffServiceDtoMapper extends AbstractConverter<Bag, GetTariffS
             .nameEng(source.getNameEng())
             .description(source.getDescription())
             .descriptionEng(source.getDescriptionEng())
-            .minAmountOfBags(source.getMinAmountOfBags().name())
+            .limitIncluded(source.getLimitIncluded())
             .build();
     }
 }
