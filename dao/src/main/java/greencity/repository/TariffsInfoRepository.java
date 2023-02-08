@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>, JpaSpecificationExecutor<TariffsInfo> {
@@ -105,4 +106,13 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
         + " rs.id in(:stationsIds) and"
         + " ti.courier_id = :courierId")
     void deactivateTariffsByCourierAndRegionAndReceivingStations(Long regionId, List<Long> stationsIds, Long courierId);
+
+    /**
+     * Method for getting set of tariffs.
+     *
+     * @param id - list of tariffIds.
+     * @return - set of tariffs.
+     * @author - Nikita Korzh.
+     */
+    Set<TariffsInfo> findTariffsInfosByIdIsIn(List<Long> id);
 }

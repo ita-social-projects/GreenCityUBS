@@ -777,7 +777,6 @@ class SuperAdminControllerTest {
         Optional<List<Long>> citiesIds = Optional.empty();
         Optional<List<Long>> stationsIds = Optional.empty();
         Optional<Long> courierId = Optional.empty();
-
         DetailsOfDeactivateTariffsDto details = DetailsOfDeactivateTariffsDto.builder()
             .regionsIds(regionsIds)
             .citiesIds(citiesIds)

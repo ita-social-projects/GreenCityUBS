@@ -2,6 +2,7 @@ package greencity.dto.employee;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import greencity.dto.position.PositionDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Data
 @Builder
@@ -24,6 +26,11 @@ public class EmployeeSignUpDto {
 
     @JsonIgnore
     private String password;
+
+    private String uuid;
+
+    private List<PositionDto> positions;
+
     @JsonProperty("isUbs")
     private boolean isUbs;
 }

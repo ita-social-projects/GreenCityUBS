@@ -5,7 +5,7 @@
 
     <changeSet id="ch-insert-all-regions" author="Fedorko Yurii">
         <update tableName="regions">
-            <column name="name_en" value="Kyiv region"/>
+            <column name="name_en" value="Kyiv Oblast"/>
             <column name="name_uk" value="Київська область"/>
             <where>id=1</where>
         </update>
@@ -64,98 +64,14 @@
             <column name="receiving_station_id">1</column>
         </insert>
 
-        <insert tableName="regions">
-            <column name="name_uk">Львівська область</column>
-            <column name="name_en">Lviv region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Івано-Франківська область</column>
-            <column name="name_en">Ivano-Frankivsk region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Черкаська область</column>
-            <column name="name_en">Cherkasy region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Чернігівська область</column>
-            <column name="name_en">Chernihiv region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Чернівецька область</column>
-            <column name="name_en">Chernivtsi region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Дніпропетровська область</column>
-            <column name="name_en">Dnipropetrovsk region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Донецька область</column>
-            <column name="name_en">Donetsk region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Харківська область</column>
-            <column name="name_en">Kharkiv region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Херсонська область</column>
-            <column name="name_en">Kherson region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Хмельницька область</column>
-            <column name="name_en">Khmelnytskyi region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Кіровоградська область</column>
-            <column name="name_en">Kirovohrad region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Луганська область</column>
-            <column name="name_en">Luhansk region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Миколаївська область</column>
-            <column name="name_en">Mykolaiv region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Одеська область</column>
-            <column name="name_en">Odessa region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Полтавська область</column>
-            <column name="name_en">Poltava region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Рівненська область</column>
-            <column name="name_en">Rivne region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Сумська область</column>
-            <column name="name_en">Sumy region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Тернопільська область</column>
-            <column name="name_en">Ternopil region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Вінницька область</column>
-            <column name="name_en">Vinnytsia region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Волинська область</column>
-            <column name="name_en">Volyn region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Закарпатська область</column>
-            <column name="name_en">Zakarpattia region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Запорізька область</column>
-            <column name="name_en">Zaporizhia region</column>
-        </insert>
-        <insert tableName="regions">
-            <column name="name_uk">Житомирська область</column>
-            <column name="name_en">Zhytomyr region</column>
+        <insert tableName="tariff_infos_receiving_employee_mapping">
+            <column name="employee_id">1</column>
+            <column name ="tariffs_info_id">1</column>
         </insert>
 
+        <insert tableName="tariff_infos_receiving_employee_mapping">
+            <column name="employee_id">1</column>
+            <column name ="tariffs_info_id">2</column>
+        </insert>
     </changeSet>
 </databaseChangeLog>
