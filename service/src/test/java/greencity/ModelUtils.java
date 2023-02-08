@@ -3778,81 +3778,144 @@ public class ModelUtils {
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithEmptyParams() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.empty())
-            .citiesId(Optional.empty())
-            .stationsId(Optional.empty())
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.empty())
             .courierId(Optional.empty())
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegion() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.of(List.of(1L)))
-            .citiesId(Optional.empty())
-            .stationsId(Optional.empty())
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.empty())
             .courierId(Optional.empty())
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegionAndCities() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.of(List.of(1L)))
-            .citiesId(Optional.of(List.of(1L, 11L)))
-            .stationsId(Optional.empty())
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.empty())
             .courierId(Optional.empty())
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourier() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.empty())
-            .citiesId(Optional.empty())
-            .stationsId(Optional.empty())
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.empty())
             .courierId(Optional.of(1L))
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithReceivingStations() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.empty())
-            .citiesId(Optional.empty())
-            .stationsId(Optional.of(List.of(1L, 12L)))
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.empty())
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndReceivingStations() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.empty())
-            .citiesId(Optional.empty())
-            .stationsId(Optional.of(List.of(1L, 12L)))
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.of(1L))
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndRegion() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.of(List.of(1L)))
-            .citiesId(Optional.empty())
-            .stationsId(Optional.empty())
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.empty())
             .courierId(Optional.of(1L))
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegionAndCityAndStation() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.of(List.of(1L)))
-            .citiesId(Optional.of(List.of(1L, 11L)))
-            .stationsId(Optional.of(List.of(1L, 12L)))
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.empty())
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithAllParams() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.of(List.of(1L)))
-            .citiesId(Optional.of(List.of(1L, 11L)))
-            .stationsId(Optional.of(List.of(1L, 12L)))
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegionAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndRegionAndCities() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.empty())
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndRegionAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCities() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.empty())
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCitiesAndCourier() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.empty())
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCitiesAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCitiesAndCourierAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.of(1L))
             .build();
     }
