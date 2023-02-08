@@ -3403,12 +3403,13 @@ public class ModelUtils {
             .newValue("1")
             .build();
     }
+
     public static RequestToChangeOrdersDataDto getRequestToAddAdminCommentForOrder() {
         return RequestToChangeOrdersDataDto.builder()
-                .columnName("adminComment")
-                .orderIdsList(List.of(1L))
-                .newValue("Admin Comment")
-                .build();
+            .columnName("adminComment")
+            .orderIdsList(List.of(1L))
+            .newValue("Admin Comment")
+            .build();
     }
 
     public static List<Bot> botList() {
