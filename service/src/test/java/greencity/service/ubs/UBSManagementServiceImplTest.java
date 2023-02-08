@@ -2308,12 +2308,19 @@ class UBSManagementServiceImplTest {
     }
 
     private static Stream<Arguments> provideOrdersWithDifferentInitialExportDetailsForUpdateOrderExportDetails() {
+        Order orderWithoutExportDate = getOrderExportDetails();
+        orderWithoutExportDate.setDateOfExport(null);
+        Order orderWithoutDeliverFromTo = getOrderExportDetails();
+        orderWithoutDeliverFromTo.setDeliverFrom(null);
+        orderWithoutDeliverFromTo.setDeliverTo(null);
         return Stream.of(
             Arguments.of(getOrderExportDetailsWithNullValues(), OrderHistory.SET_EXPORT_DETAILS),
             Arguments.of(getOrderExportDetailsWithExportDate(), OrderHistory.UPDATE_EXPORT_DETAILS),
             Arguments.of(getOrderExportDetailsWithExportDateDeliverFrom(), OrderHistory.UPDATE_EXPORT_DETAILS),
             Arguments.of(getOrderExportDetailsWithExportDateDeliverFromTo(), OrderHistory.UPDATE_EXPORT_DETAILS),
             Arguments.of(getOrderExportDetails(), OrderHistory.UPDATE_EXPORT_DETAILS),
-            Arguments.of(getOrderExportDetailsWithDeliverFromTo(), OrderHistory.UPDATE_EXPORT_DETAILS));
+            Arguments.of(getOrderExportDetailsWithDeliverFromTo(), OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(orderWithoutExportDate, OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(orderWithoutExportDate, OrderHistory.UPDATE_EXPORT_DETAILS));
     }
 }
