@@ -262,19 +262,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> optionalLocationId) {
         User user = userRepository.findUserByUuid(uuid).orElseThrow(
             () -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-        List<BagTranslationDto> btdList = getBagList(optionalLocationId)
+        List<BagTranslationDto> btdList = getBagList(optionalLocationId.orElse(null))
             .stream()
             .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
             .collect(Collectors.toList());
-
         return new UserPointsAndAllBagsDto(btdList, user.getCurrentPoints());
     }
 
-    private List<Bag> getBagList(Optional<Long> optionalLocationId) {
-        if (optionalLocationId.isPresent()) {
-            long locationId = checkAndGetLocationId(optionalLocationId.get());
+    private List<Bag> getBagList(Long locationId) {
+        if (locationId != null) {
             return bagRepository
-                .findBagsByLocationIdAndLocationStatusIsActive(locationId);
+                .findBagsByLocationIdAndLocationStatusIsActive(
+                    checkAndGetLocationId(locationId));
         }
         return bagRepository
             .findAll();

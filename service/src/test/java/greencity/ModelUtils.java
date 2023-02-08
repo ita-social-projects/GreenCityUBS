@@ -4104,15 +4104,6 @@ public class ModelUtils {
             .id(1L)
             .build();
     }
-<<<<<<< HEAD
-=======
-
-    public static OrderStatusPageDto getOrderStatusData() {
-        return OrderStatusPageDto.builder()
-            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-            .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
-            .build();
-    }
 
     public static Order getOrderExportDetailsWithExportDate() {
         return Order.builder()
@@ -4147,5 +4138,4 @@ public class ModelUtils {
         order.setDeliverFrom(LocalDateTime.of(2023, 2, 8, 15, 0));
         return order;
     }
->>>>>>> dev
 }
