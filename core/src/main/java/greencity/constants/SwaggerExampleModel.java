@@ -31,28 +31,9 @@ public final class SwaggerExampleModel {
             + "      \"name\": \"string\"\n"
             + "  }\n"
             + " ],\n"
-            + "  \"receivingStations\": [\n"
-            + "  {\n"
-            + "      \"id\": 0,\n"
-            + "      \"name\": \"string\"\n"
-            + "  }\n"
-            + " ],\n"
-            + "  \"location\": \n"
-            + "  {\n"
-            + "      \"locationId\": 0,\n"
-            + "      \"nameEn\": \"string\",\n"
-            + "      \"nameUa\": \"string\"\n"
-            + "  },\n"
-            + "  \"courier\": \n"
-            + "    {\n"
-            + "      \"courierId\": 0,\n"
-            + "  \"courierTranslationDtos\": [\n"
-            + "  {\n"
-            + "      \"nameEn\": \"string\",\n"
-            + "      \"nameUa\": \"string\"\n"
-            + "  }\n"
-            + " ]\n"
-            + "}\n"
+            + " \"tariffId\": "
+            + "  [\n 0 \n"
+            + "  ]\n"
             + "}";
 
     public static final String ADD_NEW_EMPLOYEE =
@@ -67,7 +48,6 @@ public final class SwaggerExampleModel {
             + "{\n"
             + "  \"id\": 0,\n"
             + EMPLOYEE_BEGIN
-            + "  \"image\": \"string\",\n"
             + EMPLOYEE_END
             + AFTER_EXAMPLE;
 }
