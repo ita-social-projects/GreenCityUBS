@@ -52,6 +52,7 @@ class ManagementEmployeeControllerTest {
     private final String GET_ALL_POSITIONS_LINK = "/get-all-positions";
     private final String DELETE_POSITION_LINK = "/delete-position/";
     private final String DELETE_IMAGE_LINK = "/delete-employee-image/";
+    private final String GET_ALL_TARIFFS = "/getTariffs";
 
     private MockMvc mockMvc;
     @Mock
@@ -78,8 +79,8 @@ class ManagementEmployeeControllerTest {
     }
 
     @Test
-    void saveEmployee() throws Exception {
-        EmployeeDto dto = getEmployeeDto();
+    void saveEmployeeTest() throws Exception {
+        EmployeeDto dto = new EmployeeDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
         MockMultipartFile jsonFile = new MockMultipartFile("employeeDto",
@@ -90,6 +91,7 @@ class ManagementEmployeeControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
+        verify(service).save(dto, null);
     }
 
     @Test
@@ -125,11 +127,11 @@ class ManagementEmployeeControllerTest {
     }
 
     @Test
-    void updateEmployeeBadRequest() throws Exception {
-        EmployeeDto dto = getEmployeeDto();
+    void updateEmployeeTest() throws Exception {
+        EmployeeDto dto = new EmployeeDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
-        MockMultipartFile jsonFile = new MockMultipartFile("EmployeeDto",
+        MockMultipartFile jsonFile = new MockMultipartFile("employeeDto",
             "", "application/json", responseJSON.getBytes());
         MockMultipartHttpServletRequestBuilder builder =
             MockMvcRequestBuilders.multipart(UBS_LINK + UPDATE_LINK);
@@ -141,7 +143,8 @@ class ManagementEmployeeControllerTest {
         mockMvc.perform(builder.file(jsonFile)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isOk());
+        verify(service, times(1)).update(dto, null);
     }
 
     @Test
@@ -227,5 +230,12 @@ class ManagementEmployeeControllerTest {
 
         String email = principal.getName();
         verify(ubsClientService).updateEmployeesAuthorities(dto, email);
+    }
+
+    @Test
+    void getTariffInfoForEmployeeTest() throws Exception {
+        mockMvc.perform(get(UBS_LINK + GET_ALL_TARIFFS)
+            .principal(principal)).andExpect(status().isOk());
+        verify(service, times(1)).getTariffsForEmployee();
     }
 }
