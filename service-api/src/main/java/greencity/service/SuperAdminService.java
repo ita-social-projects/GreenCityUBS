@@ -13,8 +13,8 @@ import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
-import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
+import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffServiceDto;
@@ -66,30 +66,31 @@ public interface SuperAdminService {
     GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id, String uuid);
 
     /**
-     * Method for add new Service.
+     * Method for add new Service for Tariff.
      *
-     * @param dto  {@link CreateServiceDto}
-     * @param uuid {@link String} - employee uuid.
-     * @return {@link ServiceDto}
+     * @param tariffId {@link Long} - tariff id.
+     * @param dto      {@link ServiceDto} - new service dto.
+     * @param uuid     {@link String} - employee uuid.
+     * @return {@link GetServiceDto} - created service dto.
      * @author Vadym Makitra
      * @author Julia Seti
      */
-    ServiceDto addService(CreateServiceDto dto, String uuid);
+    GetServiceDto addService(Long tariffId, ServiceDto dto, String uuid);
 
     /**
      * Method for get service by tariff id.
      *
      * @param tariffId {@link Long} - tariff id.
-     * @return {@link ServiceDto}
+     * @return {@link GetServiceDto} - service dto.
      * @author Vadym Makitra
      * @author Julia Seti
      */
-    ServiceDto getService(long tariffId);
+    GetServiceDto getService(long tariffId);
 
     /**
      * Method for delete service by id.
      *
-     * @param id - Service Id.
+     * @param id {@link Long} - Service Id.
      * @author Vadym Makitra
      */
     void deleteService(long id);
@@ -97,13 +98,14 @@ public interface SuperAdminService {
     /**
      * Method for editing service by id.
      *
-     * @param dto  - entered info about field that need to edit.
+     * @param id   {@link Long} - service id.
+     * @param dto  {@link ServiceDto} - entered info about field that need to edit.
      * @param uuid - employee uuid.
-     * @return {@link ServiceDto} - info about edited service.
+     * @return {@link GetServiceDto} - info about edited service.
      * @author Vadym Makitra
      * @author Julia Seti
      */
-    ServiceDto editService(ServiceDto dto, String uuid);
+    GetServiceDto editService(Long id, ServiceDto dto, String uuid);
 
     /**
      * Method for get all info about location.

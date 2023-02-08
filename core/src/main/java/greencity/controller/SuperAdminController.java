@@ -6,7 +6,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import greencity.dto.DetailsOfDeactivateTariffsDto;
-import greencity.dto.service.ServiceDto;
+import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffServiceDto;
@@ -45,7 +45,7 @@ import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
-import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.entity.order.Courier;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
@@ -151,50 +151,54 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for creating new service.
+     * Controller for creating new service for tariff.
      *
-     * @param dto  {@link CreateServiceDto}
-     * @param uuid {@link String} - user uuid.
-     * @return {@link ServiceDto}
+     * @param tariffId {@link Long} - tariff id.
+     * @param dto      {@link ServiceDto} - new service dto.
+     * @param uuid     {@link String} - employee uuid.
+     * @return {@link GetServiceDto} - created service dto.
+     *
      * @author Vadym Makitra
      * @author Julia Seti.
      */
 
-    @ApiOperation(value = "Add new service")
+    @ApiOperation(value = "Add service for tariff")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ServiceDto.class),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = GetServiceDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
-    @PostMapping("/createService")
-    public ResponseEntity<ServiceDto> createServices(
-        @RequestBody CreateServiceDto dto,
+    @PostMapping("/{tariffId}/createService")
+    public ResponseEntity<GetServiceDto> createServices(
+        @Valid @PathVariable Long tariffId,
+        @Valid @RequestBody ServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addService(dto, uuid));
+        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addService(tariffId, dto, uuid));
     }
 
     /**
      * Controller for getting info about service by tariff id.
      *
      * @param tariffId {@link Long} - tariff id.
-     * @return {@link ServiceDto}
+     * @return {@link GetServiceDto} - service dto.
+     *
      * @author Vadym Makitra
      * @author Julia Seti
      */
 
     @ApiOperation(value = "Get info about service by tariff id")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ServiceDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/{tariffId}/getService")
-    public ResponseEntity<ServiceDto> getService(
+    public ResponseEntity<GetServiceDto> getService(
         @Valid @PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService(tariffId));
     }
@@ -224,26 +228,29 @@ class SuperAdminController {
     /**
      * Controller for edit service by id.
      *
-     * @param dto  {@link ServiceDto}
-     * @param uuid {@link String}
-     * @return {@link ServiceDto}
+     * @param id   {@link Long} - service id.
+     * @param dto  {@link ServiceDto} - service dto.
+     * @param uuid {@link String} - employee uuid.
+     * @return {@link GetServiceDto} - edited service dto.
+     *
      * @author Vadym Makitra
      * @author Julia Seti
      */
 
-    @ApiOperation(value = "Edit service")
+    @ApiOperation(value = "Edit service by id")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ServiceDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
-    @PutMapping("/editService")
-    public ResponseEntity<ServiceDto> editService(
-        @RequestBody @Valid ServiceDto dto,
+    @PutMapping("/editService/{id}")
+    public ResponseEntity<GetServiceDto> editService(
+        @Valid @PathVariable Long id,
+        @Valid @RequestBody ServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(dto, uuid));
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, uuid));
     }
 
     /**

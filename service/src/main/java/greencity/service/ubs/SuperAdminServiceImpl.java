@@ -15,8 +15,8 @@ import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
-import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
+import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffServiceDto;
@@ -163,13 +163,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public ServiceDto addService(CreateServiceDto dto, String employeeUuid) {
-        Service service = serviceRepository.save(createService(dto, employeeUuid));
-        return modelMapper.map(service, ServiceDto.class);
+    public GetServiceDto addService(Long tariffId, ServiceDto dto, String employeeUuid) {
+        Service service = serviceRepository.save(createService(tariffId, dto, employeeUuid));
+        return modelMapper.map(service, GetServiceDto.class);
     }
 
-    private Service createService(CreateServiceDto dto, String employeeUuid) {
-        long tariffId = dto.getTariffId();
+    private Service createService(Long tariffId, ServiceDto dto, String employeeUuid) {
         if (getServiceByTariffsInfoId(tariffId).isEmpty()) {
             Employee employee = getEmployeeByUuid(employeeUuid);
             TariffsInfo tariffsInfo = getTariffById(tariffId);
@@ -189,9 +188,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public ServiceDto getService(long tariffId) {
+    public GetServiceDto getService(long tariffId) {
         return getServiceByTariffsInfoId(tariffId)
-            .map(it -> modelMapper.map(it, ServiceDto.class))
+            .map(it -> modelMapper.map(it, GetServiceDto.class))
             .orElse(null);
     }
 
@@ -201,8 +200,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public ServiceDto editService(ServiceDto dto, String employeeUuid) {
-        Service service = getServiceById(dto.getId());
+    public GetServiceDto editService(Long id, ServiceDto dto, String employeeUuid) {
+        Service service = getServiceById(id);
         Employee employee = getEmployeeByUuid(employeeUuid);
         service.setPrice(dto.getPrice());
         service.setName(dto.getName());
@@ -212,7 +211,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         service.setEditedAt(LocalDate.now());
         service.setEditedBy(employee);
         serviceRepository.save(service);
-        return modelMapper.map(service, ServiceDto.class);
+        return modelMapper.map(service, GetServiceDto.class);
     }
 
     private Employee getEmployeeByUuid(String employeeUuid) {
