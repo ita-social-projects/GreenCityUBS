@@ -4127,4 +4127,31 @@ public class ModelUtils {
             .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
             .build();
     }
+
+    public static Order getOrderExportDetailsWithExportDate() {
+        return Order.builder()
+            .id(1L)
+            .dateOfExport(LocalDate.of(2023, 2, 8))
+            .user(User.builder().id(1L).recipientName("Admin").recipientSurname("Ubs").build())
+            .build();
+    }
+
+    public static Order getOrderExportDetailsWithExportDateDeliverFrom() {
+        return Order.builder()
+            .id(1L)
+            .dateOfExport(LocalDate.of(2023, 2, 8))
+            .deliverFrom(LocalDateTime.of(2023, 2, 8, 15, 0))
+            .user(User.builder().id(1L).recipientName("Admin").recipientSurname("Ubs").build())
+            .build();
+    }
+
+    public static Order getOrderExportDetailsWithExportDateDeliverFromTo() {
+        return Order.builder()
+            .id(1L)
+            .dateOfExport(LocalDate.of(2023, 2, 8))
+            .deliverFrom(LocalDateTime.of(2023, 2, 8, 15, 0))
+            .deliverTo(LocalDateTime.of(2023, 2, 8, 16, 30))
+            .user(User.builder().id(1L).recipientName("Admin").recipientSurname("Ubs").build())
+            .build();
+    }
 }

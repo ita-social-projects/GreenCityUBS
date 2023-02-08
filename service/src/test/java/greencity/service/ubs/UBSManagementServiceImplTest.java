@@ -37,7 +37,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -54,6 +56,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
@@ -2288,14 +2291,10 @@ class UBSManagementServiceImplTest {
             LocalDate.now());
     }
 
-    @Test
-    void updateOrderExportDetailsFirstDetailsSettingUp() {
+    @ParameterizedTest
+    @MethodSource("provideOrdersWithDifferentInitialExportDetailsForUpdateOrderExportDetails")
+    void updateOrderExportDetailsSettingForDifferentInitialExportDetailsTest(Order order, String expectedHistoryEvent) {
         Employee employee = getEmployee();
-        Order order = getOrder();
-        order.setDateOfExport(null);
-        order.setDeliverFrom(null);
-        order.setDeliverTo(null);
-        order.setReceivingStation(null);
         List<ReceivingStation> receivingStations = List.of(getReceivingStation());
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
         var receivingStation = ModelUtils.getReceivingStation();
@@ -2305,22 +2304,15 @@ class UBSManagementServiceImplTest {
 
         ubsManagementService.updateOrderExportDetails(order.getId(), testDetails, employee.getEmail());
         verify(orderRepository, times(1)).save(order);
-        verify(eventService, times(1)).saveEvent(OrderHistory.SET_EXPORT_DETAILS, employee.getEmail(), order);
+        verify(eventService, times(1)).saveEvent(expectedHistoryEvent, employee.getEmail(), order);
     }
 
-    @Test
-    void updateOrderExportDetailsChangingExistingExportDetails() {
-        Employee employee = getEmployee();
-        Order order = getOrder();
-        List<ReceivingStation> receivingStations = List.of(getReceivingStation());
-        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
-        var receivingStation = ModelUtils.getReceivingStation();
-        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(receivingStationRepository.findAll()).thenReturn(receivingStations);
-
-        ubsManagementService.updateOrderExportDetails(order.getId(), testDetails, employee.getEmail());
-        verify(orderRepository, times(1)).save(order);
-        verify(eventService, times(1)).saveEvent(OrderHistory.UPDATE_EXPORT_DETAILS, employee.getEmail(), order);
+    private static Stream<Arguments> provideOrdersWithDifferentInitialExportDetailsForUpdateOrderExportDetails() {
+        return Stream.of(
+            Arguments.of(getOrderExportDetailsWithNullValues(), OrderHistory.SET_EXPORT_DETAILS),
+            Arguments.of(getOrderExportDetailsWithExportDate(), OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(getOrderExportDetailsWithExportDateDeliverFrom(), OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(getOrderExportDetailsWithExportDateDeliverFromTo(), OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(getOrderExportDetails(), OrderHistory.UPDATE_EXPORT_DETAILS));
     }
 }
