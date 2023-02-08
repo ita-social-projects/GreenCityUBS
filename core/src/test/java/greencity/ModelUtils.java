@@ -11,7 +11,7 @@ import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
@@ -187,9 +187,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static EmployeeDto getEmployeeDto() {
-        return EmployeeDto.builder()
-            .id(1L)
+    public static AddEmployeeDto getAddEmployeeDto() {
+        return AddEmployeeDto.builder()
             .firstName("Петро")
             .lastName("Петренко")
             .phoneNumber("+380935577455")
