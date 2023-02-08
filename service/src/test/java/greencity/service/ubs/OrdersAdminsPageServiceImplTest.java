@@ -404,6 +404,8 @@ class OrdersAdminsPageServiceImplTest {
         dto.setColumnName("cancellationComment");
         dto.setNewValue("Comment");
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+        dto.setColumnName("adminComment");
+        dto.setNewValue("Admin Comment");
 
         verify(receivingStationRepository, atLeast(1)).getOne(1L);
         verify(employeeRepository, atLeast(1)).findByEmail(email);

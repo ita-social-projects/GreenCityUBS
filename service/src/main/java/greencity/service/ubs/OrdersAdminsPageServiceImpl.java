@@ -70,6 +70,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String TIME_OF_EXPORT = "timeOfExport";
     private static final String CANCELLATION_REASON = "cancellationReason";
     private static final String CANCELLATION_COMMENT = "cancellationComment";
+    private static final String ADMIN_COMMENT = "adminComment";
 
     @Override
     public TableParamsDto getParametersForOrdersTable(String uuid) {
@@ -201,6 +202,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             case CANCELLATION_COMMENT:
                 return createReturnForSwitchChangeOrder(
                     cancellationCommentForDevelopStage(ordersId, value, employeeId));
+            case ADMIN_COMMENT:
+                return createReturnForSwitchChangeOrder(
+                    adminCommentForDevelopStage(ordersId, value, employeeId));
             default:
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
@@ -431,6 +435,24 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 orderRepository.updateCancelingComment(orderId, value);
                 eventService.saveEvent(OrderHistory.ORDER_CANCELLED + "  " + value, employee.getEmail(),
+                    existedOrder);
+            } catch (Exception e) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
+    }
+
+    private List<Long> adminCommentForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
+        List<Long> unresolvedGoals = new ArrayList<>();
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+        for (Long orderId : ordersId) {
+            try {
+                Order existedOrder = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                orderRepository.updateAdminComment(orderId, value);
+                eventService.saveEvent(OrderHistory.ADD_ADMIN_COMMENT + "  " + value, employee.getEmail(),
                     existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
