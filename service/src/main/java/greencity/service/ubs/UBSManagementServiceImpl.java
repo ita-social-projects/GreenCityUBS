@@ -1132,16 +1132,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return order.getDeliverTo();
     }
 
-    /**
-     * This is private method which collect's event for order export details.
-     *
-     * @param receivingStation {@link ReceivingStation}.
-     * @param deliverFrom      {@link LocalDateTime}.
-     * @param order            {@link Order}.
-     * @param email            {@link String}.
-     * @author Yuriy Bahlay.
-     */
-
     private ExportDetailsDto buildExportDto(Order order, List<ReceivingStation> receivingStations) {
         return ExportDetailsDto.builder()
             .allReceivingStations(
