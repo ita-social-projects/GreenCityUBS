@@ -2313,6 +2313,7 @@ class UBSManagementServiceImplTest {
             Arguments.of(getOrderExportDetailsWithExportDate(), OrderHistory.UPDATE_EXPORT_DETAILS),
             Arguments.of(getOrderExportDetailsWithExportDateDeliverFrom(), OrderHistory.UPDATE_EXPORT_DETAILS),
             Arguments.of(getOrderExportDetailsWithExportDateDeliverFromTo(), OrderHistory.UPDATE_EXPORT_DETAILS),
-            Arguments.of(getOrderExportDetails(), OrderHistory.UPDATE_EXPORT_DETAILS));
+            Arguments.of(getOrderExportDetails(), OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(getOrderExportDetailsWithDeliverFromTo(), OrderHistory.UPDATE_EXPORT_DETAILS));
     }
 }

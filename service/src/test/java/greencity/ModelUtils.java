@@ -4154,4 +4154,11 @@ public class ModelUtils {
             .user(User.builder().id(1L).recipientName("Admin").recipientSurname("Ubs").build())
             .build();
     }
+
+    public static Order getOrderExportDetailsWithDeliverFromTo(){
+        Order order = getOrderExportDetailsWithNullValues();
+        order.setDeliverTo(LocalDateTime.of(2023, 2, 8, 16, 30));
+        order.setDeliverFrom(LocalDateTime.of(2023, 2, 8, 15, 0));
+        return order;
+    }
 }
