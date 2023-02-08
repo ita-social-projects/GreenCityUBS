@@ -185,26 +185,26 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO) {
         String columnName = requestToChangeOrdersDataDTO.getColumnName();
         String value = requestToChangeOrdersDataDTO.getNewValue();
-        List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderId();
-        Long employeeId = employeeRepository.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
+        List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderIdsList();
+        Employee employee = employeeRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         switch (columnName) {
             case ORDER_STATUS:
-                return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employeeId));
+                return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employee.getId()));
             case DATE_OF_EXPORT:
-                return createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value, employeeId));
+                return createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value, employee.getId()));
             case TIME_OF_EXPORT:
-                return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employeeId));
+                return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employee.getId()));
             case RECEIVING:
-                return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
+                return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employee.getId()));
             case CANCELLATION_REASON:
                 return createReturnForSwitchChangeOrder(cancellationReasonForDevelopStage(ordersId, value));
             case CANCELLATION_COMMENT:
                 return createReturnForSwitchChangeOrder(
-                    cancellationCommentForDevelopStage(ordersId, value, employeeId));
+                    cancellationCommentForDevelopStage(ordersId, value, employee));
             case ADMIN_COMMENT:
                 return createReturnForSwitchChangeOrder(
-                    adminCommentForDevelopStage(ordersId, value, employeeId));
+                    adminCommentForDevelopStage(ordersId, value, employee));
             default:
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
@@ -424,43 +424,27 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         }
         return unresolvedGoals;
     }
-
-    private List<Long> cancellationCommentForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
+    private List<Long> addCommentToOrder(List<Long> ordersId, String value, Employee employee, String orderHistoryMessage) {
         List<Long> unresolvedGoals = new ArrayList<>();
-        Employee employee = employeeRepository.findById(employeeId)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                orderRepository.updateCancelingComment(orderId, value);
-                eventService.saveEvent(OrderHistory.ORDER_CANCELLED + "  " + value, employee.getEmail(),
-                    existedOrder);
-            } catch (Exception e) {
-                unresolvedGoals.add(orderId);
-            }
-        }
-        return unresolvedGoals;
-    }
-
-    private List<Long> adminCommentForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
-        List<Long> unresolvedGoals = new ArrayList<>();
-        Employee employee = employeeRepository.findById(employeeId)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
-        for (Long orderId : ordersId) {
-            try {
-                Order existedOrder = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 orderRepository.updateAdminComment(orderId, value);
-                eventService.saveEvent(OrderHistory.ADD_ADMIN_COMMENT + "  " + value, employee.getEmail(),
-                    existedOrder);
+                eventService.saveEvent(orderHistoryMessage + "  " + value, employee.getEmail(),
+                        existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
         }
         return unresolvedGoals;
     }
-
+    private List<Long> cancellationCommentForDevelopStage(List<Long> ordersId, String value, Employee employee) {
+        return addCommentToOrder(ordersId, value, employee, OrderHistory.ORDER_CANCELLED);
+    }
+    private List<Long> adminCommentForDevelopStage(List<Long> ordersId, String value, Employee employee) {
+        return addCommentToOrder(ordersId, value, employee, OrderHistory.ADD_ADMIN_COMMENT);
+    }
     @Override
     public synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
