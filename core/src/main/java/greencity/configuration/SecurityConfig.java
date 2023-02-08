@@ -110,7 +110,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/addLocations",
                 SUPER_ADMIN_LINK + "/createCourier",
                 SUPER_ADMIN_LINK + "/createTariffService",
-                SUPER_ADMIN_LINK + "/createService",
+                SUPER_ADMIN_LINK + "/{tariffId}/createService",
                 SUPER_ADMIN_LINK + "/create-receiving-station",
                 SUPER_ADMIN_LINK + "/locations/edit",
                 SUPER_ADMIN_LINK + "/**")
@@ -129,7 +129,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/update-courier",
                 SUPER_ADMIN_LINK + "/update-receiving-station",
                 SUPER_ADMIN_LINK + "/editTariffService/{id}",
-                SUPER_ADMIN_LINK + "/editService",
+                SUPER_ADMIN_LINK + "/editService/{id}",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
