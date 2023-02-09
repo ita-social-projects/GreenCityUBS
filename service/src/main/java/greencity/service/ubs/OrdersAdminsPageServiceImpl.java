@@ -426,15 +426,14 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
-    private List<Long> addCommentToOrder(List<Long> ordersId, String value, Employee employee,
-        String orderHistoryMessage) {
+    private List<Long> cancellationCommentForDevelopStage(List<Long> ordersId, String value, Employee employee) {
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                orderRepository.updateAdminComment(orderId, value);
-                eventService.saveEvent(orderHistoryMessage + "  " + value, employee.getEmail(),
+                orderRepository.updateCancelingComment(orderId, value);
+                eventService.saveEvent(OrderHistory.ORDER_CANCELLED + "  " + value, employee.getEmail(),
                     existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
@@ -443,12 +442,20 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
-    private List<Long> cancellationCommentForDevelopStage(List<Long> ordersId, String value, Employee employee) {
-        return addCommentToOrder(ordersId, value, employee, OrderHistory.ORDER_CANCELLED);
-    }
-
     private List<Long> adminCommentForDevelopStage(List<Long> ordersId, String value, Employee employee) {
-        return addCommentToOrder(ordersId, value, employee, OrderHistory.ADD_ADMIN_COMMENT);
+        List<Long> unresolvedGoals = new ArrayList<>();
+        for (Long orderId : ordersId) {
+            try {
+                Order existedOrder = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                orderRepository.updateAdminComment(orderId, value);
+                eventService.saveEvent(OrderHistory.ADD_ADMIN_COMMENT + "  " + value, employee.getEmail(),
+                    existedOrder);
+            } catch (Exception e) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
     }
 
     @Override

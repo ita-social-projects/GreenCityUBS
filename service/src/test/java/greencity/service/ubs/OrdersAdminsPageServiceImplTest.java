@@ -214,7 +214,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void addCommentToOrderReturnNotEmptyList() {
+    void adminCommentForDevelopStageReturnNotEmptyList() {
         String email = ModelUtils.TEST_EMAIL;
         var requestToChangeOrdersDataDto = ModelUtils.getRequestToAddAdminCommentForOrder();
         var employee = ModelUtils.getEmployee();
@@ -236,7 +236,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void addCommentToOrderReturnEmptyList() {
+    void adminCommentForDevelopStageReturnEmptyList() {
         String email = ModelUtils.TEST_EMAIL;
         var requestToChangeOrdersDataDto = ModelUtils.getRequestToAddAdminCommentForOrder();
         var employee = ModelUtils.getEmployee();
