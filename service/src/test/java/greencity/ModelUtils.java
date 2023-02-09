@@ -193,6 +193,7 @@ import static java.util.Collections.singletonList;
 
 public class ModelUtils {
 
+    public static final String TEST_EMAIL = "test@gmail.com";
     public static final Order TEST_ORDER = createOrder();
     public static final Address TEST_ADDRESS = createAddress2();
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
@@ -455,7 +456,6 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .user(User.builder()
@@ -3399,8 +3399,16 @@ public class ModelUtils {
     public static RequestToChangeOrdersDataDto getRequestToChangeOrdersDataDTO() {
         return RequestToChangeOrdersDataDto.builder()
             .columnName("orderStatus")
-            .orderId(List.of(1L))
+            .orderIdsList(List.of(1L))
             .newValue("1")
+            .build();
+    }
+
+    public static RequestToChangeOrdersDataDto getRequestToAddAdminCommentForOrder() {
+        return RequestToChangeOrdersDataDto.builder()
+            .columnName("adminComment")
+            .orderIdsList(List.of(1L))
+            .newValue("Admin Comment")
             .build();
     }
 
@@ -3462,7 +3470,6 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
