@@ -522,7 +522,7 @@ public class ModelUtils {
 
     public static RequestToChangeOrdersDataDto getRequestToChangeOrdersDataDTO() {
         return RequestToChangeOrdersDataDto.builder()
-            .orderId(List.of(1L))
+            .orderIdsList(List.of(1L))
             .columnName("name")
             .newValue("1")
             .build();
