@@ -14,13 +14,12 @@ import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
-import greencity.dto.service.AddServiceDto;
+import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.coords.Coordinates;
@@ -108,28 +107,28 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         "Current region: %s or cities: %s or receiving stations: %s or courier: %s don't exist.";
 
     @Override
-    public AddServiceDto addTariffService(AddServiceDto dto, String employeeUuid) {
-        Employee employee = getEmployeeByUuid(employeeUuid);
-        Bag bag = createBagWithFewTranslation(dto, employee);
-        bagRepository.save(bag);
-        return modelMapper.map(bag, AddServiceDto.class);
+    public GetTariffServiceDto addTariffService(long tariffId, TariffServiceDto dto, String employeeUuid) {
+        Bag bag = bagRepository.save(createBag(tariffId, dto, employeeUuid));
+        return modelMapper.map(bag, GetTariffServiceDto.class);
     }
 
-    private Bag createBagWithFewTranslation(AddServiceDto dto, Employee employee) {
-        final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
-        return Bag.builder().price(dto.getPrice())
+    private Bag createBag(long tariffId, TariffServiceDto dto, String employeeUuid) {
+        TariffsInfo tariffsInfo = getTariffById(tariffId);
+        Employee employee = getEmployeeByUuid(employeeUuid);
+        return Bag.builder()
+            .price(dto.getPrice())
             .capacity(dto.getCapacity())
-            .location(location)
             .commission(dto.getCommission())
             .fullPrice(getFullPrice(dto.getPrice(), dto.getCommission()))
-            .createdBy(employee)
-            .createdAt(LocalDate.now())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .name(dto.getTariffTranslationDto().getName())
-            .nameEng(dto.getTariffTranslationDto().getNameEng())
-            .description(dto.getTariffTranslationDto().getDescription())
-            .descriptionEng(dto.getTariffTranslationDto().getDescriptionEng())
+            .limitIncluded(false)
+            .name(dto.getName())
+            .nameEng(dto.getNameEng())
+            .description(dto.getDescription())
+            .descriptionEng(dto.getDescriptionEng())
+            .tariffsInfo(tariffsInfo)
+            .createdAt(LocalDate.now())
+            .createdBy(employee)
             .build();
     }
 
@@ -147,25 +146,29 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public void deleteTariffService(Integer id) {
-        Bag bag = bagRepository.findById(id).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
-        bagRepository.delete(bag);
+        bagRepository.delete(getBagById(id));
     }
 
     @Override
-    public GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id, String employeeUuid) {
+    public GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer id, String employeeUuid) {
+        Bag bag = getBagById(id);
         Employee employee = getEmployeeByUuid(employeeUuid);
-        Bag bag = bagRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
-        bag.setPrice(dto.getPrice());
         bag.setCapacity(dto.getCapacity());
+        bag.setPrice(dto.getPrice());
         bag.setCommission(dto.getCommission());
         bag.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
+        bag.setName(dto.getName());
+        bag.setNameEng(dto.getNameEng());
+        bag.setDescription(dto.getDescription());
+        bag.setDescriptionEng(dto.getDescriptionEng());
         bag.setEditedAt(LocalDate.now());
         bag.setEditedBy(employee);
-        bag.setName(dto.getName());
-        bag.setDescription(dto.getDescription());
-        bagRepository.save(bag);
-        return modelMapper.map(bag, GetTariffServiceDto.class);
+        return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
+    }
+
+    private Bag getBagById(Integer id) {
+        return bagRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
     }
 
     @Override
@@ -391,8 +394,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetTariffServiceDto includeBag(Integer id) {
-        Bag bag = bagRepository.findById(id).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
+        Bag bag = getBagById(id);
         if (bag.getMinAmountOfBags().equals(MinAmountOfBag.INCLUDE)) {
             throw new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET);
         }
@@ -403,8 +405,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetTariffServiceDto excludeBag(Integer id) {
-        Bag bag = bagRepository.findById(id).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
+        Bag bag = getBagById(id);
         if (MinAmountOfBag.EXCLUDE.equals(bag.getMinAmountOfBags())) {
             throw new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET);
         }

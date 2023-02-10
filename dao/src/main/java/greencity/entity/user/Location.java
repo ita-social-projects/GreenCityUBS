@@ -2,17 +2,32 @@ package greencity.entity.user;
 
 import greencity.entity.coords.Coordinates;
 import greencity.enums.LocationStatus;
-import greencity.entity.order.Bag;
 import greencity.entity.order.TariffLocation;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import javax.persistence.*;
-import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.Set;
 
 @Entity
-@EqualsAndHashCode(exclude = {"bags", "tariffLocations"})
-@ToString(exclude = {"bags", "tariffLocations"})
+@EqualsAndHashCode(exclude = {"tariffLocations"})
+@ToString(exclude = {"tariffLocations"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -36,9 +51,6 @@ public class Location {
 
     @Embedded
     private Coordinates coordinates;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location")
-    private List<Bag> bags;
 
     @ManyToOne
     private Region region;

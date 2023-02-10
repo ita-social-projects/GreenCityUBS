@@ -7,7 +7,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -21,7 +33,32 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.OrderAddress;
+import greencity.enums.AddressStatus;
+import greencity.enums.BotType;
+import greencity.enums.CertificateStatus;
+import greencity.enums.CourierLimit;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.PaymentType;
+import greencity.repository.AddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.EventRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UBSuserRepository;
+import greencity.repository.UserRepository;
 import greencity.exceptions.address.AddressNotFoundException;
+
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -85,7 +122,6 @@ import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
-import greencity.enums.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
@@ -106,7 +142,6 @@ import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.*;
 import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
@@ -224,32 +259,30 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> locationId) {
-        User user = userRepository.findByUuid(uuid);
-        int currentUserPoints = user.getCurrentPoints();
-        List<BagTranslationDto> btdList = bagRepository.findAll()
+    public UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> optionalLocationId) {
+        User user = userRepository.findUserByUuid(uuid).orElseThrow(
+            () -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        List<BagTranslationDto> btdList = getBagList(optionalLocationId.orElse(null))
             .stream()
-            .map(this::buildBagTranslationDto)
+            .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
             .collect(Collectors.toList());
-
-        if (locationId.isPresent()) {
-            btdList = btdList.stream().filter(obj -> obj.getLocationId().equals(locationId.get()))
-                .collect(Collectors.toList());
-        }
-
-        return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
+        return new UserPointsAndAllBagsDto(btdList, user.getCurrentPoints());
     }
 
-    private BagTranslationDto buildBagTranslationDto(Bag bag) {
-        return BagTranslationDto.builder()
-            .id(bag.getId())
-            .capacity(bag.getCapacity())
-            .price(bag.getFullPrice())
-            .name(bag.getName())
-            .nameEng(bag.getNameEng())
-            .locationId(bag.getLocation().getId())
-            .limitedIncluded(bag.getLimitIncluded())
-            .build();
+    private List<Bag> getBagList(Long locationId) {
+        return locationId != null
+            ? bagRepository
+                .findBagsByLocationIdAndLocationStatusIsActive(
+                    checkAndGetLocationId(locationId))
+            : bagRepository
+                .findAll();
+    }
+
+    private long checkAndGetLocationId(Long locationId) {
+        if (locationRepository.existsById(locationId)) {
+            return locationId;
+        }
+        throw new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID + locationId);
     }
 
     /**

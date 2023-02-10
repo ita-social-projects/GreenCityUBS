@@ -12,13 +12,12 @@ import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
-import greencity.dto.service.AddServiceDto;
+import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
@@ -28,20 +27,23 @@ import java.util.List;
 
 public interface SuperAdminService {
     /**
-     * Methods that add new Service.
+     * Methods that add new Tariff Service for Tariff.
      *
-     * @param dto  {@link AddServiceDto}
-     * @param uuid {@link String} - uuid current user.
+     * @param tariffId {@link Long} tariff id.
+     * @param dto      {@link TariffServiceDto} tariff service dto
+     * @param uuid     {@link String} - employee uuid.
      * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
+     * @author Julia Seti
      */
-    AddServiceDto addTariffService(AddServiceDto dto, String uuid);
+    GetTariffServiceDto addTariffService(long tariffId, TariffServiceDto dto, String uuid);
 
     /**
      * Method return All Tariff Service by Tariff id.
      * 
      * @param id {@link Long} - selected tariff id.
-     * @return {@link GetTariffServiceDto} - returned list of Tariff Service.
+     * @return {@link List} of {@link GetTariffServiceDto} - returned list of Tariff
+     *         Service.
      * @author Vadym Makitra
      */
     List<GetTariffServiceDto> getTariffService(long id);
@@ -49,7 +51,7 @@ public interface SuperAdminService {
     /**
      * Method for delete tariff service by Id.
      *
-     * @param id - Tariff Service Id.
+     * @param id {@link Integer} - Tariff Service Id.
      * @author Vadym Makitra
      */
     void deleteTariffService(Integer id);
@@ -57,13 +59,14 @@ public interface SuperAdminService {
     /**
      * Method for edit tariff service by Id.
      *
-     * @param dto  {@link EditTariffServiceDto}
-     * @param id   {@link Long} - selected tariff id.
-     * @param uuid {@link String} - current user;
+     * @param dto  {@link TariffServiceDto}
+     * @param id   {@link Integer} - tariff service id.
+     * @param uuid {@link String} - employee uuid;
      * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
+     * @author Julia Seti
      */
-    GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id, String uuid);
+    GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer id, String uuid);
 
     /**
      * Method for add new Service.
