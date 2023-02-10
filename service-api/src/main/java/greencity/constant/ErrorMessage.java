@@ -52,6 +52,7 @@ public final class ErrorMessage {
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
     public static final String ADDRESS_NOT_FOUND = "Address not found";
     public static final String LOCATION_DOESNT_FOUND = "Location does not found";
+    public static final String LOCATION_DOESNT_FOUND_BY_ID = "Location does not exist by id: ";
     public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown ";
     public static final String ORDER_ALREADY_HAS_VIOLATION = "Current order already has violation";
     public static final String ORDER_ALREADY_PAID = "Current order is already paid";

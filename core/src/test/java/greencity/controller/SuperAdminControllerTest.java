@@ -16,10 +16,10 @@ import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.order.EditPriceOfOrder;
-import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.TariffsInfoDto;
 import greencity.exception.handler.CustomExceptionHandler;
@@ -57,7 +57,15 @@ import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -97,47 +105,50 @@ class SuperAdminControllerTest {
 
     @Test
     void createTariffServiceTest() throws Exception {
-        AddServiceDto dto = ModelUtils.getAddServiceDto();
-        String ServiceResponceDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        TariffServiceDto dto = ModelUtils.getTariffServiceDto();
+        GetTariffServiceDto responseDto = ModelUtils.getGetTariffServiceDto();
+        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
-        when(superAdminService.addTariffService(dto, uuid)).thenReturn(dto);
+        when(superAdminService.addTariffService(1L, dto, uuid)).thenReturn(responseDto);
 
-        mockMvc.perform(post(ubsLink + "/createTariffService")
+        mockMvc.perform(post(ubsLink + "/{tariffId}/createTariffService", 1L)
             .principal(principal)
             .param("uuid", uuid)
-            .content(ServiceResponceDtoJSON)
+            .param("tariffId", "1")
+            .content(requestDtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
             .andReturn();
 
         verify(userRemoteClient).findUuidByEmail(principal.getName());
-        verify(superAdminService).addTariffService(any(AddServiceDto.class), anyString());
+        verify(superAdminService).addTariffService(anyLong(), any(TariffServiceDto.class), anyString());
     }
 
     @Test
     void createTariffServiceNotFoundException() throws Exception {
-        AddServiceDto dto = ModelUtils.getAddServiceDto();
-        String ServiceResponceDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        TariffServiceDto dto = ModelUtils.getTariffServiceDto();
+        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
-        when(superAdminService.addTariffService(any(AddServiceDto.class), anyString()))
-            .thenThrow(new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        when(superAdminService.addTariffService(anyLong(), any(TariffServiceDto.class), anyString()))
+            .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND));
 
-        mockMvc.perform(post(ubsLink + "/createTariffService")
+        mockMvc.perform(post(ubsLink + "/{tariffId}/createTariffService", 1L)
             .principal(principal)
             .param("uuid", uuid)
-            .content(ServiceResponceDtoJSON)
+            .param("tariffId", "1")
+            .content(requestDtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
             .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-            .andExpect(result -> assertEquals(ErrorMessage.LOCATION_DOESNT_FOUND,
-                result.getResolvedException().getMessage()));
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
         verify(userRemoteClient).findUuidByEmail(principal.getName());
-        verify(superAdminService).addTariffService(any(AddServiceDto.class), anyString());
+        verify(superAdminService).addTariffService(anyLong(), any(TariffServiceDto.class), anyString());
         verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 
@@ -195,15 +206,16 @@ class SuperAdminControllerTest {
 
     @Test
     void editTariffService() throws Exception {
-        EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
-        String ServiceResponseDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        TariffServiceDto dto = ModelUtils.getTariffServiceDto();
+        GetTariffServiceDto responseDto = ModelUtils.getGetTariffServiceDto();
+        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
-        when(superAdminService.editTariffService(dto, 1, uuid)).thenReturn(ModelUtils.getTariffServiceDto());
+        when(superAdminService.editTariffService(dto, 1, uuid)).thenReturn(responseDto);
 
         mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
-            .content(ServiceResponseDtoJSON)
+            .content(requestDtoJSON)
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal)
             .param("uuid", uuid))
@@ -211,14 +223,14 @@ class SuperAdminControllerTest {
             .andReturn();
 
         verify(userRemoteClient).findUuidByEmail(principal.getName());
-        verify(superAdminService).editTariffService(any(EditTariffServiceDto.class), anyInt(), anyString());
+        verify(superAdminService).editTariffService(any(TariffServiceDto.class), anyInt(), anyString());
         verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 
     @Test
     void editTariffServiceNotFoundException() throws Exception {
-        EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
-        String ServiceResponseDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        TariffServiceDto dto = ModelUtils.getTariffServiceDto();
+        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
@@ -226,17 +238,17 @@ class SuperAdminControllerTest {
             .thenThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
 
         mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
-            .content(ServiceResponseDtoJSON)
+            .content(requestDtoJSON)
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal)
             .param("uuid", uuid))
             .andExpect(status().isNotFound())
             .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
             .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
-                result.getResolvedException().getMessage()));
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
         verify(userRemoteClient).findUuidByEmail(principal.getName());
-        verify(superAdminService).editTariffService(any(EditTariffServiceDto.class), anyInt(), anyString());
+        verify(superAdminService).editTariffService(any(TariffServiceDto.class), anyInt(), anyString());
         verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 
@@ -764,12 +776,96 @@ class SuperAdminControllerTest {
 
     @Test
     void includeBag() throws Exception {
-        mockMvc.perform(patch(ubsLink + "/includeBag/{id}", 1L)).andExpect(status().isOk());
+        GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
+
+        when(superAdminService.includeBag(1)).thenReturn(dto);
+
+        mockMvc.perform(patch(ubsLink + "/includeBag/{id}", 1L)
+            .principal(principal)
+            .param("id", "1"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        verify(superAdminService).includeBag(1);
+    }
+
+    @Test
+    void includeBagThrowNotFoundException() throws Exception {
+        when(superAdminService.includeBag(1))
+            .thenThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
+
+        mockMvc.perform(patch(ubsLink + "/includeBag/{id}", 1L)
+            .principal(principal)
+            .param("id", "1"))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).includeBag(1);
+    }
+
+    @Test
+    void includeBagThrowBadRequestException() throws Exception {
+        when(superAdminService.includeBag(1))
+            .thenThrow(new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET));
+
+        mockMvc.perform(patch(ubsLink + "/includeBag/{id}", 1L)
+            .principal(principal)
+            .param("id", "1"))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+            .andExpect(result -> assertEquals(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).includeBag(1);
     }
 
     @Test
     void excludeBag() throws Exception {
-        mockMvc.perform(patch(ubsLink + "/excludeBag/{id}", 1L)).andExpect(status().isOk());
+        GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
+
+        when(superAdminService.excludeBag(1)).thenReturn(dto);
+
+        mockMvc.perform(patch(ubsLink + "/excludeBag/{id}", 1L)
+            .principal(principal)
+            .param("id", "1"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        verify(superAdminService).excludeBag(1);
+    }
+
+    @Test
+    void excludeBagThrowNotFoundException() throws Exception {
+        when(superAdminService.excludeBag(1))
+            .thenThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
+
+        mockMvc.perform(patch(ubsLink + "/excludeBag/{id}", 1L)
+            .principal(principal)
+            .param("id", "1"))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).excludeBag(1);
+    }
+
+    @Test
+    void excludeBagThrowBadRequestException() throws Exception {
+        when(superAdminService.excludeBag(1))
+            .thenThrow(new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET));
+
+        mockMvc.perform(patch(ubsLink + "/excludeBag/{id}", 1L)
+            .principal(principal)
+            .param("id", "1"))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+            .andExpect(result -> assertEquals(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).excludeBag(1);
     }
 
     @Test

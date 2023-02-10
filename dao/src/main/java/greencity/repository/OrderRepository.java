@@ -211,6 +211,17 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     void updateCancelingComment(Long orderId, String cancellationComment);
 
     /**
+     * Method sets admin comment for order by order id.
+     * 
+     * @param orderId      - order's ID
+     * @param adminComment - admin comment to set
+     */
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE Order o SET o.adminComment =:adminComment WHERE o.id =:orderId")
+    void updateAdminComment(Long orderId, String adminComment);
+
+    /**
      * Method sets order cancellation reason by order's id.
      *
      * @param orderId            - order's ID

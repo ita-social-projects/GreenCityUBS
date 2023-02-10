@@ -109,8 +109,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/check-if-tariff-exists",
                 SUPER_ADMIN_LINK + "/addLocations",
                 SUPER_ADMIN_LINK + "/createCourier",
-                SUPER_ADMIN_LINK + "/createTariffService",
                 SUPER_ADMIN_LINK + "/{tariffId}/createService",
+                SUPER_ADMIN_LINK + "/{tariffId}/createTariffService",
                 SUPER_ADMIN_LINK + "/create-receiving-station",
                 SUPER_ADMIN_LINK + "/locations/edit",
                 SUPER_ADMIN_LINK + "/**")
@@ -144,7 +144,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/setLimitsByAmountOfBags/{tariffId}",
                 SUPER_ADMIN_LINK + "/setLimitsBySumOfOrder/{tariffId}",
                 SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}",
-                SUPER_ADMIN_LINK + "/deactivateCourier/{id}")
+                SUPER_ADMIN_LINK + "/deactivateCourier/{id}",
+                SUPER_ADMIN_LINK + "/excludeBag/{id}",
+                SUPER_ADMIN_LINK + "/includeBag/{id}")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
                 UBS_MANAG_LINK + "/update-order-page-admin-info/{id}",
