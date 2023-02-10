@@ -102,9 +102,9 @@ import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.service.TariffServiceDto;
-import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
+import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -2363,19 +2363,18 @@ public class ModelUtils {
             .signature("Test Signature").build();
     }
 
-    public static CreateServiceDto getCreateServiceDto() {
-        return CreateServiceDto.builder()
+    public static ServiceDto getServiceDto() {
+        return ServiceDto.builder()
             .name("Name")
             .nameEng("NameEng")
             .price(100)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .tariffId(1L)
             .build();
     }
 
-    public static ServiceDto getServiceDto() {
-        return ServiceDto.builder()
+    public static GetServiceDto getGetServiceDto() {
+        return GetServiceDto.builder()
             .id(1L)
             .name("Name")
             .nameEng("NameEng")
