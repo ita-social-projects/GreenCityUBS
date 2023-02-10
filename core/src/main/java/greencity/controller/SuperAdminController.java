@@ -447,10 +447,11 @@ class SuperAdminController {
     /**
      * Controller for include Bag.
      *
-     * @return {@link GetTariffServiceDto}
+     * @param id {@link Integer} - bag id
+     * @return {@link GetTariffServiceDto} - tariff service dto
      * @author Vadym Makitra
      */
-    @ApiOperation(value = "Include bag")
+    @ApiOperation(value = "Include limit for bag")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -458,19 +459,20 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PatchMapping("/includeBag/{id}")
+    @PatchMapping("/includeLimit/{id}")
     public ResponseEntity<GetTariffServiceDto> includeBag(
         @PathVariable Integer id) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.includeBag(id));
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.includeLimit(id));
     }
 
     /**
      * Controller for include Bag.
      *
-     * @return {@link GetTariffServiceDto}
+     * @param id {@link Integer} - bag id
+     * @return {@link GetTariffServiceDto} - tariff service dto
      * @author Vadym Makitra
      */
-    @ApiOperation(value = "Exclude bag")
+    @ApiOperation(value = "Exclude limit for bag")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -478,10 +480,10 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PatchMapping("/excludeBag/{id}")
+    @PatchMapping("/excludeLimit/{id}")
     public ResponseEntity<GetTariffServiceDto> excludeBag(
         @PathVariable Integer id) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.excludeBag(id));
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.excludeLimit(id));
     }
 
     /**

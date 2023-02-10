@@ -184,22 +184,24 @@ public interface SuperAdminService {
     GetTariffsInfoDto setLimitDescription(Long courierId, String limitDescription);
 
     /**
-     * Method for include bag into minimum set of package.
+     * Method for include limit for bag.
      *
-     * @param id - if of bag.
+     * @param id - bag id.
      * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
+     * @author Julia Seti
      */
-    GetTariffServiceDto includeBag(Integer id);
+    GetTariffServiceDto includeLimit(Integer id);
 
     /**
-     * Method for exclude bag from minimum set of package.
+     * Method for exclude limit for bag.
      *
-     * @param id - if of bag.
+     * @param id - bag id.
      * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
+     * @author Julia Seti
      */
-    GetTariffServiceDto excludeBag(Integer id);
+    GetTariffServiceDto excludeLimit(Integer id);
 
     /**
      * Method for change status courier and tariffs to deactivate.

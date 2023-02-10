@@ -392,23 +392,23 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetTariffServiceDto includeBag(Integer id) {
+    public GetTariffServiceDto includeLimit(Integer id) {
         Bag bag = getBagById(id);
-        if (bag.getMinAmountOfBags().equals(MinAmountOfBag.INCLUDE)) {
+        if (bag.getLimitIncluded()) {
             throw new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET);
         }
-        bag.setMinAmountOfBags(MinAmountOfBag.INCLUDE);
+        bag.setLimitIncluded(true);
         bagRepository.save(bag);
         return modelMapper.map(bag, GetTariffServiceDto.class);
     }
 
     @Override
-    public GetTariffServiceDto excludeBag(Integer id) {
+    public GetTariffServiceDto excludeLimit(Integer id) {
         Bag bag = getBagById(id);
-        if (MinAmountOfBag.EXCLUDE.equals(bag.getMinAmountOfBags())) {
+        if (!bag.getLimitIncluded()) {
             throw new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET);
         }
-        bag.setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
+        bag.setLimitIncluded(false);
         bagRepository.save(bag);
         return modelMapper.map(bag, GetTariffServiceDto.class);
     }

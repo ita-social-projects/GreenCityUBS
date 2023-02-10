@@ -2230,6 +2230,7 @@ public class ModelUtils {
             .description("Description")
             .descriptionEng("DescriptionEng")
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .limitIncluded(false)
             .build());
     }
 
@@ -2766,19 +2767,13 @@ public class ModelUtils {
         return Bag.builder()
             .id(1)
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .limitIncluded(false)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("Test")
             .nameEng("a")
             .createdBy(getEmployee())
             .editedBy(getEmployee())
-            .build();
-    }
-
-    public static Bag bagDto2() {
-        return Bag.builder()
-            .id(1)
-            .minAmountOfBags(MinAmountOfBag.EXCLUDE)
             .build();
     }
 
