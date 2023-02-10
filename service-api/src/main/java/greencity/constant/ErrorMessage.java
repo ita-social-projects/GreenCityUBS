@@ -124,6 +124,9 @@ public final class ErrorMessage {
 
     public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max field must have different values";
 
+    public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED = "Employee with current uuid was not "
+        + "deactivated.";
+
     /**
      * Constructor.
      */

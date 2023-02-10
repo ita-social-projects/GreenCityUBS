@@ -123,4 +123,12 @@ public interface UserRemoteClient {
      */
     @PutMapping("/user/authorities")
     void updateAuthorities(@RequestBody UpdateEmployeeAuthoritiesDto dto);
+
+    /**
+     * Deactivate employee by uuid.
+     *
+     * @param uuid - uuid of employee.
+     */
+    @PutMapping("/user/deactivate-employee")
+    void deactivateEmployee(@RequestParam String uuid);
 }
