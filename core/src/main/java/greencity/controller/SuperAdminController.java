@@ -454,12 +454,11 @@ class SuperAdminController {
     @ApiOperation(value = "Include limit for bag")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PatchMapping("/includeLimit/{id}")
+    @PutMapping("/includeLimit/{id}")
     public ResponseEntity<GetTariffServiceDto> includeBag(
         @PathVariable Integer id) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.includeLimit(id));
@@ -475,12 +474,11 @@ class SuperAdminController {
     @ApiOperation(value = "Exclude limit for bag")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PatchMapping("/excludeLimit/{id}")
+    @PutMapping("/excludeLimit/{id}")
     public ResponseEntity<GetTariffServiceDto> excludeBag(
         @PathVariable Integer id) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.excludeLimit(id));
