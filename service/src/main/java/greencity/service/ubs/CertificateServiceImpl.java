@@ -30,9 +30,13 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Override
     public void addCertificate(CertificateDtoForAdding add) {
-        add.setPoints(add.getInitialPointsValue());
-        Certificate certificate = modelMapper.map(add, Certificate.class);
-        certificateRepository.save(certificate);
+        if (certificateRepository.existsCertificateByCode(add.getCode())) {
+            throw new BadRequestException(CERTIFICATE_EXIST);
+        } else {
+            add.setPoints(add.getInitialPointsValue());
+            Certificate certificate = modelMapper.map(add, Certificate.class);
+            certificateRepository.save(certificate);
+        }
     }
 
     @Override
