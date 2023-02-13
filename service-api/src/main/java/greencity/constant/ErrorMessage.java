@@ -1,6 +1,7 @@
 package greencity.constant;
 
 public final class ErrorMessage {
+    public static final String CERTIFICATE_EXIST = "Certificate with this code is already exist";
     public static final String CERTIFICATE_NOT_FOUND_BY_CODE = "Certificate does not exist by this code: ";
     public static final String CERTIFICATE_EXPIRED = "Certificate expired by this code: ";
     public static final String CERTIFICATE_STATUS = "Certificate has status 'EXPIRED' or 'USED'";

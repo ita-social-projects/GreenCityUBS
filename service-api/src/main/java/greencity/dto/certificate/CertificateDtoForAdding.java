@@ -22,7 +22,7 @@ public class CertificateDtoForAdding {
     private int monthCount;
 
     @NotNull
-    @Min(1)
+    @Min(0)
     @Max(9999)
     private int points;
 
