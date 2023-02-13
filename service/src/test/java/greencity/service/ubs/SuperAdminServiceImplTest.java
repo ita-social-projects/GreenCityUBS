@@ -622,15 +622,16 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void excludeBagTest() {
-        Bag bag = ModelUtils.bagDto();
+    void excludeLimitTest() {
+        Bag bag = ModelUtils.getBag().get();
+        bag.setLimitIncluded(true);
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
 
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bag);
         when(modelMapper.map(bag, GetTariffServiceDto.class)).thenReturn(dto);
 
-        superAdminService.excludeBag(1);
+        superAdminService.excludeLimit(1);
 
         verify(bagRepository).findById(1);
         verify(bagRepository).save(bag);
@@ -638,34 +639,34 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void excludeBagThrowNotFoundException() {
+    void excludeLimitThrowNotFoundException() {
         when(bagRepository.findById(1)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> superAdminService.excludeBag(1));
+            () -> superAdminService.excludeLimit(1));
 
         verify(bagRepository).findById(1);
         verify(bagRepository, never()).save(any(Bag.class));
     }
 
     @Test
-    void excludeBagThrowBadRequestException() {
-        Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto2());
+    void excludeLimitThrowBadRequestException() {
+        Optional<Bag> bag = ModelUtils.getBag();
         when(bagRepository.findById(1)).thenReturn(bag);
-        assertThrows(BadRequestException.class, () -> superAdminService.excludeBag(1));
+        assertThrows(BadRequestException.class, () -> superAdminService.excludeLimit(1));
     }
 
     @Test
-    void includeBagTest() {
-        Bag bag = ModelUtils.bagDto();
+    void includeLimitTest() {
+        Bag bag = ModelUtils.getBag().get();
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
-        bag.setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
+        dto.setLimitIncluded(true);
 
         when(bagRepository.findById(10)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bag);
         when(modelMapper.map(bag, GetTariffServiceDto.class)).thenReturn(dto);
 
-        superAdminService.includeBag(10);
+        superAdminService.includeLimit(10);
 
         verify(bagRepository).findById(10);
         verify(bagRepository).save(bag);
@@ -673,21 +674,22 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void includeBagThrowNotFoundException() {
+    void includeLimitThrowNotFoundException() {
         when(bagRepository.findById(1)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> superAdminService.includeBag(1));
+            () -> superAdminService.includeLimit(1));
 
         verify(bagRepository).findById(1);
         verify(bagRepository, never()).save(any(Bag.class));
     }
 
     @Test
-    void includeBagThrowBadRequestException() {
-        Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto());
-        when(bagRepository.findById(1)).thenReturn(bag);
-        assertThrows(BadRequestException.class, () -> superAdminService.includeBag(1));
+    void includeLimitThrowBadRequestException() {
+        Bag bag = ModelUtils.bagDto();
+        bag.setLimitIncluded(true);
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        assertThrows(BadRequestException.class, () -> superAdminService.includeLimit(1));
     }
 
     @Test

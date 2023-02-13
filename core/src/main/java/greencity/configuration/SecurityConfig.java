@@ -145,8 +145,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/setLimitsBySumOfOrder/{tariffId}",
                 SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}",
                 SUPER_ADMIN_LINK + "/deactivateCourier/{id}",
-                SUPER_ADMIN_LINK + "/excludeBag/{id}",
-                SUPER_ADMIN_LINK + "/includeBag/{id}")
+                SUPER_ADMIN_LINK + "/includeLimit/{bagId}",
+                SUPER_ADMIN_LINK + "/excludeLimit/{bagId}")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
                 UBS_MANAG_LINK + "/update-order-page-admin-info/{id}",

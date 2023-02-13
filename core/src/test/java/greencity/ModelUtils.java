@@ -383,6 +383,7 @@ public class ModelUtils {
             .price(120)
             .commission(50)
             .description("Description")
+            .limitIncluded(true)
             .build();
     }
 
