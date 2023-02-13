@@ -394,10 +394,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public GetTariffServiceDto includeLimit(Integer id) {
         Bag bag = getBagById(id);
-        boolean limitIncluded = bag.getLimitIncluded();
-        if (limitIncluded) {
-            throw new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET);
-        }
         bag.setLimitIncluded(true);
         bagRepository.save(bag);
         return modelMapper.map(bag, GetTariffServiceDto.class);
@@ -406,10 +402,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public GetTariffServiceDto excludeLimit(Integer id) {
         Bag bag = getBagById(id);
-        boolean limitIncluded = bag.getLimitIncluded();
-        if (!limitIncluded) {
-            throw new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET);
-        }
         bag.setLimitIncluded(false);
         bagRepository.save(bag);
         return modelMapper.map(bag, GetTariffServiceDto.class);

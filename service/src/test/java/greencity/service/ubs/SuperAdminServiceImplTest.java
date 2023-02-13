@@ -650,13 +650,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void excludeLimitThrowBadRequestException() {
-        Optional<Bag> bag = ModelUtils.getBag();
-        when(bagRepository.findById(1)).thenReturn(bag);
-        assertThrows(BadRequestException.class, () -> superAdminService.excludeLimit(1));
-    }
-
-    @Test
     void includeLimitTest() {
         Bag bag = ModelUtils.getBag().get();
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
@@ -682,14 +675,6 @@ class SuperAdminServiceImplTest {
 
         verify(bagRepository).findById(1);
         verify(bagRepository, never()).save(any(Bag.class));
-    }
-
-    @Test
-    void includeLimitThrowBadRequestException() {
-        Bag bag = ModelUtils.bagDto();
-        bag.setLimitIncluded(true);
-        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        assertThrows(BadRequestException.class, () -> superAdminService.includeLimit(1));
     }
 
     @Test
