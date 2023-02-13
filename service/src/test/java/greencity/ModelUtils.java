@@ -884,7 +884,8 @@ public class ModelUtils {
         return CertificateDtoForAdding.builder()
             .code("1111-1234")
             .monthCount(0)
-            .points(10)
+            .initialPointsValue(10)
+            .points(0)
             .build();
     }
 
