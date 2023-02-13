@@ -775,26 +775,26 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void includeBag() throws Exception {
+    void includeLimit() throws Exception {
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
 
-        when(superAdminService.includeBag(1)).thenReturn(dto);
+        when(superAdminService.includeLimit(1)).thenReturn(dto);
 
-        mockMvc.perform(patch(ubsLink + "/includeBag/{id}", 1L)
+        mockMvc.perform(patch(ubsLink + "/includeLimit/{id}", 1L)
             .principal(principal)
             .param("id", "1"))
             .andExpect(status().isOk())
             .andReturn();
 
-        verify(superAdminService).includeBag(1);
+        verify(superAdminService).includeLimit(1);
     }
 
     @Test
-    void includeBagThrowNotFoundException() throws Exception {
-        when(superAdminService.includeBag(1))
+    void includeLimitThrowNotFoundException() throws Exception {
+        when(superAdminService.includeLimit(1))
             .thenThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
 
-        mockMvc.perform(patch(ubsLink + "/includeBag/{id}", 1L)
+        mockMvc.perform(patch(ubsLink + "/includeLimit/{id}", 1L)
             .principal(principal)
             .param("id", "1"))
             .andExpect(status().isNotFound())
@@ -802,15 +802,15 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(superAdminService).includeBag(1);
+        verify(superAdminService).includeLimit(1);
     }
 
     @Test
-    void includeBagThrowBadRequestException() throws Exception {
-        when(superAdminService.includeBag(1))
+    void includeLimitThrowBadRequestException() throws Exception {
+        when(superAdminService.includeLimit(1))
             .thenThrow(new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET));
 
-        mockMvc.perform(patch(ubsLink + "/includeBag/{id}", 1L)
+        mockMvc.perform(patch(ubsLink + "/includeLimit/{id}", 1L)
             .principal(principal)
             .param("id", "1"))
             .andExpect(status().isBadRequest())
@@ -818,30 +818,31 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(superAdminService).includeBag(1);
+        verify(superAdminService).includeLimit(1);
     }
 
     @Test
-    void excludeBag() throws Exception {
+    void excludeLimit() throws Exception {
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
+        dto.setLimitIncluded(false);
 
-        when(superAdminService.excludeBag(1)).thenReturn(dto);
+        when(superAdminService.excludeLimit(1)).thenReturn(dto);
 
-        mockMvc.perform(patch(ubsLink + "/excludeBag/{id}", 1L)
+        mockMvc.perform(patch(ubsLink + "/excludeLimit/{id}", 1L)
             .principal(principal)
             .param("id", "1"))
             .andExpect(status().isOk())
             .andReturn();
 
-        verify(superAdminService).excludeBag(1);
+        verify(superAdminService).excludeLimit(1);
     }
 
     @Test
-    void excludeBagThrowNotFoundException() throws Exception {
-        when(superAdminService.excludeBag(1))
+    void excludeLimitThrowNotFoundException() throws Exception {
+        when(superAdminService.excludeLimit(1))
             .thenThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
 
-        mockMvc.perform(patch(ubsLink + "/excludeBag/{id}", 1L)
+        mockMvc.perform(patch(ubsLink + "/excludeLimit/{id}", 1L)
             .principal(principal)
             .param("id", "1"))
             .andExpect(status().isNotFound())
@@ -849,15 +850,15 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(superAdminService).excludeBag(1);
+        verify(superAdminService).excludeLimit(1);
     }
 
     @Test
-    void excludeBagThrowBadRequestException() throws Exception {
-        when(superAdminService.excludeBag(1))
+    void excludeLimitThrowBadRequestException() throws Exception {
+        when(superAdminService.excludeLimit(1))
             .thenThrow(new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET));
 
-        mockMvc.perform(patch(ubsLink + "/excludeBag/{id}", 1L)
+        mockMvc.perform(patch(ubsLink + "/excludeLimit/{id}", 1L)
             .principal(principal)
             .param("id", "1"))
             .andExpect(status().isBadRequest())
@@ -865,7 +866,7 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(superAdminService).excludeBag(1);
+        verify(superAdminService).excludeLimit(1);
     }
 
     @Test
