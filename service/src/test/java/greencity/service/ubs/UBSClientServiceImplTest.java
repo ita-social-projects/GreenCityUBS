@@ -1241,6 +1241,8 @@ class UBSClientServiceImplTest {
         when(orderRepository.save(any())).thenReturn(orderDto);
         OrderCancellationReasonDto result = ubsService.updateOrderCancellationReason(1L, dto, anyString());
 
+        verify(eventService, times(1))
+            .saveEvent("Статус Замовлення - Скасовано", "", orderDto);
         assertEquals(dto.getCancellationReason(), result.getCancellationReason());
         assertEquals(dto.getCancellationComment(), result.getCancellationComment());
         verify(orderRepository).save(orderDto);
