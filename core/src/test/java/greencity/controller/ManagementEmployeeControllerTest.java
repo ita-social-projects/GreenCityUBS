@@ -149,11 +149,11 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void deleteEmployeeTest() throws Exception {
-        doNothing().when(service).deleteEmployee(1L);
+        doNothing().when(service).deactivateEmployee(1L);
 
         mockMvc.perform(put(UBS_LINK + DELETE_LINK + "/" + 1)
             .principal(principal)).andExpect(status().isOk());
-        verify(service, times(1)).deleteEmployee(1L);
+        verify(service, times(1)).deactivateEmployee(1L);
     }
 
     @Test

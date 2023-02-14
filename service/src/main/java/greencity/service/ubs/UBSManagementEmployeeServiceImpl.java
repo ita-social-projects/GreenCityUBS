@@ -179,7 +179,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     @Transactional
-    public void deleteEmployee(Long id) {
+    public void deactivateEmployee(Long id) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
         if (employee.getEmployeeStatus().equals(EmployeeStatus.ACTIVE)) {

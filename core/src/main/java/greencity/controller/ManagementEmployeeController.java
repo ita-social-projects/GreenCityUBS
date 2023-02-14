@@ -146,7 +146,7 @@ public class ManagementEmployeeController {
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @PutMapping("/deactivate-employee/{id}")
     public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable Long id) {
-        employeeService.deleteEmployee(id);
+        employeeService.deactivateEmployee(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

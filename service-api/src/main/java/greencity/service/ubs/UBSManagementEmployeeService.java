@@ -59,7 +59,7 @@ public interface UBSManagementEmployeeService {
      * @param id {@link Long}
      * @author Mykola Danylko
      */
-    void deleteEmployee(Long id);
+    void deactivateEmployee(Long id);
 
     /**
      * Method creates new employee position.
