@@ -143,13 +143,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         updatedEmployee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
         updatedEmployee.setUuid(upEmployee.getUuid());
         updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
+
         if (image != null) {
-            if (!updatedEmployee.getImagePath().equals(defaultImagePath)) {
-                fileService.delete(updatedEmployee.getImagePath());
-            }
             updatedEmployee.setImagePath(fileService.upload(image));
         } else {
-            updatedEmployee.setImagePath(defaultImagePath);
+            updatedEmployee.setImagePath(upEmployee.getImagePath());
         }
         return modelMapper.map(employeeRepository.save(updatedEmployee), EmployeeDto.class);
     }
