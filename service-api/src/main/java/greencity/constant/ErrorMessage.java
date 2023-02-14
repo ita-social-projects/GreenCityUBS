@@ -1,6 +1,7 @@
 package greencity.constant;
 
 public final class ErrorMessage {
+    public static final String CERTIFICATE_EXIST = "Certificate with this code is already exist";
     public static final String CERTIFICATE_NOT_FOUND_BY_CODE = "Certificate does not exist by this code: ";
     public static final String CERTIFICATE_EXPIRED = "Certificate expired by this code: ";
     public static final String CERTIFICATE_STATUS = "Certificate has status 'EXPIRED' or 'USED'";
@@ -52,6 +53,7 @@ public final class ErrorMessage {
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
     public static final String ADDRESS_NOT_FOUND = "Address not found";
     public static final String LOCATION_DOESNT_FOUND = "Location does not found";
+    public static final String LOCATION_DOESNT_FOUND_BY_ID = "Location does not exist by id: ";
     public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown ";
     public static final String ORDER_ALREADY_HAS_VIOLATION = "Current order already has violation";
     public static final String ORDER_ALREADY_PAID = "Current order is already paid";

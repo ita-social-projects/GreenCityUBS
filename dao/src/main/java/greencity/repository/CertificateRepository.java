@@ -51,4 +51,13 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @return set of {@link Certificate}
      */
     Set<Certificate> findAllByCodeAndCertificateStatus(List<String> code, CertificateStatus status);
+
+    /**
+     * Method to check if certificate is already exist by code.
+     *
+     * @param code - certificate code.
+     * @return return true if certificate exists and false if not.
+     * @author Lilia Mokhnatska
+     */
+    boolean existsCertificateByCode(String code);
 }
