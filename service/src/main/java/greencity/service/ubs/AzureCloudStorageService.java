@@ -44,7 +44,7 @@ public class AzureCloudStorageService implements FileService {
         BlobClient client = containerClient()
             .getBlobClient(blob + multipartFile.getOriginalFilename());
         try {
-            client.upload(new BufferedInputStream(multipartFile.getInputStream()), multipartFile.getSize());
+            client.upload(new BufferedInputStream(multipartFile.getInputStream()), multipartFile.getSize(), true);
         } catch (IOException e) {
             throw new FileNotSavedException(ErrorMessage.FILE_NOT_SAVED);
         }
