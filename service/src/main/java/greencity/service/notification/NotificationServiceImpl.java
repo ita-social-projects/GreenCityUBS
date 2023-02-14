@@ -60,6 +60,8 @@ public class NotificationServiceImpl implements NotificationService {
     private OrderRepository orderRepository;
     private ViolationRepository violationRepository;
     private NotificationParameterRepository notificationParameterRepository;
+    @Autowired
+    @Qualifier("kyivZonedClock")
     private Clock clock;
     private List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
