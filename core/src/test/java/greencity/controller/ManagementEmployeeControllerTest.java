@@ -46,7 +46,7 @@ class ManagementEmployeeControllerTest {
     private final String UPDATE_LINK = "/update-employee";
     private final String FIND_ALL_LINK = "/getAll-employees";
     private final String FIND_ALL_ACTIVE_LINK = "/getAll-active-employees";
-    private final String DELETE_LINK = "/delete-employee";
+    private final String DELETE_LINK = "/deactivate-employee";
     private final String SAVE_POSITION_LINK = "/create-position";
     private final String UPDATE_POSITION_LINK = "/update-position";
     private final String GET_ALL_POSITIONS_LINK = "/get-all-positions";
@@ -151,7 +151,7 @@ class ManagementEmployeeControllerTest {
     void deleteEmployeeTest() throws Exception {
         doNothing().when(service).deleteEmployee(1L);
 
-        mockMvc.perform(delete(UBS_LINK + DELETE_LINK + "/" + 1)
+        mockMvc.perform(put(UBS_LINK + DELETE_LINK + "/" + 1)
             .principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).deleteEmployee(1L);
     }
