@@ -13,6 +13,6 @@ import javax.validation.constraints.Pattern;
 @ToString
 public class AddingReceivingStationDto {
     @NotNull
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z0-9-'\\s.]{1,30}")
+    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z0-9-'\\s]{3,40}")
     private String name;
 }

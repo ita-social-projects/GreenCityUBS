@@ -925,6 +925,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 eventService.saveEvent(OrderHistory.ORDER_ADJUSTMENT, email, order);
             } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
                 eventService.saveEvent(OrderHistory.ORDER_CONFIRMED, email, order);
+            } else if (order.getOrderStatus() == OrderStatus.FORMED) {
+                eventService.saveEvent(OrderHistory.ORDER_FORMED, email, order);
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
                 eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
                     + order.getImageReasonNotTakingBags(), email, order);
@@ -1056,8 +1058,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * Method returns update export details by order id.
      *
-     * @param id  of {@link Long} order id;
-     * @param dto of{@link ExportDetailsDtoUpdate}
+     * @param id    of {@link Long} order id;
+     * @param dto   of{@link ExportDetailsDtoUpdate}
+     * @param email {@link String} email;
      * @return {@link ExportDetailsDto};
      * @author Orest Mahdziak
      */
@@ -1065,53 +1068,68 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoUpdate dto, String email) {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        if (nonNull(dto.getReceivingStationId())) {
-            ReceivingStation station = receivingStationRepository.findById(dto.getReceivingStationId())
-                .orElseThrow(() -> new NotFoundException(
-                    RECEIVING_STATION_NOT_FOUND_BY_ID + dto.getReceivingStationId()));
-            order.setReceivingStation(station);
+        final List<ReceivingStation> receivingStation = getAllReceivingStations();
+        String action;
+        if (order.getReceivingStation() == null && order.getDateOfExport() == null
+            && order.getDeliverFrom() == null && order.getDeliverTo() == null) {
+            action = OrderHistory.SET_EXPORT_DETAILS;
+        } else {
+            action = OrderHistory.UPDATE_EXPORT_DETAILS;
         }
+        order.setReceivingStation(getUpdatedReceivingStation(dto.getReceivingStationId(), order));
+        order.setDateOfExport(getUpdatedDateExport(dto.getDateExport(), order));
+        order.setDeliverFrom(getUpdatedDeliveryFrom(dto.getTimeDeliveryFrom(), order));
+        order.setDeliverTo(getUpdatedDeliveryTo(dto.getTimeDeliveryTo(), order));
+        orderRepository.save(order);
+        eventService.saveEvent(action, email, order);
+        return buildExportDto(order, receivingStation);
+    }
+
+    private List<ReceivingStation> getAllReceivingStations() {
         List<ReceivingStation> receivingStation = receivingStationRepository.findAll();
         if (receivingStation.isEmpty()) {
             throw new NotFoundException(RECEIVING_STATION_NOT_FOUND);
         }
-        String dateExport = dto.getDateExport() != null ? dto.getDateExport() : null;
-        String timeDeliveryFrom = dto.getTimeDeliveryFrom() != null ? dto.getTimeDeliveryFrom() : null;
-        String timeDeliveryTo = dto.getTimeDeliveryTo() != null ? dto.getTimeDeliveryTo() : null;
-        if (dateExport != null) {
-            String[] date = dateExport.split("T");
-            order.setDateOfExport(LocalDate.parse(date[0]));
-        }
-        if (timeDeliveryFrom != null) {
-            LocalDateTime dateTime = LocalDateTime.parse(timeDeliveryFrom);
-            order.setDeliverFrom(dateTime);
-        }
-        if (timeDeliveryTo != null) {
-            LocalDateTime dateAndTimeDeliveryTo = LocalDateTime.parse(timeDeliveryTo);
-            order.setDeliverTo(dateAndTimeDeliveryTo);
-        }
-        orderRepository.save(order);
-        final String receivingStationValue = order.getReceivingStation().getName();
-        final LocalDateTime deliverFrom = order.getDeliverFrom();
-        collectEventsAboutOrderExportDetails(receivingStationValue, deliverFrom, order, email);
-        return buildExportDto(order, receivingStation);
+        return receivingStation;
     }
 
-    /**
-     * This is private method which collect's event for order export details.
-     *
-     * @param receivingStationValue {@link String}.
-     * @param deliverFrom           {@link LocalDateTime}.
-     * @param order                 {@link Order}.
-     * @author Yuriy Bahlay.
-     */
-    private void collectEventsAboutOrderExportDetails(String receivingStationValue, LocalDateTime deliverFrom,
-        Order order, String email) {
-        if (receivingStationValue != null || deliverFrom != null) {
-            eventService.saveEvent(OrderHistory.UPDATE_EXPORT_DETAILS, email, order);
-        } else {
-            eventService.save(OrderHistory.SET_EXPORT_DETAILS, email, order);
+    private ReceivingStation getUpdatedReceivingStation(Long receivingStationId, Order order) {
+        if (nonNull(receivingStationId)) {
+            return receivingStationRepository.findById(receivingStationId)
+                .orElseThrow(() -> new NotFoundException(
+                    RECEIVING_STATION_NOT_FOUND_BY_ID + receivingStationId));
+        } else if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
+            return null;
         }
+        return order.getReceivingStation();
+    }
+
+    private LocalDate getUpdatedDateExport(String dateExport, Order order) {
+        if (dateExport != null) {
+            String[] date = dateExport.split("T");
+            return LocalDate.parse(date[0]);
+        } else if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
+            return null;
+        }
+        return order.getDateOfExport();
+    }
+
+    private LocalDateTime getUpdatedDeliveryFrom(String timeDeliveryFrom, Order order) {
+        if (timeDeliveryFrom != null) {
+            return LocalDateTime.parse(timeDeliveryFrom);
+        } else if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
+            return null;
+        }
+        return order.getDeliverFrom();
+    }
+
+    private LocalDateTime getUpdatedDeliveryTo(String timeDeliveryTo, Order order) {
+        if (timeDeliveryTo != null) {
+            return LocalDateTime.parse(timeDeliveryTo);
+        } else if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
+            return null;
+        }
+        return order.getDeliverTo();
     }
 
     private ExportDetailsDto buildExportDto(Order order, List<ReceivingStation> receivingStations) {
@@ -1265,16 +1283,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     @Transactional
     public void deleteManualPayment(Long paymentId, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Employee employee = employeeRepository.findByUuid(uuid)
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment not found"));
         if (payment.getImagePath() != null) {
             fileService.delete(payment.getImagePath());
         }
         paymentRepository.deletePaymentById(paymentId);
-        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY + paymentId,
-            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), payment.getOrder());
+        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
         updateOrderPaymentStatusForManualPayment(payment.getOrder());
     }
 
@@ -1285,13 +1303,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public ManualPaymentResponseDto updateManualPayment(Long paymentId,
         ManualPaymentRequestDto paymentRequestDto,
         MultipartFile image, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Employee employee = employeeRepository.findByUuid(uuid)
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(
             () -> new NotFoundException(PAYMENT_NOT_FOUND + paymentId));
         Payment paymentUpdated = paymentRepository.save(changePaymentEntity(payment, paymentRequestDto, image));
         eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
-            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
 
         ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(paymentUpdated);
         updateOrderPaymentStatusForManualPayment(payment.getOrder());
@@ -1669,10 +1687,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         dto.getEmployeeId().toString(),
                         dto.getPositionId(),
                         email));
+            } else {
+                if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
+                    List<EmployeeOrderPosition> employeeOrderPositions = employeeOrderPositionRepository
+                        .findAllByOrderId(orderId);
+                    if (!employeeOrderPositions.isEmpty()) {
+                        employeeOrderPositionRepository.deleteAll(employeeOrderPositions);
+                    }
+                }
             }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
+    }
+
+    private boolean isOrderStatusFormedOrCanceledOrBroughtHimself(Order order) {
+        return order.getOrderStatus() == OrderStatus.FORMED
+            || order.getOrderStatus() == OrderStatus.CANCELED
+            || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF;
     }
 
     private void checkAvailableOrderForEmployee(Order order, String email) {
@@ -1761,7 +1793,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
-        Long orderId) {
+        Long orderId, String email) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
@@ -1784,6 +1816,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         orderRepository.save(order);
         userRepository.save(currentUser);
+        eventService.saveEvent(OrderHistory.ADDED_BONUSES, email, order);
 
         return AddBonusesToUserDto.builder()
             .amount(addBonusesToUserDto.getAmount())
@@ -1809,5 +1842,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .order(order)
                 .build());
         notificationService.notifyBonuses(order, (long) points);
+    }
+
+    @Override
+    public void updateOrderStatusToExpected() {
+        orderRepository.updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
+            OrderStatus.ON_THE_ROUTE.name(),
+            LocalDate.now());
     }
 }

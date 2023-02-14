@@ -1,6 +1,7 @@
 package greencity.constant;
 
 public final class ErrorMessage {
+    public static final String CERTIFICATE_EXIST = "Certificate with this code is already exist";
     public static final String CERTIFICATE_NOT_FOUND_BY_CODE = "Certificate does not exist by this code: ";
     public static final String CERTIFICATE_EXPIRED = "Certificate expired by this code: ";
     public static final String CERTIFICATE_STATUS = "Certificate has status 'EXPIRED' or 'USED'";
@@ -50,7 +51,9 @@ public final class ErrorMessage {
     public static final String CANNOT_DELETE_DEFAULT_IMAGE = "You can't delete default image.";
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
+    public static final String ADDRESS_NOT_FOUND = "Address not found";
     public static final String LOCATION_DOESNT_FOUND = "Location does not found";
+    public static final String LOCATION_DOESNT_FOUND_BY_ID = "Location does not exist by id: ";
     public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown ";
     public static final String ORDER_ALREADY_HAS_VIOLATION = "Current order already has violation";
     public static final String ORDER_ALREADY_PAID = "Current order is already paid";
@@ -105,6 +108,7 @@ public final class ErrorMessage {
     public static final String COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY = "Could not retrieve employee's authority";
     public static final String EMPLOYEE_AUTHORITY_WAS_NOT_EDITED = "Employee's authority was not edited";
     public static final String EMPLOYEE_EMAIL_WAS_NOT_EDITED = "Employee's email was not edited";
+    public static final String EMPLOYEE_AUTHORITIES_DONT_UPDATE = "Employee's authorities was not updated";
     public static final String COMMENT_ERROR = "Invalid comment= ";
     public static final String TOO_MUCH_POINTS_FOR_ORDER = "Too much points for order, maximum amount: ";
     public static final String TARIFF_FOR_ORDER_NOT_EXIST = "Could not find tariff for order with id: ";
@@ -119,6 +123,8 @@ public final class ErrorMessage {
         "Limits are not inputted properly. You should only input AmountOfBags or PriceOfOrder.";
     public static final String MAX_BAG_VALUE_IS_INCORRECT = "Max bag value should be greater than min";
     public static final String MAX_PRICE_VALUE_IS_INCORRECT = "Max price value should be greater than min";
+
+    public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max field must have different values";
 
     /**
      * Constructor.

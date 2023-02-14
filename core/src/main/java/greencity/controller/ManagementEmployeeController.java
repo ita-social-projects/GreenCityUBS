@@ -4,10 +4,12 @@ import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.service.ubs.UBSClientService;
@@ -77,7 +79,7 @@ public class ManagementEmployeeController {
     @ApiPageable
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/getAll-employees")
-    public ResponseEntity<Page<EmployeeDto>> getAllEmployees(EmployeePage employeePage,
+    public ResponseEntity<Page<GetEmployeeDto>> getAllEmployees(EmployeePage employeePage,
         EmployeeFilterCriteria employeeFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(employeeService.findAll(employeePage, employeeFilterCriteria));
@@ -98,7 +100,7 @@ public class ManagementEmployeeController {
     @ApiPageable
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/getAll-active-employees")
-    public ResponseEntity<Page<EmployeeDto>> getAllActiveEmployees(EmployeePage employeePage,
+    public ResponseEntity<Page<GetEmployeeDto>> getAllActiveEmployees(EmployeePage employeePage,
         EmployeeFilterCriteria employeeFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(employeeService.findAllActiveEmployees(employeePage, employeeFilterCriteria));
@@ -135,7 +137,7 @@ public class ManagementEmployeeController {
      */
     @ApiOperation(value = "Delete employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -287,5 +289,22 @@ public class ManagementEmployeeController {
         @ApiIgnore Principal principal) {
         ubsClientService.updateEmployeesAuthorities(dto, principal.getName());
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller that return list of all tariffs.
+     *
+     * @return list of all tariffs.
+     */
+    @ApiOperation(value = "Get all tariffs for working with employee page")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
+    @GetMapping("/getTariffs")
+    public ResponseEntity<List<GetTariffInfoForEmployeeDto>> getTariffInfoForEmployee() {
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.getTariffsForEmployee());
     }
 }

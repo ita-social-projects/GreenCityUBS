@@ -1,12 +1,7 @@
 package greencity.dto.employee;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import greencity.annotations.ValidPhoneNumber;
-import greencity.dto.LocationsDtos;
-import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.tariff.TariffsInfoDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder
@@ -38,11 +32,5 @@ public class EmployeeDto {
     @NotEmpty
     private List<PositionDto> employeePositions;
     @NotEmpty
-    private List<ReceivingStationDto> receivingStations;
-    @NotNull
-    private LocationsDtos location;
-    @NotNull
-    private CourierDto courier;
-    @JsonIgnore
-    private Set<TariffsInfoDto> tariffs;
+    private List<Long> tariffId;
 }

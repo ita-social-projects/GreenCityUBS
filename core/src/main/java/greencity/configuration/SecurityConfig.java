@@ -94,7 +94,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/getActiveLocations",
                 SUPER_ADMIN_LINK + "/getCouriers",
                 SUPER_ADMIN_LINK + "/tariffs",
-                SUPER_ADMIN_LINK + "/getTariffService",
+                SUPER_ADMIN_LINK + "/{tariffId}/getTariffService",
                 SUPER_ADMIN_LINK + "/{tariffId}/getService",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
@@ -109,8 +109,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/check-if-tariff-exists",
                 SUPER_ADMIN_LINK + "/addLocations",
                 SUPER_ADMIN_LINK + "/createCourier",
-                SUPER_ADMIN_LINK + "/createTariffService",
-                SUPER_ADMIN_LINK + "/createService",
+                SUPER_ADMIN_LINK + "/{tariffId}/createService",
+                SUPER_ADMIN_LINK + "/{tariffId}/createTariffService",
                 SUPER_ADMIN_LINK + "/create-receiving-station",
                 SUPER_ADMIN_LINK + "/locations/edit",
                 SUPER_ADMIN_LINK + "/**")
@@ -129,7 +129,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/update-courier",
                 SUPER_ADMIN_LINK + "/update-receiving-station",
                 SUPER_ADMIN_LINK + "/editTariffService/{id}",
-                SUPER_ADMIN_LINK + "/editService",
+                SUPER_ADMIN_LINK + "/editService/{id}",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
@@ -144,7 +144,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/setLimitsByAmountOfBags/{tariffId}",
                 SUPER_ADMIN_LINK + "/setLimitsBySumOfOrder/{tariffId}",
                 SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}",
-                SUPER_ADMIN_LINK + "/deactivateCourier/{id}")
+                SUPER_ADMIN_LINK + "/deactivateCourier/{id}",
+                SUPER_ADMIN_LINK + "/includeLimit/{bagId}",
+                SUPER_ADMIN_LINK + "/excludeLimit/{bagId}")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
                 UBS_MANAG_LINK + "/update-order-page-admin-info/{id}",
