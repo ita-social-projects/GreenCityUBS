@@ -243,7 +243,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(600);
         when(locationRepository.existsById(locationId)).thenReturn(true);
         when(userRepository.findUserByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.of(user));
-        when(bagRepository.findBagsByLocationIdAndLocationStatusIsActive(locationId)).thenReturn(bagList);
+        when(bagRepository.findBagsByLocationIdAndTariffStatusIsActive(locationId)).thenReturn(bagList);
         when(modelMapper.map(bagList.get(0), BagTranslationDto.class)).thenReturn(dto);
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
@@ -256,7 +256,7 @@ class UBSClientServiceImplTest {
 
         verify(locationRepository).existsById(locationId);
         verify(userRepository).findUserByUuid("35467585763t4sfgchjfuyetf");
-        verify(bagRepository).findBagsByLocationIdAndLocationStatusIsActive(locationId);
+        verify(bagRepository).findBagsByLocationIdAndTariffStatusIsActive(locationId);
         verify(modelMapper).map(bagList.get(0), BagTranslationDto.class);
     }
 
@@ -297,7 +297,7 @@ class UBSClientServiceImplTest {
 
         verify(locationRepository).existsById(1L);
         verify(userRepository).findUserByUuid("35467585763t4sfgchjfuyetf");
-        verify(bagRepository, never()).findBagsByLocationIdAndLocationStatusIsActive(anyLong());
+        verify(bagRepository, never()).findBagsByLocationIdAndTariffStatusIsActive(anyLong());
     }
 
     @Test
@@ -310,7 +310,7 @@ class UBSClientServiceImplTest {
 
         verify(userRepository).findUserByUuid("35467585763t4sfgchjfuyetf");
         verify(locationRepository, never()).existsById(1L);
-        verify(bagRepository, never()).findBagsByLocationIdAndLocationStatusIsActive(anyLong());
+        verify(bagRepository, never()).findBagsByLocationIdAndTariffStatusIsActive(anyLong());
     }
 
     @Test

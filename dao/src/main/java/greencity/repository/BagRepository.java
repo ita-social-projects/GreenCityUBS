@@ -119,6 +119,6 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         value = "SELECT * FROM bag b "
             + "JOIN tariffs_info ti on ti.id = b.tariffs_info_id "
             + "JOIN tariffs_locations tl on ti.id = tl.tariffs_info_id "
-            + "WHERE tl.location_id =:locationId and ti.location_status = 'ACTIVE'")
-    List<Bag> findBagsByLocationIdAndLocationStatusIsActive(@Param("locationId") Long locationId);
+            + "WHERE tl.location_id =:locationId and ti.tariff_status = 'ACTIVE'")
+    List<Bag> findBagsByLocationIdAndTariffStatusIsActive(@Param("locationId") Long locationId);
 }

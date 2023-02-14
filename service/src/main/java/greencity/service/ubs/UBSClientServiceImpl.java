@@ -272,7 +272,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private List<Bag> getBagList(Long locationId) {
         return locationId != null
             ? bagRepository
-                .findBagsByLocationIdAndLocationStatusIsActive(
+                .findBagsByLocationIdAndTariffStatusIsActive(
                     checkAndGetLocationId(locationId))
             : bagRepository
                 .findAll();

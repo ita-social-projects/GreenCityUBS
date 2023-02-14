@@ -3651,7 +3651,7 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .max(10L)
