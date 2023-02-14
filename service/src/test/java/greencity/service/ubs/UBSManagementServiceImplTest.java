@@ -596,7 +596,7 @@ class UBSManagementServiceImplTest {
             .saveEvent("Статус Замовлення - Підтверджено",
                 "test@gmail.com", order);
         verify(eventService, times(1))
-            .saveEvent("Статус Замовлення - Скасовано" + "  " + order.getCancellationComment(),
+            .saveEvent("Статус Замовлення - Скасовано",
                 "test@gmail.com", order);
 
     }
