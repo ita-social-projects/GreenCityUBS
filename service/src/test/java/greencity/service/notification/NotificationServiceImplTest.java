@@ -286,31 +286,31 @@ class NotificationServiceImplTest {
         void testNotifyAllHalfPaidPackages() {
             User user = User.builder().id(42L).build();
             List<Order> orders = List.of(Order.builder().id(47L).user(user)
-                            .orderDate(LocalDateTime.now(fixedClock))
-                            .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
-                            .payment(Collections.emptyList())
-                            .certificates(Collections.emptySet())
-                            .amountOfBagsOrdered(Collections.singletonMap(1,3))
-                            .exportedQuantity(Collections.emptyMap())
-                            .confirmedQuantity(Collections.singletonMap(1,4))
-                            .pointsToUse(0)
+                .orderDate(LocalDateTime.now(fixedClock))
+                .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
+                .payment(Collections.emptyList())
+                .certificates(Collections.emptySet())
+                .amountOfBagsOrdered(Collections.singletonMap(1, 3))
+                .exportedQuantity(Collections.emptyMap())
+                .confirmedQuantity(Collections.singletonMap(1, 4))
+                .pointsToUse(0)
+                .build(),
+                Order.builder().id(51L).user(user)
+                    .orderDate(LocalDateTime.now(fixedClock))
+                    .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
+                    .certificates(Collections.emptySet())
+                    .amountOfBagsOrdered(Collections.singletonMap(1, 3))
+                    .exportedQuantity(Collections.singletonMap(1, 5))
+                    .confirmedQuantity(Collections.singletonMap(1, 4))
+                    .pointsToUse(0)
+                    .payment(List.of(
+                        Payment.builder()
+                            .paymentStatus(PaymentStatus.PAID).amount(0L)
                             .build(),
-                    Order.builder().id(51L).user(user)
-                            .orderDate(LocalDateTime.now(fixedClock))
-                            .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
-                            .certificates(Collections.emptySet())
-                            .amountOfBagsOrdered(Collections.singletonMap(1,3))
-                            .exportedQuantity(Collections.singletonMap(1,5))
-                            .confirmedQuantity(Collections.singletonMap(1,4))
-                            .pointsToUse(0)
-                            .payment(List.of(
-                                    Payment.builder()
-                                            .paymentStatus(PaymentStatus.PAID).amount(0L)
-                                            .build(),
-                                    Payment.builder()
-                                            .paymentStatus(PaymentStatus.PAYMENT_REFUNDED).amount(0L)
-                                            .build()))
-                            .build());
+                        Payment.builder()
+                            .paymentStatus(PaymentStatus.PAYMENT_REFUNDED).amount(0L)
+                            .build()))
+                    .build());
 
             when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.HALF_PAID))
                 .thenReturn(orders);
