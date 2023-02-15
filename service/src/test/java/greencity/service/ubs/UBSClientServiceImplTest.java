@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
+import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -2397,6 +2398,13 @@ class UBSClientServiceImplTest {
         UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
         userRemoteClient.updateEmployeesAuthorities(dto);
         verify(userRemoteClient, times(1)).updateEmployeesAuthorities(dto);
+    }
+
+    @Test
+    void updateEmployeesAuthoritiesHystrixRuntimeException() {
+        UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
+        doThrow(HystrixRuntimeException.class).when(userRemoteClient).updateEmployeesAuthorities(dto);
+        assertThrows(HystrixRuntimeException.class, () -> userRemoteClient.updateEmployeesAuthorities(dto));
     }
 
     @Test
