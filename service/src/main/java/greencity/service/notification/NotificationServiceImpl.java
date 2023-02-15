@@ -5,6 +5,7 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.entity.order.Certificate;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
@@ -167,15 +168,25 @@ public class NotificationServiceImpl implements NotificationService {
         Long paidAmount = order.getPayment().stream()
             .filter(payment -> !payment.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED)
                 && !payment.getPaymentStatus().equals(PaymentStatus.UNPAID))
-            .map(Payment::getAmount).reduce(0L, Long::sum);
+            .map(Payment::getAmount).reduce(0L, Long::sum) / 100;
+
+        Integer certificatePointsUsed = order.getCertificates().stream()
+            .map(Certificate::getPoints).reduce(0, Integer::sum);
 
         List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
-        Map<Integer, Integer> amountOfBagsOrdered = order.getAmountOfBagsOrdered();
+        Map<Integer, Integer> bagsAmount;
+        if (!order.getExportedQuantity().isEmpty()) {
+            bagsAmount = order.getExportedQuantity();
+        } else if (!order.getConfirmedQuantity().isEmpty()) {
+            bagsAmount = order.getConfirmedQuantity();
+        } else {
+            bagsAmount = order.getAmountOfBagsOrdered();
+        }
 
-        Integer price = bags.stream().map(bag -> amountOfBagsOrdered.get(bag.getId()) * bag.getFullPrice())
+        Integer price = bags.stream().map(bag -> bagsAmount.get(bag.getId()) * bag.getFullPrice())
             .reduce(0, Integer::sum);
 
-        long amountToPay = price - paidAmount;
+        long amountToPay = price - (paidAmount + order.getPointsToUse() + certificatePointsUsed);
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
