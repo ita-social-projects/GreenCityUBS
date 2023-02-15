@@ -22,8 +22,6 @@ import greencity.dto.notification.NotificationScheduleDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.AssignEmployeesForOrderDto;
-import greencity.dto.order.AssignForOrderEmployee;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
@@ -343,21 +341,6 @@ public class ModelUtils {
             .price(100)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .build();
-    }
-
-    public static AssignEmployeesForOrderDto assignEmployeeToOrderDto() {
-        return AssignEmployeesForOrderDto.builder()
-            .orderId(1L)
-            .employeesList(List.of(AssignForOrderEmployee.builder()
-                .employeeId(1L)
-                .build(),
-                AssignForOrderEmployee.builder()
-                    .employeeId(1L)
-                    .build(),
-                AssignForOrderEmployee.builder()
-                    .employeeId(1L)
-                    .build()))
             .build();
     }
 
