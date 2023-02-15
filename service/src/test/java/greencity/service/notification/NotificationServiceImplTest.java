@@ -292,20 +292,27 @@ class NotificationServiceImplTest {
                 .certificates(Collections.emptySet())
                 .amountOfBagsOrdered(Collections.singletonMap(1, 3))
                 .exportedQuantity(Collections.emptyMap())
-                .confirmedQuantity(Collections.singletonMap(1, 4))
+                .confirmedQuantity(Collections.singletonMap(1, 3))
                 .pointsToUse(0)
+                .payment(List.of(
+                    Payment.builder()
+                        .paymentStatus(PaymentStatus.PAID).amount(10000L)
+                        .build(),
+                    Payment.builder()
+                        .paymentStatus(PaymentStatus.UNPAID).amount(0L)
+                        .build()))
                 .build(),
                 Order.builder().id(51L).user(user)
                     .orderDate(LocalDateTime.now(fixedClock))
                     .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
                     .certificates(Collections.emptySet())
                     .amountOfBagsOrdered(Collections.singletonMap(1, 3))
-                    .exportedQuantity(Collections.singletonMap(1, 5))
-                    .confirmedQuantity(Collections.singletonMap(1, 4))
+                    .exportedQuantity(Collections.emptyMap())
+                    .confirmedQuantity(Collections.emptyMap())
                     .pointsToUse(0)
                     .payment(List.of(
                         Payment.builder()
-                            .paymentStatus(PaymentStatus.PAID).amount(0L)
+                            .paymentStatus(PaymentStatus.PAID).amount(10000L)
                             .build(),
                         Payment.builder()
                             .paymentStatus(PaymentStatus.PAYMENT_REFUNDED).amount(0L)
@@ -331,9 +338,9 @@ class NotificationServiceImplTest {
 
             Set<NotificationParameter> parameters = new HashSet<>();
 
-            when(bagRepository.findBagsByOrderId(any())).thenReturn(Collections.emptyList());
+            when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag1list());
 
-            long amountToPay = 0L;
+            long amountToPay = 4400L;
 
             parameters.add(NotificationParameter.builder().key("amountToPay")
                 .value(String.format("%.2f", (double) amountToPay)).build());
