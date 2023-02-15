@@ -18,10 +18,10 @@ public class EmployeeDto {
     @Min(1)
     private Long id;
     @NotNull
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    @Pattern(regexp = "^[a-zA-Z0-9]+([._]?[a-zA-Z0-9]+)++$")
     private String firstName;
     @NotNull
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    @Pattern(regexp = "^[a-zA-Z0-9]+([._]?[a-zA-Z0-9]+)++$")
     private String lastName;
     @NotNull
     @ValidPhoneNumber

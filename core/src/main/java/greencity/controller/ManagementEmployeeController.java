@@ -26,10 +26,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 
@@ -285,9 +283,8 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEES_AUTHORITIES', authentication)")
     @PutMapping("/edit-authorities")
-    public ResponseEntity<Object> editAuthorities(@Valid @RequestBody UserEmployeeAuthorityDto dto,
-        @ApiIgnore Principal principal) {
-        ubsClientService.updateEmployeesAuthorities(dto, principal.getName());
+    public ResponseEntity<Object> editAuthorities(@Valid @RequestBody UserEmployeeAuthorityDto dto) {
+        ubsClientService.updateEmployeesAuthorities(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

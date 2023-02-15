@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
+import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
 import greencity.entity.user.employee.Employee;
@@ -1952,10 +1953,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
+    public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto) {
         Employee employee = employeeRepository.findByEmail(dto.getEmployeeEmail())
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
-        userRemoteClient.updateEmployeesAuthorities(dto, email);
+        try {
+            userRemoteClient.updateEmployeesAuthorities(dto);
+        } catch (HystrixRuntimeException e) {
+            throw new BadRequestException(EMPLOYEE_DOESNT_EXIST);
+        }
     }
 
     @Override

@@ -2395,9 +2395,8 @@ class UBSClientServiceImplTest {
     @Test
     void updateEmployeesAuthorities() {
         UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
-        userRemoteClient.updateEmployeesAuthorities(dto, "test@mail.com");
-        verify(userRemoteClient, times(1)).updateEmployeesAuthorities(
-            dto, "test@mail.com");
+        userRemoteClient.updateEmployeesAuthorities(dto);
+        verify(userRemoteClient, times(1)).updateEmployeesAuthorities(dto);
     }
 
     @Test
@@ -2420,10 +2419,9 @@ class UBSClientServiceImplTest {
 
         when(employeeRepository.findByEmail(dto.getEmployeeEmail())).thenReturn(Optional.of(ModelUtils.getEmployee()));
 
-        ubsService.updateEmployeesAuthorities(dto, dto.getEmployeeEmail());
+        ubsService.updateEmployeesAuthorities(dto);
 
-        verify(userRemoteClient, times(1)).updateEmployeesAuthorities(
-            dto, "test@mail.com");
+        verify(userRemoteClient, times(1)).updateEmployeesAuthorities(dto);
         verify(employeeRepository, times(1)).findByEmail(anyString());
     }
 
