@@ -2,7 +2,6 @@ package greencity.service;
 
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
-import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.AddingReceivingStationDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierUpdateDto;
@@ -11,7 +10,6 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
-import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
@@ -174,36 +172,6 @@ public interface SuperAdminService {
     List<CourierDto> getAllCouriers();
 
     /**
-     * Method for edit limit description.
-     *
-     * @param courierId        - id of courier
-     * @param limitDescription - new limit description.
-     * @return {@link GetTariffsInfoDto}
-     * @author Vadym Makitra
-     */
-    GetTariffsInfoDto setLimitDescription(Long courierId, String limitDescription);
-
-    /**
-     * Method for include limit for bag.
-     *
-     * @param id - bag id.
-     * @return {@link GetTariffServiceDto}
-     * @author Vadym Makitra
-     * @author Julia Seti
-     */
-    GetTariffServiceDto includeLimit(Integer id);
-
-    /**
-     * Method for exclude limit for bag.
-     *
-     * @param id - bag id.
-     * @return {@link GetTariffServiceDto}
-     * @author Vadym Makitra
-     * @author Julia Seti
-     */
-    GetTariffServiceDto excludeLimit(Integer id);
-
-    /**
      * Method for change status courier and tariffs to deactivate.
      *
      * @param id - courier Id.
@@ -262,26 +230,13 @@ public interface SuperAdminService {
     boolean checkIfTariffExists(AddNewTariffDto addNewTariffDto);
 
     /**
-     * Method for edit info about tariff.
+     * Method for edit info about tariff limits by sum price of Order or by total
+     * amount of Bags.
      *
-     * @param tariffId - id of tariff
-     * @param dto      {@link EditAmountOfBagDto}
-     */
-    void setTariffLimitByAmountOfBags(Long tariffId, EditAmountOfBagDto dto);
-
-    /**
-     * Method for edit info about tariff.
+     * @param tariffId        {@link Long} tariff id
+     * @param setTariffLimits {@link SetTariffLimitsDto} dto
      *
-     * @param tariffId - id of tariff
-     * @param dto      {@link EditPriceOfOrder}
-     */
-    void setTariffLimitBySumOfOrder(Long tariffId, EditPriceOfOrder dto);
-
-    /**
-     * Method for edit info about tariff limits.
-     *
-     * @param tariffId        - id of tariff
-     * @param setTariffLimits {@link SetTariffLimitsDto}
+     * @author Julia Seti
      */
     void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimits);
 

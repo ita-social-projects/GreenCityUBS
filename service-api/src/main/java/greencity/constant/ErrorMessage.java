@@ -120,11 +120,11 @@ public final class ErrorMessage {
     public static final String BAGS_WITH_MIN_AMOUNT_OF_BIG_BAGS_NOT_FOUND =
         "There are not any tariff which include big bags for this location";
     public static final String TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY =
-        "Limits are not inputted properly. You should only input AmountOfBags or PriceOfOrder.";
+        "Limits are not inputted properly. You should input the Order limit type, Min and Max limit values "
+            + "for at least one package.";
     public static final String MAX_BAG_VALUE_IS_INCORRECT = "Max bag value should be greater than min";
     public static final String MAX_PRICE_VALUE_IS_INCORRECT = "Max price value should be greater than min";
-
-    public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max field must have different values";
+    public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max fields must have different values";
 
     /**
      * Constructor.
