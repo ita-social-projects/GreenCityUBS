@@ -68,8 +68,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                 ((ProviderManager) authenticationManager).setEraseCredentialsAfterAuthentication(false);
                 Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(token, null));
-                Optional<UserVO> user =
-                    userRemoteClient.getRecordsAsync((String) authentication.getPrincipal()).get();
+                Optional<UserVO> user = userRemoteClient.getRecordsAsync((String) authentication.getPrincipal()).get();
                 log.info("user: {}", user);
                 if (user.isPresent()) {
                     log.debug("User successfully authenticate - {}", authentication.getPrincipal());
