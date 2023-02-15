@@ -85,6 +85,13 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
                 log.error(ErrorMessage.EMPLOYEE_AUTHORITIES_DONT_UPDATE);
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITIES_DONT_UPDATE, throwable);
             }
+
+            @Override
+            public void deactivateEmployee(String uuid) {
+                log.error(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED);
+                throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED,
+                    throwable);
+            }
         };
     }
 }

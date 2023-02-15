@@ -144,9 +144,9 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
-    @DeleteMapping("/delete-employee/{id}")
+    @PutMapping("/deactivate-employee/{id}")
     public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable Long id) {
-        employeeService.deleteEmployee(id);
+        employeeService.deactivateEmployee(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
