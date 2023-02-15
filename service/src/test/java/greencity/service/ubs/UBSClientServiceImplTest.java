@@ -2403,8 +2403,12 @@ class UBSClientServiceImplTest {
     @Test
     void updateEmployeesAuthoritiesHystrixRuntimeException() {
         UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
+        Employee employee = getEmployee();
+
+        when(employeeRepository.findByEmail(dto.getEmployeeEmail())).thenReturn(Optional.of(employee));
+
         doThrow(HystrixRuntimeException.class).when(userRemoteClient).updateEmployeesAuthorities(dto);
-        assertThrows(HystrixRuntimeException.class, () -> userRemoteClient.updateEmployeesAuthorities(dto));
+        assertThrows(BadRequestException.class, () -> ubsService.updateEmployeesAuthorities(dto));
     }
 
     @Test
