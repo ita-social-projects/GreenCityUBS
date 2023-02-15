@@ -12,7 +12,6 @@ import greencity.dto.courier.CourierInfoDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.employee.EmployeePositionDtoResponse;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.*;
@@ -31,9 +30,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
-import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
@@ -1423,73 +1420,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-
-    @Override
-    @Transactional
-    public void updatePositions(EmployeePositionDtoResponse dto, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Order order = orderRepository.findById(dto.getOrderId())
-            .orElseThrow(
-                () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + dto.getOrderId()));
-        List<EmployeeOrderPosition> employeeOrderPositions = new ArrayList<>();
-        for (EmployeeOrderPositionDTO employeeOrderPositionDTO : dto.getEmployeeOrderPositionDTOS()) {
-            String[] dtoFirstAndLastName = new String[0];
-            try {
-                dtoFirstAndLastName = employeeOrderPositionDTO.getName().split(" ");
-            } catch (IndexOutOfBoundsException e) {
-                throw new NotFoundException(EMPLOYEE_DOESNT_EXIST);
-            }
-            Position position = positionRepository.findById(employeeOrderPositionDTO.getPositionId())
-                .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
-            Employee employee =
-                employeeRepository.findByFirstNameAndLastName(dtoFirstAndLastName[0], dtoFirstAndLastName[1])
-                    .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
-            Long oldEmployeePositionId =
-                employeeOrderPositionRepository.findByEmployeeId(employee.getId());
-            if (nonNull(oldEmployeePositionId) && oldEmployeePositionId != 0 && oldEmployeePositionId != 1) {
-                collectEventsAboutUpdatingEmployeesAssignedForOrder(oldEmployeePositionId, order, currentUser);
-            }
-            employeeOrderPositions.add(EmployeeOrderPosition.builder()
-                .employee(employee)
-                .position(position)
-                .order(order)
-                .build());
-        }
-        List<EmployeeOrderPosition> newList = employeeOrderPositionRepository.findAllByOrderId(dto.getOrderId());
-        if (!newList.isEmpty()) {
-            employeeOrderPositionRepository.deleteAll(newList);
-        }
-        employeeOrderPositionRepository.saveAll(employeeOrderPositions);
-    }
-
-    /**
-     * This is private method which collect's event when managers will update
-     * assigned.
-     *
-     * @param position {@link Long}.
-     * @param order    {@link Order}.
-     * @author Yuriy Bahlay.
-     */
-    private void collectEventsAboutUpdatingEmployeesAssignedForOrder(Long position, Order order, User currentUser) {
-        if (position == 2) {
-            eventService.save(OrderHistory.UPDATE_MANAGER_CALL,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (position == 3) {
-            eventService.save(OrderHistory.UPDATE_MANAGER_LOGIEST,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (position == 4) {
-            eventService.save(OrderHistory.UPDATE_MANAGER_CALL_PILOT,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (position == 5) {
-            eventService.save(OrderHistory.UPDATE_MANAGER_DRIVER,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        }
-    }
-
     @Override
     public ReasonNotTakeBagDto saveReason(Long orderId, String description, MultipartFile[] images) {
         final Order order = orderRepository.findById(orderId)
@@ -1512,72 +1442,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setOrderStatus(OrderStatus.CANCELED);
         orderRepository.save(order);
         return dto;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public void assignEmployeesWithThePositionsToTheOrder(AssignEmployeesForOrderDto dto, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Order order = orderRepository.findById(dto.getOrderId()).orElseThrow(
-            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
-        checkAvailableOrderForEmployee(order, currentUser.getRecipientEmail());
-        if (dto.getEmployeesList() != null) {
-            for (int i = 0; i < dto.getEmployeesList().size(); i++) {
-                AssignForOrderEmployee assignForOrderEmployee = dto.getEmployeesList().get(i);
-                boolean isExistEmployee = employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(dto.getOrderId(),
-                    assignForOrderEmployee.getEmployeeId());
-                if (isExistEmployee) {
-                    throw new FoundException(
-                        EMPLOYEE_ALREADY_ASSIGNED + assignForOrderEmployee.getEmployeeId());
-                }
-                Employee employeeForAssigning = employeeRepository.findById(assignForOrderEmployee.getEmployeeId())
-                    .orElseThrow(() -> new NotFoundException(
-                        EMPLOYEE_NOT_FOUND + assignForOrderEmployee.getEmployeeId()));
-                checkAvailableOrderForEmployee(order, employeeForAssigning.getEmail());
-                Long positionForEmployee =
-                    employeeRepository.findPositionById(assignForOrderEmployee.getEmployeeId())
-                        .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
-                if (positionForEmployee != 1) {
-                    EmployeeOrderPosition employeeOrderPositions = EmployeeOrderPosition.builder()
-                        .order(order)
-                        .employee(employeeForAssigning)
-                        .position(Position.builder().id(positionForEmployee).build())
-                        .build();
-                    employeeOrderPositionRepository.save(employeeOrderPositions);
-                    collectsEventsAboutAssigningEmployees(positionForEmployee, currentUser, order);
-                } else {
-                    throw new FoundException(ErrorMessage.EMPLOYEE_IS_NOT_ASSIGN);
-                }
-            }
-        }
-    }
-
-    /**
-     * This is private method which collect's event when managers will assign.
-     *
-     * @param position    {@link Long}.
-     * @param currentUser {@link User}
-     * @param order       {@link Order}.
-     * @author Yuriy Bahlay.
-     */
-    private void collectsEventsAboutAssigningEmployees(Long position, User currentUser, Order order) {
-        if (position == 2) {
-            eventService.save(OrderHistory.ASSIGN_CALL_MANAGER,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (position == 3) {
-            eventService.save(OrderHistory.ASSIGN_LOGIEST,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (position == 4) {
-            eventService.save(OrderHistory.ASSIGN_CALL_PILOT,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (position == 5) {
-            eventService.save(OrderHistory.ASSIGN_DRIVER,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        }
     }
 
     /**

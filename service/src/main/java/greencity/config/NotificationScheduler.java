@@ -4,15 +4,24 @@ import greencity.service.notification.NotificationServiceImpl;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+
+import java.time.Clock;
+import java.time.ZoneId;
 
 @Slf4j
 @Configuration
 @EnableScheduling
 @NoArgsConstructor
 public class NotificationScheduler {
+    @Bean
+    Clock kyivZonedClock() {
+        return Clock.system(ZoneId.of("Europe/Kiev"));
+    }
+
     @Autowired
     private NotificationServiceImpl notificationService;
 

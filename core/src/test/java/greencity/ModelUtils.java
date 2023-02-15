@@ -21,15 +21,12 @@ import greencity.dto.notification.NotificationScheduleDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.AssignEmployeesForOrderDto;
-import greencity.dto.order.AssignForOrderEmployee;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderResponseDto;
@@ -218,19 +215,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderDetailInfoDto getOrderDetailInfoDto() {
-        return OrderDetailInfoDto.builder()
-            .orderId(1L)
-            .capacity(10)
-            .price(400)
-            .amount(100)
-            .exportedQuantity(100)
-            .confirmedQuantity(200)
-            .name("test")
-            .bagId(3)
-            .build();
-    }
-
     public static OrderDetailStatusDto getOrderDetailStatusDto() {
         return getOrderDetailStatusDto(PaymentStatus.PAID);
     }
@@ -340,21 +324,6 @@ public class ModelUtils {
             .price(100)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .build();
-    }
-
-    public static AssignEmployeesForOrderDto assignEmployeeToOrderDto() {
-        return AssignEmployeesForOrderDto.builder()
-            .orderId(1L)
-            .employeesList(List.of(AssignForOrderEmployee.builder()
-                .employeeId(1L)
-                .build(),
-                AssignForOrderEmployee.builder()
-                    .employeeId(1L)
-                    .build(),
-                AssignForOrderEmployee.builder()
-                    .employeeId(1L)
-                    .build()))
             .build();
     }
 

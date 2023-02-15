@@ -90,4 +90,10 @@ class UserRemoteClientFallbackFactoryTest {
         UpdateEmployeeAuthoritiesDto dto = UpdateEmployeeAuthoritiesDto.builder().build();
         assertThrows(RemoteServerUnavailableException.class, () -> client.updateAuthorities(dto));
     }
+
+    @Test
+    void deactivateEmployee() {
+        String uuid = "87df9ad5-6393-441f-8423-8b2e770b01a8";
+        assertThrows(RemoteServerUnavailableException.class, () -> client.deactivateEmployee(uuid));
+    }
 }

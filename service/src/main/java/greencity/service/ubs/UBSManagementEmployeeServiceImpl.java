@@ -143,13 +143,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         updatedEmployee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
         updatedEmployee.setUuid(upEmployee.getUuid());
         updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
+
         if (image != null) {
-            if (!updatedEmployee.getImagePath().equals(defaultImagePath)) {
-                fileService.delete(updatedEmployee.getImagePath());
-            }
             updatedEmployee.setImagePath(fileService.upload(image));
         } else {
-            updatedEmployee.setImagePath(defaultImagePath);
+            updatedEmployee.setImagePath(upEmployee.getImagePath());
         }
         return modelMapper.map(employeeRepository.save(updatedEmployee), EmployeeDto.class);
     }
@@ -181,11 +179,16 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     @Transactional
-    public void deleteEmployee(Long id) {
+    public void deactivateEmployee(Long id) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
         if (employee.getEmployeeStatus().equals(EmployeeStatus.ACTIVE)) {
             employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+            try {
+                userRemoteClient.deactivateEmployee(employee.getUuid());
+            } catch (HystrixRuntimeException e) {
+                throw new BadRequestException("Employee with current uuid doesn't exist: " + employee.getUuid());
+            }
             employeeRepository.save(employee);
         }
     }
