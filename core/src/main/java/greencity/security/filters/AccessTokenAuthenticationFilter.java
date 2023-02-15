@@ -60,6 +60,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
         throws IOException, ServletException {
         String token = extractToken(request);
 
+        log.info("token: {}", token);
         if (token != null) {
             try {
                 ((ProviderManager) authenticationManager).setEraseCredentialsAfterAuthentication(false);
@@ -67,7 +68,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                     .authenticate(new UsernamePasswordAuthenticationToken(token, null));
                 Optional<UserVO> user =
                     userRemoteClient.findNotDeactivatedByEmail((String) authentication.getPrincipal());
-
+                log.info("user: {}", user);
                 if (user.isPresent()) {
                     log.debug("User successfully authenticate - {}", authentication.getPrincipal());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
