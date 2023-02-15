@@ -1,5 +1,6 @@
 package greencity.security.filters;
 
+import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
 import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
@@ -68,6 +69,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                     .authenticate(new UsernamePasswordAuthenticationToken(token, null));
                 Optional<UserVO> user =
                     userRemoteClient.findNotDeactivatedByEmail((String) authentication.getPrincipal());
+                Thread.sleep(500);
                 log.info("user: {}", user);
                 if (user.isPresent()) {
                     log.debug("User successfully authenticate - {}", authentication.getPrincipal());
