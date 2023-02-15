@@ -4,6 +4,7 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
 import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
+import greencity.service.FeignClientCallAsync;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,13 +31,13 @@ import java.util.Optional;
 public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTool jwtTool;
     private final AuthenticationManager authenticationManager;
-    private final UserRemoteClient userRemoteClient;
+    private final FeignClientCallAsync userRemoteClient;
 
     /**
      * Constructor.
      */
     public AccessTokenAuthenticationFilter(JwtTool jwtTool, AuthenticationManager authenticationManager,
-        UserRemoteClient userRemoteClient) {
+        FeignClientCallAsync userRemoteClient) {
         this.jwtTool = jwtTool;
         this.authenticationManager = authenticationManager;
         this.userRemoteClient = userRemoteClient;
@@ -67,9 +68,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                 ((ProviderManager) authenticationManager).setEraseCredentialsAfterAuthentication(false);
                 Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(token, null));
-                Optional<UserVO> user =
-                    userRemoteClient.findNotDeactivatedByEmail((String) authentication.getPrincipal());
-                Thread.sleep(1000);
+                Optional<UserVO> user = userRemoteClient.getRecordsAsync((String) authentication.getPrincipal()).get();
                 log.info("user: {}", user);
                 if (user.isPresent()) {
                     log.debug("User successfully authenticate - {}", authentication.getPrincipal());
