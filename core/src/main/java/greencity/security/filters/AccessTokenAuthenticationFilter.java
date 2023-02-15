@@ -69,7 +69,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                     .authenticate(new UsernamePasswordAuthenticationToken(token, null));
                 Optional<UserVO> user =
                     userRemoteClient.findNotDeactivatedByEmail((String) authentication.getPrincipal());
-                Thread.sleep(500);
+                Thread.sleep(1000);
                 log.info("user: {}", user);
                 if (user.isPresent()) {
                     log.debug("User successfully authenticate - {}", authentication.getPrincipal());
