@@ -219,18 +219,36 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void deleteTest() {
+    void deactivateEmployeeTest() {
         Employee employee = getEmployee();
         employee.setImagePath("Pass");
-        System.out.println(employee.getEmployeeStatus());
         when(repository.findById(1L)).thenReturn(Optional.of(employee));
-        employeeService.deleteEmployee(1L);
+        employeeService.deactivateEmployee(1L);
         verify(repository).findById(1L);
-        System.out.println(employee.getEmployeeStatus());
         assertEquals(EmployeeStatus.INACTIVE, employee.getEmployeeStatus());
         Exception thrown = assertThrows(NotFoundException.class,
-            () -> employeeService.deleteEmployee(2L));
+            () -> employeeService.deactivateEmployee(2L));
         assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
+    }
+
+    @Test
+    void deactivateEmployeeInactiveTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+        assertEquals(EmployeeStatus.INACTIVE, employee.getEmployeeStatus());
+    }
+
+    @Test
+    void deactivateEmployeeHystrixRuntimeExceptionTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+
+        doThrow(HystrixRuntimeException.class).when(userRemoteClient).deactivateEmployee(null);
+        assertThrows(BadRequestException.class, () -> employeeService.deactivateEmployee(employee.getId()));
+
+        verify(repository).findById(1L);
     }
 
     @Test
