@@ -1023,6 +1023,23 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void setTariffLimitsIfBagNotBelongToTariff() {
+        TariffsInfo tariffInfo = ModelUtils.getTariffInfo();
+        SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();
+        Bag bag = ModelUtils.getTariffBag();
+        tariffInfo.setId(2L);
+
+        when(tariffsInfoRepository.findById(2L)).thenReturn(Optional.of(tariffInfo));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(2L, dto));
+
+        verify(tariffsInfoRepository).findById(2L);
+        verify(bagRepository).findById(1);
+    }
+
+    @Test
     void setTariffLimitsWithNullMaxAndTrueBagLimitIncluded() {
         TariffsInfo tariffInfo = ModelUtils.getTariffInfo();
         SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();

@@ -563,11 +563,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void setTariffLimits(Long tariffId, SetTariffLimitsDto dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
 
-        checkLimitParamsAreValid(dto);
+        checkIfLimitParamsAreValid(dto);
 
         List<Bag> bags = dto.getBagLimitDtoList()
             .stream()
-            .map(this::updateBagLimitIncluded)
+            .map(bagDto -> checkAndUpdateBagLimitIncluded(bagDto, tariffId))
             .collect(Collectors.toList());
         bagRepository.saveAll(bags);
 
@@ -581,11 +581,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfoRepository.save(tariffsInfo);
     }
 
-    private void checkLimitParamsAreValid(SetTariffLimitsDto dto) {
+    private void checkIfLimitParamsAreValid(SetTariffLimitsDto dto) {
         boolean isBagLimitIncludedTrue = dto.getBagLimitDtoList()
             .stream()
             .anyMatch(BagLimitDto::getLimitIncluded);
-
         boolean areTariffLimitParamsAllNotNull = dto.getMin() != null
             && dto.getMax() != null
             && dto.getCourierLimit() != null;
@@ -595,13 +594,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         if ((areTariffLimitParamsAllNotNull && isBagLimitIncludedTrue)
             || (areTariffLimitParamsAllNull && !isBagLimitIncludedTrue)) {
-            checkMinAndMaxLimitValuesAreCorrect(dto);
+            checkIfMinAndMaxLimitValuesAreCorrect(dto);
         } else {
             throw new BadRequestException(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY);
         }
     }
 
-    private void checkMinAndMaxLimitValuesAreCorrect(SetTariffLimitsDto dto) {
+    private void checkIfMinAndMaxLimitValuesAreCorrect(SetTariffLimitsDto dto) {
         if (dto.getMin() != null && dto.getMax() != null) {
             if (dto.getMin().equals(dto.getMax())) {
                 throw new BadRequestException(ErrorMessage.MIN_MAX_VALUE_RESTRICTION);
@@ -614,8 +613,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
     }
 
-    private Bag updateBagLimitIncluded(BagLimitDto dto) {
+    private Bag checkAndUpdateBagLimitIncluded(BagLimitDto dto, Long tariffId) {
         Bag bag = tryToFindBagById(dto.getId());
+        if (!bag.getTariffsInfo().getId().equals(tariffId)) {
+            throw new BadRequestException(String.format(ErrorMessage.BAG_FOR_TARIFF_NOT_EXIST, bag.getId(), tariffId));
+        }
         bag.setLimitIncluded(dto.getLimitIncluded());
         return bag;
     }

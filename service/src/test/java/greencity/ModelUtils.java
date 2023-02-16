@@ -2262,6 +2262,7 @@ public class ModelUtils {
             .name("name")
             .nameEng("nameEng")
             .limitIncluded(false)
+            .tariffsInfo(getTariffInfo())
             .build();
     }
 
