@@ -284,18 +284,51 @@ class NotificationServiceImplTest {
 
         @Test
         void testNotifyAllHalfPaidPackages() {
-            User user = User.builder().id(42L).build();
+            User user = getUser();
             List<Order> orders = List.of(Order.builder().id(47L).user(user)
                 .orderDate(LocalDateTime.now(fixedClock))
                 .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
                 .payment(Collections.emptyList())
+                .certificates(Collections.emptySet())
+                .amountOfBagsOrdered(Collections.singletonMap(1, 3))
+                .exportedQuantity(Collections.emptyMap())
+                .confirmedQuantity(Collections.singletonMap(1, 3))
+                .pointsToUse(50)
+                .payment(List.of(
+                    Payment.builder()
+                        .paymentStatus(PaymentStatus.PAID).amount(5000L)
+                        .build(),
+                    Payment.builder()
+                        .paymentStatus(PaymentStatus.UNPAID).amount(0L)
+                        .build()))
                 .build(),
+                Order.builder().id(53L).user(user)
+                    .orderDate(LocalDateTime.now(fixedClock))
+                    .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
+                    .certificates(Collections.singleton(getCertificate()))
+                    .amountOfBagsOrdered(Collections.singletonMap(1, 3))
+                    .exportedQuantity(Collections.singletonMap(1, 3))
+                    .confirmedQuantity(Collections.singletonMap(1, 3))
+                    .pointsToUse(40)
+                    .payment(List.of(
+                        Payment.builder()
+                            .paymentStatus(PaymentStatus.PAID).amount(5000L)
+                            .build(),
+                        Payment.builder()
+                            .paymentStatus(PaymentStatus.PAYMENT_REFUNDED).amount(0L)
+                            .build()))
+                    .build(),
                 Order.builder().id(51L).user(user)
                     .orderDate(LocalDateTime.now(fixedClock))
                     .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
+                    .certificates(Collections.emptySet())
+                    .amountOfBagsOrdered(Collections.singletonMap(1, 3))
+                    .exportedQuantity(Collections.emptyMap())
+                    .confirmedQuantity(Collections.emptyMap())
+                    .pointsToUse(0)
                     .payment(List.of(
                         Payment.builder()
-                            .paymentStatus(PaymentStatus.PAID).amount(0L)
+                            .paymentStatus(PaymentStatus.PAID).amount(10000L)
                             .build(),
                         Payment.builder()
                             .paymentStatus(PaymentStatus.PAYMENT_REFUNDED).amount(0L)
@@ -307,7 +340,7 @@ class NotificationServiceImplTest {
 
             UserNotification notification = new UserNotification();
             notification.setNotificationType(NotificationType.UNPAID_PACKAGE);
-            notification.setUser(User.builder().id(42L).build());
+            notification.setUser(user);
             notification.setOrder(orders.get(0));
             notification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(2));
 
@@ -319,11 +352,15 @@ class NotificationServiceImplTest {
                 NotificationType.UNPAID_PACKAGE.toString(),
                 orders.get(1).getId().toString())).thenReturn(Optional.empty());
 
+            when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(
+                NotificationType.UNPAID_PACKAGE.toString(),
+                orders.get(2).getId().toString())).thenReturn(Optional.empty());
+
             Set<NotificationParameter> parameters = new HashSet<>();
 
-            when(bagRepository.findBagsByOrderId(any())).thenReturn(Collections.emptyList());
+            when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag1list());
 
-            long amountToPay = 0L;
+            long amountToPay = 4400L;
 
             parameters.add(NotificationParameter.builder().key("amountToPay")
                 .value(String.format("%.2f", (double) amountToPay)).build());
@@ -336,8 +373,8 @@ class NotificationServiceImplTest {
 
             notificationService.notifyAllHalfPaidPackages();
 
-            verify(userNotificationRepository, times(2)).save(notification);
-            verify(notificationParameterRepository, times(2)).saveAll(any());
+            verify(userNotificationRepository, times(3)).save(notification);
+            verify(notificationParameterRepository, times(3)).saveAll(any());
         }
     }
 
