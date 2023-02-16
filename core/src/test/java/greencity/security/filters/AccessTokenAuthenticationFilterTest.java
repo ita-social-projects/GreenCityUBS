@@ -70,6 +70,7 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
+    @Deprecated
     void doFilterInternalTest() throws IOException, ServletException {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn("SuperSecretAccessToken");
         when(providerManager.authenticate(any()))
@@ -102,6 +103,7 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
+    @Deprecated
     void doFilterInternalAccessDeniedTest() throws IOException, ServletException {
         String token = "SuperSecretAccessToken";
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
