@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -71,7 +72,7 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     void doFilterInternalTest() throws IOException, ServletException {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn("SuperSecretAccessToken");
         when(providerManager.authenticate(any()))
@@ -102,9 +103,8 @@ class AccessTokenAuthenticationFilterTest {
         verify(providerManager).authenticate(providerManager.authenticate(
             new UsernamePasswordAuthenticationToken(token, null)));
     }
-
     @Test
-    @Ignore
+    @Disabled
     void doFilterInternalAccessDeniedTest() throws IOException, ServletException {
         String token = "SuperSecretAccessToken";
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
