@@ -103,6 +103,7 @@ class AccessTokenAuthenticationFilterTest {
         verify(providerManager).authenticate(providerManager.authenticate(
             new UsernamePasswordAuthenticationToken(token, null)));
     }
+
     @Test
     @Disabled
     void doFilterInternalAccessDeniedTest() throws IOException, ServletException {
