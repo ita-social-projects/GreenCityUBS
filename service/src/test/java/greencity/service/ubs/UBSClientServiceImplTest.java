@@ -2401,17 +2401,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void updateEmployeesAuthoritiesHystrixRuntimeException() {
-        UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
-        Employee employee = getEmployee();
-
-        when(employeeRepository.findByEmail(dto.getEmployeeEmail())).thenReturn(Optional.of(employee));
-
-        doThrow(HystrixRuntimeException.class).when(userRemoteClient).updateEmployeesAuthorities(dto);
-        assertThrows(BadRequestException.class, () -> ubsService.updateEmployeesAuthorities(dto));
-    }
-
-    @Test
     void getAllAuthoritiesService() {
         Optional<Employee> employeeOptional = Optional.ofNullable(getEmployee());
         when(employeeRepository.findByEmail(anyString())).thenReturn(employeeOptional);

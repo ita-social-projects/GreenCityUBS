@@ -1,6 +1,7 @@
 package greencity.dto.employee;
 
 import greencity.annotations.ValidPhoneNumber;
+import greencity.constant.ValidationConstant;
 import greencity.dto.position.PositionDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,10 +19,10 @@ public class EmployeeDto {
     @Min(1)
     private Long id;
     @NotNull
-    @Pattern(regexp = "^(?!\\.)(?!.*\\.$)(?!.*?\\.\\.)(?!.*?\\-\\-)(?!.*?\\'\\')[-'ʼ ґҐіІєЄїЇА-Яа-я+\\w.]{1,30}$")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String firstName;
     @NotNull
-    @Pattern(regexp = "^(?!\\.)(?!.*\\.$)(?!.*?\\.\\.)(?!.*?\\-\\-)(?!.*?\\'\\')[-'ʼ ґҐіІєЄїЇА-Яа-я+\\w.]{1,30}$")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String lastName;
     @NotNull
     @ValidPhoneNumber

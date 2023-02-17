@@ -1956,11 +1956,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto) {
         Employee employee = employeeRepository.findByEmail(dto.getEmployeeEmail())
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
-        try {
-            userRemoteClient.updateEmployeesAuthorities(dto);
-        } catch (HystrixRuntimeException e) {
-            throw new BadRequestException(EMPLOYEE_DOESNT_EXIST);
-        }
+        userRemoteClient.updateEmployeesAuthorities(dto);
     }
 
     @Override
