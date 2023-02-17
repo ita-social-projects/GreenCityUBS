@@ -6,6 +6,7 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeSignUpDto;
+import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UpdateEmployeeAuthoritiesDto;
 import greencity.dto.position.AddingPositionDto;
@@ -57,7 +58,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
-    public EmployeeDto save(EmployeeDto dto, MultipartFile image) {
+    public EmployeeWithTariffsDto save(EmployeeDto dto, MultipartFile image) {
         dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
         if (dto.getEmail() != null && employeeRepository.existsByEmail(dto.getEmail())) {
             throw new UnprocessableEntityException(
@@ -75,7 +76,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             employee.setImagePath(defaultImagePath);
         }
         signUpEmployee(employee);
-        return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
+        return modelMapper.map(employeeRepository.save(employee), EmployeeWithTariffsDto.class);
     }
 
     private void signUpEmployee(Employee employee) {
@@ -127,7 +128,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     @Transactional
-    public EmployeeDto update(EmployeeDto dto, MultipartFile image) {
+    public EmployeeWithTariffsDto update(EmployeeDto dto, MultipartFile image) {
         final Employee upEmployee = employeeRepository.findById(dto.getId()).orElseThrow(
             () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
 
@@ -149,7 +150,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         } else {
             updatedEmployee.setImagePath(upEmployee.getImagePath());
         }
-        return modelMapper.map(employeeRepository.save(updatedEmployee), EmployeeDto.class);
+        return modelMapper.map(employeeRepository.save(updatedEmployee), EmployeeWithTariffsDto.class);
     }
 
     @Override

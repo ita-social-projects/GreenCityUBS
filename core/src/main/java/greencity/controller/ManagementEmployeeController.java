@@ -4,6 +4,7 @@ import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.pageble.PageableAdvancedDto;
@@ -44,7 +45,7 @@ public class ManagementEmployeeController {
      * Controller saves employee.
      *
      * @param employeeDto {@link EmployeeDto}
-     * @return {@link EmployeeDto} saved employee.
+     * @return {@link EmployeeWithTariffsDto} saved employee.
      * @author Mykola Danylko.
      */
     @ApiOperation(value = "Save employee")
@@ -57,7 +58,7 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
     @PostMapping(value = "/save-employee")
-    public ResponseEntity<EmployeeDto> saveEmployee(
+    public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
         @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
             required = true) @Valid @RequestPart EmployeeDto employeeDto,
         @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
@@ -109,7 +110,7 @@ public class ManagementEmployeeController {
     /**
      * Controller updates information about employee.
      *
-     * @return {@link EmployeeDto} update employee.
+     * @return {@link EmployeeWithTariffsDto} update employee.
      * @author Mykola Danylko.
      */
     @ApiOperation(value = "Update information about employee")
@@ -122,7 +123,7 @@ public class ManagementEmployeeController {
     })
     @PutMapping(value = "/update-employee",
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<EmployeeDto> update(
+    public ResponseEntity<EmployeeWithTariffsDto> update(
         @ApiParam(value = SwaggerExampleModel.EMPLOYEE_DTO,
             required = true) @RequestPart @Valid EmployeeDto employeeDto,
         @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
