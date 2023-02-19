@@ -5,7 +5,7 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
@@ -65,7 +65,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void saveEmployeeTest() {
         Employee employee = getEmployee();
-        EmployeeDto dto = getEmployeeDto();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
 
@@ -84,7 +84,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void saveEmployeeWithDefaultImagePathTest() {
         Employee employee = getEmployee();
-        EmployeeDto dto = getEmployeeDto();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
 
         when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
@@ -102,14 +102,14 @@ class UBSManagementEmployeeServiceImplTest {
     void saveEmployeeShouldThrowExceptionTest() {
         Employee employee = getEmployee();
         employee.setId(null);
-        EmployeeDto employeeDto = getEmployeeDto();
-        employeeDto.setEmail("test@gmail.com");
+        EmployeeWithTariffsIdDto employeeWithTariffsIdDto = getEmployeeWithTariffsIdDto();
+        employeeWithTariffsIdDto.getEmployeeDto().setEmail("test@gmail.com");
 
         when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(true, false, false);
         Exception thrown = assertThrows(UnprocessableEntityException.class,
-            () -> employeeService.save(employeeDto, null));
+            () -> employeeService.save(employeeWithTariffsIdDto, null));
         assertEquals(thrown.getMessage(),
-            ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeDto.getEmail());
+            ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeWithTariffsIdDto.getEmployeeDto().getEmail());
 
         verify(repository).existsByEmail(getAddEmployeeDto().getEmail());
     }
@@ -132,7 +132,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void updateEmployeeTest() {
         Employee employee = getEmployeeForUpdateEmailCheck();
-        EmployeeDto dto = getEmployeeDto();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
         Position position = ModelUtils.getPosition();
 
         MockMultipartFile file = new MockMultipartFile("employeeDto",
@@ -151,7 +151,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void updateEmployeeWhenPositionDoesNotExistsTest() {
         Employee employee = getEmployeeForUpdateEmailCheck();
-        EmployeeDto dto = getEmployeeDto();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
         Position position = ModelUtils.getPosition();
 
         MockMultipartFile file = new MockMultipartFile("employeeDto",
@@ -167,7 +167,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void updateEmployeeWithDefaultImagePathTest() {
         Employee employee = getEmployee();
-        EmployeeDto dto = getEmployeeDto();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
         Position position = ModelUtils.getPosition();
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
@@ -182,13 +182,13 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeeNotFoundTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDto();
+        EmployeeWithTariffsIdDto dto = ModelUtils.getEmployeeWithTariffsIdDto();
         assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
     }
 
     @Test
     void updateEmployeeEmailAlreadyExistsTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDto();
+        EmployeeWithTariffsIdDto dto = ModelUtils.getEmployeeWithTariffsIdDto();
         Employee employee = getEmployee();
 
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
@@ -202,7 +202,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void updateEmployeeEmailThrowsExceptionWhenUserWithSuchEmailIsAlreadyExistsTest() {
         Employee employee = getEmployeeForUpdateEmailCheck();
-        EmployeeDto dto = getEmployeeDto();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
         Position position = ModelUtils.getPosition();
 
         MockMultipartFile file = new MockMultipartFile("employeeDto",
@@ -210,12 +210,13 @@ class UBSManagementEmployeeServiceImplTest {
 
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
-        doThrow(HystrixRuntimeException.class).when(userRemoteClient).updateEmployeeEmail(dto.getEmail(), null);
+        doThrow(HystrixRuntimeException.class).when(userRemoteClient)
+            .updateEmployeeEmail(dto.getEmployeeDto().getEmail(), null);
 
         assertThrows(BadRequestException.class, () -> employeeService.update(dto, file));
         verify(positionRepository).existsPositionByIdAndName(position.getId(), position.getName());
         verify(repository, times(2)).findById(anyLong());
-        verify(userRemoteClient).updateEmployeeEmail(dto.getEmail(), null);
+        verify(userRemoteClient).updateEmployeeEmail(dto.getEmployeeDto().getEmail(), null);
     }
 
     @Test

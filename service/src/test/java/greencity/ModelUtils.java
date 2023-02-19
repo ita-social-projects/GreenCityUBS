@@ -35,13 +35,14 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
-import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.employee.EmployeePositionDtoResponse;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
+import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -977,13 +978,18 @@ public class ModelUtils {
 
     public static EmployeeWithTariffsDto getEmployeeWithTariffsDto() {
         return EmployeeWithTariffsDto.builder()
-            .id(1L)
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .image("path")
-            .employeePositions(List.of(PositionDto.builder().id(1L).name("Водій").build()))
+            .employeeDto(EmployeeDto.builder()
+                .id(1L)
+                .firstName("Петро")
+                .lastName("Петренко")
+                .phoneNumber("+380935577455")
+                .email("test@gmail.com")
+                .image("path")
+                .employeePositions(List.of(PositionDto.builder()
+                    .id(1L)
+                    .name("Водій")
+                    .build()))
+                .build())
             .tariffs(List.of(getTariffInfoForEmployeeDto()))
             .build();
     }
@@ -1131,19 +1137,21 @@ public class ModelUtils {
             .build();
     }
 
-    public static EmployeeDto getEmployeeDto() {
-        return EmployeeDto
+    public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
+        return EmployeeWithTariffsIdDto
             .builder()
-            .id(1L)
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .image("path")
-            .employeePositions(List.of(PositionDto.builder()
+            .employeeDto(EmployeeDto.builder()
                 .id(1L)
-                .name("Водій")
-                .build()))
+                .firstName("Петро")
+                .lastName("Петренко")
+                .phoneNumber("+380935577455")
+                .email("test@gmail.com")
+                .image("path")
+                .employeePositions(List.of(PositionDto.builder()
+                    .id(1L)
+                    .name("Водій")
+                    .build()))
+                .build())
             .tariffId(List.of(1L))
             .build();
     }

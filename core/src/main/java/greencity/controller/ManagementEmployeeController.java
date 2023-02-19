@@ -3,7 +3,7 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
-import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -44,13 +44,13 @@ public class ManagementEmployeeController {
     /**
      * Controller saves employee.
      *
-     * @param employeeDto {@link EmployeeDto}
+     * @param employeeWithTariffsIdDto {@link EmployeeWithTariffsIdDto}
      * @return {@link EmployeeWithTariffsDto} saved employee.
      * @author Mykola Danylko.
      */
     @ApiOperation(value = "Save employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = EmployeeDto.class),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = EmployeeWithTariffsIdDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -60,9 +60,9 @@ public class ManagementEmployeeController {
     @PostMapping(value = "/save-employee")
     public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
         @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
-            required = true) @Valid @RequestPart EmployeeDto employeeDto,
+            required = true) @Valid @RequestPart EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
         @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeDto, image));
+        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 
     /**
@@ -115,7 +115,7 @@ public class ManagementEmployeeController {
      */
     @ApiOperation(value = "Update information about employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeWithTariffsIdDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
@@ -125,9 +125,9 @@ public class ManagementEmployeeController {
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> update(
         @ApiParam(value = SwaggerExampleModel.EMPLOYEE_DTO,
-            required = true) @RequestPart @Valid EmployeeDto employeeDto,
+            required = true) @RequestPart @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
         @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
-        return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeDto, image));
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeWithTariffsIdDto, image));
     }
 
     /**

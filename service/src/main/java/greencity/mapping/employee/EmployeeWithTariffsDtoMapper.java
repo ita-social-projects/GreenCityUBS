@@ -5,6 +5,7 @@ import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.GetReceivingStationDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
+import greencity.dto.employee.EmployeeDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.user.employee.Employee;
@@ -18,18 +19,20 @@ public class EmployeeWithTariffsDtoMapper extends AbstractConverter<Employee, Em
     @Override
     protected EmployeeWithTariffsDto convert(Employee employee) {
         return EmployeeWithTariffsDto.builder()
-            .id(employee.getId())
-            .firstName(employee.getFirstName())
-            .lastName(employee.getLastName())
-            .email(employee.getEmail())
-            .phoneNumber(employee.getPhoneNumber())
-            .image(employee.getImagePath())
-            .employeePositions(employee.getEmployeePosition().stream()
-                .map(position -> PositionDto.builder()
-                    .id(position.getId())
-                    .name(position.getName())
-                    .build())
-                .collect(Collectors.toList()))
+            .employeeDto(EmployeeDto.builder()
+                .id(employee.getId())
+                .firstName(employee.getFirstName())
+                .lastName(employee.getLastName())
+                .email(employee.getEmail())
+                .phoneNumber(employee.getPhoneNumber())
+                .image(employee.getImagePath())
+                .employeePositions(employee.getEmployeePosition().stream()
+                    .map(position -> PositionDto.builder()
+                        .id(position.getId())
+                        .name(position.getName())
+                        .build())
+                    .collect(Collectors.toList()))
+                .build())
             .tariffs(employee.getTariffInfos().stream()
                 .map(getTariffs -> GetTariffInfoForEmployeeDto.builder()
                     .id(getTariffs.getId())
