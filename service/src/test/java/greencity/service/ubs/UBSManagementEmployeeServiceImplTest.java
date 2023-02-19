@@ -82,6 +82,18 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
+    void saveEmployeeWithExistingEmailShouldThrowExceptionTest() {
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(true);
+        Exception thrown = assertThrows(UnprocessableEntityException.class,
+            () -> employeeService.save(dto, null));
+        assertEquals(thrown.getMessage(),
+            ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmployeeDto().getEmail());
+
+        verify(repository).existsByEmail(getAddEmployeeDto().getEmail());
+    }
+
+    @Test
     void saveEmployeeWithDefaultImagePathTest() {
         Employee employee = getEmployee();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
