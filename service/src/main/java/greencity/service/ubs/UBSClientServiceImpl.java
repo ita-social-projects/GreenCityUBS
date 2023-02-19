@@ -1546,7 +1546,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private Integer calculateSumToPay(OrderFondyClientDto dto, Order order, User currentUser) {
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
-        Integer sumToPay = bagForUserDtos.stream()
+        int sumToPay = bagForUserDtos.stream()
             .map(BagForUserDto::getTotalPrice)
             .reduce(0, Integer::sum);
 
@@ -1726,7 +1726,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         checkForNullCounter(order);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
 
-        Integer sumToPay = formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap);
+        int sumToPay = formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap);
         sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, order, sumToPay);
 
@@ -1948,14 +1948,20 @@ public class UBSClientServiceImpl implements UBSClientService {
     public Set<String> getAllAuthorities(String email) {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
-        return userRemoteClient.getAllAuthorities(employee.getEmail());
+        Set<String> authorities = userRemoteClient.getAllAuthorities(employee.getEmail());
+        if (authorities.isEmpty()) {
+            throw new NotFoundException(COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY);
+        }
+        return authorities;
     }
 
     @Override
     public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
-        Employee employee = employeeRepository.findByEmail(dto.getEmployeeEmail())
-            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
-        userRemoteClient.updateEmployeesAuthorities(dto, email);
+        if (employeeRepository.existsByEmail(dto.getEmployeeEmail())) {
+            userRemoteClient.updateEmployeesAuthorities(dto, email);
+        } else {
+            throw new NotFoundException(EMPLOYEE_DOESNT_EXIST);
+        }
     }
 
     @Override

@@ -32,6 +32,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             @Override
             public Optional<UserVO> findNotDeactivatedByEmail(String email) {
                 log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email, throwable);
+
                 return Optional.empty();
             }
 
@@ -59,7 +60,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             @Override
             public Set<String> getAllAuthorities(String email) {
                 log.error(ErrorMessage.COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY, throwable);
-                return Collections.singleton(throwable.getMessage());
+                return Collections.emptySet();
             }
 
             @Override
