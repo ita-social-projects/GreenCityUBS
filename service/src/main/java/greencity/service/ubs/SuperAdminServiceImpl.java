@@ -557,6 +557,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .creator(employeeRepository.findByUuid(uuid)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid)))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .employees(Set.copyOf((employeeRepository.findAllByEmployeePositionId(6L))))
             .build();
         return tariffsInfoRepository.save(tariffsInfo);
     }
