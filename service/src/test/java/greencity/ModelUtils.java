@@ -17,12 +17,12 @@ import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
-import greencity.dto.bag.BagForUserDto;
-import greencity.dto.bag.BagMappingDto;
-import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagDto;
+import greencity.dto.bag.BagForUserDto;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.bag.BagLimitDto;
+import greencity.dto.bag.BagMappingDto;
 import greencity.dto.bag.BagTranslationDto;
-import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
@@ -69,7 +69,6 @@ import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.order.EmployeeOrderPositionDTO;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
@@ -156,7 +155,6 @@ import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
-import greencity.enums.MinAmountOfBag;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -965,14 +963,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Петрівка")
                 .build()))
-            .build();
-    }
-
-    public static EmployeeSignUpDto getEmployeeSignUpDto() {
-        return EmployeeSignUpDto.builder()
-            .name("testname")
-            .email("test@gmail.com")
-            .isUbs(true)
             .build();
     }
 
@@ -2245,7 +2235,6 @@ public class ModelUtils {
             .editedBy(getEmployee())
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .limitIncluded(false)
             .build());
     }
@@ -2324,12 +2313,12 @@ public class ModelUtils {
             .fullPrice(150)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
             .limitIncluded(false)
+            .tariffsInfo(getTariffInfo())
             .build();
     }
 
@@ -2352,7 +2341,6 @@ public class ModelUtils {
             .fullPrice(150)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .limitIncluded(false)
             .description("Description")
             .descriptionEng("DescriptionEng")
@@ -2782,7 +2770,6 @@ public class ModelUtils {
     public static Bag bagDto() {
         return Bag.builder()
             .id(1)
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .limitIncluded(false)
             .description("Description")
             .descriptionEng("DescriptionEng")
@@ -2790,22 +2777,6 @@ public class ModelUtils {
             .nameEng("a")
             .createdBy(getEmployee())
             .editedBy(getEmployee())
-            .build();
-    }
-
-    public static EditPriceOfOrder getEditPriceOfOrder() {
-        return EditPriceOfOrder.builder()
-            .max(500000L)
-            .min(300L)
-            .locationId(1L)
-            .build();
-    }
-
-    public static EditAmountOfBagDto getAmountOfBagDto() {
-        return EditAmountOfBagDto.builder()
-            .max(99L)
-            .min(2L)
-            .locationId(1L)
             .build();
     }
 
@@ -2833,7 +2804,6 @@ public class ModelUtils {
     public static Bag bagDtoClient() {
         return Bag.builder()
             .id(1)
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .price(1)
             .fullPrice(1)
             .commission(2)
@@ -4062,11 +4032,44 @@ public class ModelUtils {
             .build();
     }
 
-    public static SetTariffLimitsDto setTariffLimitsWithAmountOfBigBags() {
+    public static BagLimitDto getBagLimitIncludedDtoTrue() {
+        return BagLimitDto.builder()
+            .id(1)
+            .limitIncluded(true)
+            .build();
+    }
+
+    public static BagLimitDto getBagLimitIncludedDtoFalse() {
+        return BagLimitDto.builder()
+            .id(1)
+            .limitIncluded(false)
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithAmountOfBags() {
         return SetTariffLimitsDto.builder()
             .min(1L)
             .max(2L)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoTrue()))
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithNullAllTariffParamsAndFalseBagLimit() {
+        return SetTariffLimitsDto.builder()
+            .min(null)
+            .max(null)
+            .courierLimit(null)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoFalse()))
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithNullMinAndMaxAndFalseBagLimit() {
+        return SetTariffLimitsDto.builder()
+            .min(null)
+            .max(null)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoFalse()))
             .build();
     }
 
@@ -4075,6 +4078,7 @@ public class ModelUtils {
             .min(2L)
             .max(2L)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoTrue()))
             .build();
     }
 
@@ -4083,6 +4087,7 @@ public class ModelUtils {
             .min(100L)
             .max(200L)
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoTrue()))
             .build();
     }
 
@@ -4091,6 +4096,7 @@ public class ModelUtils {
             .min(2L)
             .max(1L)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoTrue()))
             .build();
     }
 
@@ -4099,6 +4105,7 @@ public class ModelUtils {
             .min(200L)
             .max(100L)
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoTrue()))
             .build();
     }
 
@@ -4114,13 +4121,6 @@ public class ModelUtils {
                     .limitedIncluded(false)
                     .build()),
             600);
-    }
-
-    public static TariffsInfoDto getLimitDescriptionDto() {
-        return TariffsInfoDto.builder()
-            .limitDescription("Description")
-            .id(1L)
-            .build();
     }
 
     public static Order getOrderExportDetailsWithExportDate() {

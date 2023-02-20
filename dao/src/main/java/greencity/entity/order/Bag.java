@@ -1,7 +1,6 @@
 package greencity.entity.order;
 
 import greencity.entity.user.employee.Employee;
-import greencity.enums.MinAmountOfBag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -50,10 +49,6 @@ public class Bag {
 
     @Column(nullable = false)
     private String descriptionEng;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private MinAmountOfBag minAmountOfBags;
 
     @Column(nullable = false)
     private Boolean limitIncluded;
