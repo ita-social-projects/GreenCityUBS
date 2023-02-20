@@ -583,7 +583,7 @@ class SuperAdminController {
      *
      * @author Julia Seti
      */
-    @ApiOperation(value = "Edit tariff limits by sum price of Order or by total amount of Bags")
+    @ApiOperation(value = "Set tariff limits")
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
