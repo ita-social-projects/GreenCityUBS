@@ -5,13 +5,12 @@ import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
-import greencity.dto.bag.EditAmountOfBagDto;
+import greencity.dto.bag.BagLimitDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
@@ -43,7 +42,7 @@ import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.dto.tariff.TariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -54,6 +53,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
 import greencity.enums.AddressStatus;
 import greencity.enums.CancellationReason;
+import greencity.enums.CourierLimit;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -181,23 +181,6 @@ public class ModelUtils {
         return NotificationDto.builder()
             .title("Test")
             .body("Test")
-            .build();
-    }
-
-    public static AddEmployeeDto getAddEmployeeDto() {
-        return AddEmployeeDto.builder()
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .employeePositions(List.of(PositionDto.builder()
-                .id(1L)
-                .name("Водій")
-                .build()))
-            .receivingStations(List.of(ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
             .build();
     }
 
@@ -385,13 +368,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static EditAmountOfBagDto getAmountOfSum() {
-        return EditAmountOfBagDto.builder()
-            .min(1L)
-            .max(2L)
-            .build();
-    }
-
     public static PaymentResponseDto getPaymentResponseDto() {
         return PaymentResponseDto.builder()
             .order_id("1_1")
@@ -553,10 +529,17 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffsInfoDto getLimitDescriptionDto() {
-        return TariffsInfoDto.builder()
-            .limitDescription("Description")
-            .id(1L)
+    public static SetTariffLimitsDto setTariffLimitsWithAmountOfBags() {
+        return SetTariffLimitsDto.builder()
+            .min(1L)
+            .max(2L)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(
+                BagLimitDto
+                    .builder()
+                    .id(1)
+                    .limitIncluded(true)
+                    .build()))
             .build();
     }
 }
