@@ -4007,6 +4007,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static SetTariffLimitsDto setTariffLimitsWithNullMinAndMaxAndFalseBagLimit() {
+        return SetTariffLimitsDto.builder()
+            .min(null)
+            .max(null)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoFalse()))
+            .build();
+    }
+
     public static SetTariffLimitsDto setTariffsLimitWithSameMinAndMaxValue() {
         return SetTariffLimitsDto.builder()
             .min(2L)
@@ -4055,13 +4064,6 @@ public class ModelUtils {
                     .limitedIncluded(false)
                     .build()),
             600);
-    }
-
-    public static TariffsInfoDto getLimitDescriptionDto() {
-        return TariffsInfoDto.builder()
-            .limitDescription("Description")
-            .id(1L)
-            .build();
     }
 
     public static Order getOrderExportDetailsWithExportDate() {

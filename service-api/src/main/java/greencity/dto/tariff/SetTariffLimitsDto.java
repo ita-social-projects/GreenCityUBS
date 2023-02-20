@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Builder
@@ -17,6 +18,7 @@ import java.util.List;
 public class SetTariffLimitsDto {
     private Long min;
     private Long max;
+    @NotNull
     private CourierLimit courierLimit;
     private String limitDescription;
     @NotEmpty

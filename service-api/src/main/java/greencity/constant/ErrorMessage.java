@@ -118,10 +118,8 @@ public final class ErrorMessage {
     public static final String CANNOT_ACCESS_ORDER_FOR_EMPLOYEE = "Cannot access order with id: ";
     public static final String NUMBER_OF_ADDRESSES_EXCEEDED = "Number of addresses reached maximum";
     public static final String TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY =
-        "Limits are not inputted properly. You should input the order limit type, min and max limit values "
-            + "for at least one package.";
-    public static final String MAX_BAG_VALUE_IS_INCORRECT = "Max bag value should be greater than min";
-    public static final String MAX_PRICE_VALUE_IS_INCORRECT = "Max price value should be greater than min";
+        "Limits are not inputted properly. You should input min and/or max limit values for at least one package.";
+    public static final String MAX_VALUE_IS_INCORRECT = "Max value should be greater than min";
     public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max fields must have different values";
     public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED = "Employee with current uuid was not "
         + "deactivated.";

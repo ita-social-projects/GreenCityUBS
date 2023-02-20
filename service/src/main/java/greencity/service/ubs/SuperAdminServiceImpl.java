@@ -560,24 +560,21 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
+    @Transactional
     public void setTariffLimits(Long tariffId, SetTariffLimitsDto dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
-
         checkIfLimitParamsAreValid(dto);
-
         List<Bag> bags = dto.getBagLimitDtoList()
             .stream()
-            .map(bagDto -> checkAndUpdateBagLimitIncluded(bagDto, tariffId))
+            .map(bagDto -> changeBagLimitIncluded(bagDto, tariffId))
             .collect(Collectors.toList());
         bagRepository.saveAll(bags);
 
         tariffsInfo.setMin(dto.getMin());
         tariffsInfo.setMax(dto.getMax());
-        tariffsInfo.setCourierLimit(dto.getCourierLimit() != null
-            ? dto.getCourierLimit()
-            : CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+        tariffsInfo.setCourierLimit(dto.getCourierLimit());
         tariffsInfo.setLimitDescription(dto.getLimitDescription());
-        tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+        tariffsInfo.setLocationStatus(getChangedTariffStatus(dto.getMin(), dto.getMax()));
         tariffsInfoRepository.save(tariffsInfo);
     }
 
@@ -585,41 +582,39 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         boolean isBagLimitIncludedTrue = dto.getBagLimitDtoList()
             .stream()
             .anyMatch(BagLimitDto::getLimitIncluded);
-        boolean areTariffLimitParamsAllNotNull = dto.getMin() != null
-            && dto.getMax() != null
-            && dto.getCourierLimit() != null;
-        boolean areTariffLimitParamsAllNull = dto.getMin() == null
-            && dto.getMax() == null
-            && dto.getCourierLimit() == null;
-
-        if ((areTariffLimitParamsAllNotNull && isBagLimitIncludedTrue)
-            || (areTariffLimitParamsAllNull && !isBagLimitIncludedTrue)) {
-            checkIfMinAndMaxLimitValuesAreCorrect(dto);
-        } else {
+        boolean areMinOrMaxNotNull = dto.getMin() != null || dto.getMax() != null;
+        boolean areParamsValid = dto.getCourierLimit() != null
+            && ((areMinOrMaxNotNull && isBagLimitIncludedTrue)
+                || (!areMinOrMaxNotNull && !isBagLimitIncludedTrue));
+        if (!areParamsValid) {
             throw new BadRequestException(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY);
         }
+        checkIfMinAndMaxLimitValuesAreCorrect(dto.getMax(), dto.getMin());
     }
 
-    private void checkIfMinAndMaxLimitValuesAreCorrect(SetTariffLimitsDto dto) {
-        if (dto.getMin() != null && dto.getMax() != null) {
-            if (dto.getMin().equals(dto.getMax())) {
+    private void checkIfMinAndMaxLimitValuesAreCorrect(Long max, Long min) {
+        if (min != null && max != null) {
+            if (min.equals(max)) {
                 throw new BadRequestException(ErrorMessage.MIN_MAX_VALUE_RESTRICTION);
-            } else if (dto.getMin() > dto.getMax()) {
-                String message = dto.getCourierLimit() == CourierLimit.LIMIT_BY_SUM_OF_ORDER
-                    ? ErrorMessage.MAX_PRICE_VALUE_IS_INCORRECT
-                    : ErrorMessage.MAX_BAG_VALUE_IS_INCORRECT;
-                throw new BadRequestException(message);
+            } else if (min > max) {
+                throw new BadRequestException(ErrorMessage.MAX_VALUE_IS_INCORRECT);
             }
         }
     }
 
-    private Bag checkAndUpdateBagLimitIncluded(BagLimitDto dto, Long tariffId) {
+    private Bag changeBagLimitIncluded(BagLimitDto dto, Long tariffId) {
         Bag bag = tryToFindBagById(dto.getId());
         if (!bag.getTariffsInfo().getId().equals(tariffId)) {
             throw new BadRequestException(String.format(ErrorMessage.BAG_FOR_TARIFF_NOT_EXIST, bag.getId(), tariffId));
         }
         bag.setLimitIncluded(dto.getLimitIncluded());
         return bag;
+    }
+
+    private LocationStatus getChangedTariffStatus(Long min, Long max) {
+        return min != null || max != null
+            ? LocationStatus.ACTIVE
+            : LocationStatus.DEACTIVATED;
     }
 
     @Override
