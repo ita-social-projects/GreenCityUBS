@@ -4,6 +4,7 @@ import greencity.client.UserRemoteClient;
 import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
+import greencity.service.FeignClientCallAsync;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,13 +36,13 @@ import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtTool jwtTool;
-    private final UserRemoteClient userRemoteClient;
+    private final FeignClientCallAsync userRemoteClient;
 
     /**
      * Constructor.
      */
     @Autowired
-    public SecurityConfig(JwtTool jwtTool, UserRemoteClient userRemoteClient) {
+    public SecurityConfig(JwtTool jwtTool, FeignClientCallAsync userRemoteClient) {
         this.jwtTool = jwtTool;
         this.userRemoteClient = userRemoteClient;
     }
