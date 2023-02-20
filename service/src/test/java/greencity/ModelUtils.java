@@ -35,12 +35,14 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
-import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.employee.EmployeePositionDtoResponse;
 import greencity.dto.employee.EmployeeSignUpDto;
+import greencity.dto.employee.EmployeeWithTariffsDto;
+import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -974,6 +976,24 @@ public class ModelUtils {
             .build();
     }
 
+    public static EmployeeWithTariffsDto getEmployeeWithTariffsDto() {
+        return EmployeeWithTariffsDto.builder()
+            .employeeDto(EmployeeDto.builder()
+                .id(1L)
+                .firstName("Петро")
+                .lastName("Петренко")
+                .phoneNumber("+380935577455")
+                .email("test@gmail.com")
+                .image("path")
+                .employeePositions(List.of(PositionDto.builder()
+                    .id(1L)
+                    .name("Водій")
+                    .build()))
+                .build())
+            .tariffs(List.of(getTariffInfoForEmployeeDto()))
+            .build();
+    }
+
     public static TariffsInfoDto getTariffsInfoDto() {
         return TariffsInfoDto.builder()
             .id(1L)
@@ -1015,7 +1035,8 @@ public class ModelUtils {
     public static GetReceivingStationDto getGetReceivingStationDto() {
         return GetReceivingStationDto
             .builder()
-            .name("receivingStation")
+            .stationId(1L)
+            .name("Петрівка")
             .build();
     }
 
@@ -1036,6 +1057,24 @@ public class ModelUtils {
                 .service(new Service())
                 .build()))
             .imagePath("path")
+            .build();
+    }
+
+    public static Employee getEmployeeWithTariffs() {
+        return Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeeStatus(EmployeeStatus.ACTIVE)
+            .employeePosition(Set.of(Position.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .tariffInfos(Set.of(getTariffsInfo()))
+            .imagePath("path")
+            .tariffs(List.of(getTariffInfo()))
             .build();
     }
 
@@ -1098,19 +1137,21 @@ public class ModelUtils {
             .build();
     }
 
-    public static EmployeeDto getEmployeeDto() {
-        return EmployeeDto
+    public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
+        return EmployeeWithTariffsIdDto
             .builder()
-            .id(1L)
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .image("path")
-            .employeePositions(List.of(PositionDto.builder()
+            .employeeDto(EmployeeDto.builder()
                 .id(1L)
-                .name("Водій")
-                .build()))
+                .firstName("Петро")
+                .lastName("Петренко")
+                .phoneNumber("+380935577455")
+                .email("test@gmail.com")
+                .image("path")
+                .employeePositions(List.of(PositionDto.builder()
+                    .id(1L)
+                    .name("Водій")
+                    .build()))
+                .build())
             .tariffId(List.of(1L))
             .build();
     }
@@ -3583,7 +3624,8 @@ public class ModelUtils {
             .min(500L)
             .orders(Collections.emptyList())
             .receivingStationList(Set.of(ReceivingStation.builder()
-                .name("receivingStation")
+                .id(1L)
+                .name("Петрівка")
                 .createdBy(ModelUtils.createEmployee())
                 .build()))
             .build();
