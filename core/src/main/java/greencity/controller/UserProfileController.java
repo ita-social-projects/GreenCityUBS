@@ -3,6 +3,7 @@ package greencity.controller;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.location.LocationSummaryDto;
+import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.service.ubs.UBSClientService;
@@ -61,6 +62,12 @@ public class UserProfileController {
     public ResponseEntity<UserProfileDto> getUserData(
         @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getProfileData(userUuid));
+    }
+
+    @PostMapping("/user/create")
+    public ResponseEntity<Long> createUserProfile(
+            @Valid @RequestBody UserProfileCreateDto userProfileCreateDto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(ubsClientService.createUserProfile(userProfileCreateDto));
     }
 
     /**

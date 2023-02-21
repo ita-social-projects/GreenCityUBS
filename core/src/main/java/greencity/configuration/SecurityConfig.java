@@ -75,6 +75,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .exceptionHandling()
             .authenticationEntryPoint((req, resp, exc) -> resp.sendError(SC_UNAUTHORIZED, "Authorize first."))
             .accessDeniedHandler((req, resp, exc) -> resp.sendError(SC_FORBIDDEN, "You don't have authorities."))
+                .and()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.POST, UBS_LINK + "/userProfile/user/create")
+                .permitAll()
             .and()
             .authorizeRequests()
             .antMatchers(HttpMethod.GET,

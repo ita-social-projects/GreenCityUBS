@@ -31,6 +31,7 @@ import javax.transaction.Transactional;
 
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
+import greencity.dto.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.AddressStatus;
@@ -114,14 +115,6 @@ import greencity.dto.payment.PaymentRequestDtoLiqPay;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.payment.StatusRequestDtoLiqPay;
-import greencity.dto.user.AllPointsUserDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.PointsForUbsUserDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserPointDto;
-import greencity.dto.user.UserPointsAndAllBagsDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
@@ -291,7 +284,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public PersonalDataDto getSecondPageData(String uuid) {
-        User currentUser = createUserByUuidIfUserDoesNotExist(uuid);
+        User currentUser = userRepository.findByUuid(uuid);
         List<UBSuser> ubsUser = ubsUserRepository.findUBSuserByUser(currentUser);
         if (ubsUser.isEmpty()) {
             ubsUser.add(UBSuser.builder().id(null).build());
@@ -439,7 +432,6 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
-        createUserByUuidIfUserDoesNotExist(uuid);
         Long id = userRepository.findByUuid(uuid).getId();
         List<AddressDto> addressDtoList = addressRepo.findAllNonDeletedAddressesByUserId(id)
             .stream()
@@ -455,7 +447,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto addressRequestDto,
         String uuid) {
-        createUserByUuidIfUserDoesNotExist(uuid);
         User currentUser = userRepository.findByUuid(uuid);
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
@@ -493,7 +484,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest addressRequestDto,
         String uuid) {
-        createUserByUuidIfUserDoesNotExist(uuid);
         User currentUser = userRepository.findByUuid(uuid);
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
@@ -935,6 +925,21 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
+    @Override
+    public Long createUserProfile(UserProfileCreateDto userProfileCreateDto) {
+        User user = userRepository.findByUuid(userProfileCreateDto.getUuid());
+        if (user == null) {
+            user = userRepository.save(User.builder()
+                    .uuid(userProfileCreateDto.getUuid())
+                    .recipientEmail(userProfileCreateDto.getEmail())
+                    .recipientName(userProfileCreateDto.getName())
+                    .currentPoints(0)
+                    .violations(0)
+                    .dateOfRegistration(LocalDate.now()).build());
+        }
+        return user.getId();
+    }
+
     private UBSuser updateRecipientDataInOrder(UBSuser ubSuser, UbsCustomersDtoUpdate dto) {
         if (nonNull(dto.getRecipientEmail())) {
             ubSuser.setEmail(dto.getRecipientEmail());
@@ -1204,7 +1209,6 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public UserProfileUpdateDto updateProfileData(String uuid, UserProfileUpdateDto userProfileUpdateDto) {
-        createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserData(user, userProfileUpdateDto);
         List<Address> addressList =
@@ -1225,7 +1229,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public UserProfileDto getProfileData(String uuid) {
-        createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         List<Address> allAddress = addressRepo.findAllNonDeletedAddressesByUserId(user.getId());
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
@@ -1246,18 +1249,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         user.setAlternateEmail(userProfileUpdateDto.getAlternateEmail());
         user.setRecipientPhone(
             UAPhoneNumberUtil.getE164PhoneNumberFormat(userProfileUpdateDto.getRecipientPhone()));
-        return user;
-    }
-
-    private User createUserByUuidIfUserDoesNotExist(String uuid) {
-        User user = userRepository.findByUuid(uuid);
-        if (user == null) {
-            UbsCustomersDto ubsCustomersDto = userRemoteClient.findByUuid(uuid)
-                .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
-            return userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
-                .recipientEmail(ubsCustomersDto.getEmail()).recipientName("")
-                .dateOfRegistration(LocalDate.now()).build());
-        }
         return user;
     }
 
