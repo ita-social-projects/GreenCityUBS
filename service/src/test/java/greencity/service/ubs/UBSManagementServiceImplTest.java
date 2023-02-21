@@ -581,6 +581,17 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectDone.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectDone.getDate());
 
+        order.setPointsToUse(0);
+        testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
+        expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
+        OrderDetailStatusDto producedObjectCancelled2 = ubsManagementService
+            .updateOrderDetailStatus(order.getId(), testOrderDetail, "test@gmail.com");
+
+        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled2.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled2.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectCancelled2.getDate());
+        assertEquals(0, order.getPointsToUse());
+
         testOrderDetail.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF.toString());
         expectedObject.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF.toString());
         OrderDetailStatusDto producedObjectBroughtItHimself = ubsManagementService
@@ -590,13 +601,24 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectBroughtItHimself.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectBroughtItHimself.getDate());
 
+        order.setCertificates(Set.of(ModelUtils.getCertificate()));
+        testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
+        expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
+        OrderDetailStatusDto producedObjectCancelled3 = ubsManagementService
+            .updateOrderDetailStatus(order.getId(), testOrderDetail, "test@gmail.com");
+
+        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled3.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled3.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectCancelled3.getDate());
+        assertEquals(0, order.getPointsToUse());
+
         verify(eventService, times(1))
             .saveEvent("Статус Замовлення - Узгодження",
                 "test@gmail.com", order);
         verify(eventService, times(1))
             .saveEvent("Статус Замовлення - Підтверджено",
                 "test@gmail.com", order);
-        verify(eventService, times(1))
+        verify(eventService, times(3))
             .saveEvent("Статус Замовлення - Скасовано",
                 "test@gmail.com", order);
 
