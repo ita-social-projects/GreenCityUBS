@@ -518,6 +518,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfo.setTariffLocations(tariffLocationSet);
         tariffsLocationRepository.saveAll(tariffLocationSet);
         tariffsInfoRepository.save(tariffsInfo);
+        updateEmployeeTariffsInfoMapping(tariffsInfo);
         return new AddNewTariffResponseDto(tariffForLocationAndCourierAlreadyExistIdList, idListToCheck);
     }
 
@@ -532,6 +533,17 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .build();
         return tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    private void updateEmployeeTariffsInfoMapping(TariffsInfo tariffsInfo) {
+        employeeRepository.findAllByEmployeePositionId(6L)
+            .forEach(e -> setEmployeeTariffInfos(e, tariffsInfo));
+    }
+
+    private void setEmployeeTariffInfos(Employee employee, TariffsInfo tariffsInfo) {
+        Set<TariffsInfo> tariffsInfos = employee.getTariffInfos();
+        tariffsInfos.add(tariffsInfo);
+        employee.setTariffInfos(tariffsInfos);
     }
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {

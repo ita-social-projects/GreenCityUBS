@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
@@ -151,6 +150,7 @@ import greencity.util.OrderUtils;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -260,30 +260,20 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> optionalLocationId) {
+    public UserPointsAndAllBagsDto getFirstPageData(String uuid, Long orderId) {
         User user = userRepository.findUserByUuid(uuid).orElseThrow(
             () -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-        List<BagTranslationDto> btdList = getBagList(optionalLocationId.orElse(null))
-            .stream()
+
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_NOT_FOUND));
+
+        var tariffId = order.getTariffsInfo().getId();
+
+        var bagTranslationDtoList = bagRepository.findBagsByTariffInfoId(tariffId).stream()
             .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
-            .collect(Collectors.toList());
-        return new UserPointsAndAllBagsDto(btdList, user.getCurrentPoints());
-    }
+            .collect(toList());
 
-    private List<Bag> getBagList(Long locationId) {
-        return locationId != null
-            ? bagRepository
-                .findBagsByLocationIdAndLocationStatusIsActive(
-                    checkAndGetLocationId(locationId))
-            : bagRepository
-                .findAll();
-    }
-
-    private long checkAndGetLocationId(Long locationId) {
-        if (locationRepository.existsById(locationId)) {
-            return locationId;
-        }
-        throw new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID + locationId);
+        return new UserPointsAndAllBagsDto(bagTranslationDtoList, user.getCurrentPoints());
     }
 
     /**
@@ -445,7 +435,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .sorted(Comparator.comparing(Address::getId))
             .map(u -> modelMapper.map(u, AddressDto.class))
-            .collect(Collectors.toList());
+            .collect(toList());
         return new OrderWithAddressesResponseDto(addressDtoList);
     }
 
@@ -668,7 +658,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return orderRepository.getAllOrdersOfUser(uuid).stream()
             .sorted(Comparator.comparing(Order::getOrderDate))
             .map(order -> modelMapper.map(order, OrderClientDto.class))
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     /**
@@ -741,7 +731,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .collect(Collectors.toList());
+            .collect(toList());
 
         Double amountBeforePayment =
             fullPrice - order.getPointsToUse() - countPaidAmount(payments) - countCertificatesBonuses(certificateDtos);
@@ -818,7 +808,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return bagsForOrder.stream()
             .filter(bag -> actualBagAmounts.containsKey(bag.getId()))
             .map(bag -> buildBagForUserDto(bag, actualBagAmounts.get(bag.getId())))
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     private Map<Integer, Integer> getActualBagAmountsForOrder(Order order) {
@@ -1185,7 +1175,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             bonusForUbsUser = changeOfPointsList.stream()
                 .sorted(Comparator.comparing(ChangeOfPoints::getDate).reversed())
                 .map(m -> modelMapper.map(m, PointsForUbsUserDto.class))
-                .collect(Collectors.toList());
+                .collect(toList());
         }
         AllPointsUserDto allBonusesForUserDto = new AllPointsUserDto();
         allBonusesForUserDto.setUserBonuses(userBonuses);
@@ -1209,7 +1199,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return orderEvents
             .stream()
             .map(event -> modelMapper.map(event, EventDto.class))
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     /**
@@ -1221,7 +1211,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         setUserData(user, userProfileUpdateDto);
         List<Address> addressList =
             userProfileUpdateDto.getAddressDto().stream().map(a -> modelMapper.map(a, Address.class))
-                .collect(Collectors.toList());
+                .collect(toList());
 
         for (Address address : addressList) {
             address.setUser(user);
@@ -1229,7 +1219,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         user.setAddresses(addressList);
         User savedUser = userRepository.save(user);
         List<AddressDto> mapperAddressDto =
-            addressList.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
+            addressList.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(toList());
         UserProfileUpdateDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileUpdateDto.class);
         UserProfileUpdateDto.builder().addressDto(mapperAddressDto).build();
         return mappedUserProfileDto;
@@ -1244,7 +1234,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<AddressDto> addressDto =
             allAddress.stream()
                 .map(a -> modelMapper.map(a, AddressDto.class))
-                .collect(Collectors.toList());
+                .collect(toList());
         userProfileDto.setAddressDto(addressDto);
         userProfileDto.setBotList(botList);
         userProfileDto.setHasPassword(userRemoteClient.getPasswordStatus().isHasPassword());
@@ -1552,7 +1542,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Payment> payments = order.getPayment();
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .collect(Collectors.toList());
+            .collect(toList());
 
         sumToPay =
             sumToPay - order.getPointsToUse() - countPaidAmount(payments).intValue()
@@ -1861,7 +1851,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return EnumSet.allOf(BotType.class)
             .stream()
             .map(type -> new Bot(type.name(), createLink(type, uuid)))
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     private String createLink(BotType type, String uuid) {
@@ -1880,11 +1870,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     private List<AllActiveLocationsDto> getAllActiveLocations() {
         List<Location> locations = locationRepository.findAllActive();
         Map<RegionDto, List<LocationsDtos>> map = locations.stream()
-            .collect(Collectors.toMap(x -> modelMapper.map(x, RegionDto.class),
+            .collect(toMap(x -> modelMapper.map(x, RegionDto.class),
                 x -> new ArrayList<>(List.of(modelMapper.map(x, LocationsDtos.class))),
                 (x, y) -> {
                     x.addAll(y);
-                    return new ArrayList<>(x).stream().distinct().collect(Collectors.toList());
+                    return new ArrayList<>(x).stream().distinct().collect(toList());
                 }));
 
         return map.entrySet().stream()
@@ -1894,7 +1884,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .nameUk(x.getKey().getNameUk())
                 .locations(x.getValue())
                 .build())
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     @Override
@@ -1961,6 +1951,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     public List<LocationSummaryDto> getLocationSummary() {
         return regionRepository.findAll().stream()
             .map(location -> modelMapper.map(location, LocationSummaryDto.class))
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 }
