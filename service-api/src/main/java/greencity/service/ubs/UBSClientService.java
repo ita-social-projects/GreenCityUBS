@@ -186,7 +186,8 @@ public interface UBSClientService {
     /**
      * Method creates ubs user profile if it does not exist.
      *
-     * @param userProfileCreateDto of {@link UserProfileCreateDto} with profile data;
+     * @param userProfileCreateDto of {@link UserProfileCreateDto} with profile
+     *                             data;
      * @return id {@link Long} of ubs user profile;
      * @author Maksym Golik
      */

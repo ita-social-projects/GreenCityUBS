@@ -930,12 +930,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         User user = userRepository.findByUuid(userProfileCreateDto.getUuid());
         if (user == null) {
             user = userRepository.save(User.builder()
-                    .uuid(userProfileCreateDto.getUuid())
-                    .recipientEmail(userProfileCreateDto.getEmail())
-                    .recipientName(userProfileCreateDto.getName())
-                    .currentPoints(0)
-                    .violations(0)
-                    .dateOfRegistration(LocalDate.now()).build());
+                .uuid(userProfileCreateDto.getUuid())
+                .recipientEmail(userProfileCreateDto.getEmail())
+                .recipientName(userProfileCreateDto.getName())
+                .currentPoints(0)
+                .violations(0)
+                .dateOfRegistration(LocalDate.now()).build());
         }
         return user.getId();
     }

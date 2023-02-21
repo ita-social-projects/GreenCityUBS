@@ -64,9 +64,14 @@ public class UserProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getProfileData(userUuid));
     }
 
+    @ApiOperation(value = "Create user profile")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = Long.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+    })
     @PostMapping("/user/create")
     public ResponseEntity<Long> createUserProfile(
-            @Valid @RequestBody UserProfileCreateDto userProfileCreateDto){
+        @Valid @RequestBody UserProfileCreateDto userProfileCreateDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ubsClientService.createUserProfile(userProfileCreateDto));
     }
 
