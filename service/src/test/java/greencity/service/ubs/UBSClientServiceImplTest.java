@@ -532,6 +532,17 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void getSecondPageDataWithUserNotFound() {
+        String uuid = "35467585763t4sfgchjfuyetf";
+
+        when(userRepository.findByUuid(uuid)).thenReturn(null);
+
+        assertThrows(EntityNotFoundException.class, () -> ubsService.getSecondPageData("35467585763t4sfgchjfuyetf"));
+
+        verify(userRepository, times(1)).findByUuid(anyString());
+    }
+
+    @Test
     void getSecondPageDataWithUserFounded() {
 
         String uuid = "35467585763t4sfgchjfuyetf";
@@ -542,17 +553,21 @@ class UBSClientServiceImplTest {
             .setRecipientEmail("mail@mail.ua")
             .setRecipientPhone("067894522")
             .setAlternateEmail("my@email.com");
-        List<UBSuser> ubsUser = Collections.singletonList(getUBSuser());
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        List<UBSuser> ubsUser = Arrays.asList(getUBSuser());
+        when(userRepository.findByUuid(uuid)).thenReturn(null);
         when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
+        when(userRemoteClient.findByUuid(anyString())).thenReturn(Optional.ofNullable(getUbsCustomersDto()));
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
+        when(userRepository.save(any())).thenReturn(user.setId(1L));
         PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
 
         assertEquals(expected, actual);
 
         verify(userRepository, times(1)).findByUuid(anyString());
         verify(ubsUserRepository, times(1)).findUBSuserByUser(any());
+        verify(userRemoteClient, times(1)).findByUuid(anyString());
         verify(modelMapper, times(1)).map(user, PersonalDataDto.class);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -872,7 +887,7 @@ class UBSClientServiceImplTest {
         OrderWithAddressesResponseDto actual = ubsService.findAllAddressesForCurrentOrder(uuid);
 
         assertEquals(actual, expected);
-        verify(userRepository, times(1)).findByUuid(uuid);
+        verify(userRepository, times(2)).findByUuid(uuid);
         verify(addressRepository, times(1)).findAllNonDeletedAddressesByUserId(user.getId());
     }
 
