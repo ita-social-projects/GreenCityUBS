@@ -64,6 +64,13 @@ public class UserProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getProfileData(userUuid));
     }
 
+    /**
+     * Controller creates ubs user profile.
+     *
+     * @param userProfileCreateDto {@link UserProfileCreateDto}.
+     * @return id of ubs profile {@link Long}.
+     * @author Maksym Golik.
+     */
     @ApiOperation(value = "Create user profile")
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = Long.class),
