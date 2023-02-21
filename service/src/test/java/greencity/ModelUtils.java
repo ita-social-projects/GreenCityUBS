@@ -40,7 +40,6 @@ import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.employee.EmployeePositionDtoResponse;
-import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.GetEmployeeDto;
@@ -1075,6 +1074,25 @@ public class ModelUtils {
             .imagePath("path")
             .tariffs(List.of(getTariffInfo()))
             .build();
+    }
+
+    public static List<Employee> getEmployeeList() {
+        return List.of(
+            Employee.builder()
+                .id(1L)
+                .firstName("Петро")
+                .lastName("Петренко")
+                .phoneNumber("+380935577455")
+                .email("test@gmail.com")
+                .employeeStatus(EmployeeStatus.ACTIVE)
+                .employeePosition(Set.of(Position.builder()
+                    .id(6L)
+                    .name("Супер адмін")
+                    .build()))
+                .tariffInfos(new HashSet<>())
+                .imagePath("path")
+                .tariffs(List.of(getTariffInfo()))
+                .build());
     }
 
     public static Employee getEmployeeForUpdateEmailCheck() {
