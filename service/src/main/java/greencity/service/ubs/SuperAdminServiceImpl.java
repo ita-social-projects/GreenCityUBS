@@ -537,15 +537,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private void updateEmployeeTariffsInfoMapping(TariffsInfo tariffsInfo) {
         employeeRepository.findAllByEmployeePositionId(6L)
-            .stream()
-            .map(e -> setEmployeeTariffInfos(e, tariffsInfo))
-            .collect(Collectors.toList());
+            .forEach(e -> setEmployeeTariffInfos(e, tariffsInfo));
     }
 
-    private Employee setEmployeeTariffInfos(Employee employee, TariffsInfo tariffsInfo) {
+    private void setEmployeeTariffInfos(Employee employee, TariffsInfo tariffsInfo) {
         Set<TariffsInfo> tariffsInfos = employee.getTariffInfos();
         tariffsInfos.add(tariffsInfo);
-        return employee.setTariffInfos(tariffsInfos);
+        employee.setTariffInfos(tariffsInfos);
     }
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {
