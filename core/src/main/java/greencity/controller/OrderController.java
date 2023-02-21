@@ -58,12 +58,12 @@ public class OrderController {
      * Controller returns all available bags and bonus points of current user.
      * {@link UserVO}.
      *
-     * @param userUuid   {@link UserVO} id.
-     * @param locationId {@link UserVO} id of location to filter by.
+     * @param userUuid {@link UserVO} id.
+     * @param orderId  {@link UserVO} id of order.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */
-    @ApiOperation(value = "Get current user points and filtered by location bags list.")
+    @ApiOperation(value = "Get current user points by order id.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointsAndAllBagsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
@@ -73,9 +73,9 @@ public class OrderController {
     @GetMapping("/order-details")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestParam(required = false) Optional<Long> locationId) {
+        @RequestParam Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageData(userUuid, locationId));
+            .body(ubsClientService.getFirstPageData(userUuid, orderId));
     }
 
     /**
