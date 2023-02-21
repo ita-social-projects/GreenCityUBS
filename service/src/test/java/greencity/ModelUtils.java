@@ -510,6 +510,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static Order getOrderWithoutPayment() {
+        return Order.builder()
+            .id(1L)
+            .payment(Collections.emptyList())
+            .certificates(Collections.emptySet())
+            .pointsToUse(500)
+            .build();
+    }
+
     public static OrderDto getOrderDto() {
         return OrderDto.builder()
             .firstName("oleh")
@@ -2592,6 +2601,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static PaymentTableInfoDto getPaymentTableInfoDto2() {
+        return PaymentTableInfoDto.builder()
+            .paidAmount(0L)
+            .unPaidAmount(0L)
+            .paymentInfoDtos(Collections.emptyList())
+            .overpayment(400L)
+            .build();
+    }
+
     public static PaymentInfoDto getInfoPayment() {
         return PaymentInfoDto.builder()
             .comment("ddd")
@@ -3200,6 +3218,30 @@ public class ModelUtils {
             .exportedQuantity(new HashMap<>())
             .pointsToUse(100)
             .orderStatus(OrderStatus.DONE)
+            .build();
+    }
+
+    public static Order getOrderWithoutExportedBags() {
+        Map<Integer, Integer> hashMap = new HashMap<>();
+        hashMap.put(1, 1);
+        hashMap.put(2, 1);
+        return Order.builder()
+            .id(1L)
+            .amountOfBagsOrdered(hashMap)
+            .confirmedQuantity(hashMap)
+            .exportedQuantity(new HashMap<>())
+            .pointsToUse(100)
+            .certificates(Collections.emptySet())
+            .orderStatus(OrderStatus.CONFIRMED)
+            .user(User.builder().id(1L).currentPoints(100).build())
+            .payment(Lists.newArrayList(Payment.builder()
+                .paymentId("1L")
+                .amount(20000L)
+                .currency("UAH")
+                .settlementDate("20.02.1990")
+                .comment("avb")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
             .build();
     }
 
