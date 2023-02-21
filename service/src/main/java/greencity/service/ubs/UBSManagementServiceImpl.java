@@ -699,7 +699,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         countOfChanges++;
                     }
                     values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
-                        .append(exporterWasteWas.orElse(0L))
+                        .append(exporterWasteWas.orElse(confirmWasteWas.orElse(0L)))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
@@ -928,7 +928,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.FORMED) {
                 eventService.saveEvent(OrderHistory.ORDER_FORMED, email, order);
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getReasonNotTakingBagDescription(), email, order);
+                eventService.saveEvent(
+                    OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getReasonNotTakingBagDescription(), email, order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
                 setOrderCancellation(order, dto.getCancellationComment());
                 eventService.saveEvent(OrderHistory.ORDER_CANCELLED, email, order);
