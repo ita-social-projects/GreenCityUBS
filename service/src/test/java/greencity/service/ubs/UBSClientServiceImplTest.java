@@ -273,12 +273,13 @@ class UBSClientServiceImplTest {
     void getFirstPageDataOrderNotFoundException() {
         User user = getUserWithLastLocation();
         Long orderId = 1L;
+        String uuid = "35467585763t4sfgchjfuyetf";
 
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         var message = assertThrows(NotFoundException.class,
-            () -> ubsService.getFirstPageData(anyString(), orderId))
+            () -> ubsService.getFirstPageData(uuid, orderId))
                 .getMessage();
 
         assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_NOT_FOUND, message);
@@ -291,11 +292,15 @@ class UBSClientServiceImplTest {
     @Test
     void getFirstPageDataUserNotFoundException() {
         Long orderId = 1L;
+        String uuid = "35467585763t4sfgchjfuyetf";
 
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class,
-            () -> ubsService.getFirstPageData(anyString(), orderId));
+        var message = assertThrows(NotFoundException.class,
+            () -> ubsService.getFirstPageData(uuid, orderId))
+                .getMessage();
+
+        assertEquals(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, message);
 
         verify(userRepository).findUserByUuid(anyString());
         verify(orderRepository, never()).findById(anyLong());
