@@ -869,9 +869,14 @@ class SuperAdminServiceImplTest {
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(Collections.emptyList());
         when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
+        when(employeeRepository.findAllByEmployeePositionId(6L)).thenReturn(ModelUtils.getEmployeeList());
+        when(tariffsLocationRepository.saveAll(anySet())).thenReturn(anyList());
+
         superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf");
+
         verify(tariffsInfoRepository, times(2)).save(any());
         verify(tariffsLocationRepository).saveAll(anySet());
+        verify(employeeRepository).findAllByEmployeePositionId(6L);
     }
 
     @Test
@@ -896,6 +901,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findAllById(List.of(1L));
         verify(locationRepository).findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId());
+        verify(employeeRepository, never()).findAllByEmployeePositionId(6L);
     }
 
     @Test
@@ -917,6 +923,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(dto.getCourierId(),
             dto.getLocationIdList());
         verifyNoMoreInteractions(courierRepository, tariffsLocationRepository);
+        verify(employeeRepository, never()).findAllByEmployeePositionId(6L);
     }
 
     @Test
@@ -928,6 +935,7 @@ class SuperAdminServiceImplTest {
         verify(courierRepository).findById(anyLong());
         verify(receivingStationRepository).findAllById(any());
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(anyLong(), anyList());
+        verify(employeeRepository, never()).findAllByEmployeePositionId(6L);
     }
 
     @Test
@@ -936,6 +944,7 @@ class SuperAdminServiceImplTest {
         when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+        verify(employeeRepository, never()).findAllByEmployeePositionId(6L);
     }
 
     @Test
