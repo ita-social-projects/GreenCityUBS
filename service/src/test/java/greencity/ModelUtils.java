@@ -1640,7 +1640,6 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .certificates(Collections.emptySet())
