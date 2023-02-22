@@ -236,7 +236,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageData() {
-        Long orderId = 1L;
+        Optional<Long> optionalOrderId = Optional.of(1L);
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
 
@@ -256,7 +256,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(bagList.get(0), BagTranslationDto.class)).thenReturn(dto);
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageData(anyString(), orderId);
+            ubsService.getFirstPageData(anyString(), optionalOrderId);
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
@@ -267,37 +267,41 @@ class UBSClientServiceImplTest {
         verify(orderRepository).findById(anyLong());
         verify(bagRepository).findBagsByTariffInfoId(anyLong());
         verify(modelMapper).map(bagList.get(0), BagTranslationDto.class);
+        verify(bagRepository, never()).findAll();
     }
 
     @Test
     void getFirstPageDataOrderNotFoundException() {
         User user = getUserWithLastLocation();
-        Long orderId = 1L;
+        Optional<Long> optionalOrderId = Optional.of(1L);
         String uuid = "35467585763t4sfgchjfuyetf";
 
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         var message = assertThrows(NotFoundException.class,
-            () -> ubsService.getFirstPageData(uuid, orderId))
+            () -> ubsService.getFirstPageData(uuid, optionalOrderId))
                 .getMessage();
 
-        assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_NOT_FOUND, message);
+        assertEquals(
+                ErrorMessage.ORDER_WITH_CURRENT_ID_NOT_FOUND + optionalOrderId.get(),
+                message);
 
         verify(userRepository).findUserByUuid(anyString());
         verify(orderRepository).findById(anyLong());
         verify(bagRepository, never()).findBagsByTariffInfoId(anyLong());
+        verify(bagRepository, never()).findAll();
     }
 
     @Test
     void getFirstPageDataUserNotFoundException() {
-        Long orderId = 1L;
+        Optional<Long> optionalOrderId = Optional.of(1L);
         String uuid = "35467585763t4sfgchjfuyetf";
 
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.empty());
 
         var message = assertThrows(NotFoundException.class,
-            () -> ubsService.getFirstPageData(uuid, orderId))
+            () -> ubsService.getFirstPageData(uuid, optionalOrderId))
                 .getMessage();
 
         assertEquals(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, message);
@@ -305,6 +309,7 @@ class UBSClientServiceImplTest {
         verify(userRepository).findUserByUuid(anyString());
         verify(orderRepository, never()).findById(anyLong());
         verify(bagRepository, never()).findBagsByTariffInfoId(anyLong());
+        verify(bagRepository, never()).findAll();
     }
 
     @Test

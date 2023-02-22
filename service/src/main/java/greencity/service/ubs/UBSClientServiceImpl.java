@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
@@ -68,6 +69,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import com.google.maps.model.AddressComponentType;
@@ -259,20 +261,33 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDto getFirstPageData(String uuid, Long orderId) {
+    public UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> optionalOrderId) {
         User user = userRepository.findUserByUuid(uuid).orElseThrow(
             () -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
 
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_NOT_FOUND));
-
-        var tariffId = order.getTariffsInfo().getId();
-
-        var bagTranslationDtoList = bagRepository.findBagsByTariffInfoId(tariffId).stream()
+        var bagTranslationDtoList = getBagsByOrderId(optionalOrderId.orElse(null)).stream()
             .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
             .collect(toList());
 
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, user.getCurrentPoints());
+    }
+
+    private List<Bag> getBagsByOrderId(Long orderId) {
+        if (orderId != null) {
+            var order = getOrderByIdOrThrowNotFoundException(
+                    orderId,
+                    ORDER_WITH_CURRENT_ID_NOT_FOUND);
+            var tariffId = order.getTariffsInfo().getId();
+
+            return bagRepository.findBagsByTariffInfoId(tariffId);
+        } else {
+            return bagRepository.findAll();
+        }
+    }
+
+    private Order getOrderByIdOrThrowNotFoundException(Long orderId, String exceptionMessage) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException(exceptionMessage + orderId));
     }
 
     /**

@@ -59,7 +59,7 @@ public class OrderController {
      * {@link UserVO}.
      *
      * @param userUuid {@link UserVO} id.
-     * @param orderId  {@link UserVO} id of order.
+     * @param optionalOrderId  {@link UserVO} id of order.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */
@@ -73,9 +73,9 @@ public class OrderController {
     @GetMapping("/order-details")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestParam Long orderId) {
+        @RequestParam(required = false) Optional<Long> optionalOrderId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageData(userUuid, orderId));
+            .body(ubsClientService.getFirstPageData(userUuid, optionalOrderId));
     }
 
     /**
