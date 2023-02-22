@@ -271,6 +271,36 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void getFirstPageDataWithoutOrderId() {
+        var user = getUserWithLastLocation();
+        user.setCurrentPoints(600);
+
+        var bagList = getBag1list();
+        var bagTranslationDto = getBagTranslationDto();
+
+        var userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
+
+        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
+        when(bagRepository.findAll()).thenReturn(bagList);
+        when(modelMapper.map(bagList.get(0), BagTranslationDto.class)).thenReturn(bagTranslationDto);
+
+        var userPointsAndAllBagsDtoActual =
+            ubsService.getFirstPageData(anyString(), Optional.empty());
+
+        assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
+        assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
+
+        verify(userRepository).findUserByUuid(anyString());
+        verify(bagRepository).findAll();
+        verify(modelMapper).map(any(), any());
+
+        verify(bagRepository, never()).findBagsByTariffInfoId(anyLong());
+    }
+
+    @Test
     void getFirstPageDataOrderNotFoundException() {
         User user = getUserWithLastLocation();
         Optional<Long> optionalOrderId = Optional.of(1L);
