@@ -84,7 +84,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @return {@link List} of {@link Bag} by tariffInfoId.
      * @author Safarov Renat
      */
-    @Query(value = "SELECT b FROM Bag as b where b.tariffsInfo.id =:tariffInfoId")
+    @Query(value = "SELECT b FROM Bag AS b WHERE b.tariffsInfo.id =:tariffInfoId")
     List<Bag> findBagsByTariffInfoId(@Param("tariffInfoId") Long tariffInfoId);
 
     /**
@@ -95,18 +95,4 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Julia Seti
      */
     List<Bag> getAllByTariffsInfoId(Long tariffId);
-
-    /**
-     * method, that returns {@link List} of {@link Bag} by location id.
-     *
-     * @param locationId {@link Long} location id.
-     * @return {@link List} of {@link Bag} by location id.
-     * @author Julia Seti
-     */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM bag b "
-            + "JOIN tariffs_info ti on ti.id = b.tariffs_info_id "
-            + "JOIN tariffs_locations tl on ti.id = tl.tariffs_info_id "
-            + "WHERE tl.location_id =:locationId and ti.location_status = 'ACTIVE'")
-    List<Bag> findBagsByLocationIdAndLocationStatusIsActive(@Param("locationId") Long locationId);
 }
