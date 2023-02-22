@@ -99,17 +99,14 @@ class OrderControllerTest {
 
     @Test
     void getCurrentUserPoints() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString())))
-            .thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
         mockMvc.perform(get(ubsLink + "/order-details")
-            .principal(principal)
-            .param("orderId", "1")
-            .contentType(MediaType.APPLICATION_JSON))
+            .principal(principal))
             .andExpect(status().isOk());
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", 1L);
+        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", Optional.empty());
     }
 
     @Test
