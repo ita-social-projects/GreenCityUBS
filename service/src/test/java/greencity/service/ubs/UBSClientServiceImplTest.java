@@ -19,7 +19,6 @@ import javax.persistence.EntityNotFoundException;
 import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.user.*;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Event;
@@ -90,6 +89,14 @@ import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.payment.StatusRequestDtoLiqPay;
+import greencity.dto.user.AllPointsUserDto;
+import greencity.dto.user.PasswordStatusDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.UserProfileCreateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.enums.AddressStatus;
 import greencity.enums.CertificateStatus;
@@ -108,7 +115,28 @@ import greencity.exceptions.user.UserNotFoundException;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 
-import static greencity.ModelUtils.*;
+import static greencity.ModelUtils.TEST_BAG_LIST;
+import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
+import static greencity.ModelUtils.TEST_PAYMENT_LIST;
+import static greencity.ModelUtils.getAddress;
+import static greencity.ModelUtils.getCertificate;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getMaximumAmountOfAddresses;
+import static greencity.ModelUtils.getOrder;
+import static greencity.ModelUtils.getOrderClientDto;
+import static greencity.ModelUtils.getOrderDetails;
+import static greencity.ModelUtils.getOrderDoneByUser;
+import static greencity.ModelUtils.getOrderFondyClientDto;
+import static greencity.ModelUtils.getOrderPaymentDetailDto;
+import static greencity.ModelUtils.getOrderResponseDto;
+import static greencity.ModelUtils.getOrderTest;
+import static greencity.ModelUtils.getPayment;
+import static greencity.ModelUtils.getSuccessfulFondyResponse;
+import static greencity.ModelUtils.getTestUser;
+import static greencity.ModelUtils.getUBSuser;
+import static greencity.ModelUtils.getUserProfileCreateDto;
+import static greencity.ModelUtils.getUser;
+import static greencity.ModelUtils.getUserWithLastLocation;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
@@ -2427,15 +2455,15 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testCreateUserProfileIfProfileDoesNotExists(){
+    void testCreateUserProfileIfProfileDoesNotExists() {
         UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
         User userForSave = User.builder()
-                .uuid(userProfileCreateDto.getUuid())
-                .recipientEmail(userProfileCreateDto.getEmail())
-                .recipientName(userProfileCreateDto.getName())
-                .currentPoints(0)
-                .violations(0)
-                .dateOfRegistration(LocalDate.now()).build();
+            .uuid(userProfileCreateDto.getUuid())
+            .recipientEmail(userProfileCreateDto.getEmail())
+            .recipientName(userProfileCreateDto.getName())
+            .currentPoints(0)
+            .violations(0)
+            .dateOfRegistration(LocalDate.now()).build();
         User user = getUser();
         when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(null);
         when(userRepository.save(userForSave)).thenReturn(user);
@@ -2446,7 +2474,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testCreateUserProfileIfProfileExists(){
+    void testCreateUserProfileIfProfileExists() {
         UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
         User user = getUser();
         when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(user);
