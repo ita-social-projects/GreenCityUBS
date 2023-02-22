@@ -275,8 +275,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private List<Bag> getBagsByOrderId(Long orderId) {
         if (orderId != null) {
             var order = getOrderByIdOrThrowNotFoundException(
-                    orderId,
-                    ORDER_WITH_CURRENT_ID_NOT_FOUND);
+                orderId,
+                ORDER_WITH_CURRENT_ID_NOT_FOUND);
             var tariffId = order.getTariffsInfo().getId();
 
             return bagRepository.findBagsByTariffInfoId(tariffId);
@@ -287,7 +287,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private Order getOrderByIdOrThrowNotFoundException(Long orderId, String exceptionMessage) {
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException(exceptionMessage + orderId));
+            .orElseThrow(() -> new NotFoundException(exceptionMessage + orderId));
     }
 
     /**

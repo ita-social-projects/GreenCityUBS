@@ -58,8 +58,8 @@ public class OrderController {
      * Controller returns all available bags and bonus points of current user.
      * {@link UserVO}.
      *
-     * @param userUuid {@link UserVO} id.
-     * @param optionalOrderId  {@link UserVO} id of order.
+     * @param userUuid        {@link UserVO} id.
+     * @param optionalOrderId {@link UserVO} id of order.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */

@@ -284,8 +284,8 @@ class UBSClientServiceImplTest {
                 .getMessage();
 
         assertEquals(
-                ErrorMessage.ORDER_WITH_CURRENT_ID_NOT_FOUND + optionalOrderId.get(),
-                message);
+            ErrorMessage.ORDER_WITH_CURRENT_ID_NOT_FOUND + optionalOrderId.get(),
+            message);
 
         verify(userRepository).findUserByUuid(anyString());
         verify(orderRepository).findById(anyLong());
