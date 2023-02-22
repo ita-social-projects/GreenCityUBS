@@ -98,11 +98,28 @@ class OrderControllerTest {
     }
 
     @Test
-    void getCurrentUserPoints() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+    void getCurrentUserPointsWithOrderId() throws Exception {
+        when(userRemoteClient.findUuidByEmail((anyString())))
+            .thenReturn("35467585763t4sfgchjfuyetf");
 
         mockMvc.perform(get(ubsLink + "/order-details")
-            .principal(principal))
+            .principal(principal)
+            .param("optionalOrderId", "1")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
+        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(1L));
+    }
+
+    @Test
+    void getCurrentUserPointsWithoutOrderId() throws Exception {
+        when(userRemoteClient.findUuidByEmail((anyString())))
+            .thenReturn("35467585763t4sfgchjfuyetf");
+
+        mockMvc.perform(get(ubsLink + "/order-details").principal(principal)
+            .param("optionalOrderId", "")
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
