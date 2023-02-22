@@ -96,6 +96,7 @@ import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.UserProfileCreateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.enums.AddressStatus;
 import greencity.enums.CertificateStatus;
@@ -134,7 +135,6 @@ import static greencity.ModelUtils.getPayment;
 import static greencity.ModelUtils.getSuccessfulFondyResponse;
 import static greencity.ModelUtils.getTestUser;
 import static greencity.ModelUtils.getUBSuser;
-import static greencity.ModelUtils.getUbsCustomersDto;
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getUserWithLastLocation;
 import static org.junit.Assert.assertNotNull;
@@ -567,17 +567,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getSecondPageDataWithUserNotFound() {
-        String uuid = "35467585763t4sfgchjfuyetf";
-
-        when(userRepository.findByUuid(uuid)).thenReturn(null);
-
-        assertThrows(EntityNotFoundException.class, () -> ubsService.getSecondPageData("35467585763t4sfgchjfuyetf"));
-
-        verify(userRepository, times(1)).findByUuid(anyString());
-    }
-
-    @Test
     void getSecondPageDataWithUserFounded() {
 
         String uuid = "35467585763t4sfgchjfuyetf";
@@ -588,21 +577,17 @@ class UBSClientServiceImplTest {
             .setRecipientEmail("mail@mail.ua")
             .setRecipientPhone("067894522")
             .setAlternateEmail("my@email.com");
-        List<UBSuser> ubsUser = Arrays.asList(getUBSuser());
-        when(userRepository.findByUuid(uuid)).thenReturn(null);
+        List<UBSuser> ubsUser = Collections.singletonList(getUBSuser());
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
-        when(userRemoteClient.findByUuid(anyString())).thenReturn(Optional.ofNullable(getUbsCustomersDto()));
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
-        when(userRepository.save(any())).thenReturn(user.setId(1L));
         PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
 
         assertEquals(expected, actual);
 
         verify(userRepository, times(1)).findByUuid(anyString());
         verify(ubsUserRepository, times(1)).findUBSuserByUser(any());
-        verify(userRemoteClient, times(1)).findByUuid(anyString());
         verify(modelMapper, times(1)).map(user, PersonalDataDto.class);
-        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -922,7 +907,7 @@ class UBSClientServiceImplTest {
         OrderWithAddressesResponseDto actual = ubsService.findAllAddressesForCurrentOrder(uuid);
 
         assertEquals(actual, expected);
-        verify(userRepository, times(2)).findByUuid(uuid);
+        verify(userRepository, times(1)).findByUuid(uuid);
         verify(addressRepository, times(1)).findAllNonDeletedAddressesByUserId(user.getId());
     }
 
@@ -2495,5 +2480,35 @@ class UBSClientServiceImplTest {
             .getById(
                 (long) order.getOrderPaymentStatus().getStatusValue());
         verify(ordersForUserRepository).getAllByUserUuid(pageable, user.getUuid());
+    }
+
+    @Test
+    void testCreateUserProfileIfProfileDoesNotExists() {
+        UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
+        User userForSave = User.builder()
+            .uuid(userProfileCreateDto.getUuid())
+            .recipientEmail(userProfileCreateDto.getEmail())
+            .recipientName(userProfileCreateDto.getName())
+            .currentPoints(0)
+            .violations(0)
+            .dateOfRegistration(LocalDate.now()).build();
+        User user = getUser();
+        when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(null);
+        when(userRepository.save(userForSave)).thenReturn(user);
+        Long actualId = ubsService.createUserProfile(userProfileCreateDto);
+        verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
+        verify(userRepository, times(1)).save(userForSave);
+        assertEquals(user.getId(), actualId);
+    }
+
+    @Test
+    void testCreateUserProfileIfProfileExists() {
+        UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
+        User user = getUser();
+        when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(user);
+        Long actualId = ubsService.createUserProfile(userProfileCreateDto);
+        verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
+        verify(userRepository, times(0)).save(any(User.class));
+        assertEquals(user.getId(), actualId);
     }
 }
