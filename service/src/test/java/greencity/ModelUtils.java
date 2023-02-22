@@ -108,12 +108,7 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.dto.tariff.TariffsInfoDto;
-import greencity.dto.user.AddBonusesToUserDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserPointsAndAllBagsDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.*;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -1645,6 +1640,7 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
+                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .certificates(Collections.emptySet())
@@ -4214,5 +4210,13 @@ public class ModelUtils {
         order.setDeliverTo(LocalDateTime.of(2023, 2, 8, 16, 30));
         order.setDeliverFrom(LocalDateTime.of(2023, 2, 8, 15, 0));
         return order;
+    }
+
+    public static UserProfileCreateDto getUserProfileCreateDto() {
+        return UserProfileCreateDto.builder()
+                .name("UbsProfile")
+                .email("ubsuser@mail.com")
+                .uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
+                .build();
     }
 }
