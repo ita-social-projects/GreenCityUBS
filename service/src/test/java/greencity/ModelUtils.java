@@ -993,20 +993,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffsInfoDto getTariffsInfoDto() {
-        return TariffsInfoDto.builder()
-            .id(1L)
-            .max(20L)
-            .min(2L)
-            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-            .tariffLocations(Set.of(TariffLocation.builder()
-                .location(getLocation())
-                .build()))
-            .receivingStations(List.of(getReceivingStationDto()))
-            .courier(getCourierDto())
-            .build();
-    }
-
     public static GetTariffInfoForEmployeeDto getTariffInfoForEmployeeDto() {
         return GetTariffInfoForEmployeeDto
             .builder()
@@ -3559,6 +3545,40 @@ public class ModelUtils {
             .receivingStationList(Set.of(getReceivingStation()))
             .courier(getCourier())
             .service(getService())
+            .build();
+    }
+
+    public static TariffsInfo getTariffsInfoActive() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .locationStatus(LocationStatus.ACTIVE)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .max(20L)
+            .min(2L)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .location(getLocation())
+                .build()))
+            .receivingStationList(Set.of(getReceivingStation()))
+            .courier(getCourier())
+            .service(getService())
+            .bags(getBag4list())
+            .build();
+    }
+
+    public static TariffsInfo getTariffsInfoDeactivated() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .locationStatus(LocationStatus.DEACTIVATED)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .max(20L)
+            .min(2L)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .location(getLocation())
+                .build()))
+            .receivingStationList(Set.of(getReceivingStation()))
+            .courier(getCourier())
+            .service(getService())
+            .bags(getBag4list())
             .build();
     }
 
