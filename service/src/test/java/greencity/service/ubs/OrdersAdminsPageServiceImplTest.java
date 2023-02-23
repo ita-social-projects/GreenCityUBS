@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
+import greencity.constant.ErrorMessage;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.enums.OrderStatus;
@@ -199,6 +200,65 @@ class OrdersAdminsPageServiceImplTest {
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
+    @Test
+    void chooseOrderDataSwitcherThrowEntityNotFoundExceptionTest() {
+        String email = ModelUtils.TEST_EMAIL;
+        var requestToChangeOrdersDataDto = ModelUtils.getRequestToChangeOrdersDataDTO();
+        var entityNotFoundException = assertThrows(
+            EntityNotFoundException.class,
+            () -> ordersAdminsPageService.chooseOrdersDataSwitcher(email, requestToChangeOrdersDataDto));
+
+        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND, entityNotFoundException.getMessage());
+
+        verify(employeeRepository).findByEmail(email);
+    }
+
+    @Test
+    void adminCommentForDevelopStageReturnNotEmptyList() {
+        String email = ModelUtils.TEST_EMAIL;
+        var requestToChangeOrdersDataDto = ModelUtils.getRequestToAddAdminCommentForOrder();
+        var employee = ModelUtils.getEmployee();
+
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+
+        var changeOrderResponseDTO = ordersAdminsPageService.chooseOrdersDataSwitcher(
+            email,
+            requestToChangeOrdersDataDto);
+
+        assertEquals(
+            requestToChangeOrdersDataDto.getOrderIdsList().size(),
+            changeOrderResponseDTO.getUnresolvedGoalsOrderId().size());
+
+        int orderRepositoryFindByIdCalls = requestToChangeOrdersDataDto.getOrderIdsList().size();
+
+        verify(employeeRepository).findByEmail(email);
+        verify(orderRepository, times(orderRepositoryFindByIdCalls)).findById(anyLong());
+    }
+
+    @Test
+    void adminCommentForDevelopStageReturnEmptyList() {
+        String email = ModelUtils.TEST_EMAIL;
+        var requestToChangeOrdersDataDto = ModelUtils.getRequestToAddAdminCommentForOrder();
+        var employee = ModelUtils.getEmployee();
+        var order = ModelUtils.getOrder();
+
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        var changeOrderResponseDto = ordersAdminsPageService.chooseOrdersDataSwitcher(
+            email,
+            requestToChangeOrdersDataDto);
+
+        assertEquals(
+            0,
+            changeOrderResponseDto.getUnresolvedGoalsOrderId().size());
+
+        int orderRepositoryFindByIdCalls = requestToChangeOrdersDataDto.getOrderIdsList().size();
+
+        verify(employeeRepository).findByEmail(email);
+        verify(orderRepository, times(orderRepositoryFindByIdCalls)).findById(anyLong());
+    }
+
     @ParameterizedTest
     @CsvSource({
         "FORMED, ADJUSTMENT",
@@ -386,7 +446,6 @@ class OrdersAdminsPageServiceImplTest {
 
         when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
         when(employeeRepository.findByEmail(email)).thenReturn(employee);
-        when(employeeRepository.findById(1L)).thenReturn(employee);
 
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("dateOfExport");
@@ -404,6 +463,8 @@ class OrdersAdminsPageServiceImplTest {
         dto.setColumnName("cancellationComment");
         dto.setNewValue("Comment");
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+        dto.setColumnName("adminComment");
+        dto.setNewValue("Admin Comment");
 
         verify(receivingStationRepository, atLeast(1)).getOne(1L);
         verify(employeeRepository, atLeast(1)).findByEmail(email);

@@ -1,20 +1,19 @@
 package greencity.dto.employee;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import greencity.annotations.ValidPhoneNumber;
-import greencity.dto.LocationsDtos;
-import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.ReceivingStationDto;
+import greencity.constant.ValidationConstant;
 import greencity.dto.position.PositionDto;
-import greencity.dto.tariff.TariffsInfoDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder
@@ -24,10 +23,10 @@ public class EmployeeDto {
     @Min(1)
     private Long id;
     @NotNull
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String firstName;
     @NotNull
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String lastName;
     @NotNull
     @ValidPhoneNumber
@@ -37,12 +36,4 @@ public class EmployeeDto {
     private String image;
     @NotEmpty
     private List<PositionDto> employeePositions;
-    @NotEmpty
-    private List<ReceivingStationDto> receivingStations;
-    @NotNull
-    private LocationsDtos location;
-    @NotNull
-    private CourierDto courier;
-    @JsonIgnore
-    private Set<TariffsInfoDto> tariffs;
 }

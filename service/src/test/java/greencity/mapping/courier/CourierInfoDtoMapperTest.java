@@ -23,18 +23,14 @@ class CourierInfoDtoMapperTest {
 
         CourierInfoDto expected = CourierInfoDto.builder()
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
-            .maxAmountOfBigBags(20L)
-            .maxPriceOfOrder(20000L)
-            .minAmountOfBigBags(2L)
-            .minPriceOfOrder(500L)
+            .min(2L)
+            .max(20L)
             .build();
 
         CourierInfoDto actual = courierInfoDtoMapper.convert(courierLocation);
         Assertions.assertEquals(actual.getCourierLimit(), expected.getCourierLimit());
-        Assertions.assertEquals(actual.getMaxAmountOfBigBags(), expected.getMaxAmountOfBigBags());
-        Assertions.assertEquals(actual.getMaxPriceOfOrder(), expected.getMaxPriceOfOrder());
-        Assertions.assertEquals(actual.getMinAmountOfBigBags(), expected.getMinAmountOfBigBags());
-        Assertions.assertEquals(actual.getMinPriceOfOrder(), expected.getMinPriceOfOrder());
+        Assertions.assertEquals(actual.getMax(), expected.getMax());
+        Assertions.assertEquals(actual.getMin(), expected.getMin());
 
     }
 }

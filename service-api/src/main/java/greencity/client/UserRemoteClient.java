@@ -4,6 +4,7 @@ import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeeSignUpDto;
+import greencity.dto.employee.UpdateEmployeeAuthoritiesDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;
@@ -95,7 +96,7 @@ public interface UserRemoteClient {
      * @param dto {@link UserEmployeeAuthorityDto}
      */
     @PutMapping("/user/edit-authorities")
-    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, @RequestParam(EMAIL) String email);
+    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
 
     /**
      * Save an employee to users table in GreenCityUser.
@@ -106,11 +107,28 @@ public interface UserRemoteClient {
     void signUpEmployee(@RequestBody EmployeeSignUpDto dto);
 
     /**
-     * Edit an employee's email.
+     * Update employee email.
      *
-     * @param employeeEmail    {@link String}
-     * @param newEmployeeEmail {@link String}
+     * @param newEmployeeEmail - new email of employee.
+     * @param uuid             - uuid of current employee.
      */
-    @PutMapping("user/update-employee-email")
-    void updateEmployeeEmail(@RequestParam String employeeEmail, @RequestParam String newEmployeeEmail);
+    @PutMapping("/user/employee-email")
+    void updateEmployeeEmail(@RequestParam String newEmployeeEmail, @RequestParam String uuid);
+
+    /**
+     * Update authorities in chosen employee.
+     *
+     * @param dto {@link UpdateEmployeeAuthoritiesDto} contains email and list of
+     *            positions.
+     */
+    @PutMapping("/user/authorities")
+    void updateAuthorities(@RequestBody UpdateEmployeeAuthoritiesDto dto);
+
+    /**
+     * Deactivate employee by uuid.
+     *
+     * @param uuid - uuid of employee.
+     */
+    @PutMapping("/user/deactivate-employee")
+    void deactivateEmployee(@RequestParam String uuid);
 }

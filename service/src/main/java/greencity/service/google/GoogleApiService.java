@@ -27,19 +27,17 @@ public class GoogleApiService {
      * @param searchRequest - address for search
      * @return GeocodingResults - return result from geocoding service
      */
-    public List<GeocodingResult> getResultFromGeoCode(String searchRequest) {
+    public List<GeocodingResult> getResultFromGeoCode(String searchRequest, Integer langCode) {
         List<GeocodingResult> geocodingResults = new ArrayList<>();
 
-        locales.forEach(locale -> {
-            try {
-                GeocodingResult[] results = GeocodingApi.newRequest(context)
-                    .address(searchRequest).language(locale.getLanguage()).await();
-                Collections.addAll(geocodingResults, results);
-            } catch (IOException | InterruptedException | ApiException e) {
-                Thread.currentThread().interrupt();
-                throw new GoogleApiException(e.getMessage());
-            }
-        });
+        try {
+            GeocodingResult[] results = GeocodingApi.newRequest(context)
+                .address(searchRequest).language(locales.get(langCode).getLanguage()).await();
+            Collections.addAll(geocodingResults, results);
+        } catch (IOException | InterruptedException | ApiException e) {
+            Thread.currentThread().interrupt();
+            throw new GoogleApiException(e.getMessage());
+        }
         return geocodingResults;
     }
 }

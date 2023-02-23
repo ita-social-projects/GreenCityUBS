@@ -19,7 +19,9 @@ public final class SwaggerExampleModel {
         + "</div>";
 
     private static final String EMPLOYEE_BEGIN =
-        "  \"firstName\": \"string\",\n"
+        "  \"employeeDto\": \n"
+            + "{\n"
+            + "  \"firstName\": \"string\",\n"
             + "  \"lastName\": \"string\",\n"
             + "  \"phoneNumber\": \"string\",\n"
             + "  \"email\": \"string\",\n";
@@ -30,29 +32,10 @@ public final class SwaggerExampleModel {
             + "      \"id\": 0,\n"
             + "      \"name\": \"string\"\n"
             + "  }\n"
-            + " ],\n"
-            + "  \"receivingStations\": [\n"
-            + "  {\n"
-            + "      \"id\": 0,\n"
-            + "      \"name\": \"string\"\n"
-            + "  }\n"
-            + " ],\n"
-            + "  \"location\": \n"
-            + "  {\n"
-            + "      \"locationId\": 0,\n"
-            + "      \"nameEn\": \"string\",\n"
-            + "      \"nameUa\": \"string\"\n"
-            + "  },\n"
-            + "  \"courier\": \n"
-            + "    {\n"
-            + "      \"courierId\": 0,\n"
-            + "  \"courierTranslationDtos\": [\n"
-            + "  {\n"
-            + "      \"nameEn\": \"string\",\n"
-            + "      \"nameUa\": \"string\"\n"
-            + "  }\n"
-            + " ]\n"
-            + "}\n"
+            + " ]},\n"
+            + " \"tariffId\": "
+            + "  [\n 0 \n"
+            + "  ]\n"
             + "}";
 
     public static final String ADD_NEW_EMPLOYEE =
@@ -65,9 +48,8 @@ public final class SwaggerExampleModel {
     public static final String EMPLOYEE_DTO =
         BEFORE_EXAMPLE
             + "{\n"
-            + "  \"id\": 0,\n"
             + EMPLOYEE_BEGIN
-            + "  \"image\": \"string\",\n"
+            + "  \"id\": 0,\n"
             + EMPLOYEE_END
             + AFTER_EXAMPLE;
 }

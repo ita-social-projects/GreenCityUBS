@@ -34,7 +34,7 @@ public class PersonalDataDto implements Serializable {
     private String senderEmail;
     private String senderPhoneNumber;
 
-    @Length(max = 200)
+    @Length(max = 255)
     private String addressComment;
 
     private Long ubsUserId;

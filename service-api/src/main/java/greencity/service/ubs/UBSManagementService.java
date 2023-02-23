@@ -4,7 +4,6 @@ import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.employee.EmployeePositionDtoResponse;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
@@ -215,22 +214,9 @@ public interface UBSManagementService {
     EmployeePositionDtoRequest getAllEmployeesByPosition(Long id, String email);
 
     /**
-     * Method that update EmployeePositionDtoResponse.
-     */
-    void updatePositions(EmployeePositionDtoResponse dto, String uuid);
-
-    /**
      * Method that save ReasonNotTakeBagDto.
      */
     ReasonNotTakeBagDto saveReason(Long orderId, String description, MultipartFile[] images);
-
-    /**
-     * This method assign Employee with it's position for current order.
-     *
-     * @param dto {@link AssignEmployeesForOrderDto}.
-     * @author Yuriy Bahlay.
-     */
-    void assignEmployeesWithThePositionsToTheOrder(AssignEmployeesForOrderDto dto, String uuid);
 
     /**
      * This is method which is save Admin comment.
@@ -280,10 +266,11 @@ public interface UBSManagementService {
      *
      * @param addBonusesToUserDto {@link AddBonusesToUserDto}.
      * @param orderId             {@link Long}.
+     * @param email               {@link String}.
      *
      * @author Pavlo Hural.
      */
-    AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId);
+    AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId, String email);
 
     /**
      * Method returns employee's access status to order.
@@ -294,4 +281,12 @@ public interface UBSManagementService {
      * @author Hlazova Nataliia.
      */
     Boolean checkEmployeeForOrder(Long orderId, String email);
+
+    /**
+     * This is method which is updates orders status at 00:00 everyday where date of
+     * export equals current date.
+     *
+     * @author Anatolii Shapiro.
+     */
+    void updateOrderStatusToExpected();
 }

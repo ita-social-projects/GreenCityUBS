@@ -23,16 +23,14 @@ class TariffsForLocationDtoMapperTest {
         TariffsForLocationDto dto = mapper.convert(tariffsInfo);
 
         Assertions.assertEquals(tariffsInfo.getId(), dto.getTariffInfoId());
-        Assertions.assertEquals(tariffsInfo.getCourierLimit().toString(), dto.getCourierLimit());
+        Assertions.assertEquals(tariffsInfo.getCourierLimit(), dto.getCourierLimit());
         Assertions.assertEquals(CourierDto.builder().courierId(tariffsInfo.getCourier().getId())
             .nameUk(tariffsInfo.getCourier().getNameUk())
             .nameEn(tariffsInfo.getCourier().getNameEn())
             .courierStatus(tariffsInfo.getCourier().getCourierStatus().name())
             .createDate(tariffsInfo.getCourier().getCreateDate())
             .build(), dto.getCourierDto());
-        Assertions.assertEquals(tariffsInfo.getMinAmountOfBigBags(), dto.getMinAmountOfBigBags());
-        Assertions.assertEquals(tariffsInfo.getMaxAmountOfBigBags(), dto.getMaxAmountOfBigBags());
-        Assertions.assertEquals(tariffsInfo.getMinPriceOfOrder(), dto.getMinPriceOfOrder());
-        Assertions.assertEquals(tariffsInfo.getMaxPriceOfOrder(), dto.getMaxPriceOfOrder());
+        Assertions.assertEquals(tariffsInfo.getMin(), dto.getMin());
+        Assertions.assertEquals(tariffsInfo.getMax(), dto.getMax());
     }
 }

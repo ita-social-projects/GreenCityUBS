@@ -1,15 +1,24 @@
 package greencity.service.ubs;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
-import greencity.dto.employee.EmployeeSignUpDto;
-import greencity.dto.tariff.TariffsInfoDto;
+import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
+import greencity.dto.position.AddingPositionDto;
+import greencity.dto.position.PositionDto;
+import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.Position;
+import greencity.enums.EmployeeStatus;
+import greencity.enums.SortingOrder;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
+import greencity.exceptions.UnprocessableEntityException;
+import greencity.filters.EmployeeFilterCriteria;
+import greencity.filters.EmployeePage;
 import greencity.repository.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,34 +30,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.mock.web.MockMultipartFile;
 
-import greencity.constant.AppConstant;
-import greencity.constant.ErrorMessage;
-import greencity.dto.employee.EmployeeDto;
-import greencity.dto.position.AddingPositionDto;
-import greencity.dto.position.PositionDto;
-import greencity.enums.EmployeeStatus;
-import greencity.enums.SortingOrder;
-import greencity.entity.user.employee.Employee;
-import greencity.entity.user.employee.Position;
-import greencity.exceptions.NotFoundException;
-import greencity.exceptions.UnprocessableEntityException;
-import greencity.filters.EmployeeFilterCriteria;
-import greencity.filters.EmployeePage;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementEmployeeServiceImplTest {
@@ -72,164 +63,209 @@ class UBSManagementEmployeeServiceImplTest {
     private EmployeeCriteriaRepository employeeCriteriaRepository;
 
     @Test
-    void saveEmployee() {
+    void saveEmployeeTest() {
         Employee employee = getEmployee();
-        EmployeeDto dto = getEmployeeDto();
-        TariffsInfoDto tariffsDto = getTariffsInfoDto();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        MockMultipartFile file = new MockMultipartFile("employeeDto",
+            "", "application/json", "random Bytes".getBytes());
 
-        TariffsInfo tariffsInfo = getTariffsInfo();
-        when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber())).thenReturn(false);
         when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
-        when(modelMapper.map(tariffsInfo, TariffsInfoDto.class)).thenReturn(tariffsDto);
         when(repository.save(any())).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
-        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(true);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
-        employeeService.save(dto, null);
+        employeeService.save(dto, file);
 
-        verify(fileService, never()).upload(null);
-        verify(repository, times(1)).existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber());
         verify(repository, times(1)).existsByEmail(getAddEmployeeDto().getEmail());
-        verify(modelMapper, times(3)).map(any(), any());
+        verify(modelMapper, times(2)).map(any(), any());
         verify(repository, times(1)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
-        verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(any(), any());
     }
 
     @Test
-    void saveEmployeeShouldThrowException() {
+    void saveEmployeeWithExistingEmailShouldThrowExceptionTest() {
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(true);
+        Exception thrown = assertThrows(UnprocessableEntityException.class,
+            () -> employeeService.save(dto, null));
+        assertEquals(thrown.getMessage(),
+            ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmployeeDto().getEmail());
+
+        verify(repository).existsByEmail(getAddEmployeeDto().getEmail());
+    }
+
+    @Test
+    void saveEmployeeWithDefaultImagePathTest() {
+        Employee employee = getEmployee();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+
+        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
+        when(repository.save(any())).thenReturn(employee);
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
+        employeeService.save(dto, null);
+
+        verify(repository, times(1)).existsByEmail(getAddEmployeeDto().getEmail());
+        verify(modelMapper, times(2)).map(any(), any());
+        verify(repository, times(1)).save(any());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
+    }
+
+    @Test
+    void saveEmployeeShouldThrowExceptionTest() {
         Employee employee = getEmployee();
         employee.setId(null);
-        EmployeeDto employeeDto = getEmployeeDto();
-        employeeDto.setEmail("test@gmail.com");
-        when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber()))
-            .thenReturn(true, false, false, false);
-        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(true, false, false);
-        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false, true);
-        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
+        EmployeeWithTariffsIdDto employeeWithTariffsIdDto = getEmployeeWithTariffsIdDto();
+        employeeWithTariffsIdDto.getEmployeeDto().setEmail("test@gmail.com");
 
+        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(true, false, false);
         Exception thrown = assertThrows(UnprocessableEntityException.class,
-            () -> employeeService.save(employeeDto, null));
+            () -> employeeService.save(employeeWithTariffsIdDto, null));
         assertEquals(thrown.getMessage(),
-            ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + employeeDto.getPhoneNumber());
-        Exception thrown1 = assertThrows(UnprocessableEntityException.class,
-            () -> employeeService.save(employeeDto, null));
-        assertEquals(thrown1.getMessage(),
-            ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeDto.getEmail());
-        Exception thrown3 = assertThrows(NotFoundException.class,
-            () -> employeeService.save(employeeDto, null));
-        assertEquals(ErrorMessage.POSITION_NOT_FOUND, thrown3.getMessage());
-        Exception thrown4 = assertThrows(NotFoundException.class,
-            () -> employeeService.save(employeeDto, null));
-        assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND, thrown4.getMessage());
+            ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeWithTariffsIdDto.getEmployeeDto().getEmail());
+
+        verify(repository).existsByEmail(getAddEmployeeDto().getEmail());
     }
 
     @Test
-    void findAll() {
+    void findAllTest() {
         EmployeePage employeePage = new EmployeePage();
         EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
         Pageable pageable = PageRequest.of(0, 5, Sort.by(
             Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
+
         when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
             .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
         employeeService.findAll(employeePage, employeeFilterCriteria);
+
         verify(employeeCriteriaRepository, times(1))
             .findAll(employeePage, employeeFilterCriteria);
     }
 
     @Test
     void updateEmployeeTest() {
-        Employee employee = getEmployee();
-        EmployeeDto dto = ModelUtils.getEmployeeDto();
-        ReceivingStation station = ModelUtils.getReceivingStation();
+        Employee employee = getEmployeeForUpdateEmailCheck();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
         Position position = ModelUtils.getPosition();
-        TariffsInfo tariffsInfo = getTariffsInfo();
 
-        when(repository.existsById(any())).thenReturn(true);
-        when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(false);
-        when(repository.existsByEmailAndId(anyString(), anyLong())).thenReturn(false);
+        MockMultipartFile file = new MockMultipartFile("employeeDto",
+            "", "application/json", "random Bytes".getBytes());
+
+        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
-        when(stationRepository.existsReceivingStationByIdAndName(anyLong(), anyString()))
-            .thenReturn(true);
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
+        employeeService.update(dto, file);
 
+        verify(modelMapper, times(2)).map(any(), any());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
+        verify(repository, times(2)).findById(anyLong());
+    }
+
+    @Test
+    void updateEmployeeWhenPositionDoesNotExistsTest() {
+        Employee employee = getEmployeeForUpdateEmailCheck();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        Position position = ModelUtils.getPosition();
+
+        MockMultipartFile file = new MockMultipartFile("employeeDto",
+            "", "application/json", "random Bytes".getBytes());
+
+        when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(false);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
+        assertThrows(NotFoundException.class, () -> employeeService.update(dto, file));
+        verify(positionRepository).existsPositionByIdAndName(position.getId(), position.getName());
+        verify(repository).findById(anyLong());
+    }
+
+    @Test
+    void updateEmployeeWithDefaultImagePathTest() {
+        Employee employee = getEmployee();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        Position position = ModelUtils.getPosition();
+
+        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
+        when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
         employeeService.update(dto, null);
 
-        verify(repository, times(1)).save(any());
-        verify(repository, times(1)).existsByEmailAndId(anyString(), anyLong());
-        verify(repository, times(1)).existsByPhoneNumberAndId(anyString(), anyLong());
+        verify(modelMapper, times(2)).map(any(), any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
-        verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(station.getId(),
-            station.getName());
+        verify(repository, times(2)).findById(anyLong());
     }
 
     @Test
     void updateEmployeeNotFoundTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
-        when(repository.existsById(any())).thenReturn(false, true, true, true, true);
+        EmployeeWithTariffsIdDto dto = ModelUtils.getEmployeeWithTariffsIdDto();
         assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
-    }
-
-    @Test
-    void updateEmployeePhoneAlreadyExistsTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
-        when(repository.existsById(any())).thenReturn(true);
-        when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(true);
-        assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, null));
     }
 
     @Test
     void updateEmployeeEmailAlreadyExistsTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
-        when(repository.existsById(any())).thenReturn(true);
-        when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(false);
-        when(repository.existsByEmailAndId(anyString(), anyLong())).thenReturn(true);
-        assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, null));
+        EmployeeWithTariffsIdDto dto = ModelUtils.getEmployeeWithTariffsIdDto();
+        Employee employee = getEmployee();
+
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
+        when(repository.findEmployeesByEmailAndIdNot(anyString(), anyLong())).thenReturn(List.of(employee));
+        assertThrows(BadRequestException.class, () -> employeeService.update(dto, null));
+
+        verify(repository).findById(anyLong());
+        verify(repository).findEmployeesByEmailAndIdNot(anyString(), anyLong());
     }
 
     @Test
-    void updateEmployeePositionNotFoundTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
-        when(repository.existsById(any())).thenReturn(true);
-        when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(false);
-        when(repository.existsByEmailAndId(anyString(), anyLong())).thenReturn(false);
-        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false, true);
-        assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
-    }
-
-    @Test
-    void updateEmployeeStationNotFoundTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
+    void updateEmployeeEmailThrowsExceptionWhenUserWithSuchEmailIsAlreadyExistsTest() {
+        Employee employee = getEmployeeForUpdateEmailCheck();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
         Position position = ModelUtils.getPosition();
-        when(repository.existsById(any())).thenReturn(true);
-        when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(false);
-        when(repository.existsByEmailAndId(anyString(), anyLong())).thenReturn(false);
+
+        MockMultipartFile file = new MockMultipartFile("employeeDto",
+            "", "application/json", "random Bytes".getBytes());
+
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
-        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
+        doThrow(HystrixRuntimeException.class).when(userRemoteClient)
+            .updateEmployeeEmail(dto.getEmployeeDto().getEmail(), null);
+
+        assertThrows(BadRequestException.class, () -> employeeService.update(dto, file));
+        verify(positionRepository).existsPositionByIdAndName(position.getId(), position.getName());
+        verify(repository, times(2)).findById(anyLong());
+        verify(userRemoteClient).updateEmployeeEmail(dto.getEmployeeDto().getEmail(), null);
     }
 
     @Test
-    void delete() {
+    void deactivateEmployeeTest() {
         Employee employee = getEmployee();
         employee.setImagePath("Pass");
-        System.out.println(employee.getEmployeeStatus());
         when(repository.findById(1L)).thenReturn(Optional.of(employee));
-        employeeService.deleteEmployee(1L);
+        employeeService.deactivateEmployee(1L);
         verify(repository).findById(1L);
-        System.out.println(employee.getEmployeeStatus());
         assertEquals(EmployeeStatus.INACTIVE, employee.getEmployeeStatus());
         Exception thrown = assertThrows(NotFoundException.class,
-            () -> employeeService.deleteEmployee(2L));
+            () -> employeeService.deactivateEmployee(2L));
         assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
     }
 
     @Test
-    void createPosition() {
+    void deactivateEmployeeInactiveTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+        assertEquals(EmployeeStatus.INACTIVE, employee.getEmployeeStatus());
+    }
+
+    @Test
+    void deactivateEmployeeHystrixRuntimeExceptionTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+
+        doThrow(HystrixRuntimeException.class).when(userRemoteClient).deactivateEmployee(null);
+        assertThrows(BadRequestException.class, () -> employeeService.deactivateEmployee(employee.getId()));
+
+        verify(repository).findById(1L);
+    }
+
+    @Test
+    void createPositionTest() {
         AddingPositionDto addingPositionDto = AddingPositionDto.builder().name("Водій").build();
         when(positionRepository.existsPositionByName(any())).thenReturn(false, true);
         lenient().when(modelMapper.map(any(Position.class), eq(PositionDto.class))).thenReturn(getPositionDto());
@@ -248,7 +284,7 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void updatePosition() {
+    void updatePositionTest() {
         PositionDto dto = getPositionDto();
         when(positionRepository.existsById(dto.getId())).thenReturn(true, true, false);
         when(positionRepository.existsPositionByName(dto.getName())).thenReturn(false, true);
@@ -271,7 +307,7 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void getAllPosition() {
+    void getAllPositionTest() {
         when(positionRepository.findAll()).thenReturn(List.of(getPosition()));
         when(modelMapper.map(any(), any())).thenReturn(getPositionDto());
 
@@ -283,7 +319,7 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void deletePosition() {
+    void deletePositionTest() {
         Position position = getPosition();
         when(positionRepository.findById(1L)).thenReturn(Optional.of(position));
 
@@ -306,7 +342,7 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void deleteEmployeeImage() {
+    void deleteEmployeeImageTest() {
         Employee employee = getEmployee();
         employee.setImagePath("path");
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
@@ -319,7 +355,7 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void deleteEmployeeImageShouldThrowExceptions() {
+    void deleteEmployeeImageShouldThrowExceptionsTest() {
         Employee employee = getEmployee();
         employee.setImagePath(AppConstant.DEFAULT_IMAGE);
         when(repository.findById(2L)).thenReturn(Optional.empty());
@@ -336,7 +372,7 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void findAllActiveEmployees() {
+    void findAllActiveEmployeesTest() {
         EmployeePage employeePage = new EmployeePage();
         EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
         Pageable pageable = PageRequest.of(0, 5, Sort.by(
@@ -346,5 +382,19 @@ class UBSManagementEmployeeServiceImplTest {
         employeeService.findAllActiveEmployees(employeePage, employeeFilterCriteria);
         verify(employeeCriteriaRepository, times(1))
             .findAllActiveEmployees(employeePage, employeeFilterCriteria);
+    }
+
+    @Test
+    void getTariffsForEmployeeTest() {
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        GetTariffInfoForEmployeeDto dto = GetTariffInfoForEmployeeDto.builder().build();
+
+        when(modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class)).thenReturn(dto);
+        when(tariffsInfoRepository.findAll()).thenReturn(List.of(getTariffsInfo()));
+
+        List<GetTariffInfoForEmployeeDto> dtos = employeeService.getTariffsForEmployee();
+        assertEquals(1, dtos.size());
+        verify(modelMapper, times(1)).map(any(), any());
+        verify(tariffsInfoRepository).findAll();
     }
 }

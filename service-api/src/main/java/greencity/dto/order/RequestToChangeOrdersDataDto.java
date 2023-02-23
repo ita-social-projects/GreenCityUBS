@@ -11,7 +11,7 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 public class RequestToChangeOrdersDataDto {
-    private List<Long> orderId;
+    private List<Long> orderIdsList;
     private String columnName;
     private String newValue;
 }

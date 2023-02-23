@@ -2,7 +2,6 @@ package greencity.dto.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,16 +13,9 @@ import javax.validation.constraints.NotNull;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
-@EqualsAndHashCode
+@ToString
 public class ServiceDto {
-    @NotNull
-    private Long id;
-
-    @NotNull
-    private Integer price;
-
     @NotNull
     private String name;
 
@@ -35,4 +27,7 @@ public class ServiceDto {
 
     @NotNull
     private String descriptionEng;
+
+    @NotNull
+    private Integer price;
 }

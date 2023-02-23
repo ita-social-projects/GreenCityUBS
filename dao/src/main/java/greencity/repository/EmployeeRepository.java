@@ -65,6 +65,16 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Boolean existsByEmailAndId(String email, Long id);
 
     /**
+     * Method that return list of Employee by an email except with current id.
+     *
+     * @param email {@link String}
+     * @param id    {@link Long}
+     * @return list of employee;
+     * @author Nikita Korzh
+     */
+    List<Employee> findEmployeesByEmailAndIdNot(String email, Long id);
+
+    /**
      * Method return all employees depends on their positions.
      *
      * @param positionId {@link Integer}

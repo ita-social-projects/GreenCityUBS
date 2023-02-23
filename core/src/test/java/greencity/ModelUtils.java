@@ -5,13 +5,12 @@ import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
-import greencity.dto.bag.EditAmountOfBagDto;
+import greencity.dto.bag.BagLimitDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
@@ -22,15 +21,12 @@ import greencity.dto.notification.NotificationScheduleDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.AssignEmployeesForOrderDto;
-import greencity.dto.order.AssignForOrderEmployee;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderResponseDto;
@@ -41,10 +37,12 @@ import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.position.PositionDto;
-import greencity.dto.service.AddServiceDto;
-import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
-import greencity.dto.tariff.*;
+import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.service.TariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -55,6 +53,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
 import greencity.enums.AddressStatus;
 import greencity.enums.CancellationReason;
+import greencity.enums.CourierLimit;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -185,24 +184,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static EmployeeDto getEmployeeDto() {
-        return EmployeeDto.builder()
-            .id(1L)
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .employeePositions(List.of(PositionDto.builder()
-                .id(1L)
-                .name("Водій")
-                .build()))
-            .receivingStations(List.of(ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
-            .build();
-    }
-
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()
             .customerName("customer name")
@@ -231,19 +212,6 @@ public class ModelUtils {
             .name("Ivan Petyrov")
             .email("lipa@gmail.com")
             .phoneNumber("096765432")
-            .build();
-    }
-
-    public static OrderDetailInfoDto getOrderDetailInfoDto() {
-        return OrderDetailInfoDto.builder()
-            .orderId(1L)
-            .capacity(10)
-            .price(400)
-            .amount(100)
-            .exportedQuantity(100)
-            .confirmedQuantity(200)
-            .name("test")
-            .bagId(3)
             .build();
     }
 
@@ -337,8 +305,11 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffTranslationDto getTariffTranslationDto() {
-        return TariffTranslationDto.builder()
+    public static TariffServiceDto getTariffServiceDto() {
+        return TariffServiceDto.builder()
+            .capacity(120)
+            .commission(10)
+            .price(100)
             .name("Test")
             .nameEng("a")
             .description("Description")
@@ -346,53 +317,17 @@ public class ModelUtils {
             .build();
     }
 
-    public static AddServiceDto getAddServiceDto() {
-        return AddServiceDto.builder()
-            .capacity(120)
-            .commission(10)
-            .price(100)
-            .tariffTranslationDto(getTariffTranslationDto())
-            .build();
-    }
-
-    public static CreateServiceDto createServiceDto() {
-        return CreateServiceDto.builder()
+    public static ServiceDto getServiceDto() {
+        return ServiceDto.builder()
             .name("Name")
             .nameEng("NameEng")
             .price(100)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .tariffId(1L)
             .build();
     }
 
-    public static AssignEmployeesForOrderDto assignEmployeeToOrderDto() {
-        return AssignEmployeesForOrderDto.builder()
-            .orderId(1L)
-            .employeesList(List.of(AssignForOrderEmployee.builder()
-                .employeeId(1L)
-                .build(),
-                AssignForOrderEmployee.builder()
-                    .employeeId(1L)
-                    .build(),
-                AssignForOrderEmployee.builder()
-                    .employeeId(1L)
-                    .build()))
-            .build();
-    }
-
-    public static EditTariffServiceDto getEditTariffServiceDto() {
-        return EditTariffServiceDto.builder()
-            .name("Бавовняна сумка")
-            .capacity(120)
-            .price(120)
-            .commission(50)
-            .description("Description")
-            .langCode("ua")
-            .build();
-    }
-
-    public static GetTariffServiceDto getTariffServiceDto() {
+    public static GetTariffServiceDto getGetTariffServiceDto() {
         return GetTariffServiceDto.builder()
             .id(1)
             .name("Бавовняна сумка")
@@ -400,6 +335,7 @@ public class ModelUtils {
             .price(120)
             .commission(50)
             .description("Description")
+            .limitIncluded(true)
             .build();
     }
 
@@ -421,21 +357,14 @@ public class ModelUtils {
             .signature("Test Signature").build();
     }
 
-    public static ServiceDto getServiceDto() {
-        return ServiceDto.builder()
+    public static GetServiceDto getGetServiceDto() {
+        return GetServiceDto.builder()
             .id(1L)
             .name("Name")
             .nameEng("NameEng")
             .price(100)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .build();
-    }
-
-    public static EditAmountOfBagDto getAmountOfSum() {
-        return EditAmountOfBagDto.builder()
-            .minAmountOfBigBags(1L)
-            .maxAmountOfBigBags(2L)
             .build();
     }
 
@@ -519,7 +448,7 @@ public class ModelUtils {
 
     public static RequestToChangeOrdersDataDto getRequestToChangeOrdersDataDTO() {
         return RequestToChangeOrdersDataDto.builder()
-            .orderId(List.of(1L))
+            .orderIdsList(List.of(1L))
             .columnName("name")
             .newValue("1")
             .build();
@@ -600,10 +529,17 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffsInfoDto getLimitDescriptionDto() {
-        return TariffsInfoDto.builder()
-            .limitDescription("Description")
-            .id(1L)
+    public static SetTariffLimitsDto setTariffLimitsWithAmountOfBags() {
+        return SetTariffLimitsDto.builder()
+            .min(1L)
+            .max(2L)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(
+                BagLimitDto
+                    .builder()
+                    .id(1)
+                    .limitIncluded(true)
+                    .build()))
             .build();
     }
 }

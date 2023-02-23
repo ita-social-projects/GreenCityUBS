@@ -1,8 +1,6 @@
 package greencity.entity.order;
 
 import greencity.entity.user.employee.Employee;
-import greencity.enums.MinAmountOfBag;
-import greencity.entity.user.Location;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +17,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = {"location"})
-@ToString(exclude = {"location"})
+@EqualsAndHashCode(exclude = {"tariffsInfo"})
+@ToString(exclude = {"tariffsInfo"})
 @Builder
 @Table(name = "bag")
 public class Bag {
@@ -34,11 +32,26 @@ public class Bag {
     @Column(nullable = false)
     private Integer price;
 
-    @Column
+    @Column(nullable = false)
     private Integer commission;
 
     @Column(nullable = false)
     private Integer fullPrice;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String nameEng;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
+    private String descriptionEng;
+
+    @Column(nullable = false)
+    private Boolean limitIncluded;
 
     @Column(nullable = false)
     private LocalDate createdAt;
@@ -54,28 +67,7 @@ public class Bag {
     @JoinColumn
     private Employee editedBy;
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(name = "name_eng")
-    private String nameEng;
-
-    @Column
-    private String description;
-
-    @Column(name = "description_eng")
-    private String descriptionEng;
-
-    @Column(nullable = false, name = "min_amount_of_bags")
-    @Enumerated(EnumType.STRING)
-    private MinAmountOfBag minAmountOfBags;
-
     @ManyToOne
-    private Location location;
-
-    @ManyToOne
+    @JoinColumn(nullable = false)
     private TariffsInfo tariffsInfo;
-
-    @Column(name = "limit_included")
-    private Boolean limitIncluded;
 }

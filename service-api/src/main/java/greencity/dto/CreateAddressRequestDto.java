@@ -40,6 +40,6 @@ public class CreateAddressRequestDto {
     private String houseNumber;
     private String entranceNumber;
     private String houseCorpus;
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ]*", message = validationMessage)
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ!?]*", message = validationMessage)
     private String addressComment;
 }

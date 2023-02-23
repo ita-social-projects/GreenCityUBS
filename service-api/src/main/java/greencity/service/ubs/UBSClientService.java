@@ -34,11 +34,12 @@ public interface UBSClientService {
     /**
      * Methods returns all available for order bags and current user's bonus points.
      *
-     * @param uuid current {@link User}'s uuid.
+     * @param uuid    current {@link User}'s uuid.
+     * @param orderId {@link Optional} order id.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */
-    UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> locationId);
+    UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> orderId);
 
     /**
      * Methods returns all saved user data.
@@ -257,15 +258,6 @@ public interface UBSClientService {
     List<EventDto> getAllEventsForOrder(Long orderId, String email);
 
     /**
-     * Methods for converting UserProfileDTO to PersonalDataDTO.
-     *
-     * @param userProfileDto {@link UserProfileDto}.
-     * @return {@link PersonalDataDto}.
-     * @author Liyubomy Pater.
-     */
-    PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto);
-
-    /**
      * Methods saves all entered by user data to database.
      * 
      * @param dto     {@link OrderResponseDto} user entered data;
@@ -382,7 +374,7 @@ public interface UBSClientService {
      *
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
      */
-    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email);
+    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
 
     /**
      * Methods returns all locations.

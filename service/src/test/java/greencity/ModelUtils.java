@@ -12,31 +12,37 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.LocationsDtos;
 import greencity.dto.OptionForColumnDTO;
+import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
-import greencity.dto.bag.BagForUserDto;
-import greencity.dto.bag.BagMappingDto;
-import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagDto;
+import greencity.dto.bag.BagForUserDto;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.bag.BagLimitDto;
+import greencity.dto.bag.BagMappingDto;
 import greencity.dto.bag.BagTranslationDto;
-import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.GetReceivingStationDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
-import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.employee.EmployeePositionDtoResponse;
+import greencity.dto.employee.EmployeeWithTariffsDto;
+import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
@@ -58,13 +64,10 @@ import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.notification.TitleDto;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.AssignEmployeesForOrderDto;
-import greencity.dto.order.AssignForOrderEmployee;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.order.EmployeeOrderPositionDTO;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
@@ -97,14 +100,13 @@ import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.service.AddServiceDto;
-import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.TariffServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.tariff.TariffTranslationDto;
 import greencity.dto.tariff.TariffsInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -152,7 +154,6 @@ import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
-import greencity.enums.MinAmountOfBag;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -186,6 +187,7 @@ import static java.util.Collections.singletonList;
 
 public class ModelUtils {
 
+    public static final String TEST_EMAIL = "test@gmail.com";
     public static final Order TEST_ORDER = createOrder();
     public static final Address TEST_ADDRESS = createAddress2();
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
@@ -448,7 +450,6 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .user(User.builder()
@@ -505,6 +506,15 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .build();
+    }
+
+    public static Order getOrderWithoutPayment() {
+        return Order.builder()
+            .id(1L)
+            .payment(Collections.emptyList())
+            .certificates(Collections.emptySet())
+            .pointsToUse(500)
             .build();
     }
 
@@ -880,7 +890,8 @@ public class ModelUtils {
         return CertificateDtoForAdding.builder()
             .code("1111-1234")
             .monthCount(0)
-            .points(10)
+            .initialPointsValue(10)
+            .points(0)
             .build();
     }
 
@@ -963,60 +974,53 @@ public class ModelUtils {
             .build();
     }
 
-    public static EmployeeDto getEmployeeDto() {
-        return EmployeeDto.builder()
-            .id(1L)
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .employeePositions(List.of(PositionDto.builder()
+    public static EmployeeWithTariffsDto getEmployeeWithTariffsDto() {
+        return EmployeeWithTariffsDto.builder()
+            .employeeDto(EmployeeDto.builder()
                 .id(1L)
-                .name("Водій")
-                .build()))
-            .receivingStations(List.of(ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
-            .courier(getCourierDto())
-            .location(LocationsDtos.builder()
-                .locationId(1L)
-                .nameEn("location")
-                .nameUk("локація")
+                .firstName("Петро")
+                .lastName("Петренко")
+                .phoneNumber("+380935577455")
+                .email("test@gmail.com")
+                .image("path")
+                .employeePositions(List.of(PositionDto.builder()
+                    .id(1L)
+                    .name("Водій")
+                    .build()))
                 .build())
+            .tariffs(List.of(getTariffInfoForEmployeeDto()))
             .build();
     }
 
-    public static TariffsInfoDto getTariffsInfoDto() {
-        return TariffsInfoDto.builder()
+    public static GetTariffInfoForEmployeeDto getTariffInfoForEmployeeDto() {
+        return GetTariffInfoForEmployeeDto
+            .builder()
             .id(1L)
-            .maxAmountOfBags(20L)
-            .maxPriceOfOrder(20000L)
-            .minAmountOfBags(2L)
-            .minPriceOfOrder(500L)
-            .tariffLocations(Set.of(TariffLocation.builder()
-                .location(getLocation())
-                .build()))
-            .receivingStations(List.of(getReceivingStationDto()))
-            .courier(getCourierDto())
+            .region(RegionDto.builder()
+                .regionId(1L)
+                .nameEn("Kyiv region")
+                .nameUk("Київська область")
+                .build())
+            .locationsDtos(List.of(getLocationsDtos()))
+            .receivingStationDtos(List.of(getGetReceivingStationDto()))
+            .courier(getCourierTranslationDto())
             .build();
     }
 
-    public static EmployeeDto getEmployeeDtoWithReceivingStations() {
-        return EmployeeDto.builder()
-            .id(1L)
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .employeePositions(List.of(PositionDto.builder()
-                .id(1L)
-                .name("Водій")
-                .build()))
-            .receivingStations(List.of(ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
+    public static LocationsDtos getLocationsDtos() {
+        return LocationsDtos
+            .builder()
+            .locationId(1L)
+            .nameUk("Київ")
+            .nameEn("Kyiv")
+            .build();
+    }
+
+    public static GetReceivingStationDto getGetReceivingStationDto() {
+        return GetReceivingStationDto
+            .builder()
+            .stationId(1L)
+            .name("Петрівка")
             .build();
     }
 
@@ -1032,8 +1036,166 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
+            .tariffInfos(Set.of(TariffsInfo.builder()
+                .id(1L)
+                .service(new Service())
+                .build()))
             .imagePath("path")
+            .build();
+    }
+
+    public static Employee getEmployeeWithTariffs() {
+        return Employee.builder()
             .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeeStatus(EmployeeStatus.ACTIVE)
+            .employeePosition(Set.of(Position.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .tariffInfos(Set.of(getTariffsInfo()))
+            .imagePath("path")
+            .tariffs(List.of(getTariffInfo()))
+            .build();
+    }
+
+    public static List<Employee> getEmployeeList() {
+        return List.of(
+            Employee.builder()
+                .id(1L)
+                .firstName("Петро")
+                .lastName("Петренко")
+                .phoneNumber("+380935577455")
+                .email("test@gmail.com")
+                .employeeStatus(EmployeeStatus.ACTIVE)
+                .employeePosition(Set.of(Position.builder()
+                    .id(6L)
+                    .name("Супер адмін")
+                    .build()))
+                .tariffInfos(new HashSet<>())
+                .imagePath("path")
+                .tariffs(List.of(getTariffInfo()))
+                .build());
+    }
+
+    public static Employee getEmployeeForUpdateEmailCheck() {
+        return Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test1@gmail.com")
+            .employeeStatus(EmployeeStatus.ACTIVE)
+            .employeePosition(Set.of(Position.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .tariffInfos(Set.of(TariffsInfo.builder()
+                .id(1L)
+                .service(new Service())
+                .build()))
+            .imagePath("path")
+            .build();
+    }
+
+    public static Employee getFullEmployee() {
+        return Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .imagePath("path")
+            .employeeStatus(EmployeeStatus.ACTIVE)
+            .employeePosition(Set.of(Position.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .tariffInfos(Set.of(TariffsInfo.builder()
+                .id(1L)
+                .service(getService())
+                .courier(getCourier())
+                .tariffLocations(Set.of(getTariffLocation()))
+                .receivingStationList(Set.of(getReceivingStation()))
+                .build()))
+            .tariffs(List.of(TariffsInfo.builder()
+                .id(1L)
+                .service(getService())
+                .courier(getCourier())
+                .tariffLocations(Set.of(getTariffLocation()))
+                .build()))
+            .build();
+    }
+
+    public static TariffLocation getTariffLocation() {
+        return TariffLocation
+            .builder()
+            .id(1L)
+            .tariffsInfo(getTariffsInfo())
+            .location(getLocation())
+            .locationStatus(LocationStatus.ACTIVE)
+            .build();
+    }
+
+    public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
+        return EmployeeWithTariffsIdDto
+            .builder()
+            .employeeDto(EmployeeDto.builder()
+                .id(1L)
+                .firstName("Петро")
+                .lastName("Петренко")
+                .phoneNumber("+380935577455")
+                .email("test@gmail.com")
+                .image("path")
+                .employeePositions(List.of(PositionDto.builder()
+                    .id(1L)
+                    .name("Водій")
+                    .build()))
+                .build())
+            .tariffId(List.of(1L))
+            .build();
+    }
+
+    public static GetEmployeeDto getGetEmployeeDto() {
+        return GetEmployeeDto
+            .builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .image("path")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .tariffs(List.of(GetTariffInfoForEmployeeDto.builder()
+                .id(1L)
+                .region(RegionDto.builder()
+                    .regionId(1L)
+                    .nameEn("Kyiv region")
+                    .nameUk("Київська область")
+                    .build())
+                .locationsDtos(List.of(LocationsDtos
+                    .builder()
+                    .locationId(1L)
+                    .nameEn("Kyiv")
+                    .nameUk("Київ")
+                    .build()))
+                .receivingStationDtos(List.of(GetReceivingStationDto
+                    .builder()
+                    .stationId(1L)
+                    .name("Петрівка")
+                    .build()))
+                .courier(CourierTranslationDto.builder()
+                    .id(1L)
+                    .nameUk("Тест")
+                    .nameEn("Test")
+                    .build())
+                .build()))
             .build();
     }
 
@@ -1469,7 +1631,6 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .certificates(Collections.emptySet())
@@ -2047,62 +2208,30 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffTranslationDto getTariffTranslationDto() {
-        return TariffTranslationDto.builder()
+    public static TariffServiceDto TariffServiceDto() {
+        return TariffServiceDto.builder()
+            .capacity(20)
+            .price(100)
+            .commission(50)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .nameEng("nameEng")
             .name("name")
+            .nameEng("nameEng")
             .build();
     }
 
-    public static AddServiceDto addServiceDto() {
-        return AddServiceDto.builder()
-            .commission(50)
-            .capacity(100)
-            .price(100)
-            .tariffTranslationDto(getTariffTranslationDto())
-            .locationId(1L)
-            .build();
-    }
-
-    public static GetTariffServiceDto getTariffServiceDto() {
+    public static GetTariffServiceDto getGetTariffServiceDto() {
         return GetTariffServiceDto.builder()
             .id(1)
             .capacity(20)
             .price(100)
             .commission(50)
             .fullPrice(150)
-            .capacity(100)
-            .minAmountOfBags(MinAmountOfBag.INCLUDE.name())
+            .limitIncluded(false)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
-            .build();
-    }
-
-    public static AssignEmployeesForOrderDto assignEmployeesForOrderDto() {
-        return AssignEmployeesForOrderDto.builder()
-            .orderId(1L)
-            .employeesList(List.of(AssignForOrderEmployee.builder()
-                .employeeId(1L)
-                .build(),
-                AssignForOrderEmployee.builder()
-                    .employeeId(1L)
-                    .build(),
-                AssignForOrderEmployee.builder()
-                    .employeeId(1L)
-                    .build()))
-            .build();
-    }
-
-    public static AssignEmployeesForOrderDto assignEmployeeForOrderDto() {
-        return AssignEmployeesForOrderDto.builder()
-            .orderId(1L)
-            .employeesList(List.of(AssignForOrderEmployee.builder()
-                .employeeId(1L)
-                .build()))
             .build();
     }
 
@@ -2118,18 +2247,17 @@ public class ModelUtils {
             .editedBy(getEmployee())
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .limitIncluded(false)
             .build());
     }
 
-    public static EditTariffServiceDto getEditTariffServiceDto() {
-        return EditTariffServiceDto.builder()
+    public static TariffServiceDto getTariffServiceDto() {
+        return TariffServiceDto.builder()
             .name("Бавовняна сумка")
             .capacity(120)
             .price(120)
             .commission(50)
             .description("Description")
-            .langCode("ua")
             .build();
 
     }
@@ -2195,15 +2323,25 @@ public class ModelUtils {
             .price(100)
             .commission(50)
             .fullPrice(150)
-            .capacity(100)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
-            .location(getLocation())
+            .limitIncluded(false)
+            .tariffsInfo(getTariffInfo())
+            .build();
+    }
+
+    public static BagTranslationDto getBagTranslationDto() {
+        return BagTranslationDto.builder()
+            .id(1)
+            .capacity(20)
+            .price(150)
+            .name("name")
+            .nameEng("nameEng")
+            .limitedIncluded(false)
             .build();
     }
 
@@ -2213,15 +2351,13 @@ public class ModelUtils {
             .price(100)
             .commission(50)
             .fullPrice(150)
-            .capacity(100)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .limitIncluded(false)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
-            .location(getLocation())
             .build();
     }
 
@@ -2244,19 +2380,18 @@ public class ModelUtils {
             .signature("Test Signature").build();
     }
 
-    public static CreateServiceDto getCreateServiceDto() {
-        return CreateServiceDto.builder()
+    public static ServiceDto getServiceDto() {
+        return ServiceDto.builder()
             .name("Name")
             .nameEng("NameEng")
             .price(100)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .tariffId(1L)
             .build();
     }
 
-    public static ServiceDto getServiceDto() {
-        return ServiceDto.builder()
+    public static GetServiceDto getGetServiceDto() {
+        return GetServiceDto.builder()
             .id(1L)
             .name("Name")
             .nameEng("NameEng")
@@ -2357,6 +2492,19 @@ public class ModelUtils {
 
     }
 
+    public static List<Bag> getBag1list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(20)
+            .commission(50)
+            .fullPrice(1500)
+            .name("name")
+            .nameEng("nameEng")
+            .limitIncluded(false)
+            .build());
+    }
+
     public static List<Bag> getBaglist() {
         return List.of(Bag.builder()
             .id(1)
@@ -2408,7 +2556,6 @@ public class ModelUtils {
             .capacity(10)
             .commission(21)
             .fullPrice(20)
-            .location(Location.builder().id(1L).build())
             .name("name")
             .nameEng("nameEng")
             .limitIncluded(false)
@@ -2419,7 +2566,6 @@ public class ModelUtils {
                 .capacity(10)
                 .commission(21)
                 .fullPrice(21)
-                .location(Location.builder().id(1L).build())
                 .name("name")
                 .nameEng("nameEng")
                 .limitIncluded(false)
@@ -2455,6 +2601,15 @@ public class ModelUtils {
             .unPaidAmount(0L)
             .paymentInfoDtos(List.of(getInfoPayment().setAmount(10L)))
             .overpayment(800L)
+            .build();
+    }
+
+    public static PaymentTableInfoDto getPaymentTableInfoDto2() {
+        return PaymentTableInfoDto.builder()
+            .paidAmount(0L)
+            .unPaidAmount(0L)
+            .paymentInfoDtos(Collections.emptyList())
+            .overpayment(400L)
             .build();
     }
 
@@ -2636,46 +2791,13 @@ public class ModelUtils {
     public static Bag bagDto() {
         return Bag.builder()
             .id(1)
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .location(Location
-                .builder()
-                .id(1L)
-                .locationStatus(LocationStatus.ACTIVE)
-                .build())
+            .limitIncluded(false)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("Test")
             .nameEng("a")
             .createdBy(getEmployee())
             .editedBy(getEmployee())
-            .build();
-    }
-
-    public static Bag bagDto2() {
-        return Bag.builder()
-            .id(1)
-            .minAmountOfBags(MinAmountOfBag.EXCLUDE)
-            .location(Location
-                .builder()
-                .id(1L)
-                .locationStatus(LocationStatus.ACTIVE)
-                .build())
-            .build();
-    }
-
-    public static EditPriceOfOrder getEditPriceOfOrder() {
-        return EditPriceOfOrder.builder()
-            .maxPriceOfOrder(500000L)
-            .minPriceOfOrder(300L)
-            .locationId(1L)
-            .build();
-    }
-
-    public static EditAmountOfBagDto getAmountOfBagDto() {
-        return EditAmountOfBagDto.builder()
-            .maxAmountOfBigBags(99L)
-            .minAmountOfBigBags(2L)
-            .locationId(1L)
             .build();
     }
 
@@ -2703,14 +2825,9 @@ public class ModelUtils {
     public static Bag bagDtoClient() {
         return Bag.builder()
             .id(1)
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .price(1)
             .fullPrice(1)
             .commission(2)
-            .location(Location
-                .builder()
-                .id(1L)
-                .build())
             .build();
     }
 
@@ -3088,10 +3205,9 @@ public class ModelUtils {
                 .tariffLocations(Set.of(TariffLocation.builder()
                     .id(1L)
                     .build()))
-                .maxAmountOfBigBags(2L)
-                .maxPriceOfOrder(500000L)
-                .minAmountOfBigBags(99L)
-                .minPriceOfOrder(500L)
+                .max(99L)
+                .min(2L)
+                .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
                 .build())
 
             .build();
@@ -3105,6 +3221,30 @@ public class ModelUtils {
             .exportedQuantity(new HashMap<>())
             .pointsToUse(100)
             .orderStatus(OrderStatus.DONE)
+            .build();
+    }
+
+    public static Order getOrderWithoutExportedBags() {
+        Map<Integer, Integer> hashMap = new HashMap<>();
+        hashMap.put(1, 1);
+        hashMap.put(2, 1);
+        return Order.builder()
+            .id(1L)
+            .amountOfBagsOrdered(hashMap)
+            .confirmedQuantity(hashMap)
+            .exportedQuantity(new HashMap<>())
+            .pointsToUse(100)
+            .certificates(Collections.emptySet())
+            .orderStatus(OrderStatus.CONFIRMED)
+            .user(User.builder().id(1L).currentPoints(100).build())
+            .payment(Lists.newArrayList(Payment.builder()
+                .paymentId("1L")
+                .amount(20000L)
+                .currency("UAH")
+                .settlementDate("20.02.1990")
+                .comment("avb")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
             .build();
     }
 
@@ -3278,8 +3418,16 @@ public class ModelUtils {
     public static RequestToChangeOrdersDataDto getRequestToChangeOrdersDataDTO() {
         return RequestToChangeOrdersDataDto.builder()
             .columnName("orderStatus")
-            .orderId(List.of(1L))
+            .orderIdsList(List.of(1L))
             .newValue("1")
+            .build();
+    }
+
+    public static RequestToChangeOrdersDataDto getRequestToAddAdminCommentForOrder() {
+        return RequestToChangeOrdersDataDto.builder()
+            .columnName("adminComment")
+            .orderIdsList(List.of(1L))
+            .newValue("Admin Comment")
             .build();
     }
 
@@ -3341,7 +3489,6 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
@@ -3389,16 +3536,48 @@ public class ModelUtils {
         return TariffsInfo.builder()
             .id(1L)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
-            .maxAmountOfBigBags(20L)
-            .maxPriceOfOrder(20000L)
-            .minAmountOfBigBags(2L)
-            .minPriceOfOrder(500L)
+            .max(20L)
+            .min(2L)
             .tariffLocations(Set.of(TariffLocation.builder()
                 .location(getLocation())
                 .build()))
             .receivingStationList(Set.of(getReceivingStation()))
             .courier(getCourier())
             .service(getService())
+            .build();
+    }
+
+    public static TariffsInfo getTariffsInfoActive() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .locationStatus(LocationStatus.ACTIVE)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .max(20L)
+            .min(2L)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .location(getLocation())
+                .build()))
+            .receivingStationList(Set.of(getReceivingStation()))
+            .courier(getCourier())
+            .service(getService())
+            .bags(getBag4list())
+            .build();
+    }
+
+    public static TariffsInfo getTariffsInfoDeactivated() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .locationStatus(LocationStatus.DEACTIVATED)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .max(20L)
+            .min(2L)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .location(getLocation())
+                .build()))
+            .receivingStationList(Set.of(getReceivingStation()))
+            .courier(getCourier())
+            .service(getService())
+            .bags(getBag4list())
             .build();
     }
 
@@ -3490,13 +3669,12 @@ public class ModelUtils {
             .locationStatus(LocationStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
-            .maxAmountOfBigBags(100L)
-            .minAmountOfBigBags(2L)
-            .maxPriceOfOrder(50000L)
-            .minPriceOfOrder(500L)
+            .max(6000L)
+            .min(500L)
             .orders(Collections.emptyList())
             .receivingStationList(Set.of(ReceivingStation.builder()
-                .name("receivingStation")
+                .id(1L)
+                .name("Петрівка")
                 .createdBy(ModelUtils.createEmployee())
                 .build()))
             .build();
@@ -3518,10 +3696,30 @@ public class ModelUtils {
             .locationStatus(LocationStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
-            .maxAmountOfBigBags(100L)
-            .minAmountOfBigBags(5L)
-            .maxPriceOfOrder(50000L)
-            .minPriceOfOrder(500L)
+            .max(100L)
+            .min(5L)
+            .orders(List.of(ModelUtils.getOrder()))
+            .build();
+    }
+
+    public static TariffsInfo getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .courier(ModelUtils.getCourier())
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .location(Location.builder().id(1L)
+                    .region(ModelUtils.getRegion())
+                    .nameUk("Київ")
+                    .nameEn("Kyiv")
+                    .coordinates(ModelUtils.getCoordinates())
+                    .build())
+                .build()))
+            .locationStatus(LocationStatus.ACTIVE)
+            .creator(ModelUtils.getEmployee())
+            .createdAt(LocalDate.of(2022, 10, 20))
+            .max(10L)
+            .min(5L)
             .orders(List.of(ModelUtils.getOrder()))
             .build();
     }
@@ -3625,7 +3823,7 @@ public class ModelUtils {
     public static CreateAddressRequestDto getAddressRequestDto() {
         return CreateAddressRequestDto.builder()
             .addressComment("fdsfs")
-            .searchAddress("fake address")
+            .searchAddress("fake street name, 13, fake street, 02000")
             .district("fdsfds")
             .districtEn("dsadsad")
             .region("regdsad")
@@ -3640,7 +3838,7 @@ public class ModelUtils {
         return OrderAddressDtoRequest.builder()
             .id(0L)
             .region("fake region")
-            .searchAddress("fake address")
+            .searchAddress("fake street name, 13, fake street, 02000")
             .city("fake street")
             .district("fake district")
             .entranceNumber("1")
@@ -3733,6 +3931,14 @@ public class ModelUtils {
             .build();
     }
 
+    public static CourierTranslationDto getCourierTranslationDto() {
+        return CourierTranslationDto.builder()
+            .id(1L)
+            .nameUk("Тест")
+            .nameEn("Test")
+            .build();
+    }
+
     public static List<Address> getMaximumAmountOfAddresses() {
         return List.of(new Address(), new Address(), new Address(), new Address());
     }
@@ -3763,167 +3969,270 @@ public class ModelUtils {
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithEmptyParams() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.empty())
-            .citiesId(Optional.empty())
-            .stationsId(Optional.empty())
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.empty())
             .courierId(Optional.empty())
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegion() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.of(List.of(1L)))
-            .citiesId(Optional.empty())
-            .stationsId(Optional.empty())
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.empty())
             .courierId(Optional.empty())
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegionAndCities() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.of(List.of(1L)))
-            .citiesId(Optional.of(List.of(1L, 11L)))
-            .stationsId(Optional.empty())
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.empty())
             .courierId(Optional.empty())
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourier() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.empty())
-            .citiesId(Optional.empty())
-            .stationsId(Optional.empty())
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.empty())
             .courierId(Optional.of(1L))
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithReceivingStations() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.empty())
-            .citiesId(Optional.empty())
-            .stationsId(Optional.of(List.of(1L, 12L)))
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.empty())
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndReceivingStations() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.empty())
-            .citiesId(Optional.empty())
-            .stationsId(Optional.of(List.of(1L, 12L)))
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.of(1L))
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndRegion() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.of(List.of(1L)))
-            .citiesId(Optional.empty())
-            .stationsId(Optional.empty())
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.empty())
             .courierId(Optional.of(1L))
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegionAndCityAndStation() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.of(List.of(1L)))
-            .citiesId(Optional.of(List.of(1L, 11L)))
-            .stationsId(Optional.of(List.of(1L, 12L)))
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.empty())
             .build();
     }
 
     public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithAllParams() {
         return DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(Optional.of(List.of(1L)))
-            .citiesId(Optional.of(List.of(1L, 11L)))
-            .stationsId(Optional.of(List.of(1L, 12L)))
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.of(1L))
             .build();
     }
 
-    public static SetTariffLimitsDto setTariffLimitsWithAmountOfBigBags() {
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegionAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndRegionAndCities() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.empty())
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndRegionAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.empty())
+            .stationsIds(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCities() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.empty())
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCitiesAndCourier() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.empty())
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCitiesAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCitiesAndCourierAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.empty())
+            .citiesIds(Optional.of(List.of(1L, 11L)))
+            .stationsIds(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static BagLimitDto getBagLimitIncludedDtoTrue() {
+        return BagLimitDto.builder()
+            .id(1)
+            .limitIncluded(true)
+            .build();
+    }
+
+    public static BagLimitDto getBagLimitIncludedDtoFalse() {
+        return BagLimitDto.builder()
+            .id(1)
+            .limitIncluded(false)
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithAmountOfBags() {
         return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(1L)
-            .maxAmountOfBigBags(2L)
-            .minPriceOfOrder(0L)
-            .maxPriceOfOrder(0L)
+            .min(1L)
+            .max(2L)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoTrue()))
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithNullAllTariffParamsAndFalseBagLimit() {
+        return SetTariffLimitsDto.builder()
+            .min(null)
+            .max(null)
+            .courierLimit(null)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoFalse()))
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithNullMinAndMaxAndFalseBagLimit() {
+        return SetTariffLimitsDto.builder()
+            .min(null)
+            .max(null)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoFalse()))
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffsLimitWithSameMinAndMaxValue() {
+        return SetTariffLimitsDto.builder()
+            .min(2L)
+            .max(2L)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoTrue()))
             .build();
     }
 
     public static SetTariffLimitsDto setTariffLimitsWithPriceOfOrder() {
         return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(0L)
-            .maxAmountOfBigBags(0L)
-            .minPriceOfOrder(100L)
-            .maxPriceOfOrder(200L)
+            .min(100L)
+            .max(200L)
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoTrue()))
             .build();
     }
 
     public static SetTariffLimitsDto setTariffLimitsWithAmountOfBigBagsWhereMaxValueIsGreater() {
         return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(2L)
-            .maxAmountOfBigBags(1L)
-            .minPriceOfOrder(0L)
-            .maxPriceOfOrder(0L)
+            .min(2L)
+            .max(1L)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoTrue()))
             .build();
     }
 
     public static SetTariffLimitsDto setTariffLimitsWithPriceOfOrderWhereMaxValueIsGreater() {
         return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(0L)
-            .maxAmountOfBigBags(0L)
-            .minPriceOfOrder(200L)
-            .maxPriceOfOrder(100L)
-            .build();
-    }
-
-    public static SetTariffLimitsDto setTariffLimitsWithBothLimitsInputed() {
-        return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(1L)
-            .maxAmountOfBigBags(2L)
-            .minPriceOfOrder(100L)
-            .maxPriceOfOrder(200L)
-            .build();
-    }
-
-    public static SetTariffLimitsDto setTariffLimitsWithNoneLimitsInputed() {
-        return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(1L)
-            .maxAmountOfBigBags(2L)
-            .minPriceOfOrder(100L)
-            .maxPriceOfOrder(200L)
+            .min(200L)
+            .max(100L)
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .bagLimitDtoList(List.of(getBagLimitIncludedDtoTrue()))
             .build();
     }
 
     public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDto() {
         return new UserPointsAndAllBagsDto(
-            Arrays.asList(
+            List.of(
                 BagTranslationDto.builder()
                     .id(1)
                     .name("name")
-                    .capacity(10)
-                    .price(20)
+                    .capacity(20)
+                    .price(150)
                     .nameEng("nameEng")
-                    .locationId(1L)
-                    .limitedIncluded(false)
-                    .build(),
-                BagTranslationDto.builder()
-                    .id(2)
-                    .name("name")
-                    .capacity(10)
-                    .price(21)
-                    .nameEng("nameEng")
-                    .locationId(1L)
                     .limitedIncluded(false)
                     .build()),
             600);
     }
 
-    public static TariffsInfoDto getLimitDescriptionDto() {
-        return TariffsInfoDto.builder()
-            .limitDescription("Description")
+    public static Order getOrderExportDetailsWithExportDate() {
+        return Order.builder()
             .id(1L)
+            .dateOfExport(LocalDate.of(2023, 2, 8))
+            .user(User.builder().id(1L).recipientName("Admin").recipientSurname("Ubs").build())
             .build();
+    }
+
+    public static Order getOrderExportDetailsWithExportDateDeliverFrom() {
+        return Order.builder()
+            .id(1L)
+            .dateOfExport(LocalDate.of(2023, 2, 8))
+            .deliverFrom(LocalDateTime.of(2023, 2, 8, 15, 0))
+            .user(User.builder().id(1L).recipientName("Admin").recipientSurname("Ubs").build())
+            .build();
+    }
+
+    public static Order getOrderExportDetailsWithExportDateDeliverFromTo() {
+        return Order.builder()
+            .id(1L)
+            .dateOfExport(LocalDate.of(2023, 2, 8))
+            .deliverFrom(LocalDateTime.of(2023, 2, 8, 15, 0))
+            .deliverTo(LocalDateTime.of(2023, 2, 8, 16, 30))
+            .user(User.builder().id(1L).recipientName("Admin").recipientSurname("Ubs").build())
+            .build();
+    }
+
+    public static Order getOrderExportDetailsWithDeliverFromTo() {
+        Order order = getOrderExportDetailsWithNullValues();
+        order.setDeliverTo(LocalDateTime.of(2023, 2, 8, 16, 30));
+        order.setDeliverFrom(LocalDateTime.of(2023, 2, 8, 15, 0));
+        return order;
     }
 }

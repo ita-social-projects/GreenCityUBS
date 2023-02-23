@@ -15,6 +15,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
+import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
@@ -31,14 +32,15 @@ import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
 import greencity.service.notification.NotificationServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -51,9 +53,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
@@ -558,6 +562,7 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectNotTakenOut.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectNotTakenOut.getDate());
 
+        testOrderDetail.setCancellationReason("MOVING_OUT");
         testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
         expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
         OrderDetailStatusDto producedObjectCancelled = ubsManagementService
@@ -577,6 +582,17 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectDone.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectDone.getDate());
 
+        order.setPointsToUse(0);
+        testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
+        expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
+        OrderDetailStatusDto producedObjectCancelled2 = ubsManagementService
+            .updateOrderDetailStatus(order.getId(), testOrderDetail, "test@gmail.com");
+
+        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled2.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled2.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectCancelled2.getDate());
+        assertEquals(0, order.getPointsToUse());
+
         testOrderDetail.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF.toString());
         expectedObject.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF.toString());
         OrderDetailStatusDto producedObjectBroughtItHimself = ubsManagementService
@@ -586,14 +602,25 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectBroughtItHimself.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectBroughtItHimself.getDate());
 
+        order.setCertificates(Set.of(ModelUtils.getCertificate()));
+        testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
+        expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
+        OrderDetailStatusDto producedObjectCancelled3 = ubsManagementService
+            .updateOrderDetailStatus(order.getId(), testOrderDetail, "test@gmail.com");
+
+        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled3.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled3.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectCancelled3.getDate());
+        assertEquals(0, order.getPointsToUse());
+
         verify(eventService, times(1))
             .saveEvent("Статус Замовлення - Узгодження",
                 "test@gmail.com", order);
         verify(eventService, times(1))
             .saveEvent("Статус Замовлення - Підтверджено",
                 "test@gmail.com", order);
-        verify(eventService, times(1))
-            .saveEvent("Статус Замовлення - Скасовано" + "  " + order.getCancellationComment(),
+        verify(eventService, times(3))
+            .saveEvent("Статус Замовлення - Скасовано",
                 "test@gmail.com", order);
 
     }
@@ -817,67 +844,6 @@ class UBSManagementServiceImplTest {
         assertEquals(2L, user.getChangeOfPointsList().size());
     }
 
-    @ParameterizedTest
-    @CsvSource({"2, Змінено менеджера обдзвону",
-        "3, Змінено логіста",
-        "4, Змінено штурмана",
-        "5, Змінено водія"})
-    void testUpdatePositionTest(long diffParam, String eventName) {
-        User user = ModelUtils.getTestUser();
-        user.setRecipientSurname("Gerasum");
-        user.setRecipientName("Yuriy");
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
-        when(positionRepository.findById(2L)).thenReturn(Optional.ofNullable(TEST_POSITION));
-        when(employeeRepository.findByFirstNameAndLastName(anyString(), anyString()))
-            .thenReturn(Optional.ofNullable(TEST_EMPLOYEE));
-        when(employeeOrderPositionRepository.saveAll(anyIterable()))
-            .thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
-        when(employeeOrderPositionRepository.findByEmployeeId(1L)).thenReturn(diffParam);
-        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
-        ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE, "abc");
-        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
-        verify(orderRepository).findById(1L);
-        verify(positionRepository).findById(2L);
-        verify(employeeRepository).findByFirstNameAndLastName(anyString(), anyString());
-        verify(employeeOrderPositionRepository).saveAll(anyIterable());
-        Order order = TEST_ORDER_UPDATE_POSITION;
-        verify(eventService, times(1)).save(eventName,
-            order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
-    }
-
-    @Test
-    void testUpdatePositionThrowsOrderNotFoundException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE, "abc"));
-    }
-
-    @Test
-    void testUpdatePositionThrowsPositionNotFoundException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
-        when(positionRepository.findById(2L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE, "abc"));
-    }
-
-    @Test
-    void testUpdatePositionThrowsEmployeeNotFoundException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
-        when(positionRepository.findById(2L)).thenReturn(Optional.of(TEST_POSITION));
-        when(employeeRepository.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE, "abc"));
-    }
-
     @Test
     void testGetAdditionalBagsInfo() {
         when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(TEST_USER));
@@ -1020,6 +986,28 @@ class UBSManagementServiceImplTest {
         verify(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         verify(orderDetailRepository).getAmount(any(), any());
+    }
+
+    @Test
+    void testSetOrderDetailWithExportedWaste() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusDoneDto()));
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        doNothing().when(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+        when(orderRepository.getOrderDetails(anyLong()))
+            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(orderDetailRepository.ifRecordExist(any(), any())).thenReturn(1L);
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "test@gmail.com");
+        verify(orderRepository, times(2)).findById(1L);
+        verify(bagRepository, times(2)).findCapacityById(1);
+        verify(bagRepository, times(2)).findById(1);
+        verify(orderDetailRepository, times(3)).ifRecordExist(any(), any());
+        verify(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
     }
 
     @Test
@@ -1169,144 +1157,6 @@ class UBSManagementServiceImplTest {
 
         assertThrows(NotFoundException.class,
             () -> ubsManagementService.setOrderDetail(1L, confirm, exported, "test@gmail.com"));
-    }
-
-    @Test
-    void testAssignEmployeeWithThePositionToTheOrderException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        AssignEmployeesForOrderDto assignEmployeeForOrderDto = assignEmployeesForOrderDto();
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto, "abc"));
-    }
-
-    @Test
-    void testAssignEmployeeWithThePositionToTheOrderEmployeeAlreadyExistException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
-        Order order = getTestUser().getOrders().get(0);
-        order.setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail(null)).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(true);
-        AssignEmployeesForOrderDto assignEmployeesForOrderDto = assignEmployeesForOrderDto();
-        assertThrows(FoundException.class,
-            () -> ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeesForOrderDto, "abc"));
-    }
-
-    @Test
-    void testAssignEmployeesWithThePositionToTheOrderEmployeeNotFindException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
-        Order order = getTestUser().getOrders().get(0);
-        order.setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail(null)).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(false);
-        AssignEmployeesForOrderDto assignEmployeeForOrderDto = assignEmployeesForOrderDto();
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto, "abc"));
-    }
-
-    @Test
-    void testAssignEmployeesToTheOrderEmployeeNotFindException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
-        Order order = getTestUser().getOrders().get(0);
-        order.setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail(null)).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(false);
-        when(employeeRepository.findById(1L)).thenReturn(Optional.empty());
-        AssignEmployeesForOrderDto assignEmployeeForOrderDto = assignEmployeesForOrderDto();
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto, "abc"));
-    }
-
-    @Test
-    void testAssignEmployeesWithThePositionsNotFoundToEmployee() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
-        Order order = getTestUser().getOrders().get(0);
-        order.setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail(null)).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(false);
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
-        when(employeeRepository.findByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeRepository.findPositionById(1L)).thenReturn(Optional.empty());
-        AssignEmployeesForOrderDto assignEmployeeForOrderDto = assignEmployeesForOrderDto();
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto, "abc"));
-    }
-
-    @Test
-    void testAssignEmployeesWithThePositionsToTheOrderIsNotAssignedException() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
-        Order order = getTestUser().getOrders().get(0);
-        order.setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail(null)).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(false);
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
-        when(employeeRepository.findByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeRepository.findPositionById(1L)).thenReturn(Optional.of(1L));
-        AssignEmployeesForOrderDto assignEmployeeForOrderDto = assignEmployeesForOrderDto();
-        assertThrows(FoundException.class,
-            () -> ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto, "abc"));
-    }
-
-    @ParameterizedTest
-    @CsvSource({"2, Закріплено менеджера обдзвону",
-        "3, Закріплено логіста",
-        "4, Закріплено штурмана",
-        "5, Закріплено водія"})
-    void testAssignEmployeesWithThePositionsToTheOrderParams(long diffParam, String eventName) {
-        User user = ModelUtils.getTestUser();
-        user.setRecipientName("Петро");
-        user.setRecipientSurname("Петренко");
-        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
-        Order order = getTestUser().getOrders().get(0);
-        order.setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail(null)).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(false);
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
-        when(employeeRepository.findByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeRepository.findPositionById(1L)).thenReturn(Optional.of(diffParam));
-        ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto(), "abc");
-        verify(employeeOrderPositionRepository, times(1)).save(any());
-        verify(eventService, times(1)).save(eventName,
-            employee.getFirstName() + "  " + employee.getLastName(), order);
     }
 
     @Test
@@ -1878,6 +1728,15 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void getPaymentInfoWithoutPayment() {
+        Order order = getOrderWithoutPayment();
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        assertEquals(ModelUtils.getPaymentTableInfoDto2(), ubsManagementService.getPaymentInfo(order.getId(), 100L));
+    }
+
+    @Test
     void getPaymentInfoExceptionTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
@@ -2229,36 +2088,60 @@ class UBSManagementServiceImplTest {
     void addBonusesToUserTest() {
         Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
         User user = order.getUser();
+        Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(bagRepository.findBagsByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
 
-        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
+        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L, employee.getEmail());
 
         verify(orderRepository).findById(1L);
         verify(orderRepository).save(order);
         verify(userRepository).save(user);
         verify(notificationService).notifyBonuses(order, 859L);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
+    }
+
+    @Test
+    void addBonusesToUserWithoutExportedBagsTest() {
+        Order order = ModelUtils.getOrderWithoutExportedBags();
+        User user = order.getUser();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findBagsByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+
+        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L, employee.getEmail());
+
+        verify(orderRepository).findById(1L);
+        verify(orderRepository).save(order);
+        verify(userRepository).save(user);
+        verify(notificationService).notifyBonuses(order, 259L);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
     }
 
     @Test
     void addBonusesToUserWithoutOrderTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         AddBonusesToUserDto dto = getAddBonusesToUserDto();
-        assertThrows(NotFoundException.class, () -> ubsManagementService.addBonusesToUser(dto, 1L));
+        String email = getEmployee().getEmail();
+        assertThrows(NotFoundException.class, () -> ubsManagementService.addBonusesToUser(dto, 1L, email));
     }
 
     @Test
     void addBonusesToUserWithNoOverpaymentTest() {
-        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        Order order = getOrderForGetOrderStatusData2Test();
+        String email = getEmployee().getEmail();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(bagRepository.findBagsByOrderId(1L)).thenReturn(ModelUtils.getBag3list());
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
 
         AddBonusesToUserDto addBonusesToUserDto = ModelUtils.getAddBonusesToUserDto();
-        assertThrows(BadRequestException.class, () -> ubsManagementService.addBonusesToUser(addBonusesToUserDto, 1L));
+        assertThrows(BadRequestException.class,
+            () -> ubsManagementService.addBonusesToUser(addBonusesToUserDto, 1L, email));
     }
 
     @Test
@@ -2273,5 +2156,46 @@ class UBSManagementServiceImplTest {
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
         assertEquals(true, ubsManagementService.checkEmployeeForOrder(order.getId(), "test@gmail.com"));
+    }
+
+    @Test
+    void updateOrderStatusToExpected() {
+        ubsManagementService.updateOrderStatusToExpected();
+        verify(orderRepository).updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
+            OrderStatus.ON_THE_ROUTE.name(),
+            LocalDate.now());
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideOrdersWithDifferentInitialExportDetailsForUpdateOrderExportDetails")
+    void updateOrderExportDetailsSettingForDifferentInitialExportDetailsTest(Order order, String expectedHistoryEvent) {
+        Employee employee = getEmployee();
+        List<ReceivingStation> receivingStations = List.of(getReceivingStation());
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(receivingStations);
+
+        ubsManagementService.updateOrderExportDetails(order.getId(), testDetails, employee.getEmail());
+        verify(orderRepository, times(1)).save(order);
+        verify(eventService, times(1)).saveEvent(expectedHistoryEvent, employee.getEmail(), order);
+    }
+
+    private static Stream<Arguments> provideOrdersWithDifferentInitialExportDetailsForUpdateOrderExportDetails() {
+        Order orderWithoutExportDate = getOrderExportDetails();
+        orderWithoutExportDate.setDateOfExport(null);
+        Order orderWithoutDeliverFromTo = getOrderExportDetails();
+        orderWithoutDeliverFromTo.setDeliverFrom(null);
+        orderWithoutDeliverFromTo.setDeliverTo(null);
+        return Stream.of(
+            Arguments.of(getOrderExportDetailsWithNullValues(), OrderHistory.SET_EXPORT_DETAILS),
+            Arguments.of(getOrderExportDetailsWithExportDate(), OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(getOrderExportDetailsWithExportDateDeliverFrom(), OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(getOrderExportDetailsWithExportDateDeliverFromTo(), OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(getOrderExportDetails(), OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(getOrderExportDetailsWithDeliverFromTo(), OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(orderWithoutExportDate, OrderHistory.UPDATE_EXPORT_DETAILS),
+            Arguments.of(orderWithoutExportDate, OrderHistory.UPDATE_EXPORT_DETAILS));
     }
 }

@@ -1,6 +1,7 @@
 package greencity.dto;
 
 import greencity.dto.courier.CourierDto;
+import greencity.enums.CourierLimit;
 import lombok.*;
 import java.util.List;
 
@@ -12,11 +13,9 @@ import java.util.List;
 @Builder
 public class TariffsForLocationDto {
     private Long tariffInfoId;
-    private Long minAmountOfBigBags;
-    private Long maxAmountOfBigBags;
-    private Long minPriceOfOrder;
-    private Long maxPriceOfOrder;
-    private String courierLimit;
+    private Long min;
+    private Long max;
+    private CourierLimit courierLimit;
     private RegionDto regionDto;
     private List<LocationsDtos> locationsDtosList;
     private CourierDto courierDto;

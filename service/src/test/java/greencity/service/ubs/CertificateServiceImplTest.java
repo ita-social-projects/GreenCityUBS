@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +52,18 @@ class CertificateServiceImplTest {
         when(modelMapper.map(certificateDtoForAdding, Certificate.class)).thenReturn(certificate);
         certificateService.addCertificate(certificateDtoForAdding);
         verify(certificateRepository, times(1)).save(certificate);
+    }
+
+    @Test
+    void addCertificateBadRequestException() {
+        CertificateDtoForAdding certificate = ModelUtils.getCertificateDtoForAdding();
+        when(certificateRepository.existsCertificateByCode("1111-1234")).thenReturn(true);
+
+        assertThrows(BadRequestException.class,
+            () -> certificateService.addCertificate(certificate));
+
+        verify(certificateRepository).existsCertificateByCode("1111-1234");
+        verify(certificateRepository, never()).save(any(Certificate.class));
     }
 
     @Test

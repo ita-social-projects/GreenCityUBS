@@ -1,6 +1,6 @@
 package greencity.mapping.service;
 
-import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
 import greencity.entity.order.Bag;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class GetTariffServiceDtoMapper extends AbstractConverter<Bag, GetTariffS
             .nameEng(source.getNameEng())
             .description(source.getDescription())
             .descriptionEng(source.getDescriptionEng())
-            .minAmountOfBags(source.getMinAmountOfBags().name())
+            .limitIncluded(source.getLimitIncluded())
             .build();
     }
 }
