@@ -1,5 +1,6 @@
 package greencity.client.config;
 
+import feign.FeignException;
 import feign.hystrix.FallbackFactory;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
@@ -10,6 +11,8 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -63,7 +66,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
+            public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto) {
                 log.error(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
             }
@@ -83,7 +86,15 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             @Override
             public void updateAuthorities(UpdateEmployeeAuthoritiesDto dto) {
                 log.error(ErrorMessage.EMPLOYEE_AUTHORITIES_DONT_UPDATE);
-                throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITIES_DONT_UPDATE, throwable);
+
+                if (throwable instanceof FeignException && ((FeignException) throwable).status() == 403) {
+                    throw new AccessDeniedException("You don't have rights for this action");
+                } else if (throwable instanceof FeignException && ((FeignException) throwable).status() == 404) {
+                    throw new BadRequestException(ErrorMessage.EMPLOYEE_DOESNT_EXIST);
+                } else {
+                    throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITIES_DONT_UPDATE,
+                        throwable);
+                }
             }
 
             @Override
