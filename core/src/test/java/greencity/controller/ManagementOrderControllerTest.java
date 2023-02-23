@@ -394,19 +394,6 @@ class ManagementOrderControllerTest {
     }
 
     @Test
-    void returnOverpaymentTest() throws Exception {
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto = ModelUtils.getOverpaymentInfoRequestDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String dtoJson = objectMapper.writeValueAsString(overpaymentInfoRequestDto);
-        mockMvc.perform(post(ubsLink + "/return-overpayment")
-            .param("orderId", "1")
-            .content(dtoJson)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     void returnOverpaymentAsMoneyInfoTest() throws Exception {
         mockMvc.perform(get(ubsLink + "/return-overpayment-as-money-info")
             .param("orderId", "2")

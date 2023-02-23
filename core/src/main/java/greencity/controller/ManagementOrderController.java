@@ -715,30 +715,6 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller returns overpayment to user.
-     *
-     * @param orderId                   {@link Long}.
-     * @param overpaymentInfoRequestDto {@link OverpaymentInfoRequestDto}.
-     * @return {@link HttpStatus} - http status.
-     * @author Ostap Mykhailivskyi
-     */
-    @ApiOperation(value = "Return overpayment to user")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/return-overpayment")
-    public ResponseEntity<HttpStatus> returnOverpayment(@RequestParam Long orderId,
-        @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto,
-        Principal principal) {
-        ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto, principal.getName());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    /**
      * Controller saves manual payment.
      *
      * @param orderId          {@link Long}.

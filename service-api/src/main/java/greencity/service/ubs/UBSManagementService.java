@@ -33,13 +33,6 @@ public interface UBSManagementService {
     /**
      * Method returns overpayment to user.
      *
-     * @author Ostap Mykhailivskyi
-     */
-    void returnOverpayment(Long orderId, OverpaymentInfoRequestDto overpaymentInfoRequestDto, String email);
-
-    /**
-     * Method returns overpayment to user.
-     *
      * @return {@link PaymentTableInfoDto};
      * @author Ostap Mykhailivskyi
      */
