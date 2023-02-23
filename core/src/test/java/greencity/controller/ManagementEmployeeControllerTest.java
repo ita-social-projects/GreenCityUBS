@@ -5,7 +5,7 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
@@ -80,10 +80,10 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void saveEmployeeTest() throws Exception {
-        EmployeeDto dto = new EmployeeDto();
+        EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
-        MockMultipartFile jsonFile = new MockMultipartFile("employeeDto",
+        MockMultipartFile jsonFile = new MockMultipartFile("employeeWithTariffsIdDto",
             "", "application/json", responseJSON.getBytes());
 
         mockMvc.perform(multipart(UBS_LINK + SAVE_LINK)
@@ -128,10 +128,10 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void updateEmployeeTest() throws Exception {
-        EmployeeDto dto = new EmployeeDto();
+        EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
-        MockMultipartFile jsonFile = new MockMultipartFile("employeeDto",
+        MockMultipartFile jsonFile = new MockMultipartFile("employeeWithTariffsIdDto",
             "", "application/json", responseJSON.getBytes());
         MockMultipartHttpServletRequestBuilder builder =
             MockMvcRequestBuilders.multipart(UBS_LINK + UPDATE_LINK);

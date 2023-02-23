@@ -13,4 +13,5 @@ public class OrderDetailStatusRequestDto {
     String orderPaymentStatus;
     String adminComment;
     String cancellationComment;
+    String cancellationReason;
 }

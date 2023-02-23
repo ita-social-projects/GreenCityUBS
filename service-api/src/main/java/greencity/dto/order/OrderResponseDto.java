@@ -36,7 +36,7 @@ public class OrderResponseDto implements Serializable {
 
     private Set<@Length(min = 3, max = 10) @Pattern(regexp = "[0-9]+") String> additionalOrders;
 
-    @Length(max = 170)
+    @Length(max = 255)
     private String orderComment;
 
     @Valid

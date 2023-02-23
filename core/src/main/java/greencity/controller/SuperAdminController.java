@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.AddNewTariffDto;
-import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.AddingReceivingStationDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierUpdateDto;
@@ -42,7 +41,6 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
-import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.entity.order.Courier;
@@ -425,66 +423,6 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for set limit description.
-     *
-     * @return {@link GetTariffsInfoDto}
-     * @author Vadym Makitra
-     */
-    @ApiOperation(value = "Set new Limit Description")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffsInfoDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
-    @PatchMapping("/setLimitDescription/{tariffId}")
-    public ResponseEntity<GetTariffsInfoDto> setLimitDescription(
-        @PathVariable Long tariffId, @RequestBody String limitDescription) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(superAdminService.setLimitDescription(tariffId, limitDescription));
-    }
-
-    /**
-     * Controller for include Bag.
-     *
-     * @param id {@link Integer} - bag id
-     * @return {@link GetTariffServiceDto} - tariff service dto
-     * @author Vadym Makitra
-     */
-    @ApiOperation(value = "Include limit for bag")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PutMapping("/includeLimit/{id}")
-    public ResponseEntity<GetTariffServiceDto> includeBag(
-        @PathVariable Integer id) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.includeLimit(id));
-    }
-
-    /**
-     * Controller for include Bag.
-     *
-     * @param id {@link Integer} - bag id
-     * @return {@link GetTariffServiceDto} - tariff service dto
-     * @author Vadym Makitra
-     */
-    @ApiOperation(value = "Exclude limit for bag")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PutMapping("/excludeLimit/{id}")
-    public ResponseEntity<GetTariffServiceDto> excludeBag(
-        @PathVariable Integer id) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.excludeLimit(id));
-    }
-
-    /**
      * Controller for deactivate courier's.
      *
      * @param id - courier id that will need to be deleted;
@@ -637,58 +575,28 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for updating TariffsInfo and setting courierLimit by amount of
-     * bags.
+     * Controller for updating Tariff Limits by sum price of Order or by amount of
+     * Bags.
      *
-     * @author Yurii Fedorko
-     */
-    @ApiOperation(value = "Edit tariffLimits by  sum of Bags")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
-    @PatchMapping("/setLimitsByAmountOfBags/{tariffId}")
-    public ResponseEntity<HttpStatus> setLimitsByAmountOfBags(@Valid @PathVariable Long tariffId,
-        @Valid @RequestBody EditAmountOfBagDto dto) {
-        superAdminService.setTariffLimitByAmountOfBags(tariffId, dto);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    /**
-     * Controller for updating TariffsInfo and setting courierLimit by sum of Order.
+     * @param tariffId {@link Long} TariffsInfo id
+     * @param dto      {@link SetTariffLimitsDto} dto
      *
-     * @author Yurii Fedorko
+     * @author Julia Seti
      */
-    @ApiOperation(value = "Edit tariff limits by sum of order")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
-    @PatchMapping("/setLimitsBySumOfOrder/{tariffId}")
-    public ResponseEntity<HttpStatus> setLimitsByPriceOfOrder(@Valid @PathVariable Long tariffId,
-        @Valid @RequestBody EditPriceOfOrder dto) {
-        superAdminService.setTariffLimitBySumOfOrder(tariffId, dto);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    @ApiOperation(value = "Edit tariff limits by sum of order or by sum of Bags")
+    @ApiOperation(value = "Set tariff limits")
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PatchMapping("/setTariffLimits/{tariffId}")
-    public ResponseEntity<HttpStatus> setLimitsForTariff(@Valid @PathVariable Long tariffId,
-        @Valid @RequestBody SetTariffLimitsDto setTariffLimits) {
-        superAdminService.setTariffLimits(tariffId, setTariffLimits);
+    @PutMapping("/setTariffLimits/{tariffId}")
+    public ResponseEntity<HttpStatus> setLimitsForTariff(
+        @Valid @PathVariable Long tariffId,
+        @Valid @RequestBody SetTariffLimitsDto dto) {
+        superAdminService.setTariffLimits(tariffId, dto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
