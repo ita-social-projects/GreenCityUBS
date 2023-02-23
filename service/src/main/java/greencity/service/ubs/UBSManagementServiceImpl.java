@@ -1162,15 +1162,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return sumToPay - paidAmount > 0 ? Math.abs(sumToPay - paidAmount) : 0L;
     }
 
-    private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
-        return ChangeOfPoints.builder()
-            .date(LocalDateTime.now())
-            .user(user)
-            .order(order)
-            .amount(Math.toIntExact(amount))
-            .build();
-    }
-
     /**
      * {@inheritDoc}
      */
