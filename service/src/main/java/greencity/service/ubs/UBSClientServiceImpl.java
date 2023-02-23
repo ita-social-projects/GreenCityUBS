@@ -28,7 +28,6 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
-import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
 import greencity.entity.user.employee.Employee;
