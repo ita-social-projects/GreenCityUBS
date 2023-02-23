@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Seti-7" author="Julia Seti">
+
+        <insert tableName="service">
+            <column name="price">50</column>
+            <column name="created_at">2023-02-21</column>
+            <column name="created_by">1</column>
+            <column name="tariffs_info_id">1</column>
+            <column name="name">Сервіс</column>
+            <column name="name_eng">Service</column>
+            <column name="description">Сервіс кур'єра УБС в локації Київ</column>
+            <column name="description_eng">
+                UBS courier service in Kyiv location</column>
+        </insert>
+        <insert tableName="service">
+            <column name="price">50</column>
+            <column name="created_at">2023-02-21</column>
+            <column name="created_by">1</column>
+            <column name="tariffs_info_id">2</column>
+            <column name="name">Сервіс</column>
+            <column name="name_eng">Service</column>
+            <column name="description">Сервіс кур'єра УБС в локації Київ 20 кілометрів</column>
+            <column name="description_eng">
+                UBS courier service in Kyiv 20 km location</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

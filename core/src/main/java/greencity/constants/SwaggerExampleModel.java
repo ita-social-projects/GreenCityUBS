@@ -19,7 +19,9 @@ public final class SwaggerExampleModel {
         + "</div>";
 
     private static final String EMPLOYEE_BEGIN =
-        "  \"firstName\": \"string\",\n"
+        "  \"employeeDto\": \n"
+            + "{\n"
+            + "  \"firstName\": \"string\",\n"
             + "  \"lastName\": \"string\",\n"
             + "  \"phoneNumber\": \"string\",\n"
             + "  \"email\": \"string\",\n";
@@ -30,7 +32,7 @@ public final class SwaggerExampleModel {
             + "      \"id\": 0,\n"
             + "      \"name\": \"string\"\n"
             + "  }\n"
-            + " ],\n"
+            + " ]},\n"
             + " \"tariffId\": "
             + "  [\n 0 \n"
             + "  ]\n"
@@ -46,8 +48,8 @@ public final class SwaggerExampleModel {
     public static final String EMPLOYEE_DTO =
         BEFORE_EXAMPLE
             + "{\n"
-            + "  \"id\": 0,\n"
             + EMPLOYEE_BEGIN
+            + "  \"id\": 0,\n"
             + EMPLOYEE_END
             + AFTER_EXAMPLE;
 }

@@ -684,11 +684,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
             if (bagOptional.isPresent() && checkOrderStatusAboutExportedWaste(order)) {
                 Optional<Long> exporterWasteWas = Optional.empty();
+                Optional<Long> confirmWasteWas = Optional.empty();
                 Bag bag = bagOptional.get();
                 if (Boolean.TRUE.equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     exporterWasteWas =
                         Optional
                             .ofNullable(orderDetailRepository.getExporterWaste(orderId, entry.getKey().longValue()));
+                    confirmWasteWas =
+                        Optional.ofNullable(orderDetailRepository.getConfirmWaste(orderId, entry.getKey().longValue()));
                 }
                 if (entry.getValue().longValue() != exporterWasteWas.orElse(0L)) {
                     if (countOfChanges == 0) {
@@ -696,7 +699,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         countOfChanges++;
                     }
                     values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
-                        .append(exporterWasteWas.orElse(0L))
+                        .append(exporterWasteWas.orElse(confirmWasteWas.orElse(0L)))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
@@ -707,13 +710,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return order.getOrderStatus() == OrderStatus.ADJUSTMENT
             || order.getOrderStatus() == OrderStatus.CONFIRMED
             || order.getOrderStatus() == OrderStatus.FORMED
-            || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT;
+            || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT
+            || order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+            || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF;
     }
 
     private boolean checkOrderStatusAboutExportedWaste(Order order) {
-        return order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
-            || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-            || order.getOrderStatus() == OrderStatus.DONE
+        return order.getOrderStatus() == OrderStatus.DONE
             || order.getOrderStatus() == OrderStatus.CANCELED;
     }
 
@@ -925,15 +928,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.FORMED) {
                 eventService.saveEvent(OrderHistory.ORDER_FORMED, email, order);
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
-                    + order.getImageReasonNotTakingBags(), email, order);
-            } else if (order.getOrderStatus() == OrderStatus.CANCELED
-                && (order.getPointsToUse() != 0 || !order.getCertificates().isEmpty())) {
-                notificationService.notifyBonusesFromCanceledOrder(order);
-                returnAllPointsFromOrder(order);
-                order.setCancellationComment(dto.getCancellationComment());
-                eventService.saveEvent(OrderHistory.ORDER_CANCELLED + "  " + dto.getCancellationComment(), email,
-                    order);
+                eventService.saveEvent(
+                    OrderHistory.ORDER_NOT_TAKEN_OUT + ".  " + order.getReasonNotTakingBagDescription(), email, order);
+            } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                setOrderCancellation(order, dto.getCancellationReason(), dto.getCancellationComment());
+                eventService.saveEvent(OrderHistory.ORDER_CANCELLED, email, order);
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
                 eventService.saveEvent(OrderHistory.ORDER_DONE, email, order);
             } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
@@ -950,6 +949,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         return buildStatuses(order, payment.get(0));
+    }
+
+    private void setOrderCancellation(Order order, String cancellationReason, String cancellationComment) {
+        if (order.getPointsToUse() != 0 || !order.getCertificates().isEmpty()) {
+            notificationService.notifyBonusesFromCanceledOrder(order);
+            returnAllPointsFromOrder(order);
+        }
+        order.setCancellationComment(cancellationComment);
+        order.setCancellationReason(CancellationReason.valueOf(cancellationReason));
     }
 
     private OrderDetailStatusDto buildStatuses(Order order, Payment payment) {

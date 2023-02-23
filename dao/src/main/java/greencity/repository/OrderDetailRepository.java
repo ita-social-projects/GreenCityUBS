@@ -84,9 +84,8 @@ public interface OrderDetailRepository extends JpaRepository<Order, Integer> {
      * @param bagId   bag id {@link Long}
      * @author Orest Mahdziak
      */
-    @Query(value = "SELECT CONFIRMED_QUANTITY FROM ORDER_BAG_MAPPING "
+    @Query(value = "SELECT EXPORTED_QUANTITY FROM ORDER_BAG_MAPPING "
         + "WHERE ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
-
     Long getExporterWaste(Long orderId, Long bagId);
 
     /**
