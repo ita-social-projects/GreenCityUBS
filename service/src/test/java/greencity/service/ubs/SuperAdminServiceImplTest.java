@@ -1199,19 +1199,101 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deactivateTariff() {
-        TariffsInfo tariffsInfo = ModelUtils.getTariffInfoWithLimitOfBags();
-        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
-        superAdminService.deactivateTariffCard(1L);
-        verify(tariffsInfoRepository).findById(anyLong());
-        verify(tariffsInfoRepository).save(tariffsInfo);
+    void switchTariffStatusToDeactivated() {
+        TariffsInfo tariffInfo = ModelUtils.getTariffsInfoActive();
+
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+        when(tariffsInfoRepository.save(tariffInfo)).thenReturn(tariffInfo);
+
+        superAdminService.switchTariffStatus(1L, LocationStatus.DEACTIVATED);
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository).save(tariffInfo);
     }
 
     @Test
-    void deactivateTariffTestThrows() {
-        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.empty());
+    void switchTariffStatusToActive() {
+        TariffsInfo tariffInfo = ModelUtils.getTariffsInfoDeactivated();
+
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+        when(tariffsInfoRepository.save(tariffInfo)).thenReturn(tariffInfo);
+
+        superAdminService.switchTariffStatus(1L, LocationStatus.ACTIVE);
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository).save(tariffInfo);
+    }
+
+    @Test
+    void switchTariffStatusThrowNotFoundException() {
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.empty());
+
         assertThrows(NotFoundException.class,
-            () -> superAdminService.deactivateTariffCard(1L));
+            () -> superAdminService.switchTariffStatus(1L, LocationStatus.ACTIVE));
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository, never()).save(any(TariffsInfo.class));
+    }
+
+    @Test
+    void switchTariffStatusFromActiveToActiveThrowBadRequestException() {
+        TariffsInfo tariffInfo = ModelUtils.getTariffsInfoActive();
+
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+
+        Throwable t = assertThrows(BadRequestException.class,
+            () -> superAdminService.switchTariffStatus(1L, LocationStatus.ACTIVE));
+        assertEquals(t.getMessage(),
+            String.format(ErrorMessage.TARIFF_ALREADY_HAS_THIS_STATUS, 1L, LocationStatus.ACTIVE));
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository, never()).save(tariffInfo);
+    }
+
+    @Test
+    void switchTariffStatusToActiveWithoutBagThrowBadRequestException() {
+        TariffsInfo tariffInfo = ModelUtils.getTariffsInfoDeactivated();
+        tariffInfo.setBags(Collections.emptyList());
+
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+
+        Throwable t = assertThrows(BadRequestException.class,
+            () -> superAdminService.switchTariffStatus(1L, LocationStatus.ACTIVE));
+        assertEquals(t.getMessage(), ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS);
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository, never()).save(tariffInfo);
+    }
+
+    @Test
+    void switchTariffStatusToActiveWithoutLimitsThrowBadRequestException() {
+        TariffsInfo tariffInfo = ModelUtils.getTariffsInfoDeactivated();
+        tariffInfo.setMax(null);
+        tariffInfo.setMin(null);
+
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+
+        Throwable t = assertThrows(BadRequestException.class,
+            () -> superAdminService.switchTariffStatus(1L, LocationStatus.ACTIVE));
+        assertEquals(t.getMessage(), ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS);
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository, never()).save(tariffInfo);
+    }
+
+    @Test
+    void switchTariffStatusToActiveWithoutServiceThrowBadRequestException() {
+        TariffsInfo tariffInfo = ModelUtils.getTariffsInfoDeactivated();
+        tariffInfo.setService(null);
+
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+
+        Throwable t = assertThrows(BadRequestException.class,
+            () -> superAdminService.switchTariffStatus(1L, LocationStatus.ACTIVE));
+        assertEquals(t.getMessage(), ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_SERVICE);
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository, never()).save(tariffInfo);
     }
 
     @Test
