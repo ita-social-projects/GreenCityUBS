@@ -384,7 +384,7 @@ public interface UBSClientService {
      *
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
      */
-    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email);
+    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
 
     /**
      * Methods returns all locations.

@@ -1954,10 +1954,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
+    public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto) {
         Employee employee = employeeRepository.findByEmail(dto.getEmployeeEmail())
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
-        userRemoteClient.updateEmployeesAuthorities(dto, email);
+        userRemoteClient.updateEmployeesAuthorities(dto);
     }
 
     @Override
