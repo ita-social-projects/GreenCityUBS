@@ -1,6 +1,5 @@
 package greencity.configuration;
 
-import greencity.client.UserRemoteClient;
 import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
@@ -142,7 +141,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
-                SUPER_ADMIN_LINK + "/deactivateCourier/{id}")
+                SUPER_ADMIN_LINK + "/deactivateCourier/{id}",
+                SUPER_ADMIN_LINK + "/switchTariffStatus/{tariffId}")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
                 UBS_MANAG_LINK + "/update-order-page-admin-info/{id}",

@@ -19,6 +19,7 @@ import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
+import greencity.enums.LocationStatus;
 import greencity.filters.TariffsInfoFilterCriteria;
 
 import java.util.List;
@@ -241,13 +242,14 @@ public interface SuperAdminService {
     void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimits);
 
     /**
-     * Method for deactivation or deleting Tariff depends on orders were made by
-     * this tariff.
+     * Method to switch the tariff status to active or deactivated.
      *
-     * @param tariffId - id of tariff
+     * @param tariffId     {@link Long} tariff id
+     * @param tariffStatus {@link LocationStatus} tariff status
      *
+     * @author Julia Seti
      */
-    void deactivateTariffCard(Long tariffId);
+    void switchTariffStatus(Long tariffId, LocationStatus tariffStatus);
 
     /**
      * Method for editing Locations.

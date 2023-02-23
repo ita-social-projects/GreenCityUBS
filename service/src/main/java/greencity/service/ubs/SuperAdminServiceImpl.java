@@ -631,27 +631,29 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     @Transactional
-    public void deactivateTariffCard(Long tariffId) {
+    public void switchTariffStatus(Long tariffId, LocationStatus tariffStatus) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
-
-        var tariffLocations = changeTariffLocationsStatusToDeactivated(
-            tariffsInfo.getTariffLocations());
-
-        tariffsInfo.setTariffLocations(tariffLocations);
-        tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED);
-
+        if (tariffsInfo.getLocationStatus().equals(tariffStatus)) {
+            throw new BadRequestException(
+                String.format(ErrorMessage.TARIFF_ALREADY_HAS_THIS_STATUS, tariffId, tariffStatus));
+        }
+        if (tariffStatus.equals(LocationStatus.ACTIVE)) {
+            checkIfTariffParamsAreValidForActivation(tariffsInfo);
+        }
+        tariffsInfo.setLocationStatus(tariffStatus);
         tariffsInfoRepository.save(tariffsInfo);
     }
 
-    private Set<TariffLocation> changeTariffLocationsStatusToDeactivated(Set<TariffLocation> tariffLocations) {
-        return tariffLocations.stream()
-            .map(this::deactivateTariffLocation)
-            .collect(Collectors.toSet());
-    }
-
-    private TariffLocation deactivateTariffLocation(TariffLocation tariffLocation) {
-        tariffLocation.setLocationStatus(LocationStatus.DEACTIVATED);
-        return tariffLocation;
+    private void checkIfTariffParamsAreValidForActivation(TariffsInfo tariffsInfo) {
+        if (tariffsInfo.getBags().isEmpty()) {
+            throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS);
+        }
+        if (tariffsInfo.getMin() == null && tariffsInfo.getMax() == null) {
+            throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS);
+        }
+        if (tariffsInfo.getService() == null) {
+            throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_SERVICE);
+        }
     }
 
     @Override

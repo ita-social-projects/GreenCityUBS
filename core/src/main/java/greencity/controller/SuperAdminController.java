@@ -12,6 +12,7 @@ import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.enums.LocationStatus;
 import greencity.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -601,21 +602,27 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for deactivation of TariffsInfo.
+     * Controller for switching tariff activation status.
      *
-     * @author Yurii Fedorko
+     * @param tariffId     {@link Long} tariff id
+     * @param tariffStatus {@link LocationStatus} tariff activation status
+     *
+     * @author Julia Seti
      */
-    @ApiOperation(value = "Deactivate tariff")
+    @ApiOperation(value = "Switch tariff activation status by tariff id")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
-    @PutMapping("/deactivateTariff/{tariffId}")
-    public ResponseEntity<HttpStatus> deactivateTariff(@PathVariable Long tariffId) {
-        superAdminService.deactivateTariffCard(tariffId);
+    @PatchMapping("/switchTariffStatus/{tariffId}")
+    public ResponseEntity<HttpStatus> switchTariffStatus(
+        @PathVariable Long tariffId,
+        @Valid @RequestBody LocationStatus tariffStatus) {
+        superAdminService.switchTariffStatus(tariffId, tariffStatus);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
