@@ -228,8 +228,7 @@ class ManagementEmployeeControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        String email = principal.getName();
-        verify(ubsClientService).updateEmployeesAuthorities(dto, email);
+        verify(ubsClientService).updateEmployeesAuthorities(dto);
     }
 
     @Test
