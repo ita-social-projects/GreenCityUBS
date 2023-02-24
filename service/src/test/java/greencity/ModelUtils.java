@@ -94,7 +94,6 @@ import greencity.dto.order.UpdateOrderDetailDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
@@ -1519,14 +1518,6 @@ public class ModelUtils {
             .description("violation1")
             .images(new ArrayList<>())
             .violationDate(localdatetime)
-            .build();
-    }
-
-    public static OverpaymentInfoRequestDto getOverpaymentInfoRequestDto() {
-        return OverpaymentInfoRequestDto.builder()
-            .overpayment(200L)
-            .bonuses(300L)
-            .comment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)
             .build();
     }
 
