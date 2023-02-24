@@ -5,7 +5,6 @@ import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.order.*;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
