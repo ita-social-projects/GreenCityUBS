@@ -20,7 +20,6 @@ import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.enums.LocationStatus;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -787,57 +786,50 @@ class SuperAdminControllerTest {
     @Test
     @SneakyThrows
     void switchTariffStatus() {
-        String requestJSON = new ObjectMapper().writeValueAsString(LocationStatus.ACTIVE);
         mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
             .principal(principal)
-            .content(requestJSON)
             .param("tariffId", "1L")
-            .contentType(MediaType.APPLICATION_JSON))
+            .param("status", "Active"))
             .andExpect(status().isOk());
 
-        verify(superAdminService).switchTariffStatus(1L, LocationStatus.ACTIVE);
+        verify(superAdminService).switchTariffStatus(1L, "Active");
     }
 
     @Test
     @SneakyThrows
     void switchTariffStatusThrowNotFoundException() {
-        String requestJSON = new ObjectMapper().writeValueAsString(LocationStatus.ACTIVE);
-
         doThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L))
-            .when(superAdminService).switchTariffStatus(1L, LocationStatus.ACTIVE);
+            .when(superAdminService).switchTariffStatus(1L, "Active");
 
         mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
             .principal(principal)
-            .content(requestJSON)
             .param("tariffId", "1L")
+            .param("status", "Active")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
             .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(superAdminService).switchTariffStatus(1L, LocationStatus.ACTIVE);
+        verify(superAdminService).switchTariffStatus(1L, "Active");
     }
 
     @Test
     @SneakyThrows
     void switchTariffStatusThrowBadRequestException() {
-        String requestJSON = new ObjectMapper().writeValueAsString(LocationStatus.ACTIVE);
-
         doThrow(new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS))
-            .when(superAdminService).switchTariffStatus(1L, LocationStatus.ACTIVE);
+            .when(superAdminService).switchTariffStatus(1L, "Active");
 
         mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
             .principal(principal)
-            .content(requestJSON)
             .param("tariffId", "1L")
-            .contentType(MediaType.APPLICATION_JSON))
+            .param("status", "Active"))
             .andExpect(status().isBadRequest())
             .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(superAdminService).switchTariffStatus(1L, LocationStatus.ACTIVE);
+        verify(superAdminService).switchTariffStatus(1L, "Active");
     }
 
     @Test
