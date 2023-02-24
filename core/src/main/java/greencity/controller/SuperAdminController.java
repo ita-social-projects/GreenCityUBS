@@ -12,8 +12,11 @@ import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.enums.LocationStatus;
 import greencity.exceptions.BadRequestException;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,9 +50,6 @@ import greencity.dto.service.TariffServiceDto;
 import greencity.entity.order.Courier;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
@@ -604,8 +604,8 @@ class SuperAdminController {
     /**
      * Controller for switching tariff activation status.
      *
-     * @param tariffId     {@link Long} tariff id
-     * @param tariffStatus {@link LocationStatus} tariff activation status
+     * @param tariffId {@link Long} tariff id
+     * @param status   {@link String} tariff activation status
      *
      * @author Julia Seti
      */
@@ -620,9 +620,10 @@ class SuperAdminController {
     })
     @PatchMapping("/switchTariffStatus/{tariffId}")
     public ResponseEntity<HttpStatus> switchTariffStatus(
-        @PathVariable Long tariffId,
-        @Valid @RequestBody LocationStatus tariffStatus) {
-        superAdminService.switchTariffStatus(tariffId, tariffStatus);
+        @PathVariable @ApiParam(name = "tariffId", required = true, value = "tariff id") Long tariffId,
+        @Valid @RequestParam @ApiParam(name = "status", required = true, value = "status",
+            allowableValues = "Active, Deactivated") String status) {
+        superAdminService.switchTariffStatus(tariffId, status);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

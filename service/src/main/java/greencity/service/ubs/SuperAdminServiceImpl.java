@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -631,17 +632,26 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     @Transactional
-    public void switchTariffStatus(Long tariffId, LocationStatus tariffStatus) {
+    public void switchTariffStatus(Long tariffId, String tariffStatus) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
-        if (tariffsInfo.getLocationStatus().equals(tariffStatus)) {
+        LocationStatus status = tryToGetTariffStatus(tariffStatus);
+        if (tariffsInfo.getLocationStatus().equals(status)) {
             throw new BadRequestException(
-                String.format(ErrorMessage.TARIFF_ALREADY_HAS_THIS_STATUS, tariffId, tariffStatus));
+                String.format(ErrorMessage.TARIFF_ALREADY_HAS_THIS_STATUS, tariffId, tariffStatus.toUpperCase()));
         }
-        if (tariffStatus.equals(LocationStatus.ACTIVE)) {
+        if (status.equals(LocationStatus.ACTIVE)) {
             checkIfTariffParamsAreValidForActivation(tariffsInfo);
         }
-        tariffsInfo.setLocationStatus(tariffStatus);
+        tariffsInfo.setLocationStatus(status);
         tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    private LocationStatus tryToGetTariffStatus(String tariffStatus) {
+        if (Objects.equals(tariffStatus.toUpperCase(), "ACTIVE")
+            || Objects.equals(tariffStatus.toUpperCase(), "DEACTIVATED")) {
+            return LocationStatus.valueOf(tariffStatus.toUpperCase());
+        }
+        throw new BadRequestException(ErrorMessage.UNRESOLVABLE_TARIFF_STATUS);
     }
 
     private void checkIfTariffParamsAreValidForActivation(TariffsInfo tariffsInfo) {
