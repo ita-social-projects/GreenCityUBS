@@ -51,7 +51,7 @@
     </changeSet>
     <changeSet author="User (generated)" id="1614595847330-9">
         <createTable tableName="bag">
-            <column autoIncrement="true" name="id" type="SERIAL">
+            <column autoIncrement="true" name="id" type="SERIAL" startWith="7">
                 <constraints primaryKey="true" primaryKeyName="bag_pkey"/>
             </column>
             <column name="capacity" type="INT">
