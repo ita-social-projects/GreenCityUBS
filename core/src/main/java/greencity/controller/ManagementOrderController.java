@@ -28,7 +28,6 @@ import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.table.CustomTableViewDto;
@@ -712,30 +711,6 @@ public class ManagementOrderController {
         @RequestParam Long sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.returnOverpaymentInfo(orderId, sumToPay, 1L));
-    }
-
-    /**
-     * Controller returns overpayment to user.
-     *
-     * @param orderId                   {@link Long}.
-     * @param overpaymentInfoRequestDto {@link OverpaymentInfoRequestDto}.
-     * @return {@link HttpStatus} - http status.
-     * @author Ostap Mykhailivskyi
-     */
-    @ApiOperation(value = "Return overpayment to user")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/return-overpayment")
-    public ResponseEntity<HttpStatus> returnOverpayment(@RequestParam Long orderId,
-        @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto,
-        Principal principal) {
-        ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto, principal.getName());
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
