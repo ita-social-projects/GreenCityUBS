@@ -785,6 +785,34 @@ class SuperAdminControllerTest {
 
     @Test
     @SneakyThrows
+    void getTariffLimitsTest() {
+        mockMvc.perform(put(ubsLink + "/getTariffLimits/{tariffId}", 1L)
+            .principal(principal)
+            .param("tariffId", "1"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        verify(superAdminService).getTariffLimits(1L);
+    }
+
+    @Test
+    @SneakyThrows
+    void getTariffLimitsThrowNotFoundException() {
+        when(superAdminService.getTariffLimits(1L))
+            .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L));
+        mockMvc.perform(put(ubsLink + "/getTariffLimits/{tariffId}", 1L)
+            .principal(principal)
+            .param("tariffId", "1"))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).getTariffLimits(1L);
+    }
+
+    @Test
+    @SneakyThrows
     void switchTariffStatus() {
         mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
             .principal(principal)

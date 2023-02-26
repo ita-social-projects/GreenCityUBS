@@ -18,6 +18,7 @@ import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Bag;
@@ -1196,6 +1197,30 @@ class SuperAdminServiceImplTest {
 
         verify(tariffsInfoRepository).findById(1L);
         verify(bagRepository).findById(1);
+    }
+
+    @Test
+    void getTariffLimitsTest() {
+        TariffsInfo tariffInfo = ModelUtils.getTariffsInfo();
+        GetTariffLimitsDto dto = ModelUtils.getGetTariffLimitsDto();
+
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+        when(modelMapper.map(tariffInfo, GetTariffLimitsDto.class)).thenReturn(dto);
+
+        superAdminService.getTariffLimits(1L);
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(modelMapper).map(tariffInfo, GetTariffLimitsDto.class);
+    }
+
+    @Test
+    void getTariffLimitsThrowNotFoundException() {
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.getTariffLimits(1L));
+
+        verify(tariffsInfoRepository).findById(1L);
     }
 
     @Test

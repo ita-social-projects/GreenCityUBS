@@ -7,9 +7,10 @@ import javax.validation.Valid;
 
 import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
-import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.exceptions.BadRequestException;
@@ -602,6 +603,28 @@ class SuperAdminController {
     }
 
     /**
+     * Controller for get info about tariff limits.
+     *
+     * @param tariffId {@link Long} - tariff id
+     * @return {@link GetTariffLimitsDto} - dto
+     *
+     * @author Julia Seti
+     */
+    @ApiOperation(value = "Get info about tariff limits")
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffLimitsDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/getTariffLimits/{tariffId}")
+    public ResponseEntity<GetTariffLimitsDto> getTariffLimits(
+        @Valid @PathVariable long tariffId) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffLimits(tariffId));
+    }
+
+    /**
      * Controller for switching tariff activation status.
      *
      * @param tariffId {@link Long} tariff id
@@ -610,7 +633,7 @@ class SuperAdminController {
      * @author Julia Seti
      */
     @ApiOperation(value = "Switch tariff activation status by tariff id")
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_TARIFF', authentication)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
