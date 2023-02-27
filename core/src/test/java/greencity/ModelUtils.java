@@ -33,7 +33,6 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.position.PositionDto;
@@ -383,14 +382,6 @@ public class ModelUtils {
         return AddingPointsToUserDto.builder()
             .email("ddd@email.com")
             .additionalPoints(2)
-            .build();
-    }
-
-    public static OverpaymentInfoRequestDto getOverpaymentInfoRequestDto() {
-        return OverpaymentInfoRequestDto.builder()
-            .bonuses(1L)
-            .overpayment(2L)
-            .comment("ss")
             .build();
     }
 

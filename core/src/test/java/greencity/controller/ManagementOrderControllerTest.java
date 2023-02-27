@@ -5,7 +5,6 @@ import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.order.*;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -389,19 +388,6 @@ class ManagementOrderControllerTest {
     void getUserViolationsTest() throws Exception {
         mockMvc.perform(get(ubsLink + "/getUsersViolations")
             .param("email", "max@email.com")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void returnOverpaymentTest() throws Exception {
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto = ModelUtils.getOverpaymentInfoRequestDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String dtoJson = objectMapper.writeValueAsString(overpaymentInfoRequestDto);
-        mockMvc.perform(post(ubsLink + "/return-overpayment")
-            .param("orderId", "1")
-            .content(dtoJson)
-            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
