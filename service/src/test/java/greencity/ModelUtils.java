@@ -6,7 +6,6 @@ import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
-import greencity.constant.AppConstant;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -104,9 +103,9 @@ import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.tariff.TariffsInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -3520,6 +3519,14 @@ public class ModelUtils {
             .createdAt(LocalDate.of(22, 2, 12))
             .creator(EmployeeNameDto.builder()
                 .email("sss@gmail.com").build())
+            .build();
+    }
+
+    public static GetTariffLimitsDto getGetTariffLimitsDto() {
+        return GetTariffLimitsDto.builder()
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .max(20L)
+            .min(2L)
             .build();
     }
 
