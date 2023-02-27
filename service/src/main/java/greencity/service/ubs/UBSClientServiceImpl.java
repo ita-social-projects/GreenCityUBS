@@ -938,7 +938,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public Long createUserProfile(UserProfileCreateDto userProfileCreateDto) {
-        if (userRemoteClient.findByUuid(userProfileCreateDto.getUuid()).isEmpty()) {
+        if(!userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())){
             throw new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
         }
         User user = userRepository.findByUuid(userProfileCreateDto.getUuid());

@@ -2491,8 +2491,6 @@ class UBSClientServiceImplTest {
             .violations(0)
             .dateOfRegistration(LocalDate.now()).build();
         User user = getUser();
-        when(userRemoteClient.findByUuid(userProfileCreateDto.getUuid()))
-            .thenReturn(Optional.of(getUbsCustomersDto()));
         when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(null);
         when(userRepository.save(userForSave)).thenReturn(user);
         Long actualId = ubsService.createUserProfile(userProfileCreateDto);
@@ -2505,23 +2503,10 @@ class UBSClientServiceImplTest {
     void testCreateUserProfileIfProfileExists() {
         UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
         User user = getUser();
-        when(userRemoteClient.findByUuid(userProfileCreateDto.getUuid()))
-            .thenReturn(Optional.of(getUbsCustomersDto()));
         when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(user);
         Long actualId = ubsService.createUserProfile(userProfileCreateDto);
         verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
         verify(userRepository, times(0)).save(any(User.class));
         assertEquals(user.getId(), actualId);
-    }
-
-    @Test
-    void testCreateUserProfileIfUserWithUuidDoesNotExists() {
-        UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
-        when(userRemoteClient.findByUuid(userProfileCreateDto.getUuid()))
-            .thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ubsService.createUserProfile(userProfileCreateDto));
-        verify(userRemoteClient, times(1)).findByUuid(userProfileCreateDto.getUuid());
-        verify(userRepository, times(0)).findByUuid(userProfileCreateDto.getUuid());
-        verify(userRepository, times(0)).save(any(User.class));
     }
 }
