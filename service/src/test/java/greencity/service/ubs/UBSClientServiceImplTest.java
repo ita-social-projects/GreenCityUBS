@@ -2481,7 +2481,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testCreateUserProfileIfProfileDoesNotExists() {
+    void testCreateUserProfileIfProfileDoesNotExist() {
         UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
         User userForSave = User.builder()
             .uuid(userProfileCreateDto.getUuid())
@@ -2510,5 +2510,12 @@ class UBSClientServiceImplTest {
         verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
         verify(userRepository, times(0)).save(any(User.class));
         assertEquals(user.getId(), actualId);
+    }
+
+    @Test
+    void testCreateUserProfileIfUserByUuidDoesNotExist() {
+        UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
+        when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> ubsService.createUserProfile(userProfileCreateDto));
     }
 }
