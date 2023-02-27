@@ -16,9 +16,10 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
-import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.coords.Coordinates;
@@ -589,6 +590,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfo.setLimitDescription(dto.getLimitDescription());
         tariffsInfo.setLocationStatus(getChangedTariffStatus(dto.getMin(), dto.getMax()));
         tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    @Override
+    public GetTariffLimitsDto getTariffLimits(Long tariffId) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+        return modelMapper.map(tariffsInfo, GetTariffLimitsDto.class);
     }
 
     private void checkIfLimitParamsAreValid(SetTariffLimitsDto dto) {
