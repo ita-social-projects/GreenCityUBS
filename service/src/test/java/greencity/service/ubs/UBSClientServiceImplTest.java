@@ -2491,6 +2491,7 @@ class UBSClientServiceImplTest {
             .violations(0)
             .dateOfRegistration(LocalDate.now()).build();
         User user = getUser();
+        when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(true);
         when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(null);
         when(userRepository.save(userForSave)).thenReturn(user);
         Long actualId = ubsService.createUserProfile(userProfileCreateDto);
@@ -2503,6 +2504,7 @@ class UBSClientServiceImplTest {
     void testCreateUserProfileIfProfileExists() {
         UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
         User user = getUser();
+        when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(true);
         when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(user);
         Long actualId = ubsService.createUserProfile(userProfileCreateDto);
         verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
