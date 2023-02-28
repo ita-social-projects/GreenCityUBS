@@ -124,6 +124,7 @@ public final class ErrorMessage {
     public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED = "Employee with current uuid was not "
         + "deactivated.";
     public static final String BAG_FOR_TARIFF_NOT_EXIST = "Could not find bag with id %d for tariff with id %d";
+    public static final String TARIFF_NOT_FOUND_FOR_BAG = "Could not find tariff for bags and location";
 
     /**
      * Constructor.
