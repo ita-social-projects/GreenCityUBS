@@ -1,6 +1,8 @@
 package greencity.repository;
 
 import greencity.entity.order.TariffLocation;
+import greencity.entity.order.TariffsInfo;
+import greencity.entity.user.Location;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TariffLocationRepository extends JpaRepository<TariffLocation, Long> {
@@ -38,4 +41,17 @@ public interface TariffLocationRepository extends JpaRepository<TariffLocation, 
             + "WHERE l.location_id IN :locationIds AND t.courier_id = :courierId")
     List<TariffLocation> findAllByCourierIdAndLocationIds(@Param("courierId") Long courierId,
         @Param("locationIds") List<Long> locationIds);
+
+    /**
+     * Method for finding TariffLocations by tariffsInfo and location.
+     *
+     * @param tariffsInfo - tariffsInfo
+     * @param location    - location
+     * @return boolean {@link Optional} where courier already works
+     */
+    Optional<TariffLocation> findTariffLocationByTariffsInfoAndLocation(TariffsInfo tariffsInfo, Location location);
+
+    @Query("SELECT tl FROM TariffLocation tl JOIN tl.tariffsInfo ti JOIN tl.location l WHERE ti.id = :tariffId AND l.id = :locationId")
+    Optional<TariffLocation> findTariffLocationByTariffsInfoAndLocationId(@Param("tariffId") Long tariffId,
+                                                                          @Param("locationId") Long locationId);
 }

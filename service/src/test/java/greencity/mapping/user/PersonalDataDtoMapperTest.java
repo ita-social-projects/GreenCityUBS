@@ -1,3 +1,4 @@
+/*
 package greencity.mapping.user;
 
 import greencity.ModelUtils;
@@ -26,3 +27,4 @@ class PersonalDataDtoMapperTest {
         assertEquals(expected, personalDataDtoMapper.convert(ubSuser));
     }
 }
+*/

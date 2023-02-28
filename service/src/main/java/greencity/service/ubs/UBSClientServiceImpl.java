@@ -30,32 +30,11 @@ import javax.transaction.Transactional;
 
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
+import greencity.entity.order.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.AddressStatus;
-import greencity.enums.BotType;
-import greencity.enums.CertificateStatus;
-import greencity.enums.CourierLimit;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
-import greencity.enums.PaymentType;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.RegionRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
+import greencity.enums.*;
+import greencity.repository.*;
 import greencity.exceptions.address.AddressNotFoundException;
 
 import lombok.Data;
@@ -122,15 +101,6 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -148,6 +118,7 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 
 import static greencity.constant.ErrorMessage.*;
+import static greencity.enums.LocationStatus.*;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.Collectors.joining;
@@ -178,6 +149,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final GoogleApiService googleApiService;
     private final EventService eventService;
+    private final TariffLocationRepository tariffLocationRepository;
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final RegionRepository regionRepository;
@@ -259,33 +231,81 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> optionalOrderId) {
-        User user = userRepository.findUserByUuid(uuid).orElseThrow(
+    public UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(String uuid, Long tariffId, Long locationId) {
+        var user = userRepository.findUserByUuid(uuid).orElseThrow(
             () -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
 
-        var bagTranslationDtoList = getBagsByOrderId(optionalOrderId.orElse(null)).stream()
-            .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
-            .collect(toList());
+        var tariffInfo = tariffsInfoRepository.findById(tariffId)
+            .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND + tariffId));
 
-        return new UserPointsAndAllBagsDto(bagTranslationDtoList, user.getCurrentPoints());
-    }
+        var location = locationRepository.findById(locationId)
+            .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
 
-    private List<Bag> getBagsByOrderId(Long orderId) {
-        if (orderId != null) {
-            var order = getOrderByIdOrThrowNotFoundException(
-                orderId,
-                ORDER_WITH_CURRENT_ID_NOT_FOUND);
-            var tariffId = order.getTariffsInfo().getId();
+        if (tariffInfo.getLocationStatus() != DEACTIVATED && location.getLocationStatus() != DEACTIVATED) {
+            var tariffLocation = tariffLocationRepository
+                    .findTariffLocationByTariffsInfoAndLocation(tariffInfo, location)
+                    .orElseThrow(() -> new BadRequestException(ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST + locationId));
 
-            return bagRepository.findBagsByTariffInfoId(tariffId);
+            // TEST CASE
+            var testTariffLocation = tariffLocationRepository.findTariffLocationByTariffsInfoAndLocationId(tariffId, locationId);
+
+            if (tariffLocation.getLocationStatus() != DEACTIVATED) {
+
+                // GENERAL LOGIC
+                var bagTranslationDtoList = bagRepository.findBagsByTariffInfoId(tariffId).stream()
+                        .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
+                        .collect(toList());
+                return new UserPointsAndAllBagsDto(bagTranslationDtoList, user.getCurrentPoints());
+            } else {
+                throw new BadRequestException("Tariff is deactivated for location: " + locationId);
+            }
         } else {
-            return bagRepository.findAll();
+            throw new BadRequestException("Tariff for service or location is deactivated!");
         }
     }
 
-    private Order getOrderByIdOrThrowNotFoundException(Long orderId, String exceptionMessage) {
-        return orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(exceptionMessage + orderId));
+    @Override
+    public UserPointsAndAllBagsDto getFirstPageDataByOrderId(String uuid, Long orderId) {
+        var user = userRepository.findUserByUuid(uuid).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+
+        var order = orderRepository.findById(orderId).orElseThrow(
+                () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+
+        var tariffsInfo = order.getTariffsInfo();
+        var location = getLocationByOrderThroughLazyInitialization(order);
+
+        // TEST CASE
+        var testLocation = locationRepository.findLocationByOrderId(orderId);
+
+        if (tariffsInfo.getLocationStatus() != DEACTIVATED && location.getLocationStatus() != DEACTIVATED) {
+            var tariffLocation = tariffLocationRepository
+                    .findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location)
+                    .orElseThrow(() -> new BadRequestException(ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST + location.getId()));
+
+            // TEST CASE
+            tariffLocationRepository.findTariffLocationByTariffsInfoAndLocationId(tariffsInfo.getId(), location.getId());
+
+            if (tariffLocation.getLocationStatus() != DEACTIVATED) {
+
+                // GENERAL LOGIC
+                var bagTranslationDtoList = bagRepository.findBagsByTariffInfoId(tariffsInfo.getId()).stream()
+                        .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
+                        .collect(toList());
+                return new UserPointsAndAllBagsDto(bagTranslationDtoList, user.getCurrentPoints());
+            } else {
+                throw new BadRequestException("Tariff is deactivated for location: " + location.getId());
+            }
+        } else {
+            throw new BadRequestException("Tariff for service or location is deactivated!");
+        }
+    }
+
+    private Location getLocationByOrderThroughLazyInitialization(Order order) {
+        return order
+                .getUbsUser()
+                .getOrderAddress()
+                .getLocation();
     }
 
     /**
@@ -361,8 +381,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        UBSuser userData;
-        userData = formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), currentUser);
+        UBSuser userData =
+            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
@@ -800,7 +820,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
-        var address = order.getUbsUser().getAddress();
+        var address = order.getUbsUser().getOrderAddress();
         return AddressInfoDto.builder()
             .addressCity(address.getCity())
             .addressCityEng(address.getCityEn())
@@ -1014,7 +1034,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return paymentRequestDto;
     }
 
-    private UBSuser formUserDataToBeSaved(PersonalDataDto dto, Long addressId, User currentUser) {
+    private UBSuser formUserDataToBeSaved(PersonalDataDto dto, Long addressId, Long locationId, User currentUser) {
         UBSuser ubsUserFromDatabaseById = null;
         if (dto.getUbsUserId() != null) {
             ubsUserFromDatabaseById =
@@ -1028,9 +1048,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             UAPhoneNumberUtil.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
-            mappedFromDtoUser.setAddress(getSavedOrderAddress(addressId, currentUser));
-            if (mappedFromDtoUser.getAddress().getAddressComment() == null) {
-                mappedFromDtoUser.getAddress().setAddressComment(dto.getAddressComment());
+            mappedFromDtoUser.setOrderAddress(saveOrderAddressWithLocation(addressId, locationId, currentUser));
+            if (mappedFromDtoUser.getOrderAddress().getAddressComment() == null) {
+                mappedFromDtoUser.getOrderAddress().setAddressComment(dto.getAddressComment());
             }
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
@@ -1326,7 +1346,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        final UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), currentUser);
+        final UBSuser userData =
+            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
@@ -1356,15 +1377,20 @@ public class UBSClientServiceImpl implements UBSClientService {
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
     }
 
-    private OrderAddress getSavedOrderAddress(Long addressId, User currentUser) {
-        Address address = addressRepo.findById(addressId).orElseThrow(() -> new NotFoundException(
-            ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+    private OrderAddress saveOrderAddressWithLocation(Long addressId, Long locationId, User currentUser) {
+        var address = addressRepo.findById(addressId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+
+        var location = locationRepository.findById(locationId)
+            .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
 
         checkIfAddressHasBeenDeleted(address);
 
         checkAddressUser(address, currentUser);
 
-        OrderAddress orderAddress = modelMapper.map(address, OrderAddress.class);
+        var orderAddress = modelMapper.map(address, OrderAddress.class);
+
+        location.addOrderAddress(orderAddress);
 
         orderAddressRepository.save(orderAddress);
 

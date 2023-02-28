@@ -58,8 +58,8 @@ public class OrderController {
      * Controller returns all available bags and bonus points of current user.
      * {@link UserVO}.
      *
-     * @param userUuid        {@link UserVO} id.
-     * @param optionalOrderId {@link UserVO} id of order.
+     * @param userUuid {@link UserVO} id.
+     * @param tariffId {@link UserVO} id of order.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */
@@ -70,12 +70,21 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/order-details")
-    public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
+    @GetMapping("/order-details-for-tariff")
+    public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPointsByTariffAndLocationId(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestParam(required = false) Optional<Long> optionalOrderId) {
+        @RequestParam Long tariffId,
+        @RequestParam Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageData(userUuid, optionalOrderId));
+            .body(ubsClientService.getFirstPageDataByTariffAndLocationId(userUuid, tariffId, locationId));
+    }
+
+    @GetMapping("/details-for-existing-order/{orderId}")
+    public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPointsByOrderId(
+            @ApiIgnore @CurrentUserUuid String userUuid,
+            @PathVariable Long orderId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsClientService.getFirstPageDataByOrderId(userUuid, orderId));
     }
 
     /**

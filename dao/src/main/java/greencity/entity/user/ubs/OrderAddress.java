@@ -1,6 +1,7 @@
 package greencity.entity.user.ubs;
 
 import greencity.entity.coords.Coordinates;
+import greencity.entity.user.Location;
 import greencity.enums.AddressStatus;
 import lombok.*;
 
@@ -73,4 +74,8 @@ public class OrderAddress {
 
     @Column(nullable = false)
     private String districtEn;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    private Location location;
 }

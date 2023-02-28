@@ -340,18 +340,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(it -> it.getPrice())
             .orElse(0);
 
-        OrderAddress address = order.getUbsUser().getAddress();
+        var orderAddress = order.getUbsUser().getOrderAddress();
 
         UserInfoDto userInfoDto =
             ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
             getInfoAboutStatusesAndDateFormed(Optional.of(order));
-        AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(address);
+        AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(orderAddress);
         return OrderStatusPageDto.builder()
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
             .userInfoDto(userInfoDto)
             .addressExportDetailsDto(addressDtoForAdminPage)
-            .addressComment(address.getAddressComment())
+            .addressComment(orderAddress.getAddressComment())
             .bags(bagInfoDtoList)
             .orderFullPrice(setTotalPrice(prices))
             .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())

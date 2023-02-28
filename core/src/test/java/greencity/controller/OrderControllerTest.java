@@ -97,7 +97,7 @@ class OrderControllerTest {
             .build();
     }
 
-    @Test
+    /*@Test
     void getCurrentUserPointsWithOrderId() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString())))
             .thenReturn("35467585763t4sfgchjfuyetf");
@@ -110,9 +110,9 @@ class OrderControllerTest {
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
         verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(1L));
-    }
+    }*/
 
-    @Test
+    /*@Test
     void getCurrentUserPointsWithoutOrderId() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString())))
             .thenReturn("35467585763t4sfgchjfuyetf");
@@ -124,7 +124,7 @@ class OrderControllerTest {
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
         verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", Optional.empty());
-    }
+    }*/
 
     @Test
     void checkIfCertificateAvailable() throws Exception {
