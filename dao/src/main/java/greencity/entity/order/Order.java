@@ -121,9 +121,6 @@ public class Order {
     @Column(name = "date_of_export")
     private LocalDate dateOfExport;
 
-    @ManyToMany(mappedBy = "attachedOrders")
-    private Set<Employee> attachedEmployees;
-
     @ElementCollection
     @CollectionTable(name = "order_additional",
         joinColumns = @JoinColumn(name = "orders_id", referencedColumnName = "id"))
