@@ -7,12 +7,17 @@ import javax.validation.Valid;
 
 import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
-import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.exceptions.BadRequestException;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,9 +51,6 @@ import greencity.dto.service.TariffServiceDto;
 import greencity.entity.order.Courier;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
@@ -601,21 +603,50 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for deactivation of TariffsInfo.
+     * Controller for get info about tariff limits.
      *
-     * @author Yurii Fedorko
+     * @param tariffId {@link Long} - tariff id
+     * @return {@link GetTariffLimitsDto} - dto
+     *
+     * @author Julia Seti
      */
-    @ApiOperation(value = "Deactivate tariff")
+    @ApiOperation(value = "Get info about tariff limits")
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffLimitsDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/getTariffLimits/{tariffId}")
+    public ResponseEntity<GetTariffLimitsDto> getTariffLimits(
+        @Valid @PathVariable long tariffId) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffLimits(tariffId));
+    }
+
+    /**
+     * Controller for switching tariff activation status.
+     *
+     * @param tariffId {@link Long} tariff id
+     * @param status   {@link String} tariff activation status
+     *
+     * @author Julia Seti
+     */
+    @ApiOperation(value = "Switch tariff activation status by tariff id")
+    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_TARIFF', authentication)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
-    @PutMapping("/deactivateTariff/{tariffId}")
-    public ResponseEntity<HttpStatus> deactivateTariff(@PathVariable Long tariffId) {
-        superAdminService.deactivateTariffCard(tariffId);
+    @PatchMapping("/switchTariffStatus/{tariffId}")
+    public ResponseEntity<HttpStatus> switchTariffStatus(
+        @PathVariable @ApiParam(name = "tariffId", required = true, value = "tariff id") Long tariffId,
+        @Valid @RequestParam @ApiParam(name = "status", required = true, value = "status",
+            allowableValues = "Active, Deactivated") String status) {
+        superAdminService.switchTariffStatus(tariffId, status);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

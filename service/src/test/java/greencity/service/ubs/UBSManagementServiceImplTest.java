@@ -13,9 +13,7 @@ import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
-import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
@@ -366,145 +364,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void checkReturnOverpaymentForStatusDone() {
-        User user = ModelUtils.getTestUser();
-        Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.DONE).setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
-        dto.setBonuses(0L);
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.of(user));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(userRepository.save(any())).thenReturn(user);
-        ubsManagementService.returnOverpayment(order.getId(), dto, "test@gmail.com");
-        assertEquals(2L, order.getPayment().size());
-        assertEquals(2L, user.getChangeOfPointsList().size());
-        assertEquals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT,
-            order.getPayment().get(order.getPayment().size() - 1).getComment());
-        assertEquals(dto.getOverpayment(), user.getCurrentPoints().longValue());
-        assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
-    }
-
-    @Test
-    void returnOverpaymentThrowsException() {
-        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
-        dto.setBonuses(0L);
-        User user = ModelUtils.getTestUser();
-        Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.DONE);
-        when(orderRepository.findById(order.getId())).thenReturn(
-            Optional.of(order));
-        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.returnOverpayment(1L, dto, "test@gmail.com"));
-    }
-
-    @Test
-    void returnOverpaymentAsMoneyForStatusCancelled() {
-        User user = ModelUtils.getTestUser();
-        Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.CANCELED).setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
-        dto.setComment(AppConstant.PAYMENT_REFUND);
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.of(user));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(userRepository.save(any())).thenReturn(user);
-        ubsManagementService.returnOverpayment(order.getId(), dto, "test@gmail.com");
-        assertEquals(2L, user.getChangeOfPointsList().size());
-        assertEquals(AppConstant.PAYMENT_REFUND,
-            order.getPayment().get(order.getPayment().size() - 1).getComment());
-        assertEquals(dto.getBonuses(), user.getCurrentPoints().longValue());
-        assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
-    }
-
-    @Test
-    void checkAvailableOrderForEmployeeExceptionTest() {
-        User user = ModelUtils.getTestUser();
-        Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.CANCELED);
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
-        dto.setComment(AppConstant.PAYMENT_REFUND);
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.of(user));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        assertThrows(BadRequestException.class,
-            () -> ubsManagementService.returnOverpayment(1L, dto, "test@gmail.com"));
-
-    }
-
-    @Test
-    void returnOverpaymentAsBonusesForStatusCancelled() {
-        User user = ModelUtils.getTestUser();
-        Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.CANCELED).setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
-        dto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.of(user));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(userRepository.save(any())).thenReturn(user);
-        ubsManagementService.returnOverpayment(order.getId(), dto, "test@gmail.com");
-        assertEquals(3L, user.getChangeOfPointsList().size());
-        assertEquals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT,
-            order.getPayment().get(order.getPayment().size() - 1).getComment());
-        assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
-        assertEquals(dto.getBonuses() + dto.getOverpayment(), user.getCurrentPoints().longValue());
-    }
-
-    @Test
-    void returnOverpaymentAsBonusesForInvalidComment() {
-        User user = ModelUtils.getTestUser();
-        Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.CANCELED).setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
-        dto.setComment("extra task");
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.of(user));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.returnOverpayment(1L, dto, "test@gmail.com"));
-    }
-
-    @Test
-    void returnOverpaymentAsBonusesForInvalidStatus() {
-        User user = ModelUtils.getTestUser();
-        Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.FORMED).setTariffsInfo(getTariffsInfo());
-        Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfoIds = new ArrayList<>();
-        tariffsInfoIds.add(1L);
-        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
-        dto.setComment("extra task");
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.of(user));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        assertThrows(BadRequestException.class,
-            () -> ubsManagementService.returnOverpayment(1L, dto, "test@gmail.com"));
-    }
-
-    @Test
     void updateOrderDetailStatusThrowException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrder()));
         OrderDetailStatusRequestDto requestDto = getTestOrderDetailStatusRequestDto();
@@ -562,6 +421,7 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectNotTakenOut.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectNotTakenOut.getDate());
 
+        testOrderDetail.setCancellationReason("MOVING_OUT");
         testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
         expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
         OrderDetailStatusDto producedObjectCancelled = ubsManagementService
@@ -985,6 +845,28 @@ class UBSManagementServiceImplTest {
         verify(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         verify(orderDetailRepository).getAmount(any(), any());
+    }
+
+    @Test
+    void testSetOrderDetailWithExportedWaste() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusDoneDto()));
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        doNothing().when(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+        when(orderRepository.getOrderDetails(anyLong()))
+            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(orderDetailRepository.ifRecordExist(any(), any())).thenReturn(1L);
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "test@gmail.com");
+        verify(orderRepository, times(2)).findById(1L);
+        verify(bagRepository, times(2)).findCapacityById(1);
+        verify(bagRepository, times(2)).findById(1);
+        verify(orderDetailRepository, times(3)).ifRecordExist(any(), any());
+        verify(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
     }
 
     @Test

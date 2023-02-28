@@ -6,7 +6,6 @@ import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
-import greencity.constant.AppConstant;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -94,7 +93,6 @@ import greencity.dto.order.UpdateOrderDetailDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
@@ -105,9 +103,9 @@ import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.tariff.TariffsInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -992,20 +990,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffsInfoDto getTariffsInfoDto() {
-        return TariffsInfoDto.builder()
-            .id(1L)
-            .max(20L)
-            .min(2L)
-            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-            .tariffLocations(Set.of(TariffLocation.builder()
-                .location(getLocation())
-                .build()))
-            .receivingStations(List.of(getReceivingStationDto()))
-            .courier(getCourierDto())
-            .build();
-    }
-
     public static GetTariffInfoForEmployeeDto getTariffInfoForEmployeeDto() {
         return GetTariffInfoForEmployeeDto
             .builder()
@@ -1536,14 +1520,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static OverpaymentInfoRequestDto getOverpaymentInfoRequestDto() {
-        return OverpaymentInfoRequestDto.builder()
-            .overpayment(200L)
-            .bonuses(300L)
-            .comment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)
-            .build();
-    }
-
     public static OrderPaymentDetailDto getOrderPaymentDetailDto() {
         return OrderPaymentDetailDto.builder()
             .amount(95000L + 1000 + 70000)
@@ -1645,7 +1621,6 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .certificates(Collections.emptySet())
@@ -3547,6 +3522,14 @@ public class ModelUtils {
             .build();
     }
 
+    public static GetTariffLimitsDto getGetTariffLimitsDto() {
+        return GetTariffLimitsDto.builder()
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .max(20L)
+            .min(2L)
+            .build();
+    }
+
     public static TariffsInfo getTariffsInfo() {
         return TariffsInfo.builder()
             .id(1L)
@@ -3559,6 +3542,40 @@ public class ModelUtils {
             .receivingStationList(Set.of(getReceivingStation()))
             .courier(getCourier())
             .service(getService())
+            .build();
+    }
+
+    public static TariffsInfo getTariffsInfoActive() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .locationStatus(LocationStatus.ACTIVE)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .max(20L)
+            .min(2L)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .location(getLocation())
+                .build()))
+            .receivingStationList(Set.of(getReceivingStation()))
+            .courier(getCourier())
+            .service(getService())
+            .bags(getBag4list())
+            .build();
+    }
+
+    public static TariffsInfo getTariffsInfoDeactivated() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .locationStatus(LocationStatus.DEACTIVATED)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .max(20L)
+            .min(2L)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .location(getLocation())
+                .build()))
+            .receivingStationList(Set.of(getReceivingStation()))
+            .courier(getCourier())
+            .service(getService())
+            .bags(getBag4list())
             .build();
     }
 

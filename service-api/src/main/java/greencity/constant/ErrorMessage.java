@@ -74,7 +74,6 @@ public final class ErrorMessage {
         "Current location already has status that's you wanna chose";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
-    public static final String BAG_WITH_THIS_STATUS_ALREADY_SET = "Bag with this status already set.";
     public static final String LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND =
         "Payment with selected id does not belong LiqPay.";
     public static final String ORDER_WITH_CURRENT_ID_NOT_FOUND = "Couldn't find order with id that you chose";
@@ -124,6 +123,15 @@ public final class ErrorMessage {
     public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED = "Employee with current uuid was not "
         + "deactivated.";
     public static final String BAG_FOR_TARIFF_NOT_EXIST = "Could not find bag with id %d for tariff with id %d";
+    public static final String TARIFF_ALREADY_HAS_THIS_STATUS = "Tariff with id %d already has status: %s";
+    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_SERVICE =
+        "Tariff has not been activated. Please add service for tariff.";
+    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS =
+        "Tariff has not been activated. Please set limits for tariff.";
+    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS =
+        "Tariff has not been activated. Please add package for tariff.";
+    public static final String UNRESOLVABLE_TARIFF_STATUS = "Unresolvable tariff status. Please choose Active "
+        + "or Deactivated.";
     public static final String TARIFF_NOT_FOUND_FOR_BAG = "Could not find tariff for bags and location";
 
     /**

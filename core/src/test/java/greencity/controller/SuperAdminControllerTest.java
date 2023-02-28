@@ -785,11 +785,79 @@ class SuperAdminControllerTest {
 
     @Test
     @SneakyThrows
-    void deactivateTariffTest() {
-        mockMvc.perform(put(ubsLink + "/deactivateTariff/{tariffId}", 1L)
+    void getTariffLimitsTest() {
+        mockMvc.perform(get(ubsLink + "/getTariffLimits/{tariffId}", 1L)
             .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
+            .param("tariffId", "1L"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        verify(superAdminService).getTariffLimits(1L);
+    }
+
+    @Test
+    @SneakyThrows
+    void getTariffLimitsThrowNotFoundException() {
+        when(superAdminService.getTariffLimits(1L))
+            .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L));
+        mockMvc.perform(get(ubsLink + "/getTariffLimits/{tariffId}", 1L)
+            .principal(principal)
+            .param("tariffId", "1"))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).getTariffLimits(1L);
+    }
+
+    @Test
+    @SneakyThrows
+    void switchTariffStatus() {
+        mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
+            .principal(principal)
+            .param("tariffId", "1L")
+            .param("status", "Active"))
             .andExpect(status().isOk());
+
+        verify(superAdminService).switchTariffStatus(1L, "Active");
+    }
+
+    @Test
+    @SneakyThrows
+    void switchTariffStatusThrowNotFoundException() {
+        doThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L))
+            .when(superAdminService).switchTariffStatus(1L, "Active");
+
+        mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
+            .principal(principal)
+            .param("tariffId", "1L")
+            .param("status", "Active")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).switchTariffStatus(1L, "Active");
+    }
+
+    @Test
+    @SneakyThrows
+    void switchTariffStatusThrowBadRequestException() {
+        doThrow(new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS))
+            .when(superAdminService).switchTariffStatus(1L, "Active");
+
+        mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
+            .principal(principal)
+            .param("tariffId", "1L")
+            .param("status", "Active"))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).switchTariffStatus(1L, "Active");
     }
 
     @Test

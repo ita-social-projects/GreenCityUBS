@@ -1,6 +1,5 @@
 package greencity.configuration;
 
-import greencity.client.UserRemoteClient;
 import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
@@ -97,6 +96,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/tariffs",
                 SUPER_ADMIN_LINK + "/{tariffId}/getTariffService",
                 SUPER_ADMIN_LINK + "/{tariffId}/getService",
+                SUPER_ADMIN_LINK + "/getTariffLimits/{tariffId}",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
@@ -104,7 +104,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/addViolationToUser",
                 UBS_MANAG_LINK + "/add-manual-payment/{id}",
                 UBS_MANAG_LINK + "/add-bonuses-user/{id}",
-                UBS_MANAG_LINK + "/return-overpayment",
                 ADMIN_EMPL_LINK + "/**",
                 SUPER_ADMIN_LINK + "/add-new-tariff",
                 SUPER_ADMIN_LINK + "/check-if-tariff-exists",
@@ -142,7 +141,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
-                SUPER_ADMIN_LINK + "/deactivateCourier/{id}")
+                SUPER_ADMIN_LINK + "/deactivateCourier/{id}",
+                SUPER_ADMIN_LINK + "/switchTariffStatus/{tariffId}")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
                 UBS_MANAG_LINK + "/update-order-page-admin-info/{id}",
