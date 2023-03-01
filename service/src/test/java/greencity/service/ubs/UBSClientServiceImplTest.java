@@ -296,7 +296,10 @@ class UBSClientServiceImplTest {
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenLocationDoesNotExist() {
         var user = getUser();
+        var uuid = user.getUuid();
+
         var tariffsInfo = getTariffInfo();
+        var tariffsInfoId = tariffsInfo.getId();
 
         var location = getLocation();
         var locationId = location.getId();
@@ -308,7 +311,7 @@ class UBSClientServiceImplTest {
         when(locationRepository.findById(locationId)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            user.getUuid(), tariffsInfo.getId(), locationId));
+                uuid, tariffsInfoId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
@@ -324,18 +327,21 @@ class UBSClientServiceImplTest {
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenTariffDoesNotExist() {
         var user = getUser();
+        var uuid = user.getUuid();
 
         var tariffsInfo = getTariffInfo();
         var tariffId = tariffsInfo.getId();
 
         var location = getLocation();
+        var locationId = location.getId();
+
         var expectedErrorMessage = TARIFF_NOT_FOUND + tariffId;
 
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffId)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            user.getUuid(), tariffId, location.getId()));
+                uuid, tariffId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
@@ -354,12 +360,15 @@ class UBSClientServiceImplTest {
         var uuid = user.getUuid();
 
         var tariffsInfo = getTariffInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+
         var location = getLocation();
+        var locationId = location.getId();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfo.getId(), location.getId()));
+            uuid, tariffsInfoId, locationId));
 
         assertEquals(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, exception.getMessage());
 
@@ -522,11 +531,12 @@ class UBSClientServiceImplTest {
         var uuid = user.getUuid();
 
         var order = getOrderWithoutPayment();
+        var orderId = order.getId();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByOrderId(
-            uuid, order.getId()));
+            uuid, orderId));
 
         assertEquals(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, exception.getMessage());
 
@@ -541,6 +551,7 @@ class UBSClientServiceImplTest {
     @Test
     void getFirstPageDataByOrderIdShouldThrowExceptionWhenOrderDoesNotExist() {
         var user = getUser();
+        var uuid = user.getUuid();
 
         var order = getOrderWithoutPayment();
         var orderId = order.getId();
@@ -551,7 +562,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByOrderId(
-            user.getUuid(), orderId));
+                uuid, orderId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
