@@ -341,7 +341,7 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findById(tariffId)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-                uuid, tariffId, locationId));
+            uuid, tariffId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
@@ -562,7 +562,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByOrderId(
-                uuid, orderId));
+            uuid, orderId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
