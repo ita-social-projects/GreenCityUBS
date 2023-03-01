@@ -57,15 +57,6 @@ public interface UserRemoteClient {
     Optional<UbsCustomersDto> findByUuid(@RequestParam(UUID) String uuid);
 
     /**
-     * Method checks the existence of the user by uuid.
-     *
-     * @param uuid {@link User}'s UUID.
-     * @return {@link Boolean}.
-     */
-    @GetMapping("/user/checkByUuid")
-    boolean checkIfUserExistsByUuid(@RequestParam(UUID) String uuid);
-
-    /**
      * Changes userStatus to "DEACTIVATED" by UUID.
      *
      * @param uuid {@link User}'s UUID.
