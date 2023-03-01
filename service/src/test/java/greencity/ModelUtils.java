@@ -353,7 +353,6 @@ public class ModelUtils {
             .senderFirstName("TestFirst")
             .orderAddress(OrderAddress.builder()
                 .id(1L)
-                // .user(null)
                 .houseNumber("1a")
                 .actual(true)
                 .entranceNumber("str")
@@ -366,6 +365,21 @@ public class ModelUtils {
                     .latitude(3.2)
                     .build())
                 .addressComment(null).build())
+            .orders(List.of(Order.builder().id(1L).build()))
+            .build();
+    }
+
+    public static UBSuser getUBSuserWtihoutOrderAddress() {
+        return UBSuser.builder()
+            .firstName("oleh")
+            .lastName("ivanov")
+            .email("mail@mail.ua")
+            .id(1L)
+            .phoneNumber("067894522")
+            .senderEmail("test@email.ua")
+            .senderPhoneNumber("+380974563223")
+            .senderLastName("TestLast")
+            .senderFirstName("TestFirst")
             .orders(List.of(Order.builder().id(1L).build()))
             .build();
     }
