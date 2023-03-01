@@ -47,11 +47,8 @@ public interface TariffLocationRepository extends JpaRepository<TariffLocation, 
      *
      * @param tariffsInfo - tariffsInfo
      * @param location    - location
-     * @return boolean {@link Optional} where courier already works
+     * @return Optional of {@link TariffLocation}
+     * @author - Safarov Renat
      */
     Optional<TariffLocation> findTariffLocationByTariffsInfoAndLocation(TariffsInfo tariffsInfo, Location location);
-
-    @Query("SELECT tl FROM TariffLocation tl JOIN tl.tariffsInfo ti JOIN tl.location l WHERE ti.id = :tariffId AND l.id = :locationId")
-    Optional<TariffLocation> findTariffLocationByTariffsInfoAndLocationId(@Param("tariffId") Long tariffId,
-                                                                          @Param("locationId") Long locationId);
 }

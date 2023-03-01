@@ -13,12 +13,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-@EqualsAndHashCode(exclude = {"tariffLocations"})
-@ToString(exclude = {"tariffLocations"})
+@EqualsAndHashCode(exclude = {"tariffLocations", "orderAddresses"})
+@ToString(exclude = {"tariffLocations", "orderAddresses"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -53,8 +54,14 @@ public class Location {
         mappedBy = "location",
         cascade = CascadeType.ALL,
         orphanRemoval = true)
-    private List<OrderAddress> orderAddresses;
+    private List<OrderAddress> orderAddresses = new ArrayList<>();
 
+    /**
+     * helper method, that allows to save OrderAddress entity in database correctly.
+     *
+     * @param orderAddress address of ubs_user for order {@link OrderAddress}
+     * @author Safarov Renat
+     */
     public void addOrderAddress(OrderAddress orderAddress) {
         orderAddresses.add(orderAddress);
         orderAddress.setLocation(this);

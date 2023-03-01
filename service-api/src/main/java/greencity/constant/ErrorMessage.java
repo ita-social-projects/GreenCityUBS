@@ -72,6 +72,8 @@ public final class ErrorMessage {
     public static final String SERVICE_ALREADY_EXISTS = "Service already exists for tariff with id: ";
     public static final String LOCATION_STATUS_IS_ALREADY_EXIST =
         "Current location already has status that's you wanna chose";
+
+    public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
     public static final String LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND =
@@ -99,6 +101,7 @@ public final class ErrorMessage {
     public static final String LANGUAGE_ERROR = "Invalid language code";
     public static final String TARIFF_NOT_FOUND = "Couldn't found tariff with id: ";
     public static final String TARIFF_FOR_LOCATION_NOT_EXIST = "Could not find tariff for location with id: ";
+    public static final String TARIFF_OR_LOCATION_IS_DEACTIVATED = "Tariff or location is deactivated.";
     public static final String TARIFF_IS_ALREADY_EXISTS = "Tariff for such locations is already exists";
     public static final String USER_HAS_NOT_BEEN_DEACTIVATED = "User has not been deactivated";
     public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";

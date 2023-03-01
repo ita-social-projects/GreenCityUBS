@@ -54,7 +54,6 @@ import com.google.maps.model.GeocodingResult;
 
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
-import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.AllActiveLocationsDto;
 import greencity.dto.CreateAddressRequestDto;
@@ -233,79 +232,66 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(String uuid, Long tariffId, Long locationId) {
         var user = userRepository.findUserByUuid(uuid).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
 
-        var tariffInfo = tariffsInfoRepository.findById(tariffId)
+        var tariffsInfo = tariffsInfoRepository.findById(tariffId)
             .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND + tariffId));
 
         var location = locationRepository.findById(locationId)
             .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
 
-        if (tariffInfo.getLocationStatus() != DEACTIVATED && location.getLocationStatus() != DEACTIVATED) {
-            var tariffLocation = tariffLocationRepository
-                    .findTariffLocationByTariffsInfoAndLocation(tariffInfo, location)
-                    .orElseThrow(() -> new BadRequestException(ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST + locationId));
+        checkIfTariffIsAvailableForCurrentLocation(tariffsInfo, location);
 
-            // TEST CASE
-            var testTariffLocation = tariffLocationRepository.findTariffLocationByTariffsInfoAndLocationId(tariffId, locationId);
-
-            if (tariffLocation.getLocationStatus() != DEACTIVATED) {
-
-                // GENERAL LOGIC
-                var bagTranslationDtoList = bagRepository.findBagsByTariffInfoId(tariffId).stream()
-                        .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
-                        .collect(toList());
-                return new UserPointsAndAllBagsDto(bagTranslationDtoList, user.getCurrentPoints());
-            } else {
-                throw new BadRequestException("Tariff is deactivated for location: " + locationId);
-            }
-        } else {
-            throw new BadRequestException("Tariff for service or location is deactivated!");
-        }
+        return getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints());
     }
 
     @Override
     public UserPointsAndAllBagsDto getFirstPageDataByOrderId(String uuid, Long orderId) {
         var user = userRepository.findUserByUuid(uuid).orElseThrow(
-                () -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-
+            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         var order = orderRepository.findById(orderId).orElseThrow(
-                () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
         var tariffsInfo = order.getTariffsInfo();
-        var location = getLocationByOrderThroughLazyInitialization(order);
 
-        // TEST CASE
-        var testLocation = locationRepository.findLocationByOrderId(orderId);
+        var location = getLocationByOrderIdThroughLazyInitialization(order);
 
-        if (tariffsInfo.getLocationStatus() != DEACTIVATED && location.getLocationStatus() != DEACTIVATED) {
-            var tariffLocation = tariffLocationRepository
-                    .findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location)
-                    .orElseThrow(() -> new BadRequestException(ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST + location.getId()));
+        checkIfTariffIsAvailableForCurrentLocation(tariffsInfo, location);
 
-            // TEST CASE
-            tariffLocationRepository.findTariffLocationByTariffsInfoAndLocationId(tariffsInfo.getId(), location.getId());
+        return getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints());
+    }
 
-            if (tariffLocation.getLocationStatus() != DEACTIVATED) {
-
-                // GENERAL LOGIC
-                var bagTranslationDtoList = bagRepository.findBagsByTariffInfoId(tariffsInfo.getId()).stream()
-                        .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
-                        .collect(toList());
-                return new UserPointsAndAllBagsDto(bagTranslationDtoList, user.getCurrentPoints());
-            } else {
-                throw new BadRequestException("Tariff is deactivated for location: " + location.getId());
-            }
+    private void checkIfTariffIsAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {
+        if (tariffsInfo.getLocationStatus() == DEACTIVATED || location.getLocationStatus() == DEACTIVATED) {
+            throw new BadRequestException(TARIFF_OR_LOCATION_IS_DEACTIVATED);
         } else {
-            throw new BadRequestException("Tariff for service or location is deactivated!");
+            var isAvailable = isTariffAvailableForCurrentLocation(tariffsInfo, location);
+            if (!isAvailable) {
+                throw new BadRequestException(LOCATION_IS_DEACTIVATED_FOR_TARIFF + tariffsInfo.getId());
+            }
         }
     }
 
-    private Location getLocationByOrderThroughLazyInitialization(Order order) {
+    private boolean isTariffAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {
+        return tariffLocationRepository
+            .findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location)
+            .orElseThrow(() -> new NotFoundException(TARIFF_FOR_LOCATION_NOT_EXIST + location.getId()))
+            .getLocationStatus() != DEACTIVATED;
+    }
+
+    private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,
+        Integer userPoints) {
+        var bagTranslationDtoList = bagRepository.findBagsByTariffsInfoId(tariffId).stream()
+            .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
+            .collect(toList());
+        return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
+    }
+
+    private Location getLocationByOrderIdThroughLazyInitialization(Order order) {
         return order
-                .getUbsUser()
-                .getOrderAddress()
-                .getLocation();
+            .getUbsUser()
+            .getOrderAddress()
+            .getLocation();
     }
 
     /**
@@ -346,7 +332,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         } else if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(courierLocation.getCourierLimit())
             && sumWithoutDiscount > courierLocation.getMax()) {
             throw new BadRequestException(
-                ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT + courierLocation.getMax());
+                PRICE_OF_ORDER_GREATER_THAN_LIMIT + courierLocation.getMax());
         }
     }
 
@@ -440,14 +426,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void checkIfAddressHasBeenDeleted(Address address) {
         if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
             throw new NotFoundException(
-                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
     }
 
     private void checkAddressUser(Address address, User user) {
         if (!address.getUser().equals(user)) {
             throw new NotFoundException(
-                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
     }
 
@@ -483,7 +469,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
         if (addresses.size() == MAXIMUM_NUMBER_OF_ADDRESSES) {
-            throw new BadRequestException(ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED);
+            throw new BadRequestException(NUMBER_OF_ADDRESSES_EXCEEDED);
         }
 
         OrderAddressDtoRequest dtoRequest = retrieveCorrectDtoRequest(addressRequestDto.getSearchAddress());
@@ -534,7 +520,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Address address = addressRepo.findById(dtoRequest.getId())
             .orElseThrow(() -> new NotFoundException(
-                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
         if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
             address = null;
         }
@@ -658,9 +644,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid) {
         Address address = addressRepo.findById(addressId).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+            () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
         if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
-            throw new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId);
+            throw new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId);
         }
         if (!address.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
@@ -703,14 +689,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || order.getOrderStatus() == OrderStatus.CONFIRMED
             || order.getOrderStatus() == OrderStatus.DONE) {
             List<Bag> bags = bagRepository.findAllByOrder(orderId);
             return buildOrderBagDto(order, bags);
         } else {
-            throw new BadRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
+            throw new BadRequestException(BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
         }
     }
 
@@ -744,7 +730,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public OrdersDataForUserDto getOrderForUser(String uuid, Long id) {
         Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
         if (order == null) {
-            throw new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
 
         return getOrdersData(order);
@@ -904,7 +890,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId, String uuid) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         User user = userRepository.findByUuid(uuid);
         if (!order.getUser().equals(user)) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
@@ -1214,7 +1200,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
         if (orderEvents.isEmpty()) {
-            throw new NotFoundException(ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION + orderId);
+            throw new NotFoundException(EVENTS_NOT_FOUND_EXCEPTION + orderId);
         }
         return orderEvents
             .stream()
@@ -1332,7 +1318,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         TariffsInfo tariffsInfo =
             tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(1L, dto.getLocationId())
                 .orElseThrow(() -> new NotFoundException(
-                    ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST + dto.getLocationId()));
+                    TARIFF_FOR_LOCATION_NOT_EXIST + dto.getLocationId()));
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
         int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
@@ -1379,7 +1365,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private OrderAddress saveOrderAddressWithLocation(Long addressId, Long locationId, User currentUser) {
         var address = addressRepo.findById(addressId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
 
         var location = locationRepository.findById(locationId)
             .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
@@ -1548,7 +1534,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public void deleteOrder(String uuid, Long id) {
         Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
         if (order == null) {
-            throw new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
         orderRepository.delete(order);
     }
@@ -1611,7 +1597,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         int maxPointsToTransfer = countAmountToPayForOrder(order);
         if (amountToTransfer > maxPointsToTransfer) {
-            throw new BadRequestException(ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER + maxPointsToTransfer);
+            throw new BadRequestException(TOO_MUCH_POINTS_FOR_ORDER + maxPointsToTransfer);
         }
 
         order.setPointsToUse(order.getPointsToUse() + amountToTransfer);
@@ -1709,7 +1695,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
                     CertificateStatus.ACTIVE);
             if (certificates.isEmpty()) {
-                throw new NotFoundException(ErrorMessage.CERTIFICATE_NOT_FOUND);
+                throw new NotFoundException(CERTIFICATE_NOT_FOUND);
             }
             checkValidationCertificates(certificates, dto);
             for (Certificate temp : certificates) {
@@ -1729,7 +1715,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void checkValidationCertificates(Set<Certificate> certificates, OrderFondyClientDto dto) {
         if (certificates.size() != dto.getCertificates().size()) {
             String validCertification = certificates.stream().map(Certificate::getCode).collect(joining(", "));
-            throw new NotFoundException(ErrorMessage.SOME_CERTIFICATES_ARE_INVALID + validCertification);
+            throw new NotFoundException(SOME_CERTIFICATES_ARE_INVALID + validCertification);
         }
     }
 
@@ -1969,7 +1955,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (tariffsInfo.isPresent()) {
             return modelMapper.map(tariffsInfo.get(), TariffsForLocationDto.class);
         } else {
-            throw new EntityNotFoundException(ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST + id);
+            throw new EntityNotFoundException(TARIFF_FOR_ORDER_NOT_EXIST + id);
         }
     }
 

@@ -38,15 +38,15 @@ public interface UBSClientService {
      * @param tariffId   {@link Long} tariff id.
      * @param locationId {@ling Long} location id.
      * @return {@link UserPointsAndAllBagsDto}.
-     * @author Oleh Bilonizhka
+     * @author Safarov Renat
      */
     UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(String uuid, Long tariffId, Long locationId);
 
     /**
      * Methods returns all available for order bags and current user's bonus points.
      *
-     * @param uuid       current {@link User}'s uuid.
-     * @param orderId   {@link Long} id of existing order.
+     * @param uuid    current {@link User}'s uuid.
+     * @param orderId {@link Long} id of existing order.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Safarov Renat
      */
@@ -394,5 +394,4 @@ public interface UBSClientService {
      * @author Max Nazaruk
      */
     List<LocationSummaryDto> getLocationSummary();
-
 }

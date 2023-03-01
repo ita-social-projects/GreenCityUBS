@@ -40,14 +40,6 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             + "AND c.courier_status = 'ACTIVE'")
     List<Location> findAllActive();
 
-    @Query("SELECT l " +
-            "FROM Order o " +
-            "JOIN o.ubsUser ubs " +
-            "JOIN ubs.orderAddress oa " +
-            "JOIN oa.location l " +
-            "WHERE o.id = :orderId")
-    Location findLocationByOrderId(@Param("orderId") Long orderId);
-
     /**
      * Method for getting list of locations from one region.
      *
