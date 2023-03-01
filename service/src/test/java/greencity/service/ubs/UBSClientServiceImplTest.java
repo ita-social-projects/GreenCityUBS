@@ -695,7 +695,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress orderAddress = ubSuser.getAddress();
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -735,7 +735,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress orderAddress = ubSuser.getAddress();
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
