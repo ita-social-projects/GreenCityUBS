@@ -239,18 +239,18 @@ class UBSClientServiceImplTest {
         when(bagRepository.findBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
         when(modelMapper.map(bags.get(0), BagTranslationDto.class)).thenReturn(bagTranslationDto);
 
-        var userPointsAndAllBagsDtoExpectedActual =
+        var userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageDataByTariffAndLocationId(uuid, tariffsInfoId, locationId);
 
         assertEquals(
             userPointsAndAllBagsDtoExpected.getBags(),
-            userPointsAndAllBagsDtoExpectedActual.getBags());
+            userPointsAndAllBagsDtoActual.getBags());
         assertEquals(
             userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
-            userPointsAndAllBagsDtoExpectedActual.getBags().get(0).getId());
+            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
         assertEquals(
             userPointsAndAllBagsDtoExpected.getPoints(),
-            userPointsAndAllBagsDtoExpectedActual.getPoints());
+            userPointsAndAllBagsDtoActual.getPoints());
 
         verify(userRepository).findUserByUuid(uuid);
         verify(tariffsInfoRepository).findById(tariffsInfoId);
@@ -505,18 +505,18 @@ class UBSClientServiceImplTest {
         when(bagRepository.findBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
         when(modelMapper.map(bags.get(0), BagTranslationDto.class)).thenReturn(bagTranslationDto);
 
-        var userPointsAndAllBagsDtoExpectedActual =
+        var userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageDataByOrderId(uuid, orderId);
 
         assertEquals(
             userPointsAndAllBagsDtoExpected.getBags(),
-            userPointsAndAllBagsDtoExpectedActual.getBags());
+            userPointsAndAllBagsDtoActual.getBags());
         assertEquals(
             userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
-            userPointsAndAllBagsDtoExpectedActual.getBags().get(0).getId());
+            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
         assertEquals(
             userPointsAndAllBagsDtoExpected.getPoints(),
-            userPointsAndAllBagsDtoExpectedActual.getPoints());
+            userPointsAndAllBagsDtoActual.getPoints());
 
         verify(userRepository).findUserByUuid(uuid);
         verify(orderRepository).findById(orderId);
