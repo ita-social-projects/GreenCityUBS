@@ -24,11 +24,9 @@ import java.security.Principal;
 import java.util.List;
 
 import static greencity.ModelUtils.getPrincipal;
-import static greencity.ModelUtils.getUserProfileCreateDto;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -85,16 +83,5 @@ class UserProfileControllerTest {
         mockMvc.perform(put(AppConstant.ubsLink + deactivateUser + "?id=5"))
             .andExpect(status().isOk());
         verify(ubsClientService).markUserAsDeactivated(5L);
-    }
-
-    @Test
-    void createUserProfile() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String content = objectMapper.writeValueAsString(getUserProfileCreateDto());
-        mockMvc.perform(post(AppConstant.ubsLink + "/user/create")
-            .content(content)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
-        verify(ubsClientService).createUserProfile(getUserProfileCreateDto());
     }
 }
