@@ -1,6 +1,7 @@
 package greencity.entity.user.ubs;
 
 import greencity.entity.coords.Coordinates;
+import greencity.entity.user.Location;
 import greencity.enums.AddressStatus;
 import lombok.*;
 
@@ -10,16 +11,20 @@ import javax.validation.constraints.Size;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"location"})
+@ToString(exclude = {"location"})
 @Getter
 @Setter
 @Builder
 @Table(name = "order_address")
-@ToString
 public class OrderAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    private Location location;
 
     @Size(min = 1, max = 20, message = "Invalid region name")
     @Column(columnDefinition = "varchar(30)", nullable = false)

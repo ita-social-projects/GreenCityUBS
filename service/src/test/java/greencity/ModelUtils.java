@@ -352,9 +352,8 @@ public class ModelUtils {
             .senderPhoneNumber("+380974563223")
             .senderLastName("TestLast")
             .senderFirstName("TestFirst")
-            .address(OrderAddress.builder()
+            .orderAddress(OrderAddress.builder()
                 .id(1L)
-                // .user(null)
                 .houseNumber("1a")
                 .actual(true)
                 .entranceNumber("str")
@@ -371,6 +370,21 @@ public class ModelUtils {
             .build();
     }
 
+    public static UBSuser getUBSuserWtihoutOrderAddress() {
+        return UBSuser.builder()
+            .firstName("oleh")
+            .lastName("ivanov")
+            .email("mail@mail.ua")
+            .id(1L)
+            .phoneNumber("067894522")
+            .senderEmail("test@email.ua")
+            .senderPhoneNumber("+380974563223")
+            .senderLastName("TestLast")
+            .senderFirstName("TestFirst")
+            .orders(List.of(Order.builder().id(1L).build()))
+            .build();
+    }
+
     public static UBSuser getUBSuserWithoutSender() {
         return UBSuser.builder()
             .firstName("oleh")
@@ -378,9 +392,8 @@ public class ModelUtils {
             .email("mail@mail.ua")
             .id(1L)
             .phoneNumber("067894522")
-            .address(OrderAddress.builder()
+            .orderAddress(OrderAddress.builder()
                 .id(1L)
-                // .user(null)
                 .houseNumber("1a")
                 .actual(true)
                 .entranceNumber("str")
@@ -436,7 +449,7 @@ public class ModelUtils {
                 .email("mail@mail.ua")
                 .id(1L)
                 .phoneNumber("067894522")
-                .address(OrderAddress.builder()
+                .orderAddress(OrderAddress.builder()
                     .id(1L)
                     .city("Lviv")
                     .street("Levaya")
@@ -451,6 +464,61 @@ public class ModelUtils {
                         .build())
                     .build())
                 .build())
+            .user(User.builder()
+                .id(1L)
+                .recipientName("Yuriy")
+                .recipientSurname("Gerasum")
+                .uuid("UUID")
+                .build())
+            .certificates(Collections.emptySet())
+            .pointsToUse(700)
+            .adminComment("Admin")
+            .cancellationComment("cancelled")
+            .receivingStation(ReceivingStation.builder()
+                .id(1L)
+                .name("Саперно-Слобідська")
+                .build())
+            .cancellationReason(CancellationReason.OUT_OF_CITY)
+            .imageReasonNotTakingBags(List.of("foto"))
+            .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+            .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
+            .build();
+    }
+
+    public static Order getOrderWithTariffAndLocation() {
+        return Order.builder()
+            .id(1L)
+            .payment(Lists.newArrayList(Payment.builder()
+                .id(1L)
+                .paymentId("1")
+                .amount(20000L)
+                .currency("UAH")
+                .comment("avb")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .ubsUser(UBSuser.builder()
+                .firstName("oleh")
+                .lastName("ivanov")
+                .email("mail@mail.ua")
+                .id(1L)
+                .phoneNumber("067894522")
+                .orderAddress(OrderAddress.builder()
+                    .id(1L)
+                    .city("Lviv")
+                    .street("Levaya")
+                    .district("frankivskiy")
+                    .entranceNumber("5")
+                    .addressComment("near mall")
+                    .houseCorpus("1")
+                    .houseNumber("4")
+                    .location(getLocation())
+                    .coordinates(Coordinates.builder()
+                        .latitude(49.83)
+                        .longitude(23.88)
+                        .build())
+                    .build())
+                .build())
+            .tariffsInfo(getTariffInfo())
             .user(User.builder()
                 .id(1L)
                 .recipientName("Yuriy")
@@ -620,7 +688,7 @@ public class ModelUtils {
                 .id(++id)
                 .ubsUser(UBSuser.builder()
                     .id(++userId)
-                    .address(OrderAddress.builder()
+                    .orderAddress(OrderAddress.builder()
                         .coordinates(coordinates)
                         .build())
                     .build())
@@ -1609,7 +1677,7 @@ public class ModelUtils {
                 .senderFirstName("TestFirst")
                 .id(1L)
                 .phoneNumber("067894522")
-                .address(OrderAddress.builder()
+                .orderAddress(OrderAddress.builder()
                     .id(1L)
                     .city("Lviv")
                     .street("Levaya")
@@ -1799,7 +1867,7 @@ public class ModelUtils {
     private static UBSuser createUbsUser() {
         return UBSuser.builder()
             .id(10L)
-            .address(createAddress())
+            .orderAddress(createAddress())
             .build();
     }
 
@@ -2263,6 +2331,7 @@ public class ModelUtils {
                 .longitude(3.34d)
                 .latitude(1.32d).build())
             .region(getRegionForMapper())
+            .orderAddresses(new ArrayList<>())
             .build();
     }
 
@@ -3159,7 +3228,7 @@ public class ModelUtils {
                 .email("mail@mail.ua")
                 .id(1L)
                 .phoneNumber("067894522")
-                .address(OrderAddress.builder()
+                .orderAddress(OrderAddress.builder()
                     .id(1L)
                     .city("Lviv")
                     .street("Levaya")
@@ -3467,7 +3536,7 @@ public class ModelUtils {
                 .email("mail@mail.ua")
                 .id(1L)
                 .phoneNumber("067894522")
-                .address(OrderAddress.builder()
+                .orderAddress(OrderAddress.builder()
                     .id(1L)
                     .city("Lviv")
                     .street("Levaya")
@@ -4198,7 +4267,7 @@ public class ModelUtils {
                     .nameEng("nameEng")
                     .limitedIncluded(false)
                     .build()),
-            600);
+            100);
     }
 
     public static Order getOrderExportDetailsWithExportDate() {

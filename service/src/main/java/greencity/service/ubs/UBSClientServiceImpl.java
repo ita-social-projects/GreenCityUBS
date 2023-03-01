@@ -31,32 +31,11 @@ import javax.transaction.Transactional;
 
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
+import greencity.entity.order.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.AddressStatus;
-import greencity.enums.BotType;
-import greencity.enums.CertificateStatus;
-import greencity.enums.CourierLimit;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
-import greencity.enums.PaymentType;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.RegionRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
+import greencity.enums.*;
+import greencity.repository.*;
 import greencity.exceptions.address.AddressNotFoundException;
 
 import lombok.Data;
@@ -76,7 +55,6 @@ import com.google.maps.model.GeocodingResult;
 
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
-import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.AllActiveLocationsDto;
 import greencity.dto.CreateAddressRequestDto;
@@ -124,15 +102,6 @@ import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -150,6 +119,7 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 
 import static greencity.constant.ErrorMessage.*;
+import static greencity.enums.LocationStatus.*;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -181,6 +151,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final GoogleApiService googleApiService;
     private final EventService eventService;
+    private final TariffLocationRepository tariffLocationRepository;
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final RegionRepository regionRepository;
@@ -262,33 +233,68 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> optionalOrderId) {
-        User user = userRepository.findUserByUuid(uuid).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+    public UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(String uuid, Long tariffId, Long locationId) {
+        var user = userRepository.findUserByUuid(uuid).orElseThrow(
+            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
 
-        var bagTranslationDtoList = getBagsByOrderId(optionalOrderId.orElse(null)).stream()
-            .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
-            .collect(toList());
+        var tariffsInfo = tariffsInfoRepository.findById(tariffId)
+            .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND + tariffId));
 
-        return new UserPointsAndAllBagsDto(bagTranslationDtoList, user.getCurrentPoints());
+        var location = locationRepository.findById(locationId)
+            .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
+
+        checkIfTariffIsAvailableForCurrentLocation(tariffsInfo, location);
+
+        return getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints());
     }
 
-    private List<Bag> getBagsByOrderId(Long orderId) {
-        if (orderId != null) {
-            var order = getOrderByIdOrThrowNotFoundException(
-                orderId,
-                ORDER_WITH_CURRENT_ID_NOT_FOUND);
-            var tariffId = order.getTariffsInfo().getId();
+    @Override
+    public UserPointsAndAllBagsDto getFirstPageDataByOrderId(String uuid, Long orderId) {
+        var user = userRepository.findUserByUuid(uuid).orElseThrow(
+            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        var order = orderRepository.findById(orderId).orElseThrow(
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-            return bagRepository.findBagsByTariffInfoId(tariffId);
+        var tariffsInfo = order.getTariffsInfo();
+
+        var location = getLocationByOrderIdThroughLazyInitialization(order);
+
+        checkIfTariffIsAvailableForCurrentLocation(tariffsInfo, location);
+
+        return getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints());
+    }
+
+    private void checkIfTariffIsAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {
+        if (tariffsInfo.getLocationStatus() == DEACTIVATED || location.getLocationStatus() == DEACTIVATED) {
+            throw new BadRequestException(TARIFF_OR_LOCATION_IS_DEACTIVATED);
         } else {
-            return bagRepository.findAll();
+            var isAvailable = isTariffAvailableForCurrentLocation(tariffsInfo, location);
+            if (!isAvailable) {
+                throw new BadRequestException(LOCATION_IS_DEACTIVATED_FOR_TARIFF + tariffsInfo.getId());
+            }
         }
     }
 
-    private Order getOrderByIdOrThrowNotFoundException(Long orderId, String exceptionMessage) {
-        return orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(exceptionMessage + orderId));
+    private boolean isTariffAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {
+        return tariffLocationRepository
+            .findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location)
+            .orElseThrow(() -> new NotFoundException(TARIFF_FOR_LOCATION_NOT_EXIST + location.getId()))
+            .getLocationStatus() != DEACTIVATED;
+    }
+
+    private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,
+        Integer userPoints) {
+        var bagTranslationDtoList = bagRepository.findBagsByTariffsInfoId(tariffId).stream()
+            .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
+            .collect(toList());
+        return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
+    }
+
+    private Location getLocationByOrderIdThroughLazyInitialization(Order order) {
+        return order
+            .getUbsUser()
+            .getOrderAddress()
+            .getLocation();
     }
 
     /**
@@ -329,7 +335,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         } else if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(courierLocation.getCourierLimit())
             && sumWithoutDiscount > courierLocation.getMax()) {
             throw new BadRequestException(
-                ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT + courierLocation.getMax());
+                PRICE_OF_ORDER_GREATER_THAN_LIMIT + courierLocation.getMax());
         }
     }
 
@@ -361,8 +367,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        UBSuser userData;
-        userData = formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), currentUser);
+        UBSuser userData =
+            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
+
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
@@ -435,14 +442,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void checkIfAddressHasBeenDeleted(Address address) {
         if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
             throw new NotFoundException(
-                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
     }
 
     private void checkAddressUser(Address address, User user) {
         if (!address.getUser().equals(user)) {
             throw new NotFoundException(
-                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
     }
 
@@ -476,7 +483,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
         if (addresses.size() == MAXIMUM_NUMBER_OF_ADDRESSES) {
-            throw new BadRequestException(ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED);
+            throw new BadRequestException(NUMBER_OF_ADDRESSES_EXCEEDED);
         }
 
         OrderAddressDtoRequest dtoRequest = retrieveCorrectDtoRequest(addressRequestDto.getSearchAddress());
@@ -526,7 +533,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Address address = addressRepo.findById(dtoRequest.getId())
             .orElseThrow(() -> new NotFoundException(
-                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
         if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
             address = null;
         }
@@ -650,9 +657,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid) {
         Address address = addressRepo.findById(addressId).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+            () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
         if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
-            throw new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId);
+            throw new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId);
         }
         if (!address.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
@@ -695,14 +702,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || order.getOrderStatus() == OrderStatus.CONFIRMED
             || order.getOrderStatus() == OrderStatus.DONE) {
             List<Bag> bags = bagRepository.findAllByOrder(orderId);
             return buildOrderBagDto(order, bags);
         } else {
-            throw new BadRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
+            throw new BadRequestException(BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
         }
     }
 
@@ -736,7 +743,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public OrdersDataForUserDto getOrderForUser(String uuid, Long id) {
         Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
         if (order == null) {
-            throw new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
 
         return getOrdersData(order);
@@ -812,7 +819,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
-        var address = order.getUbsUser().getAddress();
+        var address = order.getUbsUser().getOrderAddress();
         return AddressInfoDto.builder()
             .addressCity(address.getCity())
             .addressCityEng(address.getCityEn())
@@ -896,7 +903,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId, String uuid) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         User user = userRepository.findByUuid(uuid);
         if (!order.getUser().equals(user)) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
@@ -1044,7 +1051,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return paymentRequestDto;
     }
 
-    private UBSuser formUserDataToBeSaved(PersonalDataDto dto, Long addressId, User currentUser) {
+    private UBSuser formUserDataToBeSaved(PersonalDataDto dto, Long addressId, Long locationId, User currentUser) {
         UBSuser ubsUserFromDatabaseById = null;
         if (dto.getUbsUserId() != null) {
             ubsUserFromDatabaseById =
@@ -1058,9 +1065,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             UAPhoneNumberUtil.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
-            mappedFromDtoUser.setAddress(getSavedOrderAddress(addressId, currentUser));
-            if (mappedFromDtoUser.getAddress().getAddressComment() == null) {
-                mappedFromDtoUser.getAddress().setAddressComment(dto.getAddressComment());
+            mappedFromDtoUser.setOrderAddress(saveOrderAddressWithLocation(addressId, locationId, currentUser));
+            if (mappedFromDtoUser.getOrderAddress().getAddressComment() == null) {
+                mappedFromDtoUser.getOrderAddress().setAddressComment(dto.getAddressComment());
             }
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
@@ -1223,7 +1230,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
         if (orderEvents.isEmpty()) {
-            throw new NotFoundException(ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION + orderId);
+            throw new NotFoundException(EVENTS_NOT_FOUND_EXCEPTION + orderId);
         }
         return orderEvents
             .stream()
@@ -1327,7 +1334,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         TariffsInfo tariffsInfo =
             tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(1L, dto.getLocationId())
                 .orElseThrow(() -> new NotFoundException(
-                    ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST + dto.getLocationId()));
+                    TARIFF_FOR_LOCATION_NOT_EXIST + dto.getLocationId()));
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
         int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
@@ -1341,7 +1348,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        final UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), currentUser);
+        final UBSuser userData =
+            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
@@ -1371,15 +1379,20 @@ public class UBSClientServiceImpl implements UBSClientService {
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
     }
 
-    private OrderAddress getSavedOrderAddress(Long addressId, User currentUser) {
-        Address address = addressRepo.findById(addressId).orElseThrow(() -> new NotFoundException(
-            ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+    private OrderAddress saveOrderAddressWithLocation(Long addressId, Long locationId, User currentUser) {
+        var address = addressRepo.findById(addressId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+
+        var location = locationRepository.findById(locationId)
+            .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
 
         checkIfAddressHasBeenDeleted(address);
 
         checkAddressUser(address, currentUser);
 
-        OrderAddress orderAddress = modelMapper.map(address, OrderAddress.class);
+        var orderAddress = modelMapper.map(address, OrderAddress.class);
+
+        location.addOrderAddress(orderAddress);
 
         orderAddressRepository.save(orderAddress);
 
@@ -1537,7 +1550,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public void deleteOrder(String uuid, Long id) {
         Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
         if (order == null) {
-            throw new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
         orderRepository.delete(order);
     }
@@ -1600,7 +1613,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         int maxPointsToTransfer = countAmountToPayForOrder(order);
         if (amountToTransfer > maxPointsToTransfer) {
-            throw new BadRequestException(ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER + maxPointsToTransfer);
+            throw new BadRequestException(TOO_MUCH_POINTS_FOR_ORDER + maxPointsToTransfer);
         }
 
         order.setPointsToUse(order.getPointsToUse() + amountToTransfer);
@@ -1698,7 +1711,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
                     CertificateStatus.ACTIVE);
             if (certificates.isEmpty()) {
-                throw new NotFoundException(ErrorMessage.CERTIFICATE_NOT_FOUND);
+                throw new NotFoundException(CERTIFICATE_NOT_FOUND);
             }
             checkValidationCertificates(certificates, dto);
             for (Certificate temp : certificates) {
@@ -1718,7 +1731,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void checkValidationCertificates(Set<Certificate> certificates, OrderFondyClientDto dto) {
         if (certificates.size() != dto.getCertificates().size()) {
             String validCertification = certificates.stream().map(Certificate::getCode).collect(joining(", "));
-            throw new NotFoundException(ErrorMessage.SOME_CERTIFICATES_ARE_INVALID + validCertification);
+            throw new NotFoundException(SOME_CERTIFICATES_ARE_INVALID + validCertification);
         }
     }
 
@@ -1958,7 +1971,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (tariffsInfo.isPresent()) {
             return modelMapper.map(tariffsInfo.get(), TariffsForLocationDto.class);
         } else {
-            throw new EntityNotFoundException(ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST + id);
+            throw new EntityNotFoundException(TARIFF_FOR_ORDER_NOT_EXIST + id);
         }
     }
 
