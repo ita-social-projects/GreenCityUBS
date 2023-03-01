@@ -311,7 +311,7 @@ class UBSClientServiceImplTest {
         when(locationRepository.findById(locationId)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-                uuid, tariffsInfoId, locationId));
+            uuid, tariffsInfoId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
