@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
+import greencity.constant.ErrorMessage;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
 import greencity.entity.order.*;
