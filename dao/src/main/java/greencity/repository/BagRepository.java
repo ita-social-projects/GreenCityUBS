@@ -84,7 +84,8 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @return {@link List} of {@link Bag} by tariffInfoId.
      * @author Safarov Renat
      */
-    List<Bag> findBagsByTariffsInfoId(Long tariffInfoId);
+    @Query(value = "SELECT b FROM Bag AS b WHERE b.tariffsInfo.id =:tariffInfoId")
+    List<Bag> findBagsByTariffInfoId(@Param("tariffInfoId") Long tariffInfoId);
 
     /**
      * method, that returns {@link List} of {@link Bag} by Tariff id.

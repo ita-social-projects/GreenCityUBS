@@ -38,6 +38,7 @@ import org.springframework.web.util.NestedServletException;
 
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getRedirectionConfig;
@@ -97,33 +98,32 @@ class OrderControllerTest {
     }
 
     @Test
-    void getCurrentUserPointsByTariffAndLocationId() throws Exception {
+    void getCurrentUserPointsWithOrderId() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString())))
             .thenReturn("35467585763t4sfgchjfuyetf");
 
-        mockMvc.perform(get(ubsLink + "/order-details-for-tariff")
+        mockMvc.perform(get(ubsLink + "/order-details")
             .principal(principal)
-            .param("tariffId", "1")
-            .param("locationId", "1")
+            .param("optionalOrderId", "1")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageDataByTariffAndLocationId("35467585763t4sfgchjfuyetf", 1L, 1L);
+        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(1L));
     }
 
     @Test
-    void getCurrentUserPointsByOrderId() throws Exception {
+    void getCurrentUserPointsWithoutOrderId() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString())))
             .thenReturn("35467585763t4sfgchjfuyetf");
 
-        mockMvc.perform(get(ubsLink + "/details-for-existing-order/{orderId}", "1")
-            .principal(principal)
+        mockMvc.perform(get(ubsLink + "/order-details").principal(principal)
+            .param("optionalOrderId", "")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageDataByOrderId("35467585763t4sfgchjfuyetf", 1L);
+        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", Optional.empty());
     }
 
     @Test

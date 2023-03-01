@@ -58,14 +58,14 @@ class CoordinateServiceImplTest {
 
         for (Coordinates coordinate : ModelUtils.getCoordinatesSet()) {
             List<Order> orders = ModelUtils.getOrdersToGroupThem().stream()
-                .filter(e -> e.getUbsUser().getOrderAddress().getCoordinates().equals(coordinate)).collect(
+                .filter(e -> e.getUbsUser().getAddress().getCoordinates().equals(coordinate)).collect(
                     Collectors.toList());
             when(orderRepository.undeliveredOrdersGroupThem(coordinate.getLatitude(), coordinate.getLongitude()))
                 .thenReturn(orders);
             for (Order order : orders) {
                 when(modelMapper.map(order, OrderDto.class)).thenReturn(OrderDto.builder()
-                    .latitude(order.getUbsUser().getOrderAddress().getCoordinates().getLatitude())
-                    .longitude(order.getUbsUser().getOrderAddress().getCoordinates().getLongitude())
+                    .latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
+                    .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude())
                     .build());
             }
         }
@@ -93,11 +93,11 @@ class CoordinateServiceImplTest {
 
         for (Coordinates cord : ModelUtils.getCoordinatesSet()) {
             List<Order> currentOrders = allUndeliveredOrders.stream().filter(
-                o -> o.getUbsUser().getOrderAddress().getCoordinates().equals(cord)).collect(Collectors.toList());
+                o -> o.getUbsUser().getAddress().getCoordinates().equals(cord)).collect(Collectors.toList());
             for (Order order : currentOrders) {
                 when(modelMapper.map(order, OrderDto.class)).thenReturn(
-                    OrderDto.builder().latitude(order.getUbsUser().getOrderAddress().getCoordinates().getLatitude())
-                        .longitude(order.getUbsUser().getOrderAddress().getCoordinates().getLongitude()).build());
+                    OrderDto.builder().latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
+                        .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude()).build());
             }
         }
 

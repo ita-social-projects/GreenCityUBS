@@ -273,7 +273,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         checkAvailableOrderForEmployee(order, email);
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
 
-        var bagInfoDtoList = bagRepository.findBagsByTariffsInfoId(order.getTariffsInfo().getId()).stream()
+        var bagInfoDtoList = bagRepository.findBagsByTariffInfoId(order.getTariffsInfo().getId()).stream()
             .map(bag -> modelMapper.map(bag, BagInfoDto.class))
             .collect(Collectors.toList());
 
@@ -281,18 +281,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(it -> it.getPrice())
             .orElse(0);
 
-        var orderAddress = order.getUbsUser().getOrderAddress();
+        OrderAddress address = order.getUbsUser().getAddress();
 
         UserInfoDto userInfoDto =
             ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
             getInfoAboutStatusesAndDateFormed(Optional.of(order));
-        AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(orderAddress);
+        AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(address);
         return OrderStatusPageDto.builder()
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
             .userInfoDto(userInfoDto)
             .addressExportDetailsDto(addressDtoForAdminPage)
-            .addressComment(orderAddress.getAddressComment())
+            .addressComment(address.getAddressComment())
             .bags(bagInfoDtoList)
             .orderFullPrice(setTotalPrice(prices))
             .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())

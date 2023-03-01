@@ -20,10 +20,10 @@ public class UBSuser {
     @Id
     private Long id;
 
-    @MapsId
     @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     @JoinColumn(name = "id")
-    private OrderAddress orderAddress;
+    private OrderAddress address;
 
     @ManyToOne
     @JoinColumn(name = "users_id")
