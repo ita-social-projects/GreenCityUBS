@@ -55,13 +55,14 @@ public class OrderController {
     private final NotificationService notificationService;
 
     /**
-     * Controller returns all available bags and bonus points of current user.
-     * {@link UserVO}.
+     * Controller returns all available bags and bonus points of current user by
+     * tariff and location ids. {@link UserVO}.
      *
-     * @param userUuid        {@link UserVO} id.
-     * @param optionalOrderId {@link UserVO} id of order.
+     * @param userUuid   {@link UserVO} id.
+     * @param tariffId   {@link UserVO} id of tariff.
+     * @param locationId {@link UserVO} id of location.
      * @return {@link UserPointsAndAllBagsDto}.
-     * @author Oleh Bilonizhka
+     * @author SafarovRenat
      */
     @ApiOperation(value = "Get current user points by order id.")
     @ApiResponses(value = {
@@ -70,12 +71,37 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/order-details")
-    public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
+    @GetMapping("/order-details-for-tariff")
+    public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPointsByTariffAndLocationId(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestParam(required = false) Optional<Long> optionalOrderId) {
+        @RequestParam Long tariffId,
+        @RequestParam Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageData(userUuid, optionalOrderId));
+            .body(ubsClientService.getFirstPageDataByTariffAndLocationId(userUuid, tariffId, locationId));
+    }
+
+    /**
+     * Controller returns all available bags and bonus points of current user by
+     * order id. {@link UserVO}.
+     *
+     * @param userUuid {@link UserVO} id.
+     * @param orderId  {@link UserVO} id of order.
+     * @return {@link UserPointsAndAllBagsDto}.
+     * @author SafarovRenat
+     */
+    @ApiOperation(value = "Get current user points by order id.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointsAndAllBagsDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/details-for-existing-order/{orderId}")
+    public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPointsByOrderId(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @PathVariable Long orderId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.getFirstPageDataByOrderId(userUuid, orderId));
     }
 
     /**
