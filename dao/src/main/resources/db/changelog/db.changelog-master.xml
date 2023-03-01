@@ -179,4 +179,6 @@
     <include file="db/changelog/logs/ch-drop-column-min-amount-of-bags-in-table-bag-Seti.xml"/>
     <include file="db/changelog/logs/ch-insert-info-into-table-service-Seti.xml"/>
     <include file="db/changelog/logs/ch-add-foreign-key-column-locationId-to-OrderAddress-table-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-receiving-station-Kharchenko.xml"/>
+    <include file="db/changelog/logs/ch-drop-table-order-employee-Kharchenko.xml"/>
 </databaseChangeLog>

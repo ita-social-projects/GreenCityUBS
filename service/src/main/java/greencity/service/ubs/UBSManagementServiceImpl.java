@@ -139,65 +139,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * Method returns overpayment and bonuses to users account.
-     *
-     * @param orderId                   of {@link Long} order id;
-     * @param overpaymentInfoRequestDto {@link OverpaymentInfoRequestDto}
-     * @param email                     {@link String}.
-     * @author Ostap Mykhailivskyi
-     */
-    @Override
-    public void returnOverpayment(Long orderId,
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto, String email) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        User user = userRepository.findUserByOrderId(orderId)
-            .orElseThrow(
-                () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        checkAvailableOrderForEmployee(order, email);
-        Payment payment = createPayment(order, overpaymentInfoRequestDto);
-        switch (order.getOrderStatus()) {
-            case DONE:
-                returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
-                break;
-            case CANCELED:
-                switch (overpaymentInfoRequestDto.getComment()) {
-                    case AppConstant.PAYMENT_REFUND:
-                        returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto);
-                        collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, email);
-                        break;
-                    case AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT:
-                        returnOverpaymentAsBonusesForStatusCancelled(user, order, overpaymentInfoRequestDto);
-                        collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, email);
-                        break;
-                    default:
-                        throw new NotFoundException(COMMENT_ERROR + overpaymentInfoRequestDto.getComment());
-                }
-                break;
-            default:
-                throw new BadRequestException(BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
-        }
-        order.getPayment().add(payment);
-        userRepository.save(user);
-    }
-
-    /**
-     * This is method which collect's events about overpayment for order.
-     *
-     * @param commentStatus {@link String} comments status.
-     * @param order         {@link Order}.
-     * @param email         {@link String}.
-     * @author Yuriy Bahlay.
-     */
-    private void collectEventsAboutOverpayment(String commentStatus, Order order, String email) {
-        if (commentStatus.equals(AppConstant.PAYMENT_REFUND)) {
-            eventService.saveEvent(OrderHistory.RETURN_OVERPAYMENT_TO_CLIENT, email, order);
-        } else if (commentStatus.equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
-            eventService.saveEvent(OrderHistory.RETURN_OVERPAYMENT_AS_BONUS_TO_CLIENT, email, order);
-        }
-    }
-
-    /**
      * Method return's information about overpayment and used bonuses on canceled
      * and done orders.
      *
@@ -1219,52 +1160,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             sumToPay - ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
                 + order.getPointsToUse());
         return sumToPay - paidAmount > 0 ? Math.abs(sumToPay - paidAmount) : 0L;
-    }
-
-    private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
-        return ChangeOfPoints.builder()
-            .date(LocalDateTime.now())
-            .user(user)
-            .order(order)
-            .amount(Math.toIntExact(amount))
-            .build();
-    }
-
-    private Payment createPayment(Order order, OverpaymentInfoRequestDto dto) {
-        return Payment.builder()
-            .order(order)
-            .orderStatus("approved")
-            .comment(dto.getComment())
-            .currency("UAH")
-            .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
-            .paymentStatus(PaymentStatus.PAYMENT_REFUNDED)
-            .amount(dto.getOverpayment())
-            .build();
-    }
-
-    private void returnOverpaymentForStatusDone(User user, Order order,
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto,
-        Payment payment) {
-        user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getOverpayment()));
-        user.getChangeOfPointsList()
-            .add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getOverpayment()));
-        payment.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
-    }
-
-    private void returnOverpaymentAsMoneyForStatusCancelled(User user, Order order,
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
-        user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getBonuses()));
-        user.getChangeOfPointsList().add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getBonuses()));
-        order.getPayment().forEach(p -> p.setPaymentStatus(PaymentStatus.PAYMENT_REFUNDED));
-    }
-
-    private void returnOverpaymentAsBonusesForStatusCancelled(User user, Order order,
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
-        user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getOverpayment()
-            + overpaymentInfoRequestDto.getBonuses()));
-        user.getChangeOfPointsList()
-            .add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getOverpayment()));
-        user.getChangeOfPointsList().add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getBonuses()));
     }
 
     /**

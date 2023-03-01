@@ -133,6 +133,8 @@ public final class ErrorMessage {
         "Tariff has not been activated. Please set limits for tariff.";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS =
         "Tariff has not been activated. Please add package for tariff.";
+    public static final String UNRESOLVABLE_TARIFF_STATUS = "Unresolvable tariff status. Please choose Active "
+        + "or Deactivated.";
 
     /**
      * Constructor.
