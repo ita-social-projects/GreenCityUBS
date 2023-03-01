@@ -63,5 +63,4 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      * @return {@code true} if exists, {@code else} otherwise.
      */
     boolean existsByNameUkAndNameEnAndRegion(String nameUk, String nameEn, Region region);
-
 }
