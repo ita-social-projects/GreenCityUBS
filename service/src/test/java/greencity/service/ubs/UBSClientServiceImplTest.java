@@ -118,7 +118,15 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -611,7 +619,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -655,7 +663,7 @@ class UBSClientServiceImplTest {
         order1.getPayment().add(payment1);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
@@ -663,8 +671,100 @@ class UBSClientServiceImplTest {
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
 
         verify(userRepository, times(1)).findByUuid(anyString());
-        verify(tariffsInfoRepository, times(1)).findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong());
+        verify(tariffsInfoRepository, times(1))
+            .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
         verify(bagRepository, times(1)).findById(any());
+    }
+
+    @Test
+    void testSaveToDBWShouldThrowTariffNotFoundExceptionException() {
+        User user = getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        OrderAddress orderAddress = ubSuser.getAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+
+        verify(userRepository, times(1)).findByUuid(anyString());
+        verify(tariffsInfoRepository, times(1))
+            .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
+    }
+
+    @Test
+    void testSaveToDBWShouldThrowBagNotFoundExceptionException() throws IllegalAccessException {
+        User user = getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        OrderAddress orderAddress = ubSuser.getAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.of(getTariffInfo()));
+        when(bagRepository.findById(3)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+
+        verify(userRepository, times(1)).findByUuid(anyString());
+        verify(tariffsInfoRepository, times(1))
+            .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
+        verify(bagRepository).findById(3);
+
     }
 
     @Test
@@ -696,7 +796,7 @@ class UBSClientServiceImplTest {
         order1.getPayment().add(payment1);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -707,7 +807,8 @@ class UBSClientServiceImplTest {
         Assertions.assertNotNull(result);
 
         verify(userRepository, times(1)).findByUuid("35467585763t4sfgchjfuyetf");
-        verify(tariffsInfoRepository, times(1)).findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong());
+        verify(tariffsInfoRepository, times(1))
+            .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
         verify(bagRepository, times(2)).findById(any());
         verify(ubsUserRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(dto.getPersonalData(), UBSuser.class);
@@ -727,7 +828,7 @@ class UBSClientServiceImplTest {
         bag.setFullPrice(400);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
@@ -772,7 +873,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         Assertions.assertThrows(BadRequestException.class,
@@ -1846,7 +1947,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -1903,7 +2004,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -1952,7 +2053,7 @@ class UBSClientServiceImplTest {
             }
         }
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         Assertions.assertThrows(BadRequestException.class, () -> {
@@ -1991,7 +2092,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(
                 getTariffInfoWithLimitOfBags()
                     .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
@@ -2036,7 +2137,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(
                 getTariffInfoWithLimitOfBags()
                     .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
@@ -2493,7 +2594,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -2539,7 +2640,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -2577,7 +2678,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
