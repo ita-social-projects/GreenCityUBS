@@ -25,9 +25,9 @@
         </update>
 
         <insert tableName="tariffs_info">
+            <column name="id">1</column>
             <column name="courier_id">1</column>
             <column name="creator_id">1</column>
-            <column name="created_at">2023-02-26</column>
             <column name="courier_limits">LIMIT_BY_AMOUNT_OF_BAG</column>
             <column name="location_status">ACTIVE</column>
             <column name="min_amount_of_big_bags">2</column>
@@ -35,9 +35,9 @@
         </insert>
 
         <insert tableName="tariffs_info">
+            <column name="id">2</column>
             <column name="courier_id">1</column>
             <column name="creator_id">1</column>
-            <column name="created_at">2023-02-26</column>
             <column name="courier_limits">LIMIT_BY_AMOUNT_OF_BAG</column>
             <column name="location_status">ACTIVE</column>
             <column name="min_amount_of_big_bags">20</column>
