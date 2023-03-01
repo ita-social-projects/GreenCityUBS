@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
@@ -149,8 +150,9 @@ import greencity.util.OrderUtils;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.*;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -338,11 +340,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
-        User currentUser = userRepository.findByUuid(uuid);
-        TariffsInfo tariffsInfo =
-            tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(1L, dto.getLocationId())
-                .orElseThrow(() -> new greencity.exceptions.NotFoundException("Tariff for courier with id " + 1L
-                    + " and location with id " + dto.getLocationId() + " does not exist"));
+        final User currentUser = userRepository.findByUuid(uuid);
+        TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
         if (!dto.isShouldBePaid()) {
@@ -363,10 +362,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         UBSuser userData;
         userData = formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), currentUser);
-
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
-
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+
         if (sumToPay <= 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, null);
         } else {
@@ -374,6 +372,22 @@ public class UBSClientServiceImpl implements UBSClientService {
             String link = getLinkFromFondyCheckoutResponse(fondyClient.getCheckoutResponse(paymentRequestDto));
             return getPaymentRequestDto(order, link);
         }
+    }
+
+    private List<Integer> getBagIds(List<BagDto> dto) {
+        return dto.stream()
+            .map(BagDto::getId)
+            .collect(Collectors.toList());
+    }
+
+    private Bag tryToGetBagById(Integer id) {
+        return bagRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
+    }
+
+    private TariffsInfo tryToFindTariffsInfoByBagIds(List<Integer> bagIds, Long locationId) {
+        return tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(bagIds, locationId)
+            .orElseThrow(() -> new NotFoundException(TARIFF_FOR_LOCATION_NOT_EXIST + locationId));
     }
 
     private Order isExistOrder(OrderResponseDto dto, Long orderId) {
@@ -1136,8 +1150,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         int bigBagCounter = 0;
 
         for (BagDto temp : bags) {
-            Bag bag = bagRepository.findById(temp.getId())
-                .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + temp.getId()));
+            Bag bag = tryToGetBagById(temp.getId());
             if (bag.getCapacity() >= BAG_CAPACITY) {
                 bigBagCounter += temp.getAmount();
             }
