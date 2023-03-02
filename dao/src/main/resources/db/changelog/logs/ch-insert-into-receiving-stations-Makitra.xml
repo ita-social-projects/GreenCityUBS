@@ -9,6 +9,7 @@
             <column name="id">1</column>
             <column name="name">Саперно-Слобідська</column>
             <column name ="created_by_id">1</column>
+            <column name="create_date">2023-02-26</column>
             <column name ="station_status">ACTIVE</column>
         </insert>
     </changeSet>
