@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
@@ -21,8 +22,8 @@ import java.util.Set;
 @ToString
 public class OrderResponseDto implements Serializable {
     @Valid
+    @NotEmpty
     private List<BagDto> bags;
-    @NotNull
 
     @NotNull
     @Min(0)

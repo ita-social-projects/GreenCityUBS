@@ -8,7 +8,6 @@ import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
@@ -29,13 +28,6 @@ public interface UBSManagementService {
      * @author Struk Nazar
      */
     PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay);
-
-    /**
-     * Method returns overpayment to user.
-     *
-     * @author Ostap Mykhailivskyi
-     */
-    void returnOverpayment(Long orderId, OverpaymentInfoRequestDto overpaymentInfoRequestDto, String email);
 
     /**
      * Method returns overpayment to user.

@@ -39,7 +39,7 @@ public class CoordinateServiceImpl implements CoordinateService {
                 addressRepository.capacity(coordinates.getLatitude(), coordinates.getLongitude());
 
             List<OrderDto> currentCoordinatesOrders = allOrders.stream()
-                .filter(o -> o.getUbsUser().getAddress().getCoordinates().equals(coordinates))
+                .filter(o -> o.getUbsUser().getOrderAddress().getCoordinates().equals(coordinates))
                 .map(o -> modelMapper.map(o, OrderDto.class))
                 .collect(Collectors.toList());
 
