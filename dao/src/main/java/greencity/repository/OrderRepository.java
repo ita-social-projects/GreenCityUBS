@@ -24,7 +24,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     @Query("select o from Address a "
         + "inner join UBSuser u "
-        + "on a.id = u.address.id "
+        + "on a.id = u.orderAddress.id "
         + "inner join Order o "
         + "on o.ubsUser.id = u.id "
         + "where o.orderPaymentStatus = 'PAID'"
@@ -38,7 +38,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      *
      * @return list of {@link Order}.
      */
-    @Query("select o from Address a inner join UBSuser u on a.id = u.address.id "
+    @Query("select o from Address a inner join UBSuser u on a.id = u.orderAddress.id "
         + "inner join Order o on u = o.ubsUser "
         + "where o.orderStatus = 'PAID' and a.coordinates is not null")
     List<Order> undeliveredAddresses();

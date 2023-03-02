@@ -13,13 +13,9 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.AddNewTariffResponseDto;
-import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.*;
 import greencity.dto.service.GetTariffServiceDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
-import greencity.enums.LocationStatus;
 import greencity.filters.TariffsInfoFilterCriteria;
 
 import java.util.List;
@@ -242,14 +238,24 @@ public interface SuperAdminService {
     void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimits);
 
     /**
-     * Method to switch the tariff status to active or deactivated.
+     * Method for get info about tariff limits.
      *
-     * @param tariffId     {@link Long} tariff id
-     * @param tariffStatus {@link LocationStatus} tariff status
+     * @param tariffId {@link Long} tariff id
+     * @return {@link GetTariffLimitsDto} dto
      *
      * @author Julia Seti
      */
-    void switchTariffStatus(Long tariffId, LocationStatus tariffStatus);
+    GetTariffLimitsDto getTariffLimits(Long tariffId);
+
+    /**
+     * Method to switch the tariff status to active or deactivated.
+     *
+     * @param tariffId     {@link Long} tariff id
+     * @param tariffStatus {@link String} tariff status
+     *
+     * @author Julia Seti
+     */
+    void switchTariffStatus(Long tariffId, String tariffStatus);
 
     /**
      * Method for editing Locations.

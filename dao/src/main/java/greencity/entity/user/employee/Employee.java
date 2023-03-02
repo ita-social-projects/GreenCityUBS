@@ -56,13 +56,6 @@ public class Employee {
 
     @ManyToMany
     @JoinTable(
-        name = "order_employee",
-        joinColumns = {@JoinColumn(name = "employee_id")},
-        inverseJoinColumns = {@JoinColumn(name = "order_id")})
-    private Set<Order> attachedOrders;
-
-    @ManyToMany
-    @JoinTable(
         name = "tariff_infos_receiving_employee_mapping",
         joinColumns = {@JoinColumn(name = "employee_id")},
         inverseJoinColumns = {@JoinColumn(name = "tariffs_info_id")})
