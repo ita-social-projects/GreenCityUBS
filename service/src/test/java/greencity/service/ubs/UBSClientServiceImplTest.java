@@ -19,31 +19,11 @@ import javax.persistence.EntityNotFoundException;
 import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
+import greencity.enums.*;
+import greencity.repository.*;
 import greencity.service.google.GoogleApiService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -93,16 +73,10 @@ import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.enums.AddressStatus;
-import greencity.enums.CertificateStatus;
-import greencity.enums.CourierLimit;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -137,12 +111,22 @@ import static greencity.ModelUtils.getTestUser;
 import static greencity.ModelUtils.getUBSuser;
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getUserWithLastLocation;
+import static greencity.constant.ErrorMessage.*;
+import static greencity.enums.LocationStatus.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -190,6 +174,9 @@ class UBSClientServiceImplTest {
     private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     @Mock
     private TariffsInfoRepository tariffsInfoRepository;
+
+    @Mock
+    private TariffLocationRepository tariffLocationRepository;
     @Mock
     private LocationRepository locationRepository;
     @Mock
@@ -235,111 +222,364 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getFirstPageData() {
-        Optional<Long> optionalOrderId = Optional.of(1L);
+    void getFirstPageDataByTariffAndLocationIdShouldReturnExpectedData() {
+        var user = getUser();
+        var uuid = user.getUuid();
 
-        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
+        var tariffLocation = getTariffLocation();
 
-        User user = getUserWithLastLocation();
-        user.setCurrentPoints(600);
+        var tariffsInfo = tariffLocation.getTariffsInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+        tariffsInfo.setLocationStatus(ACTIVE);
 
-        Order order = getOrder();
-        order.setTariffsInfo(getTariffsInfo());
+        var location = tariffLocation.getLocation();
+        var locationId = location.getId();
 
-        List<Bag> bagList = getBag1list();
-
-        BagTranslationDto dto = getBagTranslationDto();
-
-        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(bagRepository.findBagsByTariffInfoId(anyLong())).thenReturn(bagList);
-        when(modelMapper.map(bagList.get(0), BagTranslationDto.class)).thenReturn(dto);
-
-        UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageData(anyString(), optionalOrderId);
-
-        assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
-        assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
-        assertEquals(userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
-            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
-
-        verify(userRepository).findUserByUuid(anyString());
-        verify(orderRepository).findById(anyLong());
-        verify(bagRepository).findBagsByTariffInfoId(anyLong());
-        verify(modelMapper).map(bagList.get(0), BagTranslationDto.class);
-        verify(bagRepository, never()).findAll();
-    }
-
-    @Test
-    void getFirstPageDataWithoutOrderId() {
-        var user = getUserWithLastLocation();
-        user.setCurrentPoints(600);
-
-        var bagList = getBag1list();
+        var bags = getBag1list();
         var bagTranslationDto = getBagTranslationDto();
-
         var userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
 
-        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
-        when(bagRepository.findAll()).thenReturn(bagList);
-        when(modelMapper.map(bagList.get(0), BagTranslationDto.class)).thenReturn(bagTranslationDto);
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
+            .thenReturn(Optional.of(tariffLocation));
+        when(bagRepository.findBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
+        when(modelMapper.map(bags.get(0), BagTranslationDto.class)).thenReturn(bagTranslationDto);
 
         var userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageData(anyString(), Optional.empty());
+            ubsService.getFirstPageDataByTariffAndLocationId(uuid, tariffsInfoId, locationId);
 
-        assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
-        assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags(),
+            userPointsAndAllBagsDtoActual.getBags());
         assertEquals(
             userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
             userPointsAndAllBagsDtoActual.getBags().get(0).getId());
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getPoints(),
+            userPointsAndAllBagsDtoActual.getPoints());
 
-        verify(userRepository).findUserByUuid(anyString());
-        verify(bagRepository).findAll();
-        verify(modelMapper).map(any(), any());
-
-        verify(bagRepository, never()).findBagsByTariffInfoId(anyLong());
+        verify(userRepository).findUserByUuid(uuid);
+        verify(tariffsInfoRepository).findById(tariffsInfoId);
+        verify(locationRepository).findById(locationId);
+        verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
+        verify(bagRepository).findBagsByTariffsInfoId(tariffsInfoId);
+        verify(modelMapper).map(bags.get(0), BagTranslationDto.class);
     }
 
     @Test
-    void getFirstPageDataOrderNotFoundException() {
-        User user = getUserWithLastLocation();
-        Optional<Long> optionalOrderId = Optional.of(1L);
-        String uuid = "35467585763t4sfgchjfuyetf";
+    void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenTariffLocationDoesNotExist() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var tariffsInfo = getTariffInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+
+        var location = getLocation();
+        var locationId = location.getId();
+
+        var expectedErrorMessage = TARIFF_FOR_LOCATION_NOT_EXIST + locationId;
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
+            .thenReturn(Optional.empty());
+
+        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
+            uuid, tariffsInfoId, locationId));
+
+        assertEquals(expectedErrorMessage, exception.getMessage());
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(tariffsInfoRepository).findById(tariffsInfoId);
+        verify(locationRepository).findById(locationId);
+        verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
+
+        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(modelMapper, never()).map(any(), any());
+    }
+
+    @Test
+    void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenLocationDoesNotExist() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var tariffsInfo = getTariffInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+
+        var location = getLocation();
+        var locationId = location.getId();
+
+        var expectedErrorMessage = LOCATION_DOESNT_FOUND_BY_ID + locationId;
 
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.empty());
 
-        var message = assertThrows(NotFoundException.class,
-            () -> ubsService.getFirstPageData(uuid, optionalOrderId))
-                .getMessage();
+        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
+            uuid, tariffsInfoId, locationId));
 
-        assertEquals(
-            ErrorMessage.ORDER_WITH_CURRENT_ID_NOT_FOUND + optionalOrderId.get(),
-            message);
+        assertEquals(expectedErrorMessage, exception.getMessage());
 
         verify(userRepository).findUserByUuid(anyString());
-        verify(orderRepository).findById(anyLong());
-        verify(bagRepository, never()).findBagsByTariffInfoId(anyLong());
-        verify(bagRepository, never()).findAll();
+        verify(tariffsInfoRepository).findById(anyLong());
+        verify(locationRepository).findById(locationId);
+
+        verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
+        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(modelMapper, never()).map(any(), any());
     }
 
     @Test
-    void getFirstPageDataUserNotFoundException() {
-        Optional<Long> optionalOrderId = Optional.of(1L);
-        String uuid = "35467585763t4sfgchjfuyetf";
+    void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenTariffDoesNotExist() {
+        var user = getUser();
+        var uuid = user.getUuid();
 
-        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.empty());
+        var tariffsInfo = getTariffInfo();
+        var tariffId = tariffsInfo.getId();
 
-        var message = assertThrows(NotFoundException.class,
-            () -> ubsService.getFirstPageData(uuid, optionalOrderId))
-                .getMessage();
+        var location = getLocation();
+        var locationId = location.getId();
 
-        assertEquals(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, message);
+        var expectedErrorMessage = TARIFF_NOT_FOUND + tariffId;
+
+        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
+        when(tariffsInfoRepository.findById(tariffId)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
+            uuid, tariffId, locationId));
+
+        assertEquals(expectedErrorMessage, exception.getMessage());
 
         verify(userRepository).findUserByUuid(anyString());
+        verify(tariffsInfoRepository).findById(tariffId);
+
+        verify(locationRepository, never()).findById(anyLong());
+        verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
+        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(modelMapper, never()).map(any(), anyLong());
+    }
+
+    @Test
+    void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenUserDoesNotExist() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var tariffsInfo = getTariffInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+
+        var location = getLocation();
+        var locationId = location.getId();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
+            uuid, tariffsInfoId, locationId));
+
+        assertEquals(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, exception.getMessage());
+
+        verify(userRepository).findUserByUuid(uuid);
+
+        verify(tariffsInfoRepository, never()).findById(anyLong());
+        verify(locationRepository, never()).findById(anyLong());
+        verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
+        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(modelMapper, never()).map(any(), any());
+    }
+
+    @Test
+    void checkIfTariffIsAvailableForCurrentLocationThrowExceptionWhenTariffIsDeactivated() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var tariffsInfo = getTariffInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+        tariffsInfo.setLocationStatus(DEACTIVATED);
+
+        var location = getLocation();
+        var locationId = location.getId();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+
+        var exception = assertThrows(BadRequestException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
+            uuid, tariffsInfoId, locationId));
+
+        assertEquals(TARIFF_OR_LOCATION_IS_DEACTIVATED, exception.getMessage());
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(tariffsInfoRepository).findById(tariffsInfoId);
+        verify(locationRepository).findById(locationId);
+
+        verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
+        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(modelMapper, never()).map(any(), any());
+    }
+
+    @Test
+    void checkIfTariffIsAvailableForCurrentLocationThrowExceptionWhenLocationIsDeactivated() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var tariffsInfo = getTariffInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+
+        var location = getLocation();
+        var locationId = location.getId();
+        location.setLocationStatus(DEACTIVATED);
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+
+        var exception = assertThrows(BadRequestException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
+            uuid, tariffsInfoId, locationId));
+
+        assertEquals(TARIFF_OR_LOCATION_IS_DEACTIVATED, exception.getMessage());
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(tariffsInfoRepository).findById(tariffsInfoId);
+        verify(locationRepository).findById(locationId);
+
+        verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
+        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(modelMapper, never()).map(any(), any());
+    }
+
+    @Test
+    void checkIfTariffIsAvailableForCurrentLocationWhenLocationForTariffIsDeactivated() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var tariffLocation = getTariffLocation();
+        tariffLocation.setLocationStatus(DEACTIVATED);
+
+        var tariffsInfo = tariffLocation.getTariffsInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+        tariffsInfo.setLocationStatus(ACTIVE);
+
+        var location = tariffLocation.getLocation();
+        var locationId = location.getId();
+
+        var expectedErrorMessage = LOCATION_IS_DEACTIVATED_FOR_TARIFF + tariffsInfoId;
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
+            .thenReturn(Optional.of(tariffLocation));
+
+        var exception = assertThrows(BadRequestException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
+            uuid, tariffsInfoId, locationId));
+
+        assertEquals(expectedErrorMessage, exception.getMessage());
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(tariffsInfoRepository).findById(tariffsInfoId);
+        verify(locationRepository).findById(locationId);
+        verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
+
+        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(modelMapper, never()).map(any(), any());
+    }
+
+    @Test
+    void getFirstPageDataByOrderIdShouldReturnExpectedData() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var order = getOrderWithTariffAndLocation();
+        var orderId = order.getId();
+
+        var tariffsInfo = order.getTariffsInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+        var location = order
+            .getUbsUser()
+            .getOrderAddress()
+            .getLocation();
+        var tariffLocation = getTariffLocation();
+
+        var bags = getBag1list();
+        var bagTranslationDto = getBagTranslationDto();
+        var userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
+            .thenReturn(Optional.of(tariffLocation));
+        when(bagRepository.findBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
+        when(modelMapper.map(bags.get(0), BagTranslationDto.class)).thenReturn(bagTranslationDto);
+
+        var userPointsAndAllBagsDtoActual =
+            ubsService.getFirstPageDataByOrderId(uuid, orderId);
+
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags(),
+            userPointsAndAllBagsDtoActual.getBags());
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getPoints(),
+            userPointsAndAllBagsDtoActual.getPoints());
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(orderRepository).findById(orderId);
+        verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
+        verify(bagRepository).findBagsByTariffsInfoId(tariffsInfoId);
+        verify(modelMapper).map(bags.get(0), BagTranslationDto.class);
+    }
+
+    @Test
+    void getFirstPageDataByOrderIdShouldThrowExceptionWhenUserDoesNotExist() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var order = getOrderWithoutPayment();
+        var orderId = order.getId();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByOrderId(
+            uuid, orderId));
+
+        assertEquals(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, exception.getMessage());
+
+        verify(userRepository).findUserByUuid(uuid);
+
         verify(orderRepository, never()).findById(anyLong());
-        verify(bagRepository, never()).findBagsByTariffInfoId(anyLong());
-        verify(bagRepository, never()).findAll();
+        verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
+        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(modelMapper, never()).map(any(), any());
+    }
+
+    @Test
+    void getFirstPageDataByOrderIdShouldThrowExceptionWhenOrderDoesNotExist() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var order = getOrderWithoutPayment();
+        var orderId = order.getId();
+
+        var expectedErrorMessage = ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId;
+
+        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByOrderId(
+            uuid, orderId));
+
+        assertEquals(expectedErrorMessage, exception.getMessage());
+
+        verify(userRepository).findUserByUuid(anyString());
+        verify(orderRepository).findById(orderId);
+
+        verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
+        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(modelMapper, never()).map(any(), any());
     }
 
     @Test
@@ -361,7 +601,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress orderAddress = ubSuser.getAddress();
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -379,7 +619,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -413,7 +653,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress orderAddress = ubSuser.getAddress();
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -423,7 +663,7 @@ class UBSClientServiceImplTest {
         order1.getPayment().add(payment1);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
@@ -431,8 +671,100 @@ class UBSClientServiceImplTest {
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
 
         verify(userRepository, times(1)).findByUuid(anyString());
-        verify(tariffsInfoRepository, times(1)).findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong());
+        verify(tariffsInfoRepository, times(1))
+            .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
         verify(bagRepository, times(1)).findById(any());
+    }
+
+    @Test
+    void testSaveToDBWShouldThrowTariffNotFoundExceptionException() {
+        User user = getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+
+        verify(userRepository, times(1)).findByUuid(anyString());
+        verify(tariffsInfoRepository, times(1))
+            .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
+    }
+
+    @Test
+    void testSaveToDBWShouldThrowBagNotFoundExceptionException() throws IllegalAccessException {
+        User user = getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.of(getTariffInfo()));
+        when(bagRepository.findById(3)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+
+        verify(userRepository, times(1)).findByUuid(anyString());
+        verify(tariffsInfoRepository, times(1))
+            .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
+        verify(bagRepository).findById(3);
+
     }
 
     @Test
@@ -454,7 +786,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress orderAddress = ubSuser.getAddress();
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -464,7 +796,7 @@ class UBSClientServiceImplTest {
         order1.getPayment().add(payment1);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -475,7 +807,8 @@ class UBSClientServiceImplTest {
         Assertions.assertNotNull(result);
 
         verify(userRepository, times(1)).findByUuid("35467585763t4sfgchjfuyetf");
-        verify(tariffsInfoRepository, times(1)).findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong());
+        verify(tariffsInfoRepository, times(1))
+            .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
         verify(bagRepository, times(2)).findById(any());
         verify(ubsUserRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(dto.getPersonalData(), UBSuser.class);
@@ -495,7 +828,7 @@ class UBSClientServiceImplTest {
         bag.setFullPrice(400);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
@@ -522,7 +855,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress address = ubSuser.getAddress();
+        OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -540,7 +873,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         Assertions.assertThrows(BadRequestException.class,
@@ -1322,7 +1655,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress orderAddress = ubSuser.getAddress();
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1419,7 +1752,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
         ubSuser.setId(null);
 
-        OrderAddress address = ubSuser.getAddress();
+        OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1581,7 +1914,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress address = ubSuser.getAddress();
+        OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1599,7 +1932,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -1636,9 +1969,13 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser().setId(null);
 
-        OrderAddress orderAddress = ubSuser.getAddress();
         Address address = getAddress();
         address.setUser(user);
+
+        var location = getLocation();
+
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
+        orderAddress.setLocation(location);
 
         orderAddress.setAddressStatus(AddressStatus.NEW);
         address.setAddressStatus(AddressStatus.NEW);
@@ -1652,11 +1989,12 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(addressRepository.findById(any())).thenReturn(Optional.of(address));
+        when(locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(modelMapper.map(address, OrderAddress.class)).thenReturn(orderAddress);
@@ -1683,7 +2021,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress address = ubSuser.getAddress();
+        OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1700,7 +2038,7 @@ class UBSClientServiceImplTest {
             }
         }
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         Assertions.assertThrows(BadRequestException.class, () -> {
@@ -1727,7 +2065,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress address = ubSuser.getAddress();
+        OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1739,7 +2077,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(
                 getTariffInfoWithLimitOfBags()
                     .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
@@ -1772,7 +2110,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress address = ubSuser.getAddress();
+        OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1784,7 +2122,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(
                 getTariffInfoWithLimitOfBags()
                     .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
@@ -1814,7 +2152,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress address = ubSuser.getAddress();
+        OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -2229,7 +2567,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress address = ubSuser.getAddress();
+        OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.DELETED);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -2241,7 +2579,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -2275,7 +2613,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        OrderAddress address = ubSuser.getAddress();
+        OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -2287,7 +2625,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -2325,7 +2663,7 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 

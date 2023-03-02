@@ -38,7 +38,6 @@ import org.springframework.web.util.NestedServletException;
 
 import java.security.Principal;
 import java.util.Arrays;
-import java.util.Optional;
 
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getRedirectionConfig;
@@ -98,32 +97,33 @@ class OrderControllerTest {
     }
 
     @Test
-    void getCurrentUserPointsWithOrderId() throws Exception {
+    void getCurrentUserPointsByTariffAndLocationId() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString())))
             .thenReturn("35467585763t4sfgchjfuyetf");
 
-        mockMvc.perform(get(ubsLink + "/order-details")
+        mockMvc.perform(get(ubsLink + "/order-details-for-tariff")
             .principal(principal)
-            .param("optionalOrderId", "1")
+            .param("tariffId", "1")
+            .param("locationId", "1")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(1L));
+        verify(ubsClientService).getFirstPageDataByTariffAndLocationId("35467585763t4sfgchjfuyetf", 1L, 1L);
     }
 
     @Test
-    void getCurrentUserPointsWithoutOrderId() throws Exception {
+    void getCurrentUserPointsByOrderId() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString())))
             .thenReturn("35467585763t4sfgchjfuyetf");
 
-        mockMvc.perform(get(ubsLink + "/order-details").principal(principal)
-            .param("optionalOrderId", "")
+        mockMvc.perform(get(ubsLink + "/details-for-existing-order/{orderId}", "1")
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", Optional.empty());
+        verify(ubsClientService).getFirstPageDataByOrderId("35467585763t4sfgchjfuyetf", 1L);
     }
 
     @Test

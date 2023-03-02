@@ -5,7 +5,6 @@
 
     <changeSet id="Makitra-15" author="Makitra Vadym">
         <insert tableName="bag">
-            <column name="id">1</column>
             <column name="capacity">120</column>
             <column name="price">230</column>
             <column name="commission">50</column>
@@ -14,7 +13,6 @@
             <column name="min_amount_of_bags">INCLUDE</column>
         </insert>
         <insert tableName="bag">
-            <column name="id">2</column>
             <column name="capacity">20</column>
             <column name="price">110</column>
             <column name="commission">0</column>
@@ -23,7 +21,6 @@
             <column name="min_amount_of_bags">EXCLUDE</column>
         </insert>
         <insert tableName="bag">
-            <column name="id">3</column>
             <column name="capacity">60</column>
             <column name="price">220</column>
             <column name="commission">0</column>
@@ -32,7 +29,6 @@
             <column name="min_amount_of_bags">EXCLUDE</column>
         </insert>
         <insert tableName="bag">
-            <column name="id">4</column>
             <column name="capacity">120</column>
             <column name="price">230</column>
             <column name="commission">50</column>
@@ -41,7 +37,6 @@
             <column name="min_amount_of_bags">INCLUDE</column>
         </insert>
         <insert tableName="bag">
-            <column name="id">5</column>
             <column name="capacity">20</column>
             <column name="price">110</column>
             <column name="commission">0</column>
@@ -50,7 +45,6 @@
             <column name="min_amount_of_bags">EXCLUDE</column>
         </insert>
         <insert tableName="bag">
-            <column name="id">6</column>
             <column name="capacity">60</column>
             <column name="price">220</column>
             <column name="commission">0</column>
