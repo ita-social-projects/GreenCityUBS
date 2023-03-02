@@ -47,6 +47,7 @@ import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
@@ -531,6 +532,14 @@ public class ModelUtils {
                     .id(1)
                     .limitIncluded(true)
                     .build()))
+            .build();
+    }
+
+    public static UserProfileCreateDto getUserProfileCreateDto() {
+        return UserProfileCreateDto.builder()
+            .name("UbsProfile")
+            .email("ubsuser@mail.com")
+            .uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
             .build();
     }
 }
