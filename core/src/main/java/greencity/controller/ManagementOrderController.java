@@ -8,10 +8,8 @@ import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.employee.EmployeePositionDtoResponse;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.AssignEmployeesForOrderDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -19,8 +17,6 @@ import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.GroupedOrderDto;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
@@ -32,7 +28,6 @@ import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.table.CustomTableViewDto;
@@ -369,29 +364,6 @@ public class ManagementOrderController {
         @Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getAddressByOrderId(id));
-    }
-
-    /**
-     * Controller for update order address.
-     *
-     * @return {@link OrderAddressDtoResponse}.
-     * @author Orest Mahdziak
-     */
-    @ApiOperation(value = "Update order address")
-    @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = OrderAddressDtoResponse.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
-    @PutMapping("/update-address")
-    public ResponseEntity<Optional<OrderAddressDtoResponse>> updateAddressByOrderId(
-        @Valid @RequestBody OrderAddressExportDetailsDtoUpdate dto, Long orderId,
-        Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateAddress(dto, orderId, principal.getName()));
     }
 
     /**
@@ -742,30 +714,6 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller returns overpayment to user.
-     *
-     * @param orderId                   {@link Long}.
-     * @param overpaymentInfoRequestDto {@link OverpaymentInfoRequestDto}.
-     * @return {@link HttpStatus} - http status.
-     * @author Ostap Mykhailivskyi
-     */
-    @ApiOperation(value = "Return overpayment to user")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/return-overpayment")
-    public ResponseEntity<HttpStatus> returnOverpayment(@RequestParam Long orderId,
-        @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto,
-        Principal principal) {
-        ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto, principal.getName());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    /**
      * Controller saves manual payment.
      *
      * @param orderId          {@link Long}.
@@ -860,29 +808,6 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for update depends on position.
-     *
-     * @return {EmployeePositionDtoResponse}.
-     * @author Bohdan Fedorkiv
-     */
-
-    @ApiOperation(value = "Update employee position by order")
-    @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
-    })
-    @PutMapping("/update-position-by-order")
-    public ResponseEntity<HttpStatus> updateByOrder(
-        @RequestBody @Valid EmployeePositionDtoResponse dto, @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.updatePositions(dto, uuid);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    /**
      * Controller for updating User violation.
      *
      * @author Bohdan Melnyk
@@ -923,30 +848,6 @@ public class ManagementOrderController {
         @RequestPart String description,
         @RequestPart(required = false) @Nullable MultipartFile[] images) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ubsManagementService.saveReason(id, description, images));
-    }
-
-    /**
-     * Controller for assigning Employees with their positions for some order by
-     * orderId.
-     *
-     * @param dto {@link AssignEmployeesForOrderDto}.
-     * @author Bahlay Yuriy.
-     */
-    @ApiOperation(value = "Assign employee for some order")
-    @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
-    })
-    @PostMapping("/assign-employees-to-order")
-    public ResponseEntity<HttpStatus> assignEmployeesToOrder(
-        @RequestBody @Valid AssignEmployeesForOrderDto dto,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.assignEmployeesWithThePositionsToTheOrder(dto, uuid);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**

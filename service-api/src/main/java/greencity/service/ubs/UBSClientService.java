@@ -34,11 +34,23 @@ public interface UBSClientService {
     /**
      * Methods returns all available for order bags and current user's bonus points.
      *
-     * @param uuid current {@link User}'s uuid.
+     * @param uuid       current {@link User}'s uuid.
+     * @param tariffId   {@link Long} tariff id.
+     * @param locationId {@ling Long} location id.
      * @return {@link UserPointsAndAllBagsDto}.
-     * @author Oleh Bilonizhka
+     * @author Safarov Renat
      */
-    UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> locationId);
+    UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(String uuid, Long tariffId, Long locationId);
+
+    /**
+     * Methods returns all available for order bags and current user's bonus points.
+     *
+     * @param uuid    current {@link User}'s uuid.
+     * @param orderId {@link Long} id of existing order.
+     * @return {@link UserPointsAndAllBagsDto}.
+     * @author Safarov Renat
+     */
+    UserPointsAndAllBagsDto getFirstPageDataByOrderId(String uuid, Long orderId);
 
     /**
      * Methods returns all saved user data.
@@ -182,6 +194,16 @@ public interface UBSClientService {
      * @author Rusanovscaia Nadejda
      */
     UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String email);
+
+    /**
+     * Method creates ubs user profile if it does not exist.
+     *
+     * @param userProfileCreateDto of {@link UserProfileCreateDto} with profile
+     *                             data;
+     * @return id {@link Long} of ubs user profile;
+     * @author Maksym Golik
+     */
+    Long createUserProfile(UserProfileCreateDto userProfileCreateDto);
 
     /**
      * Method that update user.
@@ -373,7 +395,7 @@ public interface UBSClientService {
      *
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
      */
-    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email);
+    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
 
     /**
      * Methods returns all locations.

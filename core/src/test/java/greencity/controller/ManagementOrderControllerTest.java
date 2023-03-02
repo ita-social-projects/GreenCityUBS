@@ -5,7 +5,6 @@ import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.order.*;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -150,27 +149,6 @@ class ManagementOrderControllerTest {
     void getAddressByOrder() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/read-address-order" + "/{id}", 1L))
             .andExpect(status().isOk());
-    }
-
-    @Test
-    void updateAddress() throws Exception {
-        this.mockMvc.perform(put(ubsLink + "/update-address")
-            .contentType(MediaType.APPLICATION_JSON)
-            .principal(principal)
-            .content(contentForUpdatingController))
-            .andExpect(status().isCreated());
-    }
-
-    @Test
-    void updateOrderDetail() throws Exception {
-        OrderDetailInfoDto dto = ModelUtils.getOrderDetailInfoDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
-        this.mockMvc.perform(put(ubsLink + "/update-address")
-            .content(orderResponceDtoJSON)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
     }
 
     @Test
@@ -321,32 +299,12 @@ class ManagementOrderControllerTest {
     }
 
     @Test
-    void updatePositionByOrderTest() throws Exception {
-        this.mockMvc.perform(put(ubsLink + "/update-position-by-order")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(contentForUpdatingEmployeeByOrderController))
-            .andExpect(status().isCreated());
-    }
-
-    @Test
     void groupCoordsWithSpecifiedOnes() throws Exception {
         this.mockMvc.perform(
             post(ubsLink + "/group-undelivered-with-specified")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("[{\"latitude\":84.525254,\"longitude\":12.436964}]"))
             .andExpect(status().isOk());
-    }
-
-    @Test
-    void assignEmployeeToOrder() throws Exception {
-        AssignEmployeesForOrderDto assignEmployeesForOrderDto = ModelUtils.assignEmployeeToOrderDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String writeValueAsString = objectMapper.writeValueAsString(assignEmployeesForOrderDto);
-
-        mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/assign-employees-to-order", 1L)
-            .content(writeValueAsString)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
     }
 
     @Test
@@ -430,19 +388,6 @@ class ManagementOrderControllerTest {
     void getUserViolationsTest() throws Exception {
         mockMvc.perform(get(ubsLink + "/getUsersViolations")
             .param("email", "max@email.com")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void returnOverpaymentTest() throws Exception {
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto = ModelUtils.getOverpaymentInfoRequestDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String dtoJson = objectMapper.writeValueAsString(overpaymentInfoRequestDto);
-        mockMvc.perform(post(ubsLink + "/return-overpayment")
-            .param("orderId", "1")
-            .content(dtoJson)
-            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }

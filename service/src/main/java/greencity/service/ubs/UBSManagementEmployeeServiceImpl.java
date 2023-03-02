@@ -4,8 +4,9 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeSignUpDto;
+import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UpdateEmployeeAuthoritiesDto;
 import greencity.dto.position.AddingPositionDto;
@@ -57,13 +58,15 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
-    public EmployeeDto save(EmployeeDto dto, MultipartFile image) {
-        dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
-        if (dto.getEmail() != null && employeeRepository.existsByEmail(dto.getEmail())) {
+    public EmployeeWithTariffsDto save(EmployeeWithTariffsIdDto dto, MultipartFile image) {
+        dto.getEmployeeDto()
+            .setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getEmployeeDto().getPhoneNumber()));
+        if (dto.getEmployeeDto().getEmail() != null
+            && employeeRepository.existsByEmail(dto.getEmployeeDto().getEmail())) {
             throw new UnprocessableEntityException(
-                ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
+                ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmployeeDto().getEmail());
         }
-        checkValidPosition(dto.getEmployeePositions());
+        checkValidPosition(dto.getEmployeeDto().getEmployeePositions());
 
         Employee employee = modelMapper.map(dto, Employee.class);
         employee.setUuid(UUID.randomUUID().toString());
@@ -75,7 +78,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             employee.setImagePath(defaultImagePath);
         }
         signUpEmployee(employee);
-        return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
+        return modelMapper.map(employeeRepository.save(employee), EmployeeWithTariffsDto.class);
     }
 
     private void signUpEmployee(Employee employee) {
@@ -127,15 +130,18 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     @Transactional
-    public EmployeeDto update(EmployeeDto dto, MultipartFile image) {
-        final Employee upEmployee = employeeRepository.findById(dto.getId()).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
+    public EmployeeWithTariffsDto update(EmployeeWithTariffsIdDto dto, MultipartFile image) {
+        final Employee upEmployee = employeeRepository.findById(dto.getEmployeeDto().getId()).orElseThrow(
+            () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getEmployeeDto().getId()));
 
-        if (!employeeRepository.findEmployeesByEmailAndIdNot(dto.getEmail(), dto.getId()).isEmpty()) {
-            throw new BadRequestException("Email already exist in another employee: " + dto.getEmail());
+        if (!employeeRepository
+            .findEmployeesByEmailAndIdNot(dto.getEmployeeDto().getEmail(), dto.getEmployeeDto().getId()).isEmpty()) {
+            throw new BadRequestException(
+                "Email already exist in another employee: " + dto.getEmployeeDto().getEmail());
         }
-        checkValidPosition(dto.getEmployeePositions());
-        dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
+        checkValidPosition(dto.getEmployeeDto().getEmployeePositions());
+        dto.getEmployeeDto()
+            .setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getEmployeeDto().getPhoneNumber()));
         updateEmployeeEmail(dto, upEmployee.getUuid());
         updateEmployeeAuthorities(dto);
 
@@ -149,7 +155,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         } else {
             updatedEmployee.setImagePath(upEmployee.getImagePath());
         }
-        return modelMapper.map(employeeRepository.save(updatedEmployee), EmployeeDto.class);
+        return modelMapper.map(employeeRepository.save(updatedEmployee), EmployeeWithTariffsDto.class);
     }
 
     @Override
@@ -165,11 +171,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         throw new UnprocessableEntityException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
     }
 
-    private void updateEmployeeAuthorities(EmployeeDto dto) {
+    private void updateEmployeeAuthorities(EmployeeWithTariffsIdDto dto) {
         UpdateEmployeeAuthoritiesDto authoritiesDto =
             UpdateEmployeeAuthoritiesDto.builder()
-                .email(dto.getEmail())
-                .positions(dto.getEmployeePositions())
+                .email(dto.getEmployeeDto().getEmail())
+                .positions(dto.getEmployeeDto().getEmployeePositions())
                 .build();
         userRemoteClient.updateAuthorities(authoritiesDto);
     }
@@ -179,11 +185,16 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     @Transactional
-    public void deleteEmployee(Long id) {
+    public void deactivateEmployee(Long id) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
         if (employee.getEmployeeStatus().equals(EmployeeStatus.ACTIVE)) {
             employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+            try {
+                userRemoteClient.deactivateEmployee(employee.getUuid());
+            } catch (HystrixRuntimeException e) {
+                throw new BadRequestException("Employee with current uuid doesn't exist: " + employee.getUuid());
+            }
             employeeRepository.save(employee);
         }
     }
@@ -247,11 +258,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         }
     }
 
-    private void updateEmployeeEmail(EmployeeDto dto, String uuid) {
-        Employee employee = employeeRepository.findById(dto.getId())
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
+    private void updateEmployeeEmail(EmployeeWithTariffsIdDto dto, String uuid) {
+        Employee employee = employeeRepository.findById(dto.getEmployeeDto().getId())
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getEmployeeDto().getId()));
         String oldEmail = employee.getEmail();
-        String newEmail = dto.getEmail();
+        String newEmail = dto.getEmployeeDto().getEmail();
         if (!oldEmail.equals(newEmail)) {
             try {
                 userRemoteClient.updateEmployeeEmail(newEmail, uuid);

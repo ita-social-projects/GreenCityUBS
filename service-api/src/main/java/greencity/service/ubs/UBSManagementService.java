@@ -4,12 +4,10 @@ import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.employee.EmployeePositionDtoResponse;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
@@ -30,13 +28,6 @@ public interface UBSManagementService {
      * @author Struk Nazar
      */
     PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay);
-
-    /**
-     * Method returns overpayment to user.
-     *
-     * @author Ostap Mykhailivskyi
-     */
-    void returnOverpayment(Long orderId, OverpaymentInfoRequestDto overpaymentInfoRequestDto, String email);
 
     /**
      * Method returns overpayment to user.
@@ -215,22 +206,9 @@ public interface UBSManagementService {
     EmployeePositionDtoRequest getAllEmployeesByPosition(Long id, String email);
 
     /**
-     * Method that update EmployeePositionDtoResponse.
-     */
-    void updatePositions(EmployeePositionDtoResponse dto, String uuid);
-
-    /**
      * Method that save ReasonNotTakeBagDto.
      */
     ReasonNotTakeBagDto saveReason(Long orderId, String description, MultipartFile[] images);
-
-    /**
-     * This method assign Employee with it's position for current order.
-     *
-     * @param dto {@link AssignEmployeesForOrderDto}.
-     * @author Yuriy Bahlay.
-     */
-    void assignEmployeesWithThePositionsToTheOrder(AssignEmployeesForOrderDto dto, String uuid);
 
     /**
      * This is method which is save Admin comment.

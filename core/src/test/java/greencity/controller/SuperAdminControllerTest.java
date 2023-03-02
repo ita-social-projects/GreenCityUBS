@@ -8,20 +8,18 @@ import greencity.constant.ErrorMessage;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
-import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.AddingReceivingStationDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.LocationCreateDto;
-import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.dto.tariff.TariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -728,113 +726,138 @@ class SuperAdminControllerTest {
 
     @Test
     @SneakyThrows
-    void editInfoAboutTariff() {
-        var dto = EditPriceOfOrder.builder().max(10000L).min(1000L).build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(dto);
-        mockMvc.perform(patch(ubsLink + "/setLimitsBySumOfOrder/{tariffId}", 1L)
+    void setLimitsForTariffTest() {
+        SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();
+        String requestJSON = new ObjectMapper().writeValueAsString(dto);
+        mockMvc.perform(put(ubsLink + "/setTariffLimits/{tariffId}", 1L)
             .principal(principal)
-            .content(responseJSON)
+            .content(requestJSON)
+            .param("tariffId", "1")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+
+        verify(superAdminService).setTariffLimits(anyLong(), any(SetTariffLimitsDto.class));
     }
 
     @Test
     @SneakyThrows
-    void setAmountOfSum() {
-        EditAmountOfBagDto dto = ModelUtils.getAmountOfSum();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(dto);
-        mockMvc.perform(patch(ubsLink + "/setLimitsByAmountOfBags/{tariffId}", 1L)
+    void setLimitsForTariffThrowBadRequestException() {
+        SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();
+        String requestJSON = new ObjectMapper().writeValueAsString(dto);
+
+        doThrow(new BadRequestException(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY))
+            .when(superAdminService).setTariffLimits(anyLong(), any(SetTariffLimitsDto.class));
+
+        mockMvc.perform(put(ubsLink + "/setTariffLimits/{tariffId}", 1L)
             .principal(principal)
-            .content(responseJSON)
+            .content(requestJSON)
+            .param("tariffId", "1")
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).setTariffLimits(anyLong(), any(SetTariffLimitsDto.class));
     }
 
     @Test
     @SneakyThrows
-    void deactivateTariffTest() {
-        mockMvc.perform(put(ubsLink + "/deactivateTariff/{tariffId}", 1L)
+    void setLimitsForTariffThrowNotFoundException() {
+        SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();
+        String requestJSON = new ObjectMapper().writeValueAsString(dto);
+
+        doThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L))
+            .when(superAdminService).setTariffLimits(anyLong(), any(SetTariffLimitsDto.class));
+
+        mockMvc.perform(put(ubsLink + "/setTariffLimits/{tariffId}", 1L)
             .principal(principal)
+            .content(requestJSON)
+            .param("tariffId", "1")
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).setTariffLimits(anyLong(), any(SetTariffLimitsDto.class));
     }
 
     @Test
     @SneakyThrows
-    void setLimitDescriptionTest() throws Exception {
-        TariffsInfoDto dto = ModelUtils.getLimitDescriptionDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(dto);
-        mockMvc.perform(patch(ubsLink + "/setLimitDescription/{tariffId}", 1L)
+    void getTariffLimitsTest() {
+        mockMvc.perform(get(ubsLink + "/getTariffLimits/{tariffId}", 1L)
             .principal(principal)
-            .content(responseJSON)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void includeLimit() throws Exception {
-        GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
-
-        when(superAdminService.includeLimit(1)).thenReturn(dto);
-
-        mockMvc.perform(put(ubsLink + "/includeLimit/{id}", 1L)
-            .principal(principal)
-            .param("id", "1"))
+            .param("tariffId", "1L"))
             .andExpect(status().isOk())
             .andReturn();
 
-        verify(superAdminService).includeLimit(1);
+        verify(superAdminService).getTariffLimits(1L);
     }
 
     @Test
-    void includeLimitThrowNotFoundException() throws Exception {
-        when(superAdminService.includeLimit(1))
-            .thenThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
-
-        mockMvc.perform(put(ubsLink + "/includeLimit/{id}", 1L)
+    @SneakyThrows
+    void getTariffLimitsThrowNotFoundException() {
+        when(superAdminService.getTariffLimits(1L))
+            .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L));
+        mockMvc.perform(get(ubsLink + "/getTariffLimits/{tariffId}", 1L)
             .principal(principal)
-            .param("id", "1"))
+            .param("tariffId", "1"))
             .andExpect(status().isNotFound())
             .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-            .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(superAdminService).includeLimit(1);
+        verify(superAdminService).getTariffLimits(1L);
     }
 
     @Test
-    void excludeLimit() throws Exception {
-        GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
-        dto.setLimitIncluded(false);
-
-        when(superAdminService.excludeLimit(1)).thenReturn(dto);
-
-        mockMvc.perform(put(ubsLink + "/excludeLimit/{id}", 1L)
+    @SneakyThrows
+    void switchTariffStatus() {
+        mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
             .principal(principal)
-            .param("id", "1"))
-            .andExpect(status().isOk())
-            .andReturn();
+            .param("tariffId", "1L")
+            .param("status", "Active"))
+            .andExpect(status().isOk());
 
-        verify(superAdminService).excludeLimit(1);
+        verify(superAdminService).switchTariffStatus(1L, "Active");
     }
 
     @Test
-    void excludeLimitThrowNotFoundException() throws Exception {
-        when(superAdminService.excludeLimit(1))
-            .thenThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
+    @SneakyThrows
+    void switchTariffStatusThrowNotFoundException() {
+        doThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L))
+            .when(superAdminService).switchTariffStatus(1L, "Active");
 
-        mockMvc.perform(put(ubsLink + "/excludeLimit/{id}", 1L)
+        mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
             .principal(principal)
-            .param("id", "1"))
+            .param("tariffId", "1L")
+            .param("status", "Active")
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
             .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-            .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(superAdminService).excludeLimit(1);
+        verify(superAdminService).switchTariffStatus(1L, "Active");
+    }
+
+    @Test
+    @SneakyThrows
+    void switchTariffStatusThrowBadRequestException() {
+        doThrow(new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS))
+            .when(superAdminService).switchTariffStatus(1L, "Active");
+
+        mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
+            .principal(principal)
+            .param("tariffId", "1L")
+            .param("status", "Active"))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).switchTariffStatus(1L, "Active");
     }
 
     @Test

@@ -47,6 +47,11 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
+    void checkIfUserExistsByUuid() {
+        assertThrows(RemoteServerUnavailableException.class, () -> client.checkIfUserExistsByUuid(USER_UUID));
+    }
+
+    @Test
     void markUserDeactivated() {
         assertThrows(RemoteServerUnavailableException.class, () -> client.markUserDeactivated(USER_UUID));
     }
@@ -70,7 +75,7 @@ class UserRemoteClientFallbackFactoryTest {
     @Test
     void updateEmployeesAuthorities() {
         UserEmployeeAuthorityDto dto = UserEmployeeAuthorityDto.builder().build();
-        assertThrows(RemoteServerUnavailableException.class, () -> client.updateEmployeesAuthorities(dto, USER_EMAIL));
+        assertThrows(RemoteServerUnavailableException.class, () -> client.updateEmployeesAuthorities(dto));
     }
 
     @Test
@@ -89,5 +94,11 @@ class UserRemoteClientFallbackFactoryTest {
     void updateAuthoritiesTest() {
         UpdateEmployeeAuthoritiesDto dto = UpdateEmployeeAuthoritiesDto.builder().build();
         assertThrows(RemoteServerUnavailableException.class, () -> client.updateAuthorities(dto));
+    }
+
+    @Test
+    void deactivateEmployee() {
+        String uuid = "87df9ad5-6393-441f-8423-8b2e770b01a8";
+        assertThrows(RemoteServerUnavailableException.class, () -> client.deactivateEmployee(uuid));
     }
 }

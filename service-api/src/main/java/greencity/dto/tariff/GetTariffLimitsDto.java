@@ -1,25 +1,20 @@
-package greencity.dto.order;
+package greencity.dto.tariff;
 
+import greencity.enums.CourierLimit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-@Getter
-@Setter
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EditPriceOfOrder {
+public class GetTariffLimitsDto {
     @NotNull
-    @Min(0)
+    private CourierLimit courierLimit;
     private Long min;
-    @NotNull
-    @Min(0)
     private Long max;
-    private Long locationId;
 }

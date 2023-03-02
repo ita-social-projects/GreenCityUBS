@@ -72,9 +72,10 @@ public final class ErrorMessage {
     public static final String SERVICE_ALREADY_EXISTS = "Service already exists for tariff with id: ";
     public static final String LOCATION_STATUS_IS_ALREADY_EXIST =
         "Current location already has status that's you wanna chose";
+
+    public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
-    public static final String BAG_WITH_THIS_STATUS_ALREADY_SET = "Bag with this status already set.";
     public static final String LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND =
         "Payment with selected id does not belong LiqPay.";
     public static final String ORDER_WITH_CURRENT_ID_NOT_FOUND = "Couldn't find order with id that you chose";
@@ -100,6 +101,7 @@ public final class ErrorMessage {
     public static final String LANGUAGE_ERROR = "Invalid language code";
     public static final String TARIFF_NOT_FOUND = "Couldn't found tariff with id: ";
     public static final String TARIFF_FOR_LOCATION_NOT_EXIST = "Could not find tariff for location with id: ";
+    public static final String TARIFF_OR_LOCATION_IS_DEACTIVATED = "Tariff or location is deactivated.";
     public static final String TARIFF_IS_ALREADY_EXISTS = "Tariff for such locations is already exists";
     public static final String USER_HAS_NOT_BEEN_DEACTIVATED = "User has not been deactivated";
     public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";
@@ -117,14 +119,22 @@ public final class ErrorMessage {
     public static final String CITY_NAME_CHARACTER_LIMIT = "A minimum of 3 to a maximum of 40 characters are allowed";
     public static final String CANNOT_ACCESS_ORDER_FOR_EMPLOYEE = "Cannot access order with id: ";
     public static final String NUMBER_OF_ADDRESSES_EXCEEDED = "Number of addresses reached maximum";
-    public static final String BAGS_WITH_MIN_AMOUNT_OF_BIG_BAGS_NOT_FOUND =
-        "There are not any tariff which include big bags for this location";
     public static final String TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY =
-        "Limits are not inputted properly. You should only input AmountOfBags or PriceOfOrder.";
-    public static final String MAX_BAG_VALUE_IS_INCORRECT = "Max bag value should be greater than min";
-    public static final String MAX_PRICE_VALUE_IS_INCORRECT = "Max price value should be greater than min";
-
-    public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max field must have different values";
+        "Limits are not inputted properly. You should input min and/or max limit values for at least one package.";
+    public static final String MAX_VALUE_IS_INCORRECT = "Max value should be greater than min";
+    public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max fields must have different values";
+    public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED = "Employee with current uuid was not "
+        + "deactivated.";
+    public static final String BAG_FOR_TARIFF_NOT_EXIST = "Could not find bag with id %d for tariff with id %d";
+    public static final String TARIFF_ALREADY_HAS_THIS_STATUS = "Tariff with id %d already has status: %s";
+    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_SERVICE =
+        "Tariff has not been activated. Please add service for tariff.";
+    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS =
+        "Tariff has not been activated. Please set limits for tariff.";
+    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS =
+        "Tariff has not been activated. Please add package for tariff.";
+    public static final String UNRESOLVABLE_TARIFF_STATUS = "Unresolvable tariff status. Please choose Active "
+        + "or Deactivated.";
 
     /**
      * Constructor.

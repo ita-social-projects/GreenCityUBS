@@ -7,7 +7,7 @@
             <column name="first_name">UBS</column>
             <column name="last_name">ADMIN</column>
             <column name="phone_number">+380675554433</column>
-            <column name="email">green.city.ubs@gmail.coml</column>
+            <column name="email">green.city.ubs@gmail.com</column>
             <column name="status">ACTIVE</column>
             <column name="uuid">d0840b34-3f17-4820-a375-305b855dff8b</column>
         </insert>

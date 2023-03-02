@@ -63,14 +63,4 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      * @return {@code true} if exists, {@code else} otherwise.
      */
     boolean existsByNameUkAndNameEnAndRegion(String nameUk, String nameEn, Region region);
-
-    /**
-     * Method to check if the location exists by regionId.
-     *
-     * @param regionId   - region id.
-     * @param locationId - location id.
-     * @return return true if location exists and false if not.
-     * @author Nikita Korzh.
-     */
-    boolean existsLocationByIdAndRegion(Long locationId, Long regionId);
 }

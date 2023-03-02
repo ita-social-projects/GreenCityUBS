@@ -1,7 +1,7 @@
 package greencity.mapping.employee;
 
 import greencity.ModelUtils;
-import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.entity.user.employee.Employee;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +19,7 @@ class EmployeeUpdateDtoMapperTest {
     @Test
     void convertEmployeeToEmployeeDtoTest() {
         Employee employee = ModelUtils.getEmployee();
-        EmployeeDto dto = ModelUtils.getEmployeeDto();
+        EmployeeWithTariffsIdDto dto = ModelUtils.getEmployeeWithTariffsIdDto();
         assertEquals(mapper.convert(employee), dto);
     }
 }

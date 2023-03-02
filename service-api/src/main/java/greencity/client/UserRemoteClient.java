@@ -57,6 +57,15 @@ public interface UserRemoteClient {
     Optional<UbsCustomersDto> findByUuid(@RequestParam(UUID) String uuid);
 
     /**
+     * Method checks the existence of the user by uuid.
+     *
+     * @param uuid {@link User}'s UUID.
+     * @return {@link Boolean}.
+     */
+    @GetMapping("/user/checkByUuid")
+    boolean checkIfUserExistsByUuid(@RequestParam(UUID) String uuid);
+
+    /**
      * Changes userStatus to "DEACTIVATED" by UUID.
      *
      * @param uuid {@link User}'s UUID.
@@ -96,7 +105,7 @@ public interface UserRemoteClient {
      * @param dto {@link UserEmployeeAuthorityDto}
      */
     @PutMapping("/user/edit-authorities")
-    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, @RequestParam(EMAIL) String email);
+    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
 
     /**
      * Save an employee to users table in GreenCityUser.
@@ -123,4 +132,12 @@ public interface UserRemoteClient {
      */
     @PutMapping("/user/authorities")
     void updateAuthorities(@RequestBody UpdateEmployeeAuthoritiesDto dto);
+
+    /**
+     * Deactivate employee by uuid.
+     *
+     * @param uuid - uuid of employee.
+     */
+    @PutMapping("/user/deactivate-employee")
+    void deactivateEmployee(@RequestParam String uuid);
 }
