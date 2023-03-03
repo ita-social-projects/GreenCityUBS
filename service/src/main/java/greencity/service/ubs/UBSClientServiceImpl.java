@@ -265,7 +265,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkIfTariffIsAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {
-        if (tariffsInfo.getTariffStatus() == TariffStatus.DEACTIVATED || location.getLocationStatus() == LocationStatus.DEACTIVATED) {
+        if (tariffsInfo.getTariffStatus() == TariffStatus.DEACTIVATED
+            || location.getLocationStatus() == LocationStatus.DEACTIVATED) {
             throw new BadRequestException(TARIFF_OR_LOCATION_IS_DEACTIVATED);
         } else {
             var isAvailable = isTariffAvailableForCurrentLocation(tariffsInfo, location);

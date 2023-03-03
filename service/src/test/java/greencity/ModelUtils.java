@@ -3619,7 +3619,7 @@ public class ModelUtils {
     public static TariffsInfo getTariffsInfoActive() {
         return TariffsInfo.builder()
             .id(1L)
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
             .max(20L)
             .min(2L)
@@ -3636,7 +3636,7 @@ public class ModelUtils {
     public static TariffsInfo getTariffsInfoDeactivated() {
         return TariffsInfo.builder()
             .id(1L)
-            .locationStatus(LocationStatus.DEACTIVATED)
+            .tariffStatus(TariffStatus.DEACTIVATED)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
             .max(20L)
             .min(2L)
