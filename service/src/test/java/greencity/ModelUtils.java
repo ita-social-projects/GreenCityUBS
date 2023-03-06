@@ -102,10 +102,7 @@ import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
-import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
-import greencity.dto.tariff.GetTariffLimitsDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.dto.tariff.*;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -1206,6 +1203,28 @@ public class ModelUtils {
             .build();
     }
 
+    public static TariffLocation getTariffLocation2() {
+        return TariffLocation
+            .builder()
+            .id(1L)
+            .tariffsInfo(
+                TariffsInfo.builder()
+                    .id(2L)
+                    .build())
+            .location(getLocation())
+            .locationStatus(LocationStatus.ACTIVE)
+            .build();
+    }
+
+    public static List<TariffLocation> getTariffLocationList() {
+        return List.of(getTariffLocation(),
+            TariffLocation
+                .builder()
+                .id(2L)
+                .locationStatus(LocationStatus.ACTIVE)
+                .build());
+    }
+
     public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
         return EmployeeWithTariffsIdDto
             .builder()
@@ -2012,6 +2031,23 @@ public class ModelUtils {
             .region(getRegion())
             .coordinates(getCoordinates())
             .build());
+    }
+
+    public static List<Location> getLocationList2() {
+        return List.of(Location.builder()
+            .id(1L)
+            .region(
+                Region.builder()
+                    .id(1L)
+                    .build())
+            .build(),
+            Location.builder()
+                .id(2L)
+                .region(
+                    Region.builder()
+                        .id(2L)
+                        .build())
+                .build());
     }
 
     private static EmployeePositionDtoResponse createEmployeePositionDtoResponse() {
@@ -3797,6 +3833,20 @@ public class ModelUtils {
             .locationIdList(List.of(1L))
             .receivingStationsIdList(List.of(1L))
             .regionId(1L)
+            .build();
+    }
+
+    public static EditTariffDto getEditTariffDto() {
+        return EditTariffDto.builder()
+            .locationIds(List.of(1L))
+            .receivingStationIds(List.of(1L))
+            .build();
+    }
+
+    public static EditTariffDto getEditTariffDtoWith2Locations() {
+        return EditTariffDto.builder()
+            .locationIds(List.of(1L, 2L))
+            .receivingStationIds(List.of(1L))
             .build();
     }
 

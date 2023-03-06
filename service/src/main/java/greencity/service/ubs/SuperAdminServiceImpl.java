@@ -586,12 +586,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void checkIfLocationBelongsToAnotherTariff(List<Long> locationIds, TariffsInfo tariffsInfo) {
-        long locationsInAnotherTariffsCount = tariffsLocationRepository
+        long tariffsWithLocationsCount = tariffsLocationRepository
             .findAllByCourierIdAndLocationIds(tariffsInfo.getCourier().getId(), locationIds)
             .stream()
             .filter(it -> !tariffsInfo.equals(it.getTariffsInfo()))
             .count();
-        if (locationsInAnotherTariffsCount != 0) {
+        if (tariffsWithLocationsCount != 0) {
             throw new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
         }
     }
