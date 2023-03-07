@@ -1912,6 +1912,15 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private List<AllActiveLocationsDto> getAllActiveLocations() {
         List<Location> locations = locationRepository.findAllActive();
+        return getAllActiveLocationsDtos(locations);
+    }
+
+    private List<AllActiveLocationsDto> getAllActiveLocationsByCourierId(Long courierId) {
+        List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
+        return getAllActiveLocationsDtos(locations);
+    }
+
+    private List<AllActiveLocationsDto> getAllActiveLocationsDtos(List<Location> locations) {
         Map<RegionDto, List<LocationsDtos>> map = locations.stream()
             .collect(toMap(x -> modelMapper.map(x, RegionDto.class),
                 x -> new ArrayList<>(List.of(modelMapper.map(x, LocationsDtos.class))),
@@ -1951,6 +1960,28 @@ public class UBSClientServiceImpl implements UBSClientService {
         return orderCourierPopUpDto;
     }
 
+    @Override
+    public OrderCourierPopUpDto getInfoForCourierOrderingByCourierId(String uuid, Optional<String> changeLoc,
+        Long courierId) {
+        OrderCourierPopUpDto orderCourierPopUpDto = new OrderCourierPopUpDto();
+        if (changeLoc.isPresent()) {
+            orderCourierPopUpDto.setOrderIsPresent(false);
+            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocationsByCourierId(courierId));
+            return orderCourierPopUpDto;
+        }
+        Optional<Order> lastOrder = orderRepository.getLastOrderOfUserByUUIDIfExists(uuid);
+        if (lastOrder.isPresent()) {
+            orderCourierPopUpDto.setOrderIsPresent(true);
+            orderCourierPopUpDto.setTariffsForLocationDto(
+                modelMapper.map(tariffsInfoRepository.findTariffsInfoByOrdersId(lastOrder.get().getId()),
+                    TariffsForLocationDto.class));
+        } else {
+            orderCourierPopUpDto.setOrderIsPresent(false);
+            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocationsByCourierId(courierId));
+        }
+        return orderCourierPopUpDto;
+    }
+
     private TariffsInfo findTariffsInfoByCourierAndLocationId(Long courierId, Long locationId) {
         return tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(courierId, locationId)
             .orElseThrow(
@@ -1958,11 +1989,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public OrderCourierPopUpDto getTariffInfoForLocation(Long locationId) {
+    public OrderCourierPopUpDto getTariffInfoForLocation(Long courierId, Long locationId) {
         return OrderCourierPopUpDto.builder()
             .orderIsPresent(true)
             .tariffsForLocationDto(modelMapper.map(
-                findTariffsInfoByCourierAndLocationId(1L, locationId), TariffsForLocationDto.class))
+                findTariffsInfoByCourierAndLocationId(courierId, locationId), TariffsForLocationDto.class))
             .build();
     }
 

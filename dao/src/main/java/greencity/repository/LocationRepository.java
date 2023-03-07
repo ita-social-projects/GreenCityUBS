@@ -41,6 +41,25 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     List<Location> findAllActive();
 
     /**
+     * Method for getting all active locations by courier ID.
+     *
+     * @param courierId - id of courier
+     * @return list of {@link Location}
+     * @author Anton Bondar
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM locations AS l "
+            + "INNER JOIN tariffs_locations AS m ON l.id = m.location_id "
+            + "JOIN tariffs_info AS t ON t.id = m.tariffs_info_id "
+            + "JOIN courier AS c ON c.id = t.courier_id "
+            + "WHERE l.location_status = 'ACTIVE' "
+            + "AND t.location_status = 'ACTIVE' "
+            + "AND m.location_status = 'ACTIVE' "
+            + "AND c.courier_status = 'ACTIVE' "
+            + "AND c.id = :courierId")
+    List<Location> findAllActiveLocationsByCourierId(@Param("courierId") Long courierId);
+
+    /**
      * Method for getting list of locations from one region.
      *
      * @param locIds   - list of location ID's

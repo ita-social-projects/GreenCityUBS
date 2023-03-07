@@ -2518,9 +2518,10 @@ class UBSClientServiceImplTest {
         var tariff = getTariffInfo();
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariff));
-        OrderCourierPopUpDto dto = ubsService.getTariffInfoForLocation(1L);
+        OrderCourierPopUpDto dto = ubsService.getTariffInfoForLocation(1L, 1L);
         assertTrue(dto.getOrderIsPresent());
         verify(modelMapper).map(tariff, TariffsForLocationDto.class);
+        verify(tariffsInfoRepository).findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong());
     }
 
     @Test
@@ -2532,6 +2533,39 @@ class UBSClientServiceImplTest {
         OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrdering("35467585763t4sfgchjfuyetf", Optional.empty());
         verify(modelMapper).map(tariff, TariffsForLocationDto.class);
         assertTrue(dto.getOrderIsPresent());
+    }
+
+    @Test
+    void getInfoForCourierOrderingByCourierIdTest() {
+        var tariff = getTariffInfo();
+        when(orderRepository.getLastOrderOfUserByUUIDIfExists(anyString()))
+            .thenReturn(Optional.of(getOrder()));
+        when(tariffsInfoRepository.findTariffsInfoByOrdersId(anyLong())).thenReturn(tariff);
+        OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrderingByCourierId("35467585763t4sfgchjfuyetf",
+            Optional.empty(), 1L);
+        verify(modelMapper).map(tariff, TariffsForLocationDto.class);
+        verify(orderRepository).getLastOrderOfUserByUUIDIfExists(anyString());
+        verify(tariffsInfoRepository).findTariffsInfoByOrdersId(anyLong());
+        assertTrue(dto.getOrderIsPresent());
+    }
+
+    @Test
+    void getInfoForCourierOrderingByCourierIdWhenOrderIsEmptyTest() {
+        when(orderRepository.getLastOrderOfUserByUUIDIfExists(anyString()))
+            .thenReturn(Optional.empty());
+
+        OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrderingByCourierId("35467585763t4sfgchjfuyetf",
+            Optional.empty(), 1L);
+
+        verify(orderRepository).getLastOrderOfUserByUUIDIfExists(anyString());
+        assertFalse(dto.getOrderIsPresent());
+    }
+
+    @Test
+    void getInfoForCourierOrderingByCourierIdWhenChangeLocIsPresentTest() {
+        var dto = ubsService.getInfoForCourierOrderingByCourierId(
+            "35467585763t4sfgchjfuyetf", Optional.of("w"), 1L);
+        assertEquals(0, dto.getAllActiveLocationsDtos().size());
     }
 
     @Test

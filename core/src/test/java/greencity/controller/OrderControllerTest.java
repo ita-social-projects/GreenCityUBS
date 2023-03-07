@@ -436,14 +436,16 @@ class OrderControllerTest {
     @Test
     @SneakyThrows
     void getInfoAboutTariffTest() {
-        mockMvc.perform(get(ubsLink + "/tariffinfo-for-location/{locationId}", 1L))
+        mockMvc.perform(get(ubsLink + "/tariffinfo-for-location")
+            .param("locationId", "1")
+            .param("courierId", "1"))
             .andExpect(status().isOk());
     }
 
     @Test
     @SneakyThrows
-    void getAllActiveLocations() {
-        mockMvc.perform(get(ubsLink + "/allLocations")
+    void getAllActiveLocationsByCourierIdTest() {
+        mockMvc.perform(get(ubsLink + "/allLocations/{courierId}", 1L)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());

@@ -513,47 +513,55 @@ public class OrderController {
     }
 
     /**
-     * Controller for getting all Active Locations if user haven't made any order
-     * before. If user has made an order before controller returns info about tariff
-     * by which it was made Controller is used to get all active Locations if user
-     * want to change location to make an order
+     * Controller for getting all Active Locations by courier ID, if user haven't
+     * made any order before. If user has made an order before controller returns
+     * info about tariff by which it was made Controller is used to get all active
+     * Locations if user want to change location to make an order
      *
      * @param changeLoc - optional param. If it is present controller will return
      *                  info about locations
+     * @param courierId - id of courier
      * @param uuid      - user's uuid
      * @return {@link OrderCourierPopUpDto}
+     * @author Anton Bondar
      */
-    @ApiOperation(value = "Get all location where courier is working")
+    @ApiOperation(value = "Get all active locations where courier is working")
+    @GetMapping("/allLocations/{courierId}")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/allLocations")
-    public ResponseEntity<OrderCourierPopUpDto> getAllActiveLocatins(
+    public ResponseEntity<OrderCourierPopUpDto> getAllActiveLocationsByCourierId(
         @RequestParam Optional<String> changeLoc,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        @ApiIgnore @CurrentUserUuid String uuid,
+        @Valid @PathVariable Long courierId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getInfoForCourierOrdering(uuid, changeLoc));
+            .body(ubsClientService.getInfoForCourierOrderingByCourierId(uuid, changeLoc, courierId));
     }
 
     /**
-     * Controller for getting info about tariff for location.
+     * Controller for getting info about tariff for courier and location.
      *
+     * @param courierId  - id of courier
      * @param locationId - id of location
      * @return {@link OrderCourierPopUpDto}
+     * @author Anton Bondar
      */
-    @ApiOperation(value = "Get tariff for location and courier")
+    @ApiOperation(value = "Get tariff for courier and location")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/tariffinfo-for-location/{locationId}")
-    public ResponseEntity<OrderCourierPopUpDto> getInfoAboutTariff(@Valid @PathVariable Long locationId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffInfoForLocation(locationId));
+    @GetMapping("/tariffinfo-for-location")
+    public ResponseEntity<OrderCourierPopUpDto> getInfoAboutTariff(
+        @RequestParam Long courierId,
+        @RequestParam Long locationId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.getTariffInfoForLocation(courierId, locationId));
     }
 
     /**

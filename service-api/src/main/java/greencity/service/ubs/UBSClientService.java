@@ -367,12 +367,26 @@ public interface UBSClientService {
     OrderCourierPopUpDto getInfoForCourierOrdering(String uuid, Optional<String> changeLoc);
 
     /**
-     * Method for getting info about tariff.
+     * Method for getting info about all active locations by courier ID or if user
+     * has made an order before to get info about tariff.
      *
+     * @param uuid      - user's uuid
+     * @param changeLoc - optional param. If it's present provide info about
+     * @param courierId - id of courier
+     * @return {@link OrderCourierPopUpDto}
+     * @author Anton Bondar
+     */
+    OrderCourierPopUpDto getInfoForCourierOrderingByCourierId(String uuid, Optional<String> changeLoc, Long courierId);
+
+    /**
+     * Method for getting info about tariff by courier ID and location ID.
+     *
+     * @param courierId  - id of courier
      * @param locationId - id of location
      * @return {@link OrderCourierPopUpDto}
+     * @author Anton Bondar
      */
-    OrderCourierPopUpDto getTariffInfoForLocation(Long locationId);
+    OrderCourierPopUpDto getTariffInfoForLocation(Long courierId, Long locationId);
 
     /**
      * Method for getting info about tariff by order's id.
