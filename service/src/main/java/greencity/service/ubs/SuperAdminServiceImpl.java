@@ -19,6 +19,7 @@ import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
@@ -425,7 +426,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private Location tryToFindLocationById(Long id) {
         return locationRepository.findById(id).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+            () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID + id));
     }
 
     @Override
@@ -563,6 +564,82 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private Courier tryToFindCourier(Long courierId) {
         return courierRepository.findById(courierId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
+    }
+
+    private ReceivingStation tryToFindReceivingStationById(Long id) {
+        return receivingStationRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + id));
+    }
+
+    private List<Location> tryToFindLocationsInSameRegion(List<Long> locationIds) {
+        List<Location> locations = locationIds.stream()
+            .map(this::tryToFindLocationById)
+            .collect(Collectors.toList());
+        long regionsCount = locations.stream()
+            .map(Location::getRegion)
+            .distinct()
+            .count();
+        if (regionsCount != 1) {
+            throw new BadRequestException(ErrorMessage.LOCATIONS_BELONG_TO_DIFFERENT_REGIONS);
+        }
+        return locations;
+    }
+
+    private void checkIfLocationBelongsToAnotherTariff(List<Long> locationIds, TariffsInfo tariffsInfo) {
+        long tariffsWithLocationsCount = tariffsLocationRepository
+            .findAllByCourierIdAndLocationIds(tariffsInfo.getCourier().getId(), locationIds)
+            .stream()
+            .filter(it -> !tariffsInfo.equals(it.getTariffsInfo()))
+            .count();
+        if (tariffsWithLocationsCount != 0) {
+            throw new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
+        }
+    }
+
+    private Set<ReceivingStation> tryToFindReceivingStations(List<Long> receivingStationIds) {
+        return receivingStationIds.stream()
+            .map(this::tryToFindReceivingStationById)
+            .collect(Collectors.toSet());
+    }
+
+    private Set<TariffLocation> getUpdatedTariffLocations(List<Location> locations, TariffsInfo tariffsInfo) {
+        return locations.stream()
+            .map(location -> updateTariffLocation(location, tariffsInfo))
+            .collect(Collectors.toSet());
+    }
+
+    private TariffLocation updateTariffLocation(Location location, TariffsInfo tariffsInfo) {
+        return tariffsLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location)
+            .orElseGet(() -> TariffLocation.builder()
+                .tariffsInfo(tariffsInfo)
+                .location(location)
+                .locationStatus(LocationStatus.ACTIVE)
+                .build());
+    }
+
+    private void deleteUnusedTariffLocations(Set<TariffLocation> tariffLocations, TariffsInfo tariffsInfo) {
+        tariffsLocationRepository.findAllByTariffsInfo(tariffsInfo)
+            .forEach(it -> {
+                if (!tariffLocations.contains(it)) {
+                    tariffsLocationRepository.delete(it);
+                }
+            });
+    }
+
+    @Override
+    @Transactional
+    public void editTariff(Long id, EditTariffDto dto) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(id);
+        List<Location> locations = tryToFindLocationsInSameRegion(dto.getLocationIds());
+        checkIfLocationBelongsToAnotherTariff(dto.getLocationIds(), tariffsInfo);
+        Set<ReceivingStation> receivingStations = tryToFindReceivingStations(dto.getReceivingStationIds());
+        Set<TariffLocation> tariffLocations = getUpdatedTariffLocations(locations, tariffsInfo);
+        deleteUnusedTariffLocations(tariffLocations, tariffsInfo);
+
+        tariffsInfo.setReceivingStationList(receivingStations);
+        tariffsInfo.setTariffLocations(tariffLocations);
+
+        tariffsInfoRepository.save(tariffsInfo);
     }
 
     @Override

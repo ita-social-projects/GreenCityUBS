@@ -220,6 +220,14 @@ public interface SuperAdminService {
     AddNewTariffResponseDto addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID);
 
     /**
+     * Method for editing TariffsInfo.
+     *
+     * @param id  {@link Long} tariff id.
+     * @param dto {@link EditTariffDto} edited tariff dto.
+     */
+    void editTariff(Long id, EditTariffDto dto);
+
+    /**
      * Method checks if passed TariffsInfo exists in database.
      *
      * @param addNewTariffDto {@link AddNewTariffDto}

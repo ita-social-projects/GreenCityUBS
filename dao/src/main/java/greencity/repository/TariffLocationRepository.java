@@ -51,4 +51,13 @@ public interface TariffLocationRepository extends JpaRepository<TariffLocation, 
      * @author - Safarov Renat
      */
     Optional<TariffLocation> findTariffLocationByTariffsInfoAndLocation(TariffsInfo tariffsInfo, Location location);
+
+    /**
+     * Method for finding TariffLocations by tariffsInfo.
+     *
+     * @param tariffsInfo {@link Long} - tariffsInfo
+     * @return {@link List} of {@link TariffLocation}
+     * @author - Julia Seti
+     */
+    List<TariffLocation> findAllByTariffsInfo(TariffsInfo tariffsInfo);
 }
