@@ -10,6 +10,7 @@ import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
@@ -574,6 +575,31 @@ class SuperAdminController {
     public ResponseEntity<Boolean> checkIfTariffExists(
         @RequestBody @Valid AddNewTariffDto addNewTariffDto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.checkIfTariffExists(addNewTariffDto));
+    }
+
+    /**
+     * Controller for editing tariff info.
+     *
+     * @param id  {@link Long} tariff id.
+     * @param dto {@link EditTariffDto} edited tariff dto.
+     *
+     * @author Julia Seti
+     */
+    @ApiOperation(value = "Edit tariff info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 409, message = HttpStatuses.CONFLICT)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
+    @PutMapping("/editTariffInfo/{id}")
+    public ResponseEntity<HttpStatus> editTariff(
+        @Valid @PathVariable Long id, @Valid @RequestBody EditTariffDto dto) {
+        superAdminService.editTariff(id, dto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**

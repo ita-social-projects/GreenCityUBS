@@ -40,6 +40,7 @@ import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.TariffServiceDto;
+import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.dto.user.AddBonusesToUserDto;
@@ -491,6 +492,13 @@ public class ModelUtils {
             .courierId(1L)
             .locationIdList(List.of(1L))
             .receivingStationsIdList(List.of(1L))
+            .build();
+    }
+
+    public static EditTariffDto getEditTariffDto() {
+        return EditTariffDto.builder()
+            .locationIds(List.of(1L))
+            .receivingStationIds(List.of(1L))
             .build();
     }
 
