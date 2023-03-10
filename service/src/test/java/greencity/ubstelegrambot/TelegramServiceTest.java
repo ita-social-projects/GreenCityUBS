@@ -96,5 +96,8 @@ class TelegramServiceTest {
 
         user.setTelegramBot(new TelegramBot(1L, 123L, true, user));
         assertTrue(telegramService.isEnabled(user));
+
+        user.setTelegramBot(new TelegramBot(1L, 123L, false, user));
+        assertFalse(telegramService.isEnabled(user));
     }
 }

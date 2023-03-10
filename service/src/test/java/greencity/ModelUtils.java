@@ -1430,11 +1430,19 @@ public class ModelUtils {
             .build();
     }
 
-    public static ViberBot getViberBot() {
+    public static ViberBot getViberBotNotifyTrue() {
         return ViberBot.builder()
             .id(1L)
             .chatId("111111L")
             .isNotify(true)
+            .build();
+    }
+
+    public static ViberBot getViberBotNotifyFalse() {
+        return ViberBot.builder()
+            .id(1L)
+            .chatId("111111L")
+            .isNotify(false)
             .build();
     }
 

@@ -1194,7 +1194,7 @@ class UBSClientServiceImplTest {
     void updateProfileData() {
         User user = getUserWithBotNotifyTrue();
         TelegramBot telegramBot = getTelegramBotNotifyTrue();
-        ViberBot viberBot = getViberBot();
+        ViberBot viberBot = getViberBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoList();
         List<Address> address = addressList();
         List<Bot> botList = botList();

@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UBSTelegramBotTest {
+class UBSTelegramBotTest {
     @Mock
     private UserRepository userRepository;
     @Mock
