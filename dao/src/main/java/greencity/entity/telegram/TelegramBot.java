@@ -16,9 +16,11 @@ public class TelegramBot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "chat_id")
+    @Column(nullable = false, name = "chat_id")
     private Long chatId;
+    @Column(nullable = false, name = "notify")
+    private Boolean isNotify;
     @OneToOne()
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(nullable = false, name = "user_id", referencedColumnName = "id")
     private User user;
 }

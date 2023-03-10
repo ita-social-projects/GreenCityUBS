@@ -3,7 +3,14 @@ package greencity.dto.user;
 import greencity.annotations.ValidPhoneNumber;
 import greencity.dto.address.AddressDto;
 import greencity.util.Bot;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -36,4 +43,8 @@ public class UserProfileDto {
     private List<AddressDto> addressDto;
     private List<Bot> botList;
     private Boolean hasPassword;
+    @NonNull
+    private Boolean telegramIsNotify;
+    @NonNull
+    private Boolean viberIsNotify;
 }

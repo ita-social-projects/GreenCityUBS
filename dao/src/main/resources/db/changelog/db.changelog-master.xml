@@ -181,4 +181,5 @@
     <include file="db/changelog/logs/ch-add-foreign-key-column-locationId-to-OrderAddress-table-Safarov.xml"/>
     <include file="db/changelog/logs/ch-drop-column-receiving-station-Kharchenko.xml"/>
     <include file="db/changelog/logs/ch-drop-table-order-employee-Kharchenko.xml"/>
+    <include file="db/changelog/logs/ch-add-column-notify-to-telegram-bot-Seti.xml"/>
 </databaseChangeLog>

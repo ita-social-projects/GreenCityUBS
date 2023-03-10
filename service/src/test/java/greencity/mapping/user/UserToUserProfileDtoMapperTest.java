@@ -3,7 +3,6 @@ package greencity.mapping.user;
 import greencity.ModelUtils;
 import greencity.dto.user.UserProfileDto;
 import greencity.entity.user.User;
-import greencity.mapping.user.UserToUserProfileDtoMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
