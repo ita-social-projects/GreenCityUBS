@@ -17,7 +17,7 @@ class UserToUserProfileUpdateDtoMapperTest {
     @Test
     void convert() {
         UserProfileUpdateDto userProfileUpdateDto = ModelUtils.updateUserProfileDto();
-        User user = ModelUtils.getUserWithBot();
+        User user = ModelUtils.getUserWithBotNotifyTrue();
         UserProfileUpdateDto converted = mapper.convert(user);
         Assertions.assertEquals(userProfileUpdateDto.getRecipientName(), converted.getRecipientName());
         Assertions.assertEquals(userProfileUpdateDto.getRecipientSurname(), converted.getRecipientSurname());

@@ -1192,8 +1192,8 @@ class UBSClientServiceImplTest {
 
     @Test
     void updateProfileData() {
-        User user = getUserWithBot();
-        TelegramBot telegramBot = getTelegramBot();
+        User user = getUserWithBotNotifyTrue();
+        TelegramBot telegramBot = getTelegramBotNotifyTrue();
         ViberBot viberBot = getViberBot();
         List<AddressDto> addressDto = addressDtoList();
         List<Address> address = addressList();
@@ -1243,7 +1243,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void updateProfileDataIfTelegramBotNotExists() {
-        User user = getUserWithBot();
+        User user = getUserWithBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoList();
         List<Address> address = addressList();
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDtoWithBotsIsNotifyFalse();

@@ -1410,15 +1410,23 @@ public class ModelUtils {
             .recipientSurname("Petrov")
             .recipientPhone("0666051373")
             .recipientEmail("petrov@gmail.com")
-            .telegramBot(getTelegramBot())
+            .telegramBot(getTelegramBotNotifyTrue())
             .build();
     }
 
-    public static TelegramBot getTelegramBot() {
+    public static TelegramBot getTelegramBotNotifyTrue() {
         return TelegramBot.builder()
             .id(1L)
             .chatId(111111L)
             .isNotify(true)
+            .build();
+    }
+
+    public static TelegramBot getTelegramBotNotifyFalse() {
+        return TelegramBot.builder()
+            .id(1L)
+            .chatId(111111L)
+            .isNotify(false)
             .build();
     }
 
@@ -1431,7 +1439,7 @@ public class ModelUtils {
     }
 
     public static UserProfileUpdateDto getUserProfileUpdateDto() {
-        User user = getUserWithBot();
+        User user = getUserWithBotNotifyTrue();
         return UserProfileUpdateDto.builder().addressDto(addressDtoList())
             .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
             .recipientPhone(user.getRecipientPhone())
@@ -1442,7 +1450,7 @@ public class ModelUtils {
     }
 
     public static UserProfileUpdateDto getUserProfileUpdateDtoWithBotsIsNotifyFalse() {
-        User user = getUserWithBot();
+        User user = getUserWithBotNotifyTrue();
         return UserProfileUpdateDto.builder().addressDto(addressDtoList())
             .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
             .recipientPhone(user.getRecipientPhone())
@@ -1704,7 +1712,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static User getUserWithBot() {
+    public static User getUserWithBotNotifyTrue() {
         return User.builder()
             .id(1L)
             .addresses(singletonList(getAddress()))
@@ -1716,7 +1724,23 @@ public class ModelUtils {
             .uuid("uuid")
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
-            .telegramBot(getTelegramBot())
+            .telegramBot(getTelegramBotNotifyTrue())
+            .build();
+    }
+
+    public static User getUserWithBotNotifyFalse() {
+        return User.builder()
+            .id(1L)
+            .addresses(singletonList(getAddress()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .uuid("uuid")
+            .ubsUsers(getUbsUsers())
+            .currentPoints(100)
+            .telegramBot(getTelegramBotNotifyFalse())
             .build();
     }
 

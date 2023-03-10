@@ -47,8 +47,7 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
         Optional<TelegramBot> telegramBotOptional =
             telegramBotRepository.findByUserAndChatIdAndIsNotify(user, message.getChatId(), true);
         if (telegramBotOptional.isEmpty() && message.getText().startsWith("/start")) {
-            TelegramBot telegramBot = getTelegramBot(user, message.getChatId());
-            user.setTelegramBot(telegramBot);
+            user.setTelegramBot(getTelegramBot(user, message.getChatId()));
             userRepository.save(user);
             SendMessage sendMessage =
                 new SendMessage(message.getChatId().toString(), "Вітаємо!\nВи підписались на UbsBot");
@@ -70,7 +69,7 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
                 .user(user)
                 .isNotify(true)
                 .build();
-        } else if (!telegramBot.getIsNotify()) {
+        } else if (!telegramBot.getIsNotify().booleanValue()) {
             telegramBot.setIsNotify(true);
         }
         return telegramBotRepository.save(telegramBot);
