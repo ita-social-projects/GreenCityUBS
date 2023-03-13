@@ -32,13 +32,48 @@ import javax.transaction.Transactional;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
+import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.*;
-import greencity.repository.*;
+import greencity.entity.viber.ViberBot;
+import greencity.enums.AddressStatus;
+import greencity.enums.BotType;
+import greencity.enums.CertificateStatus;
+import greencity.enums.CourierLimit;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.PaymentType;
 import greencity.exceptions.address.AddressNotFoundException;
 
+import greencity.repository.AddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.EventRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.TariffLocationRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.TelegramBotRepository;
+import greencity.repository.UBSuserRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.ViberBotRepository;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -156,6 +191,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final RegionRepository regionRepository;
+    private final TelegramBotRepository telegramBotRepository;
+    private final ViberBotRepository viberBotRepository;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -180,7 +217,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final Integer BAG_CAPACITY = 120;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "approved";
-    private static final String TELEGRAM_PART_1_OF_LINK = "t.me/";
+    private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
     private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
@@ -1243,28 +1280,26 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public UserProfileUpdateDto updateProfileData(String uuid, UserProfileUpdateDto userProfileUpdateDto) {
-        User user = userRepository.findByUuid(uuid);
+        User user = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         setUserData(user, userProfileUpdateDto);
+        setTelegramAndViberBots(user, userProfileUpdateDto.getTelegramIsNotify(),
+            userProfileUpdateDto.getViberIsNotify());
         List<Address> addressList =
             userProfileUpdateDto.getAddressDto().stream().map(a -> modelMapper.map(a, Address.class))
                 .collect(toList());
-
-        for (Address address : addressList) {
-            address.setUser(user);
-        }
+        addressList.forEach(address -> address.setUser(user));
         user.setAddresses(addressList);
         User savedUser = userRepository.save(user);
-        List<AddressDto> mapperAddressDto =
-            addressList.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(toList());
-        UserProfileUpdateDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileUpdateDto.class);
-        UserProfileUpdateDto.builder().addressDto(mapperAddressDto).build();
-        return mappedUserProfileDto;
+        return modelMapper.map(savedUser, UserProfileUpdateDto.class);
     }
 
     @Override
     public UserProfileDto getProfileData(String uuid) {
-        User user = userRepository.findByUuid(uuid);
+        User user = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         List<Address> allAddress = addressRepo.findAllNonDeletedAddressesByUserId(user.getId());
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         List<Bot> botList = getListOfBots(user.getUuid());
@@ -1278,13 +1313,25 @@ public class UBSClientServiceImpl implements UBSClientService {
         return userProfileDto;
     }
 
-    private User setUserData(User user, UserProfileUpdateDto userProfileUpdateDto) {
+    private void setUserData(User user, UserProfileUpdateDto userProfileUpdateDto) {
         user.setRecipientName(userProfileUpdateDto.getRecipientName());
         user.setRecipientSurname(userProfileUpdateDto.getRecipientSurname());
         user.setAlternateEmail(userProfileUpdateDto.getAlternateEmail());
         user.setRecipientPhone(
             UAPhoneNumberUtil.getE164PhoneNumberFormat(userProfileUpdateDto.getRecipientPhone()));
-        return user;
+    }
+
+    private void setTelegramAndViberBots(User user, Boolean telegramIsNotify, Boolean viberIsNotify) {
+        TelegramBot telegramBot = telegramBotRepository.findByUser(user).orElse(null);
+        ViberBot viberBot = viberBotRepository.findByUser(user).orElse(null);
+        if (telegramBot != null) {
+            telegramBot.setIsNotify(telegramIsNotify);
+            user.setTelegramBot(telegramBot);
+        }
+        if (viberBot != null) {
+            viberBot.setIsNotify(viberIsNotify);
+            user.setViberBot(viberBot);
+        }
     }
 
     @Override
