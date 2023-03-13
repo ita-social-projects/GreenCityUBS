@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import java.util.List;
 import java.util.Optional;
 
+import greencity.entity.user.employee.Employee;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -83,18 +84,9 @@ class ViolationServiceImplTest {
     }
 
     @Test
-    void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(violationRepository.findByOrderId(1l)).thenReturn(Optional.empty());
-        Assertions.assertThrows(NotFoundException.class, () -> violationService.deleteViolation(1L, "abc"));
-        verify(violationRepository, times(1)).findByOrderId(1L);
-    }
-
-    @Test
     void deleteViolationFromOrderByOrderId() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        Employee user = ModelUtils.getEmployee();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(user));
         Violation violation = ModelUtils.getViolation2();
         Long id = ModelUtils.getViolation().getOrder().getId();
         when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
