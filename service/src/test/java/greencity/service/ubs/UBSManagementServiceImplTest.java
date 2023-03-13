@@ -231,6 +231,7 @@ class UBSManagementServiceImplTest {
         user.setRecipientSurname("Петренко");
         Order order = ModelUtils.getFormedOrder();
         order.setTariffsInfo(getTariffsInfo());
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         Payment payment = ModelUtils.getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
             .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
