@@ -8,6 +8,7 @@ import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.address.AddressDto;
 import greencity.dto.user.UserProfileDto;
+import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,10 +16,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.Validator;
 
 import java.security.Principal;
 import java.util.List;
@@ -47,12 +52,20 @@ class UserProfileControllerTest {
     @Mock
     UserRemoteClient userRemoteClient;
 
+    @Mock
+    private Validator mockValidator;
+
     private Principal principal = getPrincipal();
+    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(userProfileController)
-            .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
+            .setCustomArgumentResolvers(
+                new PageableHandlerMethodArgumentResolver(),
+                new UserArgumentResolver(userRemoteClient))
+            .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
+            .setValidator(mockValidator)
             .build();
     }
 

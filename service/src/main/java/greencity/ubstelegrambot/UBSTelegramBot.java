@@ -3,6 +3,7 @@ package greencity.ubstelegrambot;
 import greencity.constant.ErrorMessage;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.exceptions.bots.TelegramBotAlreadyConnected;
 import greencity.repository.TelegramBotRepository;
@@ -14,6 +15,8 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -39,14 +42,12 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
         String uuId = message.getText().replace("/start", "").trim();
-        User user = userRepository.findByUuid(uuId);
-        if (user != null && user.getTelegramBot() == null && message.getText().startsWith("/start")) {
-            telegramBotRepository.save(TelegramBot.builder()
-                .chatId(message.getChatId())
-                .user(user)
-                .build());
-            TelegramBot telegramBot = telegramBotRepository.findByChatId(message.getChatId());
-            user.setTelegramBot(telegramBot);
+        User user = userRepository.findUserByUuid(uuId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        Optional<TelegramBot> telegramBotOptional =
+            telegramBotRepository.findByUserAndChatIdAndIsNotify(user, message.getChatId(), true);
+        if (telegramBotOptional.isEmpty() && message.getText().startsWith("/start")) {
+            user.setTelegramBot(getTelegramBot(user, message.getChatId()));
             userRepository.save(user);
             SendMessage sendMessage =
                 new SendMessage(message.getChatId().toString(), "Вітаємо!\nВи підписались на UbsBot");
@@ -58,5 +59,19 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
         } else {
             throw new TelegramBotAlreadyConnected(ErrorMessage.THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT);
         }
+    }
+
+    private TelegramBot getTelegramBot(User user, Long chatId) {
+        TelegramBot telegramBot = user.getTelegramBot();
+        if (telegramBot == null) {
+            telegramBot = TelegramBot.builder()
+                .chatId(chatId)
+                .user(user)
+                .isNotify(true)
+                .build();
+        } else if (!telegramBot.getIsNotify().booleanValue()) {
+            telegramBot.setIsNotify(true);
+        }
+        return telegramBotRepository.save(telegramBot);
     }
 }
