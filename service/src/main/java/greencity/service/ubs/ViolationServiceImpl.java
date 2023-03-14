@@ -183,7 +183,7 @@ public class ViolationServiceImpl implements ViolationService {
     @Override
     public void updateUserViolation(UpdateViolationToUserDto add, MultipartFile[] multipartFiles, String uuid) {
         Employee currentUser = employeeRepository.findByUuid(uuid)
-                .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Violation violation = violationRepository.findByOrderId(add.getOrderID())
             .orElseThrow(() -> new NotFoundException(ORDER_HAS_NOT_VIOLATION));
         updateViolation(violation, add, multipartFiles);
