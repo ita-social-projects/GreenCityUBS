@@ -145,6 +145,8 @@ class ViolationServiceImplTest {
             }
         }
 
+        violationService.updateUserViolation(updateViolationToUserDto, new MultipartFile[2], "abc");
+
         assertEquals(2, violation.getImages().size());
 
         verify(employeeRepository).findByUuid("abc");
