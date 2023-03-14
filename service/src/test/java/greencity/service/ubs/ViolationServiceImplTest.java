@@ -130,12 +130,12 @@ class ViolationServiceImplTest {
 
     @Test
     void updateUserViolation() {
-        User user = ModelUtils.getUser();
+        Employee employee = ModelUtils.getEmployee();
         UpdateViolationToUserDto updateViolationToUserDto = ModelUtils.getUpdateViolationToUserDto();
         Violation violation = ModelUtils.getViolation();
         List<String> violationImages = violation.getImages();
 
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
         if (updateViolationToUserDto.getImagesToDelete() != null) {
             List<String> images = updateViolationToUserDto.getImagesToDelete();
@@ -145,11 +145,11 @@ class ViolationServiceImplTest {
             }
         }
 
-        violationService.updateUserViolation(updateViolationToUserDto, new MultipartFile[2], "abc");
+        violationService.gupdateUserViolation(updateViolationToUserDto, new MultipartFile[2], "abc");
 
         assertEquals(2, violation.getImages().size());
 
-        verify(userRepository).findUserByUuid("abc");
+        verify(employeeRepository).findByUuid("abc");
         verify(violationRepository).findByOrderId(1L);
     }
 
