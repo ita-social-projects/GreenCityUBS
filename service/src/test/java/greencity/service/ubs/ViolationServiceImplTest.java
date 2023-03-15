@@ -84,6 +84,14 @@ class ViolationServiceImplTest {
     }
 
     @Test
+    void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
+        Employee employee = ModelUtils.getEmployee();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
+        when(violationRepository.findByOrderId(1l)).thenReturn(Optional.empty());
+        Assertions.assertThrows(NotFoundException.class, () -> violationService.deleteViolation(1L, "abc"));
+        verify(violationRepository, times(1)).findByOrderId(1L);
+    }
+    @Test
     void deleteViolationFromOrderByOrderId() {
         Employee user = ModelUtils.getEmployee();
         when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(user));
@@ -94,6 +102,7 @@ class ViolationServiceImplTest {
         violationService.deleteViolation(1L, "abc");
 
         verify(violationRepository, times(1)).deleteById(id);
+        verify(employeeRepository, times(1)).findByUuid(anyString());
     }
 
     @Test
