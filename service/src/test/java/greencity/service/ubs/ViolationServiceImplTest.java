@@ -90,6 +90,7 @@ class ViolationServiceImplTest {
         when(violationRepository.findByOrderId(1l)).thenReturn(Optional.empty());
         Assertions.assertThrows(NotFoundException.class, () -> violationService.deleteViolation(1L, "abc"));
         verify(violationRepository, times(1)).findByOrderId(1L);
+        verify(employeeRepository, times(1)).findByUuid(anyString());
     }
     @Test
     void deleteViolationFromOrderByOrderId() {
