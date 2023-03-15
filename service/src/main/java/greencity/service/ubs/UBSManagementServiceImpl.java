@@ -869,8 +869,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.FORMED) {
                 eventService.saveEvent(OrderHistory.ORDER_FORMED, email, order);
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                eventService.saveEvent(
-                    OrderHistory.ORDER_NOT_TAKEN_OUT + ".  " + order.getReasonNotTakingBagDescription(), email, order);
+                eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT, email, order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
                 setOrderCancellation(order, dto.getCancellationReason(), dto.getCancellationComment());
                 eventService.saveEvent(OrderHistory.ORDER_CANCELLED, email, order);
