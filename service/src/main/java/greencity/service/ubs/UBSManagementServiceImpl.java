@@ -969,7 +969,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private boolean isPaidByBonuses(List<Payment> payments) {
         return payments.stream()
             .filter(Objects::nonNull)
-            .anyMatch(payment -> payment.getPaymentSystem().equals("Bonus"));
+            .anyMatch(payment -> null != payment.getPaymentSystem() && payment.getPaymentSystem().equals("Bonus"));
     }
 
     private void setOrderCancellation(Order order, String cancellationReason, String cancellationComment) {
