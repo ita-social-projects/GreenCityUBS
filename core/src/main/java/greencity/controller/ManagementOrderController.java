@@ -9,22 +9,7 @@ import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.location.CoordinatesDto;
-import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.BigOrderTableDTO;
-import greencity.dto.order.CounterOrderDetailsDto;
-import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.ExportDetailsDto;
-import greencity.dto.order.ExportDetailsDtoUpdate;
-import greencity.dto.order.GroupedOrderDto;
-import greencity.dto.order.OrderDetailInfoDto;
-import greencity.dto.order.OrderDetailStatusDto;
-import greencity.dto.order.OrderDetailStatusRequestDto;
-import greencity.dto.order.OrderInfoDto;
-import greencity.dto.order.OrderStatusPageDto;
-import greencity.dto.order.ReadAddressByOrderDto;
-import greencity.dto.order.UpdateAllOrderPageDto;
-import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
@@ -966,5 +951,26 @@ public class ManagementOrderController {
         @RequestBody @Valid AddBonusesToUserDto addBonusesToUserDto, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId, principal.getName()));
+    }
+
+    /**
+     * Controller for get order cancellation reason.
+     *
+     * @return {@link OrderCancellationReasonDto}.
+     * @author Kharchenko Volodymyr
+     */
+    @ApiOperation(value = "Get order reason not take bag")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/get-order-cancellation-reason/{id}")
+    public ResponseEntity<OrderCancellationReasonDto> getOrderCancellationReason(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrderCancellationReason(id));
     }
 }

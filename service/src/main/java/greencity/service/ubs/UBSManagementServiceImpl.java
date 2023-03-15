@@ -31,6 +31,7 @@ import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
@@ -1616,5 +1617,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         orderRepository.updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
             OrderStatus.ON_THE_ROUTE.name(),
             LocalDate.now());
+    }
+
+    @Override
+    public OrderCancellationReasonDto getOrderCancellationReason(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        return OrderCancellationReasonDto.builder()
+            .cancellationReason(order.getCancellationReason())
+            .cancellationComment(order.getCancellationComment())
+            .build();
     }
 }

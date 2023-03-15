@@ -2057,4 +2057,14 @@ class UBSManagementServiceImplTest {
             Arguments.of(orderWithoutExportDate, OrderHistory.UPDATE_EXPORT_DETAILS),
             Arguments.of(orderWithoutExportDate, OrderHistory.UPDATE_EXPORT_DETAILS));
     }
+
+    @Test
+    void getOrderCancellationReasonTest() {
+        OrderCancellationReasonDto cancellationReasonDto = ModelUtils.getCancellationDto();
+        Order order = ModelUtils.getOrderTest();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(order));
+        OrderCancellationReasonDto result = ubsManagementService.getOrderCancellationReason(1L);
+        assertEquals(cancellationReasonDto.getCancellationReason(), result.getCancellationReason());
+        assertEquals(cancellationReasonDto.getCancellationComment(), result.getCancellationComment());
+    }
 }

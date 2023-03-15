@@ -455,4 +455,10 @@ class ManagementOrderControllerTest {
             .andExpect(status().isCreated());
 
     }
+
+    @Test
+    void getOrderCancellationReason() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-order-cancellation-reason" + "/{id}", 1L))
+            .andExpect(status().isOk());
+    }
 }
