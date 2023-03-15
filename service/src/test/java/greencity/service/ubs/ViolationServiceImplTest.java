@@ -92,6 +92,7 @@ class ViolationServiceImplTest {
         verify(violationRepository, times(1)).findByOrderId(1L);
         verify(employeeRepository, times(1)).findByUuid(anyString());
     }
+
     @Test
     void deleteViolationFromOrderByOrderId() {
         Employee user = ModelUtils.getEmployee();
