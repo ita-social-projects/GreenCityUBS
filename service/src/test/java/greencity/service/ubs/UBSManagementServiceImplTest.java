@@ -1520,7 +1520,6 @@ class UBSManagementServiceImplTest {
     void updateOrderExportDetails() {
         User user = getTestUser();
         Order order = getOrderDoneByUser();
-        order.setDateOfExport(LocalDate.now());
 
         List<ReceivingStation> receivingStations = List.of(getReceivingStation());
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequestToday();
