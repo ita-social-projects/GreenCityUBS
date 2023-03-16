@@ -49,7 +49,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ConstraintViolationException.class,
         MappingException.class,
         CourierAlreadyExists.class,
-        ServiceAlreadyExistsException.class
+        ServiceAlreadyExistsException.class,
+        IllegalArgumentException.class
     })
     public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));

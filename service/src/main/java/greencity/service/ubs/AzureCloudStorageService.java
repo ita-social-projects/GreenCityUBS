@@ -4,6 +4,7 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.google.common.annotations.VisibleForTesting;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.image.FileNotSavedException;
@@ -40,6 +41,9 @@ public class AzureCloudStorageService implements FileService {
      */
     @Override
     public String upload(MultipartFile multipartFile) {
+        if (multipartFile == null) {
+            throw new IllegalArgumentException(ErrorMessage.FILE_IS_NULL);
+        }
         final String blob = UUID.randomUUID().toString();
         BlobClient client = containerClient()
             .getBlobClient(blob + multipartFile.getOriginalFilename());
@@ -65,7 +69,8 @@ public class AzureCloudStorageService implements FileService {
         }
     }
 
-    private BlobContainerClient containerClient() {
+    @VisibleForTesting
+    BlobContainerClient containerClient() {
         BlobServiceClient serviceClient = new BlobServiceClientBuilder()
             .connectionString(connectionString).buildClient();
         return serviceClient.getBlobContainerClient(containerName);

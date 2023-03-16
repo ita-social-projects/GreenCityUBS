@@ -3,8 +3,10 @@ package greencity.service.ubs;
 import java.util.List;
 import java.util.Optional;
 
+import greencity.constant.ErrorMessage;
+import greencity.entity.order.TariffsInfo;
+import greencity.entity.user.employee.Employee;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,8 +35,11 @@ import greencity.repository.UserViolationsTableRepo;
 import greencity.repository.ViolationRepository;
 import greencity.service.notification.NotificationServiceImpl;
 
+import javax.persistence.EntityNotFoundException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
@@ -105,23 +110,30 @@ class ViolationServiceImplTest {
     }
 
     @Test
-    @Disabled
     void checkAddUserViolation() {
+        Employee employee = ModelUtils.getEmployee();
+        List<Long> tariffsInfos = List.of(1L, 2L, 3L);
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
+        order.setTariffsInfo(tariffsInfo);
         order.setUser(user);
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
         add.setOrderID(order.getId());
         when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(1);
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(employee));
+        when(employeeRepository.findTariffsInfoForEmployee(anyLong())).thenReturn(tariffsInfos);
         violationService.addUserViolation(add, new MultipartFile[2], "abc");
 
+        verify(orderRepository, times(2)).findById(anyLong());
+        verify(userRepository).countTotalUsersViolations(anyLong());
+        verify(employeeRepository).findByEmail(anyString());
+        verify(employeeRepository).findTariffsInfoForEmployee(anyLong());
         assertEquals(1, user.getViolations());
     }
 
     @Test
-    @Disabled
     void checkAddUserViolationThrowsException() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
@@ -129,11 +141,11 @@ class ViolationServiceImplTest {
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
         add.setOrderID(order.getId());
         when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(ModelUtils.getViolation()));
 
-        assertThrows(NotFoundException.class,
+        verify(orderRepository, never()).findById(anyLong());
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class,
             () -> violationService.addUserViolation(add, new MultipartFile[2], "abc"));
+        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND, ex.getMessage());
     }
 
     @Test

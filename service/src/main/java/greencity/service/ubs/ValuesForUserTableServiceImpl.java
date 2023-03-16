@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import com.google.common.annotations.VisibleForTesting;
 import greencity.dto.order.UserWithSomeOrderDetailDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.enums.SortingOrder;
@@ -50,7 +51,8 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
             users.getPageable().getPageNumber(), users.getTotalPages());
     }
 
-    private UserWithSomeOrderDetailDto mapToDto(User u) {
+    @VisibleForTesting
+    UserWithSomeOrderDetailDto mapToDto(User u) {
         final UserWithSomeOrderDetailDto allFieldsFromTableDto = new UserWithSomeOrderDetailDto();
         StringBuilder name = new StringBuilder();
         allFieldsFromTableDto.setUserId(u.getId());
