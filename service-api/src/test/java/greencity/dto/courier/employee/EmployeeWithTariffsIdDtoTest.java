@@ -3,7 +3,6 @@ package greencity.dto.courier.employee;
 import greencity.ModelUtils;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
-import greencity.dto.position.PositionDto;
 import lombok.SneakyThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,20 +23,16 @@ class EmployeeWithTariffsIdDtoTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("provideFieldsAndValidValues")
-    void validFieldsInEmployeeDtoTest(Long id,
-        String firstName,
-        String lastName,
-        String email,
-        List<PositionDto> employeePositions) {
+    void validFieldsInEmployeeDtoTest(String firstName, String lastName) {
 
         var dto = EmployeeWithTariffsIdDto.builder()
             .employeeDto(EmployeeDto.builder()
-                .id(id)
+                .id(1L)
                 .firstName(firstName)
                 .lastName(lastName)
                 .phoneNumber("+390990000000")
-                .email(email)
-                .employeePositions(employeePositions)
+                .email("mail@gmail.com")
+                .employeePositions(List.of(ModelUtils.getEmployeePosition()))
                 .build())
             .tariffId(List.of(1L))
             .build();
@@ -54,20 +49,16 @@ class EmployeeWithTariffsIdDtoTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("provideFieldsAndInvalidValues")
-    void invalidFieldsInEmployeeDtoTest(Long id,
-        String firstName,
-        String lastName,
-        String email,
-        List<PositionDto> employeePositions) {
+    void invalidFieldsInEmployeeDtoTest(String firstName, String lastName, String email) {
 
         var dto = EmployeeWithTariffsIdDto.builder()
             .employeeDto(EmployeeDto.builder()
-                .id(id)
+                .id(-1L)
                 .firstName(firstName)
                 .lastName(lastName)
                 .phoneNumber("+390990000000")
                 .email(email)
-                .employeePositions(employeePositions)
+                .employeePositions(null)
                 .build())
             .tariffId(List.of(1L))
             .build();
@@ -83,32 +74,31 @@ class EmployeeWithTariffsIdDtoTest {
 
     private static Stream<Arguments> provideFieldsAndValidValues() {
         return Stream.of(
-            Arguments.of(1L, "FirstName", "LastName", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())),
-            Arguments.of(2L, "Лук'ян", "Їгор", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())),
-            Arguments.of(3L, "Лук'ян", "Ігор", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())),
-            Arguments.of(4L, "Лук'ян", "Єгор", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())),
-            Arguments.of(5L, "Лук'ян1", "Єгор1", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())),
-            Arguments.of(6L, "Лук'ян+", "Єгор+", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())),
-            Arguments.of(7L, "Лук'ян-", "Єгор-", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())),
-            Arguments.of(8L, "Лук'ян ", "Єгор ", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())),
-            Arguments.of(9L, "Лук'ян.н", "Єгор.р", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())),
-            Arguments.of(10L, "Лук'ян", "Ґгор", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())),
-            Arguments.of(11L, "лук'ян", "ґгор", "mail@gmail.com", List.of(ModelUtils.getEmployeePosition())));
+            Arguments.of("FirstName", "LastName"),
+            Arguments.of("firstName", "lastName"),
+            Arguments.of("Лук'ян", "Їгор"),
+            Arguments.of("Петро1", "ІЄгор1"),
+            Arguments.of("Лук'ян+", "Єгор+"),
+            Arguments.of("Лук'ян-", "Єгор-"),
+            Arguments.of("Лук'ян ", "Єгор "),
+            Arguments.of("Лук'ян.н", "Єгор.р"),
+            Arguments.of("Петро", "Ґгор"),
+            Arguments.of("лук'ян", "їєґгор"));
     }
 
     private static Stream<Arguments> provideFieldsAndInvalidValues() {
         return Stream.of(
-            Arguments.of(0L, "", "", "", null),
-            Arguments.of(-1L, null, null, "", null),
-            Arguments.of(-2L, null, null, null, null),
-            Arguments.of(-3L, " ", " ", "", null),
-            Arguments.of(-4L, ".", ".", ".", null),
-            Arguments.of(-5L, "T.", "T.", "T.", null),
-            Arguments.of(-6L, "T..", "T..", "T..", null),
-            Arguments.of(-7L, "T...", "T...", "T...", null),
-            Arguments.of(-8L, "T--", "T--", "T--", null),
-            Arguments.of(-9L, "T---", "T---", "T---", null),
-            Arguments.of(-10L, "''", "''", "''", null),
-            Arguments.of(-11L, "Ttttttttttttttttttttttttttttttt", "Ttttttttttttttttttttttttttttttt", "", null));
+            Arguments.of("", "", ""),
+            Arguments.of(null, null, "mail.com"),
+            Arguments.of(null, null, null),
+            Arguments.of(" ", " ", ""),
+            Arguments.of(".", ".", "."),
+            Arguments.of("T.", "T.", "T."),
+            Arguments.of("T..", "T..", "T.."),
+            Arguments.of("T...", "T...", "T..."),
+            Arguments.of("T--", "T--", "T--"),
+            Arguments.of("T---", "T---", "T---"),
+            Arguments.of("''", "''", "''"),
+            Arguments.of("Ttttttttttttttttttttttttttttttt", "Ttttttttttttttttttttttttttttttt", "mail@"));
     }
 }
