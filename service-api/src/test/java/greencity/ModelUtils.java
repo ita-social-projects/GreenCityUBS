@@ -7,6 +7,7 @@ import greencity.dto.courier.CreateCourierTranslationDto;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentRequestDtoLiqPay;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.position.PositionDto;
 import greencity.dto.table.UbsTableCreationDto;
 import greencity.dto.user.UserVO;
 import greencity.dto.violation.UserViolationMailDto;
@@ -130,6 +131,13 @@ public class ModelUtils {
             .courierId(1L)
             .locationIdList(List.of(1L))
             .receivingStationsIdList(List.of(1L))
+            .build();
+    }
+
+    public static PositionDto getEmployeePosition() {
+        return PositionDto.builder()
+            .id(1L)
+            .name("Менеджер послуги")
             .build();
     }
 }
