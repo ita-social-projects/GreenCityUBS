@@ -4,6 +4,7 @@ import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.violation.*;
+import greencity.entity.user.employee.Employee;
 import greencity.enums.SortingOrder;
 import greencity.enums.ViolationLevel;
 import greencity.entity.order.Order;
@@ -157,8 +158,9 @@ public class ViolationServiceImpl implements ViolationService {
     @Override
     @Transactional
     public void deleteViolation(Long id, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
+        Employee currentUser = employeeRepository.findByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
         Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
         if (violationOptional.isPresent()) {
             List<String> images = violationOptional.get().getImages();
@@ -171,7 +173,7 @@ public class ViolationServiceImpl implements ViolationService {
             User user = violationOptional.get().getOrder().getUser();
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
-            eventService.saveEvent(OrderHistory.DELETE_VIOLATION, currentUser.getRecipientEmail(),
+            eventService.save(OrderHistory.DELETE_VIOLATION, currentUser.getEmail(),
                 violationOptional.get().getOrder());
         } else {
             throw new NotFoundException(VIOLATION_DOES_NOT_EXIST);
@@ -180,13 +182,13 @@ public class ViolationServiceImpl implements ViolationService {
 
     @Override
     public void updateUserViolation(UpdateViolationToUserDto add, MultipartFile[] multipartFiles, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
+        Employee currentUser = employeeRepository.findByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Violation violation = violationRepository.findByOrderId(add.getOrderID())
             .orElseThrow(() -> new NotFoundException(ORDER_HAS_NOT_VIOLATION));
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
-        eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getRecipientEmail(), violation.getOrder());
+        eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getEmail(), violation.getOrder());
     }
 
     private void updateViolation(Violation violation, UpdateViolationToUserDto add, MultipartFile[] multipartFiles) {

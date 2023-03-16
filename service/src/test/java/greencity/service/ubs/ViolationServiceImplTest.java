@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import java.util.List;
 import java.util.Optional;
 
+import greencity.entity.user.employee.Employee;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -84,17 +85,18 @@ class ViolationServiceImplTest {
 
     @Test
     void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        Employee employee = ModelUtils.getEmployee();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         when(violationRepository.findByOrderId(1l)).thenReturn(Optional.empty());
         Assertions.assertThrows(NotFoundException.class, () -> violationService.deleteViolation(1L, "abc"));
         verify(violationRepository, times(1)).findByOrderId(1L);
+        verify(employeeRepository, times(1)).findByUuid(anyString());
     }
 
     @Test
     void deleteViolationFromOrderByOrderId() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        Employee user = ModelUtils.getEmployee();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(user));
         Violation violation = ModelUtils.getViolation2();
         Long id = ModelUtils.getViolation().getOrder().getId();
         when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
@@ -102,6 +104,7 @@ class ViolationServiceImplTest {
         violationService.deleteViolation(1L, "abc");
 
         verify(violationRepository, times(1)).deleteById(id);
+        verify(employeeRepository, times(1)).findByUuid(anyString());
     }
 
     @Test
@@ -138,12 +141,12 @@ class ViolationServiceImplTest {
 
     @Test
     void updateUserViolation() {
-        User user = ModelUtils.getUser();
+        Employee employee = ModelUtils.getEmployee();
         UpdateViolationToUserDto updateViolationToUserDto = ModelUtils.getUpdateViolationToUserDto();
         Violation violation = ModelUtils.getViolation();
         List<String> violationImages = violation.getImages();
 
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
         if (updateViolationToUserDto.getImagesToDelete() != null) {
             List<String> images = updateViolationToUserDto.getImagesToDelete();
@@ -157,7 +160,7 @@ class ViolationServiceImplTest {
 
         assertEquals(2, violation.getImages().size());
 
-        verify(userRepository).findUserByUuid("abc");
+        verify(employeeRepository).findByUuid("abc");
         verify(violationRepository).findByOrderId(1L);
     }
 
