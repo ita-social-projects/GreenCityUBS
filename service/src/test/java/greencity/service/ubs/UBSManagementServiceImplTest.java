@@ -25,6 +25,7 @@ import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.ReasonNotTakingBagDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -2171,4 +2172,15 @@ class UBSManagementServiceImplTest {
         verify(orderRepository, times(1)).save(order);
         verify(eventService, times(1)).saveEvent(expectedHistoryEvent, employee.getEmail(), order);
     }
+
+    @Test
+    void getReasonNotTakingBagTest(){
+        ReasonNotTakingBagDto reasonNotTakingBagDto = ModelUtils.getReasonNotTakingBagDtoTest();
+        Order order = ModelUtils.getTestOrderNotTakingBag();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(order));
+        ReasonNotTakingBagDto result = ubsManagementService.getReasonNotTakingBag(1L);
+        assertEquals(reasonNotTakingBagDto.getDescription(), result.getDescription());
+        assertEquals(reasonNotTakingBagDto.getImages(), result.getImages());
+    }
+
 }
