@@ -1024,11 +1024,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         order.setReceivingStation(getUpdatedReceivingStation(dto.getReceivingStationId(), order));
         order.setDateOfExport(getUpdatedDateExport(dto.getDateExport(), order));
-        if (order.getDateOfExport() != null) {
-            if (order.getDateOfExport().equals(LocalDate.now())
-                && order.getOrderStatus().equals(OrderStatus.CONFIRMED)) {
-                order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
-            }
+        if (order.getDateOfExport() != null && order.getDateOfExport().equals(LocalDate.now())
+            && order.getOrderStatus().equals(OrderStatus.CONFIRMED)) {
+            order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
         }
         order.setDeliverFrom(getUpdatedDeliveryFrom(dto.getTimeDeliveryFrom(), order));
         order.setDeliverTo(getUpdatedDeliveryTo(dto.getTimeDeliveryTo(), order));
