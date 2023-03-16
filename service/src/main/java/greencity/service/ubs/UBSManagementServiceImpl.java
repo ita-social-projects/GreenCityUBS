@@ -1438,6 +1438,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
                 updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), email);
             }
+            if (order.getDateOfExport().equals(LocalDate.now())
+                && order.getOrderStatus().equals(OrderStatus.CONFIRMED)) {
+                order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
+            }
             if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
                 updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, email);
             }

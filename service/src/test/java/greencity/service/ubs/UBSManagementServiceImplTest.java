@@ -1134,6 +1134,9 @@ class UBSManagementServiceImplTest {
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
         UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
         ubsManagementService.updateOrderAdminPageInfo(emptyDto, 1L, "en", "test@gmail.com");
+        order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
+
+        assertEquals(OrderStatus.ON_THE_ROUTE, order.getOrderStatus());
 
         verify(ubsClientService, times(1))
             .updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "test@gmail.com");
