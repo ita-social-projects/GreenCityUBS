@@ -281,4 +281,11 @@ public interface UBSManagementService {
      * @author Anatolii Shapiro.
      */
     void updateOrderStatusToExpected();
+
+    /**
+     * Method returns reason not taking bag to order.
+     *
+     * @author Kharchenko Volodymyr.
+     */
+    ReasonNotTakingBagDto getReasonNotTakingBag(Long orderId);
 }

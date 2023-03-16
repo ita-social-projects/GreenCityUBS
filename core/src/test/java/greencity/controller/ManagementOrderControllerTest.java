@@ -455,4 +455,10 @@ class ManagementOrderControllerTest {
             .andExpect(status().isCreated());
 
     }
+
+    @Test
+    void getOrderReasonNotTakingBag() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-order-reason-not-taking-bag" + "/{id}", 1L))
+                .andExpect(status().isOk());
+    }
 }
