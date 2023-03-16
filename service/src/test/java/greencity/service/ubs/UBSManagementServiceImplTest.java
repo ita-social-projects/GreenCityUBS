@@ -2123,4 +2123,52 @@ class UBSManagementServiceImplTest {
             Arguments.of(orderWithoutDeliverFromTo,
                 OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails));
     }
+
+    @Test
+    void updateOrderExportDetailsWhenDeliverFromIsNull() {
+        Employee employee = getEmployee();
+        List<ReceivingStation> receivingStations = List.of(getReceivingStation());
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        Order order = getOrderExportDetails();
+        var receivingStation = ModelUtils.getReceivingStation();
+        order.setDeliverFrom(null);
+        testDetails.setTimeDeliveryFrom(null);
+        String expectedHistoryEvent = OrderHistory.UPDATE_EXPORT_DETAILS
+            + String.format(OrderHistory.UPDATE_EXPORT_DATA,
+                LocalDate.of(1997, 12, 4))
+            +
+            String.format(OrderHistory.UPDATE_RECEIVING_STATION, "Петрівка");
+
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(receivingStations);
+
+        ubsManagementService.updateOrderExportDetails(order.getId(), testDetails, employee.getEmail());
+        verify(orderRepository, times(1)).save(order);
+        verify(eventService, times(1)).saveEvent(expectedHistoryEvent, employee.getEmail(), order);
+    }
+
+    @Test
+    void updateOrderExportDetailsWhenDeliverToIsNull() {
+        Employee employee = getEmployee();
+        List<ReceivingStation> receivingStations = List.of(getReceivingStation());
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        Order order = getOrderExportDetails();
+        var receivingStation = ModelUtils.getReceivingStation();
+        order.setDeliverTo(null);
+        testDetails.setTimeDeliveryTo(null);
+        String expectedHistoryEvent = OrderHistory.UPDATE_EXPORT_DETAILS
+            + String.format(OrderHistory.UPDATE_EXPORT_DATA,
+                LocalDate.of(1997, 12, 4))
+            +
+            String.format(OrderHistory.UPDATE_RECEIVING_STATION, "Петрівка");
+
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(receivingStations);
+
+        ubsManagementService.updateOrderExportDetails(order.getId(), testDetails, employee.getEmail());
+        verify(orderRepository, times(1)).save(order);
+        verify(eventService, times(1)).saveEvent(expectedHistoryEvent, employee.getEmail(), order);
+    }
 }
