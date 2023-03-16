@@ -975,7 +975,7 @@ public class ManagementOrderController {
      * @return {@link OrderCancellationReasonDto}.
      * @author Kharchenko Volodymyr
      */
-    @ApiOperation(value = "Get order reason not take bag")
+    @ApiOperation(value = "Get order cancellation reason")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
