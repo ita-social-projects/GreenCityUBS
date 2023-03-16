@@ -10,14 +10,33 @@ import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagMappingDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.order.*;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.CounterOrderDetailsDto;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.ExportDetailsDtoUpdate;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
+import greencity.dto.order.OrderInfoDto;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.order.*;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -28,16 +47,27 @@ import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
-import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.*;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeOrderPositionRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderDetailRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.PositionRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.ServiceRepository;
+import greencity.repository.UserRepository;
 import greencity.service.notification.NotificationServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -45,7 +75,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -53,15 +87,34 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementServiceImplTest {
@@ -2047,15 +2100,77 @@ class UBSManagementServiceImplTest {
         Order orderWithoutDeliverFromTo = getOrderExportDetails();
         orderWithoutDeliverFromTo.setDeliverFrom(null);
         orderWithoutDeliverFromTo.setDeliverTo(null);
+        String updateExportDetails = String.format(OrderHistory.UPDATE_EXPORT_DATA,
+            LocalDate.of(1997, 12, 4)) +
+            String.format(OrderHistory.UPDATE_DELIVERY_TIME,
+                LocalTime.of(15, 40, 24), LocalTime.of(19, 30, 30))
+            +
+            String.format(OrderHistory.UPDATE_RECEIVING_STATION, "Петрівка");
         return Stream.of(
-            Arguments.of(getOrderExportDetailsWithNullValues(), OrderHistory.SET_EXPORT_DETAILS),
-            Arguments.of(getOrderExportDetailsWithExportDate(), OrderHistory.UPDATE_EXPORT_DETAILS),
-            Arguments.of(getOrderExportDetailsWithExportDateDeliverFrom(), OrderHistory.UPDATE_EXPORT_DETAILS),
-            Arguments.of(getOrderExportDetailsWithExportDateDeliverFromTo(), OrderHistory.UPDATE_EXPORT_DETAILS),
-            Arguments.of(getOrderExportDetails(), OrderHistory.UPDATE_EXPORT_DETAILS),
-            Arguments.of(getOrderExportDetailsWithDeliverFromTo(), OrderHistory.UPDATE_EXPORT_DETAILS),
-            Arguments.of(orderWithoutExportDate, OrderHistory.UPDATE_EXPORT_DETAILS),
-            Arguments.of(orderWithoutExportDate, OrderHistory.UPDATE_EXPORT_DETAILS));
+            Arguments.of(getOrderExportDetailsWithNullValues(),
+                OrderHistory.SET_EXPORT_DETAILS + updateExportDetails),
+            Arguments.of(getOrderExportDetailsWithExportDate(),
+                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+            Arguments.of(getOrderExportDetailsWithExportDateDeliverFrom(),
+                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+            Arguments.of(getOrderExportDetailsWithExportDateDeliverFromTo(),
+                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+            Arguments.of(getOrderExportDetails(),
+                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+            Arguments.of(getOrderExportDetailsWithDeliverFromTo(),
+                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+            Arguments.of(orderWithoutExportDate,
+                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+            Arguments.of(orderWithoutDeliverFromTo,
+                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails));
+    }
+
+    @Test
+    void updateOrderExportDetailsWhenDeliverFromIsNull() {
+        Employee employee = getEmployee();
+        List<ReceivingStation> receivingStations = List.of(getReceivingStation());
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        Order order = getOrderExportDetails();
+        var receivingStation = ModelUtils.getReceivingStation();
+        order.setDeliverFrom(null);
+        testDetails.setTimeDeliveryFrom(null);
+        String expectedHistoryEvent = OrderHistory.UPDATE_EXPORT_DETAILS
+            + String.format(OrderHistory.UPDATE_EXPORT_DATA,
+                LocalDate.of(1997, 12, 4))
+            +
+            String.format(OrderHistory.UPDATE_RECEIVING_STATION, "Петрівка");
+
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(receivingStations);
+
+        ubsManagementService.updateOrderExportDetails(order.getId(), testDetails, employee.getEmail());
+        verify(orderRepository, times(1)).save(order);
+        verify(eventService, times(1)).saveEvent(expectedHistoryEvent, employee.getEmail(), order);
+    }
+
+    @Test
+    void updateOrderExportDetailsWhenDeliverToIsNull() {
+        Employee employee = getEmployee();
+        List<ReceivingStation> receivingStations = List.of(getReceivingStation());
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        Order order = getOrderExportDetails();
+        var receivingStation = ModelUtils.getReceivingStation();
+        order.setDeliverTo(null);
+        testDetails.setTimeDeliveryTo(null);
+        String expectedHistoryEvent = OrderHistory.UPDATE_EXPORT_DETAILS
+            + String.format(OrderHistory.UPDATE_EXPORT_DATA,
+                LocalDate.of(1997, 12, 4))
+            +
+            String.format(OrderHistory.UPDATE_RECEIVING_STATION, "Петрівка");
+
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(receivingStations);
+
+        ubsManagementService.updateOrderExportDetails(order.getId(), testDetails, employee.getEmail());
+        verify(orderRepository, times(1)).save(order);
+        verify(eventService, times(1)).saveEvent(expectedHistoryEvent, employee.getEmail(), order);
     }
 
     @Test
