@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReasonNotTakingBagDto {
+public class OrderNotTakingReasonDto {
     private String description;
     private List<String> images;
 }

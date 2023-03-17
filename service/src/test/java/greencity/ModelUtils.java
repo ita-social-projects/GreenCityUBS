@@ -91,7 +91,7 @@ import greencity.dto.order.SenderLocation;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderDetailDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
-import greencity.dto.order.ReasonNotTakingBagDto;
+import greencity.dto.order.OrderNotTakingReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -4469,7 +4469,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static Order getTestOrderNotTakingBag() {
+    public static Order getTestOrderNotTakingReason() {
         return Order.builder()
             .id(1L)
             .orderStatus(OrderStatus.NOT_TAKEN_OUT)
@@ -4478,8 +4478,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static ReasonNotTakingBagDto getReasonNotTakingBagDto() {
-        return ReasonNotTakingBagDto.builder()
+    public static OrderNotTakingReasonDto getOrderNotTakingReasonDto() {
+        return OrderNotTakingReasonDto.builder()
             .description("Some description")
             .images(List.of("image1", "image2"))
             .build();

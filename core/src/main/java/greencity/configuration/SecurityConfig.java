@@ -90,7 +90,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/violation-details/{id}",
                 UBS_MANAG_LINK + "/{id}/ordersAll",
                 UBS_MANAG_LINK + "/get-order-cancellation-reason/{id}",
-                UBS_MANAG_LINK + "/get-order-reason-not-taking-bag/{id}",
+                UBS_MANAG_LINK + "/get-order-not-taking-reason/{id}",
                 UBS_LINK + "/order_history/{orderId}",
                 ADMIN_EMPL_LINK + "/**",
                 ADMIN_LINK + "/notification/get-all-templates",

@@ -25,7 +25,7 @@ import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
-import greencity.dto.order.ReasonNotTakingBagDto;
+import greencity.dto.order.OrderNotTakingReasonDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
@@ -2193,21 +2193,21 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getReasonNotTakingBagTest() {
-        ReasonNotTakingBagDto reasonNotTakingBagDto = ModelUtils.getReasonNotTakingBagDto();
-        Order order = ModelUtils.getTestOrderNotTakingBag();
+    void getOrderNotTakingReasonTest() {
+        OrderNotTakingReasonDto orderNotTakingReasonDto = ModelUtils.getOrderNotTakingReasonDto();
+        Order order = ModelUtils.getTestOrderNotTakingReason();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        ReasonNotTakingBagDto result = ubsManagementService.getReasonNotTakingBag(1L);
+        OrderNotTakingReasonDto result = ubsManagementService.getOrderNotTakingReason(1L);
 
-        assertEquals(reasonNotTakingBagDto.getDescription(), result.getDescription());
-        assertEquals(reasonNotTakingBagDto.getImages(), result.getImages());
+        assertEquals(orderNotTakingReasonDto.getDescription(), result.getDescription());
+        assertEquals(orderNotTakingReasonDto.getImages(), result.getImages());
         verify(orderRepository).findById(1L);
     }
 
     @Test
-    void getReasonNotTakingBagWithoutOrderTest() {
+    void getOrderNotTakingReasonWithoutOrderTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ubsManagementService.getReasonNotTakingBag(1L));
+        assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderNotTakingReason(1L));
         verify(orderRepository).findById(1L);
     }
 }

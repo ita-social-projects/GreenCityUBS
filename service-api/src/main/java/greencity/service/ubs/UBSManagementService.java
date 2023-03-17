@@ -293,12 +293,12 @@ public interface UBSManagementService {
     OrderCancellationReasonDto getOrderCancellationReason(Long orderId);
 
     /**
-     * Method returns reason not taking bag to order.
+     * Method returns not taking reason to order.
      *
      * @param orderId {@link Long}.
-     * @return {@link ReasonNotTakingBagDto}.
+     * @return {@link OrderNotTakingReasonDto}.
      *
      * @author Kharchenko Volodymyr.
      */
-    ReasonNotTakingBagDto getReasonNotTakingBag(Long orderId);
+    OrderNotTakingReasonDto getOrderNotTakingReason(Long orderId);
 }
