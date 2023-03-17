@@ -281,4 +281,14 @@ public interface UBSManagementService {
      * @author Anatolii Shapiro.
      */
     void updateOrderStatusToExpected();
+
+    /**
+     * Method returns cancellation reason and comment to order.
+     *
+     * @param orderId {@link Long}.
+     * @return {@link OrderCancellationReasonDto}
+     *
+     * @author Kharchenko Volodymyr.
+     */
+    OrderCancellationReasonDto getOrderCancellationReason(Long orderId);
 }

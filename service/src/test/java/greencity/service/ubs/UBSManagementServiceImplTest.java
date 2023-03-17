@@ -25,6 +25,7 @@ import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -2170,5 +2171,23 @@ class UBSManagementServiceImplTest {
         ubsManagementService.updateOrderExportDetails(order.getId(), testDetails, employee.getEmail());
         verify(orderRepository, times(1)).save(order);
         verify(eventService, times(1)).saveEvent(expectedHistoryEvent, employee.getEmail(), order);
+    }
+
+    @Test
+    void getOrderCancellationReasonTest() {
+        OrderCancellationReasonDto cancellationReasonDto = ModelUtils.getCancellationDto();
+        Order order = ModelUtils.getOrderTest();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+
+        OrderCancellationReasonDto result = ubsManagementService.getOrderCancellationReason(1L);
+        assertEquals(cancellationReasonDto.getCancellationReason(), result.getCancellationReason());
+        assertEquals(cancellationReasonDto.getCancellationComment(), result.getCancellationComment());
+        verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void getOrderCancellationReasonWithoutOrderTest() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderCancellationReason(1L));
     }
 }
