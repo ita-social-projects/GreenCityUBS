@@ -2209,5 +2209,4 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> ubsManagementService.getReasonNotTakingBag(1L));
     }
-
 }

@@ -1713,5 +1713,4 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .images(order.getImageReasonNotTakingBags())
             .build();
     }
-
 }
