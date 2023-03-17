@@ -2196,7 +2196,7 @@ class UBSManagementServiceImplTest {
     void getNotTakenOrderReasonTest() {
         NotTakenOrderReasonDto notTakenOrderReasonDto = ModelUtils.getNotTakenOrderReasonDto();
         Order order = ModelUtils.getTestNotTakenOrderReason();
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         NotTakenOrderReasonDto result = ubsManagementService.getNotTakenOrderReason(1L);
 
         assertEquals(notTakenOrderReasonDto.getDescription(), result.getDescription());
