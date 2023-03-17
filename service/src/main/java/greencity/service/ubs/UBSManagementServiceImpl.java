@@ -36,7 +36,7 @@ import greencity.dto.order.OrderStatusesTranslationDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
-import greencity.dto.order.OrderNotTakingReasonDto;
+import greencity.dto.order.NotTakenOrderReasonDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
@@ -1705,10 +1705,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public OrderNotTakingReasonDto getOrderNotTakingReason(Long orderId) {
+    public NotTakenOrderReasonDto getNotTakenOrderReason(Long orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        return OrderNotTakingReasonDto.builder()
+        return NotTakenOrderReasonDto.builder()
             .description(order.getReasonNotTakingBagDescription())
             .images(order.getImageReasonNotTakingBags())
             .build();

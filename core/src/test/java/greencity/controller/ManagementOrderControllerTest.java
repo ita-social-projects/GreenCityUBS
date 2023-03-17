@@ -464,9 +464,9 @@ class ManagementOrderControllerTest {
     }
 
     @Test
-    void getOrderReasonNotTakingBag() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-order-not-taking-reason" + "/{id}", 1L))
+    void getNotTakenOrderReason() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-not-taken-order-reason" + "/{id}", 1L))
             .andExpect(status().isOk());
-        verify(ubsManagementService).getOrderNotTakingReason(1L);
+        verify(ubsManagementService).getNotTakenOrderReason(1L);
     }
 }

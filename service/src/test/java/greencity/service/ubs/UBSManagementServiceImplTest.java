@@ -25,7 +25,7 @@ import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
-import greencity.dto.order.OrderNotTakingReasonDto;
+import greencity.dto.order.NotTakenOrderReasonDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
@@ -2193,21 +2193,21 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getOrderNotTakingReasonTest() {
-        OrderNotTakingReasonDto orderNotTakingReasonDto = ModelUtils.getOrderNotTakingReasonDto();
-        Order order = ModelUtils.getTestOrderNotTakingReason();
+    void getNotTakenOrderReasonTest() {
+        NotTakenOrderReasonDto notTakenOrderReasonDto = ModelUtils.getNotTakenOrderReasonDto();
+        Order order = ModelUtils.getTestNotTakenOrderReason();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        OrderNotTakingReasonDto result = ubsManagementService.getOrderNotTakingReason(1L);
+        NotTakenOrderReasonDto result = ubsManagementService.getNotTakenOrderReason(1L);
 
-        assertEquals(orderNotTakingReasonDto.getDescription(), result.getDescription());
-        assertEquals(orderNotTakingReasonDto.getImages(), result.getImages());
+        assertEquals(notTakenOrderReasonDto.getDescription(), result.getDescription());
+        assertEquals(notTakenOrderReasonDto.getImages(), result.getImages());
         verify(orderRepository).findById(1L);
     }
 
     @Test
-    void getOrderNotTakingReasonWithoutOrderTest() {
+    void getNotTakenOrderReasonWithoutOrderTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderNotTakingReason(1L));
+        assertThrows(NotFoundException.class, () -> ubsManagementService.getNotTakenOrderReason(1L));
         verify(orderRepository).findById(1L);
     }
 }

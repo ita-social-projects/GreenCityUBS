@@ -25,7 +25,7 @@ import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
-import greencity.dto.order.OrderNotTakingReasonDto;
+import greencity.dto.order.NotTakenOrderReasonDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
@@ -992,25 +992,25 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for get order not taking reason.
+     * Controller for get not taken order reason.
      *
      * @param orderId {@link Long}.
-     * @return {@link OrderNotTakingReasonDto}.
+     * @return {@link NotTakenOrderReasonDto}.
      *
      * @author Kharchenko Volodymyr
      */
-    @ApiOperation(value = "Get order not taking reason")
+    @ApiOperation(value = "Get not taken order reason")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderNotTakingReasonDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = NotTakenOrderReasonDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-order-not-taking-reason/{id}")
-    public ResponseEntity<OrderNotTakingReasonDto> getOrderNotTakingReason(
+    @GetMapping("/get-not-taken-order-reason/{id}")
+    public ResponseEntity<NotTakenOrderReasonDto> getNotTakenOrderReason(
         @Valid @PathVariable("id") Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getOrderNotTakingReason(orderId));
+            .body(ubsManagementService.getNotTakenOrderReason(orderId));
     }
 }
