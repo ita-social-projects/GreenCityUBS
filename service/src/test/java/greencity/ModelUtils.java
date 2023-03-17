@@ -91,6 +91,7 @@ import greencity.dto.order.SenderLocation;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderDetailDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.NotTakenOrderReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -4475,6 +4476,22 @@ public class ModelUtils {
             .name("UbsProfile")
             .email("ubsuser@mail.com")
             .uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
+            .build();
+    }
+
+    public static Order getTestNotTakenOrderReason() {
+        return Order.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.NOT_TAKEN_OUT)
+            .reasonNotTakingBagDescription("Some description")
+            .imageReasonNotTakingBags(List.of("image1", "image2"))
+            .build();
+    }
+
+    public static NotTakenOrderReasonDto getNotTakenOrderReasonDto() {
+        return NotTakenOrderReasonDto.builder()
+            .description("Some description")
+            .images(List.of("image1", "image2"))
             .build();
     }
 }
