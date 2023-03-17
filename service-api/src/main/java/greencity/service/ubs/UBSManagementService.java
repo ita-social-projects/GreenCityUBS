@@ -285,6 +285,9 @@ public interface UBSManagementService {
     /**
      * Method returns reason not taking bag to order.
      *
+     * @param orderId {@link Long}.
+     * @return {@link ReasonNotTakingBagDto}.
+     *
      * @author Kharchenko Volodymyr.
      */
     ReasonNotTakingBagDto getReasonNotTakingBag(Long orderId);

@@ -2177,10 +2177,12 @@ class UBSManagementServiceImplTest {
     void getReasonNotTakingBagTest(){
         ReasonNotTakingBagDto reasonNotTakingBagDto = ModelUtils.getReasonNotTakingBagDtoTest();
         Order order = ModelUtils.getTestOrderNotTakingBag();
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         ReasonNotTakingBagDto result = ubsManagementService.getReasonNotTakingBag(1L);
+
         assertEquals(reasonNotTakingBagDto.getDescription(), result.getDescription());
         assertEquals(reasonNotTakingBagDto.getImages(), result.getImages());
+        verify(orderRepository).findById(1L);
     }
 
 }

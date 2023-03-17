@@ -970,12 +970,14 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for get order reason not take bag.
+     * Controller for get order reason not taking bag.
      *
+     * @param orderId {@link Long}.
      * @return {@link ReasonNotTakingBagDto}.
+     *
      * @author Kharchenko Volodymyr
      */
-    @ApiOperation(value = "Get order reason not take bag")
+    @ApiOperation(value = "Get order reason not taking bag")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReasonNotTakingBagDto.class),
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
@@ -985,8 +987,8 @@ public class ManagementOrderController {
     })
     @GetMapping("/get-order-reason-not-taking-bag/{id}")
     public ResponseEntity<ReasonNotTakingBagDto> getReasonNotTakingBag(
-            @Valid @PathVariable("id") Long id) {
+            @Valid @PathVariable("id") Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsManagementService.getReasonNotTakingBag(id));
+                .body(ubsManagementService.getReasonNotTakingBag(orderId));
     }
 }
