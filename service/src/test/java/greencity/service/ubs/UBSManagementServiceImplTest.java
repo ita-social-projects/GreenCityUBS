@@ -2194,7 +2194,7 @@ class UBSManagementServiceImplTest {
 
     @Test
     void getReasonNotTakingBagTest() {
-        ReasonNotTakingBagDto reasonNotTakingBagDto = ModelUtils.getReasonNotTakingBagDtoTest();
+        ReasonNotTakingBagDto reasonNotTakingBagDto = ModelUtils.getReasonNotTakingBagDto();
         Order order = ModelUtils.getTestOrderNotTakingBag();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         ReasonNotTakingBagDto result = ubsManagementService.getReasonNotTakingBag(1L);
@@ -2208,5 +2208,6 @@ class UBSManagementServiceImplTest {
     void getReasonNotTakingBagWithoutOrderTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> ubsManagementService.getReasonNotTakingBag(1L));
+        verify(orderRepository).findById(1L);
     }
 }

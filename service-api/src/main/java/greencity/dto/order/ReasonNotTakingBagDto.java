@@ -1,16 +1,15 @@
 package greencity.dto.order;
 
-import lombok.*;
-
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode
-@ToString
 public class ReasonNotTakingBagDto {
     private String description;
     private List<String> images;

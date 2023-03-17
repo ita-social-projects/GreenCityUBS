@@ -4478,7 +4478,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static ReasonNotTakingBagDto getReasonNotTakingBagDtoTest() {
+    public static ReasonNotTakingBagDto getReasonNotTakingBagDto() {
         return ReasonNotTakingBagDto.builder()
             .description("Some description")
             .images(List.of("image1", "image2"))
