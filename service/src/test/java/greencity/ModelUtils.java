@@ -169,6 +169,7 @@ import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -621,6 +622,15 @@ public class ModelUtils {
             .timeDeliveryTo("1990-12-11T19:30:30")
             .receivingStationId(1L)
             .allReceivingStations(List.of(getReceivingStationDto(), getReceivingStationDto()))
+            .build();
+    }
+
+    public static ExportDetailsDtoUpdate getExportDetailsRequestToday() {
+        return ExportDetailsDtoUpdate.builder()
+            .dateExport(String.valueOf(LocalDate.now()))
+            .timeDeliveryFrom(String.valueOf(LocalDateTime.now()))
+            .timeDeliveryTo(String.valueOf(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)))
+            .receivingStationId(1L)
             .build();
     }
 
