@@ -2177,9 +2177,17 @@ class UBSManagementServiceImplTest {
     void getOrderCancellationReasonTest() {
         OrderCancellationReasonDto cancellationReasonDto = ModelUtils.getCancellationDto();
         Order order = ModelUtils.getOrderTest();
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+
         OrderCancellationReasonDto result = ubsManagementService.getOrderCancellationReason(1L);
         assertEquals(cancellationReasonDto.getCancellationReason(), result.getCancellationReason());
         assertEquals(cancellationReasonDto.getCancellationComment(), result.getCancellationComment());
+        verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void getOrderCancellationReasonWithoutOrderTest() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderCancellationReason(1L));
     }
 }

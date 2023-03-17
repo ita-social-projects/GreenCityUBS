@@ -285,6 +285,9 @@ public interface UBSManagementService {
     /**
      * Method returns cancellation reason and comment to order.
      *
+     * @param orderId {@link Long}.
+     * @return {@link OrderCancellationReasonDto}
+     *
      * @author Kharchenko Volodymyr.
      */
     OrderCancellationReasonDto getOrderCancellationReason(Long orderId);
