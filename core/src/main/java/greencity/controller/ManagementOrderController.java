@@ -25,6 +25,7 @@ import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
@@ -966,5 +967,26 @@ public class ManagementOrderController {
         @RequestBody @Valid AddBonusesToUserDto addBonusesToUserDto, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId, principal.getName()));
+    }
+
+    /**
+     * Controller for get order cancellation reason.
+     *
+     * @return {@link OrderCancellationReasonDto}.
+     * @author Kharchenko Volodymyr
+     */
+    @ApiOperation(value = "Get order cancellation reason")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/get-order-cancellation-reason/{id}")
+    public ResponseEntity<OrderCancellationReasonDto> getOrderCancellationReason(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrderCancellationReason(id));
     }
 }
