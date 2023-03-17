@@ -291,4 +291,14 @@ public interface UBSManagementService {
      * @author Kharchenko Volodymyr.
      */
     OrderCancellationReasonDto getOrderCancellationReason(Long orderId);
+
+    /**
+     * Method returns not taken order reason.
+     *
+     * @param orderId {@link Long}.
+     * @return {@link NotTakenOrderReasonDto}.
+     *
+     * @author Kharchenko Volodymyr.
+     */
+    NotTakenOrderReasonDto getNotTakenOrderReason(Long orderId);
 }
