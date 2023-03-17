@@ -37,6 +37,7 @@ import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.order.ReasonNotTakingBagDto;
+import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
@@ -1694,12 +1695,23 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
+    public OrderCancellationReasonDto getOrderCancellationReason(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        return OrderCancellationReasonDto.builder()
+            .cancellationReason(order.getCancellationReason())
+            .cancellationComment(order.getCancellationComment())
+            .build();
+    }
+
+    @Override
     public ReasonNotTakingBagDto getReasonNotTakingBag(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         return ReasonNotTakingBagDto.builder()
-                .description(order.getReasonNotTakingBagDescription())
-                .images(order.getImageReasonNotTakingBags())
-                .build();
+            .description(order.getReasonNotTakingBagDescription())
+            .images(order.getImageReasonNotTakingBags())
+            .build();
     }
+
 }

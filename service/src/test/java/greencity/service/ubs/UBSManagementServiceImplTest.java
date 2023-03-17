@@ -26,6 +26,7 @@ import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.order.ReasonNotTakingBagDto;
+import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -2174,7 +2175,25 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getReasonNotTakingBagTest(){
+    void getOrderCancellationReasonTest() {
+        OrderCancellationReasonDto cancellationReasonDto = ModelUtils.getCancellationDto();
+        Order order = ModelUtils.getOrderTest();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+
+        OrderCancellationReasonDto result = ubsManagementService.getOrderCancellationReason(1L);
+        assertEquals(cancellationReasonDto.getCancellationReason(), result.getCancellationReason());
+        assertEquals(cancellationReasonDto.getCancellationComment(), result.getCancellationComment());
+        verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void getOrderCancellationReasonWithoutOrderTest() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderCancellationReason(1L));
+    }
+
+    @Test
+    void getReasonNotTakingBagTest() {
         ReasonNotTakingBagDto reasonNotTakingBagDto = ModelUtils.getReasonNotTakingBagDtoTest();
         Order order = ModelUtils.getTestOrderNotTakingBag();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
@@ -2183,6 +2202,12 @@ class UBSManagementServiceImplTest {
         assertEquals(reasonNotTakingBagDto.getDescription(), result.getDescription());
         assertEquals(reasonNotTakingBagDto.getImages(), result.getImages());
         verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void getReasonNotTakingBagWithoutOrderTest() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> ubsManagementService.getReasonNotTakingBag(1L));
     }
 
 }

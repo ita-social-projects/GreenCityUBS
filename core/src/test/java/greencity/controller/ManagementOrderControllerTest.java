@@ -457,9 +457,16 @@ class ManagementOrderControllerTest {
     }
 
     @Test
+    void getOrderCancellationReason() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-order-cancellation-reason" + "/{id}", 1L))
+            .andExpect(status().isOk());
+        verify(ubsManagementService).getOrderCancellationReason(1L);
+    }
+
+    @Test
     void getOrderReasonNotTakingBag() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/get-order-reason-not-taking-bag" + "/{id}", 1L))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
         verify(ubsManagementService).getReasonNotTakingBag(1L);
     }
 }

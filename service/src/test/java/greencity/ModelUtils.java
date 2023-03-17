@@ -4469,19 +4469,19 @@ public class ModelUtils {
             .build();
     }
 
-    public static Order getTestOrderNotTakingBag(){
+    public static Order getTestOrderNotTakingBag() {
         return Order.builder()
-                .id(1L)
-                .orderStatus(OrderStatus.NOT_TAKEN_OUT)
-                .reasonNotTakingBagDescription("Some description")
-                .imageReasonNotTakingBags(List.of("image1", "image2"))
-                .build();
+            .id(1L)
+            .orderStatus(OrderStatus.NOT_TAKEN_OUT)
+            .reasonNotTakingBagDescription("Some description")
+            .imageReasonNotTakingBags(List.of("image1", "image2"))
+            .build();
     }
 
-    public static ReasonNotTakingBagDto getReasonNotTakingBagDtoTest(){
+    public static ReasonNotTakingBagDto getReasonNotTakingBagDtoTest() {
         return ReasonNotTakingBagDto.builder()
-                .description("Some description")
-                .images(List.of("image1", "image2"))
-                .build();
+            .description("Some description")
+            .images(List.of("image1", "image2"))
+            .build();
     }
 }
