@@ -1572,15 +1572,19 @@ class UBSManagementServiceImplTest {
     @Test
     void updateOrderExportDetails() {
         User user = getTestUser();
-        Order order = getOrder();
+        Order order = getOrderDoneByUser();
+
         List<ReceivingStation> receivingStations = List.of(getReceivingStation());
-        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequestToday();
         var receivingStation = ModelUtils.getReceivingStation();
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(receivingStations);
 
         ubsManagementService.updateOrderExportDetails(user.getId(), testDetails, "test@gmail.com");
+
+        assertEquals(OrderStatus.ON_THE_ROUTE, order.getOrderStatus());
+
         verify(orderRepository, times(1)).save(order);
     }
 
