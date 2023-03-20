@@ -3,7 +3,7 @@ package greencity.entity.order;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierLimit;
-import greencity.enums.LocationStatus;
+import greencity.enums.TariffStatus;
 import lombok.*;
 
 import javax.persistence.*;
@@ -44,7 +44,7 @@ public class TariffsInfo {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private LocationStatus locationStatus;
+    private TariffStatus tariffStatus;
 
     @ManyToOne
     private Employee creator;

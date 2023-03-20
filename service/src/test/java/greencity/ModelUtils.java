@@ -161,6 +161,7 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.TariffStatus;
 import greencity.util.Bot;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -3771,7 +3772,7 @@ public class ModelUtils {
     public static TariffsInfo getTariffsInfoActive() {
         return TariffsInfo.builder()
             .id(1L)
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
             .max(20L)
             .min(2L)
@@ -3788,7 +3789,7 @@ public class ModelUtils {
     public static TariffsInfo getTariffsInfoDeactivated() {
         return TariffsInfo.builder()
             .id(1L)
-            .locationStatus(LocationStatus.DEACTIVATED)
+            .tariffStatus(TariffStatus.DEACTIVATED)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
             .max(20L)
             .min(2L)
@@ -3887,7 +3888,7 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .max(6000L)
@@ -3914,7 +3915,7 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .max(100L)
@@ -3936,7 +3937,7 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .max(10L)

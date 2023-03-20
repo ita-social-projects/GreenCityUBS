@@ -56,7 +56,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      */
     @Modifying
     @Query(nativeQuery = true, value = "update tariffs_info"
-        + " set location_status = 'DEACTIVATED'"
+        + " set tariff_status = 'DEACTIVATED'"
         + " from tariffs_info ti"
         + " inner join receiving_stations rs on ti.id = rs.id"
         + " inner join tariffs_locations tl on ti.id = tl.tariffs_info_id"
@@ -76,7 +76,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      */
     @Modifying
     @Query(nativeQuery = true, value = "update tariffs_info"
-        + " set location_status = 'DEACTIVATED'"
+        + " set tariff_status = 'DEACTIVATED'"
         + " from tariffs_info as ti"
         + " inner join receiving_stations rs on ti.id = rs.id"
         + " inner join tariffs_locations tl on ti.id = tl.tariffs_info_id"
@@ -97,7 +97,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      */
     @Modifying
     @Query(nativeQuery = true, value = "update tariffs_info"
-        + " set location_status = 'DEACTIVATED'"
+        + " set tariff_status = 'DEACTIVATED'"
         + " from tariffs_info as ti"
         + " inner join receiving_stations rs on ti.id = rs.id"
         + " inner join tariffs_locations tl on ti.id = tl.tariffs_info_id"

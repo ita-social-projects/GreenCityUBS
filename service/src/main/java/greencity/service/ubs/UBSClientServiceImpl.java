@@ -49,10 +49,12 @@ import greencity.enums.AddressStatus;
 import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
+import greencity.enums.LocationStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentType;
+import greencity.enums.TariffStatus;
 import greencity.exceptions.address.AddressNotFoundException;
 
 import greencity.repository.AddressRepository;
@@ -155,7 +157,6 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 
 import static greencity.constant.ErrorMessage.*;
-import static greencity.enums.LocationStatus.*;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -303,7 +304,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkIfTariffIsAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {
-        if (tariffsInfo.getLocationStatus() == DEACTIVATED || location.getLocationStatus() == DEACTIVATED) {
+        if (tariffsInfo.getTariffStatus() == TariffStatus.DEACTIVATED
+            || location.getLocationStatus() == LocationStatus.DEACTIVATED) {
             throw new BadRequestException(TARIFF_OR_LOCATION_IS_DEACTIVATED);
         } else {
             var isAvailable = isTariffAvailableForCurrentLocation(tariffsInfo, location);
@@ -317,7 +319,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return tariffLocationRepository
             .findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location)
             .orElseThrow(() -> new NotFoundException(TARIFF_FOR_LOCATION_NOT_EXIST + location.getId()))
-            .getLocationStatus() != DEACTIVATED;
+            .getLocationStatus() != LocationStatus.DEACTIVATED;
     }
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,

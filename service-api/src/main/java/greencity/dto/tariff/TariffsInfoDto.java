@@ -5,7 +5,7 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.entity.order.TariffLocation;
 import greencity.enums.CourierLimit;
-import greencity.enums.LocationStatus;
+import greencity.enums.TariffStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +22,7 @@ import java.util.Set;
 public class TariffsInfoDto {
     private Long id;
     private Set<TariffLocation> tariffLocations;
-    private LocationStatus locationStatus;
+    private TariffStatus tariffStatus;
     private List<ReceivingStationDto> receivingStations;
     private CourierDto courier;
     private String limitDescription;
