@@ -25,8 +25,10 @@ import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
+import greencity.enums.LocationStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
+import greencity.enums.TariffStatus;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -133,7 +135,6 @@ import static greencity.ModelUtils.getUBSuser;
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getUserWithLastLocation;
 import static greencity.constant.ErrorMessage.*;
-import static greencity.enums.LocationStatus.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
@@ -452,7 +453,7 @@ class UBSClientServiceImplTest {
 
         var location = getLocation();
         var locationId = location.getId();
-        location.setLocationStatus(DEACTIVATED);
+        location.setLocationStatus(LocationStatus.DEACTIVATED);
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
@@ -478,7 +479,7 @@ class UBSClientServiceImplTest {
         var uuid = user.getUuid();
 
         var tariffLocation = getTariffLocation();
-        tariffLocation.setLocationStatus(DEACTIVATED);
+        tariffLocation.setLocationStatus(LocationStatus.DEACTIVATED);
 
         var tariffsInfo = tariffLocation.getTariffsInfo();
         var tariffsInfoId = tariffsInfo.getId();
