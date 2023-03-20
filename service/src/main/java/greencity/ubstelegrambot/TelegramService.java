@@ -39,7 +39,9 @@ public class TelegramService extends AbstractNotificationProvider {
         if (Objects.isNull(user)) {
             return false;
         }
-        return Objects.nonNull(user.getTelegramBot()) && Objects.nonNull(user.getTelegramBot().getChatId());
+        return Objects.nonNull(user.getTelegramBot())
+            && Objects.nonNull(user.getTelegramBot().getChatId())
+            && Objects.equals(user.getTelegramBot().getIsNotify(), true);
     }
 
     private void sendMessageToUser(SendMessage sendMessage) {

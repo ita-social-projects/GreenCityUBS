@@ -40,7 +40,7 @@ class TelegramServiceTest {
     @InjectMocks
     private TelegramService telegramService;
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
-        .telegramBot(TelegramBot.builder().id(1L).chatId(1L).build())
+        .telegramBot(TelegramBot.builder().id(1L).chatId(1L).isNotify(true).build())
         .build();
     private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("en").build()).build();
     private final UserNotification notification = new UserNotification()
@@ -94,7 +94,10 @@ class TelegramServiceTest {
         user.setTelegramBot(new TelegramBot());
         assertFalse(telegramService.isEnabled(user));
 
-        user.setTelegramBot(new TelegramBot(1L, 123L, user));
+        user.setTelegramBot(new TelegramBot(1L, 123L, true, user));
         assertTrue(telegramService.isEnabled(user));
+
+        user.setTelegramBot(new TelegramBot(1L, 123L, false, user));
+        assertFalse(telegramService.isEnabled(user));
     }
 }
