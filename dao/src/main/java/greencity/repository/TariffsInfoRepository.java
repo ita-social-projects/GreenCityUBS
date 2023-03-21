@@ -133,4 +133,20 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
             + "WHERE b.id IN :bagIds)")
     Optional<TariffsInfo> findTariffsInfoByBagIdAndLocationId(
         @Param("bagIds") List<Integer> bagIds, @Param("locationId") Long locationId);
+
+    /**
+     * Method finds tariff by id and receiving employee id.
+     *
+     * @param tariffId   {@link Long} - tariff id.
+     * @param employeeId {@link Long} - employee id.
+     * @return {@link Optional} of {@link TariffsInfo}.
+     * @author - Julia Seti.
+     */
+
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM tariff_infos_receiving_employee_mapping te "
+            + "LEFT JOIN tariffs_info ti on ti.id = te.tariffs_info_id "
+            + "LEFT JOIN employees e on te.employee_id = e.id "
+            + "WHERE ti.id = :tariffId AND e.id = :employeeId")
+    Optional<TariffsInfo> findTariffsInfoByIdForEmployee(Long tariffId, Long employeeId);
 }
