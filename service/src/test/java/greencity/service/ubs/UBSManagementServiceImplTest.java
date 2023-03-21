@@ -595,7 +595,7 @@ class UBSManagementServiceImplTest {
         when(employeeOrderPositionRepository.findAllByOrderId(anyLong())).thenReturn(newList);
         when(positionRepository.findAll()).thenReturn(positionList);
         when(employeeRepository.findAllByEmployeePositionId(anyLong())).thenReturn(employeeList);
-        assertEquals(dto, ubsManagementService.getAllEmployeesByPosition(order.getId(), "test@gmail.com"));
+        assertEquals(dto, ubsManagementService.getAllEmployeesByPosition(1L, "test@gmail.com"));
         verify(orderRepository).findById(anyLong());
         verify(employeeRepository).findByEmail("test@gmail.com");
         verify(employeeOrderPositionRepository).findAllByOrderId(anyLong());
@@ -615,7 +615,7 @@ class UBSManagementServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.empty());
         assertThrows(BadRequestException.class,
-            () -> ubsManagementService.getAllEmployeesByPosition(order.getId(), "test@gmail.com"));
+            () -> ubsManagementService.getAllEmployeesByPosition(1L, "test@gmail.com"));
         verify(orderRepository).findById(anyLong());
         verify(employeeRepository).findByEmail("test@gmail.com");
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());

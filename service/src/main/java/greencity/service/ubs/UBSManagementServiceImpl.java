@@ -55,6 +55,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -1566,9 +1567,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void checkAvailableOrderForEmployee(Order order, String email) {
         Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND)).getId();
-        tariffsInfoRepository.findTariffsInfoByIdForEmployee(order.getTariffsInfo().getId(), employeeId)
-            .orElseThrow(
-                () -> new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + order.getId()));
+        Optional<TariffsInfo> tariffsInfoOptional = tariffsInfoRepository.findTariffsInfoByIdForEmployee(
+            order.getTariffsInfo().getId(), employeeId);
+        if (tariffsInfoOptional.isEmpty()) {
+            throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + order.getId());
+        }
     }
 
     private List<Employee> listAvailableEmployeeWithPosition(Order order, Position position) {
