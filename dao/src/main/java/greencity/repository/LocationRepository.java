@@ -35,7 +35,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             + "join tariffs_info as t on t.id = m.tariffs_info_id "
             + "join courier as c on c.id = t.courier_id "
             + "where l.location_status = 'ACTIVE' "
-            + "AND t.location_status = 'ACTIVE' "
+            + "AND t.tariff_status = 'ACTIVE' "
             + "AND m.location_status = 'ACTIVE' "
             + "AND c.courier_status = 'ACTIVE'")
     List<Location> findAllActive();

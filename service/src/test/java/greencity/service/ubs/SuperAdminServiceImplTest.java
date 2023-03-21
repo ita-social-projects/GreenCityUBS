@@ -30,6 +30,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.StationStatus;
+import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -1459,7 +1460,7 @@ class SuperAdminServiceImplTest {
 
         Throwable t = assertThrows(BadRequestException.class,
             () -> superAdminService.switchTariffStatus(1L, "Active"));
-        assertEquals(String.format(ErrorMessage.TARIFF_ALREADY_HAS_THIS_STATUS, 1L, LocationStatus.ACTIVE),
+        assertEquals(String.format(ErrorMessage.TARIFF_ALREADY_HAS_THIS_STATUS, 1L, TariffStatus.ACTIVE),
             t.getMessage());
 
         verify(tariffsInfoRepository).findById(1L);

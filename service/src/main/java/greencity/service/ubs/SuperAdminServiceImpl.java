@@ -37,6 +37,7 @@ import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.StationStatus;
+import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -530,7 +531,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .createdAt(LocalDate.now())
             .courier(courier)
             .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
-            .locationStatus(LocationStatus.NEW)
+            .tariffStatus(TariffStatus.NEW)
             .creator(employeeRepository.findByUuid(uuid)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid)))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
@@ -665,7 +666,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfo.setMax(dto.getMax());
         tariffsInfo.setCourierLimit(dto.getCourierLimit());
         tariffsInfo.setLimitDescription(dto.getLimitDescription());
-        tariffsInfo.setLocationStatus(getChangedTariffStatus(dto.getMin(), dto.getMax()));
+        tariffsInfo.setTariffStatus(getChangedTariffStatus(dto.getMin(), dto.getMax()));
         tariffsInfoRepository.save(tariffsInfo);
     }
 
@@ -708,32 +709,32 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return bag;
     }
 
-    private LocationStatus getChangedTariffStatus(Long min, Long max) {
+    private TariffStatus getChangedTariffStatus(Long min, Long max) {
         return min != null || max != null
-            ? LocationStatus.ACTIVE
-            : LocationStatus.DEACTIVATED;
+            ? TariffStatus.ACTIVE
+            : TariffStatus.DEACTIVATED;
     }
 
     @Override
     @Transactional
     public void switchTariffStatus(Long tariffId, String tariffStatus) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
-        LocationStatus status = tryToGetTariffStatus(tariffStatus);
-        if (tariffsInfo.getLocationStatus().equals(status)) {
+        TariffStatus status = tryToGetTariffStatus(tariffStatus);
+        if (tariffsInfo.getTariffStatus().equals(status)) {
             throw new BadRequestException(
                 String.format(ErrorMessage.TARIFF_ALREADY_HAS_THIS_STATUS, tariffId, tariffStatus.toUpperCase()));
         }
-        if (status.equals(LocationStatus.ACTIVE)) {
+        if (status.equals(TariffStatus.ACTIVE)) {
             checkIfTariffParamsAreValidForActivation(tariffsInfo);
         }
-        tariffsInfo.setLocationStatus(status);
+        tariffsInfo.setTariffStatus(status);
         tariffsInfoRepository.save(tariffsInfo);
     }
 
-    private LocationStatus tryToGetTariffStatus(String tariffStatus) {
+    private TariffStatus tryToGetTariffStatus(String tariffStatus) {
         if (Objects.equals(tariffStatus.toUpperCase(), "ACTIVE")
             || Objects.equals(tariffStatus.toUpperCase(), "DEACTIVATED")) {
-            return LocationStatus.valueOf(tariffStatus.toUpperCase());
+            return TariffStatus.valueOf(tariffStatus.toUpperCase());
         }
         throw new BadRequestException(ErrorMessage.UNRESOLVABLE_TARIFF_STATUS);
     }
