@@ -23,8 +23,10 @@ import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.GeneralOrderInfo;
+import greencity.dto.order.NotTakenOrderReasonDto;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailDto;
 import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
@@ -36,8 +38,6 @@ import greencity.dto.order.OrderStatusesTranslationDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
-import greencity.dto.order.NotTakenOrderReasonDto;
-import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
@@ -55,6 +55,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -70,7 +71,6 @@ import greencity.enums.PaymentType;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
@@ -84,6 +84,7 @@ import greencity.repository.PaymentRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
 import greencity.repository.ServiceRepository;
+import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
@@ -119,7 +120,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -127,7 +137,7 @@ import static java.util.Objects.nonNull;
 @AllArgsConstructor
 @Slf4j
 public class UBSManagementServiceImpl implements UBSManagementService {
-    private final AddressRepository addressRepository;
+    private final TariffsInfoRepository tariffsInfoRepository;
     private final OrderRepository orderRepository;
     private final OrderAddressRepository orderAddressRepository;
     private final ModelMapper modelMapper;
@@ -145,16 +155,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
-    private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
+    private final OrdersAdminsPageService ordersAdminsPageService;
+
+    private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
 
     private final Set<OrderStatus> orderStatusesBeforeShipment =
         EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
-    private final OrdersAdminsPageService ordersAdminsPageService;
     private static final String FORMAT_DATE = "dd-MM-yyyy";
     @Lazy
     @Autowired
@@ -1396,7 +1407,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     .name(employee.getFirstName() + " " + employee.getLastName())
                     .build())
                 .collect(Collectors.toList()));
-            dto.setAllPositionsEmployees(allPositionEmployee);
         }
         dto.setAllPositionsEmployees(allPositionEmployee);
 
@@ -1557,29 +1567,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void checkAvailableOrderForEmployee(Order order, String email) {
         Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND)).getId();
-        boolean status = false;
-        List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
-        for (Long id : tariffsInfoIds) {
-            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
-        }
-        if (!status) {
+        Optional<TariffsInfo> tariffsInfoOptional = tariffsInfoRepository.findTariffsInfoByIdForEmployee(
+            order.getTariffsInfo().getId(), employeeId);
+        if (tariffsInfoOptional.isEmpty()) {
             throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + order.getId());
         }
     }
 
     private List<Employee> listAvailableEmployeeWithPosition(Order order, Position position) {
-        List<Employee> employees = employeeRepository.findAllByEmployeePositionId(position.getId());
-        List<Employee> emps = new ArrayList<>();
-        for (Employee emp : employees) {
-            boolean status = false;
-            List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(emp.getId());
-            for (Long id : tariffsInfoIds) {
-                if (status = id.equals(order.getTariffsInfo().getId()) ? true : status) {
-                    emps.add(emp);
-                }
-            }
-        }
-        return emps;
+        Long tariffId = order.getTariffsInfo().getId();
+        return employeeRepository.findAllByEmployeePositionId(position.getId())
+            .stream()
+            .filter(
+                employee -> tariffsInfoRepository.findTariffsInfoByIdForEmployee(tariffId, employee.getId())
+                    .isPresent())
+            .collect(Collectors.toList());
     }
 
     /**
