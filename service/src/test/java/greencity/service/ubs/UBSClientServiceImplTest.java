@@ -1665,6 +1665,7 @@ class UBSClientServiceImplTest {
     void testUpdateOrderCancellationReason() {
         OrderCancellationReasonDto dto = getCancellationDto();
         Order orderDto = getOrderTest();
+        orderDto.setPointsToUse(0);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
         assert orderDto != null;
         when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
@@ -1677,6 +1678,26 @@ class UBSClientServiceImplTest {
         assertEquals(dto.getCancellationComment(), result.getCancellationComment());
         verify(orderRepository).save(orderDto);
         verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void testUpdateOrderCancellationReasonBonusReturnedToClient() {
+        OrderCancellationReasonDto dto = getCancellationDto();
+        Order orderDto = getOrderTest();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
+        assert orderDto != null;
+        when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
+        when(orderRepository.save(any())).thenReturn(orderDto);
+        OrderCancellationReasonDto result = ubsService.updateOrderCancellationReason(1L, dto, anyString());
+
+        verify(eventService, times(1))
+                .saveEvent("Статус Замовлення - Скасовано", "", orderDto);
+        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
+        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
+        verify(orderRepository).save(orderDto);
+        verify(orderRepository).findById(1L);
+        verify(eventService, times(1))
+                .saveEvent("Використані бонуси повернено на бонусний рахунок клієнта", "", orderDto);
     }
 
     @Test
