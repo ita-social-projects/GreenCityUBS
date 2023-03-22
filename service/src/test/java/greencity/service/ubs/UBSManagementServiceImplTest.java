@@ -504,7 +504,7 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectDone.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectDone.getDate());
 
-        //order.setPointsToUse(700);
+        order.setPointsToUse(0);
         testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
         expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
         OrderDetailStatusDto producedObjectCancelled2 = ubsManagementService
@@ -545,8 +545,8 @@ class UBSManagementServiceImplTest {
             .saveEvent("Статус Замовлення - Скасовано",
                 "test@gmail.com", order);
         verify(eventService, times(1))
-                .saveEvent("Використані бонуси повернено на бонусний рахунок клієнта",
-                        "test@gmail.com", order);
+            .saveEvent("Використані бонуси повернено на бонусний рахунок клієнта",
+                "test@gmail.com", order);
     }
 
     @Test
