@@ -1369,9 +1369,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setCancellationComment(dto.getCancellationComment());
         order.setId(id);
         orderRepository.save(order);
-        if (order.getPointsToUse() > 0) {
-            eventService.saveEvent(OrderHistory.RETURN_BONUSES_TO_CLIENT, uuid, order);
-        }
         return dto;
     }
 
