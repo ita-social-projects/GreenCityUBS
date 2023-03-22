@@ -1379,7 +1379,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), order);
-        if (order.getOrderPaymentStatus() != null){
+        if (order.getOrderPaymentStatus() != null) {
             if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.PAID)) {
                 eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
             } else {
