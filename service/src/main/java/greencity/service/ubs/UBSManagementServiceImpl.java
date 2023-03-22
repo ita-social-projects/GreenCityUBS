@@ -966,7 +966,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void verifyPaidWithBonuses(Order order, String email) {
         if (order.getPointsToUse() > 0) {
-            eventService.saveEvent(OrderHistory.RETURN_BONUSES_TO_CLIENT, email, order);
+            eventService.saveEvent(OrderHistory.RETURN_BONUSES_TO_CLIENT + ". Всього " + order.getPointsToUse(), email,
+                order);
         }
     }
 

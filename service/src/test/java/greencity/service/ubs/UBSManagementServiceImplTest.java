@@ -545,7 +545,7 @@ class UBSManagementServiceImplTest {
             .saveEvent("Статус Замовлення - Скасовано",
                 "test@gmail.com", order);
         verify(eventService, times(1))
-            .saveEvent("Використані бонуси повернено на бонусний рахунок клієнта",
+            .saveEvent("Невикористані бонуси повернено на бонусний рахунок клієнта" + ". Всього " + 700,
                 "test@gmail.com", order);
     }
 
