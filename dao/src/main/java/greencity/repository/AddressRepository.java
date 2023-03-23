@@ -63,4 +63,20 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     @Query(value = "SELECT * FROM address a"
         + " WHERE user_id =:userId AND a.status != 'DELETED'", nativeQuery = true)
     List<Address> findAllNonDeletedAddressesByUserId(Long userId);
+
+    /**
+     * Method returns first address {@link Address} from each distinct district.
+     *
+     * @return list of {@link Address}
+     */
+    @Query(value = "SELECT a FROM Address a WHERE a.id IN (SELECT MIN(ad.id) FROM Address ad WHERE ad.district = a.district)")
+    List<Address> findDistinctDistricts();
+
+    /**
+     * Method returns first address {@link Address} from each distinct city.
+     *
+     * @return list of {@link Address}
+     */
+    @Query(value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) FROM Address  ad WHERE ad.city = a.city)")
+    List<Address> findDistinctCity();
 }

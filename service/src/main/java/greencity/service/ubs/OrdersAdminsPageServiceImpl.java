@@ -10,6 +10,7 @@ import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnDTO;
 import greencity.dto.table.TableParamsDto;
+import greencity.entity.user.ubs.Address;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -38,6 +39,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.isNull;
@@ -57,6 +59,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
     private final EventService eventService;
     private final NotificationServiceImpl notificationService;
     private final SuperAdminService superAdminService;
@@ -121,11 +124,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 "violationsAmount", 20, false, true, false, 12, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
             new ColumnDTO(new TitleDto("region", "Область", "Region"), "region", 20, false,
                 true, false, 35, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
-            new ColumnDTO(new TitleDto("settlement", "Населений пункт", "Settlement"), "settlement", 20,
+            new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
-                true, false, 36, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
+                true, true, 36, EditType.READ_ONLY, cityList(), exportAddress),
             new ColumnDTO(new TitleDto("district", "Район", "District"), "district", 20, false,
-                true, false, 37, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
+                true, true, 37, EditType.READ_ONLY, districtList(), exportAddress),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "address", 20, false, true,
                 false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), exportAddress),
@@ -329,6 +332,31 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
         return optionForColumnDTOS;
+    }
+
+    private List<OptionForColumnDTO> districtList(){
+        return addressRepository.findDistinctDistricts()
+                .stream()
+                .map(address -> OptionForColumnDTO
+                .builder()
+                .key(address.getId().toString())
+                .en(address.getDistrictEn())
+                .ua(address.getDistrict())
+                .build())
+                .collect(Collectors.toList());
+
+    }
+
+    private List<OptionForColumnDTO> cityList(){
+        return  addressRepository.findDistinctCity()
+                .stream()
+                .map(address -> OptionForColumnDTO
+                .builder()
+                .key(address.getId().toString())
+                .en(address.getCityEn())
+                .ua(address.getCity())
+                .build())
+                .collect(Collectors.toList());
     }
 
     /* methods for changing order */
