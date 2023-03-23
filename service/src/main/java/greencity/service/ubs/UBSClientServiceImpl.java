@@ -1565,7 +1565,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void setPaymentInfo(Map<String, Object> map, Payment payment) {
         payment.setMaskedCard((String) map.get("sender_card_mask2"));
         payment.setCurrency((String) map.get("currency"));
-        payment.setPaymentSystem("LiqPay");
+        payment.setPaymentSystem((String) map.get("payment_system"));
         payment.setCardType((String) map.get("sender_card_type"));
         payment.setResponseDescription((String) map.get("err_description"));
         payment.setPaymentId(String.valueOf(map.get("payment_id")));
