@@ -40,13 +40,10 @@ import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.TariffServiceDto;
+import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.AddBonusesToUserDto;
-import greencity.dto.user.AddingPointsToUserDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.*;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
@@ -165,6 +162,8 @@ public class ModelUtils {
             .recipientSurname("Petrov")
             .recipientPhone("666051373")
             .recipientEmail("petrov@gmail.com")
+            .telegramIsNotify(true)
+            .viberIsNotify(false)
             .build();
     }
 
@@ -493,6 +492,13 @@ public class ModelUtils {
             .build();
     }
 
+    public static EditTariffDto getEditTariffDto() {
+        return EditTariffDto.builder()
+            .locationIds(List.of(1L))
+            .receivingStationIds(List.of(1L))
+            .build();
+    }
+
     public static RedirectionConfigProp getRedirectionConfig() {
         return new RedirectionConfigProp()
             .setGreenCityClient("123")
@@ -531,6 +537,14 @@ public class ModelUtils {
                     .id(1)
                     .limitIncluded(true)
                     .build()))
+            .build();
+    }
+
+    public static UserProfileCreateDto getUserProfileCreateDto() {
+        return UserProfileCreateDto.builder()
+            .name("UbsProfile")
+            .email("ubsuser@mail.com")
+            .uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
             .build();
     }
 }

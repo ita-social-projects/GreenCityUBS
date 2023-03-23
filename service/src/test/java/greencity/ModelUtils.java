@@ -91,6 +91,7 @@ import greencity.dto.order.SenderLocation;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderDetailDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.NotTakenOrderReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -102,6 +103,7 @@ import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -112,6 +114,7 @@ import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -134,6 +137,7 @@ import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.schedule.NotificationSchedule;
+import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -145,6 +149,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.CancellationReason;
 import greencity.enums.CertificateStatus;
@@ -156,6 +161,7 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.TariffStatus;
 import greencity.util.Bot;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -165,6 +171,7 @@ import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -617,6 +624,15 @@ public class ModelUtils {
             .timeDeliveryTo("1990-12-11T19:30:30")
             .receivingStationId(1L)
             .allReceivingStations(List.of(getReceivingStationDto(), getReceivingStationDto()))
+            .build();
+    }
+
+    public static ExportDetailsDtoUpdate getExportDetailsRequestToday() {
+        return ExportDetailsDtoUpdate.builder()
+            .dateExport(String.valueOf(LocalDate.now()))
+            .timeDeliveryFrom(String.valueOf(LocalDateTime.now()))
+            .timeDeliveryTo(String.valueOf(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)))
+            .receivingStationId(1L)
             .build();
     }
 
@@ -1206,6 +1222,28 @@ public class ModelUtils {
             .build();
     }
 
+    public static TariffLocation getTariffLocation2() {
+        return TariffLocation
+            .builder()
+            .id(1L)
+            .tariffsInfo(
+                TariffsInfo.builder()
+                    .id(2L)
+                    .build())
+            .location(getLocation())
+            .locationStatus(LocationStatus.ACTIVE)
+            .build();
+    }
+
+    public static List<TariffLocation> getTariffLocationList() {
+        return List.of(getTariffLocation(),
+            TariffLocation
+                .builder()
+                .id(2L)
+                .locationStatus(LocationStatus.ACTIVE)
+                .build());
+    }
+
     public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
         return EmployeeWithTariffsIdDto
             .builder()
@@ -1332,6 +1370,15 @@ public class ModelUtils {
             .recipientPhoneNumber("095123456").build();
     }
 
+    public static UserProfileDto getUserProfileDto() {
+        return UserProfileDto.builder()
+            .addressDto(List.of(addressDto()))
+            .botList(botList())
+            .telegramIsNotify(false)
+            .viberIsNotify(false)
+            .build();
+    }
+
     public static List<AddressDto> addressDtoList() {
         List<AddressDto> list = new ArrayList<>();
         list.add(AddressDto.builder()
@@ -1364,6 +1411,8 @@ public class ModelUtils {
             .recipientSurname("Petrov")
             .recipientPhone("0666051373")
             .recipientEmail("petrov@gmail.com")
+            .telegramIsNotify(true)
+            .viberIsNotify(false)
             .build();
     }
 
@@ -1373,6 +1422,61 @@ public class ModelUtils {
             .recipientSurname("Petrov")
             .recipientPhone("0666051373")
             .recipientEmail("petrov@gmail.com")
+            .telegramBot(getTelegramBotNotifyTrue())
+            .build();
+    }
+
+    public static TelegramBot getTelegramBotNotifyTrue() {
+        return TelegramBot.builder()
+            .id(1L)
+            .chatId(111111L)
+            .isNotify(true)
+            .build();
+    }
+
+    public static TelegramBot getTelegramBotNotifyFalse() {
+        return TelegramBot.builder()
+            .id(1L)
+            .chatId(111111L)
+            .isNotify(false)
+            .build();
+    }
+
+    public static ViberBot getViberBotNotifyTrue() {
+        return ViberBot.builder()
+            .id(1L)
+            .chatId("111111L")
+            .isNotify(true)
+            .build();
+    }
+
+    public static ViberBot getViberBotNotifyFalse() {
+        return ViberBot.builder()
+            .id(1L)
+            .chatId("111111L")
+            .isNotify(false)
+            .build();
+    }
+
+    public static UserProfileUpdateDto getUserProfileUpdateDto() {
+        User user = getUserWithBotNotifyTrue();
+        return UserProfileUpdateDto.builder().addressDto(addressDtoList())
+            .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
+            .recipientPhone(user.getRecipientPhone())
+            .alternateEmail("test@email.com")
+            .telegramIsNotify(true)
+            .viberIsNotify(true)
+            .build();
+    }
+
+    public static UserProfileUpdateDto getUserProfileUpdateDtoWithBotsIsNotifyFalse() {
+        User user = getUserWithBotNotifyTrue();
+        return UserProfileUpdateDto.builder().addressDto(addressDtoList())
+            .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
+            .recipientPhone(user.getRecipientPhone())
+            .alternateEmail("test@email.com")
+            .telegramIsNotify(false)
+            .viberIsNotify(false)
             .build();
     }
 
@@ -1625,6 +1729,38 @@ public class ModelUtils {
             .uuid("uuid")
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
+            .build();
+    }
+
+    public static User getUserWithBotNotifyTrue() {
+        return User.builder()
+            .id(1L)
+            .addresses(singletonList(getAddress()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .uuid("uuid")
+            .ubsUsers(getUbsUsers())
+            .currentPoints(100)
+            .telegramBot(getTelegramBotNotifyTrue())
+            .build();
+    }
+
+    public static User getUserWithBotNotifyFalse() {
+        return User.builder()
+            .id(1L)
+            .addresses(singletonList(getAddress()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .uuid("uuid")
+            .ubsUsers(getUbsUsers())
+            .currentPoints(100)
+            .telegramBot(getTelegramBotNotifyFalse())
             .build();
     }
 
@@ -2012,6 +2148,23 @@ public class ModelUtils {
             .region(getRegion())
             .coordinates(getCoordinates())
             .build());
+    }
+
+    public static List<Location> getLocationList2() {
+        return List.of(Location.builder()
+            .id(1L)
+            .region(
+                Region.builder()
+                    .id(1L)
+                    .build())
+            .build(),
+            Location.builder()
+                .id(2L)
+                .region(
+                    Region.builder()
+                        .id(2L)
+                        .build())
+                .build());
     }
 
     private static EmployeePositionDtoResponse createEmployeePositionDtoResponse() {
@@ -2936,6 +3089,8 @@ public class ModelUtils {
             .recipientSurname("Ivanov")
             .recipientPhone("962473289")
             .addressDto(addressDtoList())
+            .telegramIsNotify(true)
+            .viberIsNotify(false)
             .build();
     }
 
@@ -3494,7 +3649,7 @@ public class ModelUtils {
         List<Bot> botList = new ArrayList<>();
         botList.add(new Bot()
             .setType("TELEGRAM")
-            .setLink("https://t.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8"));
+            .setLink("https://telegram.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8"));
         botList.add(new Bot()
             .setType("VIBER")
             .setLink("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8"));
@@ -3617,7 +3772,7 @@ public class ModelUtils {
     public static TariffsInfo getTariffsInfoActive() {
         return TariffsInfo.builder()
             .id(1L)
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
             .max(20L)
             .min(2L)
@@ -3634,7 +3789,7 @@ public class ModelUtils {
     public static TariffsInfo getTariffsInfoDeactivated() {
         return TariffsInfo.builder()
             .id(1L)
-            .locationStatus(LocationStatus.DEACTIVATED)
+            .tariffStatus(TariffStatus.DEACTIVATED)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
             .max(20L)
             .min(2L)
@@ -3733,7 +3888,7 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .max(6000L)
@@ -3760,7 +3915,7 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .max(100L)
@@ -3782,7 +3937,7 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
-            .locationStatus(LocationStatus.ACTIVE)
+            .tariffStatus(TariffStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .max(10L)
@@ -3797,6 +3952,20 @@ public class ModelUtils {
             .locationIdList(List.of(1L))
             .receivingStationsIdList(List.of(1L))
             .regionId(1L)
+            .build();
+    }
+
+    public static EditTariffDto getEditTariffDto() {
+        return EditTariffDto.builder()
+            .locationIds(List.of(1L))
+            .receivingStationIds(List.of(1L))
+            .build();
+    }
+
+    public static EditTariffDto getEditTariffDtoWith2Locations() {
+        return EditTariffDto.builder()
+            .locationIds(List.of(1L, 2L))
+            .receivingStationIds(List.of(1L))
             .build();
     }
 
@@ -4301,5 +4470,29 @@ public class ModelUtils {
         order.setDeliverTo(LocalDateTime.of(2023, 2, 8, 16, 30));
         order.setDeliverFrom(LocalDateTime.of(2023, 2, 8, 15, 0));
         return order;
+    }
+
+    public static UserProfileCreateDto getUserProfileCreateDto() {
+        return UserProfileCreateDto.builder()
+            .name("UbsProfile")
+            .email("ubsuser@mail.com")
+            .uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
+            .build();
+    }
+
+    public static Order getTestNotTakenOrderReason() {
+        return Order.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.NOT_TAKEN_OUT)
+            .reasonNotTakingBagDescription("Some description")
+            .imageReasonNotTakingBags(List.of("image1", "image2"))
+            .build();
+    }
+
+    public static NotTakenOrderReasonDto getNotTakenOrderReasonDto() {
+        return NotTakenOrderReasonDto.builder()
+            .description("Some description")
+            .images(List.of("image1", "image2"))
+            .build();
     }
 }

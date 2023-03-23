@@ -3,27 +3,50 @@ package greencity.service.ubs;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
 import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
+import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.*;
-import greencity.repository.*;
+import greencity.entity.viber.ViberBot;
+import greencity.enums.AddressStatus;
+import greencity.enums.CertificateStatus;
+import greencity.enums.CourierLimit;
+import greencity.enums.LocationStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.TariffStatus;
+import greencity.repository.AddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.EventRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.TariffLocationRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.TelegramBotRepository;
+import greencity.repository.UBSuserRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -75,6 +98,7 @@ import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.UserProfileCreateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
@@ -108,11 +132,9 @@ import static greencity.ModelUtils.getPayment;
 import static greencity.ModelUtils.getSuccessfulFondyResponse;
 import static greencity.ModelUtils.getTestUser;
 import static greencity.ModelUtils.getUBSuser;
-import static greencity.ModelUtils.getUbsCustomersDto;
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getUserWithLastLocation;
 import static greencity.constant.ErrorMessage.*;
-import static greencity.enums.LocationStatus.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
@@ -152,7 +174,6 @@ class UBSClientServiceImplTest {
     private OrderAddressRepository orderAddressRepository;
     @Mock
     private OrderRepository orderRepository;
-
     @Mock
     private EmployeeRepository employeeRepository;
     @InjectMocks
@@ -174,13 +195,16 @@ class UBSClientServiceImplTest {
     private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     @Mock
     private TariffsInfoRepository tariffsInfoRepository;
-
     @Mock
     private TariffLocationRepository tariffLocationRepository;
     @Mock
     private LocationRepository locationRepository;
     @Mock
     private GoogleApiService googleApiService;
+    @Mock
+    private TelegramBotRepository telegramBotRepository;
+    @Mock
+    private ViberBotRepository viberBotRepository;
 
     @Test
     @Transactional
@@ -230,7 +254,7 @@ class UBSClientServiceImplTest {
 
         var tariffsInfo = tariffLocation.getTariffsInfo();
         var tariffsInfoId = tariffsInfo.getId();
-        tariffsInfo.setLocationStatus(ACTIVE);
+        tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
 
         var location = tariffLocation.getLocation();
         var locationId = location.getId();
@@ -396,7 +420,7 @@ class UBSClientServiceImplTest {
 
         var tariffsInfo = getTariffInfo();
         var tariffsInfoId = tariffsInfo.getId();
-        tariffsInfo.setLocationStatus(DEACTIVATED);
+        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
 
         var location = getLocation();
         var locationId = location.getId();
@@ -429,7 +453,7 @@ class UBSClientServiceImplTest {
 
         var location = getLocation();
         var locationId = location.getId();
-        location.setLocationStatus(DEACTIVATED);
+        location.setLocationStatus(LocationStatus.DEACTIVATED);
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
@@ -455,11 +479,11 @@ class UBSClientServiceImplTest {
         var uuid = user.getUuid();
 
         var tariffLocation = getTariffLocation();
-        tariffLocation.setLocationStatus(DEACTIVATED);
+        tariffLocation.setLocationStatus(LocationStatus.DEACTIVATED);
 
         var tariffsInfo = tariffLocation.getTariffsInfo();
         var tariffsInfoId = tariffsInfo.getId();
-        tariffsInfo.setLocationStatus(ACTIVE);
+        tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
 
         var location = tariffLocation.getLocation();
         var locationId = location.getId();
@@ -900,17 +924,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getSecondPageDataWithUserNotFound() {
-        String uuid = "35467585763t4sfgchjfuyetf";
-
-        when(userRepository.findByUuid(uuid)).thenReturn(null);
-
-        assertThrows(EntityNotFoundException.class, () -> ubsService.getSecondPageData("35467585763t4sfgchjfuyetf"));
-
-        verify(userRepository, times(1)).findByUuid(anyString());
-    }
-
-    @Test
     void getSecondPageDataWithUserFounded() {
 
         String uuid = "35467585763t4sfgchjfuyetf";
@@ -921,21 +934,17 @@ class UBSClientServiceImplTest {
             .setRecipientEmail("mail@mail.ua")
             .setRecipientPhone("067894522")
             .setAlternateEmail("my@email.com");
-        List<UBSuser> ubsUser = Arrays.asList(getUBSuser());
-        when(userRepository.findByUuid(uuid)).thenReturn(null);
+        List<UBSuser> ubsUser = Collections.singletonList(getUBSuser());
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
-        when(userRemoteClient.findByUuid(anyString())).thenReturn(Optional.ofNullable(getUbsCustomersDto()));
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
-        when(userRepository.save(any())).thenReturn(user.setId(1L));
         PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
 
         assertEquals(expected, actual);
 
         verify(userRepository, times(1)).findByUuid(anyString());
         verify(ubsUserRepository, times(1)).findUBSuserByUser(any());
-        verify(userRemoteClient, times(1)).findByUuid(anyString());
         verify(modelMapper, times(1)).map(user, PersonalDataDto.class);
-        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -1183,41 +1192,90 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void saveProfileData() {
-        User user = getUser();
-
-        when(userRepository.findByUuid("87df9ad5-6393-441f-8423-8b2e770b01a8")).thenReturn(user);
-
+    void updateProfileData() {
+        User user = getUserWithBotNotifyTrue();
+        TelegramBot telegramBot = getTelegramBotNotifyTrue();
+        ViberBot viberBot = getViberBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoList();
         List<Address> address = addressList();
         List<Bot> botList = botList();
+        UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
+        String uuid = UUID.randomUUID().toString();
 
-        UserProfileUpdateDto userProfileUpdateDto =
-            UserProfileUpdateDto.builder().addressDto(addressDto)
-                .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
-                .recipientPhone(user.getRecipientPhone())
-                .alternateEmail("test@email.com")
-                .build();
-
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(telegramBotRepository.findByUser(user)).thenReturn(Optional.of(telegramBot));
+        when(viberBotRepository.findByUser(user)).thenReturn(Optional.of(viberBot));
         when(modelMapper.map(addressDto.get(0), Address.class)).thenReturn(address.get(0));
         when(modelMapper.map(addressDto.get(1), Address.class)).thenReturn(address.get(1));
         when(userRepository.save(user)).thenReturn(user);
-        when(modelMapper.map(address.get(0), AddressDto.class)).thenReturn(addressDto.get(0));
-        when(modelMapper.map(address.get(1), AddressDto.class)).thenReturn(addressDto.get(1));
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
-        ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileUpdateDto);
+
+        ubsService.updateProfileData(uuid, userProfileUpdateDto);
+
         for (Bot bot : botList) {
-            assertNotNull(bot);
+            Assertions.assertNotNull(bot);
         }
-        assertNotNull(userProfileUpdateDto.getAddressDto());
-        assertNotNull(userProfileUpdateDto);
-        assertNotNull(address);
+        Assertions.assertNotNull(userProfileUpdateDto.getAddressDto());
+        Assertions.assertNotNull(userProfileUpdateDto);
+        Assertions.assertNotNull(address);
+        Assertions.assertTrue(userProfileUpdateDto.getTelegramIsNotify());
+        Assertions.assertTrue(userProfileUpdateDto.getViberIsNotify());
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(telegramBotRepository).findByUser(user);
+        verify(viberBotRepository).findByUser(user);
+        verify(modelMapper).map(addressDto.get(0), Address.class);
+        verify(modelMapper).map(addressDto.get(1), Address.class);
+        verify(userRepository).save(user);
+        verify(modelMapper).map(user, UserProfileUpdateDto.class);
+    }
+
+    @Test
+    void updateProfileDataThrowNotFoundException() {
+        UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
+        String uuid = UUID.randomUUID().toString();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class,
+            () -> ubsService.updateProfileData(uuid, userProfileUpdateDto));
+        verify(userRepository).findUserByUuid(uuid);
+
+    }
+
+    @Test
+    void updateProfileDataIfTelegramBotNotExists() {
+        User user = getUserWithBotNotifyTrue();
+        List<AddressDto> addressDto = addressDtoList();
+        List<Address> address = addressList();
+        UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDtoWithBotsIsNotifyFalse();
+        String uuid = UUID.randomUUID().toString();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(telegramBotRepository.findByUser(user)).thenReturn(Optional.empty());
+        when(viberBotRepository.findByUser(user)).thenReturn(Optional.empty());
+        when(modelMapper.map(addressDto.get(0), Address.class)).thenReturn(address.get(0));
+        when(modelMapper.map(addressDto.get(1), Address.class)).thenReturn(address.get(1));
+        when(userRepository.save(user)).thenReturn(user);
+        when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
+
+        ubsService.updateProfileData(uuid, userProfileUpdateDto);
+
+        assertFalse(userProfileUpdateDto.getTelegramIsNotify());
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(telegramBotRepository).findByUser(user);
+        verify(viberBotRepository).findByUser(user);
+        verify(modelMapper).map(addressDto.get(0), Address.class);
+        verify(modelMapper).map(addressDto.get(1), Address.class);
+        verify(userRepository).save(user);
+        verify(modelMapper).map(user, UserProfileUpdateDto.class);
     }
 
     @Test
     void getProfileData() {
         User user = getUser();
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        String uuid = UUID.randomUUID().toString();
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         UserProfileDto userProfileDto = new UserProfileDto();
         List<AddressDto> addressDto = addressDtoList();
         userProfileDto.setAddressDto(addressDto);
@@ -1226,13 +1284,23 @@ class UBSClientServiceImplTest {
         userProfileDto.setBotList(botList);
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
         when(userRemoteClient.getPasswordStatus()).thenReturn(new PasswordStatusDto(true));
-        assertEquals(userProfileDto, ubsService.getProfileData(user.getUuid()));
+        assertEquals(userProfileDto, ubsService.getProfileData(uuid));
         for (Bot bot : botList) {
-            assertNotNull(bot);
+            Assertions.assertNotNull(bot);
         }
-        assertNotNull(addressDto);
-        assertNotNull(userProfileDto);
-        assertNotNull(address);
+        Assertions.assertNotNull(addressDto);
+        Assertions.assertNotNull(userProfileDto);
+        Assertions.assertNotNull(address);
+    }
+
+    @Test
+    void getProfileDataNotFoundException() {
+        String uuid = UUID.randomUUID().toString();
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> ubsService.getProfileData(uuid));
+        verify(userRepository).findUserByUuid(uuid);
     }
 
     @Test
@@ -1255,7 +1323,7 @@ class UBSClientServiceImplTest {
         OrderWithAddressesResponseDto actual = ubsService.findAllAddressesForCurrentOrder(uuid);
 
         assertEquals(actual, expected);
-        verify(userRepository, times(2)).findByUuid(uuid);
+        verify(userRepository, times(1)).findByUuid(uuid);
         verify(addressRepository, times(1)).findAllNonDeletedAddressesByUserId(user.getId());
     }
 
@@ -1689,7 +1757,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
-        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null));
+        Assertions.assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null));
 
         verify(bagRepository, times(2)).findById(3);
         verify(ubsUserRepository).findById(1L);
@@ -2831,5 +2899,44 @@ class UBSClientServiceImplTest {
             .getById(
                 (long) order.getOrderPaymentStatus().getStatusValue());
         verify(ordersForUserRepository).getAllByUserUuid(pageable, user.getUuid());
+    }
+
+    @Test
+    void testCreateUserProfileIfProfileDoesNotExist() {
+        UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
+        User userForSave = User.builder()
+            .uuid(userProfileCreateDto.getUuid())
+            .recipientEmail(userProfileCreateDto.getEmail())
+            .recipientName(userProfileCreateDto.getName())
+            .currentPoints(0)
+            .violations(0)
+            .dateOfRegistration(LocalDate.now()).build();
+        User user = getUser();
+        when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(true);
+        when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(null);
+        when(userRepository.save(userForSave)).thenReturn(user);
+        Long actualId = ubsService.createUserProfile(userProfileCreateDto);
+        verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
+        verify(userRepository, times(1)).save(userForSave);
+        assertEquals(user.getId(), actualId);
+    }
+
+    @Test
+    void testCreateUserProfileIfProfileExists() {
+        UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
+        User user = getUser();
+        when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(true);
+        when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(user);
+        Long actualId = ubsService.createUserProfile(userProfileCreateDto);
+        verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
+        verify(userRepository, times(0)).save(any(User.class));
+        assertEquals(user.getId(), actualId);
+    }
+
+    @Test
+    void testCreateUserProfileIfUserByUuidDoesNotExist() {
+        UserProfileCreateDto userProfileCreateDto = getUserProfileCreateDto();
+        when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> ubsService.createUserProfile(userProfileCreateDto));
     }
 }

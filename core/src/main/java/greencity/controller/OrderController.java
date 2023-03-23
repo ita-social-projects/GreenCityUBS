@@ -64,11 +64,10 @@ public class OrderController {
      * @return {@link UserPointsAndAllBagsDto}.
      * @author SafarovRenat
      */
-    @ApiOperation(value = "Get current user points by order id.")
+    @ApiOperation(value = "Get order points by details")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointsAndAllBagsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/order-details-for-tariff")

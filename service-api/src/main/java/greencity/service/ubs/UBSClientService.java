@@ -196,6 +196,16 @@ public interface UBSClientService {
     UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String email);
 
     /**
+     * Method creates ubs user profile if it does not exist.
+     *
+     * @param userProfileCreateDto of {@link UserProfileCreateDto} with profile
+     *                             data;
+     * @return id {@link Long} of ubs user profile;
+     * @author Maksym Golik
+     */
+    Long createUserProfile(UserProfileCreateDto userProfileCreateDto);
+
+    /**
      * Method that update user.
      *
      * @param uuid current {@link String} user`s uuid;
