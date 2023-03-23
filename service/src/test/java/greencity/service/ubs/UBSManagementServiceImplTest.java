@@ -443,6 +443,8 @@ class UBSManagementServiceImplTest {
         List<Payment> payment = new ArrayList<>();
         payment.add(Payment.builder().build());
 
+        order.setPayment(payment);
+
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(paymentRepository.findAllByOrderId(anyLong())).thenReturn(payment);
         when(paymentRepository.saveAll(any())).thenReturn(payment);
@@ -542,7 +544,9 @@ class UBSManagementServiceImplTest {
         verify(eventService, times(3))
             .saveEvent("Статус Замовлення - Скасовано",
                 "test@gmail.com", order);
-
+        verify(eventService, times(1))
+            .saveEvent("Невикористані бонуси повернено на бонусний рахунок клієнта" + ". Всього " + 700,
+                "test@gmail.com", order);
     }
 
     @Test
