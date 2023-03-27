@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.annotation.PostConstruct;
 
-import static greencity.enums.NotificationReceiverType.OTHER;
+import static greencity.enums.NotificationReceiverType.*;
 
 @RequiredArgsConstructor
 public abstract class AbstractNotificationProvider {
@@ -67,7 +67,7 @@ public abstract class AbstractNotificationProvider {
             .orElseThrow(() -> new UserNotFoundException(
                 ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + notification.getUser().getRecipientEmail()));
         return NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository,
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), EMAIL, templateRepository,
                 monthsOfAccountInactivity);
     }
 }
