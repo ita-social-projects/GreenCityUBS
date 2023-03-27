@@ -1,11 +1,7 @@
 package greencity.service.ubs;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
@@ -53,7 +48,6 @@ import greencity.enums.LocationStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.PaymentType;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.address.AddressNotFoundException;
 
@@ -196,10 +190,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String fondyPaymentKey;
     @Value("${greencity.payment.merchant-id}")
     private String merchantId;
-    @Value("${greencity.payment.liq-pay-public-key}")
-    private String publicKey;
-    @Value("${greencity.payment.liq-pay-private-key}")
-    private String privateKey;
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
@@ -1365,8 +1355,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return dto;
     }
 
-
-
     private int reduceOrderSumDueToUsedPoints(int sumToPay, int pointsToUse) {
         if (sumToPay >= pointsToUse) {
             sumToPay -= pointsToUse;
@@ -1401,7 +1389,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return orderAddress;
     }
 
-
     @Override
     public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, String uuid) {
         OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId, uuid);
@@ -1413,65 +1400,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         Double initialPrice = orderStatusPageDto.getOrderDiscountedPrice();
         orderStatusPageDto.setOrderExportedDiscountedPrice(exportedPrice - initialPrice);
         return orderStatusPageDto;
-    }
-
-
-    private Payment converterMapToEntity(Map<String, Object> map, Order order) {
-        if (map == null) {
-            return null;
-        }
-        List<Payment> payments = paymentRepository.findAllByOrder(order);
-        Payment payment = payments.get(payments.size() - 1);
-        String status = (String) map.get("status");
-        if (status.equals("success")) {
-            payment.setResponseStatus(status);
-            payment.setPaymentStatus(PaymentStatus.PAID);
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-            setPaymentInfo(map, payment);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + payment.getPaymentId(),
-                OrderHistory.SYSTEM, order);
-        } else if (status.equals(FAILED_STATUS)) {
-            payment.setResponseStatus(status);
-            payment.setPaymentStatus(PaymentStatus.UNPAID);
-            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-            setPaymentInfo(map, payment);
-        }
-        return payment;
-    }
-
-    private void setPaymentInfo(Map<String, Object> map, Payment payment) {
-        payment.setMaskedCard((String) map.get("sender_card_mask2"));
-        payment.setCurrency((String) map.get("currency"));
-        payment.setPaymentSystem((String) map.get("payment_system"));
-        payment.setCardType((String) map.get("sender_card_type"));
-        payment.setResponseDescription((String) map.get("err_description"));
-        payment.setPaymentId(String.valueOf(map.get("payment_id")));
-        payment.setComment((String) map.get("description"));
-        payment.setPaymentType(PaymentType.AUTO);
-        payment.setSenderCellPhone((String) map.get("sender_phone"));
-        String orderTime = convertMillisecondToLocalDateTime((long) map.get("create_date"));
-        payment.setOrderTime(orderTime);
-        String endDate = convertMillisecondToLocalDate((Long) map.get("end_date"));
-        payment.setSettlementDate(endDate);
-        double fees = (double) map.get("sender_commission");
-        payment.setFee((long) fees);
-        double amount = (double) map.get("amount");
-        payment.setAmount((long) amount * 100);
-    }
-
-    private String convertMillisecondToLocalDateTime(long millis) {
-        LocalDateTime date =
-            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDateTime();
-        Timestamp timestamp = Timestamp.valueOf(date);
-        return new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(timestamp);
-    }
-
-    private String convertMillisecondToLocalDate(long millis) {
-        LocalDate date =
-            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return dateFormatter.format(date);
     }
 
     @Override
@@ -1675,7 +1603,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return sumToPay <= 0;
     }
 
-
     @Override
     @Transactional
     public void validatePaymentClient(PaymentResponseDto dto) {
@@ -1861,8 +1788,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto) {
-        Employee employee = employeeRepository.findByEmail(dto.getEmployeeEmail())
-            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         userRemoteClient.updateEmployeesAuthorities(dto);
     }
 

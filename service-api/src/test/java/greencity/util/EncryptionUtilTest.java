@@ -49,5 +49,4 @@ public class EncryptionUtilTest {
         Assert.assertEquals(expected, encryptionUtil.formRequestSignature(paymentRequestDto, PASSWORD, MERCHANT_ID));
     }
 
-
 }

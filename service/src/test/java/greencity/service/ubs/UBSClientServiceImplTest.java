@@ -2027,7 +2027,6 @@ class UBSClientServiceImplTest {
         });
     }
 
-
     @Test
     void validatePaymentClientTest() {
 
