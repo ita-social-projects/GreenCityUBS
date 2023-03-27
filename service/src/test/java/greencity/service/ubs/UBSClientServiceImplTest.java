@@ -90,8 +90,6 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseDtoLiqPay;
-import greencity.dto.payment.StatusRequestDtoLiqPay;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.PersonalDataDto;
@@ -162,8 +160,6 @@ class UBSClientServiceImplTest {
     private ModelMapper modelMapper;
     @Mock
     private CertificateRepository certificateRepository;
-    @Mock
-    private LiqPayService liqPayService;
     @Mock
     private UserRemoteClient userRemoteClient;
     @Mock
@@ -1721,163 +1717,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void saveFullOrderFromLiqPay() {
-        User user = getUserWithLastLocation();
-        user.setCurrentPoints(900);
-
-        OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(15);
-        Order order = getOrder();
-        user.setOrders(new ArrayList<>());
-        user.getOrders().add(order);
-        user.setChangeOfPointsList(new ArrayList<>());
-
-        Bag bag = new Bag();
-        bag.setCapacity(120);
-        bag.setFullPrice(400);
-
-        UBSuser ubSuser = getUBSuser();
-
-        OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
-
-        Order order1 = getOrder();
-        order1.setPayment(new ArrayList<>());
-        Payment payment1 = getPayment();
-        payment1.setId(1L);
-        order1.getPayment().add(payment1);
-
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-            .thenReturn(Optional.of(getTariffInfo()));
-        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
-        when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
-
-        Assertions.assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null));
-
-        verify(bagRepository, times(2)).findById(3);
-        verify(ubsUserRepository).findById(1L);
-        verify(modelMapper).map(dto, Order.class);
-        verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
-        verify(orderRepository).findById(any());
-        verify(liqPayService).getCheckoutResponse(any());
-    }
-
-    @Test
-    void saveFullOrderFromLiqPayFailPaidOrder() {
-        User user = getUserWithLastLocation();
-        user.setCurrentPoints(1000);
-        OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(5);
-        Order order = getOrder();
-        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        Bag bag = new Bag();
-        bag.setCapacity(120);
-        bag.setFullPrice(400);
-
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-            .thenReturn(Optional.of(getTariffInfo()));
-        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
-
-        Assertions.assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", 1L));
-    }
-
-    @Test
-    void testSaveFullOrderFromLiqPayThrowsException() {
-        User user = getUserWithLastLocation();
-        user.setCurrentPoints(900);
-        OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(2);
-        Order order = getOrder();
-        user.setOrders(new ArrayList<>());
-        user.getOrders().add(order);
-        user.setChangeOfPointsList(new ArrayList<>());
-
-        Bag bag = new Bag();
-        bag.setCapacity(100);
-        bag.setFullPrice(1);
-
-        Order order1 = getOrder();
-        order1.setPayment(new ArrayList<>());
-        Payment payment1 = getPayment();
-        payment1.setId(1L);
-        order1.getPayment().add(payment1);
-
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-            .thenReturn(Optional.of(getTariffInfoWithLimitOfBags()));
-        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null));
-    }
-
-    @Test
-    void saveFullOrderFromLiqPayThrowNotFoundOrderAddressException() {
-        User user = getUserWithLastLocation();
-        user.setCurrentPoints(900);
-
-        OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(15);
-        Order order = getOrder();
-        user.setOrders(new ArrayList<>());
-        user.getOrders().add(order);
-        user.setChangeOfPointsList(new ArrayList<>());
-
-        Optional<Bag> bag = getBag();
-
-        UBSuser ubSuser = getUBSuser();
-        ubSuser.setId(null);
-
-        OrderAddress address = ubSuser.getOrderAddress();
-        address.setAddressStatus(AddressStatus.NEW);
-
-        Order order1 = getOrder();
-        order1.setPayment(new ArrayList<>());
-        Payment payment1 = getPayment();
-        payment1.setId(1L);
-        order1.getPayment().add(payment1);
-
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-            .thenReturn(Optional.of(getTariffInfo()));
-        when(bagRepository.findById(3)).thenReturn(bag);
-        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
-        when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> {
-            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null);
-        });
-    }
-
-    @Test
-    void validateLiqPayPayment() {
-        PaymentResponseDtoLiqPay dto = getPaymentResponceDto();
-
-        when(encryptionUtil.formingResponseSignatureLiqPay(dto.getData(), null)).thenReturn("Test Signature");
-
-        ubsService.validateLiqPayPayment(dto);
-
-    }
-
-    @Test
-    void validateNotValidLiqPayPayment() {
-        PaymentResponseDtoLiqPay dto = getPaymentResponceDto();
-
-        when(encryptionUtil.formingResponseSignatureLiqPay(dto.getData(), null)).thenReturn("fdf");
-
-        assertThrows(BadRequestException.class, () -> ubsService.validateLiqPayPayment(dto));
-    }
-
-    @Test
     void deleteOrder() {
         Order order = getOrder();
         when(ordersForUserRepository.getAllByUserUuidAndId(order.getUser().getUuid(), order.getId()))
@@ -1947,35 +1786,6 @@ class UBSClientServiceImplTest {
         OrderFondyClientDto dto = getOrderFondyClientDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         Assertions.assertThrows(BadRequestException.class, () -> ubsService.processOrderFondyClient(dto, "uuid"));
-    }
-
-    @Test
-    void proccessOrderLiqpayClient() {
-        Order order = getOrderCount();
-        HashMap<Integer, Integer> value = new HashMap<>();
-        value.put(1, 22);
-        order.setAmountOfBagsOrdered(value);
-        OrderFondyClientDto dto = getOrderFondyClientDto();
-        Bag bag = bagDtoClient();
-        User user = getUser();
-        user.setCurrentPoints(100);
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(liqPayService.getCheckoutResponse(any())).thenReturn("TestValue");
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        ubsService.proccessOrderLiqpayClient(dto, "uuid");
-
-        verify(orderRepository, times(2)).findById(1L);
-        verify(liqPayService).getCheckoutResponse(any());
-    }
-
-    @Test
-    void proccessOrderLiqpayClientFailPaidOrder() {
-        Order order = getOrderCountWithPaymentStatusPaid();
-        OrderFondyClientDto dto = getOrderFondyClientDto();
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        Assertions.assertThrows(BadRequestException.class, () -> ubsService.proccessOrderLiqpayClient(dto, "uuid"));
     }
 
     @Test
@@ -2217,52 +2027,6 @@ class UBSClientServiceImplTest {
         });
     }
 
-    @Test
-    void saveFullOrderToDBFromLiqPayForIF() {
-        User user = getUserWithLastLocation();
-        user.setCurrentPoints(900);
-
-        OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(15);
-        Order order = getOrder();
-        user.setOrders(new ArrayList<>());
-        user.getOrders().add(order);
-        user.setChangeOfPointsList(new ArrayList<>());
-
-        Bag bag = new Bag();
-        bag.setCapacity(120);
-        bag.setFullPrice(400);
-
-        UBSuser ubSuser = getUBSuser();
-
-        OrderAddress address = ubSuser.getOrderAddress();
-        address.setAddressStatus(AddressStatus.NEW);
-
-        Order order1 = getOrder();
-        order1.setPayment(new ArrayList<>());
-        Payment payment1 = getPayment();
-        payment1.setId(1L);
-        order1.getPayment().add(payment1);
-
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-            .thenReturn(Optional.of(getTariffInfo()));
-        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
-        when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
-
-        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null));
-
-        verify(bagRepository, times(2)).findById(3);
-        verify(ubsUserRepository).findById(1L);
-        verify(modelMapper).map(dto, Order.class);
-        verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
-        verify(orderRepository).findById(any());
-        verify(liqPayService).getCheckoutResponse(any());
-    }
 
     @Test
     void validatePaymentClientTest() {
@@ -2752,54 +2516,6 @@ class UBSClientServiceImplTest {
 
         Assertions.assertThrows(BadRequestException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
-    }
-
-    @Test
-    void getLiqPayStatusTest() {
-        Order order = getOrder();
-        User user = order.getUser();
-
-        StatusRequestDtoLiqPay dto = StatusRequestDtoLiqPay.builder()
-            .orderId("1_1")
-            .action("status")
-            .version(3)
-            .build();
-
-        Map<String, Object> response = generateLiqPayResponse(dto);
-
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid(anyString())).thenReturn(user);
-        when(liqPayService.getPaymentStatus(dto)).thenReturn(response);
-        when(paymentRepository.findAllByOrder(order)).thenReturn(order.getPayment());
-
-        ubsService.getLiqPayStatus(1L, anyString());
-        verify(paymentRepository, times(1)).save(order.getPayment().get(0));
-        verify(orderRepository, times(1)).save(order);
-        assertEquals(response, ubsService.getLiqPayStatus(1L, "abc"));
-    }
-
-    private Map<String, Object> generateLiqPayResponse(StatusRequestDtoLiqPay dto) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("version", dto.getVersion());
-        response.put("order_id", dto.getOrderId());
-        response.put("create_date", System.currentTimeMillis());
-        response.put("end_date", System.currentTimeMillis());
-        response.put("sender_commission", 10d);
-        response.put("amount", 1d);
-        return response;
-    }
-
-    @Test
-    void getLiqPayStatusOrderDoesNotExistTest() {
-        assertThrows(NotFoundException.class, () -> ubsService.getLiqPayStatus(1L, null));
-    }
-
-    @Test
-    void getLiqPayStatusAccessDeniedTest() {
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(getOrder()));
-        when(userRepository.findByUuid(anyString())).thenReturn(getUser());
-        assertThrows(AccessDeniedException.class, () -> ubsService.getLiqPayStatus(1L, "abc"));
     }
 
     @Test

@@ -1,11 +1,8 @@
 package greencity;
 
 import greencity.dto.AddNewTariffDto;
-import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.CreateCourierDto;
-import greencity.dto.courier.CreateCourierTranslationDto;
 import greencity.dto.payment.PaymentRequestDto;
-import greencity.dto.payment.PaymentRequestDtoLiqPay;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.table.UbsTableCreationDto;
@@ -107,21 +104,6 @@ public class ModelUtils {
             .amount(2)
             .signature("")
             .responseUrl("responseUrl")
-            .build();
-    }
-
-    public static PaymentRequestDtoLiqPay getPaymentRequestDtoLiqPay() {
-        return PaymentRequestDtoLiqPay.builder()
-            .publicKey("publicKey")
-            .version(3)
-            .action("pay")
-            .amount(2)
-            .currency("USD")
-            .description("description")
-            .orderId("233")
-            .language("eng")
-            .paytypes("card")
-            .resultUrl("resultUrl")
             .build();
     }
 
