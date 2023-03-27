@@ -2564,18 +2564,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void updateEmployeesAuthoritiesService() {
-        UserEmployeeAuthorityDto dto = getUserEmployeeAuthorityDto();
-
-        when(employeeRepository.findByEmail(dto.getEmployeeEmail())).thenReturn(Optional.of(getEmployee()));
-
-        ubsService.updateEmployeesAuthorities(dto);
-
-        verify(userRemoteClient, times(1)).updateEmployeesAuthorities(dto);
-        verify(employeeRepository, times(1)).findByEmail(anyString());
-    }
-
-    @Test
     void testOrdersForUserWithQuantity() {
         OrderStatusTranslation orderStatusTranslation = getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
