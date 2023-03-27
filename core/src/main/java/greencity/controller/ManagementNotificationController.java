@@ -3,7 +3,7 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.dto.notification.NotificationTemplateDto;
-import greencity.dto.notification.NotificationTemplateLocalizedDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.service.notification.NotificationTemplateService;
 import io.swagger.annotations.ApiOperation;
@@ -44,7 +44,7 @@ public class ManagementNotificationController {
     })
     @GetMapping("/get-all-templates")
     @ApiPageable
-    public ResponseEntity<PageableDto<NotificationTemplateLocalizedDto>> getAll(@ApiIgnore Pageable pageable) {
+    public ResponseEntity<PageableDto<NotificationTemplateDto>> getAll(@ApiIgnore Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationTemplateService.findAll(pageable));
     }
@@ -62,10 +62,11 @@ public class ManagementNotificationController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PutMapping("/update-template")
+    @PutMapping("/update-template/{id}")
     public ResponseEntity<HttpStatuses> updateNotificationTemplate(
-        @RequestBody @Valid NotificationTemplateDto notificationTemplateDto) {
-        notificationTemplateService.update(notificationTemplateDto);
+            @PathVariable(name = "id") Long id,
+            @RequestBody @Valid NotificationTemplateWithPlatformsDto notificationTemplateDto) {
+        notificationTemplateService.update(id, notificationTemplateDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -83,7 +84,7 @@ public class ManagementNotificationController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-template/{id}")
-    public ResponseEntity<NotificationTemplateDto> getNotificationTemplate(@PathVariable Long id) {
+    public ResponseEntity<NotificationTemplateWithPlatformsDto> getNotificationTemplate(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationTemplateService.findById(id));
     }

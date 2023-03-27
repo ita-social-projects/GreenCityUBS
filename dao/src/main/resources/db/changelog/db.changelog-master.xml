@@ -181,4 +181,10 @@
     <include file="db/changelog/logs/ch-add-foreign-key-column-locationId-to-OrderAddress-table-Safarov.xml"/>
     <include file="db/changelog/logs/ch-drop-column-receiving-station-Kharchenko.xml"/>
     <include file="db/changelog/logs/ch-drop-table-order-employee-Kharchenko.xml"/>
+    <include file="db/changelog/logs/ch-drop-table-notification-templates-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-drop-table-notification-schedule-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-add-table-notification-templates-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-table-notification-templates-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-add-table-notification-platforms-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-table-notification-platforms-Safarov.xml"/>
 </databaseChangeLog>

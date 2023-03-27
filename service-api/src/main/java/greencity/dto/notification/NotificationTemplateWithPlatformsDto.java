@@ -10,19 +10,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NotificationTemplateDto {
-
+public class NotificationTemplateWithPlatformsDto {
     @NotNull
-    private Long id;
-    @NotEmpty
     private NotificationType type;
     @NotNull
     private NotificationTrigger trigger;
@@ -44,4 +42,5 @@ public class NotificationTemplateDto {
     private String titleEng;
     @NotNull
     private NotificationStatus notificationStatus;
+    private List<NotificationPlatformDto> platforms = new ArrayList<>();
 }
