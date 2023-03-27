@@ -318,7 +318,6 @@ class OrderControllerTest {
             .getAllEventsForOrder(1L, "test@gmail.com");
     }
 
-
     @Test
     void receivePaymentTest() throws Exception {
         PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();

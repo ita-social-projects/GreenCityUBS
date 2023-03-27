@@ -391,7 +391,6 @@ public class OrderController {
         return ResponseEntity.ok().body(ubsClientService.getOrderCancellationReason(id, uuid));
     }
 
-
     /**
      * Controller for getting status about payment from Fondy.
      *

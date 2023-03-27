@@ -13,5 +13,4 @@ public class PaymentConfigProp {
     private String merchantId;
 
     private String fondyPaymentKey;
-
 }
