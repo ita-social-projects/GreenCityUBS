@@ -3261,8 +3261,8 @@ public class ModelUtils {
             .setViolationsAmount(1)
             .setRegion("Київська область")
             .setRegionEn("Kyivs'ka oblast")
-            .setSettlement("Київ")
-            .setSettlementEn("Kyiv")
+            .setCity("Київ")
+            .setCityEn("Kyiv")
             .setDistrict("Шевченківський")
             .setDistrictEn("Shevchenkivs'kyi")
             .setAddress("Січових Стрільців, 37, 1, 1")
@@ -3303,7 +3303,7 @@ public class ModelUtils {
             .setSenderEmail("motiy14146@ecofreon.com")
             .setViolationsAmount(1)
             .setRegion(new SenderLocation().setUa("Київська область").setEn("Kyivs'ka oblast"))
-            .setSettlement(new SenderLocation().setUa("Київ").setEn("Kyiv"))
+            .setCity(new SenderLocation().setUa("Київ").setEn("Kyiv"))
             .setDistrict(new SenderLocation().setUa("Шевченківський").setEn("Shevchenkivs'kyi"))
             .setAddress(
                 new SenderLocation().setUa("Січових Стрільців, 37, 1, 1").setEn("Sichovyh Stril'tsiv, 37, 1, 1"))
@@ -3339,7 +3339,7 @@ public class ModelUtils {
             .setResponsibleLogicMan("")
             .setResponsibleNavigator("")
             .setRegion(new SenderLocation().setEn(null).setUa(null))
-            .setSettlement(new SenderLocation().setEn(null).setUa(null))
+            .setCity(new SenderLocation().setEn(null).setUa(null))
             .setDistrict(new SenderLocation().setEn(null).setUa(null))
             .setAddress(new SenderLocation().setEn(null).setUa(null));
     }

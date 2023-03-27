@@ -10,7 +10,6 @@ import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnDTO;
 import greencity.dto.table.TableParamsDto;
-import greencity.entity.user.ubs.Address;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -334,29 +333,28 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return optionForColumnDTOS;
     }
 
-    private List<OptionForColumnDTO> districtList(){
+    private List<OptionForColumnDTO> districtList() {
         return addressRepository.findDistinctDistricts()
-                .stream()
-                .map(address -> OptionForColumnDTO
+            .stream()
+            .map(address -> OptionForColumnDTO
                 .builder()
                 .key(address.getId().toString())
                 .en(address.getDistrictEn())
                 .ua(address.getDistrict())
                 .build())
-                .collect(Collectors.toList());
-
+            .collect(Collectors.toList());
     }
 
-    private List<OptionForColumnDTO> cityList(){
-        return  addressRepository.findDistinctCity()
-                .stream()
-                .map(address -> OptionForColumnDTO
+    private List<OptionForColumnDTO> cityList() {
+        return addressRepository.findDistinctCities()
+            .stream()
+            .map(address -> OptionForColumnDTO
                 .builder()
                 .key(address.getId().toString())
                 .en(address.getCityEn())
                 .ua(address.getCity())
                 .build())
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     /* methods for changing order */

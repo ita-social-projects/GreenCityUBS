@@ -69,7 +69,8 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      *
      * @return list of {@link Address}
      */
-    @Query(value = "SELECT a FROM Address a WHERE a.id IN (SELECT MIN(ad.id) FROM Address ad WHERE ad.district = a.district)")
+    @Query(value = "SELECT a FROM Address a WHERE a.id IN "
+        + "(SELECT MIN(ad.id) FROM Address ad WHERE ad.district = a.district)")
     List<Address> findDistinctDistricts();
 
     /**
@@ -78,5 +79,5 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      * @return list of {@link Address}
      */
     @Query(value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) FROM Address  ad WHERE ad.city = a.city)")
-    List<Address> findDistinctCity();
+    List<Address> findDistinctCities();
 }
