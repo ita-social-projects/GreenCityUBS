@@ -5,6 +5,7 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.entity.user.ubs.Address;
 import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
@@ -56,6 +57,8 @@ class OrdersAdminsPageServiceImplTest {
     private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private AddressRepository addressRepository;
     @Mock
     EventService eventService;
     @Mock
@@ -147,6 +150,7 @@ class OrdersAdminsPageServiceImplTest {
         List<ReceivingStationDto> receivingStations = new ArrayList<>();
         List<Employee> employeeList = new ArrayList<>();
         employeeList.add(ModelUtils.getEmployee());
+        List<Address> addressList = List.of(ModelUtils.getAddress());
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
@@ -197,6 +201,10 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(employeeList);
         when(employeeRepository.findAllByEmployeePositionId(4L))
             .thenReturn(employeeList);
+        when(addressRepository.findDistinctDistricts())
+            .thenReturn(addressList);
+        when(addressRepository.findDistinctCities())
+            .thenReturn(addressList);
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 

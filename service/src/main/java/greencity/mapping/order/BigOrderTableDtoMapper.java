@@ -26,7 +26,7 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
             .setSenderEmail(bigViews.getSenderEmail())
             .setViolationsAmount(bigViews.getViolationsAmount())
             .setRegion(new SenderLocation().setUa(bigViews.getRegion()).setEn(bigViews.getRegionEn()))
-            .setSettlement(new SenderLocation().setUa(bigViews.getSettlement()).setEn(bigViews.getSettlementEn()))
+            .setCity(new SenderLocation().setUa(bigViews.getCity()).setEn(bigViews.getCityEn()))
             .setDistrict(new SenderLocation().setUa(bigViews.getDistrict()).setEn(bigViews.getDistrictEn()))
             .setAddress(new SenderLocation().setUa(bigViews.getAddress()).setEn(bigViews.getAddressEn()))
             .setCommentToAddressForClient(bigViews.getCommentToAddressForClient())
