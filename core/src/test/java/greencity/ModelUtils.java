@@ -34,7 +34,6 @@ import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
@@ -347,12 +346,6 @@ public class ModelUtils {
         return EcoNumberDto.builder()
             .ecoNumber(Set.of("1111111111"))
             .build();
-    }
-
-    public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
-        return PaymentResponseDtoLiqPay.builder()
-            .data("Test Data")
-            .signature("Test Signature").build();
     }
 
     public static GetServiceDto getGetServiceDto() {

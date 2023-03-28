@@ -14,7 +14,6 @@ import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.UserInfoDto;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.repository.OrderRepository;
@@ -320,59 +319,6 @@ class OrderControllerTest {
     }
 
     @Test
-    void processLiqPayOrder() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/processLiqPayOrder")
-            .content(orderResponceDtoJSON)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService).saveFullOrderToDBFromLiqPay(anyObject(), eq("35467585763t4sfgchjfuyetf"), eq(null));
-        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-
-    }
-
-    @Test
-    void processLiqPayOrderId() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/processLiqPayOrder/{id}", 1L)
-            .content(orderResponceDtoJSON)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService).saveFullOrderToDBFromLiqPay(anyObject(), eq("35467585763t4sfgchjfuyetf"), any());
-        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-
-    }
-
-    @Test
-    void receiveLiqPayOrder() throws Exception {
-        PaymentResponseDtoLiqPay dto = ModelUtils.getPaymentResponceDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String gotInfo = objectMapper.writeValueAsString(dto);
-
-        setRedirectionConfigProp();
-
-        mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
-            .content(gotInfo)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
     void receivePaymentTest() throws Exception {
         PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -388,24 +334,10 @@ class OrderControllerTest {
     }
 
     @Test
-    void getLiqPayStatusPaymentTest() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getLiqPayStatus/{orderId}", 1)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     void deleteOrderAddressTest() throws Exception {
         mockMvc.perform(delete("/ubs" + "/order-addresses" + "/{id}", 1L)
             .principal(principal))
             .andExpect(status().isOk());
-    }
-
-    @Test
-    void getLiqPayStatusPayment() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getLiqPayStatus/{orderId}", 1)
-            .principal(principal)).andExpect(status().isOk());
     }
 
     @Test
