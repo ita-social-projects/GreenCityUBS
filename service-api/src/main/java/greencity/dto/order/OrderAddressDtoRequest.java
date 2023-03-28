@@ -43,6 +43,7 @@ public class OrderAddressDtoRequest {
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Z0-9a-z-\\s',]{3,40}")
     private String street;
 
+    @Length(max = 255)
     private String addressComment;
 
     private String searchAddress;

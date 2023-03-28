@@ -183,4 +183,5 @@
     <include file="db/changelog/logs/ch-drop-table-order-employee-Kharchenko.xml"/>
     <include file="db/changelog/logs/ch-add-column-notify-to-telegram-bot-Seti.xml"/>
     <include file="/db/changelog/logs/ch-change-columns-location_status-to-tariff_status-in-table-tariff_info-Oliyarnik.xml"/>
+    <include file="/db/changelog/logs/ch-modify-column-address_comment-address-table-Andzheychak.xml"/>
 </databaseChangeLog>
