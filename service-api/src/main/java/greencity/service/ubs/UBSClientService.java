@@ -13,11 +13,9 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.*;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
-import greencity.exceptions.BadRequestException;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
 
@@ -279,41 +277,12 @@ public interface UBSClientService {
     List<EventDto> getAllEventsForOrder(Long orderId, String email);
 
     /**
-     * Methods saves all entered by user data to database.
-     * 
-     * @param dto     {@link OrderResponseDto} user entered data;
-     * @param uuid    current {@link User}'s uuid;
-     * @param orderId {@link Long} order id;
-     * @return {@link LiqPayOrderResponse} order id and liqpay payment button.
-     * @author Vadym Makitra
-     */
-    LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid, Long orderId);
-
-    /**
-     * Method validates received payment response.
-     * 
-     * @param dto {@link PaymentResponseDtoLiqPay}
-     * @author Vadym Makitra
-     */
-    void validateLiqPayPayment(PaymentResponseDtoLiqPay dto);
-
-    /**
      * Method that returns order info for surcharge.
      *
      * @return {@link OrderStatusPageDto}.
      * @author Igor Boykov
      */
     OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, String uuid);
-
-    /**
-     * Method for get info about payment status from LiqPay.
-     * 
-     * @param orderId - current order id.
-     * @param uuid    current {@link User}'s uuid;
-     * @return {@link Map}
-     * @author Vadym Makitra
-     */
-    Map<String, Object> getLiqPayStatus(Long orderId, String uuid) throws BadRequestException;
 
     /**
      * Method for delete user order.
@@ -330,14 +299,6 @@ public interface UBSClientService {
      * @author Max Boiarchuk
      */
     FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws PaymentLinkException;
-
-    /**
-     * Method return link with liqpay payment .
-     *
-     * @param dto - current OrderLiqpayClientDto dto.
-     * @author Max Boiarchuk
-     */
-    LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) throws PaymentLinkException;
 
     /**
      * Method validates received payment client response.

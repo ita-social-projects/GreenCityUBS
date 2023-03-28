@@ -96,7 +96,6 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.ServiceDto;
@@ -2584,12 +2583,6 @@ public class ModelUtils {
         return EcoNumberDto.builder()
             .ecoNumber(new HashSet<>(Arrays.asList("1111111111", "3333333333")))
             .build();
-    }
-
-    public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
-        return PaymentResponseDtoLiqPay.builder()
-            .data("Test Data")
-            .signature("Test Signature").build();
     }
 
     public static ServiceDto getServiceDto() {
