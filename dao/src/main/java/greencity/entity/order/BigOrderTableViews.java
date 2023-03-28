@@ -25,11 +25,11 @@ public class BigOrderTableViews {
     private String senderEmail;
     private Integer violationsAmount;
     private String region;
-    private String settlement;
+    private String city;
     private String district;
     private String address;
     private String regionEn;
-    private String settlementEn;
+    private String cityEn;
     private String districtEn;
     private String addressEn;
     private String commentToAddressForClient;
