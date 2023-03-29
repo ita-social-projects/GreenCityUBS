@@ -502,7 +502,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * This is method which set value as true for orderStatus Cancelled or Done.
+     * This is method which set value as true for orderStatus Cancelled or Done or
+     * Not Taken Out.
      *
      * @param orderStatusTranslation      {@link OrderStatusTranslation}.
      * @param orderStatusesTranslationDto {@link OrderStatusesTranslationDto}.
