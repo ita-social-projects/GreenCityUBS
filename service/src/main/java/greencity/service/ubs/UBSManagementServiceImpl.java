@@ -515,7 +515,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         orderStatusesTranslationDto
             .setAbleActualChange(OrderStatus.NOT_TAKEN_OUT.getNumValue() == orderStatusTranslation.getStatusId()
                 || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId()
-                || OrderStatus.CANCELED.getNumValue() == orderStatusTranslation.getStatusId());
+                || OrderStatus.CONFIRMED.getNumValue() == orderStatusTranslation.getStatusId());
     }
 
     /**
