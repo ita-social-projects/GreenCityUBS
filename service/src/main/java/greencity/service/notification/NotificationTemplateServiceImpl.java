@@ -4,6 +4,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
@@ -32,12 +33,11 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
      * {@inheritDoc}
      */
     @Override
-    public void update(Long id, NotificationTemplateWithPlatformsDto notificationDto) {
+    public void update(Long id, NotificationTemplateWithPlatformsUpdateDto notificationDto) {
         NotificationTemplate template = getById(id);
         template.setTitle(notificationDto.getTitle());
         template.setTitleEng(notificationDto.getTitleEng());
         template.setNotificationType(notificationDto.getType());
-        template.setTrigger(notificationDto.getTrigger());
         template.setTrigger(notificationDto.getTrigger());
         template.setTime(notificationDto.getTime());
         template.setSchedule(notificationDto.getSchedule());

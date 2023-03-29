@@ -2,15 +2,17 @@ package greencity.entity.notifications;
 
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationStatus;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "notification_platforms")
-@Data
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @ToString(exclude = "notificationTemplate")
 public class NotificationPlatform {

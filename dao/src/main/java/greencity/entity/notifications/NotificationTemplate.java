@@ -8,11 +8,13 @@ import java.util.List;
 
 @Entity
 @Table(name = "notification_templates")
-@Data
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @ToString(exclude = "notificationPlatforms")
-@NoArgsConstructor
 @Accessors(chain = true)
 public class NotificationTemplate {
     @Id

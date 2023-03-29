@@ -4,6 +4,7 @@ import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.service.notification.NotificationTemplateService;
 import io.swagger.annotations.ApiOperation;
@@ -65,7 +66,7 @@ public class ManagementNotificationController {
     @PutMapping("/update-template/{id}")
     public ResponseEntity<HttpStatuses> updateNotificationTemplate(
             @PathVariable(name = "id") Long id,
-            @RequestBody @Valid NotificationTemplateWithPlatformsDto notificationTemplateDto) {
+            @RequestBody @Valid NotificationTemplateWithPlatformsUpdateDto notificationTemplateDto) {
         notificationTemplateService.update(id, notificationTemplateDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

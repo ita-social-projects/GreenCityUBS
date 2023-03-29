@@ -44,6 +44,10 @@ public enum NotificationTrigger {
     ORDER_WAS_CANCELED(
             "Повернення бонусів після скасування замовлення",
             "Refund of bonuses after order cancellation"
+    ),
+    CUSTOM(
+            "Кастомна",
+            "Custom"
     );
 
     private final String description;

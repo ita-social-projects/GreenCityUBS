@@ -430,7 +430,7 @@ public class NotificationServiceImpl implements NotificationService {
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), receiverType)
             .orElseThrow(() -> new NotFoundException("Template not found"));
-        String templateBody = resolveTemplateBody(language, receiverType, template); //template.getBody();
+        String templateBody = resolveTemplateBody(language, receiverType, template);
         if (notification.getParameters() == null) {
             notification.setParameters(Collections.emptySet());
         }
