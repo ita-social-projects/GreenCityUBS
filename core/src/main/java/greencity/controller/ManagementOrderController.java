@@ -595,7 +595,9 @@ public class ManagementOrderController {
     @ApiOperation(value = "Controller to check current employee for order")
     @ApiResponses({
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/check-employee-for-order/{id}")
     public ResponseEntity<Boolean> checkEmployeeForOrderPage(
