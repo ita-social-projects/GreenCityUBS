@@ -13,10 +13,10 @@ public class OrderFilterDataProvider {
 
     private static final Map<String, Function<OrderSearchCriteria, String[]>> FILTERS_STRING_MAP = Map.of(
         "region", OrderSearchCriteria::getRegion,
-        "city", OrderSearchCriteria::getCity,
+        "city", OrderSearchCriteria::getCities,
         "district", OrderSearchCriteria::getDistricts,
         "regionEn", OrderSearchCriteria::getRegionEn,
-        "cityEn", OrderSearchCriteria::getCityEn,
+        "cityEn", OrderSearchCriteria::getCitiesEn,
         "districtEn", OrderSearchCriteria::getDistrictsEn);
 
     private static final Map<String, Function<OrderSearchCriteria, DateFilter>> FILTERS_DATEFILTER_MAP = Map.of(
