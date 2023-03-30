@@ -111,7 +111,6 @@
     <include file="db/changelog/logs/ch-update-locations-table-Kozak.xml"/>
     <include file="db/changelog/logs/ch-add-column-receiving_station_id-to-orders-Kuzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-add-some-columns-to-ubsUser-for-Sender-Kuzbyt_Maksym.xml"/>
-    <include file="/db/changelog/logs/ch-modify-column-address_comment-order_address-table-Andzheychak.xml"/>
     <include file="db/changelog/logs/ch-add-big_order_table-view-Kuzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-drop-column-language_id-in-table-bag_translations-Boiarchuk.xml"/>
     <include file="db/changelog/logs/ch-update-notification-templates-Kozak.xml"/>
@@ -169,6 +168,7 @@
     <include file="db/changelog/logs/ch-fk_ubs_users_and_order_address-Safarov.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table-view-Safarov.xml"/>
     <include file="db/changelog/logs/ch-drop-column_address_id-in-ubs_user-Safarov.xml"/>
+    <include file="/db/changelog/logs/ch-modify-column-address_comment-order_address-table-Andzheychak.xml"/>
     <include file="db/changelog/logs/сh-add-column-min-max-delete-min-max-amount-and-price-again.xml"/>
     <include file="db/changelog/logs/ch-alter-table-service-add-columns-service-translations-drop-columns-Seti.xml"/>
     <include file="db/changelog/logs/ch-drop-table-service-translations-Seti.xml"/>
