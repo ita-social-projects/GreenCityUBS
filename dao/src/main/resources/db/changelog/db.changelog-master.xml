@@ -111,8 +111,10 @@
     <include file="db/changelog/logs/ch-update-locations-table-Kozak.xml"/>
     <include file="db/changelog/logs/ch-add-column-receiving_station_id-to-orders-Kuzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-add-some-columns-to-ubsUser-for-Sender-Kuzbyt_Maksym.xml"/>
+    <include file="/db/changelog/logs/ch-modify-column-address_comment-address-table-Andzheychak.xml"/>
     <include file="db/changelog/logs/ch-add-order-address-table-Safarov.xml"/>
-    <include file="/db/changelog/logs/ch-modify-column-address_comment-order_address-table-Andzheychak.xml"/>
+    <include file="db/changelog/logs/ch-modify-column-address_comment-order_address-table-Andzheychak.xml"/>
+    <include file="db/changelog/logs/ch-fk_ubs_users_and_order_address-Safarov.xml"/>
     <include file="db/changelog/logs/ch-add-big_order_table-view-Kuzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-drop-column-language_id-in-table-bag_translations-Boiarchuk.xml"/>
     <include file="db/changelog/logs/ch-update-notification-templates-Kozak.xml"/>
@@ -166,7 +168,6 @@
     <include file="db/changelog/logs/ch-drop-table-courier-translation-Korzh.xml"/>
     <include file="db/changelog/logs/ch-add-column-limit-description-to-tariffs-info-Korzh.xml"/>
     <include file="db/changelog/logs/ch-modify-employee-table-Korzh.xml"/>
-    <include file="db/changelog/logs/ch-fk_ubs_users_and_order_address-Safarov.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table-view-Safarov.xml"/>
     <include file="db/changelog/logs/ch-drop-column_address_id-in-ubs_user-Safarov.xml"/>
     <include file="db/changelog/logs/сh-add-column-min-max-delete-min-max-amount-and-price-again.xml"/>
@@ -184,7 +185,6 @@
     <include file="db/changelog/logs/ch-drop-table-order-employee-Kharchenko.xml"/>
     <include file="db/changelog/logs/ch-add-column-notify-to-telegram-bot-Seti.xml"/>
     <include file="/db/changelog/logs/ch-change-columns-location_status-to-tariff_status-in-table-tariff_info-Oliyarnik.xml"/>
-    <include file="/db/changelog/logs/ch-modify-column-address_comment-address-table-Andzheychak.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Golik.xml"/>
     <include file="db/changelog/logs/ch-delete-order-status-translations-Golik.xml"/>
 </databaseChangeLog>
