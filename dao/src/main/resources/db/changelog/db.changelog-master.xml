@@ -111,6 +111,7 @@
     <include file="db/changelog/logs/ch-update-locations-table-Kozak.xml"/>
     <include file="db/changelog/logs/ch-add-column-receiving_station_id-to-orders-Kuzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-add-some-columns-to-ubsUser-for-Sender-Kuzbyt_Maksym.xml"/>
+    <include file="/db/changelog/logs/ch-modify-column-address_comment-order_address-table-Andzheychak.xml"/>
     <include file="db/changelog/logs/ch-add-big_order_table-view-Kuzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-drop-column-language_id-in-table-bag_translations-Boiarchuk.xml"/>
     <include file="db/changelog/logs/ch-update-notification-templates-Kozak.xml"/>
@@ -185,5 +186,4 @@
     <include file="/db/changelog/logs/ch-change-columns-location_status-to-tariff_status-in-table-tariff_info-Oliyarnik.xml"/>
     <include file="/db/changelog/logs/ch-modify-column-address_comment-address-table-Andzheychak.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Golik.xml"/>
-    <include file="/db/changelog/logs/ch-modify-column-address_comment-order_address-table-Andzheychak.xml"/>
 </databaseChangeLog>
