@@ -16,7 +16,6 @@ import javax.persistence.*;
 @EqualsAndHashCode(of = "id")
 @ToString(exclude = "notificationTemplate")
 public class NotificationPlatform {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
