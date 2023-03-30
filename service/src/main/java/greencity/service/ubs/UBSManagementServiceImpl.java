@@ -1364,7 +1364,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Payment payment = Payment.builder()
             .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
             .amount(paymentRequestDto.getAmount())
-            .paymentStatus(PaymentStatus.PAID)
+            .paymentStatus(verifyPaymentStatusOrder(order))
             .paymentId(paymentRequestDto.getPaymentId())
             .receiptLink(paymentRequestDto.getReceiptLink())
             .currency("UAH")
@@ -1380,13 +1380,29 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), order);
         if (order.getOrderPaymentStatus() != null) {
-            if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.PAID)) {
+            if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAID) {
                 eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
             } else {
                 eventService.save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
             }
         }
         return payment;
+    }
+
+    private PaymentStatus verifyPaymentStatusOrder(Order order) {
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAID) {
+            return PaymentStatus.PAID;
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.HALF_PAID) {
+            return PaymentStatus.HALF_PAID;
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
+            return PaymentStatus.UNPAID;
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAYMENT_REFUNDED) {
+            return PaymentStatus.PAYMENT_REFUNDED;
+        }
+        return PaymentStatus.UNPAID;
     }
 
     @Override

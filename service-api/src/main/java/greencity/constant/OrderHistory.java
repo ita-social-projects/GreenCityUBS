@@ -6,7 +6,7 @@ public final class OrderHistory {
     public static final String ORDER_BROUGHT_IT_HIMSELF = "Статус Замовлення - Привезе сам";
     public static final String ORDER_CANCELLED = "Статус Замовлення - Скасовано";
     public static final String ORDER_PAID = "Замовлення Оплачено";
-    public static final String ORDER_HALF_PAID = "Замовлення Частково оплачено";
+    public static final String ORDER_HALF_PAID = "Замовлення оплачено наполовину";
     public static final String SYSTEM = "Система";
     public static final String ORDER_FORMED = "Статус Замовлення - Сформовано";
     public static final String CLIENT = "Клієнт";
