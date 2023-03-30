@@ -485,7 +485,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (!orderStatusTranslations.isEmpty()) {
             for (OrderStatusTranslation orderStatusTranslation : orderStatusTranslations) {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
-                setValueForOrderStatusIsCancelledOrDoneAsTrue(orderStatusTranslation, orderStatusesTranslationDto);
+                setValueForOrderStatusIsNotTakenOutOrDoneOrCancelledAsTrue(orderStatusTranslation,
+                    orderStatusesTranslationDto);
                 orderStatusesTranslationDto.setUa(orderStatusTranslation.getName());
                 orderStatusesTranslationDto.setEng(orderStatusTranslation.getNameEng());
                 if (!Objects.equals(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()),
@@ -501,18 +502,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * This is method which set value as true for orderStatus Cancelled or Done.
+     * This is method which set value as true for orderStatus Cancelled or Done or
+     * Not Taken Out.
      *
      * @param orderStatusTranslation      {@link OrderStatusTranslation}.
      * @param orderStatusesTranslationDto {@link OrderStatusesTranslationDto}.
      *
      * @author Yuriy Bahlay.
      */
-    private void setValueForOrderStatusIsCancelledOrDoneAsTrue(OrderStatusTranslation orderStatusTranslation,
+    private void setValueForOrderStatusIsNotTakenOutOrDoneOrCancelledAsTrue(
+        OrderStatusTranslation orderStatusTranslation,
         OrderStatusesTranslationDto orderStatusesTranslationDto) {
         orderStatusesTranslationDto
-            .setAbleActualChange(OrderStatus.CANCELED.getNumValue() == orderStatusTranslation.getStatusId()
-                || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId());
+            .setAbleActualChange(OrderStatus.NOT_TAKEN_OUT.getNumValue() == orderStatusTranslation.getStatusId()
+                || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId()
+                || OrderStatus.CANCELED.getNumValue() == orderStatusTranslation.getStatusId());
     }
 
     /**
