@@ -65,8 +65,8 @@ public class ManagementNotificationController {
     })
     @PutMapping("/update-template/{id}")
     public ResponseEntity<HttpStatuses> updateNotificationTemplate(
-            @PathVariable(name = "id") Long id,
-            @RequestBody @Valid NotificationTemplateWithPlatformsUpdateDto notificationTemplateDto) {
+        @PathVariable(name = "id") Long id,
+        @RequestBody @Valid NotificationTemplateWithPlatformsUpdateDto notificationTemplateDto) {
         notificationTemplateService.update(id, notificationTemplateDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

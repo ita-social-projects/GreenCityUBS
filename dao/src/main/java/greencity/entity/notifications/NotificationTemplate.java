@@ -22,11 +22,10 @@ public class NotificationTemplate {
     private Long id;
 
     @OneToMany(
-            mappedBy = "notificationTemplate",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            orphanRemoval = true
-    )
+        mappedBy = "notificationTemplate",
+        cascade = CascadeType.ALL,
+        fetch = FetchType.LAZY,
+        orphanRemoval = true)
     @Setter(AccessLevel.PRIVATE)
     private List<NotificationPlatform> notificationPlatforms;
 

@@ -6,13 +6,12 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
+import greencity.enums.NotificationReceiverType;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
 import lombok.RequiredArgsConstructor;
 
 import javax.annotation.PostConstruct;
-
-import static greencity.enums.NotificationReceiverType.*;
 
 @RequiredArgsConstructor
 public abstract class AbstractNotificationProvider {
@@ -41,8 +40,9 @@ public abstract class AbstractNotificationProvider {
      *
      * @param notification {@link UserNotification} - notification to send.
      */
-    public void sendNotification(UserNotification notification, long monthsOfAccountInactivity) {
-        NotificationDto notificationDto = createNotificationDto(notification, monthsOfAccountInactivity);
+    public void sendNotification(UserNotification notification, NotificationReceiverType receiverType,
+        long monthsOfAccountInactivity) {
+        NotificationDto notificationDto = createNotificationDto(notification, receiverType, monthsOfAccountInactivity);
         if (isEnabled(notification.getUser())) {
             sendNotification(notification, notificationDto);
         }
@@ -62,12 +62,15 @@ public abstract class AbstractNotificationProvider {
      * @param notification {@link UserNotification} notification to create DTO from.
      * @return {@link NotificationDto} notification ready for sending.
      */
-    protected NotificationDto createNotificationDto(UserNotification notification, long monthsOfAccountInactivity) {
+    protected NotificationDto createNotificationDto(
+        UserNotification notification,
+        NotificationReceiverType receiverType,
+        long monthsOfAccountInactivity) {
         UserVO userVO = userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail())
             .orElseThrow(() -> new UserNotFoundException(
                 ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + notification.getUser().getRecipientEmail()));
         return NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), EMAIL, templateRepository,
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), receiverType, templateRepository,
                 monthsOfAccountInactivity);
     }
 }

@@ -47,7 +47,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
-import static greencity.enums.NotificationReceiverType.SITE;
+import static greencity.enums.NotificationReceiverType.*;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
 
@@ -407,8 +407,8 @@ public class NotificationServiceImpl implements NotificationService {
         return NotificationShortDto.builder()
             .id(notification.getId())
             .title(language.equals("ua")
-                    ? template.getTitle()
-                    : template.getTitleEng())
+                ? template.getTitle()
+                : template.getTitleEng())
             .notificationTime(notification.getNotificationTime())
             .read(notification.isRead())
             .orderId(orderId)
@@ -417,7 +417,10 @@ public class NotificationServiceImpl implements NotificationService {
 
     private void sendNotificationsForBotsAndEmail(UserNotification notification, long monthsOfAccountInactivity) {
         executor.execute(() -> notificationProviders
-            .forEach(provider -> provider.sendNotification(notification, monthsOfAccountInactivity)));
+            .forEach(provider -> {
+                provider.sendNotification(notification, MOBILE, monthsOfAccountInactivity);
+                provider.sendNotification(notification, EMAIL, monthsOfAccountInactivity);
+            }));
     }
 
     /**
@@ -444,18 +447,19 @@ public class NotificationServiceImpl implements NotificationService {
             .body(resultBody).build();
     }
 
-    private static String resolveTemplateBody(String language, NotificationReceiverType receiverType, NotificationTemplate notification) {
+    private static String resolveTemplateBody(String language, NotificationReceiverType receiverType,
+        NotificationTemplate notification) {
         return language.equals("ua")
-                ? getNotificationPlatformByReceiverType(notification, receiverType).getBody()
-                : getNotificationPlatformByReceiverType(notification, receiverType).getBodyEng();
+            ? getNotificationPlatformByReceiverType(notification, receiverType).getBody()
+            : getNotificationPlatformByReceiverType(notification, receiverType).getBodyEng();
     }
 
     private static NotificationPlatform getNotificationPlatformByReceiverType(
-            NotificationTemplate template, NotificationReceiverType receiverType) {
+        NotificationTemplate template, NotificationReceiverType receiverType) {
         return template.getNotificationPlatforms().stream()
-                .filter(platform -> platform.getNotificationReceiverType() == receiverType)
-                .findAny()
-                .orElseThrow();
+            .filter(platform -> platform.getNotificationReceiverType() == receiverType)
+            .findAny()
+            .orElseThrow();
     }
 
     private void fillAndSendNotification(Set<NotificationParameter> parameters, Order order,

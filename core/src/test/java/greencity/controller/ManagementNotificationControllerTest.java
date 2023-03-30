@@ -71,7 +71,7 @@ class ManagementNotificationControllerTest {
     void updateNotificationTemplateTest() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonDto = objectMapper.writeValueAsString(
-                ModelUtils.getNotificationTemplateWithPlatformsUpdateDto());
+            ModelUtils.getNotificationTemplateWithPlatformsUpdateDto());
         mockMvc.perform(put(url + "/update-template/{id}", 1L)
             .principal(principal)
             .content(jsonDto)
@@ -96,7 +96,7 @@ class ManagementNotificationControllerTest {
         Long id = 1L;
         String JsonDto = objectMapper.writeValueAsString(dto);
         Mockito.doThrow(NotFoundException.class)
-                .when(notificationTemplateService).update(id, dto);
+            .when(notificationTemplateService).update(id, dto);
         mockMvc.perform(put(url + "/update-template/{id}", id)
             .principal(principal)
             .content(JsonDto)

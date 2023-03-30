@@ -67,9 +67,9 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
             .collect(Collectors.toList());
         return new PageableDto<>(
             templateDtoList,
-                notificationTemplates.getTotalElements(),
-                notificationTemplates.getPageable().getPageNumber(),
-                notificationTemplates.getTotalPages());
+            notificationTemplates.getTotalElements(),
+            notificationTemplates.getPageable().getPageNumber(),
+            notificationTemplates.getTotalPages());
     }
 
     /**
