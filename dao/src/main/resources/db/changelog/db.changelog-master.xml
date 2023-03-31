@@ -186,4 +186,5 @@
     <include file="/db/changelog/logs/ch-modify-column-address_comment-address-table-Andzheychak.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Golik.xml"/>
     <include file="db/changelog/logs/ch-delete-order-status-translations-Golik.xml"/>
+    <include file="db/changelog/logs/ch-update_big_order_table_view-Golik-1.xml"/>
 </databaseChangeLog>

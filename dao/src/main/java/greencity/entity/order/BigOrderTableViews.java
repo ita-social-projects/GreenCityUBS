@@ -39,6 +39,7 @@ public class BigOrderTableViews {
     private Long generalDiscount;
     private Long amountDue;
     private String commentForOrderByClient;
+    private String commentForOrderByAdmin;
     private Long totalPayment;
     private LocalDate dateOfExport;
     private String timeOfExport;
