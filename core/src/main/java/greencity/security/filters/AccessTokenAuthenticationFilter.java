@@ -75,7 +75,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                 }
             } catch (ExpiredJwtException e) {
                 log.info("Token has expired: " + token);
-            } catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 log.info("Thread was interrupted: " + e.getMessage());
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
