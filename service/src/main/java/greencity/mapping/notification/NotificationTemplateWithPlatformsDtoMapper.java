@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 @Component
 public class NotificationTemplateWithPlatformsDtoMapper
     extends AbstractConverter<NotificationTemplate, NotificationTemplateWithPlatformsDto> {
-
     @Override
     protected NotificationTemplateWithPlatformsDto convert(NotificationTemplate notificationTemplate) {
         return NotificationTemplateWithPlatformsDto.builder()

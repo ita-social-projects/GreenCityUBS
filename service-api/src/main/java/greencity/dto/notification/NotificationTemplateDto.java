@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Builder
 public class NotificationTemplateDto {
-
     @NotNull
     private Long id;
 

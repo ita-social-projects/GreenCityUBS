@@ -13,8 +13,10 @@ public enum NotificationTrigger {
                             "Система отримує відповідь від платіжної системи",
                             "The system gets an answer from the payment system"),
     ORDER_ADDED_TO_ITINERARY_STATUS_CONFIRMED(
-                                              "Менеджер включає замовлення в маршрут і змінює статус замовлення на «Підтверджено»",
-                                              "The manager includes the order in the itinerary and changes order status to «Confirmed»"),
+                                              "Менеджер включає замовлення в маршрут "
+                                                      + "і змінює статус замовлення на «Підтверджено»",
+                                              "The manager includes the order in the itinerary "
+                                                      + "and changes order status to «Confirmed»"),
     STATUS_PARTIALLY_PAID(
                           "Зміна статусу платежу на «Частково оплачено»",
                           "Payment status changes to «Half paid»"),
