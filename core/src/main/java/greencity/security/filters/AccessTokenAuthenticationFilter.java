@@ -1,7 +1,5 @@
 package greencity.security.filters;
 
-import com.netflix.hystrix.exception.HystrixRuntimeException;
-import greencity.client.UserRemoteClient;
 import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
 import greencity.service.FeignClientCallAsync;
@@ -77,6 +75,9 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                 }
             } catch (ExpiredJwtException e) {
                 log.info("Token has expired: " + token);
+            } catch (InterruptedException e){
+                log.info("Thread was interrupted: " + e.getMessage());
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 log.info("Access denied with token: " + e.getMessage());
             }
