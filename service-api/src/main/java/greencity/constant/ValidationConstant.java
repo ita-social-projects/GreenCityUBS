@@ -17,7 +17,7 @@ public class ValidationConstant {
     public static final String COURIER_NAME_EN_REGEXP = "^[A-Z][A-Za-zА0-9'\\s]{1,29}$";
     public static final String COURIER_NAME_UK_REGEXP = "^[ЁІЇҐЄА-Я][ЁёІіЇїҐґЄєА-Яа-яA[0-9]'\\s]{1,29}$";
 
-    public static final String NAME_REGEXP = "^(?!\\.)(?!.*\\.$)(?!.*?\\.\\.)(?!.*?\\-\\-)(?!.*?\\'\\')"
+    public static final String NAME_REGEXP = "^(?!\\.)(?!.*\\.$)(?!.*?\\.\\.)(?!.*?\\-\\-)(?!.*?\\'\\')(?!\\s*$)"
         + "[-'ʼ ґҐіІєЄїЇА-Яа-я+\\w.]{1,30}$";
 
     /**

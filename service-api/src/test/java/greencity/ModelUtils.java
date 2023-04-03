@@ -1,12 +1,10 @@
 package greencity;
 
 import greencity.dto.AddNewTariffDto;
-import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.CreateCourierDto;
-import greencity.dto.courier.CreateCourierTranslationDto;
 import greencity.dto.payment.PaymentRequestDto;
-import greencity.dto.payment.PaymentRequestDtoLiqPay;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.position.PositionDto;
 import greencity.dto.table.UbsTableCreationDto;
 import greencity.dto.user.UserVO;
 import greencity.dto.violation.UserViolationMailDto;
@@ -109,27 +107,19 @@ public class ModelUtils {
             .build();
     }
 
-    public static PaymentRequestDtoLiqPay getPaymentRequestDtoLiqPay() {
-        return PaymentRequestDtoLiqPay.builder()
-            .publicKey("publicKey")
-            .version(3)
-            .action("pay")
-            .amount(2)
-            .currency("USD")
-            .description("description")
-            .orderId("233")
-            .language("eng")
-            .paytypes("card")
-            .resultUrl("resultUrl")
-            .build();
-    }
-
     public static AddNewTariffDto getAddNewTariffDto() {
         return AddNewTariffDto.builder()
             .regionId(1L)
             .courierId(1L)
             .locationIdList(List.of(1L))
             .receivingStationsIdList(List.of(1L))
+            .build();
+    }
+
+    public static PositionDto getEmployeePosition() {
+        return PositionDto.builder()
+            .id(1L)
+            .name("Менеджер послуги")
             .build();
     }
 }

@@ -3,6 +3,7 @@ package greencity.controller;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.location.LocationSummaryDto;
+import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.service.ubs.UBSClientService;
@@ -38,6 +39,7 @@ public class UserProfileController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserProfileDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PutMapping("/user/update")
     public ResponseEntity<UserProfileUpdateDto> updateUserData(@ApiIgnore @CurrentUserUuid String userUuid,
@@ -61,6 +63,24 @@ public class UserProfileController {
     public ResponseEntity<UserProfileDto> getUserData(
         @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getProfileData(userUuid));
+    }
+
+    /**
+     * Controller creates ubs user profile.
+     *
+     * @param userProfileCreateDto {@link UserProfileCreateDto}.
+     * @return id of ubs profile {@link Long}.
+     * @author Maksym Golik.
+     */
+    @ApiOperation(value = "Create user profile")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = Long.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+    })
+    @PostMapping("/user/create")
+    public ResponseEntity<Long> createUserProfile(
+        @Valid @RequestBody UserProfileCreateDto userProfileCreateDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ubsClientService.createUserProfile(userProfileCreateDto));
     }
 
     /**

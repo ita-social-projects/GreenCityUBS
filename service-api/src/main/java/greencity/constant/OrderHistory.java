@@ -6,6 +6,7 @@ public final class OrderHistory {
     public static final String ORDER_BROUGHT_IT_HIMSELF = "Статус Замовлення - Привезе сам";
     public static final String ORDER_CANCELLED = "Статус Замовлення - Скасовано";
     public static final String ORDER_PAID = "Замовлення Оплачено";
+    public static final String ORDER_HALF_PAID = "Замовлення Частково оплачено";
     public static final String SYSTEM = "Система";
     public static final String ORDER_FORMED = "Статус Замовлення - Сформовано";
     public static final String CLIENT = "Клієнт";
@@ -28,10 +29,14 @@ public final class OrderHistory {
     public static final String UPDATE_PAYMENT_MANUALLY = "Змінено деталі оплати № ";
     public static final String DELETE_PAYMENT_MANUALLY = "Видалено оплату №";
     public static final String ADD_PAYMENT_SYSTEM = "Додано оплату  №";
-    public static final String UPDATE_EXPORT_DETAILS = "Змінено деталі вивезення";
-    public static final String SET_EXPORT_DETAILS = "Встановлено деталі вивезення";
+    public static final String UPDATE_EXPORT_DETAILS = "Змінено деталі вивезення.";
+    public static final String UPDATE_EXPORT_DATA = " Дата вивезення: %s.";
+    public static final String UPDATE_DELIVERY_TIME = " Час вивезення: %s - %s.";
+    public static final String UPDATE_RECEIVING_STATION = " Станція приймання: %s.";
+    public static final String SET_EXPORT_DETAILS = "Встановлено деталі вивезення.";
     public static final String RETURN_OVERPAYMENT_TO_CLIENT = "Повернено кошти клієнту";
     public static final String RETURN_OVERPAYMENT_AS_BONUS_TO_CLIENT = "Зараховано кошти на бонусний рахунок клієнта";
+    public static final String RETURN_BONUSES_TO_CLIENT = "Невикористані бонуси повернено на бонусний рахунок клієнта";
     public static final String WASTE_REMOVAL_ADDRESS_CHANGE = "Змінено адресу вивезення відходів";
     public static final String ADD_ADMIN_COMMENT = "Додано коментар";
     public static final String ADD_NEW_ECO_NUMBER = "Додано номер замовлення з магазину";

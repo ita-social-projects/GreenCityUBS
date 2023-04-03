@@ -3,6 +3,7 @@ package greencity.repository;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.enums.LocationStatus;
+import greencity.enums.TariffStatus;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -48,7 +49,7 @@ public class DeactivateChosenEntityRepository {
             + " sum (case when t1.locationStatus = 'DEACTIVATED' then 1 else 0 end)", Long.class).getResultList();
 
         if (!tariffsId.isEmpty()) {
-            entityManager.createQuery("update TariffsInfo ti set ti.locationStatus = 'DEACTIVATED'"
+            entityManager.createQuery("update TariffsInfo ti set ti.tariffStatus = 'DEACTIVATED'"
                 + " where ti.id in(:tariffsId)")
                 .setParameter(TARIFFS_ID, tariffsId)
                 .executeUpdate();
@@ -83,7 +84,7 @@ public class DeactivateChosenEntityRepository {
 
         if (!tariffsId.isEmpty()) {
             entityManager.createQuery("update TariffsInfo ti set"
-                + " ti.locationStatus = 'DEACTIVATED' where ti.id in(:tariffsId)")
+                + " ti.tariffStatus = 'DEACTIVATED' where ti.id in(:tariffsId)")
                 .setParameter(TARIFFS_ID, tariffsId)
                 .executeUpdate();
         }
@@ -100,7 +101,7 @@ public class DeactivateChosenEntityRepository {
             .setParameter(COURIER_ID, courierId)
             .executeUpdate();
 
-        entityManager.createQuery("update TariffsInfo ti set ti.locationStatus = 'DEACTIVATED'"
+        entityManager.createQuery("update TariffsInfo ti set ti.tariffStatus = 'DEACTIVATED'"
             + "where ti.courier.id =: courierId")
             .setParameter(COURIER_ID, courierId)
             .executeUpdate();
@@ -126,7 +127,7 @@ public class DeactivateChosenEntityRepository {
 
         if (!tariffsId.isEmpty()) {
             entityManager.createQuery("update TariffsInfo ti set"
-                + " ti.locationStatus = 'DEACTIVATED' where ti.id in(:tariffsId)")
+                + " ti.tariffStatus = 'DEACTIVATED' where ti.id in(:tariffsId)")
                 .setParameter(TARIFFS_ID, tariffsId)
                 .executeUpdate();
         }
@@ -146,7 +147,7 @@ public class DeactivateChosenEntityRepository {
             .setParameter(STATIONS_ID, stationsId)
             .setParameter(COURIER_ID, courierId)
             .getResultList()
-            .forEach(tariffsInfo -> tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED));
+            .forEach(tariffsInfo -> tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED));
     }
 
     /**
@@ -164,7 +165,7 @@ public class DeactivateChosenEntityRepository {
             .setParameter(COURIER_ID, courierId)
             .setParameter(REGION_ID, regionId)
             .getResultList()
-            .forEach(tariffsInfo -> tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED));
+            .forEach(tariffsInfo -> tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED));
     }
 
     /**
@@ -185,7 +186,7 @@ public class DeactivateChosenEntityRepository {
             .setParameter(CITIES_ID, citiesId)
             .setParameter(STATIONS_ID, stationsId)
             .getResultList()
-            .forEach(tariffsInfo -> tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED));
+            .forEach(tariffsInfo -> tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED));
     }
 
     /**
@@ -211,7 +212,7 @@ public class DeactivateChosenEntityRepository {
             .setParameter(STATIONS_ID, stationsId)
             .setParameter(COURIER_ID, courierId)
             .getResultList()
-            .forEach(tariffsInfo -> tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED));
+            .forEach(tariffsInfo -> tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED));
     }
 
     /**

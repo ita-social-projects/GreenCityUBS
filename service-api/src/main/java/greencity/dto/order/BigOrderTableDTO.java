@@ -23,7 +23,7 @@ public class BigOrderTableDTO {
     private String senderEmail;
     private Integer violationsAmount;
     private SenderLocation region;
-    private SenderLocation settlement;
+    private SenderLocation city;
     private SenderLocation district;
     private SenderLocation address;
     private String commentToAddressForClient;
@@ -33,6 +33,7 @@ public class BigOrderTableDTO {
     private Long generalDiscount;
     private Long amountDue;
     private String commentForOrderByClient;
+    private String commentForOrderByAdmin;
     private Long totalPayment;
     private String dateOfExport;
     private String timeOfExport;

@@ -181,6 +181,13 @@
     <include file="db/changelog/logs/ch-add-foreign-key-column-locationId-to-OrderAddress-table-Safarov.xml"/>
     <include file="db/changelog/logs/ch-drop-column-receiving-station-Kharchenko.xml"/>
     <include file="db/changelog/logs/ch-drop-table-order-employee-Kharchenko.xml"/>
+    <include file="db/changelog/logs/ch-add-column-notify-to-telegram-bot-Seti.xml"/>
+    <include file="/db/changelog/logs/ch-change-columns-location_status-to-tariff_status-in-table-tariff_info-Oliyarnik.xml"/>
+    <include file="/db/changelog/logs/ch-modify-column-address_comment-address-table-Andzheychak.xml"/>
+    <include file="db/changelog/logs/ch-update_big_order_table_view-Golik.xml"/>
+    <include file="db/changelog/logs/ch-delete-order-status-translations-Golik.xml"/>
+    <include file="db/changelog/logs/ch-update_big_order_table_view-Golik-1.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-note-in-orders-Golik.xml"/>
     <include file="db/changelog/logs/ch-drop-table-notification-templates-Safarov.xml"/>
     <include file="db/changelog/logs/ch-drop-table-notification-schedule-Safarov.xml"/>
     <include file="db/changelog/logs/ch-add-table-notification-templates-Safarov.xml"/>

@@ -54,6 +54,8 @@ public final class ErrorMessage {
     public static final String ADDRESS_NOT_FOUND = "Address not found";
     public static final String LOCATION_DOESNT_FOUND = "Location does not found";
     public static final String LOCATION_DOESNT_FOUND_BY_ID = "Location does not exist by id: ";
+    public static final String LOCATIONS_BELONG_TO_DIFFERENT_REGIONS =
+        "The locations belong to different regions. Please choose locations from the same region";
     public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown ";
     public static final String ORDER_ALREADY_HAS_VIOLATION = "Current order already has violation";
     public static final String ORDER_ALREADY_PAID = "Current order is already paid";
@@ -76,8 +78,6 @@ public final class ErrorMessage {
     public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
-    public static final String LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND =
-        "Payment with selected id does not belong LiqPay.";
     public static final String ORDER_WITH_CURRENT_ID_NOT_FOUND = "Couldn't find order with id that you chose";
     public static final String TO_MUCH_BIG_BAG_EXCEPTION = "You choose to much big bag's max amount is: ";
     public static final String PRICE_OF_ORDER_GREATER_THAN_LIMIT =

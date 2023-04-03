@@ -160,19 +160,6 @@ class ClientControllerTest {
     }
 
     @Test
-    void processOrderLiqpayTest() throws Exception {
-        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String dtoJson = objectMapper.writeValueAsString(dto);
-
-        this.mockMvc.perform(post(ubsLink + "/processOrderLiqpay")
-            .contentType(MediaType.APPLICATION_JSON)
-            .principal(principal)
-            .content(dtoJson))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     void getUserBonusesTest() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/user-bonuses")
             .principal(principal)).andExpect(status().isOk());
