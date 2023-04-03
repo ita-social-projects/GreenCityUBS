@@ -33,25 +33,39 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
      * {@inheritDoc}
      */
     @Override
-    public void update(Long id, NotificationTemplateWithPlatformsUpdateDto notificationDto) {
+    public void update(Long id, NotificationTemplateWithPlatformsUpdateDto dto) {
         NotificationTemplate template = getById(id);
-        template.setTitle(notificationDto.getTitle());
-        template.setTitleEng(notificationDto.getTitleEng());
-        template.setNotificationType(notificationDto.getType());
-        template.setTrigger(notificationDto.getTrigger());
-        template.setTime(notificationDto.getTime());
-        template.setSchedule(notificationDto.getSchedule());
-        List<NotificationPlatform> notificationPlatforms = template.getNotificationPlatforms();
-        List<NotificationPlatformDto> notificationPlatformDtos = notificationDto.getPlatforms();
 
-        for (int i = 0; i < notificationPlatforms.size(); i++) {
-            var notificationPlatform = notificationPlatforms.get(i);
-            var notificationPlatformDto = notificationPlatformDtos.get(i);
-            notificationPlatform.setNotificationReceiverType(notificationPlatformDto.getReceiverType());
-            notificationPlatform.setBody(notificationPlatformDto.getBody());
-            notificationPlatform.setBodyEng(notificationPlatformDto.getBodyEng());
+        updateNotificationTemplateFromDto(template, dto);
+    }
+
+    private void updateNotificationTemplateFromDto(NotificationTemplate template,
+        NotificationTemplateWithPlatformsUpdateDto dto) {
+        updateNotificationTemplate(template, dto);
+        updateNotificationTemplatePlatforms(template.getNotificationPlatforms(), dto.getPlatforms());
+    }
+
+    private void updateNotificationTemplate(NotificationTemplate template,
+        NotificationTemplateWithPlatformsUpdateDto dto) {
+        template.setTitle(dto.getTitle());
+        template.setTitleEng(dto.getTitleEng());
+        template.setNotificationType(dto.getType());
+        template.setTrigger(dto.getTrigger());
+        template.setTime(dto.getTime());
+        template.setSchedule(dto.getSchedule());
+    }
+
+    private void updateNotificationTemplatePlatforms(List<NotificationPlatform> platforms,
+        List<NotificationPlatformDto> platformDtos) {
+        for (NotificationPlatform platform : platforms) {
+            NotificationPlatformDto platformDto = platformDtos.stream()
+                .filter(dto -> dto.getId().equals(platform.getId()))
+                .findAny()
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_PLATFORM_NOT_FOUND));
+            platform.setBody(platformDto.getBody());
+            platform.setBodyEng(platformDto.getBodyEng());
+            platform.setNotificationStatus(platformDto.getStatus());
         }
-        notificationTemplateRepository.save(template);
     }
 
     /**

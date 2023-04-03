@@ -29,14 +29,15 @@ public class NotificationTemplateWithPlatformsDtoMapper
                 .notificationStatus(notificationTemplate.getNotificationStatus())
                 .build())
             .platforms(notificationTemplate.getNotificationPlatforms().stream()
-                .map(notificationPlatform -> NotificationPlatformDto.builder()
-                    .receiverType(notificationPlatform.getNotificationReceiverType())
-                    .nameEng(notificationPlatform
+                .map(platform -> NotificationPlatformDto.builder()
+                    .id(platform.getId())
+                    .receiverType(platform.getNotificationReceiverType())
+                    .nameEng(platform
                         .getNotificationReceiverType()
                         .getName())
-                    .body(notificationPlatform.getBody())
-                    .bodyEng(notificationPlatform.getBodyEng())
-                    .status(notificationPlatform.getNotificationStatus())
+                    .body(platform.getBody())
+                    .bodyEng(platform.getBodyEng())
+                    .status(platform.getNotificationStatus())
                     .build())
                 .collect(Collectors.toList()))
             .build();

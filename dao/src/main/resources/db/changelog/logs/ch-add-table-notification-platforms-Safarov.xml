@@ -7,9 +7,9 @@
             <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints primaryKey="true" primaryKeyName="notification_platforms_pkey"/>
             </column>
-            <column name="body" type="VARCHAR(1500)"/>
-            <column name="body_eng" type="VARCHAR(1500)"/>
-            <column name="notification_receiver_type" type="VARCHAR(20)"/>
+            <column name="body" type="VARCHAR(850)"/>
+            <column name="body_eng" type="VARCHAR(850)"/>
+            <column name="notification_receiver_type" type="VARCHAR(30)"/>
             <column name="notification_status" type="VARCHAR(25)"/>
             <column name="notification_id" type="BIGINT"/>
         </createTable>

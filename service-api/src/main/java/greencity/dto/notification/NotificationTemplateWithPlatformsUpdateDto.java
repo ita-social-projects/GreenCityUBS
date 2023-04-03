@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -33,5 +32,6 @@ public class NotificationTemplateWithPlatformsUpdateDto {
     private String titleEng;
     @NotNull
     private NotificationStatus notificationStatus;
-    private List<NotificationPlatformDto> platforms = new ArrayList<>();
+    @NotNull
+    private List<NotificationPlatformDto> platforms;
 }

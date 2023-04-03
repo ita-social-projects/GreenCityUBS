@@ -24,13 +24,13 @@ public class NotificationPlatform {
     @JoinColumn(name = "notification_id")
     private NotificationTemplate notificationTemplate;
 
-    @Column(name = "body", length = 1500)
+    @Column(name = "body")
     private String body;
 
-    @Column(name = "body_eng", length = 1500)
+    @Column(name = "body_eng")
     private String bodyEng;
 
-    @Column(nullable = false, name = "notification_receiver_type", length = 50)
+    @Column(nullable = false, name = "notification_receiver_type")
     @Enumerated(EnumType.STRING)
     private NotificationReceiverType notificationReceiverType;
 

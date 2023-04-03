@@ -4,6 +4,7 @@ import greencity.enums.*;
 import lombok.*;
 import lombok.experimental.Accessors;
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = "notificationPlatforms")
+@ToString
 @Accessors(chain = true)
 public class NotificationTemplate {
     @Id
@@ -27,9 +28,9 @@ public class NotificationTemplate {
         fetch = FetchType.LAZY,
         orphanRemoval = true)
     @Setter(AccessLevel.PRIVATE)
-    private List<NotificationPlatform> notificationPlatforms;
+    private List<NotificationPlatform> notificationPlatforms = new ArrayList<>();
 
-    @Column(nullable = false, name = "notification_type", length = 50)
+    @Column(nullable = false, name = "notification_type")
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 
@@ -48,9 +49,35 @@ public class NotificationTemplate {
     @Enumerated(EnumType.STRING)
     private NotificationStatus notificationStatus;
 
-    @Column(name = "title", length = 300)
+    @Column(name = "title")
     private String title;
 
-    @Column(name = "title_eng", length = 300)
+    @Column(name = "title_eng")
     private String titleEng;
+
+    /**
+     * helper method, that allows to save NotificationPlatform entity in database
+     * correctly.
+     *
+     * @param platform notification platform for NotificationTemplate
+     *                 {@link NotificationPlatform}
+     * @author Safarov Renat
+     */
+    public void addNotificationPlatform(NotificationPlatform platform) {
+        platform.setNotificationTemplate(this);
+        notificationPlatforms.add(platform);
+    }
+
+    /**
+     * helper method, that allows to remove NotificationPlatform entity from
+     * database correctly.
+     *
+     * @param platform notification platform for NotificationTemplate
+     *                 {@link NotificationPlatform}
+     * @author Safarov Renat
+     */
+    public void removeNotificationPlatform(NotificationPlatform platform) {
+        platform.setNotificationTemplate(null);
+        notificationPlatforms.remove(platform);
+    }
 }

@@ -15,6 +15,8 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class NotificationPlatformDto {
     @NotNull
+    private Long id;
+    @NotNull
     private NotificationReceiverType receiverType;
     @NotNull
     private String nameEng;

@@ -468,6 +468,7 @@ public class ModelUtils {
     public static NotificationPlatformDto getNotificationPlatformDto(
         NotificationReceiverType receiverType) {
         return NotificationPlatformDto.builder()
+            .id(1L)
             .receiverType(receiverType)
             .nameEng("Site")
             .body("Body")
