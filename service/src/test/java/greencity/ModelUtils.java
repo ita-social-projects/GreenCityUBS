@@ -38,7 +38,6 @@ import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.employee.EmployeePositionDtoResponse;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.GetEmployeeDto;
@@ -59,7 +58,6 @@ import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.EmployeeOrderPositionDTO;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.GroupedOrderDto;
@@ -128,6 +126,7 @@ import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
+import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -148,6 +147,11 @@ import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.NotificationType;
+import greencity.enums.NotificationTrigger;
+import greencity.enums.NotificationTime;
+import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.TariffStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -2108,6 +2112,23 @@ public class ModelUtils {
             .region(getRegion())
             .coordinates(getCoordinates())
             .build());
+    }
+
+    public static List<Location> getLocationList2() {
+        return List.of(Location.builder()
+            .id(1L)
+            .region(
+                Region.builder()
+                    .id(1L)
+                    .build())
+            .build(),
+            Location.builder()
+                .id(2L)
+                .region(
+                    Region.builder()
+                        .id(2L)
+                        .build())
+                .build());
     }
 
     private static Employee createEmployee() {

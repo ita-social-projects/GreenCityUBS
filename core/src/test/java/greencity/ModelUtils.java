@@ -48,7 +48,16 @@ import greencity.dto.user.*;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
-import greencity.enums.*;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.AddressStatus;
+import greencity.enums.NotificationType;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationTime;
+import greencity.enums.NotificationTrigger;
+import greencity.enums.CancellationReason;
+import greencity.enums.CourierLimit;
 import org.springframework.http.HttpStatus;
 
 import java.security.Principal;
