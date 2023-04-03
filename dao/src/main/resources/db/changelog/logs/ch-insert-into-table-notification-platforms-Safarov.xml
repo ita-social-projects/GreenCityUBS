@@ -131,6 +131,48 @@
             <column name="notification_id">6</column>
         </insert>
         <insert tableName="notification_platforms">
+            <column name="body">Вітання! Ваше порушення було скасоване</column>
+            <column name="body_eng">Hello! Your violation has been canceled</column>
+            <column name="notification_receiver_type">EMAIL</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">7</column>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Вітання! Ваше порушення було скасоване</column>
+            <column name="body_eng">Hello! Your violation has been canceled</column>
+            <column name="notification_receiver_type">SITE</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">7</column>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Вітання! Ваше порушення було скасоване</column>
+            <column name="body_eng">Hello! Your violation has been canceled</column>
+            <column name="notification_receiver_type">MOBILE</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">7</column>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Вітання! В нас відбулися зміни в порушеннях правил сортування</column>
+            <column name="body_eng">Hello! We have made changes regarding violations of sorting rules</column>
+            <column name="notification_receiver_type">EMAIL</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">8</column>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Вітання! В нас відбулися зміни в порушеннях правил сортування</column>
+            <column name="body_eng">Hello! We have made changes regarding violations of sorting rules</column>
+            <column name="notification_receiver_type">SITE</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">8</column>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Вітання! В нас відбулися зміни в порушеннях правил сортування</column>
+            <column name="body_eng">Hello! We have made changes regarding violations of sorting rules</column>
+            <column name="notification_receiver_type">MOBILE</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">8</column>
+        </insert>
+        <insert tableName="notification_platforms">
             <column name="body">Привіт! Ми помітили, що ви не користувалися послугою «УБС Кур‘єр» уже %d місяці(в). Можливо, ви вирушили в тривалу подорож, а можливо, щось пішло не так зі збиранням пластиків. Поділіться, будь ласка, цим із нами, щоб ми зрозуміли, чи можемо допомогти і як саме.</column>
             <column name="body_eng">Hi there! We noticed that you have not used the UBS Courier service for %d months. Maybe you went on a long journey, or maybe something went wrong with collecting plastics. Please share this with us so we can understand if we can help and how.</column>
             <column name="notification_receiver_type">EMAIL</column>
