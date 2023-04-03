@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Kulbaba-1" author="Oleh Kulbaba">
+        <insert tableName="notification_templates">
+            <column name="language_code">ua</column>
+            <column name="notification_type">ORDER_BROUGHT_BY_HIMSELF</column>
+            <column name="title">Статус замовлення: "Привезе сам"</column>
+            <column name="body">Шановний клієнте! Ви підтвердили, що замовлення буде привезено Вами на Станцію приймання самостійно. Звертаємо Вашу увагу на необхідність здійснення розрахунків безпосередньо на Станції приймання. Дякуємо!</column>
+            <column name="notification_receiver_type">SITE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="language_code">en</column>
+            <column name="notification_type">ORDER_BROUGHT_BY_HIMSELF</column>
+            <column name="title">Order status: "Brought by himself"</column>
+            <column name="body">Dear client! You are confirmed the order will be brought by yourself to the Receiving station. We draw your attention to the necessity of making payment at the Receiving station. Thank you</column>
+            <column name="notification_receiver_type">SITE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="language_code">ua</column>
+            <column name="notification_type">ORDER_BROUGHT_BY_HIMSELF</column>
+            <column name="title">Статус замовлення: "Привезе сам"</column>
+            <column name="body">Шановний клієнте! Ви підтвердили, що замовлення буде привезено Вами на Станцію приймання самостійно. Звертаємо Вашу увагу на необхідність здійснення розрахунків безпосередньо на Станції приймання. Дякуємо!</column>
+            <column name="notification_receiver_type">OTHER</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="language_code">en</column>
+            <column name="notification_type">ORDER_BROUGHT_BY_HIMSELF</column>
+            <column name="title">Order status: "Brought by himself"</column>
+            <column name="body">Dear client! You are confirmed the order will be brought by yourself to the Receiving station. We draw your attention to the necessity of making payment at the Receiving station. Thank you</column>
+            <column name="notification_receiver_type">OTHER</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

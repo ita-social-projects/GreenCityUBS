@@ -1565,6 +1565,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     }
                 }
             }
+            if(updateOrderPageDto.getGeneralOrderInfo().getOrderStatus().equals("Brought by himself")){
+                notificationService.notifyOrderBroughtByHimself(order);
+            }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }

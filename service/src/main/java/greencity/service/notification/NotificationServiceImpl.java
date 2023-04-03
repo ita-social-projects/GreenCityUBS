@@ -289,8 +289,14 @@ public class NotificationServiceImpl implements NotificationService {
         tryToSendNotificationForInactiveUser(callableGetInactiveUsersTasks);
     }
 
+    @Override
+    public void notifyOrderBroughtByHimself(Order order) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+        fillAndSendNotification(parameters, order, NotificationType.ORDER_BROUGHT_BY_HIMSELF);
+    }
+
     private void findInactiveUsers(Long[] monthsList, List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks,
-        List<Long> userIdsByLastNotifications) {
+                                   List<Long> userIdsByLastNotifications) {
         Arrays.stream(monthsList).forEach(months -> {
             LocalDate dateOfLastOrder = LocalDate.now(clock).minusMonths(months);
             callableGetInactiveUsersTasks.add(() -> {
