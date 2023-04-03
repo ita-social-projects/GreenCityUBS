@@ -54,7 +54,6 @@ public class BigOrderTableViews {
     private Long responsibleCallerId;
     private String responsibleNavigator;
     private Long responsibleNavigatorId;
-    private String commentsForOrder;
     private Boolean isBlocked;
     private String blockedBy;
     private Long tariffsInfoId;

@@ -127,7 +127,6 @@ public class ModelUtils {
             .setResponsibleCaller("Test, User")
             .setResponsibleNavigatorId(3L)
             .setResponsibleNavigator("Migno, Tekku")
-            .setCommentsForOrder("criteria")
             .setIsBlocked(false)
             .setBlockedBy("")
             .setTariffsInfoId(1L);
@@ -173,7 +172,6 @@ public class ModelUtils {
             .setResponsibleCaller("Tapsoy, Ipsi")
             .setResponsibleNavigatorId(10L)
             .setResponsibleNavigator("Abu, Dabi")
-            .setCommentsForOrder("criteria")
             .setIsBlocked(false)
             .setBlockedBy("")
             .setTariffsInfoId(1L);
@@ -207,7 +205,6 @@ public class ModelUtils {
             .setTotalPayment(0L)
             .setDateOfExport(LocalDate.parse("2022-02-05", DATE_TIME_FORMATTER))
             .setTimeOfExport("10:00:00-18:00:10")
-            .setCommentsForOrder("criteria")
             .setIsBlocked(true)
             .setBlockedBy("Abu, Dabi")
             .setTariffsInfoId(1L);
@@ -240,7 +237,6 @@ public class ModelUtils {
             .setTotalPayment(0L)
             .setDateOfExport(LocalDate.parse("2022-02-05", DATE_TIME_FORMATTER))
             .setTimeOfExport("10:00:00-18:00:10")
-            .setCommentsForOrder("sorting")
             .setIsBlocked(false)
             .setBlockedBy("")
             .setTariffsInfoId(1L);
@@ -285,7 +281,6 @@ public class ModelUtils {
             .setResponsibleCaller("Tapsoy, Ipsi")
             .setResponsibleNavigatorId(15L)
             .setResponsibleNavigator("Test, User")
-            .setCommentsForOrder("filtering")
             .setIsBlocked(false)
             .setBlockedBy("")
             .setTariffsInfoId(1L);
@@ -331,7 +326,6 @@ public class ModelUtils {
             .setResponsibleCaller("Tapsoy, Ipsi")
             .setResponsibleNavigatorId(15L)
             .setResponsibleNavigator("Test, User")
-            .setCommentsForOrder("searching")
             .setIsBlocked(false)
             .setBlockedBy("")
             .setTariffsInfoId(1L);

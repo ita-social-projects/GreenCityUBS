@@ -3277,7 +3277,6 @@ public class ModelUtils {
             .setResponsibleDriverId(1L)
             .setResponsibleCallerId(1L)
             .setResponsibleNavigatorId(1L)
-            .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
     }
@@ -3318,7 +3317,6 @@ public class ModelUtils {
             .setResponsibleDriver("1")
             .setResponsibleCaller("1")
             .setResponsibleNavigator("1")
-            .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
     }

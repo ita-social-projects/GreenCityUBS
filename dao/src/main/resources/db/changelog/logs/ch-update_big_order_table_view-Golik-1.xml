@@ -3,6 +3,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <changeSet id="Golik-1" author="Maksym Golik">
+        <dropView viewName="big_order_table"/>
         <createView
                 viewName="big_order_table"
                 replaceIfExists="true">
@@ -88,8 +89,6 @@
                     left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=4 )   as responsible_navigator,
                 (select e.id from employee_order_position eop
                     left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=4 )   as responsible_navigator_id,
-
-                o.note as comments_for_order,
                 o.blocked as is_blocked,
                 concat_ws(', ',e.first_name,e.last_name) as blocked_by,
                 a.region_en as region_en,

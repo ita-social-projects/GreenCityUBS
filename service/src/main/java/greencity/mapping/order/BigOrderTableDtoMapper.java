@@ -32,7 +32,6 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
             .setCommentToAddressForClient(bigViews.getCommentToAddressForClient())
             .setCommentForOrderByClient(bigViews.getCommentForOrderByClient())
             .setCommentForOrderByAdmin(bigViews.getCommentForOrderByAdmin())
-            .setCommentsForOrder(bigViews.getCommentsForOrder())
             .setBagsAmount(bigViews.getBagAmount())
             .setTotalOrderSum(bigViews.getTotalOrderSum())
             .setOrderCertificateCode(bigViews.getOrderCertificateCode())
