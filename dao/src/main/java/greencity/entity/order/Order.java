@@ -110,8 +110,6 @@ public class Order {
     @JoinColumn(name = "receiving_station_id")
     private ReceivingStation receivingStation;
 
-    private String note;
-
     @Column(name = "deliver_from")
     private LocalDateTime deliverFrom;
 

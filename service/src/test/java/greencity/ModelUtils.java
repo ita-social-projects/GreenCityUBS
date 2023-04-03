@@ -3267,6 +3267,7 @@ public class ModelUtils {
             .setGeneralDiscount(100L)
             .setAmountDue(0L)
             .setCommentForOrderByClient("commentForOrderByClient")
+            .setCommentForOrderByAdmin("commentForOrderByAdmin")
             .setTotalPayment(200L)
             .setDateOfExport(LocalDate.of(2021, 12, 8))
             .setTimeOfExport("from 15:59:52 to 15:59:52")
@@ -3276,7 +3277,6 @@ public class ModelUtils {
             .setResponsibleDriverId(1L)
             .setResponsibleCallerId(1L)
             .setResponsibleNavigatorId(1L)
-            .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
     }
@@ -3307,6 +3307,7 @@ public class ModelUtils {
             .setGeneralDiscount(100L)
             .setAmountDue(0L)
             .setCommentForOrderByClient("commentForOrderByClient")
+            .setCommentForOrderByAdmin("commentForOrderByAdmin")
             .setTotalPayment(200L)
             .setDateOfExport("2021-12-08")
             .setTimeOfExport("from 15:59:52 to 15:59:52")
@@ -3316,7 +3317,6 @@ public class ModelUtils {
             .setResponsibleDriver("1")
             .setResponsibleCaller("1")
             .setResponsibleNavigator("1")
-            .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
     }

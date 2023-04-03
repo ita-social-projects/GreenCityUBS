@@ -39,6 +39,7 @@ public class BigOrderTableViews {
     private Long generalDiscount;
     private Long amountDue;
     private String commentForOrderByClient;
+    private String commentForOrderByAdmin;
     private Long totalPayment;
     private LocalDate dateOfExport;
     private String timeOfExport;
@@ -53,7 +54,6 @@ public class BigOrderTableViews {
     private Long responsibleCallerId;
     private String responsibleNavigator;
     private Long responsibleNavigatorId;
-    private String commentsForOrder;
     private Boolean isBlocked;
     private String blockedBy;
     private Long tariffsInfoId;
