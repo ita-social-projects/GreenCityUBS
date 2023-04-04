@@ -85,7 +85,7 @@ class NotificationTemplateServiceImplTest {
     }
 
     @Test
-    public void updateThrowNotFoundExceptionForNotificationTemplateTest() {
+    void updateThrowNotFoundExceptionForNotificationTemplateTest() {
         Long id = 1L;
 
         var dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
@@ -99,7 +99,7 @@ class NotificationTemplateServiceImplTest {
     }
 
     @Test
-    public void updateThrowNotFoundExceptionForNotificationPlatform() {
+    void updateThrowNotFoundExceptionForNotificationPlatform() {
         Long id = 1L;
 
         var dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
