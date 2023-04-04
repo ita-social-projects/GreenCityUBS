@@ -147,9 +147,6 @@ import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.NotificationType;
-import greencity.enums.NotificationTrigger;
-import greencity.enums.NotificationTime;
-import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.TariffStatus;
 import greencity.enums.OrderPaymentStatus;
@@ -179,6 +176,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import static greencity.enums.NotificationReceiverType.*;
+import static greencity.enums.NotificationStatus.ACTIVE;
+import static greencity.enums.NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID;
+import static greencity.enums.NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS;
+import static greencity.enums.NotificationType.UNPAID_ORDER;
 import static greencity.enums.ViolationLevel.MAJOR;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -213,7 +214,15 @@ public class ModelUtils {
     public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
+    public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = createNotificationTemplateDto();
+
+    public static final NotificationTemplateWithPlatformsUpdateDto TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO =
+        createNotificationTemplateWithPlatformsUpdateDto();
+
+    public static final NotificationTemplateWithPlatformsDto TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO =
+        createNotificationTemplateWithPlatformsDto();
     public static final Pageable TEST_PAGEABLE = PageRequest.of(0, 5, Sort.by("notificationTime").descending());
+    public static final Pageable TEST_NOTIFICATION_PAGEABLE = PageRequest.of(0, 5, Sort.by("id").descending());
     public static final NotificationShortDto TEST_NOTIFICATION_SHORT_DTO = createNotificationShortDto();
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
         List.of(TEST_NOTIFICATION_SHORT_DTO);
@@ -223,6 +232,9 @@ public class ModelUtils {
     public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
     public static final Page<UserNotification> TEST_PAGE =
         new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
+
+    public static final Page<NotificationTemplate> TEMPLATE_PAGE =
+        new PageImpl<>(List.of(TEST_NOTIFICATION_TEMPLATE), TEST_PAGEABLE, 1L);
     public static final AdditionalBagInfoDto TEST_ADDITIONAL_BAG_INFO_DTO = createAdditionalBagInfoDto();
     public static final List<AdditionalBagInfoDto> TEST_ADDITIONAL_BAG_INFO_DTO_LIST = createAdditionalBagInfoDtoList();
     public static final Map<String, Object> TEST_MAP_ADDITIONAL_BAG = createMap();
@@ -2190,16 +2202,71 @@ public class ModelUtils {
             1);
     }
 
-    private static NotificationTemplate createNotificationTemplate() {
-        return NotificationTemplate.builder()
-            .id(1L)
-            .notificationType(NotificationType.UNPAID_ORDER)
-            .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
-            .time(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+    private static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {
+        return NotificationTemplateWithPlatformsUpdateDto.builder()
+            .type(UNPAID_ORDER)
+            .trigger(ORDER_NOT_PAID_FOR_3_DAYS)
+            .time(AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
             .schedule("0 0 18 * * ?")
             .title("Title")
             .titleEng("TitleEng")
-            .notificationStatus(NotificationStatus.ACTIVE)
+            .notificationStatus(ACTIVE)
+            .platforms(List.of(
+                createNotificationPlatformDto(SITE)))
+            .build();
+    }
+
+    private static NotificationTemplateWithPlatformsDto createNotificationTemplateWithPlatformsDto() {
+        return NotificationTemplateWithPlatformsDto.builder()
+            .notificationTemplateMainInfoDto(createNotificationTemplateMainInfoDto())
+            .platforms(List.of(createNotificationPlatformDto(SITE)))
+            .build();
+    }
+
+    private static NotificationPlatformDto createNotificationPlatformDto(NotificationReceiverType receiverType) {
+        return NotificationPlatformDto.builder()
+            .id(1L)
+            .receiverType(receiverType)
+            .nameEng("NameEng")
+            .body("Body")
+            .bodyEng("BodyEng")
+            .status(ACTIVE)
+            .build();
+    }
+
+    private static NotificationTemplateDto createNotificationTemplateDto() {
+        return NotificationTemplateDto.builder()
+            .id(1L)
+            .notificationTemplateMainInfoDto(createNotificationTemplateMainInfoDto())
+            .build();
+    }
+
+    private static NotificationTemplateMainInfoDto createNotificationTemplateMainInfoDto() {
+        return NotificationTemplateMainInfoDto.builder()
+            .type(UNPAID_ORDER)
+            .trigger(ORDER_NOT_PAID_FOR_3_DAYS)
+            .triggerDescription("Trigger")
+            .triggerDescriptionEng("TriggerEng")
+            .time(AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .timeDescription("Description")
+            .timeDescriptionEng("DescriptionEng")
+            .schedule("0 0 18 * * ?")
+            .title("Title")
+            .titleEng("TitleEng")
+            .notificationStatus(ACTIVE)
+            .build();
+    }
+
+    private static NotificationTemplate createNotificationTemplate() {
+        return NotificationTemplate.builder()
+            .id(1L)
+            .notificationType(UNPAID_ORDER)
+            .trigger(ORDER_NOT_PAID_FOR_3_DAYS)
+            .time(AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .schedule("0 0 18 * * ?")
+            .title("Title")
+            .titleEng("TitleEng")
+            .notificationStatus(ACTIVE)
             .notificationPlatforms(List.of(
                 createNotificationPlatform(SITE),
                 createNotificationPlatform(EMAIL),
@@ -2214,7 +2281,7 @@ public class ModelUtils {
             .body("Body")
             .bodyEng("BodyEng")
             .notificationReceiverType(receiverType)
-            .notificationStatus(NotificationStatus.ACTIVE)
+            .notificationStatus(ACTIVE)
             .build();
     }
 
@@ -2227,7 +2294,7 @@ public class ModelUtils {
         notification.setOrder(Order.builder()
             .id(1L)
             .build());
-        notification.setNotificationType(NotificationType.UNPAID_ORDER);
+        notification.setNotificationType(UNPAID_ORDER);
         return List.of(
             notification);
     }
@@ -2335,7 +2402,7 @@ public class ModelUtils {
             .build());
         notification.setRead(false);
         notification.setParameters(null);
-        notification.setNotificationType(NotificationType.UNPAID_ORDER);
+        notification.setNotificationType(UNPAID_ORDER);
         return notification;
     }
 

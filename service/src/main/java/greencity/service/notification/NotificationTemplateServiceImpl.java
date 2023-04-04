@@ -98,7 +98,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
      * {@inheritDoc}
      */
     private NotificationTemplate getById(Long id) {
-        return notificationTemplateRepository.findNotificationTemplateById(id)
+        return notificationTemplateRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND));
     }
 }

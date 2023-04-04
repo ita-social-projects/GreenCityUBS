@@ -27,20 +27,4 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
     Optional<NotificationTemplate> findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
         @Param(value = "type") NotificationType type,
         @Param(value = "receiverType") NotificationReceiverType receiverType);
-
-    /**
-     * Method, that returns {@link Optional} of {@link NotificationTemplate} by id.
-     *
-     *
-     * @return {@link Optional} of {@link NotificationTemplate}.
-     * @author Dima Sannytski
-     */
-    Optional<NotificationTemplate> findNotificationTemplateById(Long id);
-
-    /**
-     * Method that returns all notification templates.
-     *
-     * @author Dima Sannytski
-     */
-    Page<NotificationTemplate> findAll(Pageable pageable);
 }
