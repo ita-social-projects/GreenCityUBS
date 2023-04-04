@@ -88,6 +88,7 @@ public final class ErrorMessage {
         "SOME CERTIFICATES ARE INVALID. A valid certificate is listed here";
     public static final String CERTIFICATE_NOT_FOUND = "CERTIFICATE_NOT_FOUND";
     public static final String NOTIFICATION_TEMPLATE_NOT_FOUND = "Notification template doesn't exist";
+    public static final String NOTIFICATION_PLATFORM_NOT_FOUND = "Notification platform doesn't exist";
     public static final String LOCATION_ALREADY_EXIST = " that you try to add was already created early";
     public static final String INCORRECT_ECO_NUMBER = "Incorrect format of Eco number";
     public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";

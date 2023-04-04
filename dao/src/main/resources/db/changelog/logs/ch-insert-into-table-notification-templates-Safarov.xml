@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Safarov-11" author="Safarov Renat">
+        <insert tableName="notification_templates">
+            <column name="notification_type">UNPAID_ORDER</column>
+            <column name="trigger">ORDER_NOT_PAID_FOR_3_DAYS</column>
+            <column name="time">AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID</column>
+            <column name="schedule">0 0 18 * * ?</column>
+            <column name="title">Неоплачене замовлення</column>
+            <column name="title_eng">Unpaid order</column>
+            <column name="notification_status">ACTIVE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="notification_type">ORDER_IS_PAID</column>
+            <column name="trigger">PAYMENT_SYSTEM_RESPONSE</column>
+            <column name="time">IMMEDIATELY</column>
+            <column name="title">Оплата пройшла успішно</column>
+            <column name="title_eng">The payment was successful</column>
+            <column name="notification_status">ACTIVE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="notification_type">COURIER_ITINERARY_FORMED</column>
+            <column name="trigger">ORDER_ADDED_TO_ITINERARY_STATUS_CONFIRMED</column>
+            <column name="time">IMMEDIATELY</column>
+            <column name="title">Маршрут сформовано</column>
+            <column name="title_eng">The courier route formed</column>
+            <column name="notification_status">ACTIVE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="notification_type">UNPAID_PACKAGE</column>
+            <column name="trigger">STATUS_PARTIALLY_PAID</column>
+            <column name="time">IMMEDIATELY</column>
+            <column name="title">Оплатіть різницю у замовлені</column>
+            <column name="title_eng">Pay the change in the order</column>
+            <column name="notification_status">ACTIVE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="notification_type">ACCRUED_BONUSES_TO_ACCOUNT</column>
+            <column name="trigger">OVERPAYMENT_WHEN_STATUS_DONE</column>
+            <column name="time">IMMEDIATELY</column>
+            <column name="title">Нараховано бонуси</column>
+            <column name="title_eng">Accrued bonuses to the account</column>
+            <column name="notification_status">ACTIVE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="notification_type">VIOLATION_THE_RULES</column>
+            <column name="trigger">ORDER_VIOLATION_ADDED</column>
+            <column name="time">IMMEDIATELY</column>
+            <column name="title">Недотримання правил</column>
+            <column name="title_eng">Violation of the rules</column>
+            <column name="notification_status">ACTIVE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="notification_type">CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER</column>
+            <column name="trigger">ORDER_VIOLATION_CANCELED</column>
+            <column name="time">IMMEDIATELY</column>
+            <column name="title">Відміна порушення правил</column>
+            <column name="title_eng">Cancellation of violation of sorting rules</column>
+            <column name="notification_status">ACTIVE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="notification_type">CHANGED_IN_RULE_VIOLATION_STATUS</column>
+            <column name="trigger">ORDER_VIOLATION_CHANGED</column>
+            <column name="time">IMMEDIATELY</column>
+            <column name="title">Зміни в порушеннях правил сортування</column>
+            <column name="title_eng">Changes in violations of sorting rules</column>
+            <column name="notification_status">ACTIVE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="notification_type">LETS_STAY_CONNECTED</column>
+            <column name="trigger">TWO_MONTHS_AFTER_LAST_ORDER</column>
+            <column name="time">IMMEDIATELY</column>
+            <column name="title">Давайте залишатися на зв'язку</column>
+            <column name="title_eng">Let's stay connected</column>
+            <column name="notification_status">ACTIVE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="notification_type">BONUSES_FROM_CANCELLED_ORDER</column>
+            <column name="trigger">ORDER_WAS_CANCELED</column>
+            <column name="time">IMMEDIATELY</column>
+            <column name="title">Нараховано бонуси</column>
+            <column name="title_eng">Bonus points added</column>
+            <column name="notification_status">ACTIVE</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
