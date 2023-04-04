@@ -936,6 +936,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             orderRepository.save(order);
         }
         if (nonNull(dto.getOrderStatus())) {
+            OrderStatus previousStatus = order.getOrderStatus();
             order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
                 notificationService.notifyCourierItineraryFormed(order);
@@ -953,11 +954,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
                 eventService.saveEvent(OrderHistory.ORDER_DONE, email, order);
             } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
+                if(previousStatus == OrderStatus.FORMED){
+                    notificationService.notifyOrderBroughtByHimself(order);
+                }
                 eventService.saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, order);
             } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE) {
                 eventService.saveEvent(OrderHistory.ORDER_ON_THE_ROUTE, email, order);
             }
             orderRepository.save(order);
+
         }
         if (nonNull(dto.getOrderPaymentStatus())) {
             paymentRepository.findAllByOrderId(id)
@@ -1564,9 +1569,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         employeeOrderPositionRepository.deleteAll(employeeOrderPositions);
                     }
                 }
-            }
-            if(updateOrderPageDto.getGeneralOrderInfo().getOrderStatus().equals("Brought by himself")){
-                notificationService.notifyOrderBroughtByHimself(order);
             }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
