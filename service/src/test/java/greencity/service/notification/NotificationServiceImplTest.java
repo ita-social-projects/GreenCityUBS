@@ -383,9 +383,8 @@ class NotificationServiceImplTest {
         when(userRepository.findByUuid("Test")).thenReturn(TEST_USER);
         when(userNotificationRepository.findAllByUser(TEST_USER, TEST_PAGEABLE))
             .thenReturn(TEST_PAGE);
-        when(templateRepository.findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             NotificationType.UNPAID_ORDER,
-            "ua",
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
         PageableDto<NotificationShortDto> actual = notificationService
@@ -402,9 +401,8 @@ class NotificationServiceImplTest {
     @Test
     void testGetNotification() {
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(TEST_USER_NOTIFICATION_4));
-        when(templateRepository.findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             NotificationType.UNPAID_ORDER,
-            "ua",
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
         NotificationDto actual = notificationService.getNotification("test", 1L, "ua");
@@ -425,9 +423,8 @@ class NotificationServiceImplTest {
         UserNotification notification = createUserNotificationForViolation();
         notification.getUser().setUuid("abc");
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
-        when(templateRepository.findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             NotificationType.VIOLATION_THE_RULES,
-            "ua",
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
         when(violationRepository.findByOrderId(notification.getOrder().getId()))
             .thenReturn(Optional.of(getViolation()));
@@ -442,9 +439,8 @@ class NotificationServiceImplTest {
         UserNotification notification = createUserNotificationForViolation();
         notification.getUser().setUuid("abc");
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
-        when(templateRepository.findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             NotificationType.VIOLATION_THE_RULES,
-            "ua",
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
         when(violationRepository.findByOrderId(notification.getOrder().getId()))
             .thenReturn(Optional.empty());

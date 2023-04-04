@@ -7,10 +7,8 @@ import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
-import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.service.ubs.NotificationService;
-import greencity.service.ubs.NotificationTemplatesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -22,7 +20,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
 import java.util.Locale;
 
 @RestController
@@ -31,7 +28,6 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class NotificationController {
     private final NotificationService notificationService;
-    private final NotificationTemplatesService notificationTemplatesService;
 
     /**
      * Controller return body of the notification and set status - is read.
@@ -100,44 +96,4 @@ public class NotificationController {
      *
      * @author Natalia Kozak
      */
-
-    @ApiOperation(value = "Update body in notification template for SITE notifications")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PutMapping(value = "/updateTemplateForSITE")
-    public ResponseEntity<HttpStatus> updateNotificationTemplateForSITE(
-        @Valid @RequestBody UpdateNotificationTemplatesDto updateNotificationTemplatesDto,
-        @ApiIgnore @ValidLanguage Locale locale) {
-        notificationTemplatesService.updateNotificationTemplateForSITE(updateNotificationTemplatesDto.getBody(),
-            updateNotificationTemplatesDto.getNotificationType(), locale.getLanguage());
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    /**
-     * Controller updates body in notification templates for receiving type OTHER.
-     *
-     * @author Natalia Kozak
-     */
-
-    @ApiOperation(value = "Update body in notification template for OTHER notifications")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PutMapping(value = "/updateTemplateForOTHER")
-    public ResponseEntity<HttpStatus> updateNotificationTemplateForOTHER(
-        @Valid @RequestBody UpdateNotificationTemplatesDto updateNotificationTemplatesDto,
-        @ApiIgnore @ValidLanguage Locale locale) {
-        notificationTemplatesService.updateNotificationTemplateForOTHER(updateNotificationTemplatesDto.getBody(),
-            updateNotificationTemplatesDto.getNotificationType(), locale.getLanguage());
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
 }

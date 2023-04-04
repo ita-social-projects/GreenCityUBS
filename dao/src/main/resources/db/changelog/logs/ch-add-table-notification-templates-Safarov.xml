@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Safarov-9" author="Safarov Renat">
+        <createTable tableName="notification_templates">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="notification_templates_pkey"/>
+            </column>
+            <column name="notification_type" type="VARCHAR(255)"/>
+            <column name="trigger" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schedule" type="VARCHAR(50)"/>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_eng" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_status" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

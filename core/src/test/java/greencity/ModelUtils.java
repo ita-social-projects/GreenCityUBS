@@ -17,9 +17,11 @@ import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.notification.NotificationDto;
-import greencity.dto.notification.NotificationScheduleDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
-import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.EcoNumberDto;
@@ -46,12 +48,16 @@ import greencity.dto.user.*;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
-import greencity.enums.AddressStatus;
-import greencity.enums.CancellationReason;
-import greencity.enums.CourierLimit;
-import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.AddressStatus;
+import greencity.enums.NotificationType;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationTime;
+import greencity.enums.NotificationTrigger;
+import greencity.enums.CancellationReason;
+import greencity.enums.CourierLimit;
 import org.springframework.http.HttpStatus;
 
 import java.security.Principal;
@@ -68,9 +74,6 @@ import java.util.stream.Collectors;
 import static greencity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
-
-    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
-        new NotificationScheduleDto().setCron("0 0 18 * * ?");
 
     public static Principal getPrincipal() {
         return () -> "test@gmail.com";
@@ -415,12 +418,64 @@ public class ModelUtils {
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
-        return new NotificationTemplateDto()
-            .setId(1L)
-            .setTitle("test")
-            .setBody("test")
-            .setNotificationType("UNPAID_ORDER")
-            .setSchedule(NOTIFICATION_SCHEDULE_DTO);
+        return NotificationTemplateDto.builder()
+            .id(1L)
+            .notificationTemplateMainInfoDto(getNotificationTemplateMainInfoDto())
+            .build();
+    }
+
+    public static NotificationTemplateWithPlatformsDto getNotificationTemplateWithPlatformsDto() {
+        return NotificationTemplateWithPlatformsDto.builder()
+            .notificationTemplateMainInfoDto(getNotificationTemplateMainInfoDto())
+            .platforms(List.of(
+                getNotificationPlatformDto(NotificationReceiverType.SITE)))
+            .build();
+    }
+
+    public static NotificationTemplateWithPlatformsUpdateDto getNotificationTemplateWithPlatformsUpdateDto() {
+        return NotificationTemplateWithPlatformsUpdateDto.builder()
+            .type(NotificationType.UNPAID_ORDER)
+            .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
+            .time(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .schedule("0 0 18 * * ?")
+            .title("Неопачене замовлення")
+            .titleEng("Unpaid order")
+            .notificationStatus(NotificationStatus.ACTIVE)
+            .platforms(List.of(
+                getNotificationPlatformDto(NotificationReceiverType.SITE)))
+            .build();
+    }
+
+    public static NotificationTemplateMainInfoDto getNotificationTemplateMainInfoDto() {
+        return NotificationTemplateMainInfoDto.builder()
+            .type(NotificationType.UNPAID_ORDER)
+            .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
+            .triggerDescription(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS
+                .getDescription())
+            .triggerDescriptionEng(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS
+                .getDescriptionEng())
+            .time(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .timeDescription(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID
+                .getDescription())
+            .timeDescriptionEng(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID
+                .getDescriptionEng())
+            .schedule("0 0 18 * * ?")
+            .title("Неопачене замовлення")
+            .titleEng("Unpaid order")
+            .notificationStatus(NotificationStatus.ACTIVE)
+            .build();
+    }
+
+    public static NotificationPlatformDto getNotificationPlatformDto(
+        NotificationReceiverType receiverType) {
+        return NotificationPlatformDto.builder()
+            .id(1L)
+            .receiverType(receiverType)
+            .nameEng("Site")
+            .body("Body")
+            .bodyEng("BodyEng")
+            .status(NotificationStatus.ACTIVE)
+            .build();
     }
 
     public static UpdateAllOrderPageDto getUpdateAllOrderPageDto() {
@@ -466,13 +521,6 @@ public class ModelUtils {
                 .firstName("Test")
                 .lastName("Test")
                 .build())
-            .build();
-    }
-
-    public static UpdateNotificationTemplatesDto getUpdateNotificationTemplatesDto() {
-        return UpdateNotificationTemplatesDto.builder()
-            .body("You have unpaid order")
-            .notificationType(NotificationType.UNPAID_ORDER.toString())
             .build();
     }
 
