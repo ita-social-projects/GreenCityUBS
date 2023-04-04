@@ -40,6 +40,7 @@ public class AddressDto implements Serializable {
     @Pattern(regexp = CH_UA + "{1,50}")
     private String street;
 
+    @Length(max = 255)
     private String addressComment;
 
     private Coordinates coordinates;

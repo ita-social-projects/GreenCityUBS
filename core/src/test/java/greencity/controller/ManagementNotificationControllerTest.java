@@ -1,9 +1,14 @@
 package greencity.controller;
 
-import java.security.Principal;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
+import greencity.configuration.SecurityConfig;
+import greencity.converters.UserArgumentResolver;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.NotFoundException;
+import greencity.service.notification.NotificationTemplateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,20 +26,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
-import greencity.configuration.SecurityConfig;
-import greencity.converters.UserArgumentResolver;
-import greencity.dto.notification.NotificationTemplateDto;
-import greencity.exception.handler.CustomExceptionHandler;
-import greencity.service.notification.NotificationTemplateService;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.security.Principal;
+import java.util.List;
 
 import static greencity.ModelUtils.getUuid;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -73,10 +70,11 @@ class ManagementNotificationControllerTest {
     @Test
     void updateNotificationTemplateTest() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        String JsonDto = objectMapper.writeValueAsString(ModelUtils.getNotificationTemplateDto());
-        mockMvc.perform(put(url + "/update-template")
+        String jsonDto = objectMapper.writeValueAsString(
+            ModelUtils.getNotificationTemplateWithPlatformsUpdateDto());
+        mockMvc.perform(put(url + "/update-template/{id}", 1L)
             .principal(principal)
-            .content(JsonDto)
+            .content(jsonDto)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
@@ -84,8 +82,8 @@ class ManagementNotificationControllerTest {
     @Test
     void getNotificationTemplateTest() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(ModelUtils.getNotificationTemplateDto());
-        mockMvc.perform(MockMvcRequestBuilders.get(url + "/get-template/" + 1L)
+        String responseJSON = objectMapper.writeValueAsString(ModelUtils.getNotificationTemplateWithPlatformsDto());
+        mockMvc.perform(MockMvcRequestBuilders.get(url + "/get-template/{id}", 1L)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
@@ -94,10 +92,12 @@ class ManagementNotificationControllerTest {
     @Test
     void saveBadRequestTest() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        NotificationTemplateDto dto = ModelUtils.getNotificationTemplateDto();
+        NotificationTemplateWithPlatformsUpdateDto dto = ModelUtils.getNotificationTemplateWithPlatformsUpdateDto();
+        Long id = 1L;
         String JsonDto = objectMapper.writeValueAsString(dto);
-        Mockito.doThrow(NotFoundException.class).when(notificationTemplateService).update(dto);
-        mockMvc.perform(put(url + "/update-template")
+        Mockito.doThrow(NotFoundException.class)
+            .when(notificationTemplateService).update(id, dto);
+        mockMvc.perform(put(url + "/update-template/{id}", id)
             .principal(principal)
             .content(JsonDto)
             .contentType(MediaType.APPLICATION_JSON))
