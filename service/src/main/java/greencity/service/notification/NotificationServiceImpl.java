@@ -293,7 +293,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyOrderBroughtByHimself(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
-        fillAndSendNotification(parameters, order, NotificationType.ORDER_BROUGHT_BY_HIMSELF);
+        fillAndSendNotification(parameters, order, NotificationType.ORDER_STATUS_CHANGED);
     }
 
     private void findInactiveUsers(Long[] monthsList, List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks,

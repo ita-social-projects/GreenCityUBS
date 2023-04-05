@@ -954,7 +954,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
                 eventService.saveEvent(OrderHistory.ORDER_DONE, email, order);
             } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
-                if(previousStatus == OrderStatus.FORMED){
+                if(previousStatus == OrderStatus.FORMED
+                && order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID){
                     notificationService.notifyOrderBroughtByHimself(order);
                 }
                 eventService.saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, order);

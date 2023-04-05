@@ -5,32 +5,12 @@
 
     <changeSet id="Kulbaba-1" author="Oleh Kulbaba">
         <insert tableName="notification_templates">
-            <column name="language_code">ua</column>
-            <column name="notification_type">ORDER_BROUGHT_BY_HIMSELF</column>
+            <column name="notification_type">ORDER_STATUS_CHANGED</column>
+            <column name="trigger">ORDER_STATUS_CHANGED_FROM_FORMED_TO_BROUGHT_BY_HIMSELF</column>
+            <column name="time">IMMEDIATELY</column>
             <column name="title">Статус замовлення: "Привезе сам"</column>
-            <column name="body">Шановний клієнте! Ви підтвердили, що замовлення буде привезено Вами на Станцію приймання самостійно. Звертаємо Вашу увагу на необхідність здійснення розрахунків безпосередньо на Станції приймання. Дякуємо!</column>
-            <column name="notification_receiver_type">SITE</column>
-        </insert>
-        <insert tableName="notification_templates">
-            <column name="language_code">en</column>
-            <column name="notification_type">ORDER_BROUGHT_BY_HIMSELF</column>
-            <column name="title">Order status: "Brought by himself"</column>
-            <column name="body">Dear client! You are confirmed the order will be brought by yourself to the Receiving station. We draw your attention to the necessity of making payment at the Receiving station. Thank you</column>
-            <column name="notification_receiver_type">SITE</column>
-        </insert>
-        <insert tableName="notification_templates">
-            <column name="language_code">ua</column>
-            <column name="notification_type">ORDER_BROUGHT_BY_HIMSELF</column>
-            <column name="title">Статус замовлення: "Привезе сам"</column>
-            <column name="body">Шановний клієнте! Ви підтвердили, що замовлення буде привезено Вами на Станцію приймання самостійно. Звертаємо Вашу увагу на необхідність здійснення розрахунків безпосередньо на Станції приймання. Дякуємо!</column>
-            <column name="notification_receiver_type">OTHER</column>
-        </insert>
-        <insert tableName="notification_templates">
-            <column name="language_code">en</column>
-            <column name="notification_type">ORDER_BROUGHT_BY_HIMSELF</column>
-            <column name="title">Order status: "Brought by himself"</column>
-            <column name="body">Dear client! You are confirmed the order will be brought by yourself to the Receiving station. We draw your attention to the necessity of making payment at the Receiving station. Thank you</column>
-            <column name="notification_receiver_type">OTHER</column>
+            <column name="title_eng">Order status: "Brought by himself"</column>
+            <column name="notification_status">ACTIVE</column>
         </insert>
     </changeSet>
 </databaseChangeLog>

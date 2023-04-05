@@ -188,11 +188,12 @@
     <include file="db/changelog/logs/ch-delete-order-status-translations-Golik.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Golik-1.xml"/>
     <include file="db/changelog/logs/ch-drop-column-note-in-orders-Golik.xml"/>
-    <include file="db/changelog/logs/ch-insert-into-notification-templates-Kulbaba.xml"/>
     <include file="db/changelog/logs/ch-drop-table-notification-templates-Safarov.xml"/>
     <include file="db/changelog/logs/ch-drop-table-notification-schedule-Safarov.xml"/>
     <include file="db/changelog/logs/ch-add-table-notification-templates-Safarov.xml"/>
     <include file="db/changelog/logs/ch-insert-into-table-notification-templates-Safarov.xml"/>
     <include file="db/changelog/logs/ch-add-table-notification-platforms-Safarov.xml"/>
     <include file="db/changelog/logs/ch-insert-into-table-notification-platforms-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-notification-templates-Kulbaba.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-notification-platforms-Kulbaba.xml"/>
 </databaseChangeLog>
