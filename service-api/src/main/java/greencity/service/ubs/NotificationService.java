@@ -79,7 +79,7 @@ public interface NotificationService {
     void notifyAllHalfPaidPackages();
 
     /**
-     * Method sends messages by e-mail/notification that order status changed to "Brought by himself"
+     * Method sends messages by e-mail/notification that order status changed to "Brought by himself".
      *
      * @param order of {@link Order} Order which status was changed
      * @author Oleh Kulbaba

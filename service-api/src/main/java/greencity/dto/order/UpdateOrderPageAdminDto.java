@@ -21,5 +21,4 @@ public class UpdateOrderPageAdminDto {
     private UpdateOrderDetailDto orderDetailDto;
     private List<UpdateResponsibleEmployeeDto> updateResponsibleEmployeeDto;
     private Long writeOffStationSum;
-
 }

@@ -42,8 +42,11 @@ public enum NotificationTrigger {
            "Кастомна",
            "Custom"),
     ORDER_STATUS_CHANGED_FROM_FORMED_TO_BROUGHT_BY_HIMSELF(
-            "Статус замовлення змінений з «Сформовано» на «Привезе сам»",
-            "Order status changed from «Formed» to «Brought by himself»");
+                                                           "Статус замовлення змінений"
+                                                               + "з «Сформовано» на «Привезе сам»",
+                                                           "Order status changed"
+                                                               + "from «Formed» to «Brought by himself»");
+
     private final String description;
     private final String descriptionEng;
 }
