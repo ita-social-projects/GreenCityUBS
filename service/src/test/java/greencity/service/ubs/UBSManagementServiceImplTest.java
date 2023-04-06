@@ -523,6 +523,7 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getOrderStatus(), producedObjectBroughtItHimself.getOrderStatus());
         assertEquals(expectedObject.getPaymentStatus(), producedObjectBroughtItHimself.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectBroughtItHimself.getDate());
+        verify(notificationService).notifyOrderBroughtByHimself(order);
 
         order.setCertificates(Set.of(ModelUtils.getCertificate()));
         testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
