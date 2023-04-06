@@ -395,12 +395,13 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testNotifyOrderBroughtByHimself(){
+    void testNotifyOrderBroughtByHimself() {
         Order order = ModelUtils.getOrder();
         UserNotification userNotification = TEST_USER_NOTIFICATION;
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
         when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(userNotification);
-        when(notificationParameterRepository.saveAll(anySet())).thenReturn(Collections.singletonList(TEST_NOTIFICATION_PARAMETER));
+        when(notificationParameterRepository.saveAll(anySet()))
+            .thenReturn(Collections.singletonList(TEST_NOTIFICATION_PARAMETER));
         notificationService.notifyOrderBroughtByHimself(order);
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(anySet());
