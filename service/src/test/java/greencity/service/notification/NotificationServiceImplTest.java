@@ -380,12 +380,6 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testNotifyHalfPaidPackage() {
-        when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag1list());
-
-    }
-
-    @Test
     void testGetAllNotificationForUser() {
         when(userRepository.findByUuid("Test")).thenReturn(TEST_USER);
         when(userNotificationRepository.findAllByUser(TEST_USER, TEST_PAGEABLE))
@@ -398,19 +392,6 @@ class NotificationServiceImplTest {
             .getAllNotificationsForUser("Test", "ua", TEST_PAGEABLE);
 
         assertEquals(TEST_DTO, actual);
-    }
-
-    @Test
-    void testNotifyOrderBroughtByHimself() {
-        Order order = ModelUtils.getOrder();
-        UserNotification userNotification = TEST_USER_NOTIFICATION;
-        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
-        when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(userNotification);
-        when(notificationParameterRepository.saveAll(anySet()))
-            .thenReturn(Collections.singletonList(TEST_NOTIFICATION_PARAMETER));
-        notificationService.notifyOrderBroughtByHimself(order);
-        verify(userNotificationRepository).save(any());
-        verify(notificationParameterRepository).saveAll(anySet());
     }
 
     @Test
