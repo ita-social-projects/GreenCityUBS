@@ -1,22 +1,17 @@
 package greencity.service.notification;
 
+import greencity.constant.OrderHistory;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.notifications.NotificationPlatform;
-import greencity.entity.order.Certificate;
-import greencity.enums.NotificationReceiverType;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.PaymentStatus;
+import greencity.entity.order.*;
+import greencity.enums.*;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
@@ -193,7 +188,17 @@ public class NotificationServiceImpl implements NotificationService {
             .value(String.format("%.2f", (double) amountToPay)).build());
         parameters.add(NotificationParameter.builder().key("orderNumber")
             .value(order.getId().toString()).build());
-        fillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
+        if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
+            fillAndSendNotification(parameters, order, NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF);
+        } else if (order.getOrderStatus() == OrderStatus.DONE
+            && order.getEvents().stream()
+                .map(Event::getEventName)
+                .collect(Collectors.toList())
+                .contains(OrderHistory.ORDER_ON_THE_ROUTE)) {
+            fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
+        } else {
+            fillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
+        }
     }
 
     /**
