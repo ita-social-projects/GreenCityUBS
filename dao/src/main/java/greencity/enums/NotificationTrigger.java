@@ -45,7 +45,15 @@ public enum NotificationTrigger {
                                                            "Статус замовлення змінений"
                                                                + "з «Сформовано» на «Привезе сам»",
                                                            "Order status changed"
-                                                               + "from «Formed» to «Brought by himself»");
+                                                               + "from «Formed» to «Brought by himself»"),
+    HALF_PAID_ORDER_STATUS_BROUGHT_BY_HIMSELF(
+            "Статус не повністю оплаченого замовлення змінено на «Привезе сам»",
+            "Status of half paid order changed to «Brought by himself»"),
+    UNDERPAYMENT_WHEN_STATUS_DONE_OR_CANCELED(
+            "Статус не оплаченого, або не повністю оплаченого замовлення змінено на «Виконано» або «Скасовано»",
+            "Status of unpaid or half paid order changed to «Done» or «Canceled»"
+    )
+    ;
 
     private final String description;
     private final String descriptionEng;

@@ -26,5 +26,47 @@
             <column name="notification_status">ACTIVE</column>
             <column name="notification_id">11</column>
         </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Шановний Клієнте! Інформуємо Вас про необхідність оплати за послуги на Станції приймання. Сума до сплати ${amountToPay}. грн</column>
+            <column name="body_eng">Dear client! We inform you about the necessity of paying for services at the Receiving station. The sum is ${amountToPay}. UAH</column>
+            <column name="notification_receiver_type">EMAIL</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">12</column>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Шановний Клієнте! Інформуємо Вас про необхідність оплати за послуги на Станції приймання. Сума до сплати ${amountToPay}. грн</column>
+            <column name="body_eng">Dear client! We inform you about the necessity of paying for services at the Receiving station. The sum is ${amountToPay}. UAH</column>
+            <column name="notification_receiver_type">SITE</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">12</column>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Шановний Клієнте! Інформуємо Вас про необхідність оплати за послуги на Станції приймання. Сума до сплати ${amountToPay}. грн</column>
+            <column name="body_eng">Dear client! We inform you about the necessity of paying for services at the Receiving station. The sum is ${amountToPay}. UAH</column>
+            <column name="notification_receiver_type">MOBILE</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">12</column>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Шановний Клієнте! Інформуємо Вас про необхідність оплати за послуги. Сума до сплати ${amountToPay}. грн.</column>
+            <column name="body_eng">Dear client! We inform you about the necessity of paying for services. The sum is ${amountToPay}. UAH</column>
+            <column name="notification_receiver_type">EMAIL</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">13</column>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Шановний Клієнте! Інформуємо Вас про необхідність оплати за послуги. Сума до сплати ${amountToPay}. грн.</column>
+            <column name="body_eng">Dear client! We inform you about the necessity of paying for services. The sum is ${amountToPay}. UAH</column>
+            <column name="notification_receiver_type">SITE</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">13</column>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="body">Шановний Клієнте! Інформуємо Вас про необхідність оплати за послуги. Сума до сплати ${amountToPay}. грн.</column>
+            <column name="body_eng">Dear client! We inform you about the necessity of paying for services. The sum is ${amountToPay}. UAH</column>
+            <column name="notification_receiver_type">MOBILE</column>
+            <column name="notification_status">ACTIVE</column>
+            <column name="notification_id">13</column>
+        </insert>
     </changeSet>
 </databaseChangeLog>
