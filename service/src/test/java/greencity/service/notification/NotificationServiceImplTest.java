@@ -380,6 +380,12 @@ class NotificationServiceImplTest {
     }
 
     @Test
+    void testNotifyHalfPaidPackage() {
+        when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag1list());
+
+    }
+
+    @Test
     void testGetAllNotificationForUser() {
         when(userRepository.findByUuid("Test")).thenReturn(TEST_USER);
         when(userNotificationRepository.findAllByUser(TEST_USER, TEST_PAGEABLE))

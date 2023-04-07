@@ -953,7 +953,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
                 eventService.saveEvent(OrderHistory.ORDER_DONE, email, order);
             } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
-                checkIfOrderStatusChangedToBroughtByHimself(OrderStatus.FORMED, order);
                 eventService.saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, order);
             } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE) {
                 eventService.saveEvent(OrderHistory.ORDER_ON_THE_ROUTE, email, order);
@@ -967,13 +966,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         return buildStatuses(order, payment.get(0));
-    }
-
-    private void checkIfOrderStatusChangedToBroughtByHimself(OrderStatus previousStatus, Order order) {
-        if (previousStatus == OrderStatus.FORMED
-            && order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
-            notificationService.notifyOrderBroughtByHimself(order);
-        }
     }
 
     private void verifyPaidWithBonuses(Order order, String email) {
@@ -1564,6 +1556,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         dto.getEmployeeId().toString(),
                         dto.getPositionId(),
                         email));
+            }
+            if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
+                notificationService.notifyUnpaidOrder(order);
             } else {
                 if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
                     List<EmployeeOrderPosition> employeeOrderPositions = employeeOrderPositionRepository

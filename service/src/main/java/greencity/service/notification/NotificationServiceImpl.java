@@ -190,14 +190,65 @@ public class NotificationServiceImpl implements NotificationService {
             .value(order.getId().toString()).build());
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
             fillAndSendNotification(parameters, order, NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF);
-        } else if (order.getOrderStatus() == OrderStatus.DONE
+        } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
             && order.getEvents().stream()
                 .map(Event::getEventName)
-                .collect(Collectors.toList())
-                .contains(OrderHistory.ORDER_ON_THE_ROUTE)) {
+                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
+                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
+                .count() == 3) {
             fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
         } else {
             fillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
+        }
+    }
+
+    @Override
+    public void notifyUnpaidOrder(Order order) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        Long totalPrice;
+        Long bonuses = order.getPointsToUse().longValue();
+        Long certificates =
+            order.getCertificates().stream().map(Certificate::getPoints).reduce(0, Integer::sum).longValue();
+        Long paidAmount = order.getPayment().stream()
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
+            .map(payment -> payment.getAmount() / 100)
+            .reduce(0L, Long::sum);
+
+        List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
+
+        if (!order.getExportedQuantity().isEmpty()) {
+            totalPrice = bags.stream()
+                .map(bag -> order.getConfirmedQuantity().get(bag.getId()) * bag.getFullPrice().longValue())
+                .reduce(0L, Long::sum);
+        } else if (!order.getConfirmedQuantity().isEmpty()) {
+            totalPrice = bags.stream()
+                .map(bag -> order.getConfirmedQuantity().get(bag.getId()) * bag.getFullPrice().longValue())
+                .reduce(0L, Long::sum);
+        } else {
+            totalPrice = bags.stream()
+                .map(bag -> order.getAmountOfBagsOrdered().get(bag.getId()) * bag.getFullPrice().longValue())
+                .reduce(0L, Long::sum);
+        }
+
+        Long amountToPay = totalPrice - paidAmount - bonuses - certificates;
+
+        parameters.add(NotificationParameter.builder().key("amountToPay")
+            .value(String.format("%.2f", (double) amountToPay)).build());
+        parameters.add(NotificationParameter.builder().key("orderNumber")
+            .value(order.getId().toString()).build());
+        if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+            && order.getEvents().stream()
+                .map(Event::getEventName)
+                .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED))) {
+            fillAndSendNotification(parameters, order, NotificationType.ORDER_STATUS_CHANGED);
+        } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
+            && order.getEvents().stream()
+                .map(Event::getEventName)
+                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
+                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
+                .count() == 3) {
+            fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
         }
     }
 
@@ -293,12 +344,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         findInactiveUsers(monthsList, callableGetInactiveUsersTasks, userIdsByLastNotifications);
         tryToSendNotificationForInactiveUser(callableGetInactiveUsersTasks);
-    }
-
-    @Override
-    public void notifyOrderBroughtByHimself(Order order) {
-        Set<NotificationParameter> parameters = new HashSet<>();
-        fillAndSendNotification(parameters, order, NotificationType.ORDER_STATUS_CHANGED);
     }
 
     private void findInactiveUsers(Long[] monthsList, List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks,
