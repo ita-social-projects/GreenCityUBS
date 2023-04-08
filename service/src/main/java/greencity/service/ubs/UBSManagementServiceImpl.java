@@ -573,7 +573,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         collectEventsAboutSetOrderDetails(confirmed, exported, orderId, email);
         final Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (!(order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT)) {
+        if (!(order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT || order.getOrderStatus() == OrderStatus.CANCELED)) {
             exported = null;
         }
 
@@ -812,8 +812,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             totalSumConfirmed =
                 (sumConfirmed
                     - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                        + order.getPointsToUse())
-                    + order.getWriteOffStationSum());
+                        + order.getPointsToUse()));
             totalSumExported =
                 (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
                     + order.getPointsToUse()));
@@ -1569,9 +1568,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         dto.getPositionId(),
                         email));
             }
-            if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-                notificationService.notifyUnpaidOrder(order);
-            } else {
+             else {
                 if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
                     List<EmployeeOrderPosition> employeeOrderPositions = employeeOrderPositionRepository
                         .findAllByOrderId(orderId);
@@ -1579,6 +1576,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         employeeOrderPositionRepository.deleteAll(employeeOrderPositions);
                     }
                 }
+            }
+            if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
+                notificationService.notifyUnpaidOrder(order);
             }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
