@@ -24,7 +24,7 @@
             <column name="notification_type">DONE_OR_CANCELED_UNPAID_ORDER</column>
             <column name="trigger">UNDERPAYMENT_WHEN_STATUS_DONE_OR_CANCELED</column>
             <column name="time">IMMEDIATELY</column>
-            <column name="title">Не оплачене замовлення</column>
+            <column name="title">Неоплачене замовлення</column>
             <column name="title_eng">Unpaid Order</column>
             <column name="notification_status">ACTIVE</column>
         </insert>

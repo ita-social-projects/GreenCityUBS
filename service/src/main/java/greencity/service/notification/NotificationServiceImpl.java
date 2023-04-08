@@ -169,6 +169,9 @@ public class NotificationServiceImpl implements NotificationService {
         Integer certificatePointsUsed = order.getCertificates().stream()
             .map(Certificate::getPoints).reduce(0, Integer::sum);
 
+        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
+        Long writeStationSum = order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
+
         List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
         Map<Integer, Integer> bagsAmount;
         if (!order.getExportedQuantity().isEmpty()) {
@@ -182,7 +185,8 @@ public class NotificationServiceImpl implements NotificationService {
         Integer price = bags.stream().map(bag -> bagsAmount.get(bag.getId()) * bag.getFullPrice())
             .reduce(0, Integer::sum);
 
-        long amountToPay = price - (paidAmount + order.getPointsToUse() + certificatePointsUsed);
+        long amountToPay =
+            price - (paidAmount + order.getPointsToUse() + certificatePointsUsed) + ubsCourierSum + writeStationSum;
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
@@ -215,11 +219,14 @@ public class NotificationServiceImpl implements NotificationService {
             .map(payment -> payment.getAmount() / 100)
             .reduce(0L, Long::sum);
 
+        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
+        Long writeStationSum = order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
+
         List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
 
         if (!order.getExportedQuantity().isEmpty()) {
             totalPrice = bags.stream()
-                .map(bag -> order.getConfirmedQuantity().get(bag.getId()) * bag.getFullPrice().longValue())
+                .map(bag -> order.getExportedQuantity().get(bag.getId()) * bag.getFullPrice().longValue())
                 .reduce(0L, Long::sum);
         } else if (!order.getConfirmedQuantity().isEmpty()) {
             totalPrice = bags.stream()
@@ -231,7 +238,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .reduce(0L, Long::sum);
         }
 
-        Long amountToPay = totalPrice - paidAmount - bonuses - certificates;
+        Long amountToPay = totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());

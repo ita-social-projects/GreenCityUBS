@@ -197,4 +197,5 @@
     <include file="db/changelog/logs/ch-insert-into-table-notification-platforms-Safarov.xml"/>
     <include file="db/changelog/logs/ch-insert-into-notification-templates-Kulbaba.xml"/>
     <include file="db/changelog/logs/ch-insert-into-notification-platforms-Kulbaba.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-to-order-table-Kulbaba.xml"/>
 </databaseChangeLog>
