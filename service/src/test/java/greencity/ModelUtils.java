@@ -3364,7 +3364,7 @@ public class ModelUtils {
                 .build())
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
-                .writeOffStationSum(50L)
+            .writeOffStationSum(50L)
             .imageReasonNotTakingBags(List.of("foto"))
 
             .tariffsInfo(TariffsInfo.builder()
@@ -3407,7 +3407,7 @@ public class ModelUtils {
             .certificates(Collections.emptySet())
             .orderStatus(OrderStatus.CONFIRMED)
             .user(User.builder().id(1L).currentPoints(100).build())
-                .writeOffStationSum(50L)
+            .writeOffStationSum(50L)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId("1L")
                 .amount(20000L)
@@ -3428,7 +3428,7 @@ public class ModelUtils {
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.ADJUSTMENT)
             .counterOrderPaymentId(1L)
-                .writeOffStationSum(50L)
+            .writeOffStationSum(50L)
             .build();
     }
 
@@ -3443,7 +3443,7 @@ public class ModelUtils {
             .counterOrderPaymentId(1L)
             .certificates(Set.of(getCertificate2()))
             .pointsToUse(100)
-                .writeOffStationSum(50L)
+            .writeOffStationSum(50L)
             .build();
     }
 

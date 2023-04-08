@@ -573,7 +573,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         collectEventsAboutSetOrderDetails(confirmed, exported, orderId, email);
         final Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (!(order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT || order.getOrderStatus() == OrderStatus.CANCELED)) {
+        if (!(order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT
+            || order.getOrderStatus() == OrderStatus.CANCELED)) {
             exported = null;
         }
 
@@ -1567,8 +1568,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         dto.getEmployeeId().toString(),
                         dto.getPositionId(),
                         email));
-            }
-             else {
+            } else {
                 if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
                     List<EmployeeOrderPosition> employeeOrderPositions = employeeOrderPositionRepository
                         .findAllByOrderId(orderId);
