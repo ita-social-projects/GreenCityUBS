@@ -242,8 +242,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
-        parameters.add(NotificationParameter.builder().key("orderNumber")
-            .value(order.getId().toString()).build());
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()
                 .map(Event::getEventName)

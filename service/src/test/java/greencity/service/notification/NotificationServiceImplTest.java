@@ -2,10 +2,12 @@ package greencity.service.notification;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import greencity.ModelUtils;
+import greencity.constant.OrderHistory;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.entity.order.Event;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -449,4 +451,95 @@ class NotificationServiceImplTest {
         assertThrows(NotFoundException.class,
             () -> notificationService.getNotification("abc", 1L, "ua"));
     }
+
+    @Test
+    void testNotifyUnpaidOrderForBroughtByHimself() {
+        User user = getUser();
+        Order order = ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto();
+        order.setConfirmedQuantity(Collections.singletonMap(1, 1));
+        order.setExportedQuantity(Collections.emptyMap());
+        order.setEvents(List.of(Event.builder().eventName(OrderHistory.ORDER_FORMED).build()));
+        order.setPayment(TEST_PAYMENT_LIST);
+        order.setPointsToUse(0);
+        order.setCertificates(Collections.emptySet());
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.ORDER_STATUS_CHANGED);
+        notification.setUser(user);
+        notification.setOrder(order);
+
+        when(userNotificationRepository.save(any())).thenReturn(notification);
+        parameters.forEach(parameter -> parameter.setUserNotification(notification));
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+
+        notificationService.notifyUnpaidOrder(order);
+
+        verify(userNotificationRepository).save(any());
+        verify(notificationParameterRepository).saveAll(any());
+    }
+
+    @Test
+    void testNotifyUnpaidOrderForDone() {
+        User user = getUser();
+        Order order = ModelUtils.getOrdersStatusDoneDto();
+        order.setConfirmedQuantity(Collections.singletonMap(1, 1));
+        order.setExportedQuantity(Collections.singletonMap(1, 1));
+        Event formed = Event.builder().eventName(OrderHistory.ORDER_FORMED).build();
+        Event adjustment = Event.builder().eventName(OrderHistory.ORDER_ADJUSTMENT).build();
+        Event confirmed = Event.builder().eventName(OrderHistory.ORDER_CONFIRMED).build();
+        Event onTheRoad = Event.builder().eventName(OrderHistory.ORDER_ON_THE_ROUTE).build();
+        order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
+        order.setPayment(TEST_PAYMENT_LIST);
+        order.setPointsToUse(0);
+        order.setCertificates(Collections.emptySet());
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
+        notification.setUser(user);
+        notification.setOrder(order);
+
+        when(userNotificationRepository.save(any())).thenReturn(notification);
+        parameters.forEach(parameter -> parameter.setUserNotification(notification));
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+
+        notificationService.notifyUnpaidOrder(order);
+
+        verify(userNotificationRepository).save(any());
+        verify(notificationParameterRepository).saveAll(any());
+    }
+
+    @Test
+    void testNotifyUnpaidOrderForCancel() {
+        User user = getUser();
+        Order order = ModelUtils.getCanceledPaidOrder();
+        order.setConfirmedQuantity(Collections.emptyMap());
+        order.setExportedQuantity(Collections.emptyMap());
+        order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
+        Event formed = Event.builder().eventName(OrderHistory.ORDER_FORMED).build();
+        Event adjustment = Event.builder().eventName(OrderHistory.ORDER_ADJUSTMENT).build();
+        Event confirmed = Event.builder().eventName(OrderHistory.ORDER_CONFIRMED).build();
+        Event onTheRoad = Event.builder().eventName(OrderHistory.ORDER_ON_THE_ROUTE).build();
+        order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
+        order.setPayment(TEST_PAYMENT_LIST);
+        order.setPointsToUse(0);
+        order.setCertificates(Collections.emptySet());
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
+        notification.setUser(user);
+        notification.setOrder(order);
+
+        when(userNotificationRepository.save(any())).thenReturn(notification);
+        parameters.forEach(parameter -> parameter.setUserNotification(notification));
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+
+        notificationService.notifyUnpaidOrder(order);
+
+        verify(userNotificationRepository).save(any());
+        verify(notificationParameterRepository).saveAll(any());
+    }
+
 }
