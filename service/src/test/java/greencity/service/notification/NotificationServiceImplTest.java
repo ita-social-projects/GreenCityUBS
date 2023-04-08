@@ -542,4 +542,62 @@ class NotificationServiceImplTest {
         verify(notificationParameterRepository).saveAll(any());
     }
 
+    @Test
+    void testNotifyHalfPaidOrderForDone() {
+        User user = getUser();
+        Order order = ModelUtils.getOrdersStatusDoneDto();
+        order.setConfirmedQuantity(Collections.singletonMap(1, 1));
+        order.setExportedQuantity(Collections.singletonMap(1, 1));
+        Event formed = Event.builder().eventName(OrderHistory.ORDER_FORMED).build();
+        Event adjustment = Event.builder().eventName(OrderHistory.ORDER_ADJUSTMENT).build();
+        Event confirmed = Event.builder().eventName(OrderHistory.ORDER_CONFIRMED).build();
+        Event onTheRoad = Event.builder().eventName(OrderHistory.ORDER_ON_THE_ROUTE).build();
+        order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
+        order.setPayment(TEST_PAYMENT_LIST);
+        order.setPointsToUse(0);
+        order.setCertificates(Collections.emptySet());
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
+        notification.setUser(user);
+        notification.setOrder(order);
+
+        when(userNotificationRepository.save(any())).thenReturn(notification);
+        parameters.forEach(parameter -> parameter.setUserNotification(notification));
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+
+        notificationService.notifyHalfPaidPackage(order);
+
+        verify(userNotificationRepository).save(any());
+        verify(notificationParameterRepository).saveAll(any());
+    }
+
+    @Test
+    void testNotifyHalfPaidOrderForBroughtByHimself() {
+        User user = getUser();
+        Order order = ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto();
+        order.setConfirmedQuantity(Collections.singletonMap(1, 1));
+        order.setExportedQuantity(Collections.emptyMap());
+        order.setEvents(List.of(Event.builder().eventName(OrderHistory.ORDER_FORMED).build()));
+        order.setPayment(TEST_PAYMENT_LIST);
+        order.setPointsToUse(0);
+        order.setCertificates(Collections.emptySet());
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.ORDER_STATUS_CHANGED);
+        notification.setUser(user);
+        notification.setOrder(order);
+
+        when(userNotificationRepository.save(any())).thenReturn(notification);
+        parameters.forEach(parameter -> parameter.setUserNotification(notification));
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+
+        notificationService.notifyHalfPaidPackage(order);
+
+        verify(userNotificationRepository).save(any());
+        verify(notificationParameterRepository).saveAll(any());
+    }
+
 }
