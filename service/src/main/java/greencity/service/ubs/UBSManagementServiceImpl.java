@@ -573,6 +573,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         collectEventsAboutSetOrderDetails(confirmed, exported, orderId, email);
         final Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        if (!(order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT
+            || order.getOrderStatus() == OrderStatus.CANCELED)) {
+            exported = null;
+        }
 
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
@@ -793,6 +797,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
                     .getFullPrice();
             }
+            if (order.getOrderStatus() == OrderStatus.DONE) {
+                sumExported += order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
+            } else {
+                sumConfirmed += order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
+                sumExported += order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
+            }
         }
 
         if (!currentCertificate.isEmpty()) {
@@ -947,6 +957,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
                 eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT, email, order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                verifyPaidWithBonuses(order, email);
                 setOrderCancellation(order, dto.getCancellationReason(), dto.getCancellationComment());
                 eventService.saveEvent(OrderHistory.ORDER_CANCELLED, email, order);
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
@@ -965,6 +976,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         return buildStatuses(order, payment.get(0));
+    }
+
+    private void verifyPaidWithBonuses(Order order, String email) {
+        if (order.getPointsToUse() > 0) {
+            eventService.saveEvent(OrderHistory.RETURN_BONUSES_TO_CLIENT + ". Всього " + order.getPointsToUse(), email,
+                order);
+        }
     }
 
     private void setOrderCancellation(Order order, String cancellationReason, String cancellationComment) {
@@ -1529,6 +1547,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
                 updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), orderId, email);
             }
+            setUbsCourierSumAndWriteOffStationSum(orderId, updateOrderPageDto.getWriteOffStationSum(),
+                updateOrderPageDto.getUbsCourierSum());
             if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
                 updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), email);
             }
@@ -1557,9 +1577,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     }
                 }
             }
+            if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
+                notificationService.notifyUnpaidOrder(order);
+            }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
+    }
+
+    private void setUbsCourierSumAndWriteOffStationSum(Long orderId, Long writeOffStationSum, Long ubsCourierSum) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        if (writeOffStationSum != null) {
+            order.setWriteOffStationSum(writeOffStationSum);
+        }
+        if (ubsCourierSum != null) {
+            order.setUbsCourierSum(ubsCourierSum);
+        }
+        orderRepository.save(order);
     }
 
     private boolean isOrderStatusFormedOrCanceledOrBroughtHimself(Order order) {

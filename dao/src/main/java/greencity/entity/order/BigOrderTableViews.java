@@ -25,11 +25,11 @@ public class BigOrderTableViews {
     private String senderEmail;
     private Integer violationsAmount;
     private String region;
-    private String settlement;
+    private String city;
     private String district;
     private String address;
     private String regionEn;
-    private String settlementEn;
+    private String cityEn;
     private String districtEn;
     private String addressEn;
     private String commentToAddressForClient;
@@ -39,6 +39,7 @@ public class BigOrderTableViews {
     private Long generalDiscount;
     private Long amountDue;
     private String commentForOrderByClient;
+    private String commentForOrderByAdmin;
     private Long totalPayment;
     private LocalDate dateOfExport;
     private String timeOfExport;
@@ -53,7 +54,6 @@ public class BigOrderTableViews {
     private Long responsibleCallerId;
     private String responsibleNavigator;
     private Long responsibleNavigatorId;
-    private String commentsForOrder;
     private Boolean isBlocked;
     private String blockedBy;
     private Long tariffsInfoId;

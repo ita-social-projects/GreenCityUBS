@@ -1,11 +1,7 @@
 package greencity.service.ubs;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
@@ -53,7 +48,6 @@ import greencity.enums.LocationStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.PaymentType;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.address.AddressNotFoundException;
 
@@ -112,7 +106,6 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.LiqPayOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
@@ -126,10 +119,7 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
-import greencity.dto.payment.PaymentRequestDtoLiqPay;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseDtoLiqPay;
-import greencity.dto.payment.StatusRequestDtoLiqPay;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.PointsForUbsUserDto;
@@ -177,7 +167,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final EmployeeRepository employeeRepository;
     private final AddressRepository addressRepo;
     private final OrderAddressRepository orderAddressRepository;
-    private final LiqPayService liqPayService;
     private final UserRemoteClient userRemoteClient;
     private final FondyClient fondyClient;
     private final PaymentRepository paymentRepository;
@@ -201,16 +190,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String fondyPaymentKey;
     @Value("${greencity.payment.merchant-id}")
     private String merchantId;
-    @Value("${greencity.payment.liq-pay-public-key}")
-    private String publicKey;
-    @Value("${greencity.payment.liq-pay-private-key}")
-    private String privateKey;
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
-    @Value("${greencity.redirect.result-url-liq-pay}")
-    private String resultUrlLiqpay;
     @Value("${greencity.redirect.result-url-fondy-personal-cabinet}")
     private String resultUrlForPersonalCabinetOfUser;
     @Value("${greencity.redirect.result-url-fondy}")
@@ -1372,49 +1355,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return dto;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    @Transactional
-    public LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid, Long orderId) {
-        User currentUser = userRepository.findByUuid(uuid);
-        TariffsInfo tariffsInfo =
-            tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(1L, dto.getLocationId())
-                .orElseThrow(() -> new NotFoundException(
-                    TARIFF_FOR_LOCATION_NOT_EXIST + dto.getLocationId()));
-        Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
-
-        int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            tariffsInfo);
-        checkSumIfCourierLimitBySumOfOrder(tariffsInfo, sumToPayWithoutDiscount);
-        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
-
-        Order order = isExistOrder(dto, orderId);
-        order.setTariffsInfo(tariffsInfo);
-        Set<Certificate> orderCertificates = new HashSet<>();
-        sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
-
-        final UBSuser userData =
-            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
-
-        getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
-
-        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        if (sumToPay == 0 || !dto.isShouldBePaid()) {
-            return buildOrderResponseWithoutButton(order);
-        } else {
-            PaymentRequestDtoLiqPay paymentRequestDto = formLiqPayPaymentRequest(order.getId(), sumToPay);
-            String liqPayData = liqPayService.getCheckoutResponse(paymentRequestDto);
-            return buildOrderResponse(order, liqPayData
-                .replace("\"", "")
-                .replace("\n", ""));
-        }
-    }
-
     private int reduceOrderSumDueToUsedPoints(int sumToPay, int pointsToUse) {
         if (sumToPay >= pointsToUse) {
             sumToPay -= pointsToUse;
@@ -1449,45 +1389,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return orderAddress;
     }
 
-    private LiqPayOrderResponse buildOrderResponse(Order order, String button) {
-        return LiqPayOrderResponse.builder()
-            .orderId(order.getId())
-            .liqPayButton(button)
-            .build();
-    }
-
-    private LiqPayOrderResponse buildOrderResponseWithoutButton(Order order) {
-        return LiqPayOrderResponse.builder()
-            .orderId(order.getId())
-            .build();
-    }
-
-    private PaymentRequestDtoLiqPay formLiqPayPaymentRequest(Long orderId, int sumToPay) {
-        Order order = orderRepository.findById(orderId).orElseThrow(null);
-
-        return PaymentRequestDtoLiqPay.builder()
-            .publicKey(publicKey)
-            .version(3)
-            .action("pay")
-            .amount(sumToPay)
-            .currency("UAH")
-            .description("ubs courier")
-            .orderId(orderId + "_" + order.getPayment()
-                .get(order.getPayment().size() - 1).getId().toString())
-            .language("en")
-            .paytypes("card")
-            .resultUrl(resultUrlLiqpay)
-            .build();
-    }
-
-    @Override
-    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto) {
-        if (!encryptionUtil.formingResponseSignatureLiqPay(dto.getData(), privateKey)
-            .equals(dto.getSignature())) {
-            throw new BadRequestException(PAYMENT_VALIDATION_ERROR);
-        }
-    }
-
     @Override
     public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, String uuid) {
         OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId, uuid);
@@ -1499,101 +1400,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         Double initialPrice = orderStatusPageDto.getOrderDiscountedPrice();
         orderStatusPageDto.setOrderExportedDiscountedPrice(exportedPrice - initialPrice);
         return orderStatusPageDto;
-    }
-
-    private StatusRequestDtoLiqPay getStatusFromLiqPay(Order order) {
-        Long orderId = order.getId();
-
-        Long paymentId = 0L;
-        try {
-            paymentId = order.getPayment().get(order.getPayment().size() - 1).getId();
-        } catch (IndexOutOfBoundsException e) {
-            throw new BadRequestException(ORDER_WITH_CURRENT_ID_NOT_FOUND);
-        }
-
-        return StatusRequestDtoLiqPay.builder()
-            .publicKey(publicKey)
-            .action("status")
-            .orderId(orderId + "_" + paymentId.toString())
-            .version(3)
-            .build();
-    }
-
-    @Override
-    public Map<String, Object> getLiqPayStatus(Long orderId, String uuid) {
-        Order order = orderRepository.findById(orderId).orElseThrow(
-            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
-            throw new AccessDeniedException(CANNOT_ACCESS_PAYMENT_STATUS);
-        }
-        StatusRequestDtoLiqPay dto = getStatusFromLiqPay(order);
-        Map<String, Object> response = liqPayService.getPaymentStatus(dto);
-        @Nullable
-        Payment payment = converterMapToEntity(response, order);
-        if (payment == null) {
-            throw new BadRequestException(LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND);
-        }
-        paymentRepository.save(payment);
-        orderRepository.save(order);
-        return response;
-    }
-
-    private Payment converterMapToEntity(Map<String, Object> map, Order order) {
-        if (map == null) {
-            return null;
-        }
-        List<Payment> payments = paymentRepository.findAllByOrder(order);
-        Payment payment = payments.get(payments.size() - 1);
-        String status = (String) map.get("status");
-        if (status.equals("success")) {
-            payment.setResponseStatus(status);
-            payment.setPaymentStatus(PaymentStatus.PAID);
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-            setPaymentInfo(map, payment);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + payment.getPaymentId(),
-                OrderHistory.SYSTEM, order);
-        } else if (status.equals(FAILED_STATUS)) {
-            payment.setResponseStatus(status);
-            payment.setPaymentStatus(PaymentStatus.UNPAID);
-            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-            setPaymentInfo(map, payment);
-        }
-        return payment;
-    }
-
-    private void setPaymentInfo(Map<String, Object> map, Payment payment) {
-        payment.setMaskedCard((String) map.get("sender_card_mask2"));
-        payment.setCurrency((String) map.get("currency"));
-        payment.setPaymentSystem("LiqPay");
-        payment.setCardType((String) map.get("sender_card_type"));
-        payment.setResponseDescription((String) map.get("err_description"));
-        payment.setPaymentId(String.valueOf(map.get("payment_id")));
-        payment.setComment((String) map.get("description"));
-        payment.setPaymentType(PaymentType.AUTO);
-        payment.setSenderCellPhone((String) map.get("sender_phone"));
-        String orderTime = convertMillisecondToLocalDateTime((long) map.get("create_date"));
-        payment.setOrderTime(orderTime);
-        String endDate = convertMillisecondToLocalDate((Long) map.get("end_date"));
-        payment.setSettlementDate(endDate);
-        double fees = (double) map.get("sender_commission");
-        payment.setFee((long) fees);
-        double amount = (double) map.get("amount");
-        payment.setAmount((long) amount * 100);
-    }
-
-    private String convertMillisecondToLocalDateTime(long millis) {
-        LocalDateTime date =
-            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDateTime();
-        Timestamp timestamp = Timestamp.valueOf(date);
-        return new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(timestamp);
-    }
-
-    private String convertMillisecondToLocalDate(long millis) {
-        LocalDate date =
-            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return dateFormatter.format(date);
     }
 
     @Override
@@ -1798,58 +1604,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) {
-        Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
-        checkIsOrderPaid(order.getOrderPaymentStatus());
-        User currentUser = findByIdUserForClient(uuid);
-
-        Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();
-        checkForNullCounter(order);
-        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-
-        Integer sumToPay = formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap);
-        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
-        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, order, sumToPay);
-
-        currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
-        userRepository.save(currentUser);
-
-        paymentVerification(sumToPay, order);
-
-        if (sumToPay == 0) {
-            return buildOrderResponse(order, null);
-        } else {
-            return linkButton(order, sumToPay);
-        }
-    }
-
-    private LiqPayOrderResponse linkButton(Order order, Integer sumToPay) {
-        Order order1 = incrementCounter(order);
-        PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = formLiqPayPayment(order1.getId(), sumToPay);
-        return buildOrderResponse(order1, liqPayService.getCheckoutResponse(paymentRequestDtoLiqPay)
-            .replace("\"", "")
-            .replace("\n", ""));
-    }
-
-    private PaymentRequestDtoLiqPay formLiqPayPayment(Long orderId, int sumToPay) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        return PaymentRequestDtoLiqPay.builder()
-            .publicKey(publicKey)
-            .version(3)
-            .action("pay")
-            .amount(sumToPay)
-            .currency("UAH")
-            .description("сourier")
-            .orderId(
-                orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
-            .language("en")
-            .paytypes("card")
-            .resultUrl(resultUrlLiqpay)
-            .build();
-    }
-
-    @Override
     @Transactional
     public void validatePaymentClient(PaymentResponseDto dto) {
         Payment orderPayment = mapPaymentClient(dto);
@@ -2034,8 +1788,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto) {
-        Employee employee = employeeRepository.findByEmail(dto.getEmployeeEmail())
-            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         userRemoteClient.updateEmployeesAuthorities(dto);
     }
 
