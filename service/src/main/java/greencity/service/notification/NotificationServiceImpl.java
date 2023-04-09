@@ -1,22 +1,17 @@
 package greencity.service.notification;
 
+import greencity.constant.OrderHistory;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.notifications.NotificationPlatform;
-import greencity.entity.order.Certificate;
-import greencity.enums.NotificationReceiverType;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.PaymentStatus;
+import greencity.entity.order.*;
+import greencity.enums.*;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
@@ -174,6 +169,9 @@ public class NotificationServiceImpl implements NotificationService {
         Integer certificatePointsUsed = order.getCertificates().stream()
             .map(Certificate::getPoints).reduce(0, Integer::sum);
 
+        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
+        Long writeStationSum = order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
+
         List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
         Map<Integer, Integer> bagsAmount;
         if (!order.getExportedQuantity().isEmpty()) {
@@ -187,13 +185,76 @@ public class NotificationServiceImpl implements NotificationService {
         Integer price = bags.stream().map(bag -> bagsAmount.get(bag.getId()) * bag.getFullPrice())
             .reduce(0, Integer::sum);
 
-        long amountToPay = price - (paidAmount + order.getPointsToUse() + certificatePointsUsed);
+        long amountToPay =
+            price - (paidAmount + order.getPointsToUse() + certificatePointsUsed) + ubsCourierSum + writeStationSum;
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
         parameters.add(NotificationParameter.builder().key("orderNumber")
             .value(order.getId().toString()).build());
-        fillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
+        if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
+            fillAndSendNotification(parameters, order, NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF);
+        } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
+            && order.getEvents().stream()
+                .map(Event::getEventName)
+                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
+                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
+                .count() == 3) {
+            fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
+        } else {
+            fillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
+        }
+    }
+
+    @Override
+    public void notifyUnpaidOrder(Order order) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        Long totalPrice;
+        Long bonuses = order.getPointsToUse().longValue();
+        Long certificates =
+            order.getCertificates().stream().map(Certificate::getPoints).reduce(0, Integer::sum).longValue();
+        Long paidAmount = order.getPayment().stream()
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
+            .map(payment -> payment.getAmount() / 100)
+            .reduce(0L, Long::sum);
+
+        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
+        Long writeStationSum = order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
+
+        List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
+
+        if (!order.getExportedQuantity().isEmpty()) {
+            totalPrice = bags.stream()
+                .map(bag -> order.getExportedQuantity().get(bag.getId()) * bag.getFullPrice().longValue())
+                .reduce(0L, Long::sum);
+        } else if (!order.getConfirmedQuantity().isEmpty()) {
+            totalPrice = bags.stream()
+                .map(bag -> order.getConfirmedQuantity().get(bag.getId()) * bag.getFullPrice().longValue())
+                .reduce(0L, Long::sum);
+        } else {
+            totalPrice = bags.stream()
+                .map(bag -> order.getAmountOfBagsOrdered().get(bag.getId()) * bag.getFullPrice().longValue())
+                .reduce(0L, Long::sum);
+        }
+
+        Long amountToPay = totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
+
+        parameters.add(NotificationParameter.builder().key("amountToPay")
+            .value(String.format("%.2f", (double) amountToPay)).build());
+        if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+            && order.getEvents().stream()
+                .map(Event::getEventName)
+                .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED))) {
+            fillAndSendNotification(parameters, order, NotificationType.ORDER_STATUS_CHANGED);
+        } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
+            && order.getEvents().stream()
+                .map(Event::getEventName)
+                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
+                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
+                .count() == 3) {
+            fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
+        }
     }
 
     /**
