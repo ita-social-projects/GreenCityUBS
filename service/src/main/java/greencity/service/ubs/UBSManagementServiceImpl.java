@@ -797,6 +797,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
                     .getFullPrice();
             }
+
             if (order.getExportedQuantity().size() != 0) {
                 sumExported += getUbsCourierOrWriteOffStationSum(order);
             } else if (order.getConfirmedQuantity().size() != 0) {
