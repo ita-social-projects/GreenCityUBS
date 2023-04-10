@@ -95,7 +95,7 @@ class ViberServiceImplTest {
     void testSendWelcomeMessageAndPreRegisterViberBotForUserThrowViberBotAlreadyConnected() {
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         assertThrows(ViberBotAlreadyConnected.class,
-                () -> viberService.sendWelcomeMessageAndPreRegisterViberBotForUser("42", "32L"));
+            () -> viberService.sendWelcomeMessageAndPreRegisterViberBotForUser("42", "32L"));
         verify(userRepository, times(1)).findUserByUuid(anyString());
     }
 
