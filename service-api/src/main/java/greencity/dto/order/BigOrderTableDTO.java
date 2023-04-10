@@ -33,7 +33,6 @@ public class BigOrderTableDTO {
     private Long generalDiscount;
     private Long amountDue;
     private String commentForOrderByClient;
-    private String commentForOrderByAdmin;
     private Long totalPayment;
     private String dateOfExport;
     private String timeOfExport;

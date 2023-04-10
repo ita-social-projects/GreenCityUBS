@@ -3270,7 +3270,7 @@ public class ModelUtils {
             .setGeneralDiscount(100L)
             .setAmountDue(0L)
             .setCommentForOrderByClient("commentForOrderByClient")
-            .setCommentForOrderByAdmin("commentForOrderByAdmin")
+            .setCommentsForOrder("commentForOrderByAdmin")
             .setTotalPayment(200L)
             .setDateOfExport("2021-12-08")
             .setTimeOfExport("from 15:59:52 to 15:59:52")
