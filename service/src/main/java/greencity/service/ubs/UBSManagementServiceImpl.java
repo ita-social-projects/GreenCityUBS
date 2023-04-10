@@ -804,7 +804,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 sumConfirmed += getUbsCourierOrWriteOffStationSum(order);
             } else {
                 sumAmount += getUbsCourierOrWriteOffStationSum(order);
-
             }
         }
 
