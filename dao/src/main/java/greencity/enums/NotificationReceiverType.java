@@ -1,5 +1,12 @@
 package greencity.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum NotificationReceiverType {
-    SITE, OTHER
+    EMAIL("Email"), SITE("Site"), MOBILE("Mobile");
+
+    private final String name;
 }

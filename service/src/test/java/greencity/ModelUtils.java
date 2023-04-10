@@ -38,7 +38,6 @@ import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.employee.EmployeePositionDtoResponse;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.GetEmployeeDto;
@@ -53,21 +52,12 @@ import greencity.dto.location.LocationToCityDto;
 import greencity.dto.location.LocationTranslationDto;
 import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
-import greencity.dto.notification.BodyDto;
-import greencity.dto.notification.NotificationDto;
-import greencity.dto.notification.NotificationScheduleDto;
-import greencity.dto.notification.NotificationShortDto;
-import greencity.dto.notification.NotificationTemplateDto;
-import greencity.dto.notification.NotificationTemplateLocalizedDto;
-import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.notification.TitleDto;
-import greencity.dto.notification.UpdateNotificationTemplatesDto;
+import greencity.dto.notification.*;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.EmployeeOrderPositionDTO;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.GroupedOrderDto;
@@ -96,7 +86,6 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.ServiceDto;
@@ -120,6 +109,7 @@ import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.NotificationParameter;
+import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
@@ -136,7 +126,6 @@ import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
-import greencity.entity.schedule.NotificationSchedule;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
@@ -158,10 +147,11 @@ import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.NotificationType;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.TariffStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.TariffStatus;
 import greencity.util.Bot;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -185,7 +175,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static greencity.enums.NotificationReceiverType.SITE;
+import static greencity.enums.NotificationReceiverType.*;
+import static greencity.enums.NotificationStatus.ACTIVE;
+import static greencity.enums.NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID;
+import static greencity.enums.NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS;
+import static greencity.enums.NotificationType.UNPAID_ORDER;
 import static greencity.enums.ViolationLevel.MAJOR;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -194,7 +188,6 @@ public class ModelUtils {
 
     public static final String TEST_EMAIL = "test@gmail.com";
     public static final Order TEST_ORDER = createOrder();
-    public static final Address TEST_ADDRESS = createAddress2();
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
     public static final OrderAddressExportDetailsDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE =
         createOrderAddressDtoUpdate();
@@ -220,23 +213,28 @@ public class ModelUtils {
     public static final UserNotification TEST_USER_NOTIFICATION_5 = createUserNotification5();
     public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
     public static final Violation TEST_VIOLATION = createTestViolation();
-    public static final Pageable TEST_PAGEABLE_NOTIFICATION_TEMPLATE = PageRequest.of(0, 5, Sort.by("id").descending());
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
+    public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = createNotificationTemplateDto();
+
+    public static final NotificationTemplateWithPlatformsUpdateDto TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO =
+        createNotificationTemplateWithPlatformsUpdateDto();
+
+    public static final NotificationTemplateWithPlatformsDto TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO =
+        createNotificationTemplateWithPlatformsDto();
     public static final Pageable TEST_PAGEABLE = PageRequest.of(0, 5, Sort.by("notificationTime").descending());
+    public static final Pageable TEST_NOTIFICATION_PAGEABLE = PageRequest.of(0, 5, Sort.by("id").descending());
     public static final NotificationShortDto TEST_NOTIFICATION_SHORT_DTO = createNotificationShortDto();
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
         List.of(TEST_NOTIFICATION_SHORT_DTO);
     public static final PageableDto<NotificationShortDto> TEST_DTO = createPageableDto();
-    public static final Order TEST_ORDER_UPDATE_POSITION = createOrder2();
-    public static final List<EmployeeOrderPosition> TEST_EMPLOYEE_ORDER_POSITION = createEmployeeOrderPositionList();
-    public static final EmployeePositionDtoResponse TEST_EMPLOYEE_POSITION_DTO_RESPONSE =
-        createEmployeePositionDtoResponse();
-    public static final Position TEST_POSITION = createPosition();
     public static final Employee TEST_EMPLOYEE = createEmployee();
     public static final User TEST_USER = createUser();
     public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
     public static final Page<UserNotification> TEST_PAGE =
         new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
+
+    public static final Page<NotificationTemplate> TEMPLATE_PAGE =
+        new PageImpl<>(List.of(TEST_NOTIFICATION_TEMPLATE), TEST_PAGEABLE, 1L);
     public static final AdditionalBagInfoDto TEST_ADDITIONAL_BAG_INFO_DTO = createAdditionalBagInfoDto();
     public static final List<AdditionalBagInfoDto> TEST_ADDITIONAL_BAG_INFO_DTO_LIST = createAdditionalBagInfoDtoList();
     public static final Map<String, Object> TEST_MAP_ADDITIONAL_BAG = createMap();
@@ -244,15 +242,6 @@ public class ModelUtils {
         Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
-    public static final Page<NotificationTemplate> TEST_NOTIFICATION_TEMPLATE_PAGE = getNotificationTemplatePageable();
-    public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
-    public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
-    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
-        new NotificationScheduleDto().setCron("0 0 18 * * ?");
-    public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = getNotificationTemplateDto();
-    public static final List<NotificationTemplateDto> TEST_NOTIFICATION_TEMPLATE_LIST =
-        List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
-    public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
 
     public static CourierUpdateDto getUpdateCourierDto() {
@@ -2012,19 +2001,6 @@ public class ModelUtils {
             .build();
     }
 
-    private static Address createAddress2() {
-        return Address.builder()
-            .id(2L)
-            .houseNumber("1")
-            .entranceNumber("3")
-            .district("Syhiv")
-            .street("Stys")
-            .houseCorpus("2")
-            .city("cc")
-            .region("cc")
-            .build();
-    }
-
     private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
             .addressId(1L)
@@ -2167,44 +2143,6 @@ public class ModelUtils {
                 .build());
     }
 
-    private static EmployeePositionDtoResponse createEmployeePositionDtoResponse() {
-        return EmployeePositionDtoResponse.builder()
-            .orderId(1L)
-            .employeeOrderPositionDTOS(createEmployeePositionDto())
-            .build();
-    }
-
-    private static List<EmployeeOrderPositionDTO> createEmployeePositionDto() {
-        return List.of(
-            EmployeeOrderPositionDTO.builder()
-                .name("Test Test")
-                .positionId(2L)
-                .build());
-    }
-
-    private static List<EmployeeOrderPosition> createEmployeeOrderPositionList() {
-        return List.of(
-            EmployeeOrderPosition.builder()
-                .id(1L)
-                .employee(createEmployee())
-                .position(createPosition())
-                .order(createOrder2())
-                .build());
-    }
-
-    private static Position createPosition() {
-        return Position.builder()
-            .id(2L)
-            .build();
-    }
-
-    private static Order createOrder2() {
-        return Order.builder()
-            .id(2L)
-            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
-            .build();
-    }
-
     private static Employee createEmployee() {
         return Employee.builder()
             .id(1L)
@@ -2250,7 +2188,7 @@ public class ModelUtils {
         return NotificationShortDto.builder()
             .id(1L)
             .orderId(1L)
-            .title("Test")
+            .title("Title")
             .notificationTime(LocalDateTime.of(2021, 9, 17, 20, 26, 10))
             .read(false)
             .build();
@@ -2264,23 +2202,87 @@ public class ModelUtils {
             1);
     }
 
-    private static PageableDto<NotificationTemplateDto> templateDtoPageableDto() {
-        return new PageableDto<>(
-            TEST_NOTIFICATION_TEMPLATE_LIST,
-            1,
-            0,
-            1);
+    private static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {
+        return NotificationTemplateWithPlatformsUpdateDto.builder()
+            .type(UNPAID_ORDER)
+            .trigger(ORDER_NOT_PAID_FOR_3_DAYS)
+            .time(AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .schedule("0 0 18 * * ?")
+            .title("Title")
+            .titleEng("TitleEng")
+            .notificationStatus(ACTIVE)
+            .platforms(List.of(
+                createNotificationPlatformDto(SITE)))
+            .build();
+    }
+
+    private static NotificationTemplateWithPlatformsDto createNotificationTemplateWithPlatformsDto() {
+        return NotificationTemplateWithPlatformsDto.builder()
+            .notificationTemplateMainInfoDto(createNotificationTemplateMainInfoDto())
+            .platforms(List.of(createNotificationPlatformDto(SITE)))
+            .build();
+    }
+
+    private static NotificationPlatformDto createNotificationPlatformDto(NotificationReceiverType receiverType) {
+        return NotificationPlatformDto.builder()
+            .id(1L)
+            .receiverType(receiverType)
+            .nameEng("NameEng")
+            .body("Body")
+            .bodyEng("BodyEng")
+            .status(ACTIVE)
+            .build();
+    }
+
+    private static NotificationTemplateDto createNotificationTemplateDto() {
+        return NotificationTemplateDto.builder()
+            .id(1L)
+            .notificationTemplateMainInfoDto(createNotificationTemplateMainInfoDto())
+            .build();
+    }
+
+    private static NotificationTemplateMainInfoDto createNotificationTemplateMainInfoDto() {
+        return NotificationTemplateMainInfoDto.builder()
+            .type(UNPAID_ORDER)
+            .trigger(ORDER_NOT_PAID_FOR_3_DAYS)
+            .triggerDescription("Trigger")
+            .triggerDescriptionEng("TriggerEng")
+            .time(AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .timeDescription("Description")
+            .timeDescriptionEng("DescriptionEng")
+            .schedule("0 0 18 * * ?")
+            .title("Title")
+            .titleEng("TitleEng")
+            .notificationStatus(ACTIVE)
+            .build();
     }
 
     private static NotificationTemplate createNotificationTemplate() {
-        NotificationTemplate notificationTemplate = new NotificationTemplate();
-        notificationTemplate.setTitle("Test");
-        notificationTemplate.setNotificationType(NotificationType.UNPAID_ORDER);
-        notificationTemplate.setNotificationReceiverType(SITE);
-        notificationTemplate.setBody("Test");
-        // notificationTemplate.set;
+        return NotificationTemplate.builder()
+            .id(1L)
+            .notificationType(UNPAID_ORDER)
+            .trigger(ORDER_NOT_PAID_FOR_3_DAYS)
+            .time(AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .schedule("0 0 18 * * ?")
+            .title("Title")
+            .titleEng("TitleEng")
+            .notificationStatus(ACTIVE)
+            .notificationPlatforms(List.of(
+                createNotificationPlatform(SITE),
+                createNotificationPlatform(EMAIL),
+                createNotificationPlatform(MOBILE)))
+            .build();
+    }
 
-        return notificationTemplate;
+    public static NotificationPlatform createNotificationPlatform(
+        NotificationReceiverType receiverType) {
+        return NotificationPlatform.builder()
+            .id(1L)
+            .body("Body")
+            .bodyEng("BodyEng")
+            .notificationReceiverType(receiverType)
+            .notificationStatus(ACTIVE)
+            .build();
     }
 
     private static List<UserNotification> createUserNotificationList() {
@@ -2292,7 +2294,7 @@ public class ModelUtils {
         notification.setOrder(Order.builder()
             .id(1L)
             .build());
-        notification.setNotificationType(NotificationType.UNPAID_ORDER);
+        notification.setNotificationType(UNPAID_ORDER);
         return List.of(
             notification);
     }
@@ -2400,21 +2402,21 @@ public class ModelUtils {
             .build());
         notification.setRead(false);
         notification.setParameters(null);
-        notification.setNotificationType(NotificationType.UNPAID_ORDER);
+        notification.setNotificationType(UNPAID_ORDER);
         return notification;
     }
 
     private static NotificationDto createNotificationDto() {
         return NotificationDto.builder()
-            .title("Test")
-            .body("Test")
+            .title("Title")
+            .body("Body")
             .build();
     }
 
     public static NotificationDto createViolationNotificationDto() {
         return NotificationDto.builder()
-            .title("Test")
-            .body("Test")
+            .title("Title")
+            .body("Body")
             .images(emptyList())
             .build();
     }
@@ -2584,12 +2586,6 @@ public class ModelUtils {
         return EcoNumberDto.builder()
             .ecoNumber(new HashSet<>(Arrays.asList("1111111111", "3333333333")))
             .build();
-    }
-
-    public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
-        return PaymentResponseDtoLiqPay.builder()
-            .data("Test Data")
-            .signature("Test Signature").build();
     }
 
     public static ServiceDto getServiceDto() {
@@ -3043,46 +3039,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static NotificationTemplate getNotificationTemplate() {
-        return new NotificationTemplate()
-            .setId(1L)
-            .setBody("test")
-            .setTitle("test")
-            .setNotificationType(NotificationType.UNPAID_ORDER)
-            .setNotificationReceiverType(SITE)
-            .setLanguageCode("ua");
-    }
-
-    public static NotificationTemplateDto getNotificationTemplateDto() {
-        return new NotificationTemplateDto()
-            .setId(1L)
-            .setBody("test")
-            .setTitle("test")
-            .setNotificationType("UNPAID_ORDER")
-            .setSchedule(NOTIFICATION_SCHEDULE_DTO);
-    }
-
-    public static PageableDto<NotificationTemplateLocalizedDto> getNotificationTemplateLocalizedDto() {
-        return new PageableDto<>(List.of(NotificationTemplateLocalizedDto.builder()
-            .id(1L)
-            .title(TitleDto.builder().enTitle("test").uaTitle("test").build())
-            .body(BodyDto.builder().bodyEn("test").bodyUa("test").build())
-            .notificationType("UNPAID_ORDER")
-            .build()), 1, 0, 1);
-    }
-
-    public static Page<NotificationTemplate> getNotificationTemplatePageable() {
-        return new PageImpl<>(List.of(new NotificationTemplate()
-            .setId(1L)
-            .setBody("test")
-            .setTitle("test")
-            .setNotificationType(NotificationType.UNPAID_ORDER)
-            .setNotificationReceiverType(SITE)
-            .setLanguageCode("ua")),
-            TEST_PAGEABLE_NOTIFICATION_TEMPLATE,
-            1);
-    }
-
     public static UserProfileUpdateDto updateUserProfileDto() {
         return UserProfileUpdateDto.builder()
             .recipientName("Taras")
@@ -3261,8 +3217,8 @@ public class ModelUtils {
             .setViolationsAmount(1)
             .setRegion("Київська область")
             .setRegionEn("Kyivs'ka oblast")
-            .setSettlement("Київ")
-            .setSettlementEn("Kyiv")
+            .setCity("Київ")
+            .setCityEn("Kyiv")
             .setDistrict("Шевченківський")
             .setDistrictEn("Shevchenkivs'kyi")
             .setAddress("Січових Стрільців, 37, 1, 1")
@@ -3274,6 +3230,7 @@ public class ModelUtils {
             .setGeneralDiscount(100L)
             .setAmountDue(0L)
             .setCommentForOrderByClient("commentForOrderByClient")
+            .setCommentForOrderByAdmin("commentForOrderByAdmin")
             .setTotalPayment(200L)
             .setDateOfExport(LocalDate.of(2021, 12, 8))
             .setTimeOfExport("from 15:59:52 to 15:59:52")
@@ -3283,7 +3240,6 @@ public class ModelUtils {
             .setResponsibleDriverId(1L)
             .setResponsibleCallerId(1L)
             .setResponsibleNavigatorId(1L)
-            .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
     }
@@ -3303,7 +3259,7 @@ public class ModelUtils {
             .setSenderEmail("motiy14146@ecofreon.com")
             .setViolationsAmount(1)
             .setRegion(new SenderLocation().setUa("Київська область").setEn("Kyivs'ka oblast"))
-            .setSettlement(new SenderLocation().setUa("Київ").setEn("Kyiv"))
+            .setCity(new SenderLocation().setUa("Київ").setEn("Kyiv"))
             .setDistrict(new SenderLocation().setUa("Шевченківський").setEn("Shevchenkivs'kyi"))
             .setAddress(
                 new SenderLocation().setUa("Січових Стрільців, 37, 1, 1").setEn("Sichovyh Stril'tsiv, 37, 1, 1"))
@@ -3314,6 +3270,7 @@ public class ModelUtils {
             .setGeneralDiscount(100L)
             .setAmountDue(0L)
             .setCommentForOrderByClient("commentForOrderByClient")
+            .setCommentsForOrder("commentForOrderByAdmin")
             .setTotalPayment(200L)
             .setDateOfExport("2021-12-08")
             .setTimeOfExport("from 15:59:52 to 15:59:52")
@@ -3323,7 +3280,6 @@ public class ModelUtils {
             .setResponsibleDriver("1")
             .setResponsibleCaller("1")
             .setResponsibleNavigator("1")
-            .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
     }
@@ -3339,7 +3295,7 @@ public class ModelUtils {
             .setResponsibleLogicMan("")
             .setResponsibleNavigator("")
             .setRegion(new SenderLocation().setEn(null).setUa(null))
-            .setSettlement(new SenderLocation().setEn(null).setUa(null))
+            .setCity(new SenderLocation().setEn(null).setUa(null))
             .setDistrict(new SenderLocation().setEn(null).setUa(null))
             .setAddress(new SenderLocation().setEn(null).setUa(null));
     }
@@ -3395,7 +3351,6 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").currentPoints(100).build())
@@ -3409,6 +3364,7 @@ public class ModelUtils {
                 .build())
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
+            .writeOffStationSum(50L)
             .imageReasonNotTakingBags(List.of("foto"))
 
             .tariffsInfo(TariffsInfo.builder()
@@ -3451,6 +3407,7 @@ public class ModelUtils {
             .certificates(Collections.emptySet())
             .orderStatus(OrderStatus.CONFIRMED)
             .user(User.builder().id(1L).currentPoints(100).build())
+            .writeOffStationSum(50L)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId("1L")
                 .amount(20000L)
@@ -3471,6 +3428,7 @@ public class ModelUtils {
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.ADJUSTMENT)
             .counterOrderPaymentId(1L)
+            .writeOffStationSum(50L)
             .build();
     }
 
@@ -3485,6 +3443,7 @@ public class ModelUtils {
             .counterOrderPaymentId(1L)
             .certificates(Set.of(getCertificate2()))
             .pointsToUse(100)
+            .writeOffStationSum(50L)
             .build();
     }
 
@@ -3800,21 +3759,6 @@ public class ModelUtils {
             .courier(getCourier())
             .service(getService())
             .bags(getBag4list())
-            .build();
-    }
-
-    public static UpdateNotificationTemplatesDto getUpdateNotificationTemplatesDto() {
-        return UpdateNotificationTemplatesDto.builder()
-            .body("test")
-            .notificationType(NotificationType.UNPAID_ORDER.toString())
-            .build();
-    }
-
-    public static NotificationTemplateLocalizedDto getNotificationTemplateLocalizeDto() {
-        return NotificationTemplateLocalizedDto.builder()
-            .id(1L)
-            .notificationType(NotificationType.UNPAID_ORDER.toString())
-            .notificationReceiverType(SITE.toString())
             .build();
     }
 
@@ -4187,19 +4131,6 @@ public class ModelUtils {
         return UserEmployeeAuthorityDto.builder()
             .employeeEmail("test@mail.com")
             .authorities(getAllAuthorities())
-            .build();
-    }
-
-    public static NotificationScheduleDto getInfoAboutNotificationScheduleDto() {
-        return NotificationScheduleDto.builder()
-            .cron("test")
-            .build();
-    }
-
-    public static NotificationSchedule getInfoAboutNotificationSchedule() {
-        return NotificationSchedule.builder()
-            .notificationType(NotificationType.TEST)
-            .cron("test")
             .build();
     }
 
