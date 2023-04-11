@@ -1345,9 +1345,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             notificationService.notifyPaidOrder(order);
         } else if (paymentsForCurrentOrder == 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-        } else if (totalPaidAmount > 0 && totalAmount < totalPaidAmount) {
-            order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
-            notificationService.notifyHalfPaidPackage(order);
         }
         orderRepository.save(order);
     }
