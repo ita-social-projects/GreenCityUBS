@@ -505,7 +505,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * This is method which set value as true for orderStatus Cancelled or Done or
      * Not Taken Out.
      *
-     * @param orderStatusTranslation      {@link OrderStatusTranslation}.
+     * @param orderStatusTranslation      {@linku OrderStatusTranslation}.
      * @param orderStatusesTranslationDto {@link OrderStatusesTranslationDto}.
      *
      * @author Yuriy Bahlay.
@@ -1386,7 +1386,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Payment payment = Payment.builder()
             .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
             .amount(paymentRequestDto.getAmount())
-            .paymentStatus(PaymentStatus.PAID)
+            .paymentStatus(verifyPaymentStatusOrder(order))
             .paymentId(paymentRequestDto.getPaymentId())
             .receiptLink(paymentRequestDto.getReceiptLink())
             .currency("UAH")
@@ -1401,8 +1401,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), order);
-        eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+        if (order.getOrderPaymentStatus() != null) {
+            if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAID) {
+                eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            } else {
+                eventService.save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
+            }
+        }
         return payment;
+    }
+
+    private PaymentStatus verifyPaymentStatusOrder(Order order) {
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAID) {
+            return PaymentStatus.PAID;
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.HALF_PAID) {
+            return PaymentStatus.HALF_PAID;
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
+            return PaymentStatus.UNPAID;
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAYMENT_REFUNDED) {
+            return PaymentStatus.PAYMENT_REFUNDED;
+        }
+        return PaymentStatus.UNPAID;
     }
 
     @Override
