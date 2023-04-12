@@ -12,6 +12,7 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.NotificationReceiverType;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Order;
@@ -598,6 +599,32 @@ class NotificationServiceImplTest {
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());
+    }
+
+    @Test
+    void createNotificationDtoTitleUaLanguageTest() {
+        String language = "ua";
+
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(any(), any()))
+            .thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+
+        NotificationDto result = NotificationServiceImpl.createNotificationDto(TEST_USER_NOTIFICATION, language,
+            NotificationReceiverType.MOBILE, templateRepository, 5L);
+
+        assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitle(), result.getTitle());
+    }
+
+    @Test
+    void createNotificationDtoTitleEnLanguageTest() {
+        String language = "en";
+
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(any(), any()))
+            .thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+
+        NotificationDto result = NotificationServiceImpl.createNotificationDto(TEST_USER_NOTIFICATION, language,
+            NotificationReceiverType.MOBILE, templateRepository, 5L);
+
+        assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitleEng(), result.getTitle());
     }
 
 }

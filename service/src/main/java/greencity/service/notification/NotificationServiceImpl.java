@@ -503,8 +503,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         StringSubstitutor sub = new StringSubstitutor(valuesMap);
         String resultBody = sub.replace(String.format(templateBody, monthsOfAccountInactivity));
+        String title = language.equals("ua") ? template.getTitle() : template.getTitleEng();
 
-        return NotificationDto.builder().title(template.getTitle())
+        return NotificationDto.builder().title(title)
             .body(resultBody).build();
     }
 
