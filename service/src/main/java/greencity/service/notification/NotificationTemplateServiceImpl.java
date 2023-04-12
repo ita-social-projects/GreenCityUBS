@@ -47,12 +47,12 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
 
     private void updateNotificationTemplate(NotificationTemplate template,
         NotificationTemplateWithPlatformsUpdateDto dto) {
-        template.setTitle(dto.getTitle());
-        template.setTitleEng(dto.getTitleEng());
-        template.setNotificationType(dto.getType());
-        template.setTrigger(dto.getTrigger());
-        template.setTime(dto.getTime());
-        template.setSchedule(dto.getSchedule());
+        template.setTitle(dto.getNotificationTemplateMainInfoDto().getTitle());
+        template.setTitleEng(dto.getNotificationTemplateMainInfoDto().getTitleEng());
+        template.setNotificationType(dto.getNotificationTemplateMainInfoDto().getType());
+        template.setTrigger(dto.getNotificationTemplateMainInfoDto().getTrigger());
+        template.setTime(dto.getNotificationTemplateMainInfoDto().getTime());
+        template.setSchedule(dto.getNotificationTemplateMainInfoDto().getSchedule());
     }
 
     private void updateNotificationTemplatePlatforms(List<NotificationPlatform> platforms,
