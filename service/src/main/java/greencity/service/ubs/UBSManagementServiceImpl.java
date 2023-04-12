@@ -797,11 +797,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
                     .getFullPrice();
             }
-            if (order.getOrderStatus() == OrderStatus.DONE) {
-                sumExported += order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
+
+            if (order.getExportedQuantity().size() != 0) {
+                sumExported += getUbsCourierOrWriteOffStationSum(order);
+            } else if (order.getConfirmedQuantity().size() != 0) {
+                sumConfirmed += getUbsCourierOrWriteOffStationSum(order);
             } else {
-                sumConfirmed += order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
-                sumExported += order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
+                sumAmount += getUbsCourierOrWriteOffStationSum(order);
             }
         }
 
@@ -846,6 +848,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         setDtoInfoFromOrder(dto, order);
         setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported);
         return dto;
+    }
+
+    private Long getUbsCourierOrWriteOffStationSum(Order order) {
+        if (order.getUbsCourierSum() != null && order.getWriteOffStationSum() == null) {
+            return order.getUbsCourierSum();
+        } else if (order.getWriteOffStationSum() != null && order.getUbsCourierSum() == null) {
+            return order.getWriteOffStationSum();
+        } else if (order.getWriteOffStationSum() != null && order.getUbsCourierSum() != null) {
+            return order.getWriteOffStationSum() + order.getUbsCourierSum();
+        } else {
+            return 0L;
+        }
     }
 
     private void setDtoInfoFromOrder(CounterOrderDetailsDto dto, Order order) {
