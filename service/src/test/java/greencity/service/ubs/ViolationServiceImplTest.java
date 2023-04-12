@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -115,13 +116,14 @@ class ViolationServiceImplTest {
         verify(employeeRepository, times(1)).findByUuid(anyString());
     }
 
-    @Test
-    void checkAddUserViolation() {
+    @ParameterizedTest
+    @EnumSource(value = OrderStatus.class, names = {"DONE", "NOT_TAKEN_OUT"})
+    void checkAddUserViolation(OrderStatus orderStatus) {
         Employee employee = ModelUtils.getEmployee();
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
         order.setUser(user);
-        order.setOrderStatus(OrderStatus.DONE);
+        order.setOrderStatus(orderStatus);
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
         order.setTariffsInfo(tariffsInfo);
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
