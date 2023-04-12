@@ -60,22 +60,23 @@ class NotificationTemplateServiceImplTest {
     void updateTest() {
         Long id = 1L;
 
-        var dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
-        var platformDto = dto.getPlatforms().get(0);
+        var updateDto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+        var mainInfoDto = updateDto.getNotificationTemplateMainInfoDto();
+        var platformDto = updateDto.getPlatforms().get(0);
 
         var notification = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
         var platform = notification.getNotificationPlatforms().get(0);
 
         when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
 
-        notificationService.update(id, dto);
+        notificationService.update(id, updateDto);
 
-        assertEquals(dto.getTitle(), notification.getTitle());
-        assertEquals(dto.getTitleEng(), notification.getTitleEng());
-        assertEquals(dto.getType(), notification.getNotificationType());
-        assertEquals(dto.getTrigger(), notification.getTrigger());
-        assertEquals(dto.getTime(), notification.getTime());
-        assertEquals(dto.getSchedule(), notification.getSchedule());
+        assertEquals(mainInfoDto.getTitle(), notification.getTitle());
+        assertEquals(mainInfoDto.getTitleEng(), notification.getTitleEng());
+        assertEquals(mainInfoDto.getType(), notification.getNotificationType());
+        assertEquals(mainInfoDto.getTrigger(), notification.getTrigger());
+        assertEquals(mainInfoDto.getTime(), notification.getTime());
+        assertEquals(mainInfoDto.getSchedule(), notification.getSchedule());
 
         assertEquals(platformDto.getBody(), platform.getBody());
         assertEquals(platformDto.getBodyEng(), platform.getBodyEng());
