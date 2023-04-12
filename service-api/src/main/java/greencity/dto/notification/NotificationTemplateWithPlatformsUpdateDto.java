@@ -1,9 +1,5 @@
 package greencity.dto.notification;
 
-import greencity.enums.NotificationStatus;
-import greencity.enums.NotificationTime;
-import greencity.enums.NotificationTrigger;
-import greencity.enums.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
