@@ -509,7 +509,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadRequestException(NUMBER_OF_ADDRESSES_EXCEEDED);
         }
 
-        OrderAddressDtoRequest dtoRequest = retrieveCorrectDtoRequest(addressRequestDto.getSearchAddress());
+        OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
 
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
             modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
@@ -540,54 +540,29 @@ public class UBSClientServiceImpl implements UBSClientService {
     public OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest addressRequestDto,
         String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
+        Address address = addressRepo.findById(addressRequestDto.getId())
+                .orElseThrow(() -> new NotFoundException(
+                        NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressRequestDto.getId()));
+
+        if(address.getUser().getId().equals(currentUser.getId())){
+            throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
+        }
+
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
-        OrderAddressDtoRequest dtoRequest;
-        if (addressRequestDto.getSearchAddress() != null) {
-            dtoRequest = retrieveCorrectDtoRequest(addressRequestDto.getSearchAddress());
-            checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
-        } else {
-            dtoRequest = addressRequestDto;
-        }
+        OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
+        checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
 
-        if (addresses != null) {
-            checkIfAddressExist(addresses, dtoRequest);
-        }
+        checkIfAddressExist(addresses, dtoRequest);
 
-        Address address = addressRepo.findById(dtoRequest.getId())
-            .orElseThrow(() -> new NotFoundException(
-                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
-        if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
-            address = null;
-        }
+        Address newAddress = modelMapper.map(dtoRequest, Address.class);
 
-        final AddressStatus addressStatus = address != null ? address.getAddressStatus() : null;
-        final User addressUser = address != null ? address.getUser() : null;
-        final Boolean addressActual = address != null ? address.getActual() : null;
-
-        address = modelMapper.map(dtoRequest, Address.class);
-
-        if (!currentUser.equals(addressUser)) {
-            address.setId(null);
-        }
-
-        address.setUser(addressUser);
-        address.setActual(true);
-        address.setAddressStatus(addressStatus);
-        address.setActual(addressActual);
-        addressRepo.save(address);
+        newAddress.setUser(address.getUser());
+        newAddress.setAddressStatus(address.getAddressStatus());
+        newAddress.setActual(address.getActual());
+        addressRepo.save(newAddress);
 
         return findAllAddressesForCurrentOrder(uuid);
-    }
-
-    private OrderAddressDtoRequest retrieveCorrectDtoRequest(String searchRequest) {
-        String[] search = searchRequest.split(", ");
-
-        return getLocationDto(searchRequest).stream()
-            .filter(a -> a.getCityEn() != null && a.getCityEn().equals(search[2]))
-            .filter(a -> a.getHouseNumber() != null && a.getHouseNumber().equals(search[1]))
-            .findFirst()
-            .orElseThrow(() -> new AddressNotFoundException(ADDRESS_NOT_FOUND));
     }
 
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
@@ -628,25 +603,19 @@ public class UBSClientServiceImpl implements UBSClientService {
                     .forEach(componentType -> value.accept(addressComponent.longName))));
     }
 
-    private List<OrderAddressDtoRequest> getLocationDto(String searchRequest) {
-        List<GeocodingResult> resultsUa = googleApiService.getResultFromGeoCode(searchRequest, 0);
-        List<GeocodingResult> resultsEn = googleApiService.getResultFromGeoCode(searchRequest, 1);
+    private OrderAddressDtoRequest getLocationDto(String placeId) {
+        GeocodingResult resultsUa = googleApiService.getResultFromGeoCode(placeId, 0);
+        GeocodingResult resultsEn = googleApiService.getResultFromGeoCode(placeId, 1);
 
-        List<OrderAddressDtoRequest> result = new ArrayList<>();
+        OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
+        initializeGeoCodingResults(initializeUkrainianGeoCodingResult(orderAddressDtoRequest), resultsUa);
+        initializeGeoCodingResults(initializeEnglishGeoCodingResult(orderAddressDtoRequest), resultsEn);
 
-        for (int i = 0; i < resultsEn.size() || i < resultsUa.size(); i++) {
-            OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
-            initializeGeoCodingResults(initializeUkrainianGeoCodingResult(orderAddressDtoRequest), resultsUa.get(i));
-            initializeGeoCodingResults(initializeEnglishGeoCodingResult(orderAddressDtoRequest), resultsEn.get(i));
+        double latitude = resultsEn.geometry.location.lat;
+        double longitude = resultsEn.geometry.location.lng;
+        orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
 
-            double latitude = resultsEn.get(i).geometry.location.lat;
-            double longitude = resultsEn.get(i).geometry.location.lng;
-            orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
-
-            result.add(orderAddressDtoRequest);
-        }
-
-        return result;
+        return orderAddressDtoRequest;
     }
 
     private void checkNullFieldsOnGoogleResponse(OrderAddressDtoRequest dtoRequest,

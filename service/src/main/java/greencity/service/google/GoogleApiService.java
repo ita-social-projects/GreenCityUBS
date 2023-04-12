@@ -2,9 +2,13 @@ package greencity.service.google;
 
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
+import com.google.maps.PlacesApi;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.GeocodingResult;
 
+import greencity.constant.ErrorMessage;
+import greencity.exceptions.NotFoundException;
+import greencity.exceptions.address.AddressNotFoundException;
 import greencity.exceptions.api.GoogleApiException;
 import lombok.Data;
 import org.springframework.stereotype.Service;
@@ -24,20 +28,22 @@ public class GoogleApiService {
     /**
      * Send request to the google and receive response with geocoding.
      *
-     * @param searchRequest - address for search
+     * @param placeId - place id
      * @return GeocodingResults - return result from geocoding service
      */
-    public List<GeocodingResult> getResultFromGeoCode(String searchRequest, Integer langCode) {
-        List<GeocodingResult> geocodingResults = new ArrayList<>();
+    public GeocodingResult getResultFromGeoCode(String placeId, Integer langCode) {
 
         try {
             GeocodingResult[] results = GeocodingApi.newRequest(context)
-                .address(searchRequest).language(locales.get(langCode).getLanguage()).await();
-            Collections.addAll(geocodingResults, results);
+                    .place(placeId).language(locales.get(langCode).getLanguage()).await();
+            if(results.length == 0){
+                throw new AddressNotFoundException(ErrorMessage.ADDRESS_NOT_FOUND);
+            }
+            return results[0];
+
         } catch (IOException | InterruptedException | ApiException e) {
             Thread.currentThread().interrupt();
             throw new GoogleApiException(e.getMessage());
         }
-        return geocodingResults;
     }
 }
