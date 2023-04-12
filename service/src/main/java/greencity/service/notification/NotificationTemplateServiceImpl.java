@@ -22,8 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static greencity.enums.NotificationStatus.INACTIVE;
+
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @AllArgsConstructor
 public class NotificationTemplateServiceImpl implements NotificationTemplateService {
     private NotificationTemplateRepository notificationTemplateRepository;
@@ -33,6 +35,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public void update(Long id, NotificationTemplateWithPlatformsUpdateDto dto) {
         NotificationTemplate template = getById(id);
 
@@ -92,6 +95,15 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     @Override
     public NotificationTemplateWithPlatformsDto findById(Long id) {
         return modelMapper.map(getById(id), NotificationTemplateWithPlatformsDto.class);
+    }
+
+    @Override
+    @Transactional
+    public void deactivateNotificationById(Long id) {
+        var notificationTemplate = getById(id);
+        notificationTemplate.setNotificationStatus(INACTIVE);
+        notificationTemplate.getNotificationPlatforms()
+            .forEach(platform -> platform.setNotificationStatus(INACTIVE));
     }
 
     /**
