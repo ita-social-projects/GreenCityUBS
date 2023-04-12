@@ -122,12 +122,10 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
     public void sendWelcomeMessageAndPreRegisterViberBotForUser(String receiverId, String uuid) {
         User user = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-        if (user.getViberBot() == null) {
-            viberBotRepository.save(ViberBot.builder()
-                .chatId(receiverId)
-                .isNotify(false)
-                .user(user)
-                .build());
+        if (!isEnabled(user)) {
+            ViberBot viberBot = getViberBot(user);
+            viberBot.setChatId(receiverId);
+            viberBotRepository.save(viberBot);
         } else {
             throw new ViberBotAlreadyConnected(ErrorMessage.THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT);
         }
@@ -138,6 +136,14 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
                 + "Надішли будь який символ для того щоб підписатись на бота і отримувати сповіщення.")
             .build();
         sendMessageToUser(sendMessageToUserDto);
+    }
+
+    private ViberBot getViberBot(User user) {
+        return viberBotRepository.findByUser(user)
+            .orElse(ViberBot.builder()
+                .isNotify(false)
+                .user(user)
+                .build());
     }
 
     /**

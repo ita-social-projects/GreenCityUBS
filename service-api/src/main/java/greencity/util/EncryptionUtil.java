@@ -1,16 +1,10 @@
 package greencity.util;
 
-import com.liqpay.LiqPayUtil;
 import greencity.dto.payment.PaymentRequestDto;
-import greencity.dto.payment.PaymentRequestDtoLiqPay;
 import greencity.dto.payment.PaymentResponseDto;
 import lombok.ToString;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.json.JSONObject;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
 
@@ -98,45 +92,5 @@ public class EncryptionUtil {
         if (number != null) {
             stringBuilder.append("|" + number);
         }
-    }
-
-    /**
-     * Method forms encrypted signature based on order details.
-     * 
-     * @param dto        {@link PaymentRequestDtoLiqPay}
-     * @param privateKey - key from liqpay personal kabinet
-     * @return {@link String} - encrypted signature;
-     */
-    public String formingRequestSignatureLiqPay(PaymentRequestDtoLiqPay dto, String privateKey) {
-        JSONObject data = new JSONObject();
-        data.put("public_key", dto.getPublicKey());
-        data.put("version", dto.getVersion());
-        data.put("action", dto.getAction());
-        data.put("amount", dto.getAmount());
-        data.put("currency", dto.getCurrency());
-        data.put("description", dto.getDescription());
-        data.put("order_id", dto.getOrderId());
-        data.put("language", dto.getLanguage());
-        data.put("paytypes", dto.getPaytypes());
-        data.put("result_url", dto.getResultUrl());
-
-        String dataToBase64 = Base64.encodeBase64String(data.toString().getBytes(StandardCharsets.UTF_8));
-
-        return strToSignLiqPay(privateKey + dataToBase64 + privateKey);
-    }
-
-    /**
-     * Method forms encrypted signature based on response.
-     * 
-     * @param data       - data that got from LiqPay
-     * @param privateKey - key from liqpay personal kabinet
-     * @return {@link String} - ecnrypted signature;
-     */
-    public String formingResponseSignatureLiqPay(String data, String privateKey) {
-        return strToSignLiqPay(privateKey + data + privateKey);
-    }
-
-    private String strToSignLiqPay(String str) {
-        return LiqPayUtil.base64_encode(LiqPayUtil.sha1(str));
     }
 }

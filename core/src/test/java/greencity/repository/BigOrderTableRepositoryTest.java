@@ -110,7 +110,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
 
     // @Test
     void get_All_Orders_Filter_By_City_DESC() {
-        var filter = new OrderSearchCriteria().setCity(new String[] {"Київ"});
+        var filter = new OrderSearchCriteria().setCities(new String[] {"Київ"});
         var orders = ModelUtils.getListBOTViewsStandardPageDESC();
         List<Long> tariffsInfoIds = new ArrayList<>();
         tariffsInfoIds.add(1L);

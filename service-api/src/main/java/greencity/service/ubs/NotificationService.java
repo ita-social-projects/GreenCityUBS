@@ -79,6 +79,14 @@ public interface NotificationService {
     void notifyAllHalfPaidPackages();
 
     /**
+     * Method sends messages by e-mail/notification that order is unpaid.
+     *
+     * @param order of {@link Order} Order which status was changed
+     * @author Oleh Kulbaba
+     */
+    void notifyUnpaidOrder(Order order);
+
+    /**
      * Method that returns page with notifications for user by UUID.
      *
      * @author Ann Sakhno

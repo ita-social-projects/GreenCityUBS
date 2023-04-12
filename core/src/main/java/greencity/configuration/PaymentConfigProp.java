@@ -13,8 +13,4 @@ public class PaymentConfigProp {
     private String merchantId;
 
     private String fondyPaymentKey;
-
-    private String liqPayPublicKey;
-
-    private String liqPayPrivateKey;
 }

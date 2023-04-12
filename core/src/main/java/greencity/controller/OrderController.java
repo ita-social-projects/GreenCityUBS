@@ -14,13 +14,11 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.*;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
-import greencity.exceptions.BadRequestException;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
@@ -41,7 +39,6 @@ import javax.validation.constraints.Pattern;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -68,7 +65,6 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointsAndAllBagsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/order-details-for-tariff")
@@ -393,76 +389,6 @@ public class OrderController {
         @PathVariable("id") final Long id,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.ok().body(ubsClientService.getOrderCancellationReason(id, uuid));
-    }
-
-    /**
-     * Controller saves all entered by user data to database from LiqPay.
-     *
-     * @param userUuid {@link UserVO} id.
-     * @param dto      {@link OrderResponseDto} order data.
-     * @param id       {@link Long} orderId.
-     * @return {@link LiqPayOrderResponse}.
-     * @author Vadym Makitra
-     */
-    @ApiOperation(value = "Process user order.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping(value = {"/processLiqPayOrder", "/processLiqPayOrder/{id}"})
-    public ResponseEntity<LiqPayOrderResponse> processLiqPayOrder(
-        @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto,
-        @Valid @PathVariable("id") Optional<Long> id) {
-        return id.map(uid -> ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid, uid)))
-            .orElseGet(() -> ResponseEntity.status(HttpStatus.OK)
-                .body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid, null)));
-    }
-
-    /**
-     * Controller checks if received data is valid and stores payment info if is.
-     *
-     * @param dto {@link PaymentResponseDtoLiqPay} - response order data.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "Receive payment.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
-    })
-    @PostMapping(value = "/receiveLiqPayPayment")
-    public ResponseEntity<HttpStatus> receiveLiqPayPayment(
-        PaymentResponseDtoLiqPay dto, HttpServletResponse response) throws IOException {
-        ubsClientService.validateLiqPayPayment(dto);
-        if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
-        }
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    /**
-     * Controller for getting status about payment from Liq Pay.
-     * 
-     * @param orderId - current order
-     * @param uuid    current {@link User}'s uuid.
-     * @return {@link Map}
-     */
-    @ApiOperation(value = "Get status of Payment from Liq Pay.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @GetMapping(value = "/getLiqPayStatus/{orderId}")
-    public ResponseEntity<Map<String, Object>> getLiqPayStatusPayment(
-        @Valid @PathVariable Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) throws BadRequestException {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getLiqPayStatus(orderId, uuid));
     }
 
     /**

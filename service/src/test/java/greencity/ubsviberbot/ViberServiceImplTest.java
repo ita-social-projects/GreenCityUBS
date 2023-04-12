@@ -1,17 +1,19 @@
 package greencity.ubsviberbot;
 
+import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.client.ViberClient;
 import greencity.dto.language.LanguageVO;
 import greencity.dto.user.UserVO;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.enums.MessageType;
-import greencity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
+import greencity.enums.NotificationType;
 import greencity.exceptions.bots.MessageWasNotSent;
+import greencity.exceptions.bots.ViberBotAlreadyConnected;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.UserRepository;
@@ -26,9 +28,16 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
-import static greencity.enums.NotificationReceiverType.OTHER;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static greencity.enums.NotificationReceiverType.MOBILE;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ViberServiceImplTest {
@@ -37,7 +46,7 @@ class ViberServiceImplTest {
     private NotificationTemplateRepository templateRepository;
 
     @Mock
-    private UserRemoteClient userRemoteClient;;
+    private UserRemoteClient userRemoteClient;
 
     @Mock
     private ViberClient viberClient;
@@ -66,12 +75,10 @@ class ViberServiceImplTest {
         .setUser(user);
     private final UserVO userVO = UserVO.builder()
         .languageVO(LanguageVO.builder()
-            .code("en")
+            .code("ua")
             .build())
         .build();
-    private final NotificationTemplate template = new NotificationTemplate()
-        .setTitle("Title")
-        .setBody("Body");
+    private final NotificationTemplate template = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
 
     @Test
     void testSendWelcomeMessageAndPreRegisterViberBotForUser() {
@@ -81,6 +88,14 @@ class ViberServiceImplTest {
         when(viberBotRepository.save(any())).thenReturn(user.getViberBot());
         viberService.sendWelcomeMessageAndPreRegisterViberBotForUser("42", "32L");
         verify(viberBotRepository, times(1)).save(any());
+        verify(userRepository, times(1)).findUserByUuid(anyString());
+    }
+
+    @Test
+    void testSendWelcomeMessageAndPreRegisterViberBotForUserThrowViberBotAlreadyConnected() {
+        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
+        assertThrows(ViberBotAlreadyConnected.class,
+            () -> viberService.sendWelcomeMessageAndPreRegisterViberBotForUser("42", "32L"));
         verify(userRepository, times(1)).findUserByUuid(anyString());
     }
 
@@ -101,18 +116,18 @@ class ViberServiceImplTest {
         SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
             .receiver(notification.getUser().getViberBot().getChatId())
             .type(MessageType.text)
-            .text(template.getTitle() + "\n\n" + template.getBody())
+            .text(template.getTitle() + "\n\n" + template.getNotificationPlatforms().get(0).getBody())
             .build();
 
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
         when(templateRepository
-            .findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
-                notification.getNotificationType(), userVO.getLanguageVO().getCode(), OTHER))
+            .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+                notification.getNotificationType(), MOBILE))
                     .thenReturn(Optional.of(template));
         when(viberClient.sendMessage(sendMessageToUserDto)).thenReturn(null);
 
-        viberService.sendNotification(notification, 0L);
+        viberService.sendNotification(notification, MOBILE, 0L);
 
         verify(viberClient).sendMessage(any());
     }
@@ -124,11 +139,11 @@ class ViberServiceImplTest {
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
         when(templateRepository
-            .findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
-                notification.getNotificationType(), userVO.getLanguageVO().getCode(), OTHER))
+            .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+                notification.getNotificationType(), MOBILE))
                     .thenReturn(Optional.of(template));
 
-        viberService.sendNotification(notification, 0L);
+        viberService.sendNotification(notification, MOBILE, 0L);
 
         verify(viberClient, never()).sendMessage(any());
     }
@@ -137,7 +152,7 @@ class ViberServiceImplTest {
     void sendNotificationUserNotFoundException() {
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class, () -> viberService.sendNotification(notification, 0L));
+        assertThrows(UserNotFoundException.class, () -> viberService.sendNotification(notification, MOBILE, 0L));
     }
 
     @Test
@@ -145,12 +160,12 @@ class ViberServiceImplTest {
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
         when(templateRepository
-            .findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
-                notification.getNotificationType(), userVO.getLanguageVO().getCode(), OTHER))
+            .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+                notification.getNotificationType(), MOBILE))
                     .thenReturn(Optional.of(template));
         when(viberClient.sendMessage(any())).thenThrow(new RuntimeException());
 
-        assertThrows(MessageWasNotSent.class, () -> viberService.sendNotification(notification, 0L));
+        assertThrows(MessageWasNotSent.class, () -> viberService.sendNotification(notification, MOBILE, 0L));
     }
 
     @Test

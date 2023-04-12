@@ -57,9 +57,6 @@ class ManagementOrderControllerTest {
     CertificateService certificateService;
 
     @Mock
-    LiqPayService liqPayService;
-
-    @Mock
     private Validator mockValidator;
 
     @InjectMocks

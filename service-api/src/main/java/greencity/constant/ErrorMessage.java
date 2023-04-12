@@ -61,6 +61,8 @@ public final class ErrorMessage {
     public static final String ORDER_ALREADY_PAID = "Current order is already paid";
     public static final String VIOLATION_DOES_NOT_EXIST = "Violation does not exist for current order";
     public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
+    public static final String INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION =
+        "Cannot add a violation to order with this status: ";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
     public static final String NOT_ENOUGH_BIG_BAGS_EXCEPTION = "Not enough big bags, minimal amount is:";
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
@@ -78,8 +80,6 @@ public final class ErrorMessage {
     public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
-    public static final String LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND =
-        "Payment with selected id does not belong LiqPay.";
     public static final String ORDER_WITH_CURRENT_ID_NOT_FOUND = "Couldn't find order with id that you chose";
     public static final String TO_MUCH_BIG_BAG_EXCEPTION = "You choose to much big bag's max amount is: ";
     public static final String PRICE_OF_ORDER_GREATER_THAN_LIMIT =
@@ -90,6 +90,7 @@ public final class ErrorMessage {
         "SOME CERTIFICATES ARE INVALID. A valid certificate is listed here";
     public static final String CERTIFICATE_NOT_FOUND = "CERTIFICATE_NOT_FOUND";
     public static final String NOTIFICATION_TEMPLATE_NOT_FOUND = "Notification template doesn't exist";
+    public static final String NOTIFICATION_PLATFORM_NOT_FOUND = "Notification platform doesn't exist";
     public static final String LOCATION_ALREADY_EXIST = " that you try to add was already created early";
     public static final String INCORRECT_ECO_NUMBER = "Incorrect format of Eco number";
     public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";
