@@ -61,6 +61,8 @@ public final class ErrorMessage {
     public static final String ORDER_ALREADY_PAID = "Current order is already paid";
     public static final String VIOLATION_DOES_NOT_EXIST = "Violation does not exist for current order";
     public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
+    public static final String INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION =
+        "Cannot add a violation to order with this status: ";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
     public static final String NOT_ENOUGH_BIG_BAGS_EXCEPTION = "Not enough big bags, minimal amount is:";
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
