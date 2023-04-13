@@ -49,7 +49,6 @@ import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.TariffStatus;
-import greencity.exceptions.address.AddressNotFoundException;
 
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
@@ -541,14 +540,14 @@ public class UBSClientServiceImpl implements UBSClientService {
         String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         Address address = addressRepo.findById(addressRequestDto.getId())
-                .orElseThrow(() -> new NotFoundException(
-                        NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressRequestDto.getId()));
+            .orElseThrow(() -> new NotFoundException(
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressRequestDto.getId()));
 
-        if(address.getUser().getId().equals(currentUser.getId())){
+        if (!address.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
 
-        List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
+        List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
 
         OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
         checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
@@ -650,11 +649,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     public OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid) {
         Address address = addressRepo.findById(addressId).orElseThrow(
             () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
-        if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
-            throw new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId);
-        }
         if (!address.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
+        }
+        if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
+            throw new BadRequestException(CANNOT_DELETE_ALREADY_DELETED_ADDRESS);
         }
         address.setAddressStatus(AddressStatus.DELETED);
         address.setActual(false);

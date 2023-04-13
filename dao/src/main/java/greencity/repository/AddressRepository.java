@@ -56,13 +56,21 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     int capacity(double latitude, double longitude);
 
     /**
-     * Method returns list of not deleted {@link Address}addresses for current user.
+     * Method returns list of not deleted {@link Address} addresses for current
+     * user.
      *
      * @return list of {@link Address}.
      */
     @Query(value = "SELECT * FROM address a"
         + " WHERE user_id =:userId AND a.status != 'DELETED'", nativeQuery = true)
     List<Address> findAllNonDeletedAddressesByUserId(Long userId);
+
+    /**
+     * Method returns list of {@link Address} addresses for current user.
+     *
+     * @return list of {@link Address}.
+     */
+    List<Address> findAllByUserId(Long userId);
 
     /**
      * Method returns first address {@link Address} from each distinct district.
