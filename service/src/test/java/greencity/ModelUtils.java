@@ -1830,92 +1830,91 @@ public class ModelUtils {
 
     public static Order getFormedOrder() {
         return Order.builder()
+            .id(1L)
+            .events(List.of(new Event(1L, LocalDateTime.now(),
+                "Roman", "Roman", new Order())))
+            .orderStatus(OrderStatus.FORMED)
+            .payment(singletonList(Payment.builder()
                 .id(1L)
-                .events(List.of(new Event(1L, LocalDateTime.now(),
-                        "Roman", "Roman", new Order())))
-                .orderStatus(OrderStatus.FORMED)
-                .payment(singletonList(Payment.builder()
-                        .id(1L)
-                        .amount(350L)
-                        .paymentStatus(PaymentStatus.PAID)
-                        .build()))
-                .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-                .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-                .exportedQuantity(Collections.singletonMap(1, 1))
-                .amountOfBagsOrdered(Map.of(1, 1))
-                .confirmedQuantity(Map.of(1, 0))
-                .exportedQuantity(Map.of(1, 1))
-                .pointsToUse(100)
-                .user(User.builder().id(1L).currentPoints(100).build())
-                .build();
+                .amount(350L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 0))
+            .exportedQuantity(Map.of(1, 1))
+            .pointsToUse(100)
+            .user(User.builder().id(1L).currentPoints(100).build())
+            .build();
     }
 
     public static Order getFormedOrderVersion2() {
         return Order.builder()
+            .id(1L)
+            .events(List.of(new Event(1L, LocalDateTime.now(),
+                "Roman", "Roman", new Order())))
+            .orderStatus(OrderStatus.FORMED)
+            .payment(singletonList(Payment.builder()
                 .id(1L)
-                .events(List.of(new Event(1L, LocalDateTime.now(),
-                        "Roman", "Roman", new Order())))
-                .orderStatus(OrderStatus.FORMED)
-                .payment(singletonList(Payment.builder()
-                        .id(1L)
-                        .amount(350L)
-                        .paymentStatus(PaymentStatus.PAID)
-                        .build()))
-                .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-                .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-                .exportedQuantity(Collections.singletonMap(1, 1))
-                .amountOfBagsOrdered(Map.of(1, 1))
-                .confirmedQuantity(Map.of(1, 1))
-                .exportedQuantity(Map.of(1, 0))
-                .pointsToUse(100)
-                .user(User.builder().id(1L).currentPoints(100).build())
-                .build();
+                .amount(350L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 0))
+            .pointsToUse(100)
+            .user(User.builder().id(1L).currentPoints(100).build())
+            .build();
     }
 
     public static Order getFormedOrderVersion3() {
         return Order.builder()
+            .id(1L)
+            .events(List.of(new Event(1L, LocalDateTime.now(),
+                "Roman", "Roman", new Order())))
+            .orderStatus(OrderStatus.FORMED)
+            .payment(singletonList(Payment.builder()
                 .id(1L)
-                .events(List.of(new Event(1L, LocalDateTime.now(),
-                        "Roman", "Roman", new Order())))
-                .orderStatus(OrderStatus.FORMED)
-                .payment(singletonList(Payment.builder()
-                        .id(1L)
-                        .amount(350L)
-                        .paymentStatus(PaymentStatus.PAID)
-                        .build()))
-                .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-                .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-                .exportedQuantity(Collections.singletonMap(1, 1))
-                .amountOfBagsOrdered(Map.of(1, 1))
-                .confirmedQuantity(Map.of(1, 1))
-                .exportedQuantity(Map.of(1, 1))
-                .pointsToUse(100)
-                .user(User.builder().id(1L).currentPoints(100).build())
-                .build();
+                .amount(350L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .pointsToUse(100)
+            .user(User.builder().id(1L).currentPoints(100).build())
+            .build();
     }
 
     public static Order getFormedOrderVersion4() {
         return Order.builder()
+            .id(1L)
+            .events(List.of(new Event(1L, LocalDateTime.now(),
+                "Roman", "Roman", new Order())))
+            .orderStatus(OrderStatus.FORMED)
+            .payment(singletonList(Payment.builder()
                 .id(1L)
-                .events(List.of(new Event(1L, LocalDateTime.now(),
-                        "Roman", "Roman", new Order())))
-                .orderStatus(OrderStatus.FORMED)
-                .payment(singletonList(Payment.builder()
-                        .id(1L)
-                        .amount(350L)
-                        .paymentStatus(PaymentStatus.PAID)
-                        .build()))
-                .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-                .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-                .exportedQuantity(Collections.singletonMap(1, 1))
-                .amountOfBagsOrdered(Map.of(1, 1))
-                .confirmedQuantity(Map.of(1, 0))
-                .exportedQuantity(Map.of(1, 0))
-                .pointsToUse(100)
-                .user(User.builder().id(1L).currentPoints(100).build())
-                .build();
+                .amount(350L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 0))
+            .exportedQuantity(Map.of(1, 0))
+            .pointsToUse(100)
+            .user(User.builder().id(1L).currentPoints(100).build())
+            .build();
     }
-
 
     public static Order getCanceledPaidOrder() {
         return Order.builder()

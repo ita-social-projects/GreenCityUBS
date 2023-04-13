@@ -332,8 +332,8 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(getBaglist());
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
-                employee.getFirstName() + "  " + employee.getLastName(),
-                getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(),
+            getOrder());
         ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
@@ -352,8 +352,8 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(getBaglist());
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
-                employee.getFirstName() + "  " + employee.getLastName(),
-                getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(),
+            getOrder());
         ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
@@ -372,8 +372,8 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(getBaglist());
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
-                employee.getFirstName() + "  " + employee.getLastName(),
-                getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(),
+            getOrder());
         ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
