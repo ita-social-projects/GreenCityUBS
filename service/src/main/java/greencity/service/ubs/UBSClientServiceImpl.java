@@ -547,7 +547,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
 
-        List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
+        List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
         OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
         checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
@@ -570,7 +570,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .anyMatch(addressDto -> addressDto.equals(dtoRequest));
 
         if (exist) {
-            throw new NotFoundException(ADDRESS_ALREADY_EXISTS);
+            throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
         }
     }
 

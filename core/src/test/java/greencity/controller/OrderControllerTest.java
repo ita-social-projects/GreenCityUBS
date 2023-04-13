@@ -223,7 +223,7 @@ class OrderControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-        verify(ubsClientService).updateCurrentAddressForOrder(anyObject(), eq("35467585763t4sfgchjfuyetf"));
+        verify(ubsClientService).updateCurrentAddressForOrder(any(), eq("35467585763t4sfgchjfuyetf"));
     }
 
     @Test

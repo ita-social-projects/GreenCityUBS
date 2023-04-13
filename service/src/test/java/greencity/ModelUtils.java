@@ -4011,6 +4011,7 @@ public class ModelUtils {
             .houseNumber("1")
             .houseCorpus("2")
             .entranceNumber("3")
+            .placeId("place_id")
             .build();
     }
 
@@ -4030,6 +4031,7 @@ public class ModelUtils {
             .cityEn("fake street")
             .districtEn("fake district")
             .regionEn("fake region")
+            .placeId("place_id")
             .build();
     }
 
@@ -4052,6 +4054,7 @@ public class ModelUtils {
             .cityEn("fake street")
             .districtEn(withDistrictRegionHouse ? "fake district" : null)
             .regionEn(withDistrictRegionHouse ? "fake region" : null)
+            .placeId("place_id")
             .build();
     }
 

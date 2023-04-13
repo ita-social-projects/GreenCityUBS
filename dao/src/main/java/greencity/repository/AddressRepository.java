@@ -66,13 +66,6 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     List<Address> findAllNonDeletedAddressesByUserId(Long userId);
 
     /**
-     * Method returns list of {@link Address} addresses for current user.
-     *
-     * @return list of {@link Address}.
-     */
-    List<Address> findAllByUserId(Long userId);
-
-    /**
      * Method returns first address {@link Address} from each distinct district.
      *
      * @return list of {@link Address}
