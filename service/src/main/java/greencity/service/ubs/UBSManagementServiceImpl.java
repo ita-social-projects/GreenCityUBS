@@ -395,7 +395,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
-        return dto.getSumConfirmed() != 0 && dto.getSumExported() == 0;
+        return dto.getSumConfirmed() != 0;
     }
 
     private Boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
