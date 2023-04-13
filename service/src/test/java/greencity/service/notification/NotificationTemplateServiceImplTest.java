@@ -66,7 +66,7 @@ class NotificationTemplateServiceImplTest {
     void updateTest() {
         Long id = 1L;
 
-        var updateDto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+        var updateDto = TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
         var mainInfoDto = updateDto.getNotificationTemplateMainInfoDto();
         var platformDto = updateDto.getPlatforms().get(0);
 
