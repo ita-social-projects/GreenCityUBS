@@ -27,4 +27,11 @@ public interface NotificationTemplateService {
      * @author Dima Sannytski
      */
     NotificationTemplateWithPlatformsDto findById(Long id);
+
+    /**
+     * Method that deactivate notification template and all platforms by id.
+     *
+     * @author Dima Sannytski
+     */
+    void deactivateNotificationById(Long id);
 }

@@ -435,13 +435,7 @@ public class ModelUtils {
 
     public static NotificationTemplateWithPlatformsUpdateDto getNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
-            .type(NotificationType.UNPAID_ORDER)
-            .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
-            .time(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
-            .schedule("0 0 18 * * ?")
-            .title("Неопачене замовлення")
-            .titleEng("Unpaid order")
-            .notificationStatus(NotificationStatus.ACTIVE)
+            .notificationTemplateMainInfoDto(getNotificationTemplateMainInfoDto())
             .platforms(List.of(
                 getNotificationPlatformDto(NotificationReceiverType.SITE)))
             .build();

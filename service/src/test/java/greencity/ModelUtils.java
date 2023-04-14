@@ -2204,13 +2204,7 @@ public class ModelUtils {
 
     private static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
-            .type(UNPAID_ORDER)
-            .trigger(ORDER_NOT_PAID_FOR_3_DAYS)
-            .time(AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
-            .schedule("0 0 18 * * ?")
-            .title("Title")
-            .titleEng("TitleEng")
-            .notificationStatus(ACTIVE)
+            .notificationTemplateMainInfoDto(createNotificationTemplateMainInfoDto())
             .platforms(List.of(
                 createNotificationPlatformDto(SITE)))
             .build();
