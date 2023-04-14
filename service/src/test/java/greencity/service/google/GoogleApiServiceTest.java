@@ -7,6 +7,7 @@ import com.google.maps.errors.InvalidRequestException;
 import com.google.maps.model.GeocodingResult;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.api.GoogleApiException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class GoogleApiServiceTest {
+class GoogleApiServiceTest {
 
     @InjectMocks
     GoogleApiService googleApiService;
@@ -73,6 +74,27 @@ public class GoogleApiServiceTest {
                 assertThrows(NotFoundException.class, () -> googleApiService.getResultFromGeoCode(placeId, langCode));
 
             assertEquals(ErrorMessage.NOT_FOUND_ADDRESS_BY_PLACE_ID + placeId, exception.getMessage());
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void testGetResultFromGeoCodeThrowsGoogleApiException() {
+        String placeId = "qwe";
+        Integer langCode = 0;
+        String language = "uk";
+
+        try (MockedStatic<GeocodingApi> utilities = Mockito.mockStatic(GeocodingApi.class)) {
+            utilities.when(() -> GeocodingApi.newRequest(context))
+                .thenReturn(request);
+
+            when(request.place(placeId)).thenReturn(request);
+
+            when(request.language(language)).thenReturn(request);
+
+            when(request.await()).thenThrow(new InterruptedException());
+
+            assertThrows(GoogleApiException.class, () -> googleApiService.getResultFromGeoCode(placeId, langCode));
         }
     }
 }
