@@ -8,6 +8,8 @@ import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
+import greencity.enums.NotificationStatus;
+import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationTemplateRepository;
 import lombok.AllArgsConstructor;
@@ -19,10 +21,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static greencity.enums.NotificationStatus.INACTIVE;
 
 @Service
 @Transactional(readOnly = true)
@@ -99,11 +100,20 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
 
     @Override
     @Transactional
-    public void deactivateNotificationById(Long id) {
+    public void changeNotificationStatusById(Long id, String status) {
+        checkIfNotificationStatusExists(status);
         var notificationTemplate = getById(id);
-        notificationTemplate.setNotificationStatus(INACTIVE);
+        var newStatus = NotificationStatus.valueOf(status);
+        notificationTemplate.setNotificationStatus(newStatus);
         notificationTemplate.getNotificationPlatforms()
-            .forEach(platform -> platform.setNotificationStatus(INACTIVE));
+            .forEach(platform -> platform.setNotificationStatus(newStatus));
+    }
+
+    private void checkIfNotificationStatusExists(String status) {
+        Arrays.stream(NotificationStatus.values())
+            .filter(s -> s.name().equals(status))
+            .findAny()
+            .orElseThrow(() -> new BadRequestException(ErrorMessage.NOTIFICATION_STATUS_DOES_NOT_EXIST + status));
     }
 
     /**
@@ -111,6 +121,6 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
      */
     private NotificationTemplate getById(Long id) {
         return notificationTemplateRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID + id));
     }
 }
