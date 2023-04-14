@@ -1561,6 +1561,32 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testUpdateCurrentAddressForOrderThrowsAccessDeniedException() {
+        long addressId = 1L;
+        long userId = 2L;
+
+        User user = getUserForCreate();
+        user.setId(userId);
+
+        Address address = new Address();
+        address.setId(addressId);
+        address.setUser(new User());
+        address.getUser().setId(userId + 1);
+
+        String uuid = user.getUuid();
+        OrderAddressDtoRequest dtoRequest = getTestOrderAddressLocationDto();
+        dtoRequest.setId(addressId);
+
+        when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
+            () -> ubsService.updateCurrentAddressForOrder(dtoRequest, uuid));
+
+        assertEquals(CANNOT_ACCESS_PERSONAL_INFO, exception.getMessage());
+    }
+
+    @Test
     void testDeleteCurrentAddressForOrder() {
         String uuid = "35467585763t4sfgchjfuyetf";
         User user = new User();
