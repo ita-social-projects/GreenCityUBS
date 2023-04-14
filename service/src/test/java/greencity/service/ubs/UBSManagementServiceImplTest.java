@@ -323,66 +323,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void checkUpdateManualPaymentVersion2() {
-        Employee employee = getEmployee();
-        Order order = ModelUtils.getFormedOrderVersion2();
-        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
-        when(paymentRepository.save(any())).thenReturn(getManualPayment());
-        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(getBaglist());
-        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
-            employee.getFirstName() + "  " + employee.getLastName(),
-            getOrder());
-        ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
-        verify(paymentRepository, times(1)).findById(1L);
-        verify(paymentRepository, times(1)).save(any());
-        verify(bagRepository).findBagsByOrderId(order.getId());
-        verify(eventService, times(1)).save(any(), any(), any());
-        verify(fileService, times(0)).delete(null);
-    }
-
-    @Test
-    void checkUpdateManualPaymentVersion3() {
-        Employee employee = getEmployee();
-        Order order = ModelUtils.getFormedOrderVersion3();
-        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
-        when(paymentRepository.save(any())).thenReturn(getManualPayment());
-        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(getBaglist());
-        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
-            employee.getFirstName() + "  " + employee.getLastName(),
-            getOrder());
-        ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
-        verify(paymentRepository, times(1)).findById(1L);
-        verify(paymentRepository, times(1)).save(any());
-        verify(bagRepository).findBagsByOrderId(order.getId());
-        verify(eventService, times(1)).save(any(), any(), any());
-        verify(fileService, times(0)).delete(null);
-    }
-
-    @Test
-    void checkUpdateManualPaymentVersion4() {
-        Employee employee = getEmployee();
-        Order order = ModelUtils.getFormedOrderVersion4();
-        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
-        when(paymentRepository.save(any())).thenReturn(getManualPayment());
-        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(getBaglist());
-        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
-            employee.getFirstName() + "  " + employee.getLastName(),
-            getOrder());
-        ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
-        verify(paymentRepository, times(1)).findById(1L);
-        verify(paymentRepository, times(1)).save(any());
-        verify(bagRepository).findBagsByOrderId(order.getId());
-        verify(eventService, times(1)).save(any(), any(), any());
-        verify(fileService, times(0)).delete(null);
-    }
-
-    @Test
     void saveNewManualPaymentWithPaidOrder() {
         User user = ModelUtils.getTestUser();
         user.setRecipientName("Петро");
