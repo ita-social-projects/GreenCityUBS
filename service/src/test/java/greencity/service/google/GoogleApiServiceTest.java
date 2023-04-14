@@ -1,6 +1,5 @@
 package greencity.service.google;
 
-
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.GeocodingApiRequest;
@@ -22,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
 public class GoogleApiServiceTest {
 
@@ -35,14 +33,14 @@ public class GoogleApiServiceTest {
 
     @Test
     @SneakyThrows
-    void testGetResultFromGeoCode(){
+    void testGetResultFromGeoCode() {
         String placeId = "qwe";
         Integer langCode = 0;
         String language = "uk";
 
         try (MockedStatic<GeocodingApi> utilities = Mockito.mockStatic(GeocodingApi.class)) {
             utilities.when(() -> GeocodingApi.newRequest(context))
-                    .thenReturn(request);
+                .thenReturn(request);
 
             when(request.place(placeId)).thenReturn(request);
 
@@ -56,14 +54,14 @@ public class GoogleApiServiceTest {
 
     @Test
     @SneakyThrows
-    void testGetResultFromGeoCodeThrowsNotFoundException(){
+    void testGetResultFromGeoCodeThrowsNotFoundException() {
         String placeId = "qwe";
         Integer langCode = 0;
         String language = "uk";
 
         try (MockedStatic<GeocodingApi> utilities = Mockito.mockStatic(GeocodingApi.class)) {
             utilities.when(() -> GeocodingApi.newRequest(context))
-                    .thenReturn(request);
+                .thenReturn(request);
 
             when(request.place(placeId)).thenReturn(request);
 
@@ -72,7 +70,7 @@ public class GoogleApiServiceTest {
             when(request.await()).thenThrow(new InvalidRequestException("message"));
 
             NotFoundException exception =
-                    assertThrows(NotFoundException.class, () -> googleApiService.getResultFromGeoCode(placeId, langCode));
+                assertThrows(NotFoundException.class, () -> googleApiService.getResultFromGeoCode(placeId, langCode));
 
             assertEquals(ErrorMessage.NOT_FOUND_ADDRESS_BY_PLACE_ID + placeId, exception.getMessage());
         }
