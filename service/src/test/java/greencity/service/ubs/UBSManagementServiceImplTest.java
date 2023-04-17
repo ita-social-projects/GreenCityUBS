@@ -1536,6 +1536,15 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void getOrderStatusDataTestWhenOrderIsNull() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> {
+            ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
+        });
+        verify(orderRepository).findById(1L);
+    }
+
+    @Test
     void getOrderStatusDataTestEmptyPriceDetails() {
         Order order = getOrderForGetOrderStatusEmptyPriceDetails();
         BagInfoDto bagInfoDto = getBagInfoDto();
