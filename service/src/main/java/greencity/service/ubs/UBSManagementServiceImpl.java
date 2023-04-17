@@ -358,7 +358,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         UserInfoDto userInfoDto =
             ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
-            getInfoAboutStatusesAndDateFormed(Optional.of(order));
+            getInfoAboutStatusesAndDateFormed(order);
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(orderAddress);
         return OrderStatusPageDto.builder()
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
@@ -439,31 +439,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @author Yuriy Bahlay.
      */
-    private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Optional<Order> order) {
-        OrderStatus orderStatus = order.get().getOrderStatus();
+    private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Order order) {
+        OrderStatus orderStatus = order.getOrderStatus();
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
-        String currentOrderStatusTranslation = orderStatusTranslation.get().getName();
+        String currentOrderStatusTranslation =
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
         String currentOrderStatusTranslationEng = orderStatusTranslation.get().getNameEng();
 
-        OrderPaymentStatus orderStatusPayment =
-            order.map(Order::getOrderPaymentStatus).orElse(OrderPaymentStatus.UNPAID);
-        Order currentOrder = order.orElseGet(Order::new);
+        OrderPaymentStatus orderStatusPayment = order.getOrderPaymentStatus();
         OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = orderPaymentStatusTranslationRepository
             .getById((long) orderStatusPayment.getStatusValue());
 
         return GeneralOrderInfo.builder()
-            .id(order.get().getId())
-            .dateFormed(order.map(Order::getOrderDate).orElse(null))
+            .id(order.getId())
+            .dateFormed(order.getOrderDate())
             .orderStatusesDtos(getOrderStatusesTranslation())
             .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation())
-            .orderStatus(order.map(Order::getOrderStatus).orElse(null))
-            .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
+            .orderStatus(order.getOrderStatus())
+            .orderPaymentStatus(order.getOrderPaymentStatus())
             .orderPaymentStatusName(currentOrderStatusPaymentTranslation.getTranslationValue())
             .orderPaymentStatusNameEng(currentOrderStatusPaymentTranslation.getTranslationsValueEng())
             .orderStatusName(currentOrderStatusTranslation)
             .orderStatusNameEng(currentOrderStatusTranslationEng)
-            .adminComment(currentOrder.getAdminComment())
+            .adminComment(order.getAdminComment())
             .build();
     }
 
