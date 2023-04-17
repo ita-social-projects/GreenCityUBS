@@ -440,14 +440,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay.
      */
     private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Optional<Order> order) {
-        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
+        OrderStatus orderStatus = order.get().getOrderStatus();
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
-        String currentOrderStatusTranslation =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
-        String currentOrderStatusTranslationEng =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
-                : orderStatus.name();
+        String currentOrderStatusTranslation = orderStatusTranslation.get().getName();
+        String currentOrderStatusTranslationEng = orderStatusTranslation.get().getNameEng();
 
         OrderPaymentStatus orderStatusPayment =
             order.map(Order::getOrderPaymentStatus).orElse(OrderPaymentStatus.UNPAID);
@@ -456,7 +453,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .getById((long) orderStatusPayment.getStatusValue());
 
         return GeneralOrderInfo.builder()
-            .id(order.isPresent() ? order.get().getId() : 0)
+            .id(order.get().getId())
             .dateFormed(order.map(Order::getOrderDate).orElse(null))
             .orderStatusesDtos(getOrderStatusesTranslation())
             .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation())
