@@ -445,7 +445,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
         String currentOrderStatusTranslation =
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
-        String currentOrderStatusTranslationEng = orderStatusTranslation.get().getNameEng();
+        String currentOrderStatusTranslationEng =
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
+                : orderStatus.name();
 
         OrderPaymentStatus orderStatusPayment = order.getOrderPaymentStatus();
         OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = orderPaymentStatusTranslationRepository
