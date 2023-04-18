@@ -10,8 +10,8 @@ public class InetAddressProvider {
     /**
      * Method to get HostName [InetAddress.getLocalHost().getHostName()].
      *
-     * @throws IllegalStateException if there is an error getting the host name.
      * @return the host name of the local host
+     * @throws IllegalStateException if there is an error getting the host name.
      */
     public String getInetAddressHostName() {
         try {
