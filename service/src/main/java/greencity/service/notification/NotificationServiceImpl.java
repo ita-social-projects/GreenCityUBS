@@ -62,6 +62,8 @@ public class NotificationServiceImpl implements NotificationService {
     private Clock clock;
     private List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
+    @Autowired
+    private final InetAddressProvider inetAddressProvider;
 
     @Autowired
     @Qualifier("singleThreadedExecutor")
@@ -238,10 +240,28 @@ public class NotificationServiceImpl implements NotificationService {
                 .reduce(0L, Long::sum);
         }
 
+        parameters.add(NotificationParameter.builder().key("orderNumber").value(order.getId().toString()).build());
+
         Long amountToPay = totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
+
+        final String testGreenCity = "https://greencity-ubs.testgreencity.ga/ubs/details-for-existing-order/"
+            + order.getId();
+        final String pickUpCity = "https://greencity-ubs.pick-up.city/ubs/details-for-existing-order/"
+            + order.getId();
+
+        String hostName = inetAddressProvider.getInetAddressHostName();
+
+        if (hostName.equals("www.testgreencity.ga")) {
+            parameters.add(NotificationParameter.builder().key("payButton").value(testGreenCity).build());
+        }
+
+        if (hostName.equals("www.pick-up.city")) {
+            parameters.add(NotificationParameter.builder().key("payButton").value(pickUpCity).build());
+        }
+
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()
                 .map(Event::getEventName)
