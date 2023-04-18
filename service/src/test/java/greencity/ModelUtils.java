@@ -2793,6 +2793,32 @@ public class ModelUtils {
         return OrderStatusTranslation.builder().id(6L).statusId(2L).name("name").build();
     }
 
+    public static List<OrderStatusTranslation> getOrderStatusTranslations() {
+        List<OrderStatusTranslation> orderStatusTranslations = new ArrayList<>();
+
+        OrderStatusTranslation orderStatusTranslation1 = OrderStatusTranslation.builder()
+            .id(1L)
+            .statusId(6L)
+            .name("Order DONE")
+            .build();
+        OrderStatusTranslation orderStatusTranslation2 = OrderStatusTranslation.builder()
+            .id(2L)
+            .statusId(7L)
+            .name("Order NOT TAKEN OUT")
+            .build();
+        OrderStatusTranslation orderStatusTranslation3 = OrderStatusTranslation.builder()
+            .id(3L)
+            .statusId(8L)
+            .name("Order CANCELLED")
+            .build();
+
+        orderStatusTranslations.add(orderStatusTranslation1);
+        orderStatusTranslations.add(orderStatusTranslation2);
+        orderStatusTranslations.add(orderStatusTranslation3);
+
+        return orderStatusTranslations;
+    }
+
     public static BagInfoDto getBagInfoDto() {
         return BagInfoDto.builder()
             .id(1)

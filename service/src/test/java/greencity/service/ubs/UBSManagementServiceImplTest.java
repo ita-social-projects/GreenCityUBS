@@ -1514,6 +1514,7 @@ class UBSManagementServiceImplTest {
         when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
                 .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
@@ -1530,6 +1531,7 @@ class UBSManagementServiceImplTest {
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6L);
+        verify(orderStatusTranslationRepository).findAllBy();
         verify(orderPaymentStatusTranslationRepository).getById(1L);
         verify(receivingStationRepository).findAll();
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
