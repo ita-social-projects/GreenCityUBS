@@ -69,6 +69,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Qualifier("singleThreadedExecutor")
     private ExecutorService executor;
 
+    private static final String ORDER_NUMBER_KEY = "orderNumber";
+
     /**
      * {@inheritDoc}
      */
@@ -103,7 +105,7 @@ public class NotificationServiceImpl implements NotificationService {
         userNotification.setOrder(order);
         UserNotification notification = userNotificationRepository.save(userNotification);
         NotificationParameter notificationParameter = new NotificationParameter();
-        notificationParameter.setKey("orderNumber");
+        notificationParameter.setKey(ORDER_NUMBER_KEY);
         notificationParameter.setValue(order.getId().toString());
         notificationParameter.setUserNotification(notification);
         NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
@@ -192,7 +194,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
-        parameters.add(NotificationParameter.builder().key("orderNumber")
+        parameters.add(NotificationParameter.builder().key(ORDER_NUMBER_KEY)
             .value(order.getId().toString()).build());
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
             fillAndSendNotification(parameters, order, NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF);
@@ -240,7 +242,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .reduce(0L, Long::sum);
         }
 
-        parameters.add(NotificationParameter.builder().key("orderNumber").value(order.getId().toString()).build());
+        parameters.add(NotificationParameter.builder().key(ORDER_NUMBER_KEY).value(order.getId().toString()).build());
 
         Long amountToPay = totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
 
