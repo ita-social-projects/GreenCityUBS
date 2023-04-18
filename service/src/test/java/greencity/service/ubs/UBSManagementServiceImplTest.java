@@ -859,6 +859,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
         when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(paymentRepository.selectSumPaid(1L)).thenReturn(5000L);
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -866,6 +867,16 @@ class UBSManagementServiceImplTest {
 
         verify(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void testSetOrderDetailWhenOrderNotFound() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> ubsManagementService.setOrderDetail(1L,
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc"));
     }
 
     @Test

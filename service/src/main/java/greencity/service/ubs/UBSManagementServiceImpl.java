@@ -632,19 +632,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void recalculateCertificates(long amount, Order order) {
         Set<Certificate> certificates = order.getCertificates();
-        for (Certificate certificate : certificates) {
-            amount = amount - certificate.getPoints();
-            if (amount < 0) {
-                certificate.setPoints(certificate.getPoints() + (int) amount);
-                certificateRepository.save(certificate);
-                amount = 0L;
+        if (certificates != null) {
+            for (Certificate certificate : certificates) {
+                amount = amount - certificate.getPoints();
+                if (amount < 0) {
+                    certificate.setPoints(certificate.getPoints() + (int) amount);
+                    certificateRepository.save(certificate);
+                    amount = 0L;
+                }
             }
         }
         recalculatePoints(amount, order);
     }
 
     private void recalculatePoints(long amount, Order order) {
-        if (order.getPointsToUse() > amount) {
+        if (order.getPointsToUse() != null && order.getPointsToUse() > amount) {
             userRepository.updateUserCurrentPoints(order.getUser().getId(), order.getPointsToUse() - (int) amount);
             order.setPointsToUse((int) amount);
             orderRepository.updateOrderPointsToUse(order.getId(), (int) amount);
