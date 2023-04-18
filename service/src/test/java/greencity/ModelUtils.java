@@ -2794,29 +2794,47 @@ public class ModelUtils {
     }
 
     public static List<OrderStatusTranslation> getOrderStatusTranslations() {
-        List<OrderStatusTranslation> orderStatusTranslations = new ArrayList<>();
-
-        OrderStatusTranslation orderStatusTranslation1 = OrderStatusTranslation.builder()
+        return List.of(OrderStatusTranslation.builder()
             .id(1L)
             .statusId(6L)
             .name("Order DONE")
-            .build();
-        OrderStatusTranslation orderStatusTranslation2 = OrderStatusTranslation.builder()
-            .id(2L)
-            .statusId(7L)
-            .name("Order NOT TAKEN OUT")
-            .build();
-        OrderStatusTranslation orderStatusTranslation3 = OrderStatusTranslation.builder()
-            .id(3L)
-            .statusId(8L)
-            .name("Order CANCELLED")
-            .build();
+            .build(),
+            OrderStatusTranslation.builder()
+                .id(2L)
+                .statusId(7L)
+                .name("Order NOT TAKEN OUT")
+                .build(),
+            OrderStatusTranslation.builder().id(3L)
+                .statusId(8L)
+                .name("Order CANCELLED")
+                .build());
+    }
 
-        orderStatusTranslations.add(orderStatusTranslation1);
-        orderStatusTranslations.add(orderStatusTranslation2);
-        orderStatusTranslations.add(orderStatusTranslation3);
-
-        return orderStatusTranslations;
+    public static List<OrderPaymentStatusTranslation> getOrderStatusPaymentTranslations() {
+        return List.of(OrderPaymentStatusTranslation.builder()
+            .id(1L)
+            .translationValue("тест")
+            .translationsValueEng("test")
+            .orderPaymentStatusId(1L)
+            .build(),
+            OrderPaymentStatusTranslation.builder()
+                .id(2L)
+                .translationValue("тест2")
+                .translationsValueEng("test2")
+                .orderPaymentStatusId(2L)
+                .build(),
+            OrderPaymentStatusTranslation.builder()
+                .id(3L)
+                .translationValue("тест3")
+                .translationsValueEng("test3")
+                .orderPaymentStatusId(3L)
+                .build(),
+            OrderPaymentStatusTranslation.builder()
+                .id(4L)
+                .translationValue("тест4")
+                .translationsValueEng("test4")
+                .orderPaymentStatusId(4L)
+                .build());
     }
 
     public static BagInfoDto getBagInfoDto() {

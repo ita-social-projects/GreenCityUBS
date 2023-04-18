@@ -1518,6 +1518,7 @@ class UBSManagementServiceImplTest {
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
                 .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+        when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
 
@@ -1533,6 +1534,7 @@ class UBSManagementServiceImplTest {
         verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6L);
         verify(orderStatusTranslationRepository).findAllBy();
         verify(orderPaymentStatusTranslationRepository).getById(1L);
+        verify(orderPaymentStatusTranslationRepository).getAllBy();
         verify(receivingStationRepository).findAll();
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
     }
