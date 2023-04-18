@@ -182,11 +182,12 @@ class NotificationTemplateServiceImplTest {
     @Test
     void changeNotificationStatusByIdThrowNotFoundExceptionTest() {
         Long id = 1L;
+        String newStatus = INACTIVE.toString();
 
         when(templateRepository.findById(id)).thenReturn(Optional.empty());
 
         var exception = assertThrows(
-            NotFoundException.class, () -> notificationService.changeNotificationStatusById(id, INACTIVE.name()));
+            NotFoundException.class, () -> notificationService.changeNotificationStatusById(id, newStatus));
         assertEquals(NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID + id, exception.getMessage());
 
         verify(templateRepository).findById(id);

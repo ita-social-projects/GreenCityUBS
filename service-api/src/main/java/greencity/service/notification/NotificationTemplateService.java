@@ -4,7 +4,6 @@ import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.enums.NotificationStatus;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationTemplateService {

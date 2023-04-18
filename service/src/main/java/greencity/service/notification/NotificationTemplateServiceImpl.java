@@ -101,16 +101,15 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     @Override
     @Transactional
     public void changeNotificationStatusById(Long id, String status) {
-        checkIfNotificationStatusExists(status);
+        var newStatus = getValidNotificationStatusByNameOrThrow(status);
         var notificationTemplate = getById(id);
-        var newStatus = NotificationStatus.valueOf(status);
         notificationTemplate.setNotificationStatus(newStatus);
         notificationTemplate.getNotificationPlatforms()
             .forEach(platform -> platform.setNotificationStatus(newStatus));
     }
 
-    private void checkIfNotificationStatusExists(String status) {
-        Arrays.stream(NotificationStatus.values())
+    private NotificationStatus getValidNotificationStatusByNameOrThrow(String status) {
+        return Arrays.stream(NotificationStatus.values())
             .filter(s -> s.name().equals(status))
             .findAny()
             .orElseThrow(() -> new BadRequestException(ErrorMessage.NOTIFICATION_STATUS_DOES_NOT_EXIST + status));

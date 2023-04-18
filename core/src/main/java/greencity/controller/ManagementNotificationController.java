@@ -6,7 +6,6 @@ import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.enums.NotificationStatus;
 import greencity.service.notification.NotificationTemplateService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
