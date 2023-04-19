@@ -142,9 +142,12 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1190,39 +1193,44 @@ class UBSClientServiceImplTest {
 
     @Test
     void updateProfileData() {
+        UBSClientServiceImpl ubsClientService = spy(ubsService);
+
         User user = getUserWithBotNotifyTrue();
         TelegramBot telegramBot = getTelegramBotNotifyTrue();
         ViberBot viberBot = getViberBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoList();
-        List<Address> address = addressList();
         List<Bot> botList = botList();
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
         String uuid = UUID.randomUUID().toString();
+        OrderAddressDtoRequest updateAddressRequestDto = getTestOrderAddressDtoRequest();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByUser(user)).thenReturn(Optional.of(telegramBot));
         when(viberBotRepository.findByUser(user)).thenReturn(Optional.of(viberBot));
-        when(modelMapper.map(addressDto.get(0), Address.class)).thenReturn(address.get(0));
-        when(modelMapper.map(addressDto.get(1), Address.class)).thenReturn(address.get(1));
+        when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
+        when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
+        doReturn(new OrderWithAddressesResponseDto())
+            .when(ubsClientService).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         when(userRepository.save(user)).thenReturn(user);
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
 
-        ubsService.updateProfileData(uuid, userProfileUpdateDto);
+        ubsClientService.updateProfileData(uuid, userProfileUpdateDto);
 
         for (Bot bot : botList) {
             Assertions.assertNotNull(bot);
         }
         Assertions.assertNotNull(userProfileUpdateDto.getAddressDto());
         Assertions.assertNotNull(userProfileUpdateDto);
-        Assertions.assertNotNull(address);
+        Assertions.assertNotNull(addressDto);
         Assertions.assertTrue(userProfileUpdateDto.getTelegramIsNotify());
         Assertions.assertTrue(userProfileUpdateDto.getViberIsNotify());
 
         verify(userRepository).findUserByUuid(uuid);
         verify(telegramBotRepository).findByUser(user);
         verify(viberBotRepository).findByUser(user);
-        verify(modelMapper).map(addressDto.get(0), Address.class);
-        verify(modelMapper).map(addressDto.get(1), Address.class);
+        verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
+        verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
+        verify(ubsClientService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         verify(userRepository).save(user);
         verify(modelMapper).map(user, UserProfileUpdateDto.class);
     }
@@ -1241,29 +1249,34 @@ class UBSClientServiceImplTest {
 
     @Test
     void updateProfileDataIfTelegramBotNotExists() {
+        UBSClientServiceImpl ubsClientService = spy(ubsService);
+
         User user = getUserWithBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoList();
-        List<Address> address = addressList();
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDtoWithBotsIsNotifyFalse();
         String uuid = UUID.randomUUID().toString();
+        OrderAddressDtoRequest updateAddressRequestDto = getTestOrderAddressDtoRequest();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByUser(user)).thenReturn(Optional.empty());
         when(viberBotRepository.findByUser(user)).thenReturn(Optional.empty());
-        when(modelMapper.map(addressDto.get(0), Address.class)).thenReturn(address.get(0));
-        when(modelMapper.map(addressDto.get(1), Address.class)).thenReturn(address.get(1));
+        when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
+        when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
+        doReturn(new OrderWithAddressesResponseDto())
+            .when(ubsClientService).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         when(userRepository.save(user)).thenReturn(user);
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
 
-        ubsService.updateProfileData(uuid, userProfileUpdateDto);
+        ubsClientService.updateProfileData(uuid, userProfileUpdateDto);
 
         assertFalse(userProfileUpdateDto.getTelegramIsNotify());
 
         verify(userRepository).findUserByUuid(uuid);
         verify(telegramBotRepository).findByUser(user);
         verify(viberBotRepository).findByUser(user);
-        verify(modelMapper).map(addressDto.get(0), Address.class);
-        verify(modelMapper).map(addressDto.get(1), Address.class);
+        verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
+        verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
+        verify(ubsClientService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         verify(userRepository).save(user);
         verify(modelMapper).map(user, UserProfileUpdateDto.class);
     }
@@ -1361,6 +1374,7 @@ class UBSClientServiceImplTest {
         String uuid = user.getUuid();
         OrderAddressDtoRequest dtoRequest = getTestOrderAddressLocationDto();
         CreateAddressRequestDto createAddressRequestDto = getAddressRequestDto();
+        Address addressToSave = new Address();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
@@ -1370,7 +1384,7 @@ class UBSClientServiceImplTest {
             eq(OrderAddressDtoRequest.class)))
                 .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
         when(modelMapper.map(any(),
-            eq(Address.class))).thenReturn(new Address());
+            eq(Address.class))).thenReturn(addressToSave);
         when(modelMapper.map(addresses.get(0),
             AddressDto.class))
                 .thenReturn(addressDto());
@@ -1379,7 +1393,7 @@ class UBSClientServiceImplTest {
             ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
 
         Assertions.assertEquals(getAddressDtoResponse(), actualWithSearchAddress);
-        verify(addressRepository).save(addresses.get(0));
+        verify(addressRepository).save(addressToSave);
     }
 
     @Test
@@ -1445,7 +1459,8 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
                 .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
-        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
+        when(addressRepository.findById(updateAddressRequestDto.getId()))
+            .thenReturn(Optional.ofNullable(addresses.get(0)));
         when(modelMapper.map(any(),
             eq(Address.class))).thenReturn(addresses.get(0));
 
@@ -1484,11 +1499,13 @@ class UBSClientServiceImplTest {
         addresses.get(0).setUser(user);
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
+        when(addressRepository.findById(updateAddressRequestDto.getId()))
+            .thenReturn(Optional.ofNullable(addresses.get(0)));
         when(googleApiService.getResultFromGeoCode(eq(updateAddressRequestDto.getPlaceId()), anyInt()))
             .thenReturn(getGeocodingResult().get(0));
 
-        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
+        when(addressRepository.findById(updateAddressRequestDto.getId()))
+            .thenReturn(Optional.ofNullable(addresses.get(0)));
         when(modelMapper.map(any(),
             eq(Address.class))).thenReturn(addresses.get(0));
 
@@ -1524,7 +1541,8 @@ class UBSClientServiceImplTest {
         addresses.get(0).setUser(user);
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
+        when(addressRepository.findById(updateAddressRequestDto.getId()))
+            .thenReturn(Optional.ofNullable(addresses.get(0)));
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
         when(googleApiService.getResultFromGeoCode(eq(updateAddressRequestDto.getPlaceId()), anyInt()))
             .thenReturn(getGeocodingResult().get(0));

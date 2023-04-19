@@ -517,15 +517,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         checkIfAddressExist(addresses, dtoRequest);
 
-        addresses.forEach(addressItem -> {
-            addressItem.setActual(false);
-            addressRepo.save(addressItem);
-        });
-
         Address address = modelMapper.map(dtoRequest, Address.class);
 
         address.setUser(currentUser);
-        address.setActual(true);
+        address.setActual(addresses.isEmpty());
         address.setAddressStatus(AddressStatus.NEW);
         addressRepo.save(address);
 
@@ -1240,11 +1235,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         setUserData(user, userProfileUpdateDto);
         setTelegramAndViberBots(user, userProfileUpdateDto.getTelegramIsNotify(),
             userProfileUpdateDto.getViberIsNotify());
-        List<Address> addressList =
-            userProfileUpdateDto.getAddressDto().stream().map(a -> modelMapper.map(a, Address.class))
-                .collect(toList());
-        addressList.forEach(address -> address.setUser(user));
-        user.setAddresses(addressList);
+        userProfileUpdateDto.getAddressDto().stream()
+            .filter(addressDto -> addressDto.getPlaceId() != null)
+            .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
+            .forEach(addressRequestDto -> updateCurrentAddressForOrder(addressRequestDto, uuid));
         User savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserProfileUpdateDto.class);
     }

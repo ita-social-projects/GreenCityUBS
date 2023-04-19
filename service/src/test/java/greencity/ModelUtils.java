@@ -1380,6 +1380,7 @@ public class ModelUtils {
             .district("Zaliznuchnuy")
             .city("Lviv")
             .actual(false)
+            .placeId("place_id")
             .build());
         list.add(AddressDto.builder().id(2L)
             .entranceNumber("9a")
@@ -1390,6 +1391,7 @@ public class ModelUtils {
             .district("Zaliznuchnuy")
             .city("Lviv")
             .actual(false)
+            .placeId("place_id")
             .build());
         return list;
     }
