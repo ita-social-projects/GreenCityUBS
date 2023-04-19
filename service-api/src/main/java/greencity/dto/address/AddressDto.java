@@ -1,12 +1,25 @@
 package greencity.dto.address;
 
 import greencity.entity.coords.Coordinates;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import static greencity.constant.ValidationConstant.*;
+
+import static greencity.constant.ValidationConstant.CH_EN;
+import static greencity.constant.ValidationConstant.CH_NUM;
+import static greencity.constant.ValidationConstant.CH_UA;
+import static greencity.constant.ValidationConstant.CITY_EN_REGEXP;
+import static greencity.constant.ValidationConstant.CITY_UK_REGEXP;
 
 @Getter
 @Setter
@@ -58,4 +71,6 @@ public class AddressDto implements Serializable {
     @Length(max = 30)
     @Pattern(regexp = CH_EN + "{1,30}")
     private String districtEn;
+
+    private String placeId;
 }

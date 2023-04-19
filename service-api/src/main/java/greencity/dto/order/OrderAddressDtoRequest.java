@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
 @Getter
@@ -63,4 +64,6 @@ public class OrderAddressDtoRequest {
     @Length(max = 30)
     @Pattern(regexp = "[a-zA-Z-\\s'.]{3,30}")
     private String districtEn;
+    @NotEmpty
+    private String placeId;
 }

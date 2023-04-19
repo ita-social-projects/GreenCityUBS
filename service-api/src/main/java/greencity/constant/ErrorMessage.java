@@ -17,6 +17,7 @@ public final class ErrorMessage {
     public static final String NO_SUCH_COORDINATES = "There are no any order with coordinates: ";
     public static final String INAVALID_LITRES_AMOUNT = "The amount of litres should be between 0 and 10.000 litres.";
     public static final String NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER = "Not found address with such id: ";
+    public static final String NOT_FOUND_ADDRESS_BY_PLACE_ID = "Not found address with such place id: ";
     public static final String UNDELIVERED_ORDERS_NOT_FOUND = "There are no any undelivered orders found.";
     public static final String PAYMENT_VALIDATION_ERROR = "The received payment data is not valid.";
     public static final String THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT =
@@ -98,6 +99,8 @@ public final class ErrorMessage {
     public static final String CANNOT_ACCESS_PAYMENT_STATUS = "Cannot access another user's payment status";
     public static final String USER_HAS_NO_OVERPAYMENT = "This user has no overpayment";
     public static final String CANNOT_DELETE_ADDRESS = "Cannot delete another user's address";
+    public static final String CANNOT_DELETE_ALREADY_DELETED_ADDRESS =
+        "Cannot delete an address that has already been deleted.";
     public static final String CANNOT_ACCESS_PERSONAL_INFO = "Cannot access another user's personal info";
     public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =
         "Cannot access another user's order cancellation reason";

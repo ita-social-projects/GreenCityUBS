@@ -56,7 +56,8 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     int capacity(double latitude, double longitude);
 
     /**
-     * Method returns list of not deleted {@link Address}addresses for current user.
+     * Method returns list of not deleted {@link Address} addresses for current
+     * user.
      *
      * @return list of {@link Address}.
      */
