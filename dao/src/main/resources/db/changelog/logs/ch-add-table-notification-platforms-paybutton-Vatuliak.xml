@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="Vatuliak-1" author="Vatuliak Oleh">
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton}. Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua"/>
+            <where>id=10</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton}. Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua"/>
+            <where>id=11</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton}. Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua"/>
+            <where>id=12</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! You have made some changes to the following order: #${orderNumber}. Please pay the remaining fee of ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
+            <where>id=10</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! You have made some changes to the following order: #${orderNumber}. Please pay the remaining fee of ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
+            <where>id=11</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! You have made some changes to the following order: #${orderNumber}. Please pay the remaining fee of ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
+            <where>id=12</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>
