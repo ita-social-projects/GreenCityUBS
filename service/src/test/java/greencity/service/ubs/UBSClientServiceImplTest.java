@@ -1248,6 +1248,35 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void updateProfileDataWhenAddressPlaceIdIsNull() {
+        UBSClientServiceImpl ubsClientService = spy(ubsService);
+
+        User user = getUserWithBotNotifyTrue();
+        TelegramBot telegramBot = getTelegramBotNotifyTrue();
+        ViberBot viberBot = getViberBotNotifyTrue();
+        UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
+        userProfileUpdateDto.getAddressDto().get(0).setPlaceId(null);
+        userProfileUpdateDto.getAddressDto().get(1).setPlaceId(null);
+        String uuid = UUID.randomUUID().toString();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(telegramBotRepository.findByUser(user)).thenReturn(Optional.of(telegramBot));
+        when(viberBotRepository.findByUser(user)).thenReturn(Optional.of(viberBot));
+        when(userRepository.save(user)).thenReturn(user);
+        when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
+
+        ubsClientService.updateProfileData(uuid, userProfileUpdateDto);
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(telegramBotRepository).findByUser(user);
+        verify(viberBotRepository).findByUser(user);
+        verify(modelMapper, times(0)).map(any(), any(OrderAddressDtoRequest.class));
+        verify(ubsClientService, times(0)).updateCurrentAddressForOrder(any(), anyString());
+        verify(userRepository).save(user);
+        verify(modelMapper).map(user, UserProfileUpdateDto.class);
+    }
+
+    @Test
     void updateProfileDataIfTelegramBotNotExists() {
         UBSClientServiceImpl ubsClientService = spy(ubsService);
 
