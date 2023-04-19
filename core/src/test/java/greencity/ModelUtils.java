@@ -119,6 +119,7 @@ public class ModelUtils {
             .city("Lviv")
             .region("Lvivskiy")
             .actual(false)
+            .placeId("place_id")
             .build();
     }
 
@@ -551,6 +552,7 @@ public class ModelUtils {
             .houseNumber("1")
             .houseCorpus("2")
             .entranceNumber("3")
+            .placeId("place_id")
             .build();
     }
 
