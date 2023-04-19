@@ -10,28 +10,28 @@ public interface NotificationTemplateService {
     /**
      * Method that update notification template.
      *
-     * @author Dima Sannytski
+     * @author Safarov Renat
      */
     void update(Long id, NotificationTemplateWithPlatformsUpdateDto notificationDto);
 
     /**
      * Method that returns page with all notification templates.
      *
-     * @author Dima Sannytski
+     * @author Safarov Renat
      */
     PageableDto<NotificationTemplateDto> findAll(Pageable pageable);
 
     /**
      * Method that finds and returns notification template by id.
      *
-     * @author Dima Sannytski
+     * @author Safarov Renat
      */
     NotificationTemplateWithPlatformsDto findById(Long id);
 
     /**
-     * Method that deactivate notification template and all platforms by id.
+     * Method that change status for notification template and all platforms by id.
      *
-     * @author Dima Sannytski
+     * @author Safarov Renat
      */
-    void deactivateNotificationById(Long id);
+    void changeNotificationStatusById(Long id, String status);
 }

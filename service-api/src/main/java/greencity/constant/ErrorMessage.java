@@ -67,6 +67,7 @@ public final class ErrorMessage {
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
     public static final String NOT_ENOUGH_BIG_BAGS_EXCEPTION = "Not enough big bags, minimal amount is:";
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
+    public static final String NOTIFICATION_STATUS_DOES_NOT_EXIST = "Notification status does not exist ";
     public static final String NOTIFICATION_DOES_NOT_BELONG_TO_USER = "This notification does not belong to user";
     public static final String EMPLOYEE_ALREADY_ASSIGNED = "Manager already assigned with id: ";
     public static final String EMPLOYEE_DOESNT_EXIST = "Employee doesn't exist";
@@ -90,8 +91,8 @@ public final class ErrorMessage {
     public static final String SOME_CERTIFICATES_ARE_INVALID =
         "SOME CERTIFICATES ARE INVALID. A valid certificate is listed here";
     public static final String CERTIFICATE_NOT_FOUND = "CERTIFICATE_NOT_FOUND";
-    public static final String NOTIFICATION_TEMPLATE_NOT_FOUND = "Notification template doesn't exist";
-    public static final String NOTIFICATION_PLATFORM_NOT_FOUND = "Notification platform doesn't exist";
+    public static final String NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID = "Notification template not found by id: ";
+    public static final String NOTIFICATION_PLATFORM_NOT_FOUND = "Notification platform not found";
     public static final String LOCATION_ALREADY_EXIST = " that you try to add was already created early";
     public static final String INCORRECT_ECO_NUMBER = "Incorrect format of Eco number";
     public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";
