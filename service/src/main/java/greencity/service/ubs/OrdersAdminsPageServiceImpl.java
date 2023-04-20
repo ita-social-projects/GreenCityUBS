@@ -153,7 +153,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 new TitleDto("commentForOrderByClient", "Коментар до замовлення від клієнта",
                     "Comment to the order from the client"),
                 "commentForOrderByClient", 20, false, true, false, 22, EditType.READ_ONLY, new ArrayList<>(),
-                orderDetails),
+                ordersInfo),
             new ColumnDTO(new TitleDto("totalPayment", "Оплата", "Total payment"),
                 "totalPayment", 20, false, true,
                 false, 23,
@@ -178,7 +178,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, true, 32, EditType.SELECT, navigatorList(), responsible),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "blockedBy",
                 20, false, true, false, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
-                orderDetails))));
+                ordersInfo))));
         return new TableParamsDto(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 

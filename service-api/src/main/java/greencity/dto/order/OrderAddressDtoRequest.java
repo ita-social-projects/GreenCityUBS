@@ -6,7 +6,11 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
+
+import static greencity.constant.ValidationConstant.CH_EN;
+import static greencity.constant.ValidationConstant.CH_UA;
 
 @Getter
 @Setter
@@ -40,7 +44,7 @@ public class OrderAddressDtoRequest {
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Z0-9a-z-.]{1,4}")
     private String houseNumber;
     @Length(max = 50)
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Z0-9a-z-\\s',]{3,40}")
+    @Pattern(regexp = CH_UA + "{3,40}")
     private String street;
 
     @Length(max = 255)
@@ -58,9 +62,11 @@ public class OrderAddressDtoRequest {
     @Pattern(regexp = "[a-zA-Z-\\s'.]{3,30}")
     private String regionEn;
     @Length(max = 50)
-    @Pattern(regexp = "[a-zA-Z0-9-\\s'.]{3,40}")
+    @Pattern(regexp = CH_EN + "{3,40}")
     private String streetEn;
     @Length(max = 30)
     @Pattern(regexp = "[a-zA-Z-\\s'.]{3,30}")
     private String districtEn;
+    @NotEmpty
+    private String placeId;
 }
