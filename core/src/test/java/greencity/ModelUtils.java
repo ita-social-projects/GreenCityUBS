@@ -113,7 +113,7 @@ public class ModelUtils {
             .entranceNumber("7a")
             .houseCorpus("2")
             .houseNumber("7")
-            .street("Gorodotska")
+            .street("Городоцька")
             .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
             .district("Zaliznuchnuy")
             .city("Lviv")
