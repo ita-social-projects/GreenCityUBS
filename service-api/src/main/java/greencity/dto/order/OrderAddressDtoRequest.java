@@ -6,7 +6,6 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
 import static greencity.constant.ValidationConstant.CH_EN;
