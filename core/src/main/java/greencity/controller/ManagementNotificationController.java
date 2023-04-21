@@ -86,11 +86,12 @@ public class ManagementNotificationController {
     }
 
     /**
-     * Controller that deactivate notification template and all platforms by id.
+     * Controller that change status for notification template and all platforms by
+     * id.
      *
      * @author Safarov Renat.
      */
-    @ApiOperation(value = "Deactivate notification template by id")
+    @ApiOperation(value = "Change notification template status by id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -98,9 +99,10 @@ public class ManagementNotificationController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PutMapping("/deactivate-template/{id}")
-    public ResponseEntity<HttpStatus> deactivateNotificationTemplate(@PathVariable Long id) {
-        notificationTemplateService.deactivateNotificationById(id);
+    @PutMapping("/change-template-status/{id}")
+    public ResponseEntity<HttpStatus> deactivateNotificationTemplate(
+        @PathVariable Long id, @RequestParam String status) {
+        notificationTemplateService.changeNotificationStatusById(id, status);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

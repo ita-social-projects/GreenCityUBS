@@ -1380,6 +1380,7 @@ public class ModelUtils {
             .district("Zaliznuchnuy")
             .city("Lviv")
             .actual(false)
+            .placeId("place_id")
             .build());
         list.add(AddressDto.builder().id(2L)
             .entranceNumber("9a")
@@ -1390,6 +1391,7 @@ public class ModelUtils {
             .district("Zaliznuchnuy")
             .city("Lviv")
             .actual(false)
+            .placeId("place_id")
             .build());
         return list;
     }
@@ -4005,6 +4007,7 @@ public class ModelUtils {
             .houseNumber("1")
             .houseCorpus("2")
             .entranceNumber("3")
+            .placeId("place_id")
             .build();
     }
 
@@ -4024,6 +4027,7 @@ public class ModelUtils {
             .cityEn("fake street")
             .districtEn("fake district")
             .regionEn("fake region")
+            .placeId("place_id")
             .build();
     }
 
@@ -4046,6 +4050,7 @@ public class ModelUtils {
             .cityEn("fake street")
             .districtEn(withDistrictRegionHouse ? "fake district" : null)
             .regionEn(withDistrictRegionHouse ? "fake region" : null)
+            .placeId("place_id")
             .build();
     }
 

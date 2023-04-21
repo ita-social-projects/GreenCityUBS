@@ -30,6 +30,7 @@ import java.security.Principal;
 import java.util.List;
 
 import static greencity.ModelUtils.getUuid;
+import static greencity.enums.NotificationStatus.INACTIVE;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -111,35 +112,43 @@ class ManagementNotificationControllerTest {
     @Test
     void deactivateNotificationTemplate() throws Exception {
         Long id = 1L;
-        mockMvc.perform(put(url + "/deactivate-template/{id}", id)
+        String status = INACTIVE.name();
+        mockMvc.perform(put(url + "/change-template-status/{id}", id)
+            .param("status", status)
             .principal(principal))
             .andExpect(status().isOk());
-        verify(notificationTemplateService).deactivateNotificationById(id);
+        verify(notificationTemplateService).changeNotificationStatusById(id, status);
     }
 
     @Test
     void deactivateNotificationTemplateBadRequestTest() throws Exception {
         Long id = 1L;
-        doThrow(BadRequestException.class)
-            .when(notificationTemplateService).deactivateNotificationById(id);
+        String status = INACTIVE.name();
 
-        mockMvc.perform(put(url + "/deactivate-template/{id}", id)
+        doThrow(BadRequestException.class)
+            .when(notificationTemplateService).changeNotificationStatusById(id, status);
+
+        mockMvc.perform(put(url + "/change-template-status/{id}", id)
+            .param("status", status)
             .principal(principal))
             .andExpect(status().isBadRequest());
 
-        verify(notificationTemplateService).deactivateNotificationById(id);
+        verify(notificationTemplateService).changeNotificationStatusById(id, status);
     }
 
     @Test
     void deactivateNotificationTemplateNotFoundTest() throws Exception {
         Long id = 1L;
-        doThrow(NotFoundException.class)
-            .when(notificationTemplateService).deactivateNotificationById(id);
+        String status = INACTIVE.name();
 
-        mockMvc.perform(MockMvcRequestBuilders.put(url + "/deactivate-template/{id}", id)
+        doThrow(NotFoundException.class)
+            .when(notificationTemplateService).changeNotificationStatusById(id, status);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(url + "/change-template-status/{id}", id)
+            .param("status", status)
             .principal(principal))
             .andExpect(MockMvcResultMatchers.status().isNotFound());
 
-        verify(notificationTemplateService).deactivateNotificationById(id);
+        verify(notificationTemplateService).changeNotificationStatusById(id, status);
     }
 }
