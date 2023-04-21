@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 
 import java.util.List;
@@ -94,4 +95,22 @@ public interface OrdersAdminsPageService {
      * @author Liubomyr Pater
      */
     List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position, String email);
+
+    /**
+     * Method to get column width for big order table.
+     *
+     * @param userUuid of {@link String}
+     * @return {@link ColumnWidthDto}
+     * @author Oleh Kulbaba
+     */
+    ColumnWidthDto getColumnWidthForEmployee(String userUuid);
+
+    /**
+     * Method to save or update column width for big order table.
+     *
+     * @param columnWidthDto of {@link ColumnWidthDto}
+     * @param userUuid       of {@link String}
+     * @author Oleh Kulbaba
+     */
+    void saveColumnWidthForEmployee(ColumnWidthDto columnWidthDto, String userUuid);
 }
