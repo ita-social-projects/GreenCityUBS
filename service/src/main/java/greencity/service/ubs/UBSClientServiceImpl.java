@@ -544,6 +544,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
+        if (addressRequestDto.getPlaceId() == null) {
+            address.setAddressComment(addressRequestDto.getAddressComment());
+            addressRepo.save(address);
+            return findAllAddressesForCurrentOrder(uuid);
+        }
+
         OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
         checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
 

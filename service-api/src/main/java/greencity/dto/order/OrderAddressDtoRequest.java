@@ -67,6 +67,5 @@ public class OrderAddressDtoRequest {
     @Length(max = 30)
     @Pattern(regexp = "[a-zA-Z-\\s'.]{3,30}")
     private String districtEn;
-    @NotEmpty
     private String placeId;
 }

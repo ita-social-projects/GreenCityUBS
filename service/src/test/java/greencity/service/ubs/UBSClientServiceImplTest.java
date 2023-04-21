@@ -1634,6 +1634,41 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testUpdateCurrentAddressForOrderWhenPlaceIdIsNull() {
+        UBSClientService ubsClientService = spy(ubsService);
+
+        long addressId = 1L;
+        long userId = 2L;
+        String oldComment = "comment";
+        String newComment = "newComment";
+
+        User user = getUserForCreate();
+        user.setId(userId);
+        String uuid = user.getUuid();
+        Address address = getAddress();
+        address.setId(addressId);
+        address.setAddressComment(oldComment);
+        address.setUser(user);
+        OrderAddressDtoRequest dtoRequest = getTestOrderAddressLocationDto();
+        dtoRequest.setId(addressId);
+        dtoRequest.setAddressComment(newComment);
+        dtoRequest.setPlaceId(null);
+
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
+        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientService).findAllAddressesForCurrentOrder(uuid);
+
+        ubsClientService.updateCurrentAddressForOrder(dtoRequest, uuid);
+
+        assertEquals(address.getAddressComment(), newComment);
+
+        verify(userRepository).findByUuid(uuid);
+        verify(addressRepository).findById(addressId);
+        verify(addressRepository).save(address);
+        verify(ubsClientService).findAllAddressesForCurrentOrder(uuid);
+    }
+
+    @Test
     void testDeleteCurrentAddressForOrder() {
         String uuid = "35467585763t4sfgchjfuyetf";
         User user = new User();

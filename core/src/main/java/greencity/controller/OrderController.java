@@ -242,7 +242,7 @@ public class OrderController {
      * @param uuid       {@link UserVO} id.
      * @return {@link HttpStatus} - http status.
      */
-    @ApiOperation(value = "Update order address")
+    @ApiOperation(value = "Update order address(if placeId is null updates only addressComment)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderWithAddressesResponseDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
