@@ -97,7 +97,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order")
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    private Set<Certificate> certificates = new HashSet<>();
+    private Set<Certificate> certificates;
 
     @Column(nullable = false, name = "order_status", length = 15)
     @Enumerated(EnumType.STRING)

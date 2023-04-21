@@ -872,15 +872,15 @@ class UBSManagementServiceImplTest {
 
     @Test
     void testSetOrderDetailWhenOrderNotFound() {
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class,
-            () -> ubsManagementService.setOrderDetail(anyLong(),
+            () -> ubsManagementService.setOrderDetail(1L,
                 UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
                 UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc"));
 
         assertEquals(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, exception.getMessage());
-        verify(orderRepository).findById(anyLong());
+        verify(orderRepository).findById(1L);
     }
 
     @Test
