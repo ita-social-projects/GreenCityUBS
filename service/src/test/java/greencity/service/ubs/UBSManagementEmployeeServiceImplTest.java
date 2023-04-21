@@ -258,7 +258,7 @@ class UBSManagementEmployeeServiceImplTest {
         employee.setImagePath("Pass");
         when(repository.findById(1L)).thenReturn(Optional.of(employee));
 
-        doThrow(HystrixRuntimeException.class).when(userRemoteClient).deactivateEmployee(null);
+        doThrow(HystrixRuntimeException.class).when(userRemoteClient).deactivateEmployee("Test");
         assertThrows(BadRequestException.class, () -> employeeService.deactivateEmployee(employee.getId()));
 
         verify(repository).findById(1L);
