@@ -105,6 +105,7 @@ import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
@@ -871,12 +872,15 @@ class UBSManagementServiceImplTest {
 
     @Test
     void testSetOrderDetailWhenOrderNotFound() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.setOrderDetail(1L,
+        var exception = assertThrows(NotFoundException.class,
+            () -> ubsManagementService.setOrderDetail(anyLong(),
                 UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
                 UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc"));
+
+        assertEquals(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, exception.getMessage());
+        verify(orderRepository).findById(anyLong());
     }
 
     @Test

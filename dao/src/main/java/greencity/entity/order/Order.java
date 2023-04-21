@@ -16,6 +16,7 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,7 +97,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order")
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    private Set<Certificate> certificates;
+    private Set<Certificate> certificates = new HashSet<>();
 
     @Column(nullable = false, name = "order_status", length = 15)
     @Enumerated(EnumType.STRING)

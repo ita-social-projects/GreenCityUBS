@@ -3580,6 +3580,10 @@ public class ModelUtils {
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.DONE)
             .counterOrderPaymentId(1L)
+            .certificates(Set.of(Certificate.builder()
+                .points(0)
+                .build()))
+            .pointsToUse(0)
             .build();
     }
 
