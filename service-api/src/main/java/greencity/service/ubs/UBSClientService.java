@@ -110,7 +110,8 @@ public interface UBSClientService {
     OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto requestDto, String uuid);
 
     /**
-     * Method that update address for current user.
+     * Method that update address for current user (if placeId is null updates only
+     * addressComment).
      *
      * @param requestDto {@link OrderAddressDtoRequest} information about address;
      * @param uuid       current {@link User}'s uuid;
