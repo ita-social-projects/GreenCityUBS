@@ -873,14 +873,38 @@ class UBSManagementServiceImplTest {
     @Test
     void testSetOrderDetailWhenOrderNotFound() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-
-        var exception = assertThrows(NotFoundException.class,
-            () -> ubsManagementService.setOrderDetail(1L,
-                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
-                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc"));
-
-        assertEquals(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, exception.getMessage());
+        assertThrows(NotFoundException.class,
+                () -> ubsManagementService.setOrderDetail(
+                        1L,
+                        UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                        UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+                        "abc"
+                ),
+                ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST
+        );
         verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void testSetOrderDetailIfUnpaid() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusDoneDto()));
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        doNothing().when(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+        when(orderRepository.getOrderDetails(anyLong()))
+                .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBaglist());
+        when(paymentRepository.selectSumPaid(1L)).thenReturn(0L);
+        when(orderRepository.findSumOfCertificatesByOrderId(anyLong())).thenReturn(0L);
+
+        ubsManagementService.setOrderDetail(1L,
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc");
+
+        verify(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+        verify(orderRepository).updateOrderPaymentStatus(1L, OrderPaymentStatus.UNPAID.name());
     }
 
     @Test

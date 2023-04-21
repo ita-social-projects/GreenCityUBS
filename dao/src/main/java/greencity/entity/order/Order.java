@@ -1,14 +1,14 @@
 package greencity.entity.order;
 
-import greencity.enums.CancellationReason;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.enums.CancellationReason;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import greencity.filters.StringListConverter;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
@@ -16,7 +16,6 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
