@@ -4,6 +4,7 @@ import greencity.annotations.*;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
+import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.dto.violation.UserViolationsWithUserName;
 import greencity.enums.SortingOrder;
@@ -79,11 +80,54 @@ public class AdminUbsController {
     }
 
     /**
+     * Controller for retrieving data about order table columns width.
+     *
+     * @param userUuid of {@link String}
+     * @author Oleh Kulbaba
+     */
+    @ApiOperation("Get all parameters for building table of orders")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
+    @GetMapping("/orderTableColumnsWidth")
+    public ResponseEntity<ColumnWidthDto> getTableColumnWidthForCurrentUser(
+        @ApiIgnore @CurrentUserUuid String userUuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getColumnWidthForEmployee(userUuid));
+    }
+
+    /**
+     * Controller for saving or updating data about order table columns width.
+     *
+     * @param userUuid       of {@link String}
+     * @param columnWidthDto of {@link ColumnWidthDto}
+     * @author Oleh Kulbaba
+     */
+    @ApiOperation("Get width of columns for order table")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
+    @PutMapping("/orderTableColumnsWidth")
+    public ResponseEntity<HttpStatus> saveTableColumnWidthForCurrentUser(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @RequestBody ColumnWidthDto columnWidthDto) {
+        ordersAdminsPageService.saveColumnWidthForEmployee(columnWidthDto, userUuid);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
      * Controller for any changes in orders.
      *
      * @author Liubomyr Pater
      */
-    @ApiOperation(value = "Change order's properties over request from admin's table")
+    @ApiOperation(value = "Save width of columns for order table")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
