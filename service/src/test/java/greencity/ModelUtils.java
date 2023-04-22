@@ -92,6 +92,7 @@ import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
@@ -126,6 +127,7 @@ import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
@@ -1102,6 +1104,7 @@ public class ModelUtils {
             .lastName("Петренко")
             .phoneNumber("+380935577455")
             .email("test@gmail.com")
+            .uuid("Test")
             .employeeStatus(EmployeeStatus.ACTIVE)
             .employeePosition(Set.of(Position.builder()
                 .id(1L)
@@ -4423,6 +4426,27 @@ public class ModelUtils {
         return NotTakenOrderReasonDto.builder()
             .description("Some description")
             .images(List.of("image1", "image2"))
+            .build();
+    }
+
+    public static TableColumnWidthForEmployee getTestTableColumnWidth() {
+        return TableColumnWidthForEmployee.builder()
+            .employee(getEmployee())
+            .address(50)
+            .amountDue(60)
+            .bagsAmount(150)
+            .city(200)
+            .build();
+    }
+
+    public static ColumnWidthDto getTestColumnWidthDto() {
+        return ColumnWidthDto.builder()
+            .address(100)
+            .amountDue(20)
+            .bagsAmount(500)
+            .city(320)
+            .clientPhone(340)
+            .commentForOrderByClient(600)
             .build();
     }
 }
