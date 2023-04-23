@@ -79,8 +79,10 @@ public class NotificationServiceImpl implements NotificationService {
             if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
-                UserNotification notification = initialiseNotificationForUnpaidOrder(order, userNotification);
-                sendNotificationsForBotsAndEmail(notification, 0L);
+                Long amountToPay = getAmountToPay(order);
+                Set<NotificationParameter> notificationParameters =
+                    initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
+                fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
             }
         }
     }
@@ -95,18 +97,15 @@ public class NotificationServiceImpl implements NotificationService {
                 || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)));
     }
 
-    private UserNotification initialiseNotificationForUnpaidOrder(Order order, UserNotification userNotification) {
-        userNotification.setNotificationTime(LocalDateTime.now(clock));
-        userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
-        userNotification.setOrder(order);
-        UserNotification notification = userNotificationRepository.save(userNotification);
-        NotificationParameter notificationParameter = new NotificationParameter();
-        notificationParameter.setKey("orderNumber");
-        notificationParameter.setValue(order.getId().toString());
-        notificationParameter.setUserNotification(notification);
-        NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
-        notification.setParameters(Collections.singleton(createdParameter));
-        return notification;
+    private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, Long amountToPay) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+        parameters.add(NotificationParameter.builder().key("amountToPay")
+            .value(String.format("%.2f", (double) amountToPay)).build());
+        parameters.add(NotificationParameter.builder()
+            .key("orderNumber")
+            .value(order.getId().toString())
+            .build());
+        return parameters;
     }
 
     /**
@@ -161,32 +160,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyHalfPaidPackage(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
 
-        Long paidAmount = order.getPayment().stream()
-            .filter(payment -> !payment.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED)
-                && !payment.getPaymentStatus().equals(PaymentStatus.UNPAID))
-            .map(Payment::getAmount).reduce(0L, Long::sum) / 100;
-
-        Integer certificatePointsUsed = order.getCertificates().stream()
-            .map(Certificate::getPoints).reduce(0, Integer::sum);
-
-        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
-        Long writeStationSum = order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
-
-        List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
-        Map<Integer, Integer> bagsAmount;
-        if (!order.getExportedQuantity().isEmpty()) {
-            bagsAmount = order.getExportedQuantity();
-        } else if (!order.getConfirmedQuantity().isEmpty()) {
-            bagsAmount = order.getConfirmedQuantity();
-        } else {
-            bagsAmount = order.getAmountOfBagsOrdered();
-        }
-
-        Integer price = bags.stream().map(bag -> bagsAmount.get(bag.getId()) * bag.getFullPrice())
-            .reduce(0, Integer::sum);
-
-        long amountToPay =
-            price - (paidAmount + order.getPointsToUse() + certificatePointsUsed) + ubsCourierSum + writeStationSum;
+        Long amountToPay = getAmountToPay(order);
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
@@ -210,35 +184,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyUnpaidOrder(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
 
-        Long totalPrice;
-        Long bonuses = order.getPointsToUse().longValue();
-        Long certificates =
-            order.getCertificates().stream().map(Certificate::getPoints).reduce(0, Integer::sum).longValue();
-        Long paidAmount = order.getPayment().stream()
-            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(payment -> payment.getAmount() / 100)
-            .reduce(0L, Long::sum);
-
-        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
-        Long writeStationSum = order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
-
-        List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
-
-        if (!order.getExportedQuantity().isEmpty()) {
-            totalPrice = bags.stream()
-                .map(bag -> order.getExportedQuantity().get(bag.getId()) * bag.getFullPrice().longValue())
-                .reduce(0L, Long::sum);
-        } else if (!order.getConfirmedQuantity().isEmpty()) {
-            totalPrice = bags.stream()
-                .map(bag -> order.getConfirmedQuantity().get(bag.getId()) * bag.getFullPrice().longValue())
-                .reduce(0L, Long::sum);
-        } else {
-            totalPrice = bags.stream()
-                .map(bag -> order.getAmountOfBagsOrdered().get(bag.getId()) * bag.getFullPrice().longValue())
-                .reduce(0L, Long::sum);
-        }
-
-        Long amountToPay = totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
+        Long amountToPay = getAmountToPay(order);
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
@@ -255,6 +201,42 @@ public class NotificationServiceImpl implements NotificationService {
                 .count() == 3) {
             fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
         }
+    }
+
+    private Long getAmountToPay(Order order) {
+        Long bonuses = order.getPointsToUse().longValue();
+        Long certificates =
+            order.getCertificates().stream().map(Certificate::getPoints).reduce(0, Integer::sum).longValue();
+        Long paidAmount = order.getPayment().stream()
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
+            .map(payment -> payment.getAmount() / 100)
+            .reduce(0L, Long::sum);
+
+        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
+        Long writeStationSum = order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
+
+        List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
+        Map<Integer, Integer> bagsAmount;
+        if (!order.getExportedQuantity().isEmpty()) {
+            bagsAmount = order.getExportedQuantity();
+        } else if (!order.getConfirmedQuantity().isEmpty()) {
+            bagsAmount = order.getConfirmedQuantity();
+        } else {
+            bagsAmount = order.getAmountOfBagsOrdered();
+        }
+
+        Long totalPrice = 0L;
+        for (Map.Entry<Integer, Integer> entry : bagsAmount.entrySet()) {
+            totalPrice += (long) entry.getValue() * bags
+                .stream()
+                .filter(b -> b.getId().equals(entry.getKey()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                .getFullPrice();
+        }
+
+        Long amountToPay = totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
+        return amountToPay > 0 ? amountToPay : 0;
     }
 
     /**
