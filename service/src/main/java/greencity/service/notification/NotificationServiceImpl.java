@@ -204,16 +204,21 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private Long getAmountToPay(Order order) {
-        Long bonuses = order.getPointsToUse().longValue();
-        Long certificates =
-            order.getCertificates().stream().map(Certificate::getPoints).reduce(0, Integer::sum).longValue();
-        Long paidAmount = order.getPayment().stream()
-            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(payment -> payment.getAmount() / 100)
-            .reduce(0L, Long::sum);
+        Long bonuses = order.getPointsToUse() == null ? 0L : order.getPointsToUse().longValue();
+        Long certificates = order.getCertificates() == null ? 0L
+            : order.getCertificates().stream()
+                .map(Certificate::getPoints)
+                .reduce(0, Integer::sum)
+                .longValue();
 
-        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
-        Long writeStationSum = order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
+        Long paidAmount = order.getPayment() == null ? 0L
+            : order.getPayment().stream()
+                .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
+                .map(payment -> payment.getAmount() / 100)
+                .reduce(0L, Long::sum);
+
+        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
+        Long writeStationSum = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
 
         List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
         Map<Integer, Integer> bagsAmount;
@@ -227,7 +232,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Long totalPrice = 0L;
         for (Map.Entry<Integer, Integer> entry : bagsAmount.entrySet()) {
-            totalPrice += (long) entry.getValue() * bags
+            totalPrice += entry.getValue().longValue() * bags
                 .stream()
                 .filter(b -> b.getId().equals(entry.getKey()))
                 .findFirst()
@@ -235,8 +240,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .getFullPrice();
         }
 
-        Long amountToPay = totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
-        return amountToPay > 0 ? amountToPay : 0;
+        return totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
     }
 
     /**
