@@ -30,7 +30,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.net.UnknownHostException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -38,7 +37,6 @@ import java.util.concurrent.ExecutorService;
 
 import static greencity.ModelUtils.*;
 import static greencity.enums.NotificationReceiverType.SITE;
-import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;

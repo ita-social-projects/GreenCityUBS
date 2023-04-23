@@ -70,6 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
     private ExecutorService executor;
 
     private static final String ORDER_NUMBER_KEY = "orderNumber";
+    private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
 
     /**
      * {@inheritDoc}
@@ -103,10 +104,10 @@ public class NotificationServiceImpl implements NotificationService {
 
     private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, Long amountToPay) {
         Set<NotificationParameter> parameters = new HashSet<>();
-        parameters.add(NotificationParameter.builder().key("amountToPay")
+        parameters.add(NotificationParameter.builder().key(AMOUNT_TO_PAY_KEY)
             .value(String.format("%.2f", (double) amountToPay)).build());
         parameters.add(NotificationParameter.builder()
-            .key("ORDER_NUMBER_KEY")
+            .key(ORDER_NUMBER_KEY)
             .value(order.getId().toString())
             .build());
         return parameters;
@@ -166,7 +167,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Long amountToPay = getAmountToPay(order);
 
-        parameters.add(NotificationParameter.builder().key("amountToPay")
+        parameters.add(NotificationParameter.builder().key(AMOUNT_TO_PAY_KEY)
             .value(String.format("%.2f", (double) amountToPay)).build());
         parameters.add(NotificationParameter.builder().key(ORDER_NUMBER_KEY)
             .value(order.getId().toString()).build());
@@ -190,7 +191,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Long amountToPay = getAmountToPay(order);
 
-        parameters.add(NotificationParameter.builder().key("amountToPay")
+        parameters.add(NotificationParameter.builder().key(AMOUNT_TO_PAY_KEY)
             .value(String.format("%.2f", (double) amountToPay)).build());
 
         final String testGreenCity = "https://greencity-ubs.testgreencity.ga/ubs/details-for-existing-order/"
@@ -237,7 +238,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(payment -> payment.getAmount() / 100)
                 .reduce(0L, Long::sum);
 
-        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
+        long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
         Long writeStationSum = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
 
         List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
@@ -250,7 +251,7 @@ public class NotificationServiceImpl implements NotificationService {
             bagsAmount = order.getAmountOfBagsOrdered();
         }
 
-        Long totalPrice = 0L;
+        long totalPrice = 0L;
         for (Map.Entry<Integer, Integer> entry : bagsAmount.entrySet()) {
             totalPrice += entry.getValue().longValue() * bags
                 .stream()
