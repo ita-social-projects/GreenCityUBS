@@ -92,6 +92,7 @@ import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
@@ -126,6 +127,7 @@ import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
@@ -1102,6 +1104,7 @@ public class ModelUtils {
             .lastName("Петренко")
             .phoneNumber("+380935577455")
             .email("test@gmail.com")
+            .uuid("Test")
             .employeeStatus(EmployeeStatus.ACTIVE)
             .employeePosition(Set.of(Position.builder()
                 .id(1L)
@@ -1380,6 +1383,7 @@ public class ModelUtils {
             .district("Zaliznuchnuy")
             .city("Lviv")
             .actual(false)
+            .placeId("place_id")
             .build());
         list.add(AddressDto.builder().id(2L)
             .entranceNumber("9a")
@@ -1390,6 +1394,7 @@ public class ModelUtils {
             .district("Zaliznuchnuy")
             .city("Lviv")
             .actual(false)
+            .placeId("place_id")
             .build());
         return list;
     }
@@ -4005,6 +4010,7 @@ public class ModelUtils {
             .houseNumber("1")
             .houseCorpus("2")
             .entranceNumber("3")
+            .placeId("place_id")
             .build();
     }
 
@@ -4024,6 +4030,7 @@ public class ModelUtils {
             .cityEn("fake street")
             .districtEn("fake district")
             .regionEn("fake region")
+            .placeId("place_id")
             .build();
     }
 
@@ -4046,6 +4053,7 @@ public class ModelUtils {
             .cityEn("fake street")
             .districtEn(withDistrictRegionHouse ? "fake district" : null)
             .regionEn(withDistrictRegionHouse ? "fake region" : null)
+            .placeId("place_id")
             .build();
     }
 
@@ -4418,6 +4426,27 @@ public class ModelUtils {
         return NotTakenOrderReasonDto.builder()
             .description("Some description")
             .images(List.of("image1", "image2"))
+            .build();
+    }
+
+    public static TableColumnWidthForEmployee getTestTableColumnWidth() {
+        return TableColumnWidthForEmployee.builder()
+            .employee(getEmployee())
+            .address(50)
+            .amountDue(60)
+            .bagsAmount(150)
+            .city(200)
+            .build();
+    }
+
+    public static ColumnWidthDto getTestColumnWidthDto() {
+        return ColumnWidthDto.builder()
+            .address(100)
+            .amountDue(20)
+            .bagsAmount(500)
+            .city(320)
+            .clientPhone(340)
+            .commentForOrderByClient(600)
             .build();
     }
 }

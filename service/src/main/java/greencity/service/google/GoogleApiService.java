@@ -3,15 +3,15 @@ package greencity.service.google;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
+import com.google.maps.errors.InvalidRequestException;
 import com.google.maps.model.GeocodingResult;
-
+import greencity.constant.ErrorMessage;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.api.GoogleApiException;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,22 +22,22 @@ public class GoogleApiService {
     private static final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
 
     /**
-     * Send request to the google and receive response with geocoding.
+     * Send request to the Google and receive response with geocoding.
      *
-     * @param searchRequest - address for search
+     * @param placeId - place id
      * @return GeocodingResults - return result from geocoding service
      */
-    public List<GeocodingResult> getResultFromGeoCode(String searchRequest, Integer langCode) {
-        List<GeocodingResult> geocodingResults = new ArrayList<>();
-
+    public GeocodingResult getResultFromGeoCode(String placeId, Integer langCode) {
         try {
             GeocodingResult[] results = GeocodingApi.newRequest(context)
-                .address(searchRequest).language(locales.get(langCode).getLanguage()).await();
-            Collections.addAll(geocodingResults, results);
+                .place(placeId).language(locales.get(langCode).getLanguage()).await();
+            return results[0];
         } catch (IOException | InterruptedException | ApiException e) {
             Thread.currentThread().interrupt();
+            if (e instanceof InvalidRequestException) {
+                throw new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_BY_PLACE_ID + placeId);
+            }
             throw new GoogleApiException(e.getMessage());
         }
-        return geocodingResults;
     }
 }

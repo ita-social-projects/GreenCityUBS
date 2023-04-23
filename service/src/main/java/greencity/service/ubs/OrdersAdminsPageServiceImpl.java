@@ -9,7 +9,9 @@ import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnDTO;
+import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -42,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @Data
@@ -56,6 +59,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+    private final TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
     private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
@@ -153,7 +157,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 new TitleDto("commentForOrderByClient", "Коментар до замовлення від клієнта",
                     "Comment to the order from the client"),
                 "commentForOrderByClient", 20, false, true, false, 22, EditType.READ_ONLY, new ArrayList<>(),
-                orderDetails),
+                ordersInfo),
             new ColumnDTO(new TitleDto("totalPayment", "Оплата", "Total payment"),
                 "totalPayment", 20, false, true,
                 false, 23,
@@ -178,7 +182,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, true, 32, EditType.SELECT, navigatorList(), responsible),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "blockedBy",
                 20, false, true, false, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
-                orderDetails))));
+                ordersInfo))));
         return new TableParamsDto(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
@@ -211,6 +215,35 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             default:
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
+        }
+    }
+
+    @Override
+    public ColumnWidthDto getColumnWidthForEmployee(String userUuid) {
+        Employee employee = employeeRepository.findByUuid(userUuid)
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND));
+        TableColumnWidthForEmployee tableColumnWidthForEmployee =
+            tableColumnWidthForEmployeeRepository.findByEmployeeId(employee.getId())
+                .orElseThrow(() -> new NotFoundException(COLUMN_WIDTH_INFO_NOT_FOUND));
+        return modelMapper.map(tableColumnWidthForEmployee, ColumnWidthDto.class);
+    }
+
+    @Override
+    public void saveColumnWidthForEmployee(ColumnWidthDto columnWidthDto, String userUuid) {
+        Employee employee = employeeRepository.findByUuid(userUuid)
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND));
+        if (nonNull(columnWidthDto)) {
+            tableColumnWidthForEmployeeRepository.findByEmployeeId(employee.getId()).ifPresentOrElse(
+                e -> {
+                    modelMapper.map(columnWidthDto, e);
+                    tableColumnWidthForEmployeeRepository.save(e);
+                },
+                () -> {
+                    TableColumnWidthForEmployee tableColumnWidthForEmployee =
+                        modelMapper.map(columnWidthDto, TableColumnWidthForEmployee.class);
+                    tableColumnWidthForEmployee.setEmployee(employee);
+                    tableColumnWidthForEmployeeRepository.save(tableColumnWidthForEmployee);
+                });
         }
     }
 

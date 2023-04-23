@@ -62,10 +62,14 @@ public class NotificationServiceImpl implements NotificationService {
     private Clock clock;
     private List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
+    @Autowired
+    private final InetAddressProvider inetAddressProvider;
 
     @Autowired
     @Qualifier("singleThreadedExecutor")
     private ExecutorService executor;
+
+    private static final String ORDER_NUMBER_KEY = "orderNumber";
 
     /**
      * {@inheritDoc}
@@ -102,7 +106,7 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
         parameters.add(NotificationParameter.builder()
-            .key("orderNumber")
+            .key("ORDER_NUMBER_KEY")
             .value(order.getId().toString())
             .build());
         return parameters;
@@ -164,7 +168,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
-        parameters.add(NotificationParameter.builder().key("orderNumber")
+        parameters.add(NotificationParameter.builder().key(ORDER_NUMBER_KEY)
             .value(order.getId().toString()).build());
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
             fillAndSendNotification(parameters, order, NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF);
@@ -188,6 +192,22 @@ public class NotificationServiceImpl implements NotificationService {
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
+
+        final String testGreenCity = "https://greencity-ubs.testgreencity.ga/ubs/details-for-existing-order/"
+            + order.getId();
+        final String pickUpCity = "https://greencity-ubs.pick-up.city/ubs/details-for-existing-order/"
+            + order.getId();
+
+        String hostName = inetAddressProvider.getInetAddressHostName();
+
+        if (hostName.equals("www.testgreencity.ga")) {
+            parameters.add(NotificationParameter.builder().key("payButton").value(testGreenCity).build());
+        }
+
+        if (hostName.equals("www.pick-up.city")) {
+            parameters.add(NotificationParameter.builder().key("payButton").value(pickUpCity).build());
+        }
+
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()
                 .map(Event::getEventName)

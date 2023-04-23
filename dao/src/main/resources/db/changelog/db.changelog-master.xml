@@ -198,4 +198,6 @@
     <include file="db/changelog/logs/ch-insert-into-notification-templates-Kulbaba.xml"/>
     <include file="db/changelog/logs/ch-insert-into-notification-platforms-Kulbaba.xml"/>
     <include file="db/changelog/logs/ch-add-columns-to-order-table-Kulbaba.xml"/>
+    <include file="db/changelog/logs/ch-add-table-notification-platforms-paybutton-Vatuliak.xml"/>
+    <include file="db/changelog/logs/ch-add-table-column-width-for-employee-Kulbaba.xml"/>
 </databaseChangeLog>

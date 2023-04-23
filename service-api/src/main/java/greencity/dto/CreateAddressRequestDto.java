@@ -44,4 +44,6 @@ public class CreateAddressRequestDto {
     private String houseCorpus;
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ!?]*", message = validationMessage)
     private String addressComment;
+    @NotEmpty
+    private String placeId;
 }

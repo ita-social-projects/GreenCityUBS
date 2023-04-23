@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.net.UnknownHostException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -37,6 +38,7 @@ import java.util.concurrent.ExecutorService;
 
 import static greencity.ModelUtils.*;
 import static greencity.enums.NotificationReceiverType.SITE;
+import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -76,6 +78,9 @@ class NotificationServiceImplTest {
     @Spy
     @InjectMocks
     private NotificationServiceImpl notificationService;
+
+    @Mock
+    private InetAddressProvider inetAddressProvider;
 
     private Clock fixedClock;
 
@@ -279,6 +284,7 @@ class NotificationServiceImplTest {
                 clock,
                 List.of(abstractNotificationProvider),
                 templateRepository,
+                inetAddressProvider,
                 mockExecutor);
             User user = User.builder().id(42L).build();
             User user1 = User.builder().id(43L).build();
@@ -487,6 +493,7 @@ class NotificationServiceImplTest {
         parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
         notificationService.notifyUnpaidOrder(order);
 
@@ -508,7 +515,6 @@ class NotificationServiceImplTest {
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
-
         Set<NotificationParameter> parameters = new HashSet<>();
 
         UserNotification notification = new UserNotification();
@@ -520,6 +526,8 @@ class NotificationServiceImplTest {
         parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
+
         notificationService.notifyUnpaidOrder(order);
 
         verify(userNotificationRepository).save(any());
@@ -552,11 +560,41 @@ class NotificationServiceImplTest {
         parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.pick-up.city");
 
         notificationService.notifyUnpaidOrder(order);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());
+    }
+
+    @Test
+    void testNotifyUnpaidOrderUnknownHostException() {
+        User user = getUser();
+        Order order = ModelUtils.getCanceledPaidOrder();
+        order.setConfirmedQuantity(Collections.emptyMap());
+        order.setExportedQuantity(Collections.emptyMap());
+        order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
+        Event formed = Event.builder().eventName(OrderHistory.ORDER_FORMED).build();
+        Event adjustment = Event.builder().eventName(OrderHistory.ORDER_ADJUSTMENT).build();
+        Event confirmed = Event.builder().eventName(OrderHistory.ORDER_CONFIRMED).build();
+        Event onTheRoad = Event.builder().eventName(OrderHistory.ORDER_ON_THE_ROUTE).build();
+        order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
+        order.setPayment(TEST_PAYMENT_LIST);
+        order.setPointsToUse(0);
+        order.setCertificates(Collections.emptySet());
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
+        notification.setUser(user);
+        notification.setOrder(order);
+
+        parameters.forEach(parameter -> parameter.setUserNotification(notification));
+
+        when(inetAddressProvider.getInetAddressHostName()).thenThrow(new RuntimeException());
+
+        assertThrows(RuntimeException.class, () -> notificationService.notifyUnpaidOrder(order));
     }
 
     @Test
