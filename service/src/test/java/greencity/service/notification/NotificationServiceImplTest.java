@@ -380,17 +380,14 @@ class NotificationServiceImplTest {
 
             Set<NotificationParameter> parameters = new HashSet<>();
 
-            when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag1list());
-
             long amountToPay = 4400L;
-
             parameters.add(NotificationParameter.builder().key("amountToPay")
                 .value(String.format("%.2f", (double) amountToPay)).build());
             parameters.add(NotificationParameter.builder().key("orderNumber")
                 .value(orders.get(0).getId().toString()).build());
 
+            when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag1list());
             when(userNotificationRepository.save(any())).thenReturn(notification);
-            parameters.forEach(parameter -> parameter.setUserNotification(notification));
             when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
             when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
@@ -490,7 +487,6 @@ class NotificationServiceImplTest {
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
         when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
@@ -523,7 +519,6 @@ class NotificationServiceImplTest {
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
         when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
@@ -557,7 +552,6 @@ class NotificationServiceImplTest {
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
         when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.pick-up.city");
@@ -612,7 +606,6 @@ class NotificationServiceImplTest {
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
         when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
@@ -641,7 +634,6 @@ class NotificationServiceImplTest {
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
         when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
