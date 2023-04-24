@@ -155,6 +155,7 @@ class NotificationServiceImplTest {
                     .value("10000").build());
 
             when(notificationParameterRepository.saveAll(any())).thenReturn(notificationParameters);
+            when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
             notificationService.notifyUnpaidOrders();
 
@@ -390,7 +391,8 @@ class NotificationServiceImplTest {
 
             when(userNotificationRepository.save(any())).thenReturn(notification);
             parameters.forEach(parameter -> parameter.setUserNotification(notification));
-            when(notificationParameterRepository.saveAll(parameters)).thenReturn(new ArrayList<>(parameters));
+            when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+            when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
             notificationService.notifyAllHalfPaidPackages();
 
@@ -581,16 +583,9 @@ class NotificationServiceImplTest {
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
-        Set<NotificationParameter> parameters = new HashSet<>();
 
-        UserNotification notification = new UserNotification();
-        notification.setNotificationType(NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
-        notification.setUser(user);
-        notification.setOrder(order);
-
-        parameters.forEach(parameter -> parameter.setUserNotification(notification));
-
-        when(inetAddressProvider.getInetAddressHostName()).thenThrow(new RuntimeException());
+        when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(inetAddressProvider.getInetAddressHostName()).thenThrow(new IllegalStateException());
 
         assertThrows(RuntimeException.class, () -> notificationService.notifyUnpaidOrder(order));
     }
@@ -620,6 +615,7 @@ class NotificationServiceImplTest {
         parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
         notificationService.notifyHalfPaidPackage(order);
 
@@ -648,6 +644,7 @@ class NotificationServiceImplTest {
         parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
         notificationService.notifyHalfPaidPackage(order);
 
