@@ -104,12 +104,35 @@ public class NotificationServiceImpl implements NotificationService {
 
     private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, Long amountToPay) {
         Set<NotificationParameter> parameters = new HashSet<>();
+
         parameters.add(NotificationParameter.builder().key(AMOUNT_TO_PAY_KEY)
             .value(String.format("%.2f", (double) amountToPay)).build());
+
         parameters.add(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
             .value(order.getId().toString())
             .build());
+
+        final String testGreenCity = "https://greencity-ubs.testgreencity.ga/ubs/details-for-existing-order/"
+            + order.getId();
+        final String pickUpCity = "https://greencity-ubs.pick-up.city/ubs/details-for-existing-order/"
+            + order.getId();
+
+        String hostName = inetAddressProvider.getInetAddressHostName();
+
+        if ("www.testgreencity.ga".equals(hostName)) {
+            parameters.add(NotificationParameter.builder()
+                .key("payButton")
+                .value(testGreenCity)
+                .build());
+        }
+
+        if ("www.pick-up.city".equals(hostName)) {
+            parameters.add(NotificationParameter.builder()
+                .key("payButton")
+                .value(pickUpCity)
+                .build());
+        }
         return parameters;
     }
 
@@ -163,14 +186,9 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyHalfPaidPackage(Order order) {
-        Set<NotificationParameter> parameters = new HashSet<>();
-
         Long amountToPay = getAmountToPay(order);
+        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
-        parameters.add(NotificationParameter.builder().key(AMOUNT_TO_PAY_KEY)
-            .value(String.format("%.2f", (double) amountToPay)).build());
-        parameters.add(NotificationParameter.builder().key(ORDER_NUMBER_KEY)
-            .value(order.getId().toString()).build());
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
             fillAndSendNotification(parameters, order, NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF);
         } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
@@ -187,27 +205,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyUnpaidOrder(Order order) {
-        Set<NotificationParameter> parameters = new HashSet<>();
-
         Long amountToPay = getAmountToPay(order);
-
-        parameters.add(NotificationParameter.builder().key(AMOUNT_TO_PAY_KEY)
-            .value(String.format("%.2f", (double) amountToPay)).build());
-
-        final String testGreenCity = "https://greencity-ubs.testgreencity.ga/ubs/details-for-existing-order/"
-            + order.getId();
-        final String pickUpCity = "https://greencity-ubs.pick-up.city/ubs/details-for-existing-order/"
-            + order.getId();
-
-        String hostName = inetAddressProvider.getInetAddressHostName();
-
-        if (hostName.equals("www.testgreencity.ga")) {
-            parameters.add(NotificationParameter.builder().key("payButton").value(testGreenCity).build());
-        }
-
-        if (hostName.equals("www.pick-up.city")) {
-            parameters.add(NotificationParameter.builder().key("payButton").value(pickUpCity).build());
-        }
+        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()
@@ -239,7 +238,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .reduce(0L, Long::sum);
 
         long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
-        Long writeStationSum = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
+        long writeStationSum = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
 
         List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
         Map<Integer, Integer> bagsAmount;
