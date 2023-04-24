@@ -18,13 +18,13 @@ public class PersonalDataDto implements Serializable {
     @Email
     private String email;
     @NotBlank
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ 0-9\\s-ʼ'`ʹ]{1,30}")
     private String firstName;
     @Min(1)
     @Max(1000000)
     private Long id;
     @NotBlank
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z\\s-'.]{1,30}")
+    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ 0-9\\s-ʼ'`ʹ]{1,30}")
     private String lastName;
     @NotBlank
     @ValidPhoneNumber
