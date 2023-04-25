@@ -5,6 +5,8 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.table.ColumnWidthDto;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.ubs.Address;
 import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
@@ -67,6 +69,8 @@ class OrdersAdminsPageServiceImplTest {
     private SuperAdminService superAdminService;
     @Mock
     private UserRemoteClient userRemoteClient;
+    @Mock
+    private TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
     @InjectMocks
     private OrdersAdminsPageServiceImpl ordersAdminsPageService;
 
@@ -548,4 +552,54 @@ class OrdersAdminsPageServiceImplTest {
         assertNotNull(ordersAdminsPageService.unblockOrder(user.getUuid(), orders));
     }
 
+    @Test
+    void getOrderColumnWidthForEmployeeTest() {
+        Employee employee = ModelUtils.getEmployee();
+        TableColumnWidthForEmployee tableColumnWidthForEmployee = ModelUtils.getTestTableColumnWidth();
+
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(employee));
+        when(tableColumnWidthForEmployeeRepository.findByEmployeeId(anyLong()))
+            .thenReturn(Optional.ofNullable(tableColumnWidthForEmployee));
+
+        ordersAdminsPageService.getColumnWidthForEmployee("Test");
+        verify(employeeRepository).findByUuid("Test");
+        verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(1L);
+    }
+
+    @Test
+    void saveOrderColumnWidthForEmployeeIfPresentTest() {
+        Employee employee = ModelUtils.getEmployee();
+        ColumnWidthDto columnWidthDto = ModelUtils.getTestColumnWidthDto();
+
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(employee));
+        when(tableColumnWidthForEmployeeRepository.findByEmployeeId(anyLong()))
+            .thenReturn(Optional.ofNullable(ModelUtils.getTestTableColumnWidth()));
+        when(tableColumnWidthForEmployeeRepository.save(any(TableColumnWidthForEmployee.class)))
+            .thenReturn(ModelUtils.getTestTableColumnWidth());
+
+        ordersAdminsPageService.saveColumnWidthForEmployee(columnWidthDto, "Test");
+        verify(employeeRepository).findByUuid("Test");
+        verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(1L);
+        verify(tableColumnWidthForEmployeeRepository).save(any(TableColumnWidthForEmployee.class));
+    }
+
+    @Test
+    void saveOrderColumnWidthForEmployeeIfNotPresentTest() {
+        Employee employee = ModelUtils.getEmployee();
+        ColumnWidthDto columnWidthDto = ModelUtils.getTestColumnWidthDto();
+        TableColumnWidthForEmployee tableColumnWidthForEmployee = ModelUtils.getTestTableColumnWidth();
+
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(employee));
+        when(tableColumnWidthForEmployeeRepository.findByEmployeeId(anyLong())).thenReturn(Optional.empty());
+        when(tableColumnWidthForEmployeeRepository.save(any(TableColumnWidthForEmployee.class)))
+            .thenReturn(tableColumnWidthForEmployee);
+        when(modelMapper.map(columnWidthDto, TableColumnWidthForEmployee.class))
+            .thenReturn(tableColumnWidthForEmployee);
+
+        ordersAdminsPageService.saveColumnWidthForEmployee(columnWidthDto, "Test");
+        verify(employeeRepository).findByUuid("Test");
+        verify(modelMapper).map(columnWidthDto, TableColumnWidthForEmployee.class);
+        verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(1L);
+        verify(tableColumnWidthForEmployeeRepository).save(any(TableColumnWidthForEmployee.class));
+    }
 }

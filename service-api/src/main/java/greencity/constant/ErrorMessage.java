@@ -144,6 +144,8 @@ public final class ErrorMessage {
         "Tariff has not been activated. Please add package for tariff.";
     public static final String UNRESOLVABLE_TARIFF_STATUS = "Unresolvable tariff status. Please choose Active "
         + "or Deactivated.";
+    public static final String COLUMN_WIDTH_INFO_NOT_FOUND =
+        "There is no saved column width configuration for current employee";
 
     /**
      * Constructor.
