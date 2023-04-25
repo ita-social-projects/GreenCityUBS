@@ -1765,4 +1765,28 @@ public class UBSClientServiceImpl implements UBSClientService {
             .map(location -> modelMapper.map(location, LocationSummaryDto.class))
             .collect(toList());
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderWithAddressesResponseDto makeAddressActual(Long addressId, String uuid) {
+        Address currentAddress = addressRepo.findById(addressId).orElseThrow(
+            () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+
+        User user = userRepository.findByUuid(uuid);
+
+        if (!currentAddress.getUser().equals(user)) {
+            throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
+        }
+
+        if (AddressStatus.DELETED.equals(currentAddress.getAddressStatus())) {
+            throw new BadRequestException(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS);
+        }
+
+        user.getAddresses().forEach(address -> address.setActual(false));
+        currentAddress.setActual(true);
+
+        return findAllAddressesForCurrentOrder(uuid);
+    }
 }

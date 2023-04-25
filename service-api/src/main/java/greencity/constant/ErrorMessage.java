@@ -101,6 +101,8 @@ public final class ErrorMessage {
     public static final String CANNOT_DELETE_ADDRESS = "Cannot delete another user's address";
     public static final String CANNOT_DELETE_ALREADY_DELETED_ADDRESS =
         "Cannot delete an address that has already been deleted.";
+    public static final String CANNOT_MAKE_ACTUAL_DELETED_ADDRESS =
+        "Cannot make actual address that has already been deleted.";
     public static final String CANNOT_ACCESS_PERSONAL_INFO = "Cannot access another user's personal info";
     public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =
         "Cannot access another user's order cancellation reason";

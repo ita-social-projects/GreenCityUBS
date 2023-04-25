@@ -366,4 +366,13 @@ public interface UBSClientService {
      * @author Max Nazaruk
      */
     List<LocationSummaryDto> getLocationSummary();
+
+    /**
+     * Method makes address actual (default) for current {@link User}.
+     *
+     * @param addressId - id of address
+     * @param uuid      - user's uuid
+     * @return {@link OrderWithAddressesResponseDto}
+     */
+    OrderWithAddressesResponseDto makeAddressActual(Long addressId, String uuid);
 }

@@ -282,6 +282,29 @@ public class OrderController {
     }
 
     /**
+     * Controller make address actual (default).
+     *
+     * @param addressId {@link Long}.
+     * @param uuid      {@link UserVO} id.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "Make address actual (default)")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderWithAddressesResponseDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PatchMapping("/makeAddressActual/{addressId}")
+    public ResponseEntity<OrderWithAddressesResponseDto> makeAddressActual(
+        @PathVariable Long addressId,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.makeAddressActual(addressId, uuid));
+    }
+
+    /**
      * Controller gets info about user, ubs_user and user violations by order id.
      *
      * @param id   {@link Long}.
