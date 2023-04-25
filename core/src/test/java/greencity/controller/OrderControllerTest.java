@@ -54,6 +54,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -230,6 +231,20 @@ class OrderControllerTest {
 
         this.mockMvc.perform(delete(ubsLink + "/{id}", 1L))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void makeAddressActual() throws Exception {
+        Long addressId = 1L;
+        String uuid = "35467585763t4sfgchjfuyetf";
+
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(uuid);
+
+        mockMvc.perform(patch(ubsLink + "/makeAddressActual/{addressId}", addressId)
+            .principal(principal))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).makeAddressActual(addressId, uuid);
     }
 
     @Test

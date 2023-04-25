@@ -1770,6 +1770,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public OrderWithAddressesResponseDto makeAddressActual(Long addressId, String uuid) {
         Address currentAddress = addressRepo.findById(addressId).orElseThrow(
             () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
@@ -1784,7 +1785,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadRequestException(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS);
         }
 
-        user.getAddresses().forEach(address -> address.setActual(false));
+        List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(user.getId());
+
+        addresses.forEach(address -> address.setActual(false));
         currentAddress.setActual(true);
 
         return findAllAddressesForCurrentOrder(uuid);
