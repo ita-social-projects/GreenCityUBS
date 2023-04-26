@@ -1752,6 +1752,28 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testMakeAddressActualWhereUserNotHaveActualAddress() {
+        Long firstAddressId = 1L;
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        User user = getUser();
+        firstAddress.setUser(user);
+        String uuid = user.getUuid();
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+        when(addressRepository.findByUserIdAndActualTrue(user.getId())).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> ubsService.makeAddressActual(firstAddressId, uuid));
+
+        assertEquals(ACTUAL_ADDRESS_NOT_FOUND, exception.getMessage());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository).findByUserIdAndActualTrue(user.getId());
+        verify(modelMapper, times(0)).map(any(), any());
+    }
+
+    @Test
     void testMakeAddressActualWhenAddressIsAlreadyActual() {
         Long firstAddressId = 1L;
         User user = getUser();

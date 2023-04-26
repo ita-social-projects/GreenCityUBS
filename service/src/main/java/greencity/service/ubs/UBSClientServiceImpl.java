@@ -1784,7 +1784,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         if (!currentAddress.getActual()) {
-            Address address = addressRepo.findByUserIdAndActualTrue(currentAddress.getUser().getId()).get();
+            Address address = addressRepo.findByUserIdAndActualTrue(currentAddress.getUser().getId()).orElseThrow(
+                () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
             address.setActual(false);
             currentAddress.setActual(true);
         }
