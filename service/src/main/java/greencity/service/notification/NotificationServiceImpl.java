@@ -20,6 +20,7 @@ import greencity.repository.*;
 import greencity.service.ubs.NotificationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -105,8 +106,11 @@ public class NotificationServiceImpl implements NotificationService {
     private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, Long amountToPay) {
         Set<NotificationParameter> parameters = new HashSet<>();
 
-        parameters.add(NotificationParameter.builder().key(AMOUNT_TO_PAY_KEY)
-            .value(String.format("%.2f", (double) amountToPay)).build());
+        parameters.add(NotificationParameter
+            .builder()
+            .key(AMOUNT_TO_PAY_KEY)
+            .value(String.format("%.2f", (double) amountToPay))
+            .build());
 
         parameters.add(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
@@ -233,7 +237,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Long paidAmount = order.getPayment() == null ? 0L
             : order.getPayment().stream()
-                .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
+                .filter(payment -> payment.getPaymentStatus() == PaymentStatus.PAID)
                 .map(payment -> payment.getAmount() / 100)
                 .reduce(0L, Long::sum);
 
@@ -242,23 +246,23 @@ public class NotificationServiceImpl implements NotificationService {
 
         List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
         Map<Integer, Integer> bagsAmount;
-        if (!order.getExportedQuantity().isEmpty()) {
+        if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
             bagsAmount = order.getExportedQuantity();
-        } else if (!order.getConfirmedQuantity().isEmpty()) {
+        } else if (MapUtils.isNotEmpty(order.getConfirmedQuantity())) {
             bagsAmount = order.getConfirmedQuantity();
         } else {
             bagsAmount = order.getAmountOfBagsOrdered();
         }
 
-        long totalPrice = 0L;
-        for (Map.Entry<Integer, Integer> entry : bagsAmount.entrySet()) {
-            totalPrice += entry.getValue().longValue() * bags
+        long totalPrice = bagsAmount.entrySet().stream()
+            .map(entry -> entry.getValue() * bags
                 .stream()
                 .filter(b -> b.getId().equals(entry.getKey()))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
-                .getFullPrice();
-        }
+                .getFullPrice())
+            .reduce(0, Integer::sum)
+            .longValue();
 
         return totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
     }
