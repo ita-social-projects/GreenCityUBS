@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
-public class AddressControllerTest {
+class AddressControllerTest {
 
     private static final String ubsLink = "/ubs";
 
