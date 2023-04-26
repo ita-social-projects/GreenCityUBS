@@ -1771,25 +1771,24 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public OrderWithAddressesResponseDto makeAddressActual(Long addressId, String uuid) {
+    public AddressDto makeAddressActual(Long addressId, String uuid) {
         Address currentAddress = addressRepo.findById(addressId).orElseThrow(
             () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
 
-        User user = userRepository.findByUuid(uuid);
-
-        if (!currentAddress.getUser().equals(user)) {
-            throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
+        if (!currentAddress.getUser().getUuid().equals(uuid)) {
+            throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
 
-        if (AddressStatus.DELETED.equals(currentAddress.getAddressStatus())) {
+        if (currentAddress.getAddressStatus() == AddressStatus.DELETED) {
             throw new BadRequestException(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS);
         }
 
-        List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(user.getId());
+        if (!currentAddress.getActual()) {
+            Address address = addressRepo.findByUserIdAndActualTrue(currentAddress.getUser().getId()).get();
+            address.setActual(false);
+            currentAddress.setActual(true);
+        }
 
-        addresses.forEach(address -> address.setActual(false));
-        currentAddress.setActual(true);
-
-        return findAllAddressesForCurrentOrder(uuid);
+        return modelMapper.map(currentAddress, AddressDto.class);
     }
 }

@@ -1735,13 +1735,11 @@ class UBSClientServiceImplTest {
         secondAddress.setId(secondAddressId);
         secondAddress.setActual(true);
         User user = getUser();
-        user.setAddresses(List.of(firstAddress, secondAddress));
         firstAddress.setUser(user);
         String uuid = user.getUuid();
 
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
-        when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(user.getAddresses());
+        when(addressRepository.findByUserIdAndActualTrue(user.getId())).thenReturn(Optional.of(secondAddress));
 
         ubsService.makeAddressActual(firstAddressId, uuid);
 
@@ -1749,8 +1747,29 @@ class UBSClientServiceImplTest {
         assertFalse(secondAddress.getActual());
 
         verify(addressRepository).findById(firstAddressId);
-        verify(userRepository, times(2)).findByUuid(uuid);
-        verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
+        verify(addressRepository).findByUserIdAndActualTrue(user.getId());
+        verify(modelMapper).map(firstAddress, AddressDto.class);
+    }
+
+    @Test
+    void testMakeAddressActualWhenAddressIsAlreadyActual() {
+        Long firstAddressId = 1L;
+        User user = getUser();
+        String uuid = user.getUuid();
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        firstAddress.setUser(user);
+        firstAddress.setActual(true);
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+
+        ubsService.makeAddressActual(firstAddressId, uuid);
+
+        Assertions.assertTrue(firstAddress.getActual());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository, times(0)).findByUserIdAndActualTrue(anyLong());
+        verify(modelMapper).map(firstAddress, AddressDto.class);
     }
 
     @Test
@@ -1767,8 +1786,8 @@ class UBSClientServiceImplTest {
         assertEquals(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + firstAddressId, exception.getMessage());
 
         verify(addressRepository).findById(firstAddressId);
-        verify(userRepository, times(0)).findByUuid(anyString());
-        verify(addressRepository, times(0)).findAllNonDeletedAddressesByUserId(anyLong());
+        verify(addressRepository, times(0)).findByUserIdAndActualTrue(anyLong());
+        verify(modelMapper, times(0)).map(any(), any());
     }
 
     @Test
@@ -1779,20 +1798,21 @@ class UBSClientServiceImplTest {
         user.setId(userId);
         String uuid = user.getUuid();
         Address firstAddress = getAddress();
+        User addressOwner = getUser();
+        addressOwner.setUuid("randomUuid");
         firstAddress.setId(firstAddressId);
-        firstAddress.setUser(getUser());
+        firstAddress.setUser(addressOwner);
 
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class,
             () -> ubsService.makeAddressActual(firstAddressId, uuid));
 
-        assertEquals(CANNOT_DELETE_ADDRESS, exception.getMessage());
+        assertEquals(CANNOT_ACCESS_PERSONAL_INFO, exception.getMessage());
 
         verify(addressRepository).findById(firstAddressId);
-        verify(userRepository).findByUuid(uuid);
-        verify(addressRepository, times(0)).findAllNonDeletedAddressesByUserId(anyLong());
+        verify(addressRepository, times(0)).findByUserIdAndActualTrue(anyLong());
+        verify(modelMapper, times(0)).map(any(), any());
     }
 
     @Test
@@ -1807,7 +1827,6 @@ class UBSClientServiceImplTest {
         user.setAddresses(List.of(firstAddress));
 
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
             () -> ubsService.makeAddressActual(firstAddressId, uuid));
@@ -1815,8 +1834,8 @@ class UBSClientServiceImplTest {
         assertEquals(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS, exception.getMessage());
 
         verify(addressRepository).findById(firstAddressId);
-        verify(userRepository).findByUuid(uuid);
-        verify(addressRepository, times(0)).findAllNonDeletedAddressesByUserId(anyLong());
+        verify(addressRepository, times(0)).findByUserIdAndActualTrue(anyLong());
+        verify(modelMapper, times(0)).map(any(), any());
     }
 
     @Test

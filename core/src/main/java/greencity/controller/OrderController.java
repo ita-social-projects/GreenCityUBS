@@ -8,6 +8,7 @@ import greencity.constant.ValidationConstant;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
+import greencity.dto.address.AddressDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
@@ -297,7 +298,7 @@ public class OrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PatchMapping("/makeAddressActual/{addressId}")
-    public ResponseEntity<OrderWithAddressesResponseDto> makeAddressActual(
+    public ResponseEntity<AddressDto> makeAddressActual(
         @PathVariable Long addressId,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
