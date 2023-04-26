@@ -24,7 +24,7 @@ public class ColumnWidthDto {
     private Integer dateOfExport;
     private Integer district;
     private Integer generalDiscount;
-    private Integer orderId;
+    private Integer id;
     private Integer idOrderFromShop;
     private Integer orderCertificateCode;
     private Integer orderDate;
