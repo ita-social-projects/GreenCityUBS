@@ -287,11 +287,11 @@ public class OrderController {
      *
      * @param addressId {@link Long}.
      * @param uuid      {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
+     * @return {@link ResponseEntity}.
      */
     @ApiOperation(value = "Make address actual (default)")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderWithAddressesResponseDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddressDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),

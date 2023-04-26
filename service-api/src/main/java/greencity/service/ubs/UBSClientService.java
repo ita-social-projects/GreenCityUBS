@@ -369,7 +369,7 @@ public interface UBSClientService {
     List<LocationSummaryDto> getLocationSummary();
 
     /**
-     * Makes an address actual (default) for a given user, identified by their UUID.
+     * Makes an address actual (default) for a given user, identified by his UUID.
      *
      * @param addressId - the ID of the address to make the default
      * @param uuid      - the UUID of the user whose address is being updated
