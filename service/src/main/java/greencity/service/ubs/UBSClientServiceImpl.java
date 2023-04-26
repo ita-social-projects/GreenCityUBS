@@ -1783,7 +1783,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadRequestException(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS);
         }
 
-        if (!currentAddress.getActual()) {
+        if (!Boolean.TRUE.equals(currentAddress.getActual())) {
             Address address = addressRepo.findByUserIdAndActualTrue(currentAddress.getUser().getId()).orElseThrow(
                 () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
             address.setActual(false);
