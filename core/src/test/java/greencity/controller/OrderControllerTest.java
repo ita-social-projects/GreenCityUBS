@@ -6,10 +6,8 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.RedirectionConfigProp;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
@@ -181,73 +179,6 @@ class OrderControllerTest {
     }
 
     @Test
-    void getAllAddressesForCurrentUser() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-
-        mockMvc.perform(get(ubsLink + "/findAll-order-address")
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService).findAllAddressesForCurrentOrder(anyString());
-    }
-
-    @Test
-    void saveAddressForOrder() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-
-        CreateAddressRequestDto dto = ModelUtils.getAddressRequestDto();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String createAddressRequestDto = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/save-order-address")
-            .content(createAddressRequestDto)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
-
-        verify(ubsClientService).saveCurrentAddressForOrder(any(), eq("35467585763t4sfgchjfuyetf"));
-    }
-
-    @Test
-    void updateAddressForOrder() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-
-        OrderAddressDtoRequest dto = ModelUtils.getOrderAddressDtoRequest();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderAddressDtoRequest = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(put(ubsLink + "/update-order-address")
-            .content(orderAddressDtoRequest)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-
-        verify(ubsClientService).updateCurrentAddressForOrder(any(), eq("35467585763t4sfgchjfuyetf"));
-    }
-
-    @Test
-    void deleteOrderAddress() throws Exception {
-
-        this.mockMvc.perform(delete(ubsLink + "/{id}", 1L))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void makeAddressActual() throws Exception {
-        Long addressId = 1L;
-        String uuid = "35467585763t4sfgchjfuyetf";
-
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(uuid);
-
-        mockMvc.perform(patch(ubsLink + "/makeAddressActual/{addressId}", addressId)
-            .principal(principal))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService).makeAddressActual(addressId, uuid);
-    }
-
-    @Test
     void getOrderDetailsByOrderId() throws Exception {
         UserInfoDto userInfoDto = getUserInfoDto();
         when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, null)).thenReturn(userInfoDto);
@@ -345,13 +276,6 @@ class OrderControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
-    void deleteOrderAddressTest() throws Exception {
-        mockMvc.perform(delete("/ubs" + "/order-addresses" + "/{id}", 1L)
-            .principal(principal))
-            .andExpect(status().isOk());
     }
 
     @Test

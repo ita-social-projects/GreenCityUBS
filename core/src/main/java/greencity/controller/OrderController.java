@@ -5,10 +5,8 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
 import greencity.constants.HttpStatuses;
 import greencity.constant.ValidationConstant;
-import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
-import greencity.dto.address.AddressDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
@@ -195,114 +193,6 @@ public class OrderController {
             response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    /**
-     * Controller for getting all addresses for current order.
-     *
-     * @param userUuid {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "Get all addresses for order")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderWithAddressesResponseDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-    })
-    @GetMapping("/findAll-order-address")
-    public ResponseEntity<OrderWithAddressesResponseDto> getAllAddressesForCurrentUser(
-        @ApiIgnore @CurrentUserUuid String userUuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.findAllAddressesForCurrentOrder(userUuid));
-    }
-
-    /**
-     * Controller save address for current order.
-     *
-     * @param dtoRequest {@link CreateAddressRequestDto}.
-     * @param uuid       {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "Save order address")
-    @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = OrderWithAddressesResponseDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/save-order-address")
-    public ResponseEntity<OrderWithAddressesResponseDto> saveAddressForOrder(
-        @Valid @RequestBody CreateAddressRequestDto dtoRequest,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsClientService.saveCurrentAddressForOrder(dtoRequest, uuid));
-    }
-
-    /**
-     * Controller update address for current order.
-     *
-     * @param dtoRequest {@link OrderAddressDtoRequest}.
-     * @param uuid       {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "Update order address(if placeId is null updates only addressComment)")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderWithAddressesResponseDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PutMapping("/update-order-address")
-    public ResponseEntity<OrderWithAddressesResponseDto> updateAddressForOrder(
-        @Valid @RequestBody OrderAddressDtoRequest dtoRequest,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.updateCurrentAddressForOrder(dtoRequest, uuid));
-    }
-
-    /**
-     * Controller delete order address.
-     *
-     * @param id   {@link Long}.
-     * @param uuid {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "Delete order address")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = OrderWithAddressesResponseDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @DeleteMapping("/order-addresses/{id}")
-    public ResponseEntity<OrderWithAddressesResponseDto> deleteOrderAddress(
-        @Valid @PathVariable("id") Long id,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.deleteCurrentAddressForOrder(id, uuid));
-    }
-
-    /**
-     * Controller make address actual (default).
-     *
-     * @param addressId {@link Long}.
-     * @param uuid      {@link UserVO} id.
-     * @return {@link ResponseEntity}.
-     */
-    @ApiOperation(value = "Make address actual (default)")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddressDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PatchMapping("/makeAddressActual/{addressId}")
-    public ResponseEntity<AddressDto> makeAddressActual(
-        @PathVariable Long addressId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.makeAddressActual(addressId, uuid));
     }
 
     /**
