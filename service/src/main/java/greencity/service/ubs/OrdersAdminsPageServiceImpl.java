@@ -235,7 +235,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         if (nonNull(columnWidthDto)) {
             tableColumnWidthForEmployeeRepository.findByEmployeeId(employee.getId()).ifPresentOrElse(
                 e -> {
-                    TableColumnWidthForEmployee tableColumnWidthForEmployee = modelMapper.map(columnWidthDto, TableColumnWidthForEmployee.class);
+                    TableColumnWidthForEmployee tableColumnWidthForEmployee =
+                        modelMapper.map(columnWidthDto, TableColumnWidthForEmployee.class);
                     modelMapper.map(tableColumnWidthForEmployee, e);
                     tableColumnWidthForEmployeeRepository.save(e);
                 },
