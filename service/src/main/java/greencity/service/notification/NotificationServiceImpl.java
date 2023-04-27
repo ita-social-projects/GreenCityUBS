@@ -230,7 +230,7 @@ public class NotificationServiceImpl implements NotificationService {
         long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
         long writeStationSum = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
 
-        List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
+        List<Bag> bagsType = bagRepository.findBagsByOrderId(order.getId());
         Map<Integer, Integer> bagsAmount;
         if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
             bagsAmount = order.getExportedQuantity();
@@ -240,8 +240,14 @@ public class NotificationServiceImpl implements NotificationService {
             bagsAmount = order.getAmountOfBagsOrdered();
         }
 
-        long totalPrice = bagsAmount.entrySet().stream()
-            .map(entry -> entry.getValue() * bags
+        long totalPrice = calculateBagsTotalPrice(bagsAmount, bagsType);
+
+        return totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
+    }
+
+    private long calculateBagsTotalPrice(Map<Integer, Integer> bagsAmount, List<Bag> bagsType) {
+        return bagsAmount.entrySet().stream()
+            .map(entry -> entry.getValue() * bagsType
                 .stream()
                 .filter(b -> b.getId().equals(entry.getKey()))
                 .findFirst()
@@ -249,8 +255,6 @@ public class NotificationServiceImpl implements NotificationService {
                 .getFullPrice())
             .reduce(0, Integer::sum)
             .longValue();
-
-        return totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
     }
 
     /**
