@@ -24,6 +24,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -64,11 +65,10 @@ public class NotificationServiceImpl implements NotificationService {
     private List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
     @Autowired
-    private final InetAddressProvider inetAddressProvider;
-
-    @Autowired
     @Qualifier("singleThreadedExecutor")
     private ExecutorService executor;
+    @Autowired
+    private Environment environment;
 
     private static final String ORDER_NUMBER_KEY = "orderNumber";
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
@@ -85,7 +85,7 @@ public class NotificationServiceImpl implements NotificationService {
             if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
-                Long amountToPay = getAmountToPay(order);
+                double amountToPay = getAmountToPay(order);
                 Set<NotificationParameter> notificationParameters =
                     initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
                 fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
@@ -103,13 +103,13 @@ public class NotificationServiceImpl implements NotificationService {
                 || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)));
     }
 
-    private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, Long amountToPay) {
+    private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, double amountToPay) {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         parameters.add(NotificationParameter
             .builder()
             .key(AMOUNT_TO_PAY_KEY)
-            .value(String.format("%.2f", (double) amountToPay))
+            .value(String.format("%.2f", amountToPay))
             .build());
 
         parameters.add(NotificationParameter.builder()
@@ -117,26 +117,12 @@ public class NotificationServiceImpl implements NotificationService {
             .value(order.getId().toString())
             .build());
 
-        final String testGreenCity = "https://greencity-ubs.testgreencity.ga/ubs/details-for-existing-order/"
-            + order.getId();
-        final String pickUpCity = "https://greencity-ubs.pick-up.city/ubs/details-for-existing-order/"
-            + order.getId();
+        String orderUrl = environment.getProperty("greencity.ubs.unpaid-order-url") + order.getId();
+        parameters.add(NotificationParameter.builder()
+            .key("payButton")
+            .value(orderUrl)
+            .build());
 
-        String hostName = inetAddressProvider.getInetAddressHostName();
-
-        if ("www.testgreencity.ga".equals(hostName)) {
-            parameters.add(NotificationParameter.builder()
-                .key("payButton")
-                .value(testGreenCity)
-                .build());
-        }
-
-        if ("www.pick-up.city".equals(hostName)) {
-            parameters.add(NotificationParameter.builder()
-                .key("payButton")
-                .value(pickUpCity)
-                .build());
-        }
         return parameters;
     }
 
@@ -190,7 +176,7 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyHalfPaidPackage(Order order) {
-        Long amountToPay = getAmountToPay(order);
+        double amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
@@ -209,7 +195,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyUnpaidOrder(Order order) {
-        Long amountToPay = getAmountToPay(order);
+        double amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
@@ -227,19 +213,19 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private Long getAmountToPay(Order order) {
-        Long bonuses = order.getPointsToUse() == null ? 0L : order.getPointsToUse().longValue();
-        Long certificates = order.getCertificates() == null ? 0L
+    private double getAmountToPay(Order order) {
+        long bonuses = order.getPointsToUse() == null ? 0L : order.getPointsToUse().longValue();
+        long certificates = order.getCertificates() == null ? 0L
             : order.getCertificates().stream()
                 .map(Certificate::getPoints)
                 .reduce(0, Integer::sum)
                 .longValue();
 
-        Long paidAmount = order.getPayment() == null ? 0L
+        double paidAmount = order.getPayment() == null ? 0d
             : order.getPayment().stream()
                 .filter(payment -> payment.getPaymentStatus() == PaymentStatus.PAID)
-                .map(payment -> payment.getAmount() / 100)
-                .reduce(0L, Long::sum);
+                .map(Payment::getAmount)
+                .reduce(0L, Long::sum) / 100.0;
 
         long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
         long writeStationSum = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();

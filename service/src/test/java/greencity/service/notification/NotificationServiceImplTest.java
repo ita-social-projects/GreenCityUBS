@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -78,7 +79,7 @@ class NotificationServiceImplTest {
     private NotificationServiceImpl notificationService;
 
     @Mock
-    private InetAddressProvider inetAddressProvider;
+    private Environment environment;
 
     private Clock fixedClock;
 
@@ -155,7 +156,6 @@ class NotificationServiceImplTest {
                     .value("10000").build());
 
             when(notificationParameterRepository.saveAll(any())).thenReturn(notificationParameters);
-            when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
             notificationService.notifyUnpaidOrders();
 
@@ -283,8 +283,8 @@ class NotificationServiceImplTest {
                 clock,
                 List.of(abstractNotificationProvider),
                 templateRepository,
-                inetAddressProvider,
-                mockExecutor);
+                mockExecutor,
+                environment);
             User user = User.builder().id(42L).build();
             User user1 = User.builder().id(43L).build();
             UserNotification notification = new UserNotification();
@@ -389,7 +389,6 @@ class NotificationServiceImplTest {
             when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag1list());
             when(userNotificationRepository.save(any())).thenReturn(notification);
             when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-            when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
             notificationService.notifyAllHalfPaidPackages();
 
@@ -489,7 +488,6 @@ class NotificationServiceImplTest {
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
-        when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
         notificationService.notifyUnpaidOrder(order);
 
@@ -521,8 +519,6 @@ class NotificationServiceImplTest {
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
-        when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
-
         notificationService.notifyUnpaidOrder(order);
 
         verify(userNotificationRepository).save(any());
@@ -554,34 +550,11 @@ class NotificationServiceImplTest {
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
-        when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.pick-up.city");
 
         notificationService.notifyUnpaidOrder(order);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());
-    }
-
-    @Test
-    void testNotifyUnpaidOrderUnknownHostException() {
-        User user = getUser();
-        Order order = ModelUtils.getCanceledPaidOrder();
-        order.setConfirmedQuantity(Collections.emptyMap());
-        order.setExportedQuantity(Collections.emptyMap());
-        order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
-        Event formed = Event.builder().eventName(OrderHistory.ORDER_FORMED).build();
-        Event adjustment = Event.builder().eventName(OrderHistory.ORDER_ADJUSTMENT).build();
-        Event confirmed = Event.builder().eventName(OrderHistory.ORDER_CONFIRMED).build();
-        Event onTheRoad = Event.builder().eventName(OrderHistory.ORDER_ON_THE_ROUTE).build();
-        order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
-        order.setPayment(TEST_PAYMENT_LIST);
-        order.setPointsToUse(0);
-        order.setCertificates(Collections.emptySet());
-
-        when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
-        when(inetAddressProvider.getInetAddressHostName()).thenThrow(new IllegalStateException());
-
-        assertThrows(RuntimeException.class, () -> notificationService.notifyUnpaidOrder(order));
     }
 
     @Test
@@ -608,7 +581,6 @@ class NotificationServiceImplTest {
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
-        when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
         notificationService.notifyHalfPaidPackage(order);
 
@@ -636,7 +608,6 @@ class NotificationServiceImplTest {
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
-        when(inetAddressProvider.getInetAddressHostName()).thenReturn("www.testgreencity.ga");
 
         notificationService.notifyHalfPaidPackage(order);
 
