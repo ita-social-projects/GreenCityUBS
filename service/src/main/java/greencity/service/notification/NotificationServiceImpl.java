@@ -72,6 +72,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     private static final String ORDER_NUMBER_KEY = "orderNumber";
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
+    private static final String PAY_BUTTON = "payButton";
+    private static final String ORDER_URL_PROPERTY = "greencity.ubs.unpaid-order-url";
 
     /**
      * {@inheritDoc}
@@ -117,9 +119,9 @@ public class NotificationServiceImpl implements NotificationService {
             .value(order.getId().toString())
             .build());
 
-        String orderUrl = environment.getProperty("greencity.ubs.unpaid-order-url") + order.getId();
+        String orderUrl = environment.getProperty(ORDER_URL_PROPERTY) + order.getId();
         parameters.add(NotificationParameter.builder()
-            .key("payButton")
+            .key(PAY_BUTTON)
             .value(orderUrl)
             .build());
 
@@ -221,11 +223,12 @@ public class NotificationServiceImpl implements NotificationService {
                 .reduce(0, Integer::sum)
                 .longValue();
 
+        double coinsInOneUah = 100.0;
         double paidAmount = order.getPayment() == null ? 0d
             : order.getPayment().stream()
                 .filter(payment -> payment.getPaymentStatus() == PaymentStatus.PAID)
                 .map(Payment::getAmount)
-                .reduce(0L, Long::sum) / 100.0;
+                .reduce(0L, Long::sum) / coinsInOneUah;
 
         long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
         long writeStationSum = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
