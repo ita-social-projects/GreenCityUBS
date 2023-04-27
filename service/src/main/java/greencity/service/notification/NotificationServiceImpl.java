@@ -240,21 +240,20 @@ public class NotificationServiceImpl implements NotificationService {
             bagsAmount = order.getAmountOfBagsOrdered();
         }
 
-        long totalPrice = calculateBagsTotalPrice(bagsAmount, bagsType);
+        long totalPrice = bagsAmount.entrySet().stream()
+            .map(entry -> entry.getValue() * getBagPrice(entry.getKey(), bagsType))
+            .reduce(0, Integer::sum)
+            .longValue();
 
         return totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
     }
 
-    private long calculateBagsTotalPrice(Map<Integer, Integer> bagsAmount, List<Bag> bagsType) {
-        return bagsAmount.entrySet().stream()
-            .map(entry -> entry.getValue() * bagsType
-                .stream()
-                .filter(b -> b.getId().equals(entry.getKey()))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
-                .getFullPrice())
-            .reduce(0, Integer::sum)
-            .longValue();
+    private int getBagPrice(Integer bagId, List<Bag> bagsType) {
+        return bagsType.stream()
+            .filter(b -> b.getId().equals(bagId))
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + bagId))
+            .getFullPrice();
     }
 
     /**
