@@ -230,7 +230,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.PATCH,
                 UBS_LINK + "/userProfile/**",
-                UBS_LINK + "/client/**")
+                UBS_LINK + "/client/**",
+                UBS_LINK + "/makeAddressActual/{addressId}")
             .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.DELETE,
                 UBS_LINK + "/userProfile/**",
