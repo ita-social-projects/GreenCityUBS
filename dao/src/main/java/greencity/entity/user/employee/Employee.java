@@ -1,6 +1,7 @@
 package greencity.entity.user.employee;
 
 import greencity.entity.order.Service;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.enums.EmployeeStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.TariffsInfo;
@@ -76,4 +77,7 @@ public class Employee {
 
     @OneToMany(mappedBy = "editedBy")
     private Set<Service> editedServices;
+
+    @OneToOne(mappedBy = "employee")
+    private TableColumnWidthForEmployee tableColumnWidthForEmployee;
 }

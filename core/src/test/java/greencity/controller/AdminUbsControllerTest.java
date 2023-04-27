@@ -7,6 +7,7 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.table.ColumnWidthDto;
 import greencity.service.ubs.OrdersAdminsPageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,9 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static greencity.ModelUtils.getUuid;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -118,4 +119,27 @@ class AdminUbsControllerTest {
         verify(ordersAdminsPageService).requestToBlockOrder(null, List.of());
     }
 
+    @Test
+    void getColumnWidthForEmployeeTest() throws Exception {
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(ordersAdminsPageService.getColumnWidthForEmployee(anyString())).thenReturn(new ColumnWidthDto());
+
+        mockMvc.perform(get(management + "/orderTableColumnsWidth")
+            .principal(principal))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void saveColumnWidthForEmployeeTest() throws Exception {
+        ColumnWidthDto columnWidthDto = new ColumnWidthDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(columnWidthDto);
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        doNothing().when(ordersAdminsPageService).saveColumnWidthForEmployee(any(ColumnWidthDto.class), anyString());
+        mockMvc.perform(put(management + "/orderTableColumnsWidth")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json))
+            .andExpect(status().isOk());
+    }
 }

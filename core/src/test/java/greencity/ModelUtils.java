@@ -89,7 +89,7 @@ public class ModelUtils {
 
     public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
-            .additionalOrders(new HashSet<>(List.of("232534634")))
+            .additionalOrders(new HashSet<>(List.of("12345678")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .orderComment("comment")
             .certificates(Collections.emptySet())
