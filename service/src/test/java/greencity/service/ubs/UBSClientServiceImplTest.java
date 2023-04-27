@@ -1726,6 +1726,141 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testMakeAddressActual() {
+        Long firstAddressId = 1L;
+        Long secondAddressId = 2L;
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        Address secondAddress = getAddress();
+        secondAddress.setId(secondAddressId);
+        secondAddress.setActual(true);
+        User user = getUser();
+        firstAddress.setUser(user);
+        String uuid = user.getUuid();
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+        when(addressRepository.findByUserIdAndActualTrue(user.getId())).thenReturn(Optional.of(secondAddress));
+
+        ubsService.makeAddressActual(firstAddressId, uuid);
+
+        Assertions.assertTrue(firstAddress.getActual());
+        assertFalse(secondAddress.getActual());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository).findByUserIdAndActualTrue(user.getId());
+        verify(modelMapper).map(firstAddress, AddressDto.class);
+    }
+
+    @Test
+    void testMakeAddressActualWhereUserNotHaveActualAddress() {
+        Long firstAddressId = 1L;
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        User user = getUser();
+        firstAddress.setUser(user);
+        String uuid = user.getUuid();
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+        when(addressRepository.findByUserIdAndActualTrue(user.getId())).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> ubsService.makeAddressActual(firstAddressId, uuid));
+
+        assertEquals(ACTUAL_ADDRESS_NOT_FOUND, exception.getMessage());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository).findByUserIdAndActualTrue(user.getId());
+        verify(modelMapper, times(0)).map(any(), any());
+    }
+
+    @Test
+    void testMakeAddressActualWhenAddressIsAlreadyActual() {
+        Long firstAddressId = 1L;
+        User user = getUser();
+        String uuid = user.getUuid();
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        firstAddress.setUser(user);
+        firstAddress.setActual(true);
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+
+        ubsService.makeAddressActual(firstAddressId, uuid);
+
+        Assertions.assertTrue(firstAddress.getActual());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository, times(0)).findByUserIdAndActualTrue(anyLong());
+        verify(modelMapper).map(firstAddress, AddressDto.class);
+    }
+
+    @Test
+    void testMakeAddressActualWhenAddressNotFound() {
+        Long firstAddressId = 1L;
+        User user = getUser();
+        String uuid = user.getUuid();
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> ubsService.makeAddressActual(firstAddressId, uuid));
+
+        assertEquals(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + firstAddressId, exception.getMessage());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository, times(0)).findByUserIdAndActualTrue(anyLong());
+        verify(modelMapper, times(0)).map(any(), any());
+    }
+
+    @Test
+    void testMakeAddressActualWhenAddressNotBelongsToUser() {
+        Long firstAddressId = 1L;
+        Long userId = 2L;
+        User user = getUser();
+        user.setId(userId);
+        String uuid = user.getUuid();
+        Address firstAddress = getAddress();
+        User addressOwner = getUser();
+        addressOwner.setUuid("randomUuid");
+        firstAddress.setId(firstAddressId);
+        firstAddress.setUser(addressOwner);
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
+            () -> ubsService.makeAddressActual(firstAddressId, uuid));
+
+        assertEquals(CANNOT_ACCESS_PERSONAL_INFO, exception.getMessage());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository, times(0)).findByUserIdAndActualTrue(anyLong());
+        verify(modelMapper, times(0)).map(any(), any());
+    }
+
+    @Test
+    void testMakeAddressActualWhenAddressIdDeleted() {
+        Long firstAddressId = 1L;
+        User user = getUser();
+        String uuid = user.getUuid();
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        firstAddress.setUser(user);
+        firstAddress.setAddressStatus(AddressStatus.DELETED);
+        user.setAddresses(List.of(firstAddress));
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsService.makeAddressActual(firstAddressId, uuid));
+
+        assertEquals(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS, exception.getMessage());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository, times(0)).findByUserIdAndActualTrue(anyLong());
+        verify(modelMapper, times(0)).map(any(), any());
+    }
+
+    @Test
     void getOrderPaymentDetail() {
         Order order = getOrder();
         Certificate certificate = getCertificate();
