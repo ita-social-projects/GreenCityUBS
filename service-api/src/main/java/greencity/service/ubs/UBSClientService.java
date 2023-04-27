@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
+import greencity.dto.address.AddressDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
@@ -366,4 +367,14 @@ public interface UBSClientService {
      * @author Max Nazaruk
      */
     List<LocationSummaryDto> getLocationSummary();
+
+    /**
+     * Makes an address actual (default) for a given user, identified by his UUID.
+     *
+     * @param addressId - the ID of the address to make the default
+     * @param uuid      - the UUID of the user whose address is being updated
+     *
+     * @return an {@link AddressDto} object representing the updated address
+     */
+    AddressDto makeAddressActual(Long addressId, String uuid);
 }
