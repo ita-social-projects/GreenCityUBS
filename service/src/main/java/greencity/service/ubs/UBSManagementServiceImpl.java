@@ -1295,7 +1295,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
         MultipartFile image, String email) {
-        if(paymentRequestDto.getImagePath().isBlank() && paymentRequestDto.getReceiptLink().isBlank()){
+        if (paymentRequestDto.getImagePath().isBlank() && paymentRequestDto.getReceiptLink().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receipt link or image must be present");
         }
         Order order = orderRepository.findById(orderId)
