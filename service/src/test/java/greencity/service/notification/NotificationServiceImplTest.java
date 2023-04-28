@@ -2,6 +2,7 @@ package greencity.service.notification;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import greencity.ModelUtils;
+import greencity.config.InternalUrlConfigProp;
 import greencity.constant.OrderHistory;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
@@ -29,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.env.Environment;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -79,7 +79,7 @@ class NotificationServiceImplTest {
     private NotificationServiceImpl notificationService;
 
     @Mock
-    private Environment environment;
+    private InternalUrlConfigProp internalUrlConfigProp;
 
     private Clock fixedClock;
 
@@ -284,8 +284,7 @@ class NotificationServiceImplTest {
                 List.of(abstractNotificationProvider),
                 templateRepository,
                 mockExecutor,
-                environment,
-                "https://greencity-ubs.testgreencity.ga/ubs/details-for-existing-order/");
+                internalUrlConfigProp);
             User user = User.builder().id(42L).build();
             User user1 = User.builder().id(43L).build();
             UserNotification notification = new UserNotification();

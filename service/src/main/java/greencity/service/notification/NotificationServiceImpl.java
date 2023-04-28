@@ -1,5 +1,6 @@
 package greencity.service.notification;
 
+import greencity.config.InternalUrlConfigProp;
 import greencity.constant.OrderHistory;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
@@ -24,7 +25,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -67,36 +67,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     @Qualifier("singleThreadedExecutor")
     private ExecutorService executor;
-
-    private final Environment environment;
+    private final InternalUrlConfigProp internalUrlConfigProp;
 
     private static final String ORDER_NUMBER_KEY = "orderNumber";
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
     private static final String PAY_BUTTON = "payButton";
-    private static final String ORDER_URL_PROPERTY = "greencity.ubs.unpaid-order-url";
-
-    private final String orderUrl;
-
-    /**
-     * Class constructor used for autowiring and orderUrl field initialization.
-     */
-    @Autowired
-    public NotificationServiceImpl(UserRepository userRepository, UserNotificationRepository userNotificationRepository,
-        BagRepository bagRepository, OrderRepository orderRepository, ViolationRepository violationRepository,
-        NotificationParameterRepository notificationParameterRepository,
-        List<? extends AbstractNotificationProvider> notificationProviders,
-        NotificationTemplateRepository templateRepository, Environment environment) {
-        this.userRepository = userRepository;
-        this.userNotificationRepository = userNotificationRepository;
-        this.bagRepository = bagRepository;
-        this.orderRepository = orderRepository;
-        this.violationRepository = violationRepository;
-        this.notificationParameterRepository = notificationParameterRepository;
-        this.notificationProviders = notificationProviders;
-        this.templateRepository = templateRepository;
-        this.environment = environment;
-        this.orderUrl = environment.getProperty(ORDER_URL_PROPERTY);
-    }
 
     /**
      * {@inheritDoc}
@@ -143,7 +118,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         parameters.add(NotificationParameter.builder()
             .key(PAY_BUTTON)
-            .value(orderUrl)
+            .value(internalUrlConfigProp.getUnpaidOrderUrl() + order.getId())
             .build());
 
         return parameters;
