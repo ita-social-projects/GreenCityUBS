@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -81,4 +82,14 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query(value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) FROM Address  ad WHERE ad.city = a.city)")
     List<Address> findDistinctCities();
+
+    /**
+     * Finds the actual address associated with the given user ID.
+     *
+     * @param userId the ID of the user whose address is being searched for
+     * @return an {@link Optional} object containing the actual {@link Address}
+     *         associated with the user, or an empty {@link Optional} if no such
+     *         address is found
+     */
+    Optional<Address> findByUserIdAndActualTrue(Long userId);
 }
