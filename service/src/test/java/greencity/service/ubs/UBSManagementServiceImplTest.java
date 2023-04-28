@@ -2254,4 +2254,12 @@ class UBSManagementServiceImplTest {
         assertThrows(NotFoundException.class, () -> ubsManagementService.getNotTakenOrderReason(1L));
         verify(orderRepository).findById(1L);
     }
+
+    @Test
+    void saveNewManualPaymentWithoutLinkAndImageTest() {
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).paymentId("1").build();
+        assertThrows(ResponseStatusException.class,
+            () -> ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com"));
+    }
 }
