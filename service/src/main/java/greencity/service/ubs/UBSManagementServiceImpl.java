@@ -91,6 +91,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1295,6 +1296,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
         MultipartFile image, String email) {
+        if (StringUtils.isBlank(paymentRequestDto.getImagePath())
+            && StringUtils.isBlank(paymentRequestDto.getReceiptLink())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receipt link or image must be present");
+        }
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         checkAvailableOrderForEmployee(order, email);
