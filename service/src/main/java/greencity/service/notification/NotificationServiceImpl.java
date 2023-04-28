@@ -75,8 +75,11 @@ public class NotificationServiceImpl implements NotificationService {
     private static final String PAY_BUTTON = "payButton";
     private static final String ORDER_URL_PROPERTY = "greencity.ubs.unpaid-order-url";
 
-    private final String ORDER_URL;
+    private final String orderUrl;
 
+    /**
+     * Class constructor used for autowiring and orderUrl field initialization.
+     */
     @Autowired
     public NotificationServiceImpl(UserRepository userRepository, UserNotificationRepository userNotificationRepository,
         BagRepository bagRepository, OrderRepository orderRepository, ViolationRepository violationRepository,
@@ -92,7 +95,7 @@ public class NotificationServiceImpl implements NotificationService {
         this.notificationProviders = notificationProviders;
         this.templateRepository = templateRepository;
         this.environment = environment;
-        this.ORDER_URL = environment.getProperty(ORDER_URL_PROPERTY);
+        this.orderUrl = environment.getProperty(ORDER_URL_PROPERTY);
     }
 
     /**
@@ -140,7 +143,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         parameters.add(NotificationParameter.builder()
             .key(PAY_BUTTON)
-            .value(ORDER_URL)
+            .value(orderUrl)
             .build());
 
         return parameters;
