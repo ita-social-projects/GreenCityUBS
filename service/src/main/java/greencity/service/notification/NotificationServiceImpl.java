@@ -53,27 +53,47 @@ import static java.util.stream.Collectors.toMap;
 @AllArgsConstructor
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
-    private UserRepository userRepository;
-    private UserNotificationRepository userNotificationRepository;
-    private BagRepository bagRepository;
-    private OrderRepository orderRepository;
-    private ViolationRepository violationRepository;
-    private NotificationParameterRepository notificationParameterRepository;
+    private final UserRepository userRepository;
+    private final UserNotificationRepository userNotificationRepository;
+    private final BagRepository bagRepository;
+    private final OrderRepository orderRepository;
+    private final ViolationRepository violationRepository;
+    private final NotificationParameterRepository notificationParameterRepository;
     @Autowired
     @Qualifier("kyivZonedClock")
     private Clock clock;
-    private List<? extends AbstractNotificationProvider> notificationProviders;
+    private final List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
     @Autowired
     @Qualifier("singleThreadedExecutor")
     private ExecutorService executor;
-    @Autowired
-    private Environment environment;
+
+    private final Environment environment;
 
     private static final String ORDER_NUMBER_KEY = "orderNumber";
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
     private static final String PAY_BUTTON = "payButton";
     private static final String ORDER_URL_PROPERTY = "greencity.ubs.unpaid-order-url";
+
+    private final String ORDER_URL;
+
+    @Autowired
+    public NotificationServiceImpl(UserRepository userRepository, UserNotificationRepository userNotificationRepository,
+        BagRepository bagRepository, OrderRepository orderRepository, ViolationRepository violationRepository,
+        NotificationParameterRepository notificationParameterRepository,
+        List<? extends AbstractNotificationProvider> notificationProviders,
+        NotificationTemplateRepository templateRepository, Environment environment) {
+        this.userRepository = userRepository;
+        this.userNotificationRepository = userNotificationRepository;
+        this.bagRepository = bagRepository;
+        this.orderRepository = orderRepository;
+        this.violationRepository = violationRepository;
+        this.notificationParameterRepository = notificationParameterRepository;
+        this.notificationProviders = notificationProviders;
+        this.templateRepository = templateRepository;
+        this.environment = environment;
+        this.ORDER_URL = environment.getProperty(ORDER_URL_PROPERTY);
+    }
 
     /**
      * {@inheritDoc}
@@ -108,8 +128,7 @@ public class NotificationServiceImpl implements NotificationService {
     private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, double amountToPay) {
         Set<NotificationParameter> parameters = new HashSet<>();
 
-        parameters.add(NotificationParameter
-            .builder()
+        parameters.add(NotificationParameter.builder()
             .key(AMOUNT_TO_PAY_KEY)
             .value(String.format("%.2f", amountToPay))
             .build());
@@ -119,10 +138,9 @@ public class NotificationServiceImpl implements NotificationService {
             .value(order.getId().toString())
             .build());
 
-        String orderUrl = environment.getProperty(ORDER_URL_PROPERTY) + order.getId();
         parameters.add(NotificationParameter.builder()
             .key(PAY_BUTTON)
-            .value(orderUrl)
+            .value(ORDER_URL)
             .build());
 
         return parameters;

@@ -284,7 +284,8 @@ class NotificationServiceImplTest {
                 List.of(abstractNotificationProvider),
                 templateRepository,
                 mockExecutor,
-                environment);
+                environment,
+                "https://greencity-ubs.testgreencity.ga/ubs/details-for-existing-order/");
             User user = User.builder().id(42L).build();
             User user1 = User.builder().id(43L).build();
             UserNotification notification = new UserNotification();
