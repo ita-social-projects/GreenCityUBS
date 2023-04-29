@@ -2236,7 +2236,7 @@ class UBSManagementServiceImplTest {
     void saveNewManualPaymentWithoutLinkAndImageTest() {
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
             .settlementdate("02-08-2021").amount(500L).paymentId("1").build();
-        assertThrows(ResponseStatusException.class,
+        assertThrows(BadRequestException.class,
             () -> ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com"));
     }
 }
