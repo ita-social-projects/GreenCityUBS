@@ -4,22 +4,27 @@ import greencity.client.UserRemoteClient;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
+import greencity.enums.NotificationReceiverType;
 import greencity.repository.NotificationTemplateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static greencity.enums.NotificationReceiverType.EMAIL;
+
 @Service
 public class EmailService extends AbstractNotificationProvider {
     private final UserRemoteClient userRemoteClient;
+
+    private static final NotificationReceiverType notificationType = EMAIL;
 
     /**
      * Constructor with super() call.
      */
     @Autowired
     public EmailService(UserRemoteClient userRemoteClient, NotificationTemplateRepository templateRepository) {
-        super(userRemoteClient, templateRepository);
+        super(userRemoteClient, templateRepository, notificationType);
         this.userRemoteClient = userRemoteClient;
     }
 

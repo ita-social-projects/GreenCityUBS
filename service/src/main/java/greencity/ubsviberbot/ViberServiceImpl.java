@@ -11,6 +11,7 @@ import greencity.dto.viber.enums.MessageType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
+import greencity.enums.NotificationReceiverType;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.exceptions.bots.ViberBotAlreadyConnected;
@@ -29,6 +30,8 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.Set;
 
+import static greencity.enums.NotificationReceiverType.MOBILE;
+
 @Service
 @Slf4j
 public class ViberServiceImpl extends AbstractNotificationProvider implements ViberService {
@@ -39,6 +42,8 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
     @Value("${greencity.bots.viber-bot-url}")
     private String viberBotUrl;
 
+    private static final NotificationReceiverType notificationType = MOBILE;
+
     /**
      * Constructor with super() call.
      */
@@ -48,7 +53,7 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
         UserRepository userRepository,
         ViberBotRepository viberBotRepository,
         NotificationTemplateRepository templateRepository) {
-        super(userRemoteClient, templateRepository);
+        super(userRemoteClient, templateRepository, notificationType);
         this.viberClient = viberClient;
         this.userRepository = userRepository;
         this.viberBotRepository = viberBotRepository;

@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.ApiContextInitializer;
 
 @SpringBootApplication
 @EnableFeignClients
@@ -15,10 +14,6 @@ public class UbsApplication {
      */
     public static void main(String[] args) {
         SpringApplication.run(UbsApplication.class, args);
-    }
-
-    static {
-        ApiContextInitializer.init();
     }
 
     /**
