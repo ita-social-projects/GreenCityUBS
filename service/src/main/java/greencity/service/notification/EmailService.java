@@ -6,7 +6,6 @@ import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
 import greencity.repository.NotificationTemplateRepository;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +14,6 @@ import java.util.Objects;
 import static greencity.enums.NotificationReceiverType.EMAIL;
 
 @Service
-@Getter
 public class EmailService extends AbstractNotificationProvider {
     private final UserRemoteClient userRemoteClient;
 
