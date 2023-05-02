@@ -17,4 +17,5 @@ public final class AppConstant {
     public static final String ADMIN = "ADMIN";
     public static final String USER = "USER";
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";
+    public static final double AMOUNT_OF_COINS_IN_ONE_UAH = 100.0;
 }
