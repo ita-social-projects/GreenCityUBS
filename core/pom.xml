@@ -124,7 +124,7 @@
         <dependency>
             <groupId>org.telegram</groupId>
             <artifactId>telegrambots-spring-boot-starter</artifactId>
-            <version>4.9.2</version>
+            <version>5.4.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.viber</groupId>
