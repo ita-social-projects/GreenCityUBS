@@ -647,18 +647,21 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid) {
         Address address = addressRepo.findById(addressId).orElseThrow(
             () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
-        if (!address.getUser().equals(userRepository.findByUuid(uuid))) {
+        if (!Objects.equals(address.getUser().getUuid(), uuid)) {
             throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
         }
-        if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
+        if (address.getAddressStatus() == AddressStatus.DELETED) {
             throw new BadRequestException(CANNOT_DELETE_ALREADY_DELETED_ADDRESS);
         }
         address.setAddressStatus(AddressStatus.DELETED);
         address.setActual(false);
-        addressRepo.save(address);
+        addressRepo.findAnyByUserIdAndAddressStatusNotDeleted(address.getUser().getId())
+            .ifPresent(newActualAddress -> newActualAddress.setActual(true));
+
         return findAllAddressesForCurrentOrder(uuid);
     }
 
