@@ -71,6 +71,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     private static final String ORDER_NUMBER_KEY = "orderNumber";
 
+    private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
+
     /**
      * {@inheritDoc}
      */
@@ -192,7 +194,7 @@ public class NotificationServiceImpl implements NotificationService {
         long amountToPay =
             price - (paidAmount + order.getPointsToUse() + certificatePointsUsed) + ubsCourierSum + writeStationSum;
 
-        parameters.add(NotificationParameter.builder().key("amountToPay")
+        parameters.add(NotificationParameter.builder().key(AMOUNT_TO_PAY_KEY)
             .value(String.format("%.2f", (double) amountToPay)).build());
         parameters.add(NotificationParameter.builder().key(ORDER_NUMBER_KEY)
             .value(order.getId().toString()).build());
@@ -246,7 +248,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Long amountToPay = totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
 
-        parameters.add(NotificationParameter.builder().key("amountToPay")
+        parameters.add(NotificationParameter.builder().key(AMOUNT_TO_PAY_KEY)
             .value(String.format("%.2f", (double) amountToPay)).build());
 
         final String testGreenCity = "https://greencity-ubs.testgreencity.ga/ubs/details-for-existing-order/"
@@ -551,6 +553,7 @@ public class NotificationServiceImpl implements NotificationService {
         userNotification.setUser(order.getUser());
         userNotification.setOrder(order);
         UserNotification created = userNotificationRepository.save(userNotification);
+
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
         created.setParameters(new HashSet<>(notificationParameters));

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="Andzheychak-3" author="Mark Andzheychak">
+        <update tableName="notification_platforms">
+            <column name="body">Шановний Клієнте! Інформуємо Вас про необхідність оплати за замовлення №${orderNumber}. Сума до сплати ${amountToPay}. грн.</column>
+            <column name="body_eng">Dear client! We inform you about the necessity of paying for order №${orderNumber}. The sum is ${amountToPay}. UAH</column>
+            <where>notification_id=13</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>
