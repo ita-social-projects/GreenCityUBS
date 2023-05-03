@@ -4,15 +4,21 @@ import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeeSignUpDto;
-import greencity.dto.employee.UpdateEmployeeAuthoritiesDto;
+import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -64,6 +70,27 @@ public interface UserRemoteClient {
      */
     @GetMapping("/user/checkByUuid")
     boolean checkIfUserExistsByUuid(@RequestParam(UUID) String uuid);
+
+    /**
+     * Gets current user's positions and all possible related authorities to these
+     * positions.
+     *
+     * @param email {@link String} - user's email.
+     * @return {@link PositionAuthoritiesDto}.
+     * @author Anton Bondar
+     */
+    @GetMapping("/user/get-positions-authorities")
+    PositionAuthoritiesDto getPositionsAndRelatedAuthorities(@RequestParam String email);
+
+    /**
+     * Gets information about login employee`s positions.
+     *
+     * @param email {@link String} - user's email.
+     * @return List of {@link String} - list of employee`s positions.
+     * @author Anton Bondar
+     */
+    @GetMapping("/user/get-employee-login-positions")
+    List<String> getEmployeeLoginPositionNames(@RequestParam String email);
 
     /**
      * Changes userStatus to "DEACTIVATED" by UUID.
@@ -125,13 +152,12 @@ public interface UserRemoteClient {
     void updateEmployeeEmail(@RequestParam String newEmployeeEmail, @RequestParam String uuid);
 
     /**
-     * Update authorities in chosen employee.
+     * Update an employee`s authorities to related positions in chosen employee.
      *
-     * @param dto {@link UpdateEmployeeAuthoritiesDto} contains email and list of
-     *            positions.
+     * @param dto {@link EmployeePositionsDto} contains email and list of positions.
      */
     @PutMapping("/user/authorities")
-    void updateAuthorities(@RequestBody UpdateEmployeeAuthoritiesDto dto);
+    void updateAuthoritiesToRelatedPositions(@RequestBody EmployeePositionsDto dto);
 
     /**
      * Deactivate employee by uuid.

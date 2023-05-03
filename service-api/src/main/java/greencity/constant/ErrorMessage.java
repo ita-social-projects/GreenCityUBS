@@ -37,7 +37,6 @@ public final class ErrorMessage {
     public static final String FILE_NOT_SAVED = "File hasn't been saved";
     public static final String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
     public static final String EMPLOYEE_WITH_UUID_NOT_FOUND = "Employee with current uuid doesn't exist: ";
-    public static final String CURRENT_PHONE_NUMBER_ALREADY_EXISTS = "Employee with this phone number already exists: ";
     public static final String CURRENT_EMAIL_ALREADY_EXISTS = "Employee with this email already exists: ";
     public static final String PHONE_NUMBER_PARSING_FAIL = "Phone number parsing fail: ";
     public static final String CURRENT_POSITION_ALREADY_EXISTS = "Position with this name already exists: ";
@@ -54,7 +53,6 @@ public final class ErrorMessage {
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
     public static final String ADDRESS_NOT_FOUND = "Address not found";
     public static final String ACTUAL_ADDRESS_NOT_FOUND = "Actual address not found";
-    public static final String LOCATION_DOESNT_FOUND = "Location does not found";
     public static final String LOCATION_DOESNT_FOUND_BY_ID = "Location does not exist by id: ";
     public static final String LOCATIONS_BELONG_TO_DIFFERENT_REGIONS =
         "The locations belong to different regions. Please choose locations from the same region";
@@ -70,20 +68,14 @@ public final class ErrorMessage {
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
     public static final String NOTIFICATION_STATUS_DOES_NOT_EXIST = "Notification status does not exist ";
     public static final String NOTIFICATION_DOES_NOT_BELONG_TO_USER = "This notification does not belong to user";
-    public static final String EMPLOYEE_ALREADY_ASSIGNED = "Manager already assigned with id: ";
-    public static final String EMPLOYEE_DOESNT_EXIST = "Employee doesn't exist";
-    public static final String EMPLOYEE_IS_NOT_ASSIGN =
-        "Employee service could not be assign for order or this is manager which assign managers";
+    public static final String EMPLOYEE_DOESNT_EXIST = "Employee with this email does not exist: ";
     public static final String SERVICE_IS_NOT_FOUND_BY_ID = "Couldn't found service with id: ";
-    public static final String SERVICE_IS_NOT_FOUND_BY_TARIFF_ID = "Couldn't found service for tariff with id: ";
     public static final String SERVICE_ALREADY_EXISTS = "Service already exists for tariff with id: ";
     public static final String LOCATION_STATUS_IS_ALREADY_EXIST =
         "Current location already has status that's you wanna chose";
-
     public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
-    public static final String ORDER_WITH_CURRENT_ID_NOT_FOUND = "Couldn't find order with id that you chose";
     public static final String TO_MUCH_BIG_BAG_EXCEPTION = "You choose to much big bag's max amount is: ";
     public static final String PRICE_OF_ORDER_GREATER_THAN_LIMIT =
         "The price of you're order without discount is greater than allowable limit: ";
@@ -120,8 +112,7 @@ public final class ErrorMessage {
     public static final String COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY = "Could not retrieve employee's authority";
     public static final String EMPLOYEE_AUTHORITY_WAS_NOT_EDITED = "Employee's authority was not edited";
     public static final String EMPLOYEE_EMAIL_WAS_NOT_EDITED = "Employee's email was not edited";
-    public static final String EMPLOYEE_AUTHORITIES_DONT_UPDATE = "Employee's authorities was not updated";
-    public static final String COMMENT_ERROR = "Invalid comment= ";
+    public static final String EMPLOYEE_WAS_NOT_UPDATED = "Employee was not updated";
     public static final String TOO_MUCH_POINTS_FOR_ORDER = "Too much points for order, maximum amount: ";
     public static final String TARIFF_FOR_ORDER_NOT_EXIST = "Could not find tariff for order with id: ";
     public static final String USE_ONLY_ENGLISH_LETTERS = "use only English letters";
@@ -151,7 +142,6 @@ public final class ErrorMessage {
     /**
      * Constructor.
      */
-
     private ErrorMessage() {
     }
 }
