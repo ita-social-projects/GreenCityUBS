@@ -1,6 +1,5 @@
 package greencity.client.config;
 
-import feign.FeignException;
 import feign.hystrix.FallbackFactory;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
@@ -12,7 +11,6 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
-import greencity.exceptions.BadRequestException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -79,7 +77,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
 
             @Override
             public List<String> getEmployeeLoginPositionNames(String email) {
-                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email, throwable);
+                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email);
                 throw new RemoteServerUnavailableException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST, throwable);
             }
 
