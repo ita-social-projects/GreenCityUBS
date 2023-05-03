@@ -658,9 +658,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadRequestException(CANNOT_DELETE_ALREADY_DELETED_ADDRESS);
         }
         address.setAddressStatus(AddressStatus.DELETED);
-        address.setActual(false);
-        addressRepo.findAnyByUserIdAndAddressStatusNotDeleted(address.getUser().getId())
-            .ifPresent(newActualAddress -> newActualAddress.setActual(true));
+
+        if (address.getActual()) {
+            address.setActual(false);
+            addressRepo.findAnyByUserIdAndAddressStatusNotDeleted(address.getUser().getId())
+                .ifPresent(newActualAddress -> newActualAddress.setActual(true));
+        }
 
         return findAllAddressesForCurrentOrder(uuid);
     }

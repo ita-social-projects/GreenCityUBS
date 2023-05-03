@@ -1669,16 +1669,16 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testDeleteCurrentAddressForOrder() {
+    void testDeleteCurrentAddressForOrderWhenAddressIsActual() {
         UBSClientServiceImpl ubsClientService = spy(ubsService);
 
         Long firstAddressId = 1L;
         Long secondAddressId = 2L;
         Address firstAddress = getAddress();
         firstAddress.setId(firstAddressId);
+        firstAddress.setActual(true);
         Address secondAddress = getAddress();
         secondAddress.setId(secondAddressId);
-        secondAddress.setActual(true);
         User user = getUser();
         firstAddress.setUser(user);
         String uuid = user.getUuid();
@@ -1696,6 +1696,30 @@ class UBSClientServiceImplTest {
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository).findAnyByUserIdAndAddressStatusNotDeleted(user.getId());
+        verify(ubsClientService).findAllAddressesForCurrentOrder(uuid);
+    }
+
+    @Test
+    void testDeleteCurrentAddressForOrderWhenAddressIsNotActual() {
+        UBSClientServiceImpl ubsClientService = spy(ubsService);
+
+        Long firstAddressId = 1L;
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        User user = getUser();
+        firstAddress.setUser(user);
+        String uuid = user.getUuid();
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+
+        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientService).findAllAddressesForCurrentOrder(uuid);
+
+        ubsClientService.deleteCurrentAddressForOrder(firstAddressId, uuid);
+
+        assertEquals(AddressStatus.DELETED, firstAddress.getAddressStatus());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository, times(0)).findAnyByUserIdAndAddressStatusNotDeleted(anyLong());
         verify(ubsClientService).findAllAddressesForCurrentOrder(uuid);
     }
 
@@ -1771,6 +1795,7 @@ class UBSClientServiceImplTest {
         Long firstAddressId = 1L;
         Address firstAddress = getAddress();
         firstAddress.setId(firstAddressId);
+        firstAddress.setActual(true);
         User user = getUser();
         firstAddress.setUser(user);
         String uuid = user.getUuid();
