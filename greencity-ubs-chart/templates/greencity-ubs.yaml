@@ -209,6 +209,12 @@ spec:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
               key: GOOGLE-API-KEY
+        
+        - name: DOMAIN_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: DOMAIN-NAME
         ports:
         - containerPort: 8060
           name: tomcat
