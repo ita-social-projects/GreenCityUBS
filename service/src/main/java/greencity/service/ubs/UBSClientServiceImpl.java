@@ -659,7 +659,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         address.setAddressStatus(AddressStatus.DELETED);
 
-        if (address.getActual()) {
+        if (Boolean.TRUE.equals(address.getActual())) {
             address.setActual(false);
             addressRepo.findAnyByUserIdAndAddressStatusNotDeleted(address.getUser().getId())
                 .ifPresent(newActualAddress -> newActualAddress.setActual(true));
