@@ -1669,60 +1669,149 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testDeleteCurrentAddressForOrder() {
-        String uuid = "35467585763t4sfgchjfuyetf";
-        User user = new User();
-        user.setId(13L);
-        List<Address> addresses = getTestAddresses(user);
-        Address address = addresses.get(0);
-        List<AddressDto> addressDtos = getTestAddressesDto();
+    void testDeleteCurrentAddressForOrderWhenAddressIsActual() {
+        UBSClientServiceImpl ubsClientService = spy(ubsService);
 
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
-        when(addressRepository.findById(address.getId())).thenReturn(Optional.of(address));
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
-        when(addressRepository.save(address)).thenReturn(address);
+        Long firstAddressId = 1L;
+        Long secondAddressId = 2L;
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        firstAddress.setActual(true);
+        Address secondAddress = getAddress();
+        secondAddress.setId(secondAddressId);
+        User user = getUser();
+        firstAddress.setUser(user);
+        String uuid = user.getUuid();
 
-        when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(List.of(addresses.get(1)));
-        when(modelMapper.map(addresses.get(1), AddressDto.class)).thenReturn(addressDtos.get(1));
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+        when(addressRepository.findAnyByUserIdAndAddressStatusNotDeleted(user.getId()))
+            .thenReturn(Optional.of(secondAddress));
+        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientService).findAllAddressesForCurrentOrder(uuid);
 
-        ubsService.deleteCurrentAddressForOrder(address.getId(), uuid);
-        verify(addressRepository).save(address);
+        ubsClientService.deleteCurrentAddressForOrder(firstAddressId, uuid);
+
+        Assertions.assertFalse(firstAddress.getActual());
+        assertEquals(AddressStatus.DELETED, firstAddress.getAddressStatus());
+        Assertions.assertTrue(secondAddress.getActual());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository).findAnyByUserIdAndAddressStatusNotDeleted(user.getId());
+        verify(ubsClientService).findAllAddressesForCurrentOrder(uuid);
     }
 
     @Test
-    void testDeleteUnexistingAddress() {
-        when(addressRepository.findById(42L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class,
-            () -> ubsService.deleteCurrentAddressForOrder(42L, "35467585763t4sfgchjfuyetf"));
+    void testDeleteCurrentAddressForOrderWhenAddressIsNotActual() {
+        UBSClientServiceImpl ubsClientService = spy(ubsService);
+
+        Long firstAddressId = 1L;
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        User user = getUser();
+        firstAddress.setUser(user);
+        String uuid = user.getUuid();
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+
+        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientService).findAllAddressesForCurrentOrder(uuid);
+
+        ubsClientService.deleteCurrentAddressForOrder(firstAddressId, uuid);
+
+        assertEquals(AddressStatus.DELETED, firstAddress.getAddressStatus());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository, times(0)).findAnyByUserIdAndAddressStatusNotDeleted(anyLong());
+        verify(ubsClientService).findAllAddressesForCurrentOrder(uuid);
     }
 
     @Test
-    void testDeleteDeletedAddress() {
-        String uuid = "35467585763t4sfgchjfuyetf";
-        Address address = getTestAddresses(getTestUser()).get(0);
-        address.setAddressStatus(AddressStatus.DELETED);
+    void testDeleteCurrentAddressForOrderWithUnexistingAddress() {
+        UBSClientServiceImpl ubsClientService = spy(ubsService);
 
-        when(userRepository.findByUuid(uuid)).thenReturn(getTestUser());
-        when(addressRepository.findById(42L)).thenReturn(Optional.of(address));
+        Long addressId = 1L;
 
-        assertThrows(BadRequestException.class,
-            () -> ubsService.deleteCurrentAddressForOrder(42L, uuid));
+        when(addressRepository.findById(addressId)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> ubsClientService.deleteCurrentAddressForOrder(addressId, "qwe"));
+
+        assertEquals(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId, exception.getMessage());
+
+        verify(addressRepository).findById(addressId);
+        verify(addressRepository, times(0)).findAnyByUserIdAndAddressStatusNotDeleted(anyLong());
+        verify(ubsClientService, times(0)).findAllAddressesForCurrentOrder(anyString());
     }
 
     @Test
-    void testDeleteAddressForWrongUser() {
-        long addressId = 42L;
-        long userId = 2L;
-        User user = new User();
-        user.setId(userId);
-        User addressOwnerUser = new User();
-        addressOwnerUser.setId(userId + 1);
-        String uuid = "35467585763t4sfgchjfuyetf";
-        Address address = getTestAddresses(addressOwnerUser).get(0);
-        when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
-        assertThrows(AccessDeniedException.class,
-            () -> ubsService.deleteCurrentAddressForOrder(addressId, uuid));
+    void testDeleteCurrentAddressForOrderForWrongUser() {
+        UBSClientServiceImpl ubsClientService = spy(ubsService);
+
+        Long firstAddressId = 1L;
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        User user = getUser();
+        firstAddress.setUser(user);
+        String uuid = "qwe";
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
+            () -> ubsClientService.deleteCurrentAddressForOrder(firstAddressId, uuid));
+
+        assertEquals(CANNOT_DELETE_ADDRESS, exception.getMessage());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository, times(0)).findAnyByUserIdAndAddressStatusNotDeleted(anyLong());
+        verify(ubsClientService, times(0)).findAllAddressesForCurrentOrder(anyString());
+    }
+
+    @Test
+    void testDeleteCurrentAddressForOrderWhenAddressAlreadyDeleted() {
+        UBSClientServiceImpl ubsClientService = spy(ubsService);
+
+        Long firstAddressId = 1L;
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        firstAddress.setAddressStatus(AddressStatus.DELETED);
+        User user = getUser();
+        firstAddress.setUser(user);
+        String uuid = user.getUuid();
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsClientService.deleteCurrentAddressForOrder(firstAddressId, uuid));
+
+        assertEquals(CANNOT_DELETE_ALREADY_DELETED_ADDRESS, exception.getMessage());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository, times(0)).findAnyByUserIdAndAddressStatusNotDeleted(anyLong());
+        verify(ubsClientService, times(0)).findAllAddressesForCurrentOrder(anyString());
+    }
+
+    @Test
+    void testDeleteCurrentAddressForOrderWhenItIsLastAddress() {
+        UBSClientServiceImpl ubsClientService = spy(ubsService);
+
+        Long firstAddressId = 1L;
+        Address firstAddress = getAddress();
+        firstAddress.setId(firstAddressId);
+        firstAddress.setActual(true);
+        User user = getUser();
+        firstAddress.setUser(user);
+        String uuid = user.getUuid();
+
+        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
+        when(addressRepository.findAnyByUserIdAndAddressStatusNotDeleted(user.getId())).thenReturn(Optional.empty());
+        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientService).findAllAddressesForCurrentOrder(uuid);
+
+        ubsClientService.deleteCurrentAddressForOrder(firstAddressId, uuid);
+
+        Assertions.assertFalse(firstAddress.getActual());
+        assertEquals(AddressStatus.DELETED, firstAddress.getAddressStatus());
+
+        verify(addressRepository).findById(firstAddressId);
+        verify(addressRepository).findAnyByUserIdAndAddressStatusNotDeleted(user.getId());
+        verify(ubsClientService).findAllAddressesForCurrentOrder(uuid);
     }
 
     @Test
