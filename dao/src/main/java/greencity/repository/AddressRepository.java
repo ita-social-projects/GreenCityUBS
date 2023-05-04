@@ -84,7 +84,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     List<Address> findDistinctCities();
 
     /**
-     * Finds the actual address associated with the given user ID.
+     * Finds the actual {@link Address} associated with the given user ID.
      *
      * @param userId the ID of the user whose address is being searched for
      * @return an {@link Optional} object containing the actual {@link Address}
@@ -92,4 +92,16 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      *         address is found
      */
     Optional<Address> findByUserIdAndActualTrue(Long userId);
+
+    /**
+     * Finds first non-deleted {@link Address} associated with the given user ID.
+     * 
+     * @param userId the ID of the user whose address is being searched for
+     * @return an {@link Optional} containing the first {@link Address} record that
+     *         matches the provided userId and has an address status other than
+     *         'DELETED', or an empty {@link Optional} if no matching record is
+     *         found
+     */
+    @Query(value = "SELECT * FROM address WHERE user_id =:userId AND status != 'DELETED' LIMIT 1", nativeQuery = true)
+    Optional<Address> findAnyByUserIdAndAddressStatusNotDeleted(Long userId);
 }
