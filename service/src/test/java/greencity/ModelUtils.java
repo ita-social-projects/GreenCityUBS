@@ -2804,19 +2804,19 @@ public class ModelUtils {
 
     public static PaymentTableInfoDto getPaymentTableInfoDto() {
         return PaymentTableInfoDto.builder()
-            .paidAmount(200L)
-            .unPaidAmount(0L)
-            .paymentInfoDtos(List.of(getInfoPayment().setAmount(10L)))
-            .overpayment(800L)
+            .paidAmount(200d)
+            .unPaidAmount(0d)
+            .paymentInfoDtos(List.of(getInfoPayment().setAmount(10d)))
+            .overpayment(800d)
             .build();
     }
 
     public static PaymentTableInfoDto getPaymentTableInfoDto2() {
         return PaymentTableInfoDto.builder()
-            .paidAmount(0L)
-            .unPaidAmount(0L)
+            .paidAmount(0d)
+            .unPaidAmount(0d)
             .paymentInfoDtos(Collections.emptyList())
-            .overpayment(400L)
+            .overpayment(400d)
             .build();
     }
 
@@ -2824,7 +2824,7 @@ public class ModelUtils {
         return PaymentInfoDto.builder()
             .comment("ddd")
             .id(1L)
-            .amount(1000L)
+            .amount(1000d)
             .build();
     }
 

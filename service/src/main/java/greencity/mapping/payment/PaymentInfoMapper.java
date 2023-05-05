@@ -17,7 +17,7 @@ public class PaymentInfoMapper extends AbstractConverter<Payment, PaymentInfoDto
         return PaymentInfoDto.builder()
             .id(source.getId())
             .paymentId(source.getPaymentId())
-            .amount(source.getAmount())
+            .amount(source.getAmount().doubleValue())
             .settlementdate(source.getSettlementDate())
             .comment(source.getComment())
             .receiptLink(source.getReceiptLink())
