@@ -1516,19 +1516,17 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void switchTariffStatusToActiveWithoutServiceThrowBadRequestException() {
+    void switchTariffStatusToActiveWithoutService() {
         TariffsInfo tariffInfo = ModelUtils.getTariffsInfoDeactivated();
         tariffInfo.setService(null);
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+        when(tariffsInfoRepository.save(tariffInfo)).thenReturn(tariffInfo);
 
-        Throwable t = assertThrows(BadRequestException.class,
-            () -> superAdminService.switchTariffStatus(1L, "Active"));
-        assertEquals(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_SERVICE,
-            t.getMessage());
+        superAdminService.switchTariffStatus(1L, "Active");
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(tariffsInfoRepository, never()).save(tariffInfo);
+        verify(tariffsInfoRepository).save(tariffInfo);
     }
 
     @Test

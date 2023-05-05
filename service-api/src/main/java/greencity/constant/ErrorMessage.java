@@ -128,8 +128,6 @@ public final class ErrorMessage {
         + "deactivated.";
     public static final String BAG_FOR_TARIFF_NOT_EXIST = "Could not find bag with id %d for tariff with id %d";
     public static final String TARIFF_ALREADY_HAS_THIS_STATUS = "Tariff with id %d already has status: %s";
-    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_SERVICE =
-        "Tariff has not been activated. Please add service for tariff.";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS =
         "Tariff has not been activated. Please set limits for tariff.";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS =

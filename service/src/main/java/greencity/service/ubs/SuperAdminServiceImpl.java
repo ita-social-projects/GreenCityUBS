@@ -746,9 +746,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (tariffsInfo.getMin() == null && tariffsInfo.getMax() == null) {
             throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS);
         }
-        if (tariffsInfo.getService() == null) {
-            throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_SERVICE);
-        }
     }
 
     @Override
