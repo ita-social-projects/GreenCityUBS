@@ -72,8 +72,8 @@ public interface UserRemoteClient {
     boolean checkIfUserExistsByUuid(@RequestParam(UUID) String uuid);
 
     /**
-     * Gets current user's positions and all possible related authorities to these
-     * positions.
+     * Gets user's positions and all possible related authorities to these positions
+     * by user's email.
      *
      * @param email {@link String} - user's email.
      * @return {@link PositionAuthoritiesDto}.
