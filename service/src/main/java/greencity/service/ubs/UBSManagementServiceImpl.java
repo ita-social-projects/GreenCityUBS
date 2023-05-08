@@ -207,7 +207,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 if (paymentInfoDto != null) {
                     int amountOfDecimalsAfterPoint = 2;
                     BigDecimal amountInUAH = BigDecimal.valueOf(paymentInfoDto.getAmount())
-                        .divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH_BD, amountOfDecimalsAfterPoint,
+                        .divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH, amountOfDecimalsAfterPoint,
                             RoundingMode.HALF_UP);
                     paymentInfoDto.setAmount(amountInUAH.doubleValue());
                 }
@@ -1263,11 +1263,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .reduce(0, Integer::sum);
         long bonusOverpayment = certificateSum + order.getPointsToUse() - sumToPay;
 
-        BigDecimal overpayment = paidAmount.add(new BigDecimal(Long.toString(bonusOverpayment)));
+        BigDecimal overpayment = paidAmount.add(new BigDecimal(bonusOverpayment));
 
-        return OrderStatus.CANCELED.equals(order.getOrderStatus())
+        return OrderStatus.CANCELED == order.getOrderStatus()
             ? paidAmount
-            : overpayment.max(new BigDecimal("0"));
+            : overpayment.max(BigDecimal.ZERO);
     }
 
     /**
@@ -1283,7 +1283,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(Payment::getAmount)
             .reduce(0L, Long::sum);
         int amountOfDecimalsAfterPoint = 2;
-        return new BigDecimal(coins.toString()).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH_BD,
+        return new BigDecimal(coins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
             amountOfDecimalsAfterPoint, RoundingMode.HALF_UP);
     }
 
@@ -1302,9 +1302,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .reduce(Integer::sum)
             .orElse(0)) + order.getPointsToUse());
 
-        BigDecimal unpaidAmount = new BigDecimal(sumToPay.toString()).subtract(paidAmount);
+        BigDecimal unpaidAmount = new BigDecimal(sumToPay).subtract(paidAmount);
 
-        return unpaidAmount.max(new BigDecimal("0"));
+        return unpaidAmount.max(BigDecimal.ZERO);
     }
 
     /**
@@ -1674,7 +1674,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         boolean status = false;
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
         for (Long id : tariffsInfoIds) {
-            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
+            status = id.equals(order.getTariffsInfo().getId()) || status;
         }
         return status;
     }
@@ -1709,7 +1709,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void checkOverpayment(BigDecimal overpayment) {
-        if (overpayment.compareTo(new BigDecimal("0")) == 0) {
+        if (overpayment.compareTo(BigDecimal.ZERO) == 0) {
             throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
         }
     }
@@ -1724,7 +1724,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         BigDecimal overpaymentUah = calculateOverpayment(order, setTotalPrice(prices).longValue());
         checkOverpayment(overpaymentUah);
         User currentUser = order.getUser();
-        BigDecimal overpaymentCoins = overpaymentUah.multiply(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH_BD.negate());
+        BigDecimal overpaymentCoins = overpaymentUah.multiply(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH.negate());
 
         order.getPayment().add(Payment.builder()
             .amount(overpaymentCoins.longValue())
@@ -1752,7 +1752,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void transferPointsToUser(Order order, User user, BigDecimal points) {
-        if (points.compareTo(new BigDecimal("0")) <= 0) {
+        if (points.compareTo(BigDecimal.ZERO) <= 0) {
             return;
         }
 

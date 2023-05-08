@@ -231,7 +231,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         int amountOfDecimalsAfterPoint = 2;
         BigDecimal paidAmountUah =
-            new BigDecimal(Long.toString(paidAmountCoins)).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH_BD,
+            new BigDecimal(paidAmountCoins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
                 amountOfDecimalsAfterPoint, RoundingMode.HALF_UP);
 
         long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();

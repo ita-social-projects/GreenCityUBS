@@ -873,7 +873,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .map(Payment::getAmount)
                 .reduce(0L, Long::sum);
         int amountOfDecimalsAfterPoint = 2;
-        return new BigDecimal(paidAmountInCoins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH_BD, amountOfDecimalsAfterPoint, RoundingMode.HALF_UP);
+        return new BigDecimal(paidAmountInCoins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH, amountOfDecimalsAfterPoint, RoundingMode.HALF_UP);
     }
 
     private MakeOrderAgainDto buildOrderBagDto(Order order, List<Bag> bags) {
@@ -1522,7 +1522,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
-        BigDecimal coinsAmount = sumToPay.multiply(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH_BD);
+        BigDecimal coinsAmount = sumToPay.multiply(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH);
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
             .orderId(OrderUtils.generateOrderIdForPayment(orderId, order))
