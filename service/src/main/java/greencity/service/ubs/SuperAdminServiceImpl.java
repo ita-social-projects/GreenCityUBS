@@ -146,8 +146,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public void deleteTariffService(Integer id) {
-        bagRepository.delete(tryToFindBagById(id));
+    public void deleteTariffService(Integer bagId) {
+        Bag bag = tryToFindBagById(bagId);
+        TariffsInfo tariffsInfo = bag.getTariffsInfo();
+        bagRepository.delete(bag);
+        List<Bag> bags = bagRepository.findBagsByTariffsInfoId(tariffsInfo.getId());
+        if (bags.isEmpty() || bags.stream().noneMatch(Bag::getLimitIncluded)) {
+            tariffsInfo.setTariffStatus(TariffStatus.NEW);
+            tariffsInfo.setBags(bags);
+            tariffsInfo.setMax(null);
+            tariffsInfo.setMin(null);
+            tariffsInfo.setLimitDescription(null);
+            tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+            tariffsInfoRepository.save(tariffsInfo);
+        }
     }
 
     @Override

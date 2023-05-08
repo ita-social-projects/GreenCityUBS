@@ -188,7 +188,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void getTariffServiceTest() {
-        List<Bag> bags = List.of(ModelUtils.getBag().get());
+        List<Bag> bags = List.of(ModelUtils.getOptionalBag().get());
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
 
         when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
@@ -214,15 +214,65 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deleteTariffServiceTest() {
-        Optional<Bag> bag = ModelUtils.getBag();
-        when(bagRepository.findById(1)).thenReturn(bag);
+    void deleteTariffServiceWhenTariffBagsWithLimits() {
+        Bag bag = ModelUtils.getBag();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        bag.setTariffsInfo(tariffsInfo);
+
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        doNothing().when(bagRepository).delete(bag);
+        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
         superAdminService.deleteTariffService(1);
-        verify(bagRepository).delete(bag.get());
+        assertEquals(TariffStatus.ACTIVE, tariffsInfo.getTariffStatus());
+        verify(bagRepository).findById(1);
+        verify(bagRepository).delete(bag);
+        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository, never()).save(tariffsInfo);
     }
 
     @Test
-    void deleteTariffServiceThrowException() {
+    void deleteTariffServiceWhenTariffBagsListIsEmpty() {
+        Bag bag = ModelUtils.getBag();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        bag.setTariffsInfo(tariffsInfo);
+        TariffsInfo tariffsInfoNew = ModelUtils.getTariffsInfoWithStatusNew();
+        tariffsInfoNew.setBags(Collections.emptyList());
+
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        doNothing().when(bagRepository).delete(bag);
+        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
+        when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
+        superAdminService.deleteTariffService(1);
+        assertEquals(TariffStatus.NEW, tariffsInfoNew.getTariffStatus());
+        verify(bagRepository).findById(1);
+        verify(bagRepository).delete(bag);
+        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository).save(tariffsInfo);
+    }
+
+    @Test
+    void deleteTariffServiceWhenTariffBagsWithoutLimits() {
+        Bag bag = ModelUtils.getBag();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        bag.setLimitIncluded(false);
+        bag.setTariffsInfo(tariffsInfo);
+        TariffsInfo tariffsInfoNew = ModelUtils.getTariffsInfoWithStatusNew();
+        tariffsInfoNew.setBags(Collections.emptyList());
+
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        doNothing().when(bagRepository).delete(bag);
+        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
+        when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfoNew);
+        superAdminService.deleteTariffService(1);
+        assertEquals(TariffStatus.NEW, tariffsInfoNew.getTariffStatus());
+        verify(bagRepository).findById(1);
+        verify(bagRepository).delete(bag);
+        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository).save(tariffsInfoNew);
+    }
+
+    @Test
+    void deleteTariffServiceThrowNotFoundException() {
         when(bagRepository.findById(1)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
             () -> superAdminService.deleteTariffService(1));
@@ -232,7 +282,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void editTariffService() {
-        Bag bag = ModelUtils.getBag().get();
+        Bag bag = ModelUtils.getBag();
         Employee employee = ModelUtils.getEmployee();
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
@@ -254,7 +304,7 @@ class SuperAdminServiceImplTest {
     @Test
     void editTariffServiceIfEmployeeNotFoundException() {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
-        Optional<Bag> bag = ModelUtils.getBag();
+        Optional<Bag> bag = ModelUtils.getOptionalBag();
         String uuid = UUID.randomUUID().toString();
 
         when(bagRepository.findById(1)).thenReturn(bag);
