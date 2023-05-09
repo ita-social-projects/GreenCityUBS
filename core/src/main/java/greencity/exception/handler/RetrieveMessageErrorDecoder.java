@@ -22,6 +22,7 @@ public class RetrieveMessageErrorDecoder implements ErrorDecoder {
     public Exception decode(String methodKey, Response response) {
         Map<String, Object> errorAttributes = new HashMap<>();
         errorAttributes.put("message", "An error occurred");
+        errorAttributes.put("timestamp", "");
 
         ExceptionResponce exception = new ExceptionResponce(errorAttributes);
 
