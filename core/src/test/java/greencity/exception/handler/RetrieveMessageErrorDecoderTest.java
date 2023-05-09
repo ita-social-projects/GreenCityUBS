@@ -67,7 +67,7 @@ class RetrieveMessageErrorDecoderTest {
     }
 
     @Test
-    public void decodeThrowsIOExceptionTest() throws IOException {
+    void decodeThrowsIOExceptionTest() throws IOException {
         when(mockResponse.body()).thenReturn(mockBody);
         when(mockBody.asInputStream()).thenThrow(new IOException("An error occurred"));
         Exception exception = decoder.decode("methodKey", mockResponse);
