@@ -22,7 +22,7 @@ class RetrieveMessageErrorDecoderTest {
     private final Response.Body mockBody = mock(Response.Body.class);
 
     @Test
-    void decodeBadRequestExceptionTest() throws IOException {
+    void decodeThrowsBadRequestExceptionTest() throws IOException {
         String errorMessage = "This is a bad request";
         when(mockResponse.status()).thenReturn(400);
         when(mockResponse.body()).thenReturn(mockBody);
@@ -37,7 +37,7 @@ class RetrieveMessageErrorDecoderTest {
     }
 
     @Test
-    void decodeAccessDeniedExceptionTest() throws IOException {
+    void decodeThrowsAccessDeniedExceptionTest() throws IOException {
         String errorMessage = "This is an access denied";
         when(mockResponse.status()).thenReturn(403);
         when(mockResponse.body()).thenReturn(mockBody);
@@ -52,7 +52,7 @@ class RetrieveMessageErrorDecoderTest {
     }
 
     @Test
-    void decodeNotFoundExceptionTest() throws IOException {
+    void decodeThrowsNotFoundExceptionTest() throws IOException {
         String errorMessage = "This is a not found";
         when(mockResponse.status()).thenReturn(404);
         when(mockResponse.body()).thenReturn(mockBody);
@@ -62,6 +62,17 @@ class RetrieveMessageErrorDecoderTest {
         assertEquals(errorMessage, exception.getMessage());
 
         verify(mockResponse).status();
+        verify(mockResponse).body();
+        verify(mockBody).asInputStream();
+    }
+
+    @Test
+    public void decodeThrowsIOExceptionTest() throws IOException {
+        when(mockResponse.body()).thenReturn(mockBody);
+        when(mockBody.asInputStream()).thenThrow(new IOException("An error occurred"));
+        Exception exception = decoder.decode("methodKey", mockResponse);
+        assertEquals(Exception.class, exception.getClass());
+
         verify(mockResponse).body();
         verify(mockBody).asInputStream();
     }

@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class RetrieveMessageErrorDecoder implements ErrorDecoder {
@@ -19,13 +20,17 @@ public class RetrieveMessageErrorDecoder implements ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        ExceptionResponce exception = null;
+        Map<String, Object> errorAttributes = new HashMap<>();
+        errorAttributes.put("message", "An error occurred");
+
+        ExceptionResponce exception = new ExceptionResponce(errorAttributes);
+
         try (InputStream body = response.body().asInputStream()) {
             exception = ExceptionResponce
                 .builder()
                 .message(IOUtils.toString(body, StandardCharsets.UTF_8)).build();
         } catch (IOException e) {
-            return new Exception(Objects.requireNonNull(exception).getMessage());
+            return new Exception(exception.getMessage());
         }
 
         switch (response.status()) {
