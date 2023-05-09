@@ -36,12 +36,11 @@ public class RetrieveMessageErrorDecoder implements ErrorDecoder {
 
         switch (response.status()) {
             case 400:
-                return new BadRequestException(exception.getMessage() != null ? exception.getMessage() : "Bad Request");
+                return new BadRequestException(exception.getMessage());
             case 403:
-                return new AccessDeniedException(
-                    exception.getMessage() != null ? exception.getMessage() : "Access Denied");
+                return new AccessDeniedException(exception.getMessage());
             case 404:
-                return new NotFoundException(exception.getMessage() != null ? exception.getMessage() : "Not found");
+                return new NotFoundException(exception.getMessage());
             default:
                 return errorDecoder.decode(methodKey, response);
         }
