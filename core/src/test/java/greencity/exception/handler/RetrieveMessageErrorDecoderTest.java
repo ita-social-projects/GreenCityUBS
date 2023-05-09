@@ -1,7 +1,9 @@
 package greencity.exception.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +24,7 @@ public class RetrieveMessageErrorDecoderTest {
     private final Response.Body mockBody = mock(Response.Body.class);
 
     @Test
-    public void decodeBadRequestExceptionTest() throws IOException {
+    void decodeBadRequestExceptionTest() throws IOException {
         String errorMessage = "This is a bad request";
         when(mockResponse.status()).thenReturn(400);
         when(mockResponse.body()).thenReturn(mockBody);
@@ -37,7 +39,7 @@ public class RetrieveMessageErrorDecoderTest {
     }
 
     @Test
-    public void decodeAccessDeniedExceptionTest() throws IOException {
+    void decodeAccessDeniedExceptionTest() throws IOException {
         String errorMessage = "This is an access denied";
         when(mockResponse.status()).thenReturn(403);
         when(mockResponse.body()).thenReturn(mockBody);
@@ -52,7 +54,7 @@ public class RetrieveMessageErrorDecoderTest {
     }
 
     @Test
-    public void decodeNotFoundExceptionTest() throws IOException {
+    void decodeNotFoundExceptionTest() throws IOException {
         String errorMessage = "This is a not found";
         when(mockResponse.status()).thenReturn(404);
         when(mockResponse.body()).thenReturn(mockBody);
@@ -64,5 +66,16 @@ public class RetrieveMessageErrorDecoderTest {
         verify(mockResponse).status();
         verify(mockResponse).body();
         verify(mockBody).asInputStream();
+    }
+
+    @Test
+    void decodeDefaultExceptionTest() throws IOException {
+        String errorMessage = "This is an exception";
+        when(mockResponse.body()).thenReturn(mockBody);
+        when(mockBody.asInputStream()).thenReturn(IOUtils.toInputStream(errorMessage, StandardCharsets.UTF_8));
+        assertThrows(Exception.class, () -> decoder.decode("This is an exception", mockResponse));
+
+        verify(mockResponse, times(3)).body();
+        verify(mockBody, times(2)).asInputStream();
     }
 }
