@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
+import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
@@ -72,6 +73,19 @@ class RetrieveMessageErrorDecoderTest {
         when(mockBody.asInputStream()).thenThrow(new IOException("An error occurred"));
         Exception exception = decoder.decode("methodKey", mockResponse);
         assertEquals(Exception.class, exception.getClass());
+
+        verify(mockResponse).body();
+        verify(mockBody).asInputStream();
+    }
+
+    @Test
+    void decodeThrowsRemoteServerUnavailableExceptionTest() throws IOException {
+        String errorMessage = "An error occurred";
+        when(mockResponse.body()).thenReturn(mockBody);
+        when(mockBody.asInputStream()).thenReturn(IOUtils.toInputStream(errorMessage, StandardCharsets.UTF_8));
+        Exception exception = decoder.decode("methodKey", mockResponse);
+        assertEquals(RemoteServerUnavailableException.class, exception.getClass());
+        assertEquals(errorMessage, exception.getMessage());
 
         verify(mockResponse).body();
         verify(mockBody).asInputStream();
