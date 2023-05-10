@@ -53,6 +53,7 @@ public final class ErrorMessage {
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
     public static final String ADDRESS_NOT_FOUND = "Address not found";
+    public static final String ACTUAL_ADDRESS_NOT_FOUND = "Actual address not found";
     public static final String LOCATION_DOESNT_FOUND = "Location does not found";
     public static final String LOCATION_DOESNT_FOUND_BY_ID = "Location does not exist by id: ";
     public static final String LOCATIONS_BELONG_TO_DIFFERENT_REGIONS =
@@ -101,6 +102,8 @@ public final class ErrorMessage {
     public static final String CANNOT_DELETE_ADDRESS = "Cannot delete another user's address";
     public static final String CANNOT_DELETE_ALREADY_DELETED_ADDRESS =
         "Cannot delete an address that has already been deleted.";
+    public static final String CANNOT_MAKE_ACTUAL_DELETED_ADDRESS =
+        "Cannot make actual address that has already been deleted.";
     public static final String CANNOT_ACCESS_PERSONAL_INFO = "Cannot access another user's personal info";
     public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =
         "Cannot access another user's order cancellation reason";
@@ -134,8 +137,6 @@ public final class ErrorMessage {
         + "deactivated.";
     public static final String BAG_FOR_TARIFF_NOT_EXIST = "Could not find bag with id %d for tariff with id %d";
     public static final String TARIFF_ALREADY_HAS_THIS_STATUS = "Tariff with id %d already has status: %s";
-    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_SERVICE =
-        "Tariff has not been activated. Please add service for tariff.";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS =
         "Tariff has not been activated. Please set limits for tariff.";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS =

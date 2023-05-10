@@ -2447,7 +2447,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static Optional<Bag> getBag() {
+    public static Optional<Bag> getOptionalBag() {
         return Optional.of(Bag.builder()
             .id(1)
             .capacity(120)
@@ -2461,6 +2461,22 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .limitIncluded(false)
             .build());
+    }
+
+    public static Bag getBag() {
+        return Bag.builder()
+            .id(1)
+            .capacity(120)
+            .commission(50)
+            .price(120)
+            .fullPrice(170)
+            .createdAt(LocalDate.now())
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .limitIncluded(true)
+            .build();
     }
 
     public static TariffServiceDto getTariffServiceDto() {
@@ -3836,6 +3852,31 @@ public class ModelUtils {
             .createdAt(LocalDate.of(2022, 10, 20))
             .max(6000L)
             .min(500L)
+            .orders(Collections.emptyList())
+            .receivingStationList(Set.of(ReceivingStation.builder()
+                .id(1L)
+                .name("Петрівка")
+                .createdBy(ModelUtils.createEmployee())
+                .build()))
+            .build();
+    }
+
+    public static TariffsInfo getTariffsInfoWithStatusNew() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .tariffsInfo(ModelUtils.getTariffInfoWithLimitOfBags())
+                .location(Location.builder().id(1L)
+                    .region(ModelUtils.getRegion())
+                    .nameUk("Київ")
+                    .nameEn("Kyiv")
+                    .coordinates(ModelUtils.getCoordinates())
+                    .build())
+                .build()))
+            .tariffStatus(TariffStatus.NEW)
+            .creator(ModelUtils.getEmployee())
+            .createdAt(LocalDate.of(2022, 10, 20))
             .orders(Collections.emptyList())
             .receivingStationList(Set.of(ReceivingStation.builder()
                 .id(1L)
