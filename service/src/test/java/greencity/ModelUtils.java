@@ -197,6 +197,7 @@ public class ModelUtils {
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
     public static final Bag TEST_BAG = createBag();
+    public static final BagForUserDto TEST_BAG_FOR_USER_DTO = createBagForUserDto();
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
     public static final List<OrderDetailInfoDto> TEST_ORDER_DETAILS_INFO_DTO_LIST =
@@ -2076,11 +2077,31 @@ public class ModelUtils {
 
     private static Bag createBag() {
         return Bag.builder()
-            .id(2)
+            .id(1)
             .name("Name")
             .nameEng("NameEng")
             .capacity(20)
+            .price(100)
+            .commission(0)
             .fullPrice(100)
+            .description("some_description")
+            .descriptionEng("some_eng_description")
+            .limitIncluded(true)
+            .createdAt(LocalDate.now())
+            .createdBy(Employee.builder()
+                .id(1L)
+                .build())
+            .build();
+    }
+
+    private static BagForUserDto createBagForUserDto() {
+        return BagForUserDto.builder()
+            .service("some_description")
+            .serviceEng("some_eng_description")
+            .capacity(20)
+            .fullPrice(100)
+            .count(22)
+            .totalPrice(2200)
             .build();
     }
 
