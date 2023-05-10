@@ -5,7 +5,7 @@ import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class RemoteServerUnavailableExceptionTest {
+class RemoteServerUnavailableExceptionTest {
     @Test
     void remoteServerUnavailableExceptionMessageTest() {
         String message = "Could not retrieve user data";
