@@ -769,13 +769,13 @@ public class UBSClientServiceImpl implements UBSClientService {
             .collect(toList());
 
         int amountWithDiscount = fullPrice - order.getPointsToUse() - countCertificatesBonuses(certificateDtos);
-        
+
         BigDecimal paidAmount = countPaidAmount(payments);
 
         Double amountBeforePayment = new BigDecimal(amountWithDiscount)
-                .subtract(paidAmount)
-                .doubleValue();
-                
+            .subtract(paidAmount)
+            .doubleValue();
+
         return OrdersDataForUserDto.builder()
             .id(order.getId())
             .dateForm(order.getOrderDate())
@@ -875,11 +875,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private BigDecimal countPaidAmount(List<Payment> payments) {
         Long paidAmountInCoins = payments.stream()
-                .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
-                .map(Payment::getAmount)
-                .reduce(0L, Long::sum);
+            .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
+            .map(Payment::getAmount)
+            .reduce(0L, Long::sum);
         int amountOfDecimalsAfterPoint = 2;
-        return new BigDecimal(paidAmountInCoins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH, amountOfDecimalsAfterPoint, RoundingMode.HALF_UP);
+        return new BigDecimal(paidAmountInCoins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
+            amountOfDecimalsAfterPoint, RoundingMode.HALF_UP);
     }
 
     private MakeOrderAgainDto buildOrderBagDto(Order order, List<Bag> bags) {
