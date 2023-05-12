@@ -392,6 +392,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .comment(order.getComment())
             .courierPricePerPackage(servicePrice)
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
+            .writeOffStationSum(order.getWriteOffStationSum())
             .build();
     }
 
