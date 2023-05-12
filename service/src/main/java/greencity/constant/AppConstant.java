@@ -20,4 +20,6 @@ public final class AppConstant {
     public static final String USER = "USER";
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";
     public static final BigDecimal AMOUNT_OF_COINS_IN_ONE_UAH = new BigDecimal("100");
+    public static final Integer TWO_DECIMALS_AFTER_POINT_IN_CURRENCY = 2;
+    public static final Integer NO_DECIMALS_AFTER_POINT_IN_CURRENCY = 0;
 }

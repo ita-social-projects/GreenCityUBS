@@ -205,9 +205,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (!paymentInfoDtos.isEmpty()) {
             for (PaymentInfoDto paymentInfoDto : paymentInfoDtos) {
                 if (paymentInfoDto != null) {
-                    int amountOfDecimalsAfterPoint = 2;
                     BigDecimal amountInUAH = BigDecimal.valueOf(paymentInfoDto.getAmount())
-                        .divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH, amountOfDecimalsAfterPoint,
+                        .divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
+                            AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY,
                             RoundingMode.HALF_UP);
                     paymentInfoDto.setAmount(amountInUAH.doubleValue());
                 }
@@ -239,8 +239,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             payDto.setComment(AppConstant.PAYMENT_REFUND);
         } else {
             payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
-            int amountOfDecimalsAfterPoint = 0;
-            int uahPoints = overpayment.setScale(amountOfDecimalsAfterPoint, RoundingMode.FLOOR).intValue();
+            int uahPoints =
+                overpayment.setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.FLOOR).intValue();
 
             User user = order.getUser();
             user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
@@ -1282,9 +1282,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(Payment::getAmount)
             .reduce(0L, Long::sum);
-        int amountOfDecimalsAfterPoint = 2;
         return new BigDecimal(coins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
-            amountOfDecimalsAfterPoint, RoundingMode.HALF_UP);
+            AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP);
     }
 
     /**
@@ -1756,8 +1755,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             return;
         }
 
-        int amountOfDecimalsAfterPoint = 0;
-        int uahPoints = points.setScale(amountOfDecimalsAfterPoint, RoundingMode.FLOOR).intValue();
+        int uahPoints = points.setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.FLOOR).intValue();
 
         user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
 
