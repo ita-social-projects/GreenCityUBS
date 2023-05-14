@@ -3,7 +3,6 @@ package greencity.mapping.payment;
 import greencity.ModelUtils;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.entity.order.Payment;
-import greencity.mapping.payment.PaymentInfoMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +23,7 @@ class PaymentInfoMapperTest {
         PaymentInfoDto expected = PaymentInfoDto.builder()
             .id(payment.getId())
             .paymentId(payment.getPaymentId())
-            .amount(payment.getAmount())
+            .amount(payment.getAmount().doubleValue())
             .settlementdate(LocalDate.now().toString())
             .build();
         PaymentInfoDto actual = paymentInfoMapper.convert(payment);

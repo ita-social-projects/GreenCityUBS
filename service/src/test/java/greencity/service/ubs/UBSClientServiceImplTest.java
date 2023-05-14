@@ -125,6 +125,7 @@ import static greencity.ModelUtils.TEST_BAG_LIST;
 import static greencity.ModelUtils.TEST_EMAIL;
 import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
+import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
 import static greencity.ModelUtils.addressDto;
 import static greencity.ModelUtils.addressDtoList;
 import static greencity.ModelUtils.addressList;
@@ -2185,6 +2186,7 @@ class UBSClientServiceImplTest {
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
         when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
+        when(modelMapper.map(any(Bag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
 
         ubsService.processOrderFondyClient(dto, "uuid");
 

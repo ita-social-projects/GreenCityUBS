@@ -1,5 +1,7 @@
 package greencity.service.ubs;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +26,7 @@ import java.util.stream.LongStream;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
@@ -798,16 +801,21 @@ public class UBSClientServiceImpl implements UBSClientService {
             .getById(
                 (long) order.getOrderPaymentStatus().getStatusValue());
 
-        Double fullPrice = Double.valueOf(bagForUserDtos.stream()
+        Integer fullPrice = bagForUserDtos.stream()
             .map(BagForUserDto::getTotalPrice)
-            .reduce(0, Integer::sum));
+            .reduce(0, Integer::sum);
 
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
             .collect(toList());
 
-        Double amountBeforePayment =
-            fullPrice - order.getPointsToUse() - countPaidAmount(payments) - countCertificatesBonuses(certificateDtos);
+        int amountWithDiscount = fullPrice - order.getPointsToUse() - countCertificatesBonuses(certificateDtos);
+
+        BigDecimal paidAmount = countPaidAmount(payments);
+
+        Double amountBeforePayment = new BigDecimal(amountWithDiscount)
+            .subtract(paidAmount)
+            .doubleValue();
 
         return OrdersDataForUserDto.builder()
             .id(order.getId())
@@ -819,8 +827,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .bags(bagForUserDtos)
             .additionalOrders(order.getAdditionalOrders())
             .amountBeforePayment(amountBeforePayment)
-            .paidAmount(countPaidAmount(payments).doubleValue())
-            .orderFullPrice(fullPrice)
+            .paidAmount(paidAmount.doubleValue())
+            .orderFullPrice(fullPrice.doubleValue())
             .certificate(certificateDtos)
             .bonuses(order.getPointsToUse().doubleValue())
             .sender(senderInfoDtoBuilder(order))
@@ -906,12 +914,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         return bagDto;
     }
 
-    private Long countPaidAmount(List<Payment> payments) {
-        return payments.stream()
+    private BigDecimal countPaidAmount(List<Payment> payments) {
+        Long paidAmountInCoins = payments.stream()
             .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
             .map(Payment::getAmount)
-            .map(amount -> amount / 100)
             .reduce(0L, Long::sum);
+        return new BigDecimal(paidAmountInCoins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
+            AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP);
     }
 
     private MakeOrderAgainDto buildOrderBagDto(Order order, List<Bag> bags) {
@@ -1433,12 +1442,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser = findByIdUserForClient(uuid);
         checkForNullCounter(order);
 
-        Integer sumToPay = calculateSumToPay(dto, order, currentUser);
+        BigDecimal sumToPay = calculateSumToPay(dto, order, currentUser);
 
         transferUserPointsToOrder(order, dto.getPointsToUse());
         paymentVerification(sumToPay, order);
 
-        if (sumToPay == 0) {
+        if (sumToPay.compareTo(BigDecimal.ZERO) <= 0) {
             return getPaymentRequestDto(order, null);
         } else {
             String link = formedLink(order, sumToPay);
@@ -1446,26 +1455,24 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private Integer calculateSumToPay(OrderFondyClientDto dto, Order order, User currentUser) {
+    private BigDecimal calculateSumToPay(OrderFondyClientDto dto, Order order, User currentUser) {
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
-        Integer sumToPay = bagForUserDtos.stream()
+        int sumToPay = bagForUserDtos.stream()
             .map(BagForUserDto::getTotalPrice)
             .reduce(0, Integer::sum);
 
-        List<Payment> payments = order.getPayment();
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
             .collect(toList());
 
         sumToPay =
-            sumToPay - order.getPointsToUse() - countPaidAmount(payments).intValue()
-                - countCertificatesBonuses(certificateDtos);
+            sumToPay - order.getPointsToUse() - countCertificatesBonuses(certificateDtos);
 
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, order, sumToPay);
 
-        return sumToPay;
+        return new BigDecimal(sumToPay).subtract(countPaidAmount(order.getPayment()));
     }
 
     private void checkIsOrderPaid(OrderPaymentStatus orderPaymentStatus) {
@@ -1509,8 +1516,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         return order.getSumTotalAmountWithoutDiscounts().intValue() - order.getPointsToUse() - certificatesAmount;
     }
 
-    private void paymentVerification(Integer sumToPay, Order order) {
-        if (sumToPay <= 0) {
+    private void paymentVerification(BigDecimal sumToPay, Order order) {
+        if (sumToPay.compareTo(BigDecimal.ZERO) <= 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             order.setOrderStatus(OrderStatus.CONFIRMED);
             orderRepository.save(order);
@@ -1534,7 +1541,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
     }
 
-    private String formedLink(Order order, Integer sumToPay) {
+    private String formedLink(Order order, BigDecimal sumToPay) {
         Order increment = incrementCounter(order);
         PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), sumToPay);
         return getLinkFromFondyCheckoutResponse(fondyClient.getCheckoutResponse(paymentRequestDto));
@@ -1558,16 +1565,17 @@ public class UBSClientServiceImpl implements UBSClientService {
         return order;
     }
 
-    private PaymentRequestDto formPayment(Long orderId, int sumToPay) {
+    private PaymentRequestDto formPayment(Long orderId, BigDecimal sumToPay) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
+        BigDecimal coinsAmount = sumToPay.multiply(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH);
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
             .orderId(OrderUtils.generateOrderIdForPayment(orderId, order))
             .orderDescription("courier")
             .currency("UAH")
-            .amount(sumToPay * 100)
+            .amount(coinsAmount.intValue())
             .responseUrl(resultUrlForPersonalCabinetOfUser)
             .build();
         paymentRequestDto.setSignature(encryptionUtil
