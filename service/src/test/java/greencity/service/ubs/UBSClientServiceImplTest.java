@@ -125,6 +125,7 @@ import static greencity.ModelUtils.TEST_BAG_LIST;
 import static greencity.ModelUtils.TEST_EMAIL;
 import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
+import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
 import static greencity.ModelUtils.addressDto;
 import static greencity.ModelUtils.addressDtoList;
 import static greencity.ModelUtils.addressList;
@@ -187,7 +188,6 @@ import static greencity.ModelUtils.getUserProfileUpdateDto;
 import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
 import static greencity.ModelUtils.getUserWithBotNotifyTrue;
 import static greencity.ModelUtils.getUserWithLastLocation;
-import static greencity.constant.ErrorMessage.*;
 import static greencity.ModelUtils.getViberBotNotifyTrue;
 
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
