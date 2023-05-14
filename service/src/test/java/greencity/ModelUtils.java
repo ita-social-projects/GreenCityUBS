@@ -87,6 +87,7 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
+import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
@@ -4509,6 +4510,13 @@ public class ModelUtils {
             .city(320)
             .clientPhone(340)
             .commentForOrderByClient(600)
+            .build();
+    }
+
+    public static PositionAuthoritiesDto getPositionAuthoritiesDto() {
+        return PositionAuthoritiesDto.builder()
+            .positionId(List.of(1L))
+            .authorities(List.of("Auth"))
             .build();
     }
 }
