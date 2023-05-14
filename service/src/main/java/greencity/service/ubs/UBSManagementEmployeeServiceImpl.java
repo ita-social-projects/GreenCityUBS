@@ -8,7 +8,7 @@ import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
-import greencity.dto.employee.UpdateEmployeeAuthoritiesDto;
+import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
@@ -143,7 +143,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         dto.getEmployeeDto()
             .setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getEmployeeDto().getPhoneNumber()));
         updateEmployeeEmail(dto, upEmployee.getUuid());
-        updateEmployeeAuthorities(dto);
+        updateEmployeeAuthoritiesToRelatedPositions(dto);
 
         Employee updatedEmployee = modelMapper.map(dto, Employee.class);
         updatedEmployee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
@@ -171,13 +171,12 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         throw new UnprocessableEntityException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
     }
 
-    private void updateEmployeeAuthorities(EmployeeWithTariffsIdDto dto) {
-        UpdateEmployeeAuthoritiesDto authoritiesDto =
-            UpdateEmployeeAuthoritiesDto.builder()
-                .email(dto.getEmployeeDto().getEmail())
-                .positions(dto.getEmployeeDto().getEmployeePositions())
-                .build();
-        userRemoteClient.updateAuthorities(authoritiesDto);
+    private void updateEmployeeAuthoritiesToRelatedPositions(EmployeeWithTariffsIdDto dto) {
+        var positions = EmployeePositionsDto.builder()
+            .email(dto.getEmployeeDto().getEmail())
+            .positions(dto.getEmployeeDto().getEmployeePositions())
+            .build();
+        userRemoteClient.updateAuthoritiesToRelatedPositions(positions);
     }
 
     /**
