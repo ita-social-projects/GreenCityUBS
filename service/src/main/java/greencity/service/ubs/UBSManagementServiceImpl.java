@@ -107,6 +107,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -185,13 +187,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        Long paidAmount = calculatePaidAmount(order);
-        Long overpayment = calculateOverpayment(order, sumToPay);
-        Long unPaidAmount = calculateUnpaidAmount(order, sumToPay, paidAmount);
+        BigDecimal paidAmount = calculatePaidAmount(order);
+        BigDecimal overpayment = calculateOverpayment(order, sumToPay);
+        BigDecimal unPaidAmount = calculateUnpaidAmount(order, sumToPay, paidAmount);
         PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
-        paymentTableInfoDto.setOverpayment(overpayment);
-        paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
-        paymentTableInfoDto.setPaidAmount(paidAmount);
+        paymentTableInfoDto.setOverpayment(overpayment.doubleValue());
+        paymentTableInfoDto.setUnPaidAmount(unPaidAmount.doubleValue());
+        paymentTableInfoDto.setPaidAmount(paidAmount.doubleValue());
         List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
             .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
@@ -203,8 +205,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (!paymentInfoDtos.isEmpty()) {
             for (PaymentInfoDto paymentInfoDto : paymentInfoDtos) {
                 if (paymentInfoDto != null) {
-                    Long coins = paymentInfoDto.getAmount() / 100;
-                    paymentInfoDto.setAmount(coins);
+                    BigDecimal amountInUAH = BigDecimal.valueOf(paymentInfoDto.getAmount())
+                        .divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
+                            AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY,
+                            RoundingMode.HALF_UP);
+                    paymentInfoDto.setAmount(amountInUAH.doubleValue());
                 }
             }
         }
@@ -225,20 +230,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker) {
         Order order = orderRepository.findUserById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        Long overpayment = calculateOverpayment(order, sumToPay);
+        BigDecimal overpayment = calculateOverpayment(order, sumToPay);
+
         PaymentTableInfoDto dto = getPaymentInfo(orderId, sumToPay);
-        PaymentInfoDto payDto = PaymentInfoDto.builder().amount(overpayment)
+        PaymentInfoDto payDto = PaymentInfoDto.builder().amount(overpayment.doubleValue())
             .settlementdate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)).build();
         if (marker == 1L) {
             payDto.setComment(AppConstant.PAYMENT_REFUND);
         } else {
             payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
+            int uahPoints =
+                overpayment.setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.FLOOR).intValue();
+
             User user = order.getUser();
-            user.setCurrentPoints(user.getCurrentPoints() + Integer.parseInt(overpayment.toString()));
+            user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
             orderRepository.save(order);
         }
         dto.getPaymentInfoDtos().add(payDto);
-        dto.setOverpayment(dto.getOverpayment() - overpayment);
+        BigDecimal previousOverpaymentAmount = new BigDecimal(dto.getOverpayment().toString());
+        dto.setOverpayment(previousOverpaymentAmount.subtract(overpayment).doubleValue());
         return dto;
     }
 
@@ -382,6 +392,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .comment(order.getComment())
             .courierPricePerPackage(servicePrice)
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
+            .writeOffStationSum(order.getWriteOffStationSum())
             .build();
     }
 
@@ -1242,36 +1253,38 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @param order    of {@link Order} order;
      * @param sumToPay of {@link Long} sum to pay;
-     * @return {@link Long }
+     * @return {@link BigDecimal }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculateOverpayment(Order order, Long sumToPay) {
-        long paymentSum = order.getPayment().stream()
-            .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
-            .map(payment -> payment.getAmount() / 100)
-            .reduce(0L, Long::sum);
+    private BigDecimal calculateOverpayment(Order order, Long sumToPay) {
+        BigDecimal paidAmount = calculatePaidAmount(order);
 
         long certificateSum = order.getCertificates().stream()
             .map(Certificate::getPoints)
             .reduce(0, Integer::sum);
+        long bonusOverpayment = certificateSum + order.getPointsToUse() - sumToPay;
 
-        long overpayment = paymentSum + certificateSum + order.getPointsToUse() - sumToPay;
+        BigDecimal overpayment = paidAmount.add(new BigDecimal(bonusOverpayment));
 
-        return OrderStatus.CANCELED.equals(order.getOrderStatus())
-            ? paymentSum
-            : Math.max(overpayment, 0L);
+        return OrderStatus.CANCELED == order.getOrderStatus()
+            ? paidAmount
+            : overpayment.max(BigDecimal.ZERO);
     }
 
     /**
      * Method that calculate paid amount.
      *
      * @param order of {@link Order} order id;
-     * @return {@link Long }
+     * @return {@link BigDecimal }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculatePaidAmount(Order order) {
-        return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(Payment::getAmount).map(amount -> amount / 100).reduce(0L, Long::sum);
+    private BigDecimal calculatePaidAmount(Order order) {
+        Long coins = order.getPayment().stream()
+            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
+            .map(Payment::getAmount)
+            .reduce(0L, Long::sum);
+        return new BigDecimal(coins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
+            AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP);
     }
 
     /**
@@ -1279,15 +1292,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @param order      of {@link Order} order id;
      * @param sumToPay   of {@link Long} sum to pay;
-     * @param paidAmount of {@link Long} sum to pay;
-     * @return {@link Long }
+     * @param paidAmount of {@link BigDecimal} sum to pay;
+     * @return {@link BigDecimal }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculateUnpaidAmount(Order order, Long sumToPay, Long paidAmount) {
-        sumToPay =
-            sumToPay - ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                + order.getPointsToUse());
-        return sumToPay - paidAmount > 0 ? Math.abs(sumToPay - paidAmount) : 0L;
+    private BigDecimal calculateUnpaidAmount(Order order, Long sumToPay, BigDecimal paidAmount) {
+        sumToPay = sumToPay - ((order.getCertificates().stream()
+            .map(Certificate::getPoints)
+            .reduce(Integer::sum)
+            .orElse(0)) + order.getPointsToUse());
+
+        BigDecimal unpaidAmount = new BigDecimal(sumToPay).subtract(paidAmount);
+
+        return unpaidAmount.max(BigDecimal.ZERO);
     }
 
     /**
@@ -1657,7 +1674,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         boolean status = false;
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
         for (Long id : tariffsInfoIds) {
-            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
+            status = id.equals(order.getTariffsInfo().getId()) || status;
         }
         return status;
     }
@@ -1691,24 +1708,26 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void checkOverpayment(Long overpayment) {
-        if (overpayment == 0L) {
+    private void checkOverpayment(BigDecimal overpayment) {
+        if (overpayment.compareTo(BigDecimal.ZERO) == 0) {
             throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
         }
     }
 
     @Override
+    @Transactional
     public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
         Long orderId, String email) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
-        Long overpayment = calculateOverpayment(order, setTotalPrice(prices).longValue());
-        checkOverpayment(overpayment);
+        BigDecimal overpaymentUah = calculateOverpayment(order, setTotalPrice(prices).longValue());
+        checkOverpayment(overpaymentUah);
         User currentUser = order.getUser();
+        BigDecimal overpaymentCoins = overpaymentUah.multiply(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH.negate());
 
         order.getPayment().add(Payment.builder()
-            .amount(overpayment * (-100))
+            .amount(overpaymentCoins.longValue())
             .settlementDate(addBonusesToUserDto.getSettlementdate())
             .paymentId(addBonusesToUserDto.getPaymentId())
             .receiptLink(addBonusesToUserDto.getReceiptLink())
@@ -1718,7 +1737,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .paymentStatus(PaymentStatus.PAID)
             .build());
 
-        transferPointsToUser(order, currentUser, overpayment.intValue());
+        transferPointsToUser(order, currentUser, overpaymentUah);
 
         orderRepository.save(order);
         userRepository.save(currentUser);
@@ -1732,22 +1751,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private void transferPointsToUser(Order order, User user, int points) {
-        if (points <= 0) {
+    private void transferPointsToUser(Order order, User user, BigDecimal points) {
+        if (points.compareTo(BigDecimal.ZERO) <= 0) {
             return;
         }
 
-        user.setCurrentPoints(user.getCurrentPoints() + points);
+        int uahPoints = points.setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.FLOOR).intValue();
+
+        user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
 
         user.setChangeOfPointsList(ListUtils.defaultIfNull(user.getChangeOfPointsList(), new ArrayList<>()));
         user.getChangeOfPointsList()
             .add(ChangeOfPoints.builder()
                 .user(user)
-                .amount(points)
+                .amount(uahPoints)
                 .date(LocalDateTime.now())
                 .order(order)
                 .build());
-        notificationService.notifyBonuses(order, (long) points);
+        notificationService.notifyBonuses(order, (long) uahPoints);
     }
 
     @Override

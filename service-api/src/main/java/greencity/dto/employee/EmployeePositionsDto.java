@@ -16,7 +16,7 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 @Builder
-public class UpdateEmployeeAuthoritiesDto {
+public class EmployeePositionsDto {
     private String email;
     private List<PositionDto> positions;
 }

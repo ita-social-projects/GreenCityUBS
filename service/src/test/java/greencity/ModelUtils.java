@@ -87,6 +87,7 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
+import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
@@ -197,6 +198,7 @@ public class ModelUtils {
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
     public static final Bag TEST_BAG = createBag();
+    public static final BagForUserDto TEST_BAG_FOR_USER_DTO = createBagForUserDto();
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
     public static final List<OrderDetailInfoDto> TEST_ORDER_DETAILS_INFO_DTO_LIST =
@@ -2076,11 +2078,31 @@ public class ModelUtils {
 
     private static Bag createBag() {
         return Bag.builder()
-            .id(2)
+            .id(1)
             .name("Name")
             .nameEng("NameEng")
             .capacity(20)
+            .price(100)
+            .commission(0)
             .fullPrice(100)
+            .description("some_description")
+            .descriptionEng("some_eng_description")
+            .limitIncluded(true)
+            .createdAt(LocalDate.now())
+            .createdBy(Employee.builder()
+                .id(1L)
+                .build())
+            .build();
+    }
+
+    private static BagForUserDto createBagForUserDto() {
+        return BagForUserDto.builder()
+            .service("some_description")
+            .serviceEng("some_eng_description")
+            .capacity(20)
+            .fullPrice(100)
+            .count(22)
+            .totalPrice(2200)
             .build();
     }
 
@@ -2820,19 +2842,19 @@ public class ModelUtils {
 
     public static PaymentTableInfoDto getPaymentTableInfoDto() {
         return PaymentTableInfoDto.builder()
-            .paidAmount(200L)
-            .unPaidAmount(0L)
-            .paymentInfoDtos(List.of(getInfoPayment().setAmount(10L)))
-            .overpayment(800L)
+            .paidAmount(200d)
+            .unPaidAmount(0d)
+            .paymentInfoDtos(List.of(getInfoPayment().setAmount(10d)))
+            .overpayment(800d)
             .build();
     }
 
     public static PaymentTableInfoDto getPaymentTableInfoDto2() {
         return PaymentTableInfoDto.builder()
-            .paidAmount(0L)
-            .unPaidAmount(0L)
+            .paidAmount(0d)
+            .unPaidAmount(0d)
             .paymentInfoDtos(Collections.emptyList())
-            .overpayment(400L)
+            .overpayment(400d)
             .build();
     }
 
@@ -2840,7 +2862,7 @@ public class ModelUtils {
         return PaymentInfoDto.builder()
             .comment("ddd")
             .id(1L)
-            .amount(1000L)
+            .amount(1000d)
             .build();
     }
 
@@ -4488,6 +4510,13 @@ public class ModelUtils {
             .city(320)
             .clientPhone(340)
             .commentForOrderByClient(600)
+            .build();
+    }
+
+    public static PositionAuthoritiesDto getPositionAuthoritiesDto() {
+        return PositionAuthoritiesDto.builder()
+            .positionId(List.of(1L))
+            .authorities(List.of("Auth"))
             .build();
     }
 }

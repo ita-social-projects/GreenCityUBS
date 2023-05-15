@@ -23,7 +23,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
@@ -31,9 +30,21 @@ import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
 
-import static greencity.ModelUtils.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static greencity.ModelUtils.getUuid;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -129,7 +140,7 @@ class ManagementEmployeeControllerTest {
         MockMultipartFile jsonFile = new MockMultipartFile("employeeWithTariffsIdDto",
             "", "application/json", responseJSON.getBytes());
         MockMultipartHttpServletRequestBuilder builder =
-            MockMvcRequestBuilders.multipart(UBS_LINK + UPDATE_LINK);
+            multipart(UBS_LINK + UPDATE_LINK);
         builder.with(request -> {
             request.setMethod("PUT");
             return request;
@@ -173,6 +184,32 @@ class ManagementEmployeeControllerTest {
         mockMvc.perform(get(UBS_LINK + "/get-all-authorities" + "?email=test@mail.com"))
             .andExpect(status().isOk());
         verify(ubsClientService).getAllAuthorities("test@mail.com");
+    }
+
+    @Test
+    void getPositionsAndRelatedAuthoritiesTest() throws Exception {
+        Principal principal = mock(Principal.class);
+        when(principal.getName()).thenReturn("testmail@gmail.com");
+
+        mockMvc.perform(get(UBS_LINK + "/get-positions-authorities" + "?email=" + principal.getName())
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).getPositionsAndRelatedAuthorities(principal.getName());
+    }
+
+    @Test
+    void getEmployeeLoginPositionNamesTest() throws Exception {
+        Principal principal = mock(Principal.class);
+        when(principal.getName()).thenReturn("testmail@gmail.com");
+
+        mockMvc.perform(get(UBS_LINK + "/get-employee-login-positions" + "?email=" + principal.getName())
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).getEmployeeLoginPositionNames(principal.getName());
     }
 
     @Test

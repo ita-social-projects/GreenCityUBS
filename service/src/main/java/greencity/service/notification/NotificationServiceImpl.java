@@ -1,6 +1,7 @@
 package greencity.service.notification;
 
 import greencity.config.InternalUrlConfigProp;
+import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
@@ -32,6 +33,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -85,7 +88,7 @@ public class NotificationServiceImpl implements NotificationService {
             if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
-                double amountToPay = getAmountToPay(order);
+                BigDecimal amountToPay = getAmountToPay(order);
                 Set<NotificationParameter> notificationParameters =
                     initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
                 fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
@@ -103,7 +106,8 @@ public class NotificationServiceImpl implements NotificationService {
                 || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)));
     }
 
-    private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, double amountToPay) {
+    private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order,
+        BigDecimal amountToPay) {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         parameters.add(NotificationParameter.builder()
@@ -174,7 +178,7 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyHalfPaidPackage(Order order) {
-        double amountToPay = getAmountToPay(order);
+        BigDecimal amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
@@ -193,7 +197,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyUnpaidOrder(Order order) {
-        double amountToPay = getAmountToPay(order);
+        BigDecimal amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
@@ -211,7 +215,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private double getAmountToPay(Order order) {
+    private BigDecimal getAmountToPay(Order order) {
         long bonuses = order.getPointsToUse() == null ? 0L : order.getPointsToUse().longValue();
         long certificates = order.getCertificates() == null ? 0L
             : order.getCertificates().stream()
@@ -219,12 +223,16 @@ public class NotificationServiceImpl implements NotificationService {
                 .reduce(0, Integer::sum)
                 .longValue();
 
-        double coinsInOneUah = 100.0;
-        double paidAmount = order.getPayment() == null ? 0d
+        long paidAmountCoins = order.getPayment() == null ? 0L
             : order.getPayment().stream()
                 .filter(payment -> payment.getPaymentStatus() == PaymentStatus.PAID)
                 .map(Payment::getAmount)
-                .reduce(0L, Long::sum) / coinsInOneUah;
+                .reduce(0L, Long::sum);
+
+        int amountOfDecimalsAfterPoint = 2;
+        BigDecimal paidAmountUah =
+            new BigDecimal(paidAmountCoins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
+                amountOfDecimalsAfterPoint, RoundingMode.HALF_UP);
 
         long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
         long writeStationSum = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
@@ -244,7 +252,8 @@ public class NotificationServiceImpl implements NotificationService {
             .reduce(0, Integer::sum)
             .longValue();
 
-        return totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
+        long unPaidAmount = totalPrice - bonuses - certificates + ubsCourierSum + writeStationSum;
+        return new BigDecimal(unPaidAmount).subtract(paidAmountUah);
     }
 
     private int getBagPrice(Integer bagId, List<Bag> bagsType) {

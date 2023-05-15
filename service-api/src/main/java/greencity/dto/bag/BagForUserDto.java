@@ -2,11 +2,10 @@ package greencity.dto.bag;
 
 import lombok.*;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@Builder
+@Data
 public class BagForUserDto {
     private String service;
     private String serviceEng;
