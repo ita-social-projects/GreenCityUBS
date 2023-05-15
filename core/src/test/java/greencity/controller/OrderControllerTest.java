@@ -239,21 +239,6 @@ class OrderControllerTest {
     }
 
     @Test
-    void updatesCancellationReason() throws Exception {
-        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        when(ubsClientService.updateOrderCancellationReason(anyLong(), any(), anyString())).thenReturn(dto);
-        mockMvc.perform(post(ubsLink + "/order/{id}/cancellation/", 1L)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService).updateOrderCancellationReason(anyLong(), any(), anyString());
-    }
-
-    @Test
     void testGetOrderHistoryByOrderId() throws Exception {
         mockMvc.perform(get(ubsLink + "/order_history" + "/{orderId}", 1L)
             .principal(principal))

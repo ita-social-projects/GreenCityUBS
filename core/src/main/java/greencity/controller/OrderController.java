@@ -10,7 +10,13 @@ import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.*;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.user.PersonalDataDto;
@@ -29,7 +35,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
@@ -259,30 +273,6 @@ public class OrderController {
         @Valid @RequestBody UbsCustomersDtoUpdate dto, @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.updateUbsUserInfoInOrder(dto, uuid));
-    }
-
-    /**
-     * Controller updates info about order cancellation reason.
-     *
-     * @param id   {@link Long}.
-     * @param dto  {@link OrderCancellationReasonDto}
-     * @param uuid current {@link User}'s uuid.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "updates info about order cancellation reason ")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/order/{id}/cancellation/")
-    public ResponseEntity<OrderCancellationReasonDto> updateCancellationReason(
-        @RequestBody final OrderCancellationReasonDto dto,
-        @PathVariable("id") final Long id,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.updateOrderCancellationReason(id, dto, uuid));
     }
 
     /**
