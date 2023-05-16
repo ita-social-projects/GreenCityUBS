@@ -587,10 +587,6 @@ public class ModelUtils {
     }
 
     public static EditLocationDto getEditLocationDto() {
-        return EditLocationDto.builder()
-            .locationId(1L)
-            .nameEn("name")
-            .nameUa("назва")
-            .build();
+        return new EditLocationDto().setLocationId(1L).setNameEn("name").setNameUa("назва");
     }
 }

@@ -3,7 +3,6 @@ package greencity.dto.location;
 import greencity.constant.ErrorMessage;
 import greencity.constant.ValidationConstant;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +18,6 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-@Builder
 public class EditLocationDto {
     @NotNull
     @Min(1)
