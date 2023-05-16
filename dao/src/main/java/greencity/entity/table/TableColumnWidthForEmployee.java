@@ -11,8 +11,6 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode
-@ToString
 public class TableColumnWidthForEmployee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -87,4 +85,48 @@ public class TableColumnWidthForEmployee {
     private Integer totalPayment;
     @Column
     private Integer violationsAmount;
+
+    /**
+     * Constructor with default width for all columns.
+     * 
+     * @param employee           who is trying to get columns width
+     * @param defaultColumnWidth default width
+     */
+    public TableColumnWidthForEmployee(Employee employee, Integer defaultColumnWidth) {
+        this.employee = employee;
+        this.address = defaultColumnWidth;
+        this.amountDue = defaultColumnWidth;
+        this.bagsAmount = defaultColumnWidth;
+        this.blockedBy = defaultColumnWidth;
+        this.city = defaultColumnWidth;
+        this.clientEmail = defaultColumnWidth;
+        this.clientName = defaultColumnWidth;
+        this.clientPhone = defaultColumnWidth;
+        this.commentForOrderByClient = defaultColumnWidth;
+        this.commentToAddressForClient = defaultColumnWidth;
+        this.commentsForOrder = defaultColumnWidth;
+        this.dateOfExport = defaultColumnWidth;
+        this.district = defaultColumnWidth;
+        this.generalDiscount = defaultColumnWidth;
+        this.orderId = defaultColumnWidth;
+        this.idOrderFromShop = defaultColumnWidth;
+        this.orderCertificateCode = defaultColumnWidth;
+        this.orderDate = defaultColumnWidth;
+        this.orderPaymentStatus = defaultColumnWidth;
+        this.orderStatus = defaultColumnWidth;
+        this.paymentDate = defaultColumnWidth;
+        this.receivingStatus = defaultColumnWidth;
+        this.region = defaultColumnWidth;
+        this.responsibleCaller = defaultColumnWidth;
+        this.responsibleDriver = defaultColumnWidth;
+        this.responsibleLogicMan = defaultColumnWidth;
+        this.responsibleNavigator = defaultColumnWidth;
+        this.senderEmail = defaultColumnWidth;
+        this.senderName = defaultColumnWidth;
+        this.senderPhone = defaultColumnWidth;
+        this.timeOfExport = defaultColumnWidth;
+        this.totalOrderSum = defaultColumnWidth;
+        this.totalPayment = defaultColumnWidth;
+        this.violationsAmount = defaultColumnWidth;
+    }
 }
