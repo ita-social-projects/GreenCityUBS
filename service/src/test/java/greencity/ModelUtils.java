@@ -4502,6 +4502,46 @@ public class ModelUtils {
             .build();
     }
 
+    public static TableColumnWidthForEmployee getTestTableColumnWidthForEmployeeWithDefaultValues() {
+        return TableColumnWidthForEmployee.builder()
+            .employee(getEmployee())
+            .address(120)
+            .amountDue(120)
+            .bagsAmount(120)
+            .blockedBy(120)
+            .city(120)
+            .clientEmail(120)
+            .clientName(120)
+            .clientPhone(120)
+            .commentForOrderByClient(120)
+            .commentToAddressForClient(120)
+            .commentsForOrder(120)
+            .dateOfExport(120)
+            .district(120)
+            .generalDiscount(120)
+            .orderId(120)
+            .idOrderFromShop(120)
+            .orderCertificateCode(120)
+            .orderDate(120)
+            .orderPaymentStatus(120)
+            .orderStatus(120)
+            .paymentDate(120)
+            .receivingStatus(120)
+            .region(120)
+            .responsibleCaller(120)
+            .responsibleDriver(120)
+            .responsibleLogicMan(120)
+            .responsibleNavigator(120)
+            .senderEmail(120)
+            .senderName(120)
+            .senderPhone(120)
+            .timeOfExport(120)
+            .totalOrderSum(120)
+            .totalPayment(120)
+            .violationsAmount(120)
+            .build();
+    }
+
     public static ColumnWidthDto getTestColumnWidthDto() {
         return ColumnWidthDto.builder()
             .address(100)

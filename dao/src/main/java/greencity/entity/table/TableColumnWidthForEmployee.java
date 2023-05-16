@@ -12,121 +12,88 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 public class TableColumnWidthForEmployee {
+    private static final Integer TABLE_DEFAULT_COLUMN_WIDTH = 120;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne
     private Employee employee;
     @Column
-    private Integer address;
+    private Integer address = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer amountDue;
+    private Integer amountDue = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer bagsAmount;
+    private Integer bagsAmount = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer blockedBy;
+    private Integer blockedBy = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer city;
+    private Integer city = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer clientEmail;
+    private Integer clientEmail = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer clientName;
+    private Integer clientName = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer clientPhone;
+    private Integer clientPhone = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer commentForOrderByClient;
+    private Integer commentForOrderByClient = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer commentToAddressForClient;
+    private Integer commentToAddressForClient = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer commentsForOrder;
+    private Integer commentsForOrder = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer dateOfExport;
+    private Integer dateOfExport = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer district;
+    private Integer district = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer generalDiscount;
+    private Integer generalDiscount = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer orderId;
+    private Integer orderId = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer idOrderFromShop;
+    private Integer idOrderFromShop = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer orderCertificateCode;
+    private Integer orderCertificateCode = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer orderDate;
+    private Integer orderDate = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer orderPaymentStatus;
+    private Integer orderPaymentStatus = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer orderStatus;
+    private Integer orderStatus = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer paymentDate;
+    private Integer paymentDate = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer receivingStatus;
+    private Integer receivingStatus = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer region;
+    private Integer region = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer responsibleCaller;
+    private Integer responsibleCaller = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer responsibleDriver;
+    private Integer responsibleDriver = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer responsibleLogicMan;
+    private Integer responsibleLogicMan = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer responsibleNavigator;
+    private Integer responsibleNavigator = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer senderEmail;
+    private Integer senderEmail = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer senderName;
+    private Integer senderName = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer senderPhone;
+    private Integer senderPhone = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer timeOfExport;
+    private Integer timeOfExport = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer totalOrderSum;
+    private Integer totalOrderSum = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer totalPayment;
+    private Integer totalPayment = TABLE_DEFAULT_COLUMN_WIDTH;
     @Column
-    private Integer violationsAmount;
+    private Integer violationsAmount = TABLE_DEFAULT_COLUMN_WIDTH;
 
     /**
      * Constructor with default width for all columns.
-     * 
-     * @param employee           who is trying to get columns width
-     * @param defaultColumnWidth default width
+     *
+     * @param employee who is trying to get columns width
      */
-    public TableColumnWidthForEmployee(Employee employee, Integer defaultColumnWidth) {
+    public TableColumnWidthForEmployee(Employee employee) {
         this.employee = employee;
-        this.address = defaultColumnWidth;
-        this.amountDue = defaultColumnWidth;
-        this.bagsAmount = defaultColumnWidth;
-        this.blockedBy = defaultColumnWidth;
-        this.city = defaultColumnWidth;
-        this.clientEmail = defaultColumnWidth;
-        this.clientName = defaultColumnWidth;
-        this.clientPhone = defaultColumnWidth;
-        this.commentForOrderByClient = defaultColumnWidth;
-        this.commentToAddressForClient = defaultColumnWidth;
-        this.commentsForOrder = defaultColumnWidth;
-        this.dateOfExport = defaultColumnWidth;
-        this.district = defaultColumnWidth;
-        this.generalDiscount = defaultColumnWidth;
-        this.orderId = defaultColumnWidth;
-        this.idOrderFromShop = defaultColumnWidth;
-        this.orderCertificateCode = defaultColumnWidth;
-        this.orderDate = defaultColumnWidth;
-        this.orderPaymentStatus = defaultColumnWidth;
-        this.orderStatus = defaultColumnWidth;
-        this.paymentDate = defaultColumnWidth;
-        this.receivingStatus = defaultColumnWidth;
-        this.region = defaultColumnWidth;
-        this.responsibleCaller = defaultColumnWidth;
-        this.responsibleDriver = defaultColumnWidth;
-        this.responsibleLogicMan = defaultColumnWidth;
-        this.responsibleNavigator = defaultColumnWidth;
-        this.senderEmail = defaultColumnWidth;
-        this.senderName = defaultColumnWidth;
-        this.senderPhone = defaultColumnWidth;
-        this.timeOfExport = defaultColumnWidth;
-        this.totalOrderSum = defaultColumnWidth;
-        this.totalPayment = defaultColumnWidth;
-        this.violationsAmount = defaultColumnWidth;
     }
 }

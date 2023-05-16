@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.client.UserRemoteClient;
-import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
@@ -225,7 +224,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND));
         TableColumnWidthForEmployee tableColumnWidthForEmployee =
             tableColumnWidthForEmployeeRepository.findByEmployeeId(employee.getId())
-                .orElse(new TableColumnWidthForEmployee(employee, AppConstant.TABLE_DEFAULT_COLUMN_WIDTH));
+                .orElse(new TableColumnWidthForEmployee(employee));
         return modelMapper.map(tableColumnWidthForEmployee, ColumnWidthDto.class);
     }
 

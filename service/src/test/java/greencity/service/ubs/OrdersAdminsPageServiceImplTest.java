@@ -567,6 +567,21 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
+    void getOrderColumnWidthNotFoundTableColumnWidthForEmployeeTest() {
+        Employee employee = ModelUtils.getEmployee();
+        TableColumnWidthForEmployee tableColumnWidthForEmployee =
+            ModelUtils.getTestTableColumnWidthForEmployeeWithDefaultValues();
+
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(employee));
+        when(tableColumnWidthForEmployeeRepository.findByEmployeeId(anyLong()))
+            .thenReturn(Optional.empty());
+
+        ordersAdminsPageService.getColumnWidthForEmployee("Test");
+
+        verify(modelMapper).map(tableColumnWidthForEmployee, ColumnWidthDto.class);
+    }
+
+    @Test
     void saveOrderColumnWidthForEmployeeIfPresentTest() {
         Employee employee = ModelUtils.getEmployee();
         ColumnWidthDto columnWidthDto = ModelUtils.getTestColumnWidthDto();
