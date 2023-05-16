@@ -14,6 +14,7 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
+import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.notification.NotificationDto;
@@ -583,5 +584,9 @@ public class ModelUtils {
             .email("ubsuser@mail.com")
             .uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
             .build();
+    }
+
+    public static EditLocationDto getEditLocationDto() {
+        return new EditLocationDto().setLocationId(1L).setNameEn("name").setNameUa("назва");
     }
 }
