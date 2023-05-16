@@ -1,7 +1,10 @@
 package greencity.entity.table;
 
 import greencity.entity.user.employee.Employee;
-import lombok.*;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import javax.persistence.*;
 
