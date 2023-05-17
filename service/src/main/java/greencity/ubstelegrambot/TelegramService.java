@@ -5,6 +5,8 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationType;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notification.AbstractNotificationProvider;
@@ -15,10 +17,14 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.Objects;
 
+import static greencity.enums.NotificationReceiverType.MOBILE;
+
 @Service
 @Slf4j
 public class TelegramService extends AbstractNotificationProvider {
     private final UBSTelegramBot ubsTelegramBot;
+
+    private static final NotificationReceiverType notificationType = MOBILE;
 
     /**
      * Constructor with super() call.
@@ -27,7 +33,7 @@ public class TelegramService extends AbstractNotificationProvider {
     public TelegramService(UBSTelegramBot ubsTelegramBot,
         UserRemoteClient userRemoteClient,
         NotificationTemplateRepository templateRepository) {
-        super(userRemoteClient, templateRepository);
+        super(userRemoteClient, templateRepository, notificationType);
         this.ubsTelegramBot = ubsTelegramBot;
     }
 
@@ -39,7 +45,9 @@ public class TelegramService extends AbstractNotificationProvider {
         if (Objects.isNull(user)) {
             return false;
         }
-        return Objects.nonNull(user.getTelegramBot()) && Objects.nonNull(user.getTelegramBot().getChatId());
+        return Objects.nonNull(user.getTelegramBot())
+            && Objects.nonNull(user.getTelegramBot().getChatId())
+            && Objects.equals(user.getTelegramBot().getIsNotify(), true);
     }
 
     private void sendMessageToUser(SendMessage sendMessage) {

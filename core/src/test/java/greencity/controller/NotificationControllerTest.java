@@ -1,10 +1,8 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
 import greencity.dto.notification.NotificationDto;
-import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.NotificationTemplatesService;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +25,6 @@ import java.util.List;
 import static greencity.ModelUtils.getNotificationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -82,31 +79,5 @@ class NotificationControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
-    }
-
-    @Test
-    void updateNotificationTemplateForSITE() throws Exception {
-        UpdateNotificationTemplatesDto updateNotificationTemplatesDto = ModelUtils.getUpdateNotificationTemplatesDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(updateNotificationTemplatesDto);
-
-        mockMvc.perform(put(notificationLink + "/updateTemplateForSITE")
-            .content(responseJSON)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void updateNotificationTemplateForOTHER() throws Exception {
-        UpdateNotificationTemplatesDto updateNotificationTemplatesDto = ModelUtils.getUpdateNotificationTemplatesDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(updateNotificationTemplatesDto);
-
-        mockMvc.perform(put(notificationLink + "/updateTemplateForOTHER")
-            .content(responseJSON)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
     }
 }

@@ -3,14 +3,23 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForAdding;
-import greencity.dto.order.*;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
-import greencity.service.ubs.*;
+import greencity.service.ubs.CertificateService;
+import greencity.service.ubs.CoordinateService;
+import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.ViolationService;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,11 +40,23 @@ import org.springframework.validation.Validator;
 import java.security.Principal;
 import java.util.Optional;
 
-import static greencity.ModelUtils.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static greencity.ModelUtils.getAddBonusesToUserDto;
+import static greencity.ModelUtils.getEcoNumberDto;
+import static greencity.ModelUtils.getRequestDto;
+import static greencity.ModelUtils.getUuid;
+import static greencity.ModelUtils.getViolationDetailInfoDto;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @ExtendWith(MockitoExtension.class)
 class ManagementOrderControllerTest {
@@ -57,7 +78,7 @@ class ManagementOrderControllerTest {
     CertificateService certificateService;
 
     @Mock
-    LiqPayService liqPayService;
+    UBSClientService ubsClientService;
 
     @Mock
     private Validator mockValidator;
@@ -279,7 +300,7 @@ class ManagementOrderControllerTest {
             "", "application/json", responseJSON.getBytes());
 
         MockMultipartHttpServletRequestBuilder builder =
-            MockMvcRequestBuilders.multipart(ubsLink + "/update-manual-payment/{id}", 1l);
+            multipart(ubsLink + "/update-manual-payment/{id}", 1l);
         builder.with(request -> {
             request.setMethod("PUT");
             return request;
@@ -454,5 +475,30 @@ class ManagementOrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
 
+    }
+
+    @Test
+    void getOrderCancellationReason() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-order-cancellation-reason" + "/{id}", 1L))
+            .andExpect(status().isOk());
+        verify(ubsManagementService).getOrderCancellationReason(1L);
+    }
+
+    @Test
+    void getNotTakenOrderReason() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-not-taken-order-reason/{id}", 1L))
+            .andExpect(status().isOk());
+        verify(ubsManagementService).getNotTakenOrderReason(1L);
+    }
+
+    @Test
+    void updatesCancellationReason() throws Exception {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(post(ubsLink + "/order/{id}/cancellation", 1L)
+            .principal(ModelUtils.getPrincipal())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk());
     }
 }

@@ -11,6 +11,7 @@ import greencity.dto.viber.enums.MessageType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
+import greencity.enums.NotificationReceiverType;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.exceptions.bots.ViberBotAlreadyConnected;
@@ -29,6 +30,8 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.Set;
 
+import static greencity.enums.NotificationReceiverType.MOBILE;
+
 @Service
 @Slf4j
 public class ViberServiceImpl extends AbstractNotificationProvider implements ViberService {
@@ -39,6 +42,8 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
     @Value("${greencity.bots.viber-bot-url}")
     private String viberBotUrl;
 
+    private static final NotificationReceiverType notificationType = MOBILE;
+
     /**
      * Constructor with super() call.
      */
@@ -48,7 +53,7 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
         UserRepository userRepository,
         ViberBotRepository viberBotRepository,
         NotificationTemplateRepository templateRepository) {
-        super(userRemoteClient, templateRepository);
+        super(userRemoteClient, templateRepository, notificationType);
         this.viberClient = viberClient;
         this.userRepository = userRepository;
         this.viberBotRepository = viberBotRepository;
@@ -122,12 +127,10 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
     public void sendWelcomeMessageAndPreRegisterViberBotForUser(String receiverId, String uuid) {
         User user = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-        if (user.getViberBot() == null) {
-            viberBotRepository.save(ViberBot.builder()
-                .chatId(receiverId)
-                .isNotify(false)
-                .user(user)
-                .build());
+        if (!isEnabled(user)) {
+            ViberBot viberBot = getViberBot(user);
+            viberBot.setChatId(receiverId);
+            viberBotRepository.save(viberBot);
         } else {
             throw new ViberBotAlreadyConnected(ErrorMessage.THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT);
         }
@@ -138,6 +141,14 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
                 + "Надішли будь який символ для того щоб підписатись на бота і отримувати сповіщення.")
             .build();
         sendMessageToUser(sendMessageToUserDto);
+    }
+
+    private ViberBot getViberBot(User user) {
+        return viberBotRepository.findByUser(user)
+            .orElse(ViberBot.builder()
+                .isNotify(false)
+                .user(user)
+                .build());
     }
 
     /**

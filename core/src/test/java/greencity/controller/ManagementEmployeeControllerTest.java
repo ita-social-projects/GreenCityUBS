@@ -7,8 +7,6 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.position.AddingPositionDto;
-import greencity.dto.position.PositionDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.service.ubs.UBSClientService;
@@ -25,7 +23,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
@@ -33,9 +30,21 @@ import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
 
-import static greencity.ModelUtils.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static greencity.ModelUtils.getUuid;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,10 +56,7 @@ class ManagementEmployeeControllerTest {
     private final String FIND_ALL_LINK = "/getAll-employees";
     private final String FIND_ALL_ACTIVE_LINK = "/getAll-active-employees";
     private final String DELETE_LINK = "/deactivate-employee";
-    private final String SAVE_POSITION_LINK = "/create-position";
-    private final String UPDATE_POSITION_LINK = "/update-position";
     private final String GET_ALL_POSITIONS_LINK = "/get-all-positions";
-    private final String DELETE_POSITION_LINK = "/delete-position/";
     private final String DELETE_IMAGE_LINK = "/delete-employee-image/";
     private final String GET_ALL_TARIFFS = "/getTariffs";
 
@@ -134,7 +140,7 @@ class ManagementEmployeeControllerTest {
         MockMultipartFile jsonFile = new MockMultipartFile("employeeWithTariffsIdDto",
             "", "application/json", responseJSON.getBytes());
         MockMultipartHttpServletRequestBuilder builder =
-            MockMvcRequestBuilders.multipart(UBS_LINK + UPDATE_LINK);
+            multipart(UBS_LINK + UPDATE_LINK);
         builder.with(request -> {
             request.setMethod("PUT");
             return request;
@@ -164,46 +170,10 @@ class ManagementEmployeeControllerTest {
     }
 
     @Test
-    void createPosition() throws Exception {
-        AddingPositionDto dto = AddingPositionDto.builder().name("Водій").build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(UBS_LINK + SAVE_POSITION_LINK)
-            .principal(principal)
-            .content(json)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
-
-        verify(service, times(1)).create(any(AddingPositionDto.class));
-    }
-
-    @Test
-    void updatePosition() throws Exception {
-        PositionDto dto = getPositionDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(put(UBS_LINK + UPDATE_POSITION_LINK)
-            .principal(principal)
-            .content(json)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(service, times(1)).update(dto);
-    }
-
-    @Test
     void getAllPosition() throws Exception {
         mockMvc.perform(get(UBS_LINK + GET_ALL_POSITIONS_LINK)
             .principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).getAllPositions();
-    }
-
-    @Test
-    void deletePosition() throws Exception {
-        mockMvc.perform(delete(UBS_LINK + DELETE_POSITION_LINK + "/1").principal(principal)).andExpect(status().isOk());
-        verify(service, times(1)).deletePosition(1L);
     }
 
     @Test
@@ -214,6 +184,32 @@ class ManagementEmployeeControllerTest {
         mockMvc.perform(get(UBS_LINK + "/get-all-authorities" + "?email=test@mail.com"))
             .andExpect(status().isOk());
         verify(ubsClientService).getAllAuthorities("test@mail.com");
+    }
+
+    @Test
+    void getPositionsAndRelatedAuthoritiesTest() throws Exception {
+        Principal principal = mock(Principal.class);
+        when(principal.getName()).thenReturn("testmail@gmail.com");
+
+        mockMvc.perform(get(UBS_LINK + "/get-positions-authorities" + "?email=" + principal.getName())
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).getPositionsAndRelatedAuthorities(principal.getName());
+    }
+
+    @Test
+    void getEmployeeLoginPositionNamesTest() throws Exception {
+        Principal principal = mock(Principal.class);
+        when(principal.getName()).thenReturn("testmail@gmail.com");
+
+        mockMvc.perform(get(UBS_LINK + "/get-employee-login-positions" + "?email=" + principal.getName())
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).getEmployeeLoginPositionNames(principal.getName());
     }
 
     @Test

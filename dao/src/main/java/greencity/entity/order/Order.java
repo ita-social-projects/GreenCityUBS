@@ -110,8 +110,6 @@ public class Order {
     @JoinColumn(name = "receiving_station_id")
     private ReceivingStation receivingStation;
 
-    private String note;
-
     @Column(name = "deliver_from")
     private LocalDateTime deliverFrom;
 
@@ -156,4 +154,10 @@ public class Order {
 
     @Column(name = "sum_total_amount_without_discounts")
     private Long sumTotalAmountWithoutDiscounts;
+
+    @Column(name = "ubs_courier_sum")
+    private Long ubsCourierSum;
+
+    @Column(name = "write_off_station_sum")
+    private Long writeOffStationSum;
 }

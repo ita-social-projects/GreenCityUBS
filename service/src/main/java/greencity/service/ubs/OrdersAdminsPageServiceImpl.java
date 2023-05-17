@@ -9,7 +9,9 @@ import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnDTO;
+import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -38,9 +40,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @Data
@@ -55,8 +59,10 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+    private final TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
     private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
     private final EventService eventService;
     private final NotificationServiceImpl notificationService;
     private final SuperAdminService superAdminService;
@@ -121,11 +127,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 "violationsAmount", 20, false, true, false, 12, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
             new ColumnDTO(new TitleDto("region", "Область", "Region"), "region", 20, false,
                 true, false, 35, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
-            new ColumnDTO(new TitleDto("settlement", "Населений пункт", "Settlement"), "settlement", 20,
+            new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
-                true, false, 36, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
+                true, true, 36, EditType.READ_ONLY, cityList(), exportAddress),
             new ColumnDTO(new TitleDto("district", "Район", "District"), "district", 20, false,
-                true, false, 37, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
+                true, true, 37, EditType.READ_ONLY, districtList(), exportAddress),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "address", 20, false, true,
                 false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), exportAddress),
@@ -151,7 +157,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 new TitleDto("commentForOrderByClient", "Коментар до замовлення від клієнта",
                     "Comment to the order from the client"),
                 "commentForOrderByClient", 20, false, true, false, 22, EditType.READ_ONLY, new ArrayList<>(),
-                orderDetails),
+                ordersInfo),
             new ColumnDTO(new TitleDto("totalPayment", "Оплата", "Total payment"),
                 "totalPayment", 20, false, true,
                 false, 23,
@@ -176,7 +182,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, true, 32, EditType.SELECT, navigatorList(), responsible),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "blockedBy",
                 20, false, true, false, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
-                orderDetails))));
+                ordersInfo))));
         return new TableParamsDto(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
@@ -209,6 +215,37 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             default:
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
+        }
+    }
+
+    @Override
+    public ColumnWidthDto getColumnWidthForEmployee(String userUuid) {
+        Employee employee = employeeRepository.findByUuid(userUuid)
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND));
+        TableColumnWidthForEmployee tableColumnWidthForEmployee =
+            tableColumnWidthForEmployeeRepository.findByEmployeeId(employee.getId())
+                .orElse(new TableColumnWidthForEmployee(employee));
+        return modelMapper.map(tableColumnWidthForEmployee, ColumnWidthDto.class);
+    }
+
+    @Override
+    public void saveColumnWidthForEmployee(ColumnWidthDto columnWidthDto, String userUuid) {
+        Employee employee = employeeRepository.findByUuid(userUuid)
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND));
+        if (nonNull(columnWidthDto)) {
+            tableColumnWidthForEmployeeRepository.findByEmployeeId(employee.getId()).ifPresentOrElse(
+                e -> {
+                    TableColumnWidthForEmployee tableColumnWidthForEmployee =
+                        modelMapper.map(columnWidthDto, TableColumnWidthForEmployee.class);
+                    modelMapper.map(tableColumnWidthForEmployee, e);
+                    tableColumnWidthForEmployeeRepository.save(e);
+                },
+                () -> {
+                    TableColumnWidthForEmployee tableColumnWidthForEmployee =
+                        modelMapper.map(columnWidthDto, TableColumnWidthForEmployee.class);
+                    tableColumnWidthForEmployee.setEmployee(employee);
+                    tableColumnWidthForEmployeeRepository.save(tableColumnWidthForEmployee);
+                });
         }
     }
 
@@ -329,6 +366,30 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
         return optionForColumnDTOS;
+    }
+
+    private List<OptionForColumnDTO> districtList() {
+        return addressRepository.findDistinctDistricts()
+            .stream()
+            .map(address -> OptionForColumnDTO
+                .builder()
+                .key(address.getId().toString())
+                .en(address.getDistrictEn())
+                .ua(address.getDistrict())
+                .build())
+            .collect(Collectors.toList());
+    }
+
+    private List<OptionForColumnDTO> cityList() {
+        return addressRepository.findDistinctCities()
+            .stream()
+            .map(address -> OptionForColumnDTO
+                .builder()
+                .key(address.getId().toString())
+                .en(address.getCityEn())
+                .ua(address.getCity())
+                .build())
+            .collect(Collectors.toList());
     }
 
     /* methods for changing order */

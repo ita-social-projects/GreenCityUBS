@@ -6,21 +6,56 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.address.AddressExportDetailsDto;
-import greencity.dto.bag.*;
+import greencity.dto.bag.AdditionalBagInfoDto;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.bag.BagMappingDto;
+import greencity.dto.bag.BagTransDto;
+import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.courier.CourierInfoDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.order.*;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.CounterOrderDetailsDto;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.ExportDetailsDtoUpdate;
+import greencity.dto.order.GeneralOrderInfo;
+import greencity.dto.order.NotTakenOrderReasonDto;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
+import greencity.dto.order.OrderInfoDto;
+import greencity.dto.order.OrderPaymentStatusesTranslationDto;
+import greencity.dto.order.OrderStatusPageDto;
+import greencity.dto.order.OrderStatusesTranslationDto;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.*;
+import greencity.dto.payment.ManualPaymentRequestDto;
+import greencity.dto.payment.ManualPaymentResponseDto;
+import greencity.dto.payment.PaymentInfoDto;
+import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -28,15 +63,35 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.*;
+import greencity.enums.CancellationReason;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.PaymentType;
+import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.*;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeOrderPositionRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderDetailRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.PositionRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.ServiceRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,13 +107,32 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -66,7 +140,7 @@ import static java.util.Objects.nonNull;
 @AllArgsConstructor
 @Slf4j
 public class UBSManagementServiceImpl implements UBSManagementService {
-    private final AddressRepository addressRepository;
+    private final TariffsInfoRepository tariffsInfoRepository;
     private final OrderRepository orderRepository;
     private final OrderAddressRepository orderAddressRepository;
     private final ModelMapper modelMapper;
@@ -84,16 +158,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
-    private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
+    private final OrdersAdminsPageService ordersAdminsPageService;
+
+    private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
 
     private final Set<OrderStatus> orderStatusesBeforeShipment =
         EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
-    private final OrdersAdminsPageService ordersAdminsPageService;
     private static final String FORMAT_DATE = "dd-MM-yyyy";
     @Lazy
     @Autowired
@@ -112,13 +187,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        Long paidAmount = calculatePaidAmount(order);
-        Long overpayment = calculateOverpayment(order, sumToPay);
-        Long unPaidAmount = calculateUnpaidAmount(order, sumToPay, paidAmount);
+        BigDecimal paidAmount = calculatePaidAmount(order);
+        BigDecimal overpayment = calculateOverpayment(order, sumToPay);
+        BigDecimal unPaidAmount = calculateUnpaidAmount(order, sumToPay, paidAmount);
         PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
-        paymentTableInfoDto.setOverpayment(overpayment);
-        paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
-        paymentTableInfoDto.setPaidAmount(paidAmount);
+        paymentTableInfoDto.setOverpayment(overpayment.doubleValue());
+        paymentTableInfoDto.setUnPaidAmount(unPaidAmount.doubleValue());
+        paymentTableInfoDto.setPaidAmount(paidAmount.doubleValue());
         List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
             .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
@@ -130,8 +205,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (!paymentInfoDtos.isEmpty()) {
             for (PaymentInfoDto paymentInfoDto : paymentInfoDtos) {
                 if (paymentInfoDto != null) {
-                    Long coins = paymentInfoDto.getAmount() / 100;
-                    paymentInfoDto.setAmount(coins);
+                    BigDecimal amountInUAH = BigDecimal.valueOf(paymentInfoDto.getAmount())
+                        .divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
+                            AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY,
+                            RoundingMode.HALF_UP);
+                    paymentInfoDto.setAmount(amountInUAH.doubleValue());
                 }
             }
         }
@@ -152,20 +230,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker) {
         Order order = orderRepository.findUserById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        Long overpayment = calculateOverpayment(order, sumToPay);
+        BigDecimal overpayment = calculateOverpayment(order, sumToPay);
+
         PaymentTableInfoDto dto = getPaymentInfo(orderId, sumToPay);
-        PaymentInfoDto payDto = PaymentInfoDto.builder().amount(overpayment)
+        PaymentInfoDto payDto = PaymentInfoDto.builder().amount(overpayment.doubleValue())
             .settlementdate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)).build();
         if (marker == 1L) {
             payDto.setComment(AppConstant.PAYMENT_REFUND);
         } else {
             payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
+            int uahPoints =
+                overpayment.setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.FLOOR).intValue();
+
             User user = order.getUser();
-            user.setCurrentPoints(user.getCurrentPoints() + Integer.parseInt(overpayment.toString()));
+            user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
             orderRepository.save(order);
         }
         dto.getPaymentInfoDtos().add(payDto);
-        dto.setOverpayment(dto.getOverpayment() - overpayment);
+        BigDecimal previousOverpaymentAmount = new BigDecimal(dto.getOverpayment().toString());
+        dto.setOverpayment(previousOverpaymentAmount.subtract(overpayment).doubleValue());
         return dto;
     }
 
@@ -309,6 +392,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .comment(order.getComment())
             .courierPricePerPackage(servicePrice)
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
+            .writeOffStationSum(order.getWriteOffStationSum())
             .build();
     }
 
@@ -413,7 +497,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (!orderStatusTranslations.isEmpty()) {
             for (OrderStatusTranslation orderStatusTranslation : orderStatusTranslations) {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
-                setValueForOrderStatusIsCancelledOrDoneAsTrue(orderStatusTranslation, orderStatusesTranslationDto);
+                setValueForOrderStatusIsNotTakenOutOrDoneOrCancelledAsTrue(orderStatusTranslation,
+                    orderStatusesTranslationDto);
                 orderStatusesTranslationDto.setUa(orderStatusTranslation.getName());
                 orderStatusesTranslationDto.setEng(orderStatusTranslation.getNameEng());
                 if (!Objects.equals(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()),
@@ -429,18 +514,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * This is method which set value as true for orderStatus Cancelled or Done.
+     * This is method which set value as true for orderStatus Cancelled or Done or
+     * Not Taken Out.
      *
      * @param orderStatusTranslation      {@link OrderStatusTranslation}.
      * @param orderStatusesTranslationDto {@link OrderStatusesTranslationDto}.
      *
      * @author Yuriy Bahlay.
      */
-    private void setValueForOrderStatusIsCancelledOrDoneAsTrue(OrderStatusTranslation orderStatusTranslation,
+    private void setValueForOrderStatusIsNotTakenOutOrDoneOrCancelledAsTrue(
+        OrderStatusTranslation orderStatusTranslation,
         OrderStatusesTranslationDto orderStatusesTranslationDto) {
         orderStatusesTranslationDto
-            .setAbleActualChange(OrderStatus.CANCELED.getNumValue() == orderStatusTranslation.getStatusId()
-                || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId());
+            .setAbleActualChange(OrderStatus.NOT_TAKEN_OUT.getNumValue() == orderStatusTranslation.getStatusId()
+                || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId()
+                || OrderStatus.CANCELED.getNumValue() == orderStatusTranslation.getStatusId());
     }
 
     /**
@@ -497,6 +585,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         collectEventsAboutSetOrderDetails(confirmed, exported, orderId, email);
         final Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        if (!(order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT
+            || order.getOrderStatus() == OrderStatus.CANCELED)) {
+            exported = null;
+        }
 
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
@@ -717,6 +809,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
                     .getFullPrice();
             }
+
+            if (order.getExportedQuantity().size() != 0) {
+                sumExported += getUbsCourierOrWriteOffStationSum(order);
+            } else if (order.getConfirmedQuantity().size() != 0) {
+                sumConfirmed += getUbsCourierOrWriteOffStationSum(order);
+            } else {
+                sumAmount += getUbsCourierOrWriteOffStationSum(order);
+            }
         }
 
         if (!currentCertificate.isEmpty()) {
@@ -760,6 +860,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         setDtoInfoFromOrder(dto, order);
         setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported);
         return dto;
+    }
+
+    private Long getUbsCourierOrWriteOffStationSum(Order order) {
+        if (order.getUbsCourierSum() != null && order.getWriteOffStationSum() == null) {
+            return order.getUbsCourierSum();
+        } else if (order.getWriteOffStationSum() != null && order.getUbsCourierSum() == null) {
+            return order.getWriteOffStationSum();
+        } else if (order.getWriteOffStationSum() != null && order.getUbsCourierSum() != null) {
+            return order.getWriteOffStationSum() + order.getUbsCourierSum();
+        } else {
+            return 0L;
+        }
     }
 
     private void setDtoInfoFromOrder(CounterOrderDetailsDto dto, Order order) {
@@ -869,9 +981,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.FORMED) {
                 eventService.saveEvent(OrderHistory.ORDER_FORMED, email, order);
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                eventService.saveEvent(
-                    OrderHistory.ORDER_NOT_TAKEN_OUT + ".  " + order.getReasonNotTakingBagDescription(), email, order);
+                eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT, email, order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                verifyPaidWithBonuses(order, email);
                 setOrderCancellation(order, dto.getCancellationReason(), dto.getCancellationComment());
                 eventService.saveEvent(OrderHistory.ORDER_CANCELLED, email, order);
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
@@ -890,6 +1002,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         return buildStatuses(order, payment.get(0));
+    }
+
+    private void verifyPaidWithBonuses(Order order, String email) {
+        if (order.getPointsToUse() > 0) {
+            eventService.saveEvent(OrderHistory.RETURN_BONUSES_TO_CLIENT + ". Всього " + order.getPointsToUse(), email,
+                order);
+        }
     }
 
     private void setOrderCancellation(Order order, String cancellationReason, String cancellationComment) {
@@ -1024,11 +1143,31 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         order.setReceivingStation(getUpdatedReceivingStation(dto.getReceivingStationId(), order));
         order.setDateOfExport(getUpdatedDateExport(dto.getDateExport(), order));
+        if (order.getDateOfExport() != null && order.getDateOfExport().equals(LocalDate.now())
+            && order.getOrderStatus().equals(OrderStatus.CONFIRMED)) {
+            order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
+        }
         order.setDeliverFrom(getUpdatedDeliveryFrom(dto.getTimeDeliveryFrom(), order));
         order.setDeliverTo(getUpdatedDeliveryTo(dto.getTimeDeliveryTo(), order));
         orderRepository.save(order);
-        eventService.saveEvent(action, email, order);
+        eventService.saveEvent(action + getEventOnUpdateExportDetails(order), email, order);
         return buildExportDto(order, receivingStation);
+    }
+
+    private String getEventOnUpdateExportDetails(Order order) {
+        String action = "";
+        if (order.getDateOfExport() != null) {
+            action = String.format(OrderHistory.UPDATE_EXPORT_DATA, order.getDateOfExport());
+        }
+        if (order.getDeliverFrom() != null && order.getDeliverTo() != null) {
+            action = action + String.format(OrderHistory.UPDATE_DELIVERY_TIME, order.getDeliverFrom().toLocalTime(),
+                order.getDeliverTo().toLocalTime());
+        }
+        if (order.getReceivingStation() != null) {
+            action =
+                action + String.format(OrderHistory.UPDATE_RECEIVING_STATION, order.getReceivingStation().getName());
+        }
+        return action;
     }
 
     private List<ReceivingStation> getAllReceivingStations() {
@@ -1114,36 +1253,38 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @param order    of {@link Order} order;
      * @param sumToPay of {@link Long} sum to pay;
-     * @return {@link Long }
+     * @return {@link BigDecimal }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculateOverpayment(Order order, Long sumToPay) {
-        long paymentSum = order.getPayment().stream()
-            .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
-            .map(payment -> payment.getAmount() / 100)
-            .reduce(0L, Long::sum);
+    private BigDecimal calculateOverpayment(Order order, Long sumToPay) {
+        BigDecimal paidAmount = calculatePaidAmount(order);
 
         long certificateSum = order.getCertificates().stream()
             .map(Certificate::getPoints)
             .reduce(0, Integer::sum);
+        long bonusOverpayment = certificateSum + order.getPointsToUse() - sumToPay;
 
-        long overpayment = paymentSum + certificateSum + order.getPointsToUse() - sumToPay;
+        BigDecimal overpayment = paidAmount.add(new BigDecimal(bonusOverpayment));
 
-        return OrderStatus.CANCELED.equals(order.getOrderStatus())
-            ? paymentSum
-            : Math.max(overpayment, 0L);
+        return OrderStatus.CANCELED == order.getOrderStatus()
+            ? paidAmount
+            : overpayment.max(BigDecimal.ZERO);
     }
 
     /**
      * Method that calculate paid amount.
      *
      * @param order of {@link Order} order id;
-     * @return {@link Long }
+     * @return {@link BigDecimal }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculatePaidAmount(Order order) {
-        return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(Payment::getAmount).map(amount -> amount / 100).reduce(0L, Long::sum);
+    private BigDecimal calculatePaidAmount(Order order) {
+        Long coins = order.getPayment().stream()
+            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
+            .map(Payment::getAmount)
+            .reduce(0L, Long::sum);
+        return new BigDecimal(coins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
+            AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP);
     }
 
     /**
@@ -1151,15 +1292,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @param order      of {@link Order} order id;
      * @param sumToPay   of {@link Long} sum to pay;
-     * @param paidAmount of {@link Long} sum to pay;
-     * @return {@link Long }
+     * @param paidAmount of {@link BigDecimal} sum to pay;
+     * @return {@link BigDecimal }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculateUnpaidAmount(Order order, Long sumToPay, Long paidAmount) {
-        sumToPay =
-            sumToPay - ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                + order.getPointsToUse());
-        return sumToPay - paidAmount > 0 ? Math.abs(sumToPay - paidAmount) : 0L;
+    private BigDecimal calculateUnpaidAmount(Order order, Long sumToPay, BigDecimal paidAmount) {
+        sumToPay = sumToPay - ((order.getCertificates().stream()
+            .map(Certificate::getPoints)
+            .reduce(Integer::sum)
+            .orElse(0)) + order.getPointsToUse());
+
+        BigDecimal unpaidAmount = new BigDecimal(sumToPay).subtract(paidAmount);
+
+        return unpaidAmount.max(BigDecimal.ZERO);
     }
 
     /**
@@ -1168,6 +1313,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
         MultipartFile image, String email) {
+        if (Objects.isNull(image) && StringUtils.isBlank(paymentRequestDto.getReceiptLink())) {
+            throw new BadRequestException("Receipt link or image must be present");
+        }
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         checkAvailableOrderForEmployee(order, email);
@@ -1316,7 +1464,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     .name(employee.getFirstName() + " " + employee.getLastName())
                     .build())
                 .collect(Collectors.toList()));
-            dto.setAllPositionsEmployees(allPositionEmployee);
         }
         dto.setAllPositionsEmployees(allPositionEmployee);
 
@@ -1435,6 +1582,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
                 updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), orderId, email);
             }
+            setUbsCourierSumAndWriteOffStationSum(orderId, updateOrderPageDto.getWriteOffStationSum(),
+                updateOrderPageDto.getUbsCourierSum());
             if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
                 updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), email);
             }
@@ -1463,9 +1612,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     }
                 }
             }
+            if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
+                notificationService.notifyUnpaidOrder(order);
+            }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
+    }
+
+    private void setUbsCourierSumAndWriteOffStationSum(Long orderId, Long writeOffStationSum, Long ubsCourierSum) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        if (writeOffStationSum != null) {
+            order.setWriteOffStationSum(writeOffStationSum);
+        }
+        if (ubsCourierSum != null) {
+            order.setUbsCourierSum(ubsCourierSum);
+        }
+        orderRepository.save(order);
     }
 
     private boolean isOrderStatusFormedOrCanceledOrBroughtHimself(Order order) {
@@ -1477,29 +1641,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void checkAvailableOrderForEmployee(Order order, String email) {
         Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND)).getId();
-        boolean status = false;
-        List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
-        for (Long id : tariffsInfoIds) {
-            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
-        }
-        if (!status) {
+        Optional<TariffsInfo> tariffsInfoOptional = tariffsInfoRepository.findTariffsInfoByIdForEmployee(
+            order.getTariffsInfo().getId(), employeeId);
+        if (tariffsInfoOptional.isEmpty()) {
             throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + order.getId());
         }
     }
 
     private List<Employee> listAvailableEmployeeWithPosition(Order order, Position position) {
-        List<Employee> employees = employeeRepository.findAllByEmployeePositionId(position.getId());
-        List<Employee> emps = new ArrayList<>();
-        for (Employee emp : employees) {
-            boolean status = false;
-            List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(emp.getId());
-            for (Long id : tariffsInfoIds) {
-                if (status = id.equals(order.getTariffsInfo().getId()) ? true : status) {
-                    emps.add(emp);
-                }
-            }
-        }
-        return emps;
+        Long tariffId = order.getTariffsInfo().getId();
+        return employeeRepository.findAllByEmployeePositionId(position.getId())
+            .stream()
+            .filter(
+                employee -> tariffsInfoRepository.findTariffsInfoByIdForEmployee(tariffId, employee.getId())
+                    .isPresent())
+            .collect(Collectors.toList());
     }
 
     /**
@@ -1518,7 +1674,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         boolean status = false;
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
         for (Long id : tariffsInfoIds) {
-            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
+            status = id.equals(order.getTariffsInfo().getId()) || status;
         }
         return status;
     }
@@ -1552,24 +1708,26 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void checkOverpayment(Long overpayment) {
-        if (overpayment == 0L) {
+    private void checkOverpayment(BigDecimal overpayment) {
+        if (overpayment.compareTo(BigDecimal.ZERO) == 0) {
             throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
         }
     }
 
     @Override
+    @Transactional
     public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
         Long orderId, String email) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
-        Long overpayment = calculateOverpayment(order, setTotalPrice(prices).longValue());
-        checkOverpayment(overpayment);
+        BigDecimal overpaymentUah = calculateOverpayment(order, setTotalPrice(prices).longValue());
+        checkOverpayment(overpaymentUah);
         User currentUser = order.getUser();
+        BigDecimal overpaymentCoins = overpaymentUah.multiply(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH.negate());
 
         order.getPayment().add(Payment.builder()
-            .amount(overpayment * (-100))
+            .amount(overpaymentCoins.longValue())
             .settlementDate(addBonusesToUserDto.getSettlementdate())
             .paymentId(addBonusesToUserDto.getPaymentId())
             .receiptLink(addBonusesToUserDto.getReceiptLink())
@@ -1579,7 +1737,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .paymentStatus(PaymentStatus.PAID)
             .build());
 
-        transferPointsToUser(order, currentUser, overpayment.intValue());
+        transferPointsToUser(order, currentUser, overpaymentUah);
 
         orderRepository.save(order);
         userRepository.save(currentUser);
@@ -1593,22 +1751,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private void transferPointsToUser(Order order, User user, int points) {
-        if (points <= 0) {
+    private void transferPointsToUser(Order order, User user, BigDecimal points) {
+        if (points.compareTo(BigDecimal.ZERO) <= 0) {
             return;
         }
 
-        user.setCurrentPoints(user.getCurrentPoints() + points);
+        int uahPoints = points.setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.FLOOR).intValue();
+
+        user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
 
         user.setChangeOfPointsList(ListUtils.defaultIfNull(user.getChangeOfPointsList(), new ArrayList<>()));
         user.getChangeOfPointsList()
             .add(ChangeOfPoints.builder()
                 .user(user)
-                .amount(points)
+                .amount(uahPoints)
                 .date(LocalDateTime.now())
                 .order(order)
                 .build());
-        notificationService.notifyBonuses(order, (long) points);
+        notificationService.notifyBonuses(order, (long) uahPoints);
     }
 
     @Override
@@ -1616,5 +1776,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         orderRepository.updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
             OrderStatus.ON_THE_ROUTE.name(),
             LocalDate.now());
+    }
+
+    @Override
+    public OrderCancellationReasonDto getOrderCancellationReason(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        return OrderCancellationReasonDto.builder()
+            .cancellationReason(order.getCancellationReason())
+            .cancellationComment(order.getCancellationComment())
+            .build();
+    }
+
+    @Override
+    public NotTakenOrderReasonDto getNotTakenOrderReason(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        return NotTakenOrderReasonDto.builder()
+            .description(order.getReasonNotTakingBagDescription())
+            .images(order.getImageReasonNotTakingBags())
+            .build();
     }
 }

@@ -17,10 +17,10 @@ public class OrderSearchCriteria {
     private DateFilter deliveryDate;
     private DateFilter paymentDate;
     private String[] region;
-    private String[] city;
+    private String[] cities;
     private String[] districts;
     private String[] regionEn;
-    private String[] cityEn;
+    private String[] citiesEn;
     private String[] districtsEn;
     private String[] search;
 }

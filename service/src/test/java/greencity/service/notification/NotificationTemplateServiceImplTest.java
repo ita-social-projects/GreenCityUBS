@@ -1,14 +1,11 @@
 package greencity.service.notification;
 
-import greencity.ModelUtils;
+import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationTemplateDto;
-import greencity.dto.notification.NotificationTemplateLocalizedDto;
-import greencity.dto.pageble.PageableDto;
-import greencity.enums.NotificationType;
+import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.entity.notifications.NotificationTemplate;
-import greencity.entity.schedule.NotificationSchedule;
+import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,13 +13,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_PAGEABLE;
+import static greencity.ModelUtils.TEMPLATE_PAGE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+import static greencity.constant.ErrorMessage.NOTIFICATION_STATUS_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID;
+import static greencity.enums.NotificationStatus.INACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.any;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationTemplateServiceImplTest {
@@ -30,64 +41,155 @@ class NotificationTemplateServiceImplTest {
     NotificationTemplateRepository templateRepository;
     @Mock
     ModelMapper modelMapper;
-    @Mock
-    NotificationScheduleRepo scheduleRepo;
     @InjectMocks
     private NotificationTemplateServiceImpl notificationService;
 
     @Test
     void findAll() {
-        NotificationTemplate template = ModelUtils.TEST_TEMPLATE;
-        NotificationTemplateLocalizedDto templateLocalizedDto = NotificationTemplateLocalizedDto.builder()
-            .id(1L)
-            .notificationType("UNPAID_ORDER")
-            .build();
-        NotificationSchedule notificationSchedule = ModelUtils.NOTIFICATION_SCHEDULE
-            .setNotificationType(NotificationType.UNPAID_ORDER);
-        when(scheduleRepo.findNotificationScheduleByNotificationType(NotificationType.UNPAID_ORDER))
-            .thenReturn(notificationSchedule);
-        when(templateRepository.findAllTemplates(ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE, "ua")).thenReturn(
-            ModelUtils.TEST_NOTIFICATION_TEMPLATE_PAGE);
-        when(templateRepository.findAllTemplates(ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE, "en")).thenReturn(
-            ModelUtils.TEST_NOTIFICATION_TEMPLATE_PAGE);
-        when(modelMapper.map(template, NotificationTemplateLocalizedDto.class)).thenReturn(templateLocalizedDto);
-        PageableDto<NotificationTemplateLocalizedDto> actual = notificationService.findAll(
-            ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE);
-        verify(templateRepository).findAllTemplates(ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE, "ua");
-        verify(modelMapper).map(template, NotificationTemplateLocalizedDto.class);
-        assertEquals(ModelUtils.getNotificationTemplateLocalizedDto(), actual);
+        Pageable pageable = TEST_NOTIFICATION_PAGEABLE;
+        Page<NotificationTemplate> page = TEMPLATE_PAGE;
+        var notification = TEST_NOTIFICATION_TEMPLATE;
+        var notificationDto = TEST_NOTIFICATION_TEMPLATE_DTO;
+
+        when(templateRepository.findAll(pageable)).thenReturn(page);
+        when(modelMapper.map(notification, NotificationTemplateDto.class)).thenReturn(notificationDto);
+
+        var result = notificationService.findAll(pageable);
+
+        assertEquals(result.getPage(), List.of(notificationDto));
+        assertEquals(result.getTotalElements(), page.getTotalElements());
+        assertEquals(result.getTotalPages(), page.getTotalPages());
+
+        verify(templateRepository).findAll(pageable);
+        verify(modelMapper).map(notification, NotificationTemplateDto.class);
     }
 
     @Test
     void updateTest() {
-        NotificationTemplateDto dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
-        NotificationTemplate template = ModelUtils.TEST_TEMPLATE;
-        when(templateRepository.findNotificationTemplateById(1L)).thenReturn(
-            Optional.of(template));
-        NotificationSchedule notificationSchedule = ModelUtils.NOTIFICATION_SCHEDULE
-            .setNotificationType(NotificationType.UNPAID_ORDER);
-        when(scheduleRepo.getOne(NotificationType.UNPAID_ORDER)).thenReturn(notificationSchedule);
-        notificationService.update(dto);
-        verify(scheduleRepo).save(ModelUtils.NOTIFICATION_SCHEDULE);
-        verify(templateRepository).findNotificationTemplateById(1L);
-        verify(templateRepository).save(template);
+        Long id = 1L;
+
+        var updateDto = TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+        var mainInfoDto = updateDto.getNotificationTemplateMainInfoDto();
+        var platformDto = updateDto.getPlatforms().get(0);
+
+        var notification = TEST_NOTIFICATION_TEMPLATE;
+        var platform = notification.getNotificationPlatforms().get(0);
+
+        when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
+
+        notificationService.update(id, updateDto);
+
+        assertEquals(mainInfoDto.getTitle(), notification.getTitle());
+        assertEquals(mainInfoDto.getTitleEng(), notification.getTitleEng());
+        assertEquals(mainInfoDto.getType(), notification.getNotificationType());
+        assertEquals(mainInfoDto.getTrigger(), notification.getTrigger());
+        assertEquals(mainInfoDto.getTime(), notification.getTime());
+        assertEquals(mainInfoDto.getSchedule(), notification.getSchedule());
+
+        assertEquals(platformDto.getBody(), platform.getBody());
+        assertEquals(platformDto.getBodyEng(), platform.getBodyEng());
+        assertEquals(platformDto.getStatus(), platform.getNotificationStatus());
+
+        verify(templateRepository).findById(id);
+    }
+
+    @Test
+    void updateThrowNotFoundExceptionForNotificationTemplateTest() {
+        Long id = 1L;
+
+        when(templateRepository.findById(id)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(NotFoundException.class,
+            () -> notificationService.update(id, TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO));
+        assertEquals(NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID + id, exception.getMessage());
+
+        verify(templateRepository).findById(id);
+    }
+
+    @Test
+    void updateThrowNotFoundExceptionForNotificationPlatform() {
+        Long id = 1L;
+
+        var dto = TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+        dto.getPlatforms().get(0).setId(100L);
+
+        when(templateRepository.findById(id)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+
+        var exception = assertThrows(NotFoundException.class, () -> notificationService.update(id, dto));
+        assertEquals(ErrorMessage.NOTIFICATION_PLATFORM_NOT_FOUND, exception.getMessage());
+
+        verify(templateRepository).findById(id);
     }
 
     @Test
     void findByIdTest() {
-        NotificationTemplateDto dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
-        NotificationTemplate template = ModelUtils.TEST_TEMPLATE;
-        when(templateRepository.findNotificationTemplateById(1L)).thenReturn(
-            Optional.of(template));
-        when(modelMapper.map(template, NotificationTemplateDto.class))
-            .thenReturn(dto);
-        notificationService.findById(1L);
-        verify(templateRepository).findNotificationTemplateById(1L);
-        verify(modelMapper).map(template, NotificationTemplateDto.class);
+        Long id = 1L;
+        var notification = TEST_NOTIFICATION_TEMPLATE;
+
+        when(templateRepository.findById(id))
+            .thenReturn(Optional.of(notification));
+        when(modelMapper.map(notification, NotificationTemplateWithPlatformsDto.class))
+            .thenReturn(TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO);
+
+        notificationService.findById(id);
+
+        verify(templateRepository).findById(id);
+        verify(modelMapper).map(notification, NotificationTemplateWithPlatformsDto.class);
     }
 
     @Test
-    void findByIdNotFoundExceptionTest() {
-        assertThrows(NotFoundException.class, () -> notificationService.findById(2L));
+    void findByIdThrowNotFoundExceptionTest() {
+        Long id = 1L;
+
+        when(templateRepository.findById(id)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(NotFoundException.class, () -> notificationService.findById(id));
+
+        assertEquals(NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID + id, exception.getMessage());
+
+        verify(templateRepository).findById(id);
+        verify(modelMapper, never()).map(any(), any());
+    }
+
+    @Test
+    void changeNotificationStatusByIdTest() {
+        Long id = 1L;
+        var notificationTemplate = TEST_NOTIFICATION_TEMPLATE;
+
+        when(templateRepository.findById(id)).thenReturn(Optional.of(notificationTemplate));
+
+        notificationService.changeNotificationStatusById(id, INACTIVE.name());
+
+        assertEquals(INACTIVE, notificationTemplate.getNotificationStatus());
+        notificationTemplate.getNotificationPlatforms()
+            .forEach(platform -> assertEquals(INACTIVE, platform.getNotificationStatus()));
+
+        verify(templateRepository).findById(id);
+    }
+
+    @Test
+    void changeNotificationStatusByIdThrowBadRequestException() {
+        Long id = 1L;
+        String status = "FAKE";
+
+        var exception = assertThrows(
+            BadRequestException.class, () -> notificationService.changeNotificationStatusById(id, status));
+        assertEquals(NOTIFICATION_STATUS_DOES_NOT_EXIST + status, exception.getMessage());
+
+        verify(templateRepository, never()).findById(id);
+    }
+
+    @Test
+    void changeNotificationStatusByIdThrowNotFoundExceptionTest() {
+        Long id = 1L;
+        String newStatus = INACTIVE.toString();
+
+        when(templateRepository.findById(id)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(
+            NotFoundException.class, () -> notificationService.changeNotificationStatusById(id, newStatus));
+        assertEquals(NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID + id, exception.getMessage());
+
+        verify(templateRepository).findById(id);
     }
 }

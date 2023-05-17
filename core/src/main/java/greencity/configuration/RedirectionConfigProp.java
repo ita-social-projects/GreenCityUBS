@@ -13,6 +13,5 @@ public class RedirectionConfigProp {
     private String userServerAddress;
     private String greenCityClient;
     private String resultUrlFondy;
-    private String resultUrlLiqPay;
     private String resultUrlFondyPersonalCabinet;
 }

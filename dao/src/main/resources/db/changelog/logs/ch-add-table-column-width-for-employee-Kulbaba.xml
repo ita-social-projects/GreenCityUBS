@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="Kulbaba-4" author="Oleh Kulbaba">
+        <createTable tableName="column_width_for_employee">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="employee_id" type="BIGINT"/>
+            <column name="address" type="INT"/>
+            <column name="amount_due" type="INT"/>
+            <column name="bags_amount" type="INT"/>
+            <column name="blocked_by" type="INT"/>
+            <column name="city" type="INT"/>
+            <column name="client_email" type="INT"/>
+            <column name="client_name" type="INT"/>
+            <column name="client_phone" type="INT"/>
+            <column name="comment_for_order_by_client" type="INT"/>
+            <column name="comment_to_address_for_client" type="INT"/>
+            <column name="comments_for_order" type="INT"/>
+            <column name="date_of_export" type="INT"/>
+            <column name="district" type="INT"/>
+            <column name="general_discount" type="INT"/>
+            <column name="order_id" type="INT"/>
+            <column name="id_order_from_shop" type="INT"/>
+            <column name="order_certificate_code" type="INT"/>
+            <column name="order_date" type="INT"/>
+            <column name="order_payment_status" type="INT"/>
+            <column name="order_status" type="INT"/>
+            <column name="payment_date" type="INT"/>
+            <column name="receiving_status" type="INT"/>
+            <column name="region" type="INT"/>
+            <column name="responsible_caller" type="INT"/>
+            <column name="responsible_driver" type="INT"/>
+            <column name="responsible_logic_man" type="INT"/>
+            <column name="responsible_navigator" type="INT"/>
+            <column name="sender_email" type="INT"/>
+            <column name="sender_name" type="INT"/>
+            <column name="sender_phone" type="INT"/>
+            <column name="time_of_export" type="INT"/>
+            <column name="total_order_sum" type="INT"/>
+            <column name="total_payment" type="INT"/>
+            <column name="violations_amount" type="INT"/>
+        </createTable>
+        
+        <addForeignKeyConstraint baseTableName="column_width_for_employee"
+                                 baseColumnNames="employee_id"
+                                 constraintName="fk-column_width_for_employee-to-employee"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

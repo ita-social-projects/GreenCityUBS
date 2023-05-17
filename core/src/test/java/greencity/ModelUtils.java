@@ -14,12 +14,15 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
+import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.notification.NotificationDto;
-import greencity.dto.notification.NotificationScheduleDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
-import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.EcoNumberDto;
@@ -34,29 +37,28 @@ import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.TariffServiceDto;
+import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.AddBonusesToUserDto;
-import greencity.dto.user.AddingPointsToUserDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileCreateDto;
+import greencity.dto.user.*;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
-import greencity.enums.AddressStatus;
-import greencity.enums.CancellationReason;
-import greencity.enums.CourierLimit;
-import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.AddressStatus;
+import greencity.enums.NotificationType;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationTime;
+import greencity.enums.NotificationTrigger;
+import greencity.enums.CancellationReason;
+import greencity.enums.CourierLimit;
 import org.springframework.http.HttpStatus;
 
 import java.security.Principal;
@@ -74,9 +76,6 @@ import static greencity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
 
-    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
-        new NotificationScheduleDto().setCron("0 0 18 * * ?");
-
     public static Principal getPrincipal() {
         return () -> "test@gmail.com";
     }
@@ -91,7 +90,7 @@ public class ModelUtils {
 
     public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
-            .additionalOrders(new HashSet<>(List.of("232534634")))
+            .additionalOrders(new HashSet<>(List.of("12345678")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .orderComment("comment")
             .certificates(Collections.emptySet())
@@ -115,12 +114,13 @@ public class ModelUtils {
             .entranceNumber("7a")
             .houseCorpus("2")
             .houseNumber("7")
-            .street("Gorodotska")
+            .street("Городоцька")
             .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
             .district("Zaliznuchnuy")
             .city("Lviv")
             .region("Lvivskiy")
             .actual(false)
+            .placeId("place_id")
             .build();
     }
 
@@ -166,6 +166,8 @@ public class ModelUtils {
             .recipientSurname("Petrov")
             .recipientPhone("666051373")
             .recipientEmail("petrov@gmail.com")
+            .telegramIsNotify(true)
+            .viberIsNotify(false)
             .build();
     }
 
@@ -351,12 +353,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
-        return PaymentResponseDtoLiqPay.builder()
-            .data("Test Data")
-            .signature("Test Signature").build();
-    }
-
     public static GetServiceDto getGetServiceDto() {
         return GetServiceDto.builder()
             .id(1L)
@@ -424,12 +420,58 @@ public class ModelUtils {
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
-        return new NotificationTemplateDto()
-            .setId(1L)
-            .setTitle("test")
-            .setBody("test")
-            .setNotificationType("UNPAID_ORDER")
-            .setSchedule(NOTIFICATION_SCHEDULE_DTO);
+        return NotificationTemplateDto.builder()
+            .id(1L)
+            .notificationTemplateMainInfoDto(getNotificationTemplateMainInfoDto())
+            .build();
+    }
+
+    public static NotificationTemplateWithPlatformsDto getNotificationTemplateWithPlatformsDto() {
+        return NotificationTemplateWithPlatformsDto.builder()
+            .notificationTemplateMainInfoDto(getNotificationTemplateMainInfoDto())
+            .platforms(List.of(
+                getNotificationPlatformDto(NotificationReceiverType.SITE)))
+            .build();
+    }
+
+    public static NotificationTemplateWithPlatformsUpdateDto getNotificationTemplateWithPlatformsUpdateDto() {
+        return NotificationTemplateWithPlatformsUpdateDto.builder()
+            .notificationTemplateMainInfoDto(getNotificationTemplateMainInfoDto())
+            .platforms(List.of(
+                getNotificationPlatformDto(NotificationReceiverType.SITE)))
+            .build();
+    }
+
+    public static NotificationTemplateMainInfoDto getNotificationTemplateMainInfoDto() {
+        return NotificationTemplateMainInfoDto.builder()
+            .type(NotificationType.UNPAID_ORDER)
+            .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
+            .triggerDescription(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS
+                .getDescription())
+            .triggerDescriptionEng(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS
+                .getDescriptionEng())
+            .time(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .timeDescription(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID
+                .getDescription())
+            .timeDescriptionEng(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID
+                .getDescriptionEng())
+            .schedule("0 0 18 * * ?")
+            .title("Неопачене замовлення")
+            .titleEng("Unpaid order")
+            .notificationStatus(NotificationStatus.ACTIVE)
+            .build();
+    }
+
+    public static NotificationPlatformDto getNotificationPlatformDto(
+        NotificationReceiverType receiverType) {
+        return NotificationPlatformDto.builder()
+            .id(1L)
+            .receiverType(receiverType)
+            .nameEng("Site")
+            .body("Body")
+            .bodyEng("BodyEng")
+            .status(NotificationStatus.ACTIVE)
+            .build();
     }
 
     public static UpdateAllOrderPageDto getUpdateAllOrderPageDto() {
@@ -478,19 +520,19 @@ public class ModelUtils {
             .build();
     }
 
-    public static UpdateNotificationTemplatesDto getUpdateNotificationTemplatesDto() {
-        return UpdateNotificationTemplatesDto.builder()
-            .body("You have unpaid order")
-            .notificationType(NotificationType.UNPAID_ORDER.toString())
-            .build();
-    }
-
     public static AddNewTariffDto getAddNewTariffDto() {
         return AddNewTariffDto.builder()
             .regionId(1L)
             .courierId(1L)
             .locationIdList(List.of(1L))
             .receivingStationsIdList(List.of(1L))
+            .build();
+    }
+
+    public static EditTariffDto getEditTariffDto() {
+        return EditTariffDto.builder()
+            .locationIds(List.of(1L))
+            .receivingStationIds(List.of(1L))
             .build();
     }
 
@@ -511,6 +553,7 @@ public class ModelUtils {
             .houseNumber("1")
             .houseCorpus("2")
             .entranceNumber("3")
+            .placeId("place_id")
             .build();
     }
 
@@ -541,5 +584,9 @@ public class ModelUtils {
             .email("ubsuser@mail.com")
             .uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
             .build();
+    }
+
+    public static EditLocationDto getEditLocationDto() {
+        return new EditLocationDto().setLocationId(1L).setNameEn("name").setNameUa("назва");
     }
 }

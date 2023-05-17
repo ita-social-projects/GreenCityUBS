@@ -18,6 +18,7 @@ import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.TariffServiceDto;
+import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.exception.handler.CustomExceptionHandler;
@@ -51,6 +52,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static greencity.ModelUtils.getEditLocationDto;
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,7 +66,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -714,6 +720,82 @@ class SuperAdminControllerTest {
     }
 
     @Test
+    @SneakyThrows
+    void editTariffTest() {
+        EditTariffDto dto = ModelUtils.getEditTariffDto();
+        String requestDto = new ObjectMapper().writeValueAsString(dto);
+
+        mockMvc.perform(put(ubsLink + "/editTariffInfo/{id}", 1L)
+            .content(requestDto)
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal)
+            .param("id", "1L"))
+            .andExpect(status().isOk());
+
+        verify(superAdminService).editTariff(1L, dto);
+    }
+
+    @Test
+    @SneakyThrows
+    void editTariffThrowBadRequestException() {
+        EditTariffDto dto = ModelUtils.getEditTariffDto();
+        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        doThrow(new BadRequestException(ErrorMessage.LOCATIONS_BELONG_TO_DIFFERENT_REGIONS))
+            .when(superAdminService).editTariff(1L, dto);
+
+        mockMvc.perform(put(ubsLink + "/editTariffInfo/{id}", 1L)
+            .content(requestDto)
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal)
+            .param("id", "1L"))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+            .andExpect(result -> assertEquals(ErrorMessage.LOCATIONS_BELONG_TO_DIFFERENT_REGIONS,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+        verify(superAdminService).editTariff(1L, dto);
+    }
+
+    @Test
+    @SneakyThrows
+    void editTariffThrowNotFoundException() {
+        EditTariffDto dto = ModelUtils.getEditTariffDto();
+        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        doThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND))
+            .when(superAdminService).editTariff(1L, dto);
+
+        mockMvc.perform(put(ubsLink + "/editTariffInfo/{id}", 1L)
+            .content(requestDto)
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal)
+            .param("id", "1L"))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+        verify(superAdminService).editTariff(1L, dto);
+    }
+
+    @Test
+    @SneakyThrows
+    void editTariffThrowTariffAlreadyExistsException() {
+        EditTariffDto dto = ModelUtils.getEditTariffDto();
+        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        doThrow(new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS))
+            .when(superAdminService).editTariff(1L, dto);
+
+        mockMvc.perform(put(ubsLink + "/editTariffInfo/{id}", 1L)
+            .content(requestDto)
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal)
+            .param("id", "1L"))
+            .andExpect(status().isConflict())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof TariffAlreadyExistsException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_IS_ALREADY_EXISTS,
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
+        verify(superAdminService).editTariff(1L, dto);
+    }
+
+    @Test
     void checkIfTariffExistsTest() throws Exception {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -858,6 +940,18 @@ class SuperAdminControllerTest {
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
         verify(superAdminService).switchTariffStatus(1L, "Active");
+    }
+
+    @Test
+    void editLocationsTest() throws Exception {
+        var dto = getEditLocationDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(post(ubsLink + "/locations/edit")
+            .content(objectMapper.writeValueAsString(List.of(dto)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal))
+            .andExpect(status().isOk());
+        verify(superAdminService).editLocations(List.of(dto));
     }
 
     @Test

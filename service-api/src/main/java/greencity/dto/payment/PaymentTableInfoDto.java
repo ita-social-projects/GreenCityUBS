@@ -4,16 +4,14 @@ import lombok.*;
 
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-@ToString
-@EqualsAndHashCode
+
 public class PaymentTableInfoDto {
-    Long paidAmount;
-    Long unPaidAmount;
+    Double paidAmount;
+    Double unPaidAmount;
     List<PaymentInfoDto> paymentInfoDtos;
-    Long overpayment;
+    Double overpayment;
 }

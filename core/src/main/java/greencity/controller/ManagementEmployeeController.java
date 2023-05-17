@@ -8,7 +8,7 @@ import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.pageble.PageableAdvancedDto;
-import greencity.dto.position.AddingPositionDto;
+import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.filters.EmployeeFilterCriteria;
@@ -25,7 +25,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -150,47 +159,6 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller creates employee position.
-     *
-     * @return {@link PositionDto}
-     * @author Mykola Danylko.
-     */
-    @ApiOperation(value = "Create employee position")
-    @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = PositionDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
-    })
-    @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
-    @PostMapping("/create-position")
-    public ResponseEntity<PositionDto> createPosition(@Valid AddingPositionDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.create(dto));
-    }
-
-    /**
-     * Controller updates employee position.
-     *
-     * @return {@link PositionDto}
-     * @author Mykola Danylko.
-     */
-    @ApiOperation(value = "Update employee position")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PositionDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
-    })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEE', authentication)")
-    @PutMapping("/update-position")
-    public ResponseEntity<PositionDto> updatePosition(@RequestBody @Valid PositionDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(dto));
-    }
-
-    /**
      * Controller gets all employee positions.
      *
      * @return {@link PositionDto}
@@ -206,25 +174,6 @@ public class ManagementEmployeeController {
     @GetMapping("/get-all-positions")
     public ResponseEntity<List<PositionDto>> getAllPositions() {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.getAllPositions());
-    }
-
-    /**
-     * Controller deletes employee position.
-     *
-     * @author Mykola Danylko.
-     */
-    @ApiOperation(value = "Deletes employee position")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
-    @DeleteMapping("/delete-position/{id}")
-    public ResponseEntity<HttpStatus> deletePosition(@PathVariable Long id) {
-        employeeService.deletePosition(id);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -266,6 +215,48 @@ public class ManagementEmployeeController {
     public ResponseEntity<Object> getAllAuthorities(@RequestParam String email) {
         Set<String> authorities = ubsClientService.getAllAuthorities(email);
         return ResponseEntity.status(HttpStatus.OK).body(authorities);
+    }
+
+    /**
+     * Controller to get an employee`s positions and all possible related
+     * authorities to these positions.
+     *
+     * @param email {@link String} - employee email.
+     * @return {@link PositionAuthoritiesDto}
+     *
+     * @author Anton Bondar.
+     */
+    @ApiOperation(value = "Get information about an employee`s positions and all possible "
+        + "related authorities to these positions.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/get-positions-authorities")
+    public ResponseEntity<PositionAuthoritiesDto> getPositionsAndRelatedAuthorities(@RequestParam String email) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getPositionsAndRelatedAuthorities(email));
+    }
+
+    /**
+     * Controller to get a list of login employee`s positions.
+     *
+     * @param email {@link String} - employee email.
+     * @return List of {@link String} - list of employee positions.
+     *
+     * @author Anton Bondar.
+     */
+    @ApiOperation(value = "Get information about login employee`s positions.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/get-employee-login-positions")
+    public ResponseEntity<List<String>> getEmployeeLoginPositionNames(@RequestParam String email) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getEmployeeLoginPositionNames(email));
     }
 
     /**

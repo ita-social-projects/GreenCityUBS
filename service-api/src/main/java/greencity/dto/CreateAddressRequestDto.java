@@ -1,6 +1,6 @@
 package greencity.dto;
 
-import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
@@ -21,6 +21,7 @@ public class CreateAddressRequestDto {
     // CHECKSTYLE:OFF
     private static final String validationMessage = "use only English,or Ukrainian letter";
     private static final String notEmptyValidationMessage = "name must not be empty";
+    private static final String houseNumberNotValid = "House number is invalid";
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
     private String searchAddress;
@@ -31,15 +32,18 @@ public class CreateAddressRequestDto {
     @NotEmpty(message = notEmptyValidationMessage)
     private String district;
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ]*", message = validationMessage)
-    @NotEmpty(message = "name must not be empty")
+    @NotEmpty(message = notEmptyValidationMessage)
     private String regionEn;
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
     private String region;
-    @Min(1)
+    @Pattern(regexp = "^(?:[1-9][0-9]{0,2})(?:[A-Za-zА-Яа-яЇїІіЄєҐґ])?$", message = houseNumberNotValid)
+    @NotBlank(message = notEmptyValidationMessage)
     private String houseNumber;
     private String entranceNumber;
     private String houseCorpus;
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ!?]*", message = validationMessage)
     private String addressComment;
+    @NotEmpty
+    private String placeId;
 }
