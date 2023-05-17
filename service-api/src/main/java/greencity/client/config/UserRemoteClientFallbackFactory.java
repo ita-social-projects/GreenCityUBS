@@ -1,23 +1,22 @@
 package greencity.client.config;
 
-import feign.FeignException;
 import feign.hystrix.FallbackFactory;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeeSignUpDto;
-import greencity.dto.employee.UpdateEmployeeAuthoritiesDto;
+import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
-import greencity.exceptions.BadRequestException;
-import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -71,6 +70,18 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
+            public PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email) {
+                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email, throwable);
+                throw new RemoteServerUnavailableException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST, throwable);
+            }
+
+            @Override
+            public List<String> getEmployeeLoginPositionNames(String email) {
+                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email);
+                throw new RemoteServerUnavailableException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST, throwable);
+            }
+
+            @Override
             public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto) {
                 log.error(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
@@ -89,17 +100,9 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void updateAuthorities(UpdateEmployeeAuthoritiesDto dto) {
-                log.error(ErrorMessage.EMPLOYEE_AUTHORITIES_DONT_UPDATE);
-
-                if (throwable instanceof FeignException && ((FeignException) throwable).status() == 403) {
-                    throw new AccessDeniedException("You don't have rights for this action");
-                } else if (throwable instanceof FeignException && ((FeignException) throwable).status() == 404) {
-                    throw new BadRequestException(ErrorMessage.EMPLOYEE_DOESNT_EXIST);
-                } else {
-                    throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITIES_DONT_UPDATE,
-                        throwable);
-                }
+            public void updateAuthoritiesToRelatedPositions(EmployeePositionsDto dto) {
+                log.error(ErrorMessage.EMPLOYEE_WAS_NOT_UPDATED);
+                throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_WAS_NOT_UPDATED, throwable);
             }
 
             @Override

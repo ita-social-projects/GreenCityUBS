@@ -41,4 +41,5 @@ public class OrderStatusPageDto {
     private String comment;
     private Integer courierPricePerPackage;
     private CourierInfoDto courierInfo;
+    private Long writeOffStationSum;
 }
