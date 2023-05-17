@@ -50,9 +50,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -291,8 +289,7 @@ class OrderControllerTest {
     @Test
     @SneakyThrows
     void getInfoAboutTariffTest() {
-        mockMvc.perform(get(ubsLink + "/tariffinfo-for-location")
-            .param("locationId", "1")
+        mockMvc.perform(get(ubsLink + "/tariffinfo/{locationId}", 1L)
             .param("courierId", "1"))
             .andExpect(status().isOk());
     }
@@ -300,7 +297,7 @@ class OrderControllerTest {
     @Test
     @SneakyThrows
     void getAllActiveLocationsByCourierIdTest() {
-        mockMvc.perform(get(ubsLink + "/allLocations/{courierId}", 1L)
+        mockMvc.perform(get(ubsLink + "/locations/{courierId}", 1L)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
