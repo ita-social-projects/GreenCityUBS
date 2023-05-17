@@ -12,11 +12,9 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.user.PersonalDataDto;
@@ -35,7 +33,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -358,7 +355,7 @@ public class OrderController {
      * @author Anton Bondar
      */
     @ApiOperation(value = "Get all active locations where courier is working")
-    @GetMapping("/allLocations/{courierId}")
+    @GetMapping("/locations/{courierId}")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -388,10 +385,10 @@ public class OrderController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/tariffinfo-for-location")
+    @GetMapping("/tariffinfo/{locationId}")
     public ResponseEntity<OrderCourierPopUpDto> getInfoAboutTariff(
         @RequestParam Long courierId,
-        @RequestParam Long locationId) {
+        @PathVariable Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getTariffInfoForLocation(courierId, locationId));
     }
