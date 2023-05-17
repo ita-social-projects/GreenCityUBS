@@ -15,7 +15,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 public class TableColumnWidthForEmployee {
-    private static final Integer TABLE_DEFAULT_COLUMN_WIDTH = 120;
+    private static final Integer DEFAULT_WIDTH = 120;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,73 +23,73 @@ public class TableColumnWidthForEmployee {
     @OneToOne
     private Employee employee;
     @Column
-    private Integer address = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer address = DEFAULT_WIDTH;
     @Column
-    private Integer amountDue = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer amountDue = DEFAULT_WIDTH;
     @Column
-    private Integer bagsAmount = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer bagsAmount = DEFAULT_WIDTH;
     @Column
-    private Integer blockedBy = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer blockedBy = DEFAULT_WIDTH;
     @Column
-    private Integer city = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer city = DEFAULT_WIDTH;
     @Column
-    private Integer clientEmail = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer clientEmail = DEFAULT_WIDTH;
     @Column
-    private Integer clientName = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer clientName = DEFAULT_WIDTH;
     @Column
-    private Integer clientPhone = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer clientPhone = DEFAULT_WIDTH;
     @Column
-    private Integer commentForOrderByClient = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer commentForOrderByClient = DEFAULT_WIDTH;
     @Column
-    private Integer commentToAddressForClient = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer commentToAddressForClient = DEFAULT_WIDTH;
     @Column
-    private Integer commentsForOrder = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer commentsForOrder = DEFAULT_WIDTH;
     @Column
-    private Integer dateOfExport = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer dateOfExport = DEFAULT_WIDTH;
     @Column
-    private Integer district = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer district = DEFAULT_WIDTH;
     @Column
-    private Integer generalDiscount = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer generalDiscount = DEFAULT_WIDTH;
     @Column
-    private Integer orderId = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer orderId = DEFAULT_WIDTH;
     @Column
-    private Integer idOrderFromShop = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer idOrderFromShop = DEFAULT_WIDTH;
     @Column
-    private Integer orderCertificateCode = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer orderCertificateCode = DEFAULT_WIDTH;
     @Column
-    private Integer orderDate = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer orderDate = DEFAULT_WIDTH;
     @Column
-    private Integer orderPaymentStatus = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer orderPaymentStatus = DEFAULT_WIDTH;
     @Column
-    private Integer orderStatus = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer orderStatus = DEFAULT_WIDTH;
     @Column
-    private Integer paymentDate = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer paymentDate = DEFAULT_WIDTH;
     @Column
-    private Integer receivingStatus = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer receivingStatus = DEFAULT_WIDTH;
     @Column
-    private Integer region = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer region = DEFAULT_WIDTH;
     @Column
-    private Integer responsibleCaller = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer responsibleCaller = DEFAULT_WIDTH;
     @Column
-    private Integer responsibleDriver = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer responsibleDriver = DEFAULT_WIDTH;
     @Column
-    private Integer responsibleLogicMan = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer responsibleLogicMan = DEFAULT_WIDTH;
     @Column
-    private Integer responsibleNavigator = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer responsibleNavigator = DEFAULT_WIDTH;
     @Column
-    private Integer senderEmail = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer senderEmail = DEFAULT_WIDTH;
     @Column
-    private Integer senderName = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer senderName = DEFAULT_WIDTH;
     @Column
-    private Integer senderPhone = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer senderPhone = DEFAULT_WIDTH;
     @Column
-    private Integer timeOfExport = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer timeOfExport = DEFAULT_WIDTH;
     @Column
-    private Integer totalOrderSum = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer totalOrderSum = DEFAULT_WIDTH;
     @Column
-    private Integer totalPayment = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer totalPayment = DEFAULT_WIDTH;
     @Column
-    private Integer violationsAmount = TABLE_DEFAULT_COLUMN_WIDTH;
+    private Integer violationsAmount = DEFAULT_WIDTH;
 
     /**
      * Constructor with default width for all columns.

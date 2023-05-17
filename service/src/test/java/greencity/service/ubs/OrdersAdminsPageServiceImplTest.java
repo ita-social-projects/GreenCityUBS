@@ -570,7 +570,7 @@ class OrdersAdminsPageServiceImplTest {
     void getOrderColumnWidthNotFoundTableColumnWidthForEmployeeTest() {
         Employee employee = ModelUtils.getEmployee();
         TableColumnWidthForEmployee tableColumnWidthForEmployee =
-            ModelUtils.getTestTableColumnWidthForEmployeeWithDefaultValues();
+            new TableColumnWidthForEmployee(ModelUtils.getEmployee());
 
         when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(employee));
         when(tableColumnWidthForEmployeeRepository.findByEmployeeId(anyLong()))

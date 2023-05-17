@@ -11,6 +11,7 @@ class TableColumnWidthForEmployeeTest {
         Employee employee = Employee.builder().build();
         TableColumnWidthForEmployee tableColumnWidth = new TableColumnWidthForEmployee(employee);
         int defaultWidth = 120;
+        assertEquals(employee, tableColumnWidth.getEmployee());
         assertEquals(defaultWidth, tableColumnWidth.getAddress());
         assertEquals(defaultWidth, tableColumnWidth.getAmountDue());
         assertEquals(defaultWidth, tableColumnWidth.getBagsAmount());
