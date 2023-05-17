@@ -1,7 +1,10 @@
 package greencity.entity.table;
 
 import greencity.entity.user.employee.Employee;
-import lombok.*;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import javax.persistence.*;
 
@@ -11,80 +14,89 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode
-@ToString
 public class TableColumnWidthForEmployee {
+    private static final Integer DEFAULT_WIDTH = 120;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne
     private Employee employee;
     @Column
-    private Integer address;
+    private Integer address = DEFAULT_WIDTH;
     @Column
-    private Integer amountDue;
+    private Integer amountDue = DEFAULT_WIDTH;
     @Column
-    private Integer bagsAmount;
+    private Integer bagsAmount = DEFAULT_WIDTH;
     @Column
-    private Integer blockedBy;
+    private Integer blockedBy = DEFAULT_WIDTH;
     @Column
-    private Integer city;
+    private Integer city = DEFAULT_WIDTH;
     @Column
-    private Integer clientEmail;
+    private Integer clientEmail = DEFAULT_WIDTH;
     @Column
-    private Integer clientName;
+    private Integer clientName = DEFAULT_WIDTH;
     @Column
-    private Integer clientPhone;
+    private Integer clientPhone = DEFAULT_WIDTH;
     @Column
-    private Integer commentForOrderByClient;
+    private Integer commentForOrderByClient = DEFAULT_WIDTH;
     @Column
-    private Integer commentToAddressForClient;
+    private Integer commentToAddressForClient = DEFAULT_WIDTH;
     @Column
-    private Integer commentsForOrder;
+    private Integer commentsForOrder = DEFAULT_WIDTH;
     @Column
-    private Integer dateOfExport;
+    private Integer dateOfExport = DEFAULT_WIDTH;
     @Column
-    private Integer district;
+    private Integer district = DEFAULT_WIDTH;
     @Column
-    private Integer generalDiscount;
+    private Integer generalDiscount = DEFAULT_WIDTH;
     @Column
-    private Integer orderId;
+    private Integer orderId = DEFAULT_WIDTH;
     @Column
-    private Integer idOrderFromShop;
+    private Integer idOrderFromShop = DEFAULT_WIDTH;
     @Column
-    private Integer orderCertificateCode;
+    private Integer orderCertificateCode = DEFAULT_WIDTH;
     @Column
-    private Integer orderDate;
+    private Integer orderDate = DEFAULT_WIDTH;
     @Column
-    private Integer orderPaymentStatus;
+    private Integer orderPaymentStatus = DEFAULT_WIDTH;
     @Column
-    private Integer orderStatus;
+    private Integer orderStatus = DEFAULT_WIDTH;
     @Column
-    private Integer paymentDate;
+    private Integer paymentDate = DEFAULT_WIDTH;
     @Column
-    private Integer receivingStatus;
+    private Integer receivingStatus = DEFAULT_WIDTH;
     @Column
-    private Integer region;
+    private Integer region = DEFAULT_WIDTH;
     @Column
-    private Integer responsibleCaller;
+    private Integer responsibleCaller = DEFAULT_WIDTH;
     @Column
-    private Integer responsibleDriver;
+    private Integer responsibleDriver = DEFAULT_WIDTH;
     @Column
-    private Integer responsibleLogicMan;
+    private Integer responsibleLogicMan = DEFAULT_WIDTH;
     @Column
-    private Integer responsibleNavigator;
+    private Integer responsibleNavigator = DEFAULT_WIDTH;
     @Column
-    private Integer senderEmail;
+    private Integer senderEmail = DEFAULT_WIDTH;
     @Column
-    private Integer senderName;
+    private Integer senderName = DEFAULT_WIDTH;
     @Column
-    private Integer senderPhone;
+    private Integer senderPhone = DEFAULT_WIDTH;
     @Column
-    private Integer timeOfExport;
+    private Integer timeOfExport = DEFAULT_WIDTH;
     @Column
-    private Integer totalOrderSum;
+    private Integer totalOrderSum = DEFAULT_WIDTH;
     @Column
-    private Integer totalPayment;
+    private Integer totalPayment = DEFAULT_WIDTH;
     @Column
-    private Integer violationsAmount;
+    private Integer violationsAmount = DEFAULT_WIDTH;
+
+    /**
+     * Constructor with default width for all columns.
+     *
+     * @param employee who is trying to get columns width
+     */
+    public TableColumnWidthForEmployee(Employee employee) {
+        this.employee = employee;
+    }
 }

@@ -224,7 +224,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND));
         TableColumnWidthForEmployee tableColumnWidthForEmployee =
             tableColumnWidthForEmployeeRepository.findByEmployeeId(employee.getId())
-                .orElseThrow(() -> new NotFoundException(COLUMN_WIDTH_INFO_NOT_FOUND));
+                .orElse(new TableColumnWidthForEmployee(employee));
         return modelMapper.map(tableColumnWidthForEmployee, ColumnWidthDto.class);
     }
 
