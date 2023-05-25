@@ -29,7 +29,6 @@ import javax.transaction.Transactional;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.location.LocationSummaryDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
@@ -1826,13 +1825,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto) {
         userRemoteClient.updateEmployeesAuthorities(dto);
-    }
-
-    @Override
-    public List<LocationSummaryDto> getLocationSummary() {
-        return regionRepository.findAll().stream()
-            .map(location -> modelMapper.map(location, LocationSummaryDto.class))
-            .collect(toList());
     }
 
     /**

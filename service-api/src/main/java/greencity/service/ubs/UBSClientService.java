@@ -8,7 +8,6 @@ import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.location.LocationSummaryDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
@@ -57,7 +56,7 @@ public interface UBSClientService {
      *
      * @param uuid       current {@link User}'s uuid.
      * @param tariffId   {@link Long} tariff id.
-     * @param locationId {@ling Long} location id.
+     * @param locationId {@link Long} location id.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Safarov Renat
      */
@@ -400,14 +399,6 @@ public interface UBSClientService {
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
      */
     void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
-
-    /**
-     * Methods returns all locations.
-     *
-     * @return {@link LocationSummaryDto}.
-     * @author Max Nazaruk
-     */
-    List<LocationSummaryDto> getLocationSummary();
 
     /**
      * Makes an address actual (default) for a given user, identified by his UUID.
