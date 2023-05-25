@@ -407,7 +407,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
-                    throw new RuntimeException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 if (existedOrder.getOrderStatus().checkPossibleStatus(value)) {
                     existedOrder.setOrderStatus(OrderStatus.valueOf(value));
@@ -485,7 +485,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     Order existedOrder = orderRepository.findById(orderId)
                         .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                     if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
-                        throw new RuntimeException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                        throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                     }
                     existedOrder.setCancellationReason(CancellationReason.valueOf(value));
                     existedOrder.setBlocked(false);
@@ -507,7 +507,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
-                    throw new RuntimeException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
@@ -534,7 +534,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
-                    throw new RuntimeException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
 
                 existedOrder.getEvents().add(Event.builder()
@@ -563,7 +563,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
-                    throw new RuntimeException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 existedOrder.setDateOfExport(date);
                 if (existedOrder.getDeliverFrom() != null) {
@@ -594,10 +594,10 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
-                    throw new RuntimeException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 if (existedOrder.getDateOfExport() == null) {
-                    throw new RuntimeException(DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER + existedOrder.getId());
+                    throw new IllegalStateException(DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER + existedOrder.getId());
                 }
                 existedOrder.setDeliverFrom(LocalDateTime.of(existedOrder.getDateOfExport(), timeFrom));
                 existedOrder.setDeliverTo(LocalDateTime.of(existedOrder.getDateOfExport(), timeTo));
@@ -620,7 +620,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
-                    throw new RuntimeException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 existedOrder.setReceivingStation(station);
                 existedOrder.setBlocked(false);
@@ -649,7 +649,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, currentEmployee.getId())) {
-                    throw new RuntimeException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 Boolean existedBefore =
                     employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
