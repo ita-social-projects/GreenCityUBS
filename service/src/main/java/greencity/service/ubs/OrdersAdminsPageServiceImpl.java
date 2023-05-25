@@ -35,6 +35,7 @@ import org.apache.commons.lang3.EnumUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
@@ -542,7 +543,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .order(existedOrder)
                     .eventDate(LocalDateTime.now())
                     .authorName(employee.getFirstName() + "  " + employee.getLastName())
-                    .eventName(OrderHistory.ORDER_CANCELLED + "  " + value)
+                    .eventName(OrderHistory.ADD_ADMIN_COMMENT + "  " + value)
                     .build());
                 existedOrder.setAdminComment(value);
                 existedOrder.setBlocked(false);
@@ -635,6 +636,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
+    @Transactional
     public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position,
         String email) {
         Employee currentEmployee =
