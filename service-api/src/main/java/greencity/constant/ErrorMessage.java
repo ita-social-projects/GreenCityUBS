@@ -136,6 +136,11 @@ public final class ErrorMessage {
         + "or Deactivated.";
     public static final String COLUMN_WIDTH_INFO_NOT_FOUND =
         "There is no saved column width configuration for current employee";
+    public static final String DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER =
+        "Date of export not specified for the order with ID: ";
+    public static final String EMPTY_ORDERS_ID_COLLECTION = "Request should contain at least one order ID";
+
+    public static final String ORDER_IS_BLOCKED = "The order has been blocked by employee with ID: ";
 
     /**
      * Constructor.
