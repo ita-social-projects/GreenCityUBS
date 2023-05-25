@@ -636,7 +636,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    @Transactional
     public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position,
         String email) {
         Employee currentEmployee =
