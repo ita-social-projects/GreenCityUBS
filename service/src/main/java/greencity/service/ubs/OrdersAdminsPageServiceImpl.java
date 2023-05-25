@@ -485,7 +485,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     Order existedOrder = orderRepository.findById(orderId)
                         .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                     if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
-                        throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                        throw new IllegalArgumentException(
+                            ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                     }
                     existedOrder.setCancellationReason(CancellationReason.valueOf(value));
                     existedOrder.setBlocked(false);
