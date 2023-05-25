@@ -3,11 +3,15 @@ package greencity.service.ubs;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
+import greencity.constant.OrderHistory;
 import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
+import greencity.entity.order.Event;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.ubs.Address;
+import greencity.enums.CancellationReason;
 import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
@@ -16,6 +20,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
+import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
 import greencity.service.SuperAdminService;
@@ -26,12 +31,20 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.Clock;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -210,6 +223,177 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
+    void chooseOrdersDataSwitcherEmptyOrdersIdListThrowExceptionTest() {
+        var requestToChangeOrdersDataDTO = RequestToChangeOrdersDataDto.builder()
+            .columnName("columnName")
+            .newValue("newValue")
+            .build();
+
+        var currentException = assertThrows(BadRequestException.class,
+            () -> ordersAdminsPageService.chooseOrdersDataSwitcher(ModelUtils.TEST_EMAIL,
+                requestToChangeOrdersDataDTO));
+
+        assertEquals(ErrorMessage.EMPTY_ORDERS_ID_COLLECTION, currentException.getMessage());
+    }
+
+    @Test
+    void timeOfExportForDevelopStageTest() {
+        var ordersId = List.of(1L);
+        var newValue = "10:30-15:00";
+        LocalTime timeFrom = LocalTime.parse("10:30", DateTimeFormatter.ISO_TIME);
+        LocalTime timeTo = LocalTime.parse("15:00", DateTimeFormatter.ISO_TIME);
+        var employeeId = 3L;
+        LocalDate exportDate = LocalDate.of(2023, 5, 23);
+
+        var order = Order.builder()
+            .id(1L)
+            .blocked(true)
+            .blockedByEmployee(Employee.builder()
+                .id(employeeId).build())
+            .dateOfExport(exportDate)
+            .build();
+        var expectedOrder = Order.builder()
+            .id(1L)
+            .deliverFrom(LocalDateTime.of(order.getDateOfExport(), timeFrom))
+            .deliverTo(LocalDateTime.of(order.getDateOfExport(), timeTo))
+            .dateOfExport(exportDate)
+            .build();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        List<Long> result = ordersAdminsPageService.timeOfExportForDevelopStage(ordersId, newValue, employeeId);
+
+        verify(orderRepository).save(expectedOrder);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void timeOfExportForDevelopStageNotSetExportDateThrowExceptionTest() {
+        var orderId = 1L;
+        var ordersId = List.of(orderId);
+        var newValue = "10:30-15:00";
+        var employeeId = 3L;
+
+        var order = Order.builder()
+            .id(orderId)
+            .blocked(true)
+            .blockedByEmployee(Employee.builder()
+                .id(employeeId).build())
+            .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.timeOfExportForDevelopStage(ordersId, newValue, employeeId);
+
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository, never()).save(any(Order.class));
+
+        assertTrue(order.isBlocked());
+        assertEquals(employeeId, order.getBlockedByEmployee().getId());
+        assertNull(order.getDeliverFrom());
+        assertNull(order.getDeliverTo());
+        assertEquals(List.of(orderId), result);
+    }
+
+    @Test
+    void timeOfExportForDevelopStageOrderBlockedByAnotherEmployeeThrowExceptionTest() {
+        var orderId = 1L;
+        var ordersId = List.of(orderId);
+        var newValue = "10:30-15:00";
+        var employeeId = 3L;
+        var anotherEmployeeId = 4L;
+        LocalDate exportDate = LocalDate.of(2023, 5, 23);
+
+        var order = Order.builder()
+            .id(1L)
+            .blocked(true)
+            .blockedByEmployee(Employee.builder()
+                .id(anotherEmployeeId).build())
+            .dateOfExport(exportDate)
+            .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.timeOfExportForDevelopStage(ordersId, newValue, employeeId);
+
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository, never()).save(any(Order.class));
+
+        assertTrue(order.isBlocked());
+        assertEquals(anotherEmployeeId, order.getBlockedByEmployee().getId());
+        assertNull(order.getDeliverFrom());
+        assertNull(order.getDeliverTo());
+        assertEquals(List.of(orderId), result);
+    }
+
+    @Test
+    void dateOfExportForDevelopStageUpdateDeliveringTimeTest() {
+        var ordersId = List.of(1L);
+        var newValue = "2023-06-30T00:00:00.000Z";
+        LocalTime timeFrom = LocalTime.parse("10:30", DateTimeFormatter.ISO_TIME);
+        LocalTime timeTo = LocalTime.parse("15:00", DateTimeFormatter.ISO_TIME);
+        var employeeId = 3L;
+        LocalDate previousExportDate = LocalDate.of(2023, 5, 23);
+        LocalDate newExportDate = LocalDate.of(2023, 6, 30);
+
+        var order = Order.builder()
+            .id(1L)
+            .blocked(true)
+            .blockedByEmployee(Employee.builder()
+                .id(employeeId).build())
+            .dateOfExport(previousExportDate)
+            .deliverFrom(LocalDateTime.of(previousExportDate, timeFrom))
+            .deliverTo(LocalDateTime.of(previousExportDate, timeTo))
+            .build();
+
+        var expectedOrder = Order.builder()
+            .id(1L)
+            .dateOfExport(newExportDate)
+            .deliverFrom(LocalDateTime.of(newExportDate, timeFrom))
+            .deliverTo(LocalDateTime.of(newExportDate, timeTo))
+            .build();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, newValue, employeeId);
+
+        verify(orderRepository).save(expectedOrder);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void dateOfExportForDevelopStageBlockedByAnotherEmployeeThrowExceptionTest() {
+        var orderId = 1L;
+        var ordersId = List.of(orderId);
+        var newValue = "2023-06-30T00:00:00.000Z";
+        var employeeId = 3L;
+        var anotherEmployeeId = 4L;
+        LocalDate exportDate = LocalDate.of(2023, 5, 23);
+
+        var order = Order.builder()
+            .id(1L)
+            .blocked(true)
+            .blockedByEmployee(Employee.builder()
+                .id(anotherEmployeeId).build())
+            .dateOfExport(exportDate)
+            .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, newValue, employeeId);
+
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository, never()).save(any(Order.class));
+
+        assertTrue(order.isBlocked());
+        assertEquals(anotherEmployeeId, order.getBlockedByEmployee().getId());
+        assertEquals(exportDate, order.getDateOfExport());
+        assertEquals(List.of(orderId), result);
+    }
+
+    @Test
     void chooseOrderDataSwitcherThrowEntityNotFoundExceptionTest() {
         String email = ModelUtils.TEST_EMAIL;
         var requestToChangeOrdersDataDto = ModelUtils.getRequestToChangeOrdersDataDTO();
@@ -249,7 +433,13 @@ class OrdersAdminsPageServiceImplTest {
         String email = ModelUtils.TEST_EMAIL;
         var requestToChangeOrdersDataDto = ModelUtils.getRequestToAddAdminCommentForOrder();
         var employee = ModelUtils.getEmployee();
-        var order = ModelUtils.getOrder();
+        var order = Order.builder()
+            .id(1L)
+            .blocked(true)
+            .blockedByEmployee(employee)
+            .events(new ArrayList<>())
+            .cancellationReason(CancellationReason.DELIVERED_HIMSELF)
+            .build();
 
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
@@ -261,11 +451,55 @@ class OrdersAdminsPageServiceImplTest {
         assertEquals(
             0,
             changeOrderResponseDto.getUnresolvedGoalsOrderId().size());
+        assertNull(order.getBlockedByEmployee());
+        assertFalse(order.isBlocked());
+        assertEquals(1, order.getEvents().size());
 
         int orderRepositoryFindByIdCalls = requestToChangeOrdersDataDto.getOrderIdsList().size();
 
         verify(employeeRepository).findByEmail(email);
         verify(orderRepository, times(orderRepositoryFindByIdCalls)).findById(anyLong());
+        verify(orderRepository, times(orderRepositoryFindByIdCalls)).save(any(Order.class));
+
+    }
+
+    @Test
+    void chooseOrdersDataSwitcherAdminCommentBlockedByAnotherEmployeeThrowExceptionTest() {
+        Long orderId = 1L;
+        String email = "test@gmail.com";
+
+        Employee employee = Employee.builder()
+            .id(1l)
+            .email(email)
+            .build();
+        Employee anotherEmployee = Employee.builder()
+            .id(2l)
+            .build();
+
+        RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToAddAdminCommentForOrder();
+
+        Order order = Order.builder()
+            .id(orderId)
+            .blocked(true)
+            .blockedByEmployee(anotherEmployee)
+            .build();
+
+        ChangeOrderResponseDTO expectedResult = ChangeOrderResponseDTO.builder()
+            .httpStatus(HttpStatus.OK)
+            .unresolvedGoalsOrderId(List.of(orderId))
+            .build();
+
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+
+        verify(orderRepository, never()).save(any(Order.class));
+
+        assertTrue(order.isBlocked());
+        assertEquals(anotherEmployee, order.getBlockedByEmployee());
+        assertNull(order.getAdminComment());
+        assertEquals(expectedResult, result);
     }
 
     @ParameterizedTest
@@ -327,14 +561,6 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void orderStatusForDevelopStageWithEmptyOrderId() {
-        ordersAdminsPageService.orderStatusForDevelopStage(Collections.emptyList(), "", 1L);
-
-        verify(orderRepository).changeStatusForAllOrders("", 1L);
-        verify(orderRepository).unblockAllOrders(1L);
-    }
-
-    @Test
     void orderStatusForDevelopStageEntityNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertEquals(List.of(1L),
@@ -350,13 +576,43 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
+    void orderStatusForDevelopStageBlockedByAnotherEmployeeThrowExceptionTest() {
+        var orderId = 1L;
+        var ordersId = List.of(orderId);
+        var newValue = "CONFIRMED";
+        var employeeId = 3L;
+        var anotherEmployeeId = 4L;
+
+        var order = Order.builder()
+            .id(1L)
+            .blocked(true)
+            .blockedByEmployee(Employee.builder()
+                .id(anotherEmployeeId).build())
+            .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.orderStatusForDevelopStage(ordersId, newValue, employeeId);
+
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository, never()).save(any(Order.class));
+
+        assertTrue(order.isBlocked());
+        assertEquals(anotherEmployeeId, order.getBlockedByEmployee().getId());
+        assertNull(order.getOrderStatus());
+        assertEquals(List.of(orderId), result);
+    }
+
+    @Test
     void responsibleEmployeeWithExistedBeforeTest() {
         String email = "test@gmail.com";
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Optional<Employee> currentEmployee = Optional.of(Employee.builder().id(2L).build());
         Optional<Position> position = Optional.of(ModelUtils.getPosition());
         Optional<Order> order = Optional.of(ModelUtils.getOrder());
 
         when(employeeRepository.findById(1L)).thenReturn(employee);
+        when(employeeRepository.findByEmail(anyString())).thenReturn(currentEmployee);
         when(positionRepository.findById(1L)).thenReturn(position);
         when(orderRepository.findById(1L)).thenReturn(order);
         when(employeeOrderPositionRepository.existsByOrderAndPosition(order.get(), position.get()))
@@ -375,10 +631,12 @@ class OrdersAdminsPageServiceImplTest {
     void responsibleEmployeeWithoutExistedBeforeTest() {
         String email = "test@gmail.com";
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Optional<Employee> currentEmployee = Optional.of(Employee.builder().id(2L).build());
         Optional<Position> position = Optional.of(ModelUtils.getPosition());
         Optional<Order> order = Optional.of(ModelUtils.getOrder());
 
         when(employeeRepository.findById(1L)).thenReturn(employee);
+        when(employeeRepository.findByEmail(anyString())).thenReturn(currentEmployee);
         when(positionRepository.findById(1L)).thenReturn(position);
         when(orderRepository.findById(1L)).thenReturn(order);
         when(employeeOrderPositionRepository.existsByOrderAndPosition(order.get(), position.get()))
@@ -424,8 +682,10 @@ class OrdersAdminsPageServiceImplTest {
         String uuid = "uuid";
         List<Long> ordersId = List.of(1L);
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Optional<Employee> currentEmployee = Optional.of(Employee.builder().id(2L).build());
 
         when(employeeRepository.findById(1L)).thenReturn(employee);
+        when(employeeRepository.findByEmail(anyString())).thenReturn(currentEmployee);
 
         assertThrows(NotFoundException.class,
             () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, uuid));
@@ -435,16 +695,48 @@ class OrdersAdminsPageServiceImplTest {
     void responsibleEmployeeCatchException() {
         String email = "test@gmail.com";
         List<Long> ordersId = List.of(1L);
+        Optional<Employee> currentEmployee = Optional.of(Employee.builder().id(2L).build());
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<Position> position = Optional.of(ModelUtils.getPosition());
 
         when(employeeRepository.findById(1L)).thenReturn(employee);
         when(positionRepository.findById(1L)).thenReturn(position);
+        when(employeeRepository.findByEmail(email)).thenReturn(currentEmployee);
 
         ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, email);
 
         verify(employeeRepository).findById(1L);
         verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void responsibleEmployeeOrderBlockedByAnotherEmployee() {
+        String email = "test@gmail.com";
+        Optional<Employee> currentEmployee = Optional.of(Employee.builder().id(2L).build());
+        Optional<Employee> blockedByEmployee = Optional.of(Employee.builder().id(3L).build());
+        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Optional<Position> position = Optional.of(ModelUtils.getPosition());
+        var ordersIds = List.of(1L);
+        Order order = ModelUtils.getOrder();
+        order.setBlocked(true);
+        order.setBlockedByEmployee(blockedByEmployee.get());
+
+        when(employeeRepository.findById(1L)).thenReturn(employee);
+        when(employeeRepository.findByEmail(email)).thenReturn(currentEmployee);
+        when(positionRepository.findById(1L)).thenReturn(position);
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.responsibleEmployee(ordersIds, "1", 1L, email);
+
+        verify(employeeRepository).findByEmail(email);
+        verify(employeeRepository).findById(1L);
+        verify(orderRepository).findById(1L);
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(eventService, never()).save(anyString(), anyString(), any(Order.class));
+
+        assertTrue(order.isBlocked());
+        assertEquals(blockedByEmployee.get(), order.getBlockedByEmployee());
+        assertEquals(ordersIds, result);
     }
 
     @Test
@@ -491,6 +783,34 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
+    void receivingStationForDevelopStageBlockedByAnotherEmployeeThrowExceptionTest() {
+        var orderId = 1L;
+        var ordersId = List.of(orderId);
+        var newValue = "2";
+        var employeeId = 3L;
+        var anotherEmployeeId = 4L;
+
+        var order = Order.builder()
+            .id(1L)
+            .blocked(true)
+            .blockedByEmployee(Employee.builder()
+                .id(anotherEmployeeId).build())
+            .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.receivingStationForDevelopStage(ordersId, newValue, employeeId);
+
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository, never()).save(any(Order.class));
+
+        assertNull(order.getReceivingStation());
+        assertTrue(order.isBlocked());
+        assertEquals(anotherEmployeeId, order.getBlockedByEmployee().getId());
+        assertEquals(List.of(orderId), result);
+    }
+
+    @Test
     void chooseOrdersDataSwitcherTestForResponsibleEmployee() {
         String email = "test@gmail.com";
         RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
@@ -522,6 +842,197 @@ class OrdersAdminsPageServiceImplTest {
         verify(employeeOrderPositionRepository, atLeast(1)).existsByOrderAndPosition(order.get(), position.get());
         verify(employeeOrderPositionRepository, atLeast(1)).findAllByOrderId(1L);
         verify(eventService, atLeast(1)).changesWithResponsibleEmployee(1L, Boolean.FALSE);
+    }
+
+    @Test
+    void chooseOrdersDataSwitcherCancellationReasonTest() {
+        Long orderId = 1L;
+        String email = "test@gmail.com";
+        Employee employee = Employee.builder()
+            .id(1l)
+            .email(email)
+            .build();
+        RequestToChangeOrdersDataDto dto = RequestToChangeOrdersDataDto.builder()
+            .columnName("cancellationReason")
+            .newValue("DELIVERED_HIMSELF")
+            .orderIdsList(List.of(orderId))
+            .build();
+        Order order = Order.builder()
+            .id(orderId)
+            .blocked(true)
+            .blockedByEmployee(employee)
+            .build();
+        Order expectedSavedOrder = Order.builder()
+            .id(orderId)
+            .cancellationReason(CancellationReason.DELIVERED_HIMSELF)
+            .build();
+
+        ChangeOrderResponseDTO expectedResult = ChangeOrderResponseDTO.builder()
+            .httpStatus(HttpStatus.OK)
+            .unresolvedGoalsOrderId(Collections.emptyList())
+            .build();
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+
+        verify(orderRepository).save(expectedSavedOrder);
+
+        assertFalse(order.isBlocked());
+        assertNull(order.getBlockedByEmployee());
+        assertEquals(CancellationReason.DELIVERED_HIMSELF, order.getCancellationReason());
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    void chooseOrdersDataSwitcherCancellationReasonBlockedByAnotherEmployeeThrowExceptionTest() {
+        Long orderId = 1L;
+        String email = "test@gmail.com";
+        Employee employee = Employee.builder()
+            .id(1l)
+            .email(email)
+            .build();
+        Employee anotherEmployee = Employee.builder()
+            .id(2l)
+            .build();
+
+        RequestToChangeOrdersDataDto dto = RequestToChangeOrdersDataDto.builder()
+            .columnName("cancellationReason")
+            .newValue("DELIVERED_HIMSELF")
+            .orderIdsList(List.of(orderId))
+            .build();
+
+        Order order = Order.builder()
+            .id(orderId)
+            .blocked(true)
+            .blockedByEmployee(anotherEmployee)
+            .build();
+
+        ChangeOrderResponseDTO expectedResult = ChangeOrderResponseDTO.builder()
+            .httpStatus(HttpStatus.OK)
+            .unresolvedGoalsOrderId(List.of(orderId))
+            .build();
+
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+
+        verify(orderRepository, never()).save(any(Order.class));
+
+        assertTrue(order.isBlocked());
+        assertEquals(anotherEmployee, order.getBlockedByEmployee());
+        assertNull(order.getCancellationReason());
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    void chooseOrdersDataSwitcherCancellationCommentTest() {
+        Long orderId = 1L;
+        var newComment = "some comment";
+        String email = "test@gmail.com";
+
+        Clock clock = Clock.fixed(Instant.parse("2023-05-25T10:15:30.00Z"), ZoneId.of("UTC"));
+        LocalDateTime dateTime = LocalDateTime.now(clock);
+
+        Employee employee = Employee.builder()
+            .id(1l)
+            .email(email)
+            .build();
+
+        RequestToChangeOrdersDataDto dto = RequestToChangeOrdersDataDto.builder()
+            .columnName("cancellationComment")
+            .newValue(newComment)
+            .orderIdsList(List.of(orderId))
+            .build();
+
+        Order order = Order.builder()
+            .id(orderId)
+            .blocked(true)
+            .blockedByEmployee(employee)
+            .events(new ArrayList<>())
+            .cancellationReason(CancellationReason.DELIVERED_HIMSELF)
+            .build();
+
+        Order expectedSavedOrder = Order.builder()
+            .id(orderId)
+            .events(new ArrayList<>())
+            .cancellationReason(CancellationReason.DELIVERED_HIMSELF)
+            .cancellationComment(newComment)
+            .build();
+
+        Event event = Event.builder()
+            .order(expectedSavedOrder)
+            .eventDate(dateTime)
+            .authorName(employee.getFirstName() + "  " + employee.getLastName())
+            .eventName(OrderHistory.ORDER_CANCELLED + "  " + newComment)
+            .build();
+
+        expectedSavedOrder.getEvents().add(event);
+
+        ChangeOrderResponseDTO expectedResult = ChangeOrderResponseDTO.builder()
+            .httpStatus(HttpStatus.OK)
+            .unresolvedGoalsOrderId(Collections.emptyList())
+            .build();
+
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        MockedStatic<LocalDateTime> localDateTime = Mockito.mockStatic(LocalDateTime.class);
+        localDateTime.when(LocalDateTime::now).thenReturn(dateTime);
+
+        var result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+
+        verify(orderRepository).save(expectedSavedOrder);
+        localDateTime.close();
+
+        assertFalse(order.isBlocked());
+        assertNull(order.getBlockedByEmployee());
+        assertEquals(List.of(event), order.getEvents());
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    void chooseOrdersDataSwitcherCancellationCommentBlockedByAnotherEmployeeThrowExceptionTest() {
+        Long orderId = 1L;
+        String email = "test@gmail.com";
+        var newComment = "some comment";
+
+        Employee employee = Employee.builder()
+            .id(1l)
+            .email(email)
+            .build();
+        Employee anotherEmployee = Employee.builder()
+            .id(2l)
+            .build();
+
+        RequestToChangeOrdersDataDto dto = RequestToChangeOrdersDataDto.builder()
+            .columnName("cancellationComment")
+            .newValue(newComment)
+            .orderIdsList(List.of(orderId))
+            .build();
+
+        Order order = Order.builder()
+            .id(orderId)
+            .blocked(true)
+            .blockedByEmployee(anotherEmployee)
+            .build();
+
+        ChangeOrderResponseDTO expectedResult = ChangeOrderResponseDTO.builder()
+            .httpStatus(HttpStatus.OK)
+            .unresolvedGoalsOrderId(List.of(orderId))
+            .build();
+
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        var result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+
+        verify(orderRepository, never()).save(any(Order.class));
+
+        assertTrue(order.isBlocked());
+        assertEquals(anotherEmployee, order.getBlockedByEmployee());
+        assertNull(order.getCancellationComment());
+        assertEquals(expectedResult, result);
     }
 
     @Test

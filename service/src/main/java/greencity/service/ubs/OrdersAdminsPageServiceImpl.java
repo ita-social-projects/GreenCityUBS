@@ -512,11 +512,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 existedOrder.getEvents().add(Event.builder()
-                        .order(existedOrder)
-                        .eventDate(LocalDateTime.now())
-                        .authorName(employee.getFirstName() + "  " + employee.getLastName())
-                        .eventName(OrderHistory.ORDER_CANCELLED + "  " + value)
-                        .build());
+                    .order(existedOrder)
+                    .eventDate(LocalDateTime.now())
+                    .authorName(employee.getFirstName() + "  " + employee.getLastName())
+                    .eventName(OrderHistory.ORDER_CANCELLED + "  " + value)
+                    .build());
                 existedOrder.setCancellationComment(value);
                 orderRepository.save(existedOrder);
             } catch (Exception e) {
