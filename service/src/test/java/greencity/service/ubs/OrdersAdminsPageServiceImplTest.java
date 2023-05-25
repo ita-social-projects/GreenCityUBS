@@ -977,13 +977,15 @@ class OrdersAdminsPageServiceImplTest {
 
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        MockedStatic<LocalDateTime> localDateTime = Mockito.mockStatic(LocalDateTime.class);
-        localDateTime.when(LocalDateTime::now).thenReturn(dateTime);
 
-        var result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+        ChangeOrderResponseDTO result;
+        try (MockedStatic<LocalDateTime> localDateTime = Mockito.mockStatic(LocalDateTime.class)) {
+            localDateTime.when(LocalDateTime::now).thenReturn(dateTime);
+
+            result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+        }
 
         verify(orderRepository).save(expectedSavedOrder);
-        localDateTime.close();
 
         assertFalse(order.isBlocked());
         assertNull(order.getBlockedByEmployee());
