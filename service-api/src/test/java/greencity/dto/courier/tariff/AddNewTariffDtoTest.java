@@ -43,7 +43,7 @@ class AddNewTariffDtoTest {
         Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
             validator.validate(dto);
 
-        assertThat(constraintViolations).hasSize(4);
+        assertThat(constraintViolations).hasSize(2);
     }
 
     @Test
