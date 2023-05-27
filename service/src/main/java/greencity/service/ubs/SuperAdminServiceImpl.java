@@ -64,13 +64,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -498,10 +492,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Set<ReceivingStation> findReceivingStationsForTariff(List<Long> receivingStationIdList) {
+        if (receivingStationIdList == null) {
+            return Collections.emptySet();
+        }
+
         Set<ReceivingStation> receivingStations = new HashSet<>(receivingStationRepository
             .findAllById(receivingStationIdList.stream().distinct().collect(Collectors.toList())));
         if (receivingStations.isEmpty()) {
-            throw new NotFoundException("List of receiving stations can not be empty");
+            throw new NotFoundException("List of receiving stations cannot be empty");
         }
         return receivingStations;
     }
@@ -550,15 +548,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .createdAt(LocalDate.now())
             .courier(courier)
             .tariffStatus(TariffStatus.NEW)
+            .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
             .creator(employeeRepository.findByUuid(uuid)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid)))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .build();
 
-        Optional<List<Long>> receivingStationsIdListOptional =
-            Optional.ofNullable(addNewTariffDto.getReceivingStationsIdList());
-        receivingStationsIdListOptional.ifPresent(receivingStationIds -> tariffsInfo
-            .setReceivingStationList(findReceivingStationsForTariff(receivingStationIds)));
         return tariffsInfoRepository.save(tariffsInfo);
     }
 

@@ -967,6 +967,25 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void addNewTariffThrowsExceptionWhenCourierHasStatusDeactivated() {
+        AddNewTariffDto addNewTariffDto = ModelUtils.getAddNewTariffDto();
+        String userUUID = "35467585763t4sfgchjfuyetf";
+        Courier courier = ModelUtils.getDeactivatedCourier();
+
+        // Mock the necessary dependencies
+        when(courierRepository.findById(addNewTariffDto.getCourierId())).thenReturn(Optional.of(courier));
+
+        // Perform the test
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.addNewTariff(addNewTariffDto, userUUID));
+
+        // Verify the interactions
+        verify(courierRepository).findById(addNewTariffDto.getCourierId());
+        verifyNoMoreInteractions(courierRepository, tariffsLocationRepository, tariffsInfoRepository,
+            employeeRepository);
+    }
+
+    @Test
     void addNewTariffThrowsException2() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
