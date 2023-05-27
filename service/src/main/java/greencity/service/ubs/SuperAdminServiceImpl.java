@@ -549,12 +549,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         TariffsInfo tariffsInfo = TariffsInfo.builder()
             .createdAt(LocalDate.now())
             .courier(courier)
-            .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
             .tariffStatus(TariffStatus.NEW)
             .creator(employeeRepository.findByUuid(uuid)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid)))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .build();
+
+        Optional<List<Long>> receivingStationsIdListOptional =
+            Optional.ofNullable(addNewTariffDto.getReceivingStationsIdList());
+        receivingStationsIdListOptional.ifPresent(receivingStationIds -> tariffsInfo
+            .setReceivingStationList(findReceivingStationsForTariff(receivingStationIds)));
         return tariffsInfoRepository.save(tariffsInfo);
     }
 
