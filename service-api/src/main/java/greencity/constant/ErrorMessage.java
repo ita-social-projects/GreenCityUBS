@@ -76,6 +76,7 @@ public final class ErrorMessage {
     public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
+    public static final String CANNOT_CREATE_TARIFF = "Cannot create tariff. Courier is deactivated with id: ";
     public static final String TO_MUCH_BIG_BAG_EXCEPTION = "You choose to much big bag's max amount is: ";
     public static final String PRICE_OF_ORDER_GREATER_THAN_LIMIT =
         "The price of you're order without discount is greater than allowable limit: ";
@@ -132,6 +133,9 @@ public final class ErrorMessage {
         "Tariff has not been activated. Please set limits for tariff.";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS =
         "Tariff has not been activated. Please add package for tariff.";
+
+    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER =
+        "Tariff has not been activated. Courier deactivated with id: ";
     public static final String UNRESOLVABLE_TARIFF_STATUS = "Unresolvable tariff status. Please choose Active "
         + "or Deactivated.";
     public static final String COLUMN_WIDTH_INFO_NOT_FOUND =

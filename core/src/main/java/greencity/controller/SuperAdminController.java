@@ -659,7 +659,7 @@ class SuperAdminController {
      * @author Julia Seti
      */
     @ApiOperation(value = "Switch tariff activation status by tariff id")
-    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_TARIFF', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_PRICING_CARD', authentication)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -733,7 +733,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_TARIFF', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_PRICING_CARD', authentication)")
     @PostMapping("/deactivate")
     public ResponseEntity<HttpStatus> deactivateTariffForChosenParam(
         @RequestParam(name = "regionsIds", required = false) Optional<List<Long>> regionsIds,

@@ -1,10 +1,11 @@
 package greencity.dto;
 
 import lombok.*;
+import org.springframework.lang.Nullable;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Getter
@@ -14,14 +15,14 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 public class AddNewTariffDto {
-    @NotNull
+    @Nullable
     @Min(1)
     private Long regionId;
     @NotNull
     @Min(1)
     private Long courierId;
-    @NotEmpty
+    @Size(min = 1)
     private List<@Min(1) Long> locationIdList;
-    @NotNull
+    @Nullable
     private List<@Min(1) Long> receivingStationsIdList;
 }
