@@ -986,6 +986,30 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void addNewTariffThrowsExceptionWhenListOfReceivingStationIsEmpty() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        dto.setReceivingStationsIdList(null);
+
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(employeeRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.ofNullable(getEmployee()));
+        when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
+            .thenReturn(Collections.emptyList());
+        when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(),
+            dto.getRegionId())).thenReturn(Collections.emptyList());
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+
+        verify(courierRepository).findById(1L);
+        verify(employeeRepository).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(tariffsInfoRepository, times(1)).save(any());
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
+        verify(locationRepository).findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId());
+        verify(employeeRepository, never()).findAllByEmployeePositionId(6L);
+    }
+
+    @Test
     void addNewTariffThrowsException2() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
