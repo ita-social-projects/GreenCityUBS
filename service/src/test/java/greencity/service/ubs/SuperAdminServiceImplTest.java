@@ -1623,6 +1623,23 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void switchTariffStatusFromWhenCourierDeactivatedThrowBadRequestException() {
+        TariffsInfo tariffInfo = ModelUtils.getTariffsInfoDeactivated();
+        tariffInfo.setCourier(ModelUtils.getDeactivatedCourier());
+
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+
+        Throwable t = assertThrows(BadRequestException.class,
+            () -> superAdminService.switchTariffStatus(1L, "Active"));
+        assertEquals(String.format(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER +
+            tariffInfo.getCourier().getId()),
+            t.getMessage());
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository, never()).save(tariffInfo);
+    }
+
+    @Test
     void editLocation() {
         Location location = ModelUtils.getLocation();
         when(locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
