@@ -2533,6 +2533,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static Courier getDeactivatedCourier() {
+        return Courier.builder()
+            .id(1L)
+            .courierStatus(CourierStatus.DEACTIVATED)
+            .nameUk("Тест")
+            .nameEn("Test")
+            .build();
+    }
+
     public static CourierDto getCourierDto() {
         return CourierDto.builder()
             .courierId(1L)
