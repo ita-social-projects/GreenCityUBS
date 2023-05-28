@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
@@ -24,7 +25,7 @@ public class AddNewTariffDto {
     @NotNull
     @Min(1)
     private Long courierId;
-    @Size(min = 1)
+    @NotEmpty
     private List<@Min(1) Long> locationIdList;
     private List<@Min(1) Long> receivingStationsIdList;
 }

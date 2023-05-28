@@ -35,12 +35,8 @@ class AddNewTariffDtoTest {
     }
 
     @Test
-    void addNewTariffDtoWithNullAndEmptyFieldsTest() {
-        AddNewTariffDto dto = new AddNewTariffDto(
-            null,
-            null,
-            Collections.emptyList(),
-            null);
+    void addNewTariffDtoWithValidNullFieldsTest() {
+        var dto = ModelUtils.getAddNewTariffWithNullFieldsDto();
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         final Validator validator = factory.getValidator();
@@ -48,7 +44,7 @@ class AddNewTariffDtoTest {
         Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
             validator.validate(dto);
 
-        assertThat(constraintViolations).hasSize(2);
+        assertThat(constraintViolations).isEmpty();
     }
 
     @SneakyThrows
@@ -73,7 +69,7 @@ class AddNewTariffDtoTest {
     private static Stream<Arguments> provideFieldsAndInvalidValues() {
         return Stream.of(
             Arguments.of(null, List.of()),
-            Arguments.of(-1L, List.of(-1L)),
+            Arguments.of(-2L, List.of()),
             Arguments.of(0L, List.of(0L)));
     }
 }
