@@ -72,6 +72,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 @org.springframework.stereotype.Service
 @Data
@@ -498,6 +499,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Set<ReceivingStation> findReceivingStationsForTariff(List<Long> receivingStationIdList) {
+        if (receivingStationIdList == null) {
+            return Collections.emptySet();
+        }
+
         Set<ReceivingStation> receivingStations = new HashSet<>(receivingStationRepository
             .findAllById(receivingStationIdList.stream().distinct().collect(Collectors.toList())));
         if (receivingStations.isEmpty()) {
@@ -515,6 +520,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public AddNewTariffResponseDto addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
         Courier courier = tryToFindCourier(addNewTariffDto.getCourierId());
+        checkIfCourierHasStatusDeactivated(courier);
         List<Long> idListToCheck = new ArrayList<>(addNewTariffDto.getLocationIdList());
         final var tariffForLocationAndCourierAlreadyExistIdList =
             verifyIfTariffExists(idListToCheck, addNewTariffDto.getCourierId());
@@ -536,6 +542,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfoRepository.save(tariffsInfo);
         updateEmployeeTariffsInfoMapping(tariffsInfo);
         return new AddNewTariffResponseDto(tariffForLocationAndCourierAlreadyExistIdList, idListToCheck);
+    }
+
+    private void checkIfCourierHasStatusDeactivated(Courier courier) {
+        if (courier.getCourierStatus().equals(CourierStatus.DEACTIVATED)) {
+            throw new BadRequestException(ErrorMessage.CANNOT_CREATE_TARIFF + courier.getId());
+        }
     }
 
     private TariffsInfo createTariff(AddNewTariffDto addNewTariffDto, String uuid, Courier courier) {
@@ -757,6 +769,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         if (tariffsInfo.getMin() == null && tariffsInfo.getMax() == null) {
             throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS);
+        }
+        if (tariffsInfo.getCourier().getCourierStatus().equals(CourierStatus.DEACTIVATED)) {
+            throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER
+                + tariffsInfo.getCourier().getId());
         }
     }
 

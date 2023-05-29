@@ -1,6 +1,11 @@
 package greencity.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -14,7 +19,6 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 public class AddNewTariffDto {
-    @NotNull
     @Min(1)
     private Long regionId;
     @NotNull
@@ -22,6 +26,5 @@ public class AddNewTariffDto {
     private Long courierId;
     @NotEmpty
     private List<@Min(1) Long> locationIdList;
-    @NotNull
     private List<@Min(1) Long> receivingStationsIdList;
 }
