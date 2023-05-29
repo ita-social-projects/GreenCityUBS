@@ -22,4 +22,5 @@ public class EditTariffDto {
     private List<@Min(1) Long> locationIds;
     @NotEmpty
     private List<@Min(1) Long> receivingStationIds;
+    private Long courierId;
 }
