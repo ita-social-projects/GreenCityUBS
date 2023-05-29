@@ -99,6 +99,7 @@ public final class ErrorMessage {
     public static final String CANNOT_ACCESS_PERSONAL_INFO = "Cannot access another user's personal info";
     public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =
         "Cannot access another user's order cancellation reason";
+    public static final String CANNOT_CREATE_TARIFF = "Cannot create tariff. Courier is deactivated with id: ";
     public static final String USER_WITH_THIS_EMAIL_DOES_NOT_EXIST = "User with this email does not exist: ";
     public static final String LANGUAGE_ERROR = "Invalid language code";
     public static final String TARIFF_NOT_FOUND = "Couldn't found tariff with id: ";
@@ -132,6 +133,8 @@ public final class ErrorMessage {
         "Tariff has not been activated. Please set limits for tariff.";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS =
         "Tariff has not been activated. Please add package for tariff.";
+    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER =
+        "Tariff has not been activated. Courier deactivated with id: ";
     public static final String UNRESOLVABLE_TARIFF_STATUS = "Unresolvable tariff status. Please choose Active "
         + "or Deactivated.";
     public static final String COLUMN_WIDTH_INFO_NOT_FOUND =

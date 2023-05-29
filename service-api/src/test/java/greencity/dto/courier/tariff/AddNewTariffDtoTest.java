@@ -2,7 +2,11 @@ package greencity.dto.courier.tariff;
 
 import greencity.ModelUtils;
 import greencity.dto.AddNewTariffDto;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -11,6 +15,7 @@ import javax.validation.ValidatorFactory;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,12 +35,27 @@ class AddNewTariffDtoTest {
     }
 
     @Test
-    void addNewTariffDtoWithNullAndEmptyFieldsTest() {
+    void addNewTariffDtoWithValidNullFieldsTest() {
+        var dto = ModelUtils.getAddNewTariffWithNullFieldsDto();
+
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        final Validator validator = factory.getValidator();
+
+        Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
+            validator.validate(dto);
+
+        assertThat(constraintViolations).isEmpty();
+    }
+
+    @SneakyThrows
+    @ParameterizedTest
+    @MethodSource("provideFieldsAndInvalidValues")
+    void addNewTariffDtoWithInvalidValuesTest(Long courierId, List<Long> locationIdList) {
         AddNewTariffDto dto = new AddNewTariffDto(
-            null,
-            null,
-            Collections.emptyList(),
-            null);
+            0L,
+            courierId,
+            locationIdList,
+            List.of(0L));
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         final Validator validator = factory.getValidator();
@@ -46,20 +66,10 @@ class AddNewTariffDtoTest {
         assertThat(constraintViolations).hasSize(4);
     }
 
-    @Test
-    void addNewTariffDtoWithInvalidValuesTest() {
-        AddNewTariffDto dto = new AddNewTariffDto(
-            0L,
-            0L,
-            List.of(0L),
-            List.of(0L));
-
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        final Validator validator = factory.getValidator();
-
-        Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
-            validator.validate(dto);
-
-        assertThat(constraintViolations).hasSize(4);
+    private static Stream<Arguments> provideFieldsAndInvalidValues() {
+        return Stream.of(
+            Arguments.of(null, List.of()),
+            Arguments.of(-2L, List.of()),
+            Arguments.of(0L, List.of(0L)));
     }
 }
