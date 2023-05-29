@@ -135,6 +135,8 @@ public final class ErrorMessage {
         "Tariff has not been activated. Please add package for tariff.";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER =
         "Tariff has not been activated. Courier deactivated with id: ";
+    public static final String TARIFF_EDIT_RESTRICTION_DUE_TO_DEACTIVATED_COURIER =
+        "Tariff has not been edited. Courier deactivated with id: ";
     public static final String UNRESOLVABLE_TARIFF_STATUS = "Unresolvable tariff status. Please choose Active "
         + "or Deactivated.";
     public static final String COLUMN_WIDTH_INFO_NOT_FOUND =

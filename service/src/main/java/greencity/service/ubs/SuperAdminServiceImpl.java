@@ -656,6 +656,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void editTariff(Long id, EditTariffDto dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(id);
         List<Location> locations = tryToFindLocationsInSameRegion(dto.getLocationIds());
+        Courier courier = courierRepository.findById(dto.getCourierId())
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
+
+        if (courier.getCourierStatus().equals(CourierStatus.DEACTIVATED)) {
+            throw new BadRequestException(ErrorMessage.TARIFF_EDIT_RESTRICTION_DUE_TO_DEACTIVATED_COURIER
+                + dto.getCourierId());
+        }
+
         checkIfLocationBelongsToAnotherTariff(dto.getLocationIds(), tariffsInfo);
         Set<ReceivingStation> receivingStations = tryToFindReceivingStations(dto.getReceivingStationIds());
         Set<TariffLocation> tariffLocations = getUpdatedTariffLocations(locations, tariffsInfo);
@@ -663,6 +671,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         tariffsInfo.setReceivingStationList(receivingStations);
         tariffsInfo.setTariffLocations(tariffLocations);
+        tariffsInfo.setCourier(courier);
 
         tariffsInfoRepository.save(tariffsInfo);
     }
