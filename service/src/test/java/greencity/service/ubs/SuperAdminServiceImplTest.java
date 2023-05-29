@@ -69,7 +69,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static greencity.ModelUtils.*;
+import static greencity.ModelUtils.TEST_USER;
+import static greencity.ModelUtils.getAllTariffsInfoDto;
+import static greencity.ModelUtils.getCourier;
+import static greencity.ModelUtils.getCourierDto;
+import static greencity.ModelUtils.getCourierDtoList;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getReceivingStation;
+import static greencity.ModelUtils.getReceivingStationDto;
+import static greencity.ModelUtils.getDeactivatedCourier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
