@@ -69,14 +69,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static greencity.ModelUtils.TEST_USER;
-import static greencity.ModelUtils.getAllTariffsInfoDto;
-import static greencity.ModelUtils.getCourier;
-import static greencity.ModelUtils.getCourierDto;
-import static greencity.ModelUtils.getCourierDtoList;
-import static greencity.ModelUtils.getEmployee;
-import static greencity.ModelUtils.getReceivingStation;
-import static greencity.ModelUtils.getReceivingStationDto;
+import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -1037,7 +1030,9 @@ class SuperAdminServiceImplTest {
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
         ReceivingStation receivingStation = ModelUtils.getReceivingStation();
         Location location = ModelUtils.getLocation();
+        Courier courier = getCourier();
 
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -1057,6 +1052,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
         verify(tariffsLocationRepository).findAllByTariffsInfo(tariffsInfo);
         verify(tariffsInfoRepository).save(tariffsInfo);
+        verify(courierRepository).findById(1L);
     }
 
     @Test
@@ -1067,7 +1063,9 @@ class SuperAdminServiceImplTest {
         ReceivingStation receivingStation = ModelUtils.getReceivingStation();
         Location location = ModelUtils.getLocation();
         List<TariffLocation> tariffLocations = ModelUtils.getTariffLocationList();
+        Courier courier = getCourier();
 
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -1089,6 +1087,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsLocationRepository).findAllByTariffsInfo(tariffsInfo);
         verify(tariffsLocationRepository).delete(tariffLocations.get(1));
         verify(tariffsInfoRepository).save(tariffsInfo);
+        verify(courierRepository).findById(1L);
     }
 
     @Test
@@ -1140,7 +1139,9 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         Location location = ModelUtils.getLocation();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation2();
+        Courier courier = getCourier();
 
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -1152,6 +1153,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsInfoRepository).findById(1L);
         verify(locationRepository).findById(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
+        verify(courierRepository).findById(1L);
     }
 
     @Test
@@ -1160,7 +1162,9 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         Location location = ModelUtils.getLocation();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
+        Courier courier = getCourier();
 
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -1174,6 +1178,44 @@ class SuperAdminServiceImplTest {
         verify(locationRepository).findById(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
+        verify(courierRepository).findById(1L);
+    }
+
+    @Test
+    void editTariffThrowsCourierNotFoundException() {
+        EditTariffDto dto = ModelUtils.getEditTariffDto();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Location location = ModelUtils.getLocation();
+
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
+        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.editTariff(1L, dto));
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(courierRepository).findById(1L);
+        verify(locationRepository).findById(1L);
+    }
+
+    @Test
+    void editTariffThrowsCourierHasStatusDeactivatedException() {
+        EditTariffDto dto = ModelUtils.getEditTariffDto();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Location location = ModelUtils.getLocation();
+        Courier courier = getDeactivatedCourier();
+
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.editTariff(1L, dto));
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(courierRepository).findById(1L);
+        verify(locationRepository).findById(1L);
     }
 
     @Test
@@ -1183,7 +1225,9 @@ class SuperAdminServiceImplTest {
         Location location = ModelUtils.getLocation();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
         ReceivingStation receivingStation = ModelUtils.getReceivingStation();
+        Courier courier = getCourier();
 
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -1203,6 +1247,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
         verify(tariffsLocationRepository).findAllByTariffsInfo(tariffsInfo);
         verify(tariffsInfoRepository).save(tariffsInfo);
+        verify(courierRepository).findById(1L);
     }
 
     @Test
