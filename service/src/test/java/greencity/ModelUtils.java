@@ -3893,6 +3893,7 @@ public class ModelUtils {
         return EditTariffDto.builder()
             .locationIds(List.of(1L))
             .receivingStationIds(List.of(1L))
+            .courierId(1L)
             .build();
     }
 
