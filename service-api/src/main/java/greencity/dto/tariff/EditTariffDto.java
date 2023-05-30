@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
@@ -22,5 +23,6 @@ public class EditTariffDto {
     private List<@Min(1) Long> locationIds;
     @NotEmpty
     private List<@Min(1) Long> receivingStationIds;
+    @Nullable
     private Long courierId;
 }
