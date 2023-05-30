@@ -3897,6 +3897,13 @@ public class ModelUtils {
             .build();
     }
 
+    public static EditTariffDto getEditTariffDtoWithoutCourier() {
+        return EditTariffDto.builder()
+            .locationIds(List.of(1L))
+            .receivingStationIds(List.of(1L))
+            .build();
+    }
+
     public static EditTariffDto getEditTariffDtoWith2Locations() {
         return EditTariffDto.builder()
             .locationIds(List.of(1L, 2L))
