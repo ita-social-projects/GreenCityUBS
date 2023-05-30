@@ -2,7 +2,6 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
-import greencity.dto.location.LocationSummaryDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
@@ -10,13 +9,19 @@ import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
@@ -103,22 +108,5 @@ public class UserProfileController {
         @RequestParam Long id) {
         ubsClientService.markUserAsDeactivated(id);
         return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    /**
-     * Controller return info about all locations.
-     *
-     * @return {@link ResponseEntity} list of locations.
-     * @author Max Nazaruk.
-     */
-    @ApiOperation(value = "Get info about cities in each region")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationSummaryDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @GetMapping("/locations-summary")
-    public ResponseEntity<List<LocationSummaryDto>> getLocationsSummary() {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getLocationSummary());
     }
 }
