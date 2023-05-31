@@ -14,12 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
@@ -38,10 +33,8 @@ public class ManagementNotificationController {
     @ApiOperation(value = "Get all notification templates")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-templates")
     @ApiPageable
@@ -88,5 +81,26 @@ public class ManagementNotificationController {
     public ResponseEntity<NotificationTemplateWithPlatformsDto> getNotificationTemplate(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationTemplateService.findById(id));
+    }
+
+    /**
+     * Controller that change status for notification template and all platforms by
+     * id.
+     *
+     * @author Safarov Renat.
+     */
+    @ApiOperation(value = "Change notification template status by id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PutMapping("/change-template-status/{id}")
+    public ResponseEntity<HttpStatus> deactivateNotificationTemplate(
+        @PathVariable Long id, @RequestParam String status) {
+        notificationTemplateService.changeNotificationStatusById(id, status);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

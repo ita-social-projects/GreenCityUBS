@@ -127,7 +127,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_PRICE_CARD', authentication)")
     @DeleteMapping("/deleteTariffService/{id}")
     public ResponseEntity<HttpStatus> deleteTariffService(
         @Valid @PathVariable Integer id) {
@@ -153,7 +153,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_PRICE_CARD', authentication)")
     @PutMapping("/editTariffService/{id}")
     public ResponseEntity<GetTariffServiceDto> editTariffService(
         @RequestBody TariffServiceDto dto,
@@ -357,7 +357,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_LOCATION_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_LOCATION_CARD', authentication)")
     @PatchMapping("/activeLocations/{id}")
     public ResponseEntity<HttpStatus> activeLocation(
         @PathVariable Long id) {
@@ -455,7 +455,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_RECEIVING_STATION', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_STATION', authentication)")
     @PostMapping("/create-receiving-station")
     public ResponseEntity<ReceivingStationDto> createReceivingStation(@Valid AddingReceivingStationDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
@@ -476,7 +476,7 @@ class SuperAdminController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_RECEIVING_STATION', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DESTINATION_NAME', authentication)")
     @PutMapping("/update-receiving-station")
     public ResponseEntity<ReceivingStationDto> updateReceivingStation(@RequestBody @Valid ReceivingStationDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.updateReceivingStation(dto));
@@ -510,7 +510,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_RECEIVING_STATION', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DESTINATION_NAME', authentication)")
     @DeleteMapping("/delete-receiving-station/{id}")
     public ResponseEntity<HttpStatus> deleteReceivingStation(@PathVariable Long id) {
         superAdminService.deleteReceivingStation(id);
@@ -594,7 +594,7 @@ class SuperAdminController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 409, message = HttpStatuses.CONFLICT)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_PRICE_CARD', authentication)")
     @PutMapping("/editTariffInfo/{id}")
     public ResponseEntity<HttpStatus> editTariff(
         @Valid @PathVariable Long id, @Valid @RequestBody EditTariffDto dto) {
@@ -612,7 +612,7 @@ class SuperAdminController {
      * @author Julia Seti
      */
     @ApiOperation(value = "Set tariff limits")
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_PRICE_CARD', authentication)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -659,7 +659,7 @@ class SuperAdminController {
      * @author Julia Seti
      */
     @ApiOperation(value = "Switch tariff activation status by tariff id")
-    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_TARIFF', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_PRICING_CARD', authentication)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -688,7 +688,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION_NAME', authentication)")
     @PostMapping("/locations/edit")
     public ResponseEntity<HttpStatus> editLocations(@Valid @RequestBody List<EditLocationDto> editLocationDtoList) {
         superAdminService.editLocations(editLocationDtoList);
@@ -733,7 +733,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_TARIFF', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_PRICING_CARD', authentication)")
     @PostMapping("/deactivate")
     public ResponseEntity<HttpStatus> deactivateTariffForChosenParam(
         @RequestParam(name = "regionsIds", required = false) Optional<List<Long>> regionsIds,

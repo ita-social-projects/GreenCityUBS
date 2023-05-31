@@ -4,20 +4,16 @@ import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.GetReceivingStationDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Builder;
 
 import java.util.List;
 
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
+@Data
 @Builder
 public class GetTariffInfoForEmployeeDto {
     private Long id;

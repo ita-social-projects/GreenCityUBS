@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -56,7 +57,8 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     int capacity(double latitude, double longitude);
 
     /**
-     * Method returns list of not deleted {@link Address}addresses for current user.
+     * Method returns list of not deleted {@link Address} addresses for current
+     * user.
      *
      * @return list of {@link Address}.
      */
@@ -80,4 +82,26 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query(value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) FROM Address  ad WHERE ad.city = a.city)")
     List<Address> findDistinctCities();
+
+    /**
+     * Finds the actual {@link Address} associated with the given user ID.
+     *
+     * @param userId the ID of the user whose address is being searched for
+     * @return an {@link Optional} object containing the actual {@link Address}
+     *         associated with the user, or an empty {@link Optional} if no such
+     *         address is found
+     */
+    Optional<Address> findByUserIdAndActualTrue(Long userId);
+
+    /**
+     * Finds first non-deleted {@link Address} associated with the given user ID.
+     * 
+     * @param userId the ID of the user whose address is being searched for
+     * @return an {@link Optional} containing the first {@link Address} record that
+     *         matches the provided userId and has an address status other than
+     *         'DELETED', or an empty {@link Optional} if no matching record is
+     *         found
+     */
+    @Query(value = "SELECT * FROM address WHERE user_id =:userId AND status != 'DELETED' LIMIT 1", nativeQuery = true)
+    Optional<Address> findAnyByUserIdAndAddressStatusNotDeleted(Long userId);
 }

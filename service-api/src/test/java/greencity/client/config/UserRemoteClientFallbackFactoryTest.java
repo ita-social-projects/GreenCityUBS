@@ -2,7 +2,7 @@ package greencity.client.config;
 
 import greencity.client.UserRemoteClient;
 import greencity.dto.employee.EmployeeSignUpDto;
-import greencity.dto.employee.UpdateEmployeeAuthoritiesDto;
+import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.exceptions.http.RemoteServerUnavailableException;
@@ -14,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class UserRemoteClientFallbackFactoryTest {
@@ -57,6 +59,18 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
+    void getPositionsAndRelatedAuthorities() {
+        assertThrows(RemoteServerUnavailableException.class,
+            () -> client.getPositionsAndRelatedAuthorities(USER_EMAIL));
+    }
+
+    @Test
+    void getPositionsOfLoginEmployee() {
+        assertThrows(RemoteServerUnavailableException.class,
+            () -> client.getEmployeeLoginPositionNames(USER_EMAIL));
+    }
+
+    @Test
     void getPasswordStatus() {
         assertThrows(RemoteServerUnavailableException.class, () -> client.getPasswordStatus());
     }
@@ -91,9 +105,9 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
-    void updateAuthoritiesTest() {
-        UpdateEmployeeAuthoritiesDto dto = UpdateEmployeeAuthoritiesDto.builder().build();
-        assertThrows(RemoteServerUnavailableException.class, () -> client.updateAuthorities(dto));
+    void updateAuthoritiesToRelatedPositionsTest() {
+        EmployeePositionsDto dto = EmployeePositionsDto.builder().build();
+        assertThrows(RemoteServerUnavailableException.class, () -> client.updateAuthoritiesToRelatedPositions(dto));
     }
 
     @Test

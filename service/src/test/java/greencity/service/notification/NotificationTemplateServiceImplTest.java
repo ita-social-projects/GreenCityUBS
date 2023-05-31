@@ -1,10 +1,10 @@
 package greencity.service.notification;
 
-import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.entity.notifications.NotificationTemplate;
+import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationTemplateRepository;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,15 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
-import static greencity.constant.ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_PAGEABLE;
+import static greencity.ModelUtils.TEMPLATE_PAGE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+import static greencity.constant.ErrorMessage.NOTIFICATION_STATUS_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID;
+import static greencity.enums.NotificationStatus.INACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -38,10 +46,10 @@ class NotificationTemplateServiceImplTest {
 
     @Test
     void findAll() {
-        Pageable pageable = ModelUtils.TEST_NOTIFICATION_PAGEABLE;
-        Page<NotificationTemplate> page = ModelUtils.TEMPLATE_PAGE;
-        var notification = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
-        var notificationDto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
+        Pageable pageable = TEST_NOTIFICATION_PAGEABLE;
+        Page<NotificationTemplate> page = TEMPLATE_PAGE;
+        var notification = TEST_NOTIFICATION_TEMPLATE;
+        var notificationDto = TEST_NOTIFICATION_TEMPLATE_DTO;
 
         when(templateRepository.findAll(pageable)).thenReturn(page);
         when(modelMapper.map(notification, NotificationTemplateDto.class)).thenReturn(notificationDto);
@@ -60,22 +68,23 @@ class NotificationTemplateServiceImplTest {
     void updateTest() {
         Long id = 1L;
 
-        var dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
-        var platformDto = dto.getPlatforms().get(0);
+        var updateDto = TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+        var mainInfoDto = updateDto.getNotificationTemplateMainInfoDto();
+        var platformDto = updateDto.getPlatforms().get(0);
 
-        var notification = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
+        var notification = TEST_NOTIFICATION_TEMPLATE;
         var platform = notification.getNotificationPlatforms().get(0);
 
         when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
 
-        notificationService.update(id, dto);
+        notificationService.update(id, updateDto);
 
-        assertEquals(dto.getTitle(), notification.getTitle());
-        assertEquals(dto.getTitleEng(), notification.getTitleEng());
-        assertEquals(dto.getType(), notification.getNotificationType());
-        assertEquals(dto.getTrigger(), notification.getTrigger());
-        assertEquals(dto.getTime(), notification.getTime());
-        assertEquals(dto.getSchedule(), notification.getSchedule());
+        assertEquals(mainInfoDto.getTitle(), notification.getTitle());
+        assertEquals(mainInfoDto.getTitleEng(), notification.getTitleEng());
+        assertEquals(mainInfoDto.getType(), notification.getNotificationType());
+        assertEquals(mainInfoDto.getTrigger(), notification.getTrigger());
+        assertEquals(mainInfoDto.getTime(), notification.getTime());
+        assertEquals(mainInfoDto.getSchedule(), notification.getSchedule());
 
         assertEquals(platformDto.getBody(), platform.getBody());
         assertEquals(platformDto.getBodyEng(), platform.getBodyEng());
@@ -88,12 +97,11 @@ class NotificationTemplateServiceImplTest {
     void updateThrowNotFoundExceptionForNotificationTemplateTest() {
         Long id = 1L;
 
-        var dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
-
         when(templateRepository.findById(id)).thenReturn(Optional.empty());
 
-        var exception = assertThrows(NotFoundException.class, () -> notificationService.update(id, dto));
-        assertEquals(NOTIFICATION_TEMPLATE_NOT_FOUND, exception.getMessage());
+        var exception = assertThrows(NotFoundException.class,
+            () -> notificationService.update(id, TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO));
+        assertEquals(NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID + id, exception.getMessage());
 
         verify(templateRepository).findById(id);
     }
@@ -102,12 +110,10 @@ class NotificationTemplateServiceImplTest {
     void updateThrowNotFoundExceptionForNotificationPlatform() {
         Long id = 1L;
 
-        var dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+        var dto = TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
         dto.getPlatforms().get(0).setId(100L);
 
-        var notification = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
-
-        when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
+        when(templateRepository.findById(id)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
         var exception = assertThrows(NotFoundException.class, () -> notificationService.update(id, dto));
         assertEquals(ErrorMessage.NOTIFICATION_PLATFORM_NOT_FOUND, exception.getMessage());
@@ -118,12 +124,12 @@ class NotificationTemplateServiceImplTest {
     @Test
     void findByIdTest() {
         Long id = 1L;
-        var notification = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
+        var notification = TEST_NOTIFICATION_TEMPLATE;
 
         when(templateRepository.findById(id))
             .thenReturn(Optional.of(notification));
         when(modelMapper.map(notification, NotificationTemplateWithPlatformsDto.class))
-            .thenReturn(ModelUtils.TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO);
+            .thenReturn(TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO);
 
         notificationService.findById(id);
 
@@ -139,9 +145,51 @@ class NotificationTemplateServiceImplTest {
 
         var exception = assertThrows(NotFoundException.class, () -> notificationService.findById(id));
 
-        assertEquals(NOTIFICATION_TEMPLATE_NOT_FOUND, exception.getMessage());
+        assertEquals(NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID + id, exception.getMessage());
 
         verify(templateRepository).findById(id);
         verify(modelMapper, never()).map(any(), any());
+    }
+
+    @Test
+    void changeNotificationStatusByIdTest() {
+        Long id = 1L;
+        var notificationTemplate = TEST_NOTIFICATION_TEMPLATE;
+
+        when(templateRepository.findById(id)).thenReturn(Optional.of(notificationTemplate));
+
+        notificationService.changeNotificationStatusById(id, INACTIVE.name());
+
+        assertEquals(INACTIVE, notificationTemplate.getNotificationStatus());
+        notificationTemplate.getNotificationPlatforms()
+            .forEach(platform -> assertEquals(INACTIVE, platform.getNotificationStatus()));
+
+        verify(templateRepository).findById(id);
+    }
+
+    @Test
+    void changeNotificationStatusByIdThrowBadRequestException() {
+        Long id = 1L;
+        String status = "FAKE";
+
+        var exception = assertThrows(
+            BadRequestException.class, () -> notificationService.changeNotificationStatusById(id, status));
+        assertEquals(NOTIFICATION_STATUS_DOES_NOT_EXIST + status, exception.getMessage());
+
+        verify(templateRepository, never()).findById(id);
+    }
+
+    @Test
+    void changeNotificationStatusByIdThrowNotFoundExceptionTest() {
+        Long id = 1L;
+        String newStatus = INACTIVE.toString();
+
+        when(templateRepository.findById(id)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(
+            NotFoundException.class, () -> notificationService.changeNotificationStatusById(id, newStatus));
+        assertEquals(NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID + id, exception.getMessage());
+
+        verify(templateRepository).findById(id);
     }
 }

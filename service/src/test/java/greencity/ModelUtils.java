@@ -47,12 +47,17 @@ import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
-import greencity.dto.location.LocationSummaryDto;
-import greencity.dto.location.LocationToCityDto;
 import greencity.dto.location.LocationTranslationDto;
 import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
-import greencity.dto.notification.*;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationPlatformDto;
+import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
@@ -87,11 +92,13 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
+import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
@@ -126,6 +133,7 @@ import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
@@ -175,7 +183,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static greencity.enums.NotificationReceiverType.*;
+import static greencity.enums.NotificationReceiverType.EMAIL;
+import static greencity.enums.NotificationReceiverType.MOBILE;
+import static greencity.enums.NotificationReceiverType.SITE;
 import static greencity.enums.NotificationStatus.ACTIVE;
 import static greencity.enums.NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID;
 import static greencity.enums.NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS;
@@ -195,6 +205,7 @@ public class ModelUtils {
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
     public static final Bag TEST_BAG = createBag();
+    public static final BagForUserDto TEST_BAG_FOR_USER_DTO = createBagForUserDto();
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
     public static final List<OrderDetailInfoDto> TEST_ORDER_DETAILS_INFO_DTO_LIST =
@@ -477,6 +488,7 @@ public class ModelUtils {
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
+            .events(new ArrayList<>())
             .build();
     }
 
@@ -1102,6 +1114,7 @@ public class ModelUtils {
             .lastName("Петренко")
             .phoneNumber("+380935577455")
             .email("test@gmail.com")
+            .uuid("Test")
             .employeeStatus(EmployeeStatus.ACTIVE)
             .employeePosition(Set.of(Position.builder()
                 .id(1L)
@@ -1359,15 +1372,6 @@ public class ModelUtils {
             .recipientPhoneNumber("095123456").build();
     }
 
-    public static UserProfileDto getUserProfileDto() {
-        return UserProfileDto.builder()
-            .addressDto(List.of(addressDto()))
-            .botList(botList())
-            .telegramIsNotify(false)
-            .viberIsNotify(false)
-            .build();
-    }
-
     public static List<AddressDto> addressDtoList() {
         List<AddressDto> list = new ArrayList<>();
         list.add(AddressDto.builder()
@@ -1380,6 +1384,7 @@ public class ModelUtils {
             .district("Zaliznuchnuy")
             .city("Lviv")
             .actual(false)
+            .placeId("place_id")
             .build());
         list.add(AddressDto.builder().id(2L)
             .entranceNumber("9a")
@@ -1390,6 +1395,7 @@ public class ModelUtils {
             .district("Zaliznuchnuy")
             .city("Lviv")
             .actual(false)
+            .placeId("place_id")
             .build());
         return list;
     }
@@ -2071,11 +2077,31 @@ public class ModelUtils {
 
     private static Bag createBag() {
         return Bag.builder()
-            .id(2)
+            .id(1)
             .name("Name")
             .nameEng("NameEng")
             .capacity(20)
+            .price(100)
+            .commission(0)
             .fullPrice(100)
+            .description("some_description")
+            .descriptionEng("some_eng_description")
+            .limitIncluded(true)
+            .createdAt(LocalDate.now())
+            .createdBy(Employee.builder()
+                .id(1L)
+                .build())
+            .build();
+    }
+
+    private static BagForUserDto createBagForUserDto() {
+        return BagForUserDto.builder()
+            .service("some_description")
+            .serviceEng("some_eng_description")
+            .capacity(20)
+            .fullPrice(100)
+            .count(22)
+            .totalPrice(2200)
             .build();
     }
 
@@ -2204,13 +2230,7 @@ public class ModelUtils {
 
     private static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
-            .type(UNPAID_ORDER)
-            .trigger(ORDER_NOT_PAID_FOR_3_DAYS)
-            .time(AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
-            .schedule("0 0 18 * * ?")
-            .title("Title")
-            .titleEng("TitleEng")
-            .notificationStatus(ACTIVE)
+            .notificationTemplateMainInfoDto(createNotificationTemplateMainInfoDto())
             .platforms(List.of(
                 createNotificationPlatformDto(SITE)))
             .build();
@@ -2448,7 +2468,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static Optional<Bag> getBag() {
+    public static Optional<Bag> getOptionalBag() {
         return Optional.of(Bag.builder()
             .id(1)
             .capacity(120)
@@ -2462,6 +2482,22 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .limitIncluded(false)
             .build());
+    }
+
+    public static Bag getBag() {
+        return Bag.builder()
+            .id(1)
+            .capacity(120)
+            .commission(50)
+            .price(120)
+            .fullPrice(170)
+            .createdAt(LocalDate.now())
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .limitIncluded(true)
+            .build();
     }
 
     public static TariffServiceDto getTariffServiceDto() {
@@ -2489,33 +2525,19 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<Location> getLocationForSummary() {
-        return List.of(Location.builder()
-            .locationStatus(LocationStatus.ACTIVE)
-            .nameEn("Kyiv")
-            .nameUk("Київ")
-            .coordinates(Coordinates.builder()
-                .longitude(3.21d)
-                .latitude(5.43d).build())
-            .region(getRegionForMapper())
-            .id(1L)
-            .build(),
-            Location.builder()
-                .locationStatus(LocationStatus.ACTIVE)
-                .nameEn("Bucha")
-                .nameUk("Буча")
-                .coordinates(Coordinates.builder()
-                    .longitude(4.32d)
-                    .latitude(4.21d).build())
-                .region(getRegionForMapper())
-                .id(11L)
-                .build());
-    }
-
     public static Courier getCourier() {
         return Courier.builder()
             .id(1L)
             .courierStatus(CourierStatus.ACTIVE)
+            .nameUk("Тест")
+            .nameEn("Test")
+            .build();
+    }
+
+    public static Courier getDeactivatedCourier() {
+        return Courier.builder()
+            .id(1L)
+            .courierStatus(CourierStatus.DEACTIVATED)
             .nameUk("Тест")
             .nameEn("Test")
             .build();
@@ -2849,19 +2871,19 @@ public class ModelUtils {
 
     public static PaymentTableInfoDto getPaymentTableInfoDto() {
         return PaymentTableInfoDto.builder()
-            .paidAmount(200L)
-            .unPaidAmount(0L)
-            .paymentInfoDtos(List.of(getInfoPayment().setAmount(10L)))
-            .overpayment(800L)
+            .paidAmount(200d)
+            .unPaidAmount(0d)
+            .paymentInfoDtos(List.of(getInfoPayment().setAmount(10d)))
+            .overpayment(800d)
             .build();
     }
 
     public static PaymentTableInfoDto getPaymentTableInfoDto2() {
         return PaymentTableInfoDto.builder()
-            .paidAmount(0L)
-            .unPaidAmount(0L)
+            .paidAmount(0d)
+            .unPaidAmount(0d)
             .paymentInfoDtos(Collections.emptyList())
-            .overpayment(400L)
+            .overpayment(400d)
             .build();
     }
 
@@ -2869,7 +2891,7 @@ public class ModelUtils {
         return PaymentInfoDto.builder()
             .comment("ddd")
             .id(1L)
-            .amount(1000L)
+            .amount(1000d)
             .build();
     }
 
@@ -3074,15 +3096,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static Bag bagDtoClient() {
-        return Bag.builder()
-            .id(1)
-            .price(1)
-            .fullPrice(1)
-            .commission(2)
-            .build();
-    }
-
     public static UserProfileUpdateDto updateUserProfileDto() {
         return UserProfileUpdateDto.builder()
             .recipientName("Taras")
@@ -3141,46 +3154,11 @@ public class ModelUtils {
             .build();
     }
 
-    public static Region getRegionForSummary() {
-        return Region.builder()
-            .id(1L)
-            .ukrName("Київська область")
-            .enName("Kyiv region")
-            .locations(getLocationForSummary())
-            .build();
-    }
-
     public static LocationInfoDto getInfoAboutLocationDto() {
         return LocationInfoDto.builder()
             .regionId(1L)
             .regionTranslationDtos(getRegionTranslationsDto())
             .locationsDto(getLocationsDto()).build();
-    }
-
-    public static List<LocationToCityDto> getCitiesInUa() {
-        return List.of(
-            LocationToCityDto.builder().cityName("Київ").cityId(1L)
-                .coordinates(CoordinatesDto.builder().longitude(3.21d).latitude(5.43d).build()).build(),
-            LocationToCityDto.builder().cityName("Буча").cityId(11L)
-                .coordinates(CoordinatesDto.builder().longitude(4.32d).latitude(4.21d).build()).build());
-    }
-
-    public static List<LocationToCityDto> getCitiesInEn() {
-        return List.of(
-            LocationToCityDto.builder().cityName("Kyiv").cityId(1L)
-                .coordinates(CoordinatesDto.builder().longitude(3.21d).latitude(5.43d).build()).build(),
-            LocationToCityDto.builder().cityName("Bucha").cityId(11L)
-                .coordinates(CoordinatesDto.builder().longitude(4.32d).latitude(4.21d).build()).build());
-    }
-
-    public static LocationSummaryDto getInfoAboutLocationSummaryDto() {
-        return LocationSummaryDto.builder()
-            .regionId(1L)
-            .nameUa("Київська область")
-            .nameEn("Kyiv region")
-            .citiesEn(getCitiesInEn())
-            .citiesUa(getCitiesInUa())
-            .build();
     }
 
     public static List<LocationsDto> getLocationsDto() {
@@ -3460,19 +3438,6 @@ public class ModelUtils {
                 .comment("avb")
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .build();
-    }
-
-    public static Order getOrdersStatusAdjustmentDto() {
-        return Order.builder()
-            .id(1L)
-            .payment(List.of(Payment.builder().id(1L).build()))
-            .user(User.builder().id(1L).build())
-            .imageReasonNotTakingBags(List.of("ss"))
-            .reasonNotTakingBagDescription("aa")
-            .orderStatus(OrderStatus.ADJUSTMENT)
-            .counterOrderPaymentId(1L)
-            .writeOffStationSum(50L)
             .build();
     }
 
@@ -3894,6 +3859,31 @@ public class ModelUtils {
             .build();
     }
 
+    public static TariffsInfo getTariffsInfoWithStatusNew() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .tariffsInfo(ModelUtils.getTariffInfoWithLimitOfBags())
+                .location(Location.builder().id(1L)
+                    .region(ModelUtils.getRegion())
+                    .nameUk("Київ")
+                    .nameEn("Kyiv")
+                    .coordinates(ModelUtils.getCoordinates())
+                    .build())
+                .build()))
+            .tariffStatus(TariffStatus.NEW)
+            .creator(ModelUtils.getEmployee())
+            .createdAt(LocalDate.of(2022, 10, 20))
+            .orders(Collections.emptyList())
+            .receivingStationList(Set.of(ReceivingStation.builder()
+                .id(1L)
+                .name("Петрівка")
+                .createdBy(ModelUtils.createEmployee())
+                .build()))
+            .build();
+    }
+
     public static TariffsInfo getTariffInfoWithLimitOfBags() {
         return TariffsInfo.builder()
             .id(1L)
@@ -3948,6 +3938,14 @@ public class ModelUtils {
     }
 
     public static EditTariffDto getEditTariffDto() {
+        return EditTariffDto.builder()
+            .locationIds(List.of(1L))
+            .receivingStationIds(List.of(1L))
+            .courierId(1L)
+            .build();
+    }
+
+    public static EditTariffDto getEditTariffDtoWithoutCourier() {
         return EditTariffDto.builder()
             .locationIds(List.of(1L))
             .receivingStationIds(List.of(1L))
@@ -4059,6 +4057,7 @@ public class ModelUtils {
             .houseNumber("1")
             .houseCorpus("2")
             .entranceNumber("3")
+            .placeId("place_id")
             .build();
     }
 
@@ -4078,6 +4077,7 @@ public class ModelUtils {
             .cityEn("fake street")
             .districtEn("fake district")
             .regionEn("fake region")
+            .placeId("place_id")
             .build();
     }
 
@@ -4100,6 +4100,7 @@ public class ModelUtils {
             .cityEn("fake street")
             .districtEn(withDistrictRegionHouse ? "fake district" : null)
             .regionEn(withDistrictRegionHouse ? "fake region" : null)
+            .placeId("place_id")
             .build();
     }
 
@@ -4472,6 +4473,34 @@ public class ModelUtils {
         return NotTakenOrderReasonDto.builder()
             .description("Some description")
             .images(List.of("image1", "image2"))
+            .build();
+    }
+
+    public static TableColumnWidthForEmployee getTestTableColumnWidth() {
+        return TableColumnWidthForEmployee.builder()
+            .employee(getEmployee())
+            .address(50)
+            .amountDue(60)
+            .bagsAmount(150)
+            .city(200)
+            .build();
+    }
+
+    public static ColumnWidthDto getTestColumnWidthDto() {
+        return ColumnWidthDto.builder()
+            .address(100)
+            .amountDue(20)
+            .bagsAmount(500)
+            .city(320)
+            .clientPhone(340)
+            .commentForOrderByClient(600)
+            .build();
+    }
+
+    public static PositionAuthoritiesDto getPositionAuthoritiesDto() {
+        return PositionAuthoritiesDto.builder()
+            .positionId(List.of(1L))
+            .authorities(List.of("Auth"))
             .build();
     }
 }

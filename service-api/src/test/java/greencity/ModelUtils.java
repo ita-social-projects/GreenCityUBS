@@ -116,6 +116,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static AddNewTariffDto getAddNewTariffWithNullFieldsDto() {
+        return AddNewTariffDto.builder()
+            .regionId(null)
+            .courierId(1L)
+            .locationIdList(List.of(1L))
+            .receivingStationsIdList(null)
+            .build();
+    }
+
     public static PositionDto getEmployeePosition() {
         return PositionDto.builder()
             .id(1L)

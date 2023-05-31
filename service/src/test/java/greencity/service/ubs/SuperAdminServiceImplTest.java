@@ -77,6 +77,7 @@ import static greencity.ModelUtils.getCourierDtoList;
 import static greencity.ModelUtils.getEmployee;
 import static greencity.ModelUtils.getReceivingStation;
 import static greencity.ModelUtils.getReceivingStationDto;
+import static greencity.ModelUtils.getDeactivatedCourier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -188,7 +189,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void getTariffServiceTest() {
-        List<Bag> bags = List.of(ModelUtils.getBag().get());
+        List<Bag> bags = List.of(ModelUtils.getOptionalBag().get());
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
 
         when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
@@ -214,15 +215,65 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deleteTariffServiceTest() {
-        Optional<Bag> bag = ModelUtils.getBag();
-        when(bagRepository.findById(1)).thenReturn(bag);
+    void deleteTariffServiceWhenTariffBagsWithLimits() {
+        Bag bag = ModelUtils.getBag();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        bag.setTariffsInfo(tariffsInfo);
+
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        doNothing().when(bagRepository).delete(bag);
+        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
         superAdminService.deleteTariffService(1);
-        verify(bagRepository).delete(bag.get());
+        assertEquals(TariffStatus.ACTIVE, tariffsInfo.getTariffStatus());
+        verify(bagRepository).findById(1);
+        verify(bagRepository).delete(bag);
+        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository, never()).save(tariffsInfo);
     }
 
     @Test
-    void deleteTariffServiceThrowException() {
+    void deleteTariffServiceWhenTariffBagsListIsEmpty() {
+        Bag bag = ModelUtils.getBag();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        bag.setTariffsInfo(tariffsInfo);
+        TariffsInfo tariffsInfoNew = ModelUtils.getTariffsInfoWithStatusNew();
+        tariffsInfoNew.setBags(Collections.emptyList());
+
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        doNothing().when(bagRepository).delete(bag);
+        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
+        when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
+        superAdminService.deleteTariffService(1);
+        assertEquals(TariffStatus.NEW, tariffsInfoNew.getTariffStatus());
+        verify(bagRepository).findById(1);
+        verify(bagRepository).delete(bag);
+        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository).save(tariffsInfo);
+    }
+
+    @Test
+    void deleteTariffServiceWhenTariffBagsWithoutLimits() {
+        Bag bag = ModelUtils.getBag();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        bag.setLimitIncluded(false);
+        bag.setTariffsInfo(tariffsInfo);
+        TariffsInfo tariffsInfoNew = ModelUtils.getTariffsInfoWithStatusNew();
+        tariffsInfoNew.setBags(Collections.emptyList());
+
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        doNothing().when(bagRepository).delete(bag);
+        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
+        when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfoNew);
+        superAdminService.deleteTariffService(1);
+        assertEquals(TariffStatus.NEW, tariffsInfoNew.getTariffStatus());
+        verify(bagRepository).findById(1);
+        verify(bagRepository).delete(bag);
+        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository).save(tariffsInfoNew);
+    }
+
+    @Test
+    void deleteTariffServiceThrowNotFoundException() {
         when(bagRepository.findById(1)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
             () -> superAdminService.deleteTariffService(1));
@@ -232,7 +283,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void editTariffService() {
-        Bag bag = ModelUtils.getBag().get();
+        Bag bag = ModelUtils.getBag();
         Employee employee = ModelUtils.getEmployee();
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
@@ -254,7 +305,7 @@ class SuperAdminServiceImplTest {
     @Test
     void editTariffServiceIfEmployeeNotFoundException() {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
-        Optional<Bag> bag = ModelUtils.getBag();
+        Optional<Bag> bag = ModelUtils.getOptionalBag();
         String uuid = UUID.randomUUID().toString();
 
         when(bagRepository.findById(1)).thenReturn(bag);
@@ -917,6 +968,49 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void addNewTariffThrowsExceptionWhenCourierHasStatusDeactivated() {
+        AddNewTariffDto addNewTariffDto = ModelUtils.getAddNewTariffDto();
+        String userUUID = "35467585763t4sfgchjfuyetf";
+        Courier courier = ModelUtils.getDeactivatedCourier();
+
+        // Mock the necessary dependencies
+        when(courierRepository.findById(addNewTariffDto.getCourierId())).thenReturn(Optional.of(courier));
+
+        // Perform the test
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.addNewTariff(addNewTariffDto, userUUID));
+
+        // Verify the interactions
+        verify(courierRepository).findById(addNewTariffDto.getCourierId());
+        verifyNoMoreInteractions(courierRepository, tariffsLocationRepository, tariffsInfoRepository,
+            employeeRepository);
+    }
+
+    @Test
+    void addNewTariffThrowsExceptionWhenListOfReceivingStationIsEmpty() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        dto.setReceivingStationsIdList(null);
+
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(employeeRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.ofNullable(getEmployee()));
+        when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
+            .thenReturn(Collections.emptyList());
+        when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(),
+            dto.getRegionId())).thenReturn(Collections.emptyList());
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+
+        verify(courierRepository).findById(1L);
+        verify(employeeRepository).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(tariffsInfoRepository, times(1)).save(any());
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
+        verify(locationRepository).findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId());
+        verify(employeeRepository, never()).findAllByEmployeePositionId(6L);
+    }
+
+    @Test
     void addNewTariffThrowsException2() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
@@ -944,7 +1038,9 @@ class SuperAdminServiceImplTest {
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
         ReceivingStation receivingStation = ModelUtils.getReceivingStation();
         Location location = ModelUtils.getLocation();
+        Courier courier = getCourier();
 
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -964,6 +1060,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
         verify(tariffsLocationRepository).findAllByTariffsInfo(tariffsInfo);
         verify(tariffsInfoRepository).save(tariffsInfo);
+        verify(courierRepository).findById(1L);
     }
 
     @Test
@@ -974,7 +1071,9 @@ class SuperAdminServiceImplTest {
         ReceivingStation receivingStation = ModelUtils.getReceivingStation();
         Location location = ModelUtils.getLocation();
         List<TariffLocation> tariffLocations = ModelUtils.getTariffLocationList();
+        Courier courier = getCourier();
 
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -996,6 +1095,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsLocationRepository).findAllByTariffsInfo(tariffsInfo);
         verify(tariffsLocationRepository).delete(tariffLocations.get(1));
         verify(tariffsInfoRepository).save(tariffsInfo);
+        verify(courierRepository).findById(1L);
     }
 
     @Test
@@ -1047,7 +1147,9 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         Location location = ModelUtils.getLocation();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation2();
+        Courier courier = getCourier();
 
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -1059,6 +1161,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsInfoRepository).findById(1L);
         verify(locationRepository).findById(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
+        verify(courierRepository).findById(1L);
     }
 
     @Test
@@ -1067,7 +1170,51 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         Location location = ModelUtils.getLocation();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
+        Courier courier = getCourier();
 
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
+            .thenReturn(List.of(tariffLocation));
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.editTariff(1L, dto));
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(locationRepository).findById(1L);
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
+        verify(receivingStationRepository).findById(1L);
+        verify(courierRepository).findById(1L);
+    }
+
+    @Test
+    void editTariffThrowsCourierNotFoundException() {
+        EditTariffDto dto = ModelUtils.getEditTariffDto();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Location location = ModelUtils.getLocation();
+
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
+        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.editTariff(1L, dto));
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(courierRepository).findById(1L);
+        verify(locationRepository).findById(1L);
+    }
+
+    @Test
+    void editTariffWithoutCourier() {
+        EditTariffDto dto = ModelUtils.getEditTariffDtoWithoutCourier();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Location location = ModelUtils.getLocation();
+        TariffLocation tariffLocation = ModelUtils.getTariffLocation();
+
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -1084,13 +1231,34 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void editTariffThrowsCourierHasStatusDeactivatedException() {
+        EditTariffDto dto = ModelUtils.getEditTariffDto();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Location location = ModelUtils.getLocation();
+        Courier courier = getDeactivatedCourier();
+
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.editTariff(1L, dto));
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(courierRepository).findById(1L);
+        verify(locationRepository).findById(1L);
+    }
+
+    @Test
     void editTariffWithBuildTariffLocation() {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         Location location = ModelUtils.getLocation();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
         ReceivingStation receivingStation = ModelUtils.getReceivingStation();
+        Courier courier = getCourier();
 
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -1110,6 +1278,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
         verify(tariffsLocationRepository).findAllByTariffsInfo(tariffsInfo);
         verify(tariffsInfoRepository).save(tariffsInfo);
+        verify(courierRepository).findById(1L);
     }
 
     @Test
@@ -1428,6 +1597,23 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void switchTariffStatusFromWhenCourierDeactivatedThrowBadRequestException() {
+        TariffsInfo tariffInfo = ModelUtils.getTariffsInfoDeactivated();
+        tariffInfo.setCourier(ModelUtils.getDeactivatedCourier());
+
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+
+        Throwable t = assertThrows(BadRequestException.class,
+            () -> superAdminService.switchTariffStatus(1L, "Active"));
+        assertEquals(String.format(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER +
+            tariffInfo.getCourier().getId()),
+            t.getMessage());
+
+        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository, never()).save(tariffInfo);
+    }
+
+    @Test
     void switchTariffStatusToActiveWithMinIsNull() {
         TariffsInfo tariffInfo = ModelUtils.getTariffsInfoDeactivated();
         tariffInfo.setMin(null);
@@ -1516,19 +1702,17 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void switchTariffStatusToActiveWithoutServiceThrowBadRequestException() {
+    void switchTariffStatusToActiveWithoutService() {
         TariffsInfo tariffInfo = ModelUtils.getTariffsInfoDeactivated();
         tariffInfo.setService(null);
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
+        when(tariffsInfoRepository.save(tariffInfo)).thenReturn(tariffInfo);
 
-        Throwable t = assertThrows(BadRequestException.class,
-            () -> superAdminService.switchTariffStatus(1L, "Active"));
-        assertEquals(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_SERVICE,
-            t.getMessage());
+        superAdminService.switchTariffStatus(1L, "Active");
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(tariffsInfoRepository, never()).save(tariffInfo);
+        verify(tariffsInfoRepository).save(tariffInfo);
     }
 
     @Test

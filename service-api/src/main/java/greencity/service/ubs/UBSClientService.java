@@ -3,23 +3,45 @@ package greencity.service.ubs;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
+import greencity.dto.address.AddressDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.location.LocationSummaryDto;
-import greencity.dto.order.*;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.MakeOrderAgainDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderClientDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderStatusPageDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.user.*;
+import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.user.AllPointsUserDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserPointDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserProfileCreateDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 
 public interface UBSClientService {
     /**
@@ -34,7 +56,7 @@ public interface UBSClientService {
      *
      * @param uuid       current {@link User}'s uuid.
      * @param tariffId   {@link Long} tariff id.
-     * @param locationId {@ling Long} location id.
+     * @param locationId {@link Long} location id.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Safarov Renat
      */
@@ -110,7 +132,8 @@ public interface UBSClientService {
     OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto requestDto, String uuid);
 
     /**
-     * Method that update address for current user.
+     * Method that update address for current user (if placeId is null updates only
+     * addressComment).
      *
      * @param requestDto {@link OrderAddressDtoRequest} information about address;
      * @param uuid       current {@link User}'s uuid;
@@ -352,6 +375,25 @@ public interface UBSClientService {
     Set<String> getAllAuthorities(String email);
 
     /**
+     * Method that gets an employee`s positions and all possible related authorities
+     * to these positions.
+     *
+     * @param email {@link String} - employee email.
+     * @return {@link PositionAuthoritiesDto}.
+     * @author Anton Bondar
+     */
+    PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email);
+
+    /**
+     * Method that gets information about login employee`s positions.
+     *
+     * @param email {@link String} - employee email.
+     * @return List of {@link String} - list of employee`s positions.
+     * @author Anton Bondar
+     */
+    List<String> getEmployeeLoginPositionNames(String email);
+
+    /**
      * Method updates Authority for {@link User}.
      *
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
@@ -359,10 +401,12 @@ public interface UBSClientService {
     void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
 
     /**
-     * Methods returns all locations.
+     * Makes an address actual (default) for a given user, identified by his UUID.
      *
-     * @return {@link LocationSummaryDto}.
-     * @author Max Nazaruk
+     * @param addressId - the ID of the address to make the default
+     * @param uuid      - the UUID of the user whose address is being updated
+     *
+     * @return an {@link AddressDto} object representing the updated address
      */
-    List<LocationSummaryDto> getLocationSummary();
+    AddressDto makeAddressActual(Long addressId, String uuid);
 }

@@ -9,7 +9,9 @@ import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnDTO;
+import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -17,6 +19,7 @@ import greencity.enums.PaymentStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
+import greencity.entity.order.Event;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.*;
@@ -27,6 +30,7 @@ import greencity.repository.*;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -42,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @Data
@@ -56,6 +61,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+    private final TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
     private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
@@ -153,7 +159,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 new TitleDto("commentForOrderByClient", "Коментар до замовлення від клієнта",
                     "Comment to the order from the client"),
                 "commentForOrderByClient", 20, false, true, false, 22, EditType.READ_ONLY, new ArrayList<>(),
-                orderDetails),
+                ordersInfo),
             new ColumnDTO(new TitleDto("totalPayment", "Оплата", "Total payment"),
                 "totalPayment", 20, false, true,
                 false, 23,
@@ -178,7 +184,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, true, 32, EditType.SELECT, navigatorList(), responsible),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "blockedBy",
                 20, false, true, false, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
-                orderDetails))));
+                ordersInfo))));
         return new TableParamsDto(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
@@ -188,6 +194,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         String columnName = requestToChangeOrdersDataDTO.getColumnName();
         String value = requestToChangeOrdersDataDTO.getNewValue();
         List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderIdsList();
+        if (CollectionUtils.isEmpty(ordersId)) {
+            throw new BadRequestException(EMPTY_ORDERS_ID_COLLECTION);
+        }
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         switch (columnName) {
@@ -201,7 +210,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 return createReturnForSwitchChangeOrder(
                     receivingStationForDevelopStage(ordersId, value, employee.getId()));
             case CANCELLATION_REASON:
-                return createReturnForSwitchChangeOrder(cancellationReasonForDevelopStage(ordersId, value));
+                return createReturnForSwitchChangeOrder(
+                    cancellationReasonForDevelopStage(ordersId, value, employee.getId()));
             case CANCELLATION_COMMENT:
                 return createReturnForSwitchChangeOrder(
                     cancellationCommentForDevelopStage(ordersId, value, employee));
@@ -211,6 +221,37 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             default:
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
+        }
+    }
+
+    @Override
+    public ColumnWidthDto getColumnWidthForEmployee(String userUuid) {
+        Employee employee = employeeRepository.findByUuid(userUuid)
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND));
+        TableColumnWidthForEmployee tableColumnWidthForEmployee =
+            tableColumnWidthForEmployeeRepository.findByEmployeeId(employee.getId())
+                .orElse(new TableColumnWidthForEmployee(employee));
+        return modelMapper.map(tableColumnWidthForEmployee, ColumnWidthDto.class);
+    }
+
+    @Override
+    public void saveColumnWidthForEmployee(ColumnWidthDto columnWidthDto, String userUuid) {
+        Employee employee = employeeRepository.findByUuid(userUuid)
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND));
+        if (nonNull(columnWidthDto)) {
+            tableColumnWidthForEmployeeRepository.findByEmployeeId(employee.getId()).ifPresentOrElse(
+                e -> {
+                    TableColumnWidthForEmployee tableColumnWidthForEmployee =
+                        modelMapper.map(columnWidthDto, TableColumnWidthForEmployee.class);
+                    modelMapper.map(tableColumnWidthForEmployee, e);
+                    tableColumnWidthForEmployeeRepository.save(e);
+                },
+                () -> {
+                    TableColumnWidthForEmployee tableColumnWidthForEmployee =
+                        modelMapper.map(columnWidthDto, TableColumnWidthForEmployee.class);
+                    tableColumnWidthForEmployee.setEmployee(employee);
+                    tableColumnWidthForEmployeeRepository.save(tableColumnWidthForEmployee);
+                });
         }
     }
 
@@ -361,14 +402,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     @Override
     public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         List<Long> unresolvedGoals = new ArrayList<>();
-        if (ordersId.isEmpty()) {
-            orderRepository.changeStatusForAllOrders(value, employeeId);
-            orderRepository.unblockAllOrders(employeeId);
-        }
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                }
                 if (existedOrder.getOrderStatus().checkPossibleStatus(value)) {
                     existedOrder.setOrderStatus(OrderStatus.valueOf(value));
                     removePickUpDetailsAndResponsibleEmployees(existedOrder);
@@ -436,14 +476,22 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         }
     }
 
-    private List<Long> cancellationReasonForDevelopStage(List<Long> ordersId, String value) {
+    private synchronized List<Long> cancellationReasonForDevelopStage(List<Long> ordersId, String value,
+        Long employeeId) {
         List<Long> unresolvedGoals = new ArrayList<>();
         if (EnumUtils.isValidEnum(CancellationReason.class, value)) {
             for (Long orderId : ordersId) {
                 try {
                     Order existedOrder = orderRepository.findById(orderId)
                         .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                    orderRepository.updateCancelingReason(existedOrder.getId(), value);
+                    if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
+                        throw new IllegalArgumentException(
+                            ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    }
+                    existedOrder.setCancellationReason(CancellationReason.valueOf(value));
+                    existedOrder.setBlocked(false);
+                    existedOrder.setBlockedByEmployee(null);
+                    orderRepository.save(existedOrder);
                 } catch (Exception e) {
                     unresolvedGoals.add(orderId);
                 }
@@ -452,15 +500,26 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
-    private List<Long> cancellationCommentForDevelopStage(List<Long> ordersId, String value, Employee employee) {
+    private synchronized List<Long> cancellationCommentForDevelopStage(List<Long> ordersId, String value,
+        Employee employee) {
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                orderRepository.updateCancelingComment(orderId, value);
-                eventService.saveEvent(OrderHistory.ORDER_CANCELLED + "  " + value, employee.getEmail(),
-                    existedOrder);
+                if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                }
+                existedOrder.setBlocked(false);
+                existedOrder.setBlockedByEmployee(null);
+                existedOrder.getEvents().add(Event.builder()
+                    .order(existedOrder)
+                    .eventDate(LocalDateTime.now())
+                    .authorName(employee.getFirstName() + "  " + employee.getLastName())
+                    .eventName(OrderHistory.ORDER_CANCELLED + "  " + value)
+                    .build());
+                existedOrder.setCancellationComment(value);
+                orderRepository.save(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -468,15 +527,27 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
-    private List<Long> adminCommentForDevelopStage(List<Long> ordersId, String value, Employee employee) {
+    private synchronized List<Long> adminCommentForDevelopStage(List<Long> ordersId, String value, Employee employee) {
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                orderRepository.updateAdminComment(orderId, value);
-                eventService.saveEvent(OrderHistory.ADD_ADMIN_COMMENT + "  " + value, employee.getEmail(),
-                    existedOrder);
+
+                if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                }
+
+                existedOrder.getEvents().add(Event.builder()
+                    .order(existedOrder)
+                    .eventDate(LocalDateTime.now())
+                    .authorName(employee.getFirstName() + "  " + employee.getLastName())
+                    .eventName(OrderHistory.ADD_ADMIN_COMMENT + "  " + value)
+                    .build());
+                existedOrder.setAdminComment(value);
+                existedOrder.setBlocked(false);
+                existedOrder.setBlockedByEmployee(null);
+                orderRepository.save(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -488,14 +559,20 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     public synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
         List<Long> unresolvedGoals = new ArrayList<>();
-        if (ordersId.isEmpty()) {
-            orderRepository.changeDateOfExportForAllOrders(date, employeeId);
-        }
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                }
                 existedOrder.setDateOfExport(date);
+                if (existedOrder.getDeliverFrom() != null) {
+                    existedOrder.setDeliverFrom(LocalDateTime.of(date, existedOrder.getDeliverFrom().toLocalTime()));
+                }
+                if (existedOrder.getDeliverTo() != null) {
+                    existedOrder.setDeliverTo(LocalDateTime.of(date, existedOrder.getDeliverTo().toLocalTime()));
+                }
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
@@ -510,19 +587,21 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     public synchronized List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         String from = value.substring(0, 5);
         String to = value.substring(6);
-        LocalDateTime timeFrom = LocalDateTime.of(LocalDate.now(), LocalTime.parse(from, DateTimeFormatter.ISO_TIME));
-        LocalDateTime timeTo = LocalDateTime.of(LocalDate.now(), LocalTime.parse(to, DateTimeFormatter.ISO_TIME));
+        LocalTime timeFrom = LocalTime.parse(from, DateTimeFormatter.ISO_TIME);
+        LocalTime timeTo = LocalTime.parse(to, DateTimeFormatter.ISO_TIME);
         List<Long> unresolvedGoals = new ArrayList<>();
-        if (ordersId.isEmpty()) {
-            orderRepository.changeDeliverFromForAllOrders(timeFrom, employeeId);
-            orderRepository.changeDeliverToForAllOrders(timeTo, employeeId);
-        }
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                existedOrder.setDeliverFrom(timeFrom);
-                existedOrder.setDeliverTo(timeTo);
+                if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                }
+                if (existedOrder.getDateOfExport() == null) {
+                    throw new IllegalStateException(DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER + existedOrder.getId());
+                }
+                existedOrder.setDeliverFrom(LocalDateTime.of(existedOrder.getDateOfExport(), timeFrom));
+                existedOrder.setDeliverTo(LocalDateTime.of(existedOrder.getDateOfExport(), timeTo));
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
@@ -537,13 +616,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     public synchronized List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
         List<Long> unresolvedGoals = new ArrayList<>();
-        if (ordersId.isEmpty()) {
-            orderRepository.changeReceivingStationForAllOrders(station.getId(), employeeId);
-        }
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                }
                 existedOrder.setReceivingStation(station);
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
@@ -558,6 +637,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     @Override
     public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position,
         String email) {
+        Employee currentEmployee =
+            employeeRepository.findByEmail(email).orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
@@ -568,6 +649,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                if (isOrderBlockedByAnotherEmployee(existedOrder, currentEmployee.getId())) {
+                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                }
                 Boolean existedBefore =
                     employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
                 final String historyChanges;
@@ -646,5 +730,10 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             }
         }
         return unblockedOrdersId;
+    }
+
+    private boolean isOrderBlockedByAnotherEmployee(Order order, Long employeeId) {
+        return order.getBlockedByEmployee() != null
+            && !Objects.equals(employeeId, order.getBlockedByEmployee().getId());
     }
 }

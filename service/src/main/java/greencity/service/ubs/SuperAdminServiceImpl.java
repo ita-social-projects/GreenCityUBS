@@ -72,6 +72,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 @org.springframework.stereotype.Service
 @Data
@@ -146,8 +147,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public void deleteTariffService(Integer id) {
-        bagRepository.delete(tryToFindBagById(id));
+    public void deleteTariffService(Integer bagId) {
+        Bag bag = tryToFindBagById(bagId);
+        TariffsInfo tariffsInfo = bag.getTariffsInfo();
+        bagRepository.delete(bag);
+        List<Bag> bags = bagRepository.findBagsByTariffsInfoId(tariffsInfo.getId());
+        if (bags.isEmpty() || bags.stream().noneMatch(Bag::getLimitIncluded)) {
+            tariffsInfo.setTariffStatus(TariffStatus.NEW);
+            tariffsInfo.setBags(bags);
+            tariffsInfo.setMax(null);
+            tariffsInfo.setMin(null);
+            tariffsInfo.setLimitDescription(null);
+            tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+            tariffsInfoRepository.save(tariffsInfo);
+        }
     }
 
     @Override
@@ -486,6 +499,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Set<ReceivingStation> findReceivingStationsForTariff(List<Long> receivingStationIdList) {
+        if (receivingStationIdList == null) {
+            return Collections.emptySet();
+        }
+
         Set<ReceivingStation> receivingStations = new HashSet<>(receivingStationRepository
             .findAllById(receivingStationIdList.stream().distinct().collect(Collectors.toList())));
         if (receivingStations.isEmpty()) {
@@ -503,6 +520,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public AddNewTariffResponseDto addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
         Courier courier = tryToFindCourier(addNewTariffDto.getCourierId());
+        checkIfCourierHasStatusDeactivated(courier);
         List<Long> idListToCheck = new ArrayList<>(addNewTariffDto.getLocationIdList());
         final var tariffForLocationAndCourierAlreadyExistIdList =
             verifyIfTariffExists(idListToCheck, addNewTariffDto.getCourierId());
@@ -524,6 +542,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfoRepository.save(tariffsInfo);
         updateEmployeeTariffsInfoMapping(tariffsInfo);
         return new AddNewTariffResponseDto(tariffForLocationAndCourierAlreadyExistIdList, idListToCheck);
+    }
+
+    private void checkIfCourierHasStatusDeactivated(Courier courier) {
+        if (courier.getCourierStatus().equals(CourierStatus.DEACTIVATED)) {
+            throw new BadRequestException(ErrorMessage.CANNOT_CREATE_TARIFF + courier.getId());
+        }
     }
 
     private TariffsInfo createTariff(AddNewTariffDto addNewTariffDto, String uuid, Courier courier) {
@@ -632,6 +656,18 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void editTariff(Long id, EditTariffDto dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(id);
         List<Location> locations = tryToFindLocationsInSameRegion(dto.getLocationIds());
+
+        if (dto.getCourierId() != null) {
+            Courier courier = courierRepository.findById(dto.getCourierId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
+
+            if (courier.getCourierStatus().equals(CourierStatus.DEACTIVATED)) {
+                throw new BadRequestException(ErrorMessage.TARIFF_EDIT_RESTRICTION_DUE_TO_DEACTIVATED_COURIER
+                    + dto.getCourierId());
+            }
+            tariffsInfo.setCourier(courier);
+        }
+
         checkIfLocationBelongsToAnotherTariff(dto.getLocationIds(), tariffsInfo);
         Set<ReceivingStation> receivingStations = tryToFindReceivingStations(dto.getReceivingStationIds());
         Set<TariffLocation> tariffLocations = getUpdatedTariffLocations(locations, tariffsInfo);
@@ -746,8 +782,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (tariffsInfo.getMin() == null && tariffsInfo.getMax() == null) {
             throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS);
         }
-        if (tariffsInfo.getService() == null) {
-            throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_SERVICE);
+        if (tariffsInfo.getCourier().getCourierStatus().equals(CourierStatus.DEACTIVATED)) {
+            throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER
+                + tariffsInfo.getCourier().getId());
         }
     }
 

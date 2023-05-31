@@ -1,5 +1,7 @@
 package greencity.service.notification;
 
+import greencity.config.InternalUrlConfigProp;
+import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
@@ -20,6 +22,7 @@ import greencity.repository.*;
 import greencity.service.ubs.NotificationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +33,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -51,21 +56,25 @@ import static java.util.stream.Collectors.toMap;
 @AllArgsConstructor
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
-    private UserRepository userRepository;
-    private UserNotificationRepository userNotificationRepository;
-    private BagRepository bagRepository;
-    private OrderRepository orderRepository;
-    private ViolationRepository violationRepository;
-    private NotificationParameterRepository notificationParameterRepository;
+    private final UserRepository userRepository;
+    private final UserNotificationRepository userNotificationRepository;
+    private final BagRepository bagRepository;
+    private final OrderRepository orderRepository;
+    private final ViolationRepository violationRepository;
+    private final NotificationParameterRepository notificationParameterRepository;
     @Autowired
     @Qualifier("kyivZonedClock")
     private Clock clock;
-    private List<? extends AbstractNotificationProvider> notificationProviders;
+    private final List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
-
     @Autowired
     @Qualifier("singleThreadedExecutor")
     private ExecutorService executor;
+    private final InternalUrlConfigProp internalUrlConfigProp;
+
+    private static final String ORDER_NUMBER_KEY = "orderNumber";
+    private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
+    private static final String PAY_BUTTON = "payButton";
 
     /**
      * {@inheritDoc}
@@ -79,8 +88,10 @@ public class NotificationServiceImpl implements NotificationService {
             if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
-                UserNotification notification = initialiseNotificationForUnpaidOrder(order, userNotification);
-                sendNotificationsForBotsAndEmail(notification, 0L);
+                BigDecimal amountToPay = getAmountToPay(order);
+                Set<NotificationParameter> notificationParameters =
+                    initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
+                fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
             }
         }
     }
@@ -95,18 +106,26 @@ public class NotificationServiceImpl implements NotificationService {
                 || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)));
     }
 
-    private UserNotification initialiseNotificationForUnpaidOrder(Order order, UserNotification userNotification) {
-        userNotification.setNotificationTime(LocalDateTime.now(clock));
-        userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
-        userNotification.setOrder(order);
-        UserNotification notification = userNotificationRepository.save(userNotification);
-        NotificationParameter notificationParameter = new NotificationParameter();
-        notificationParameter.setKey("orderNumber");
-        notificationParameter.setValue(order.getId().toString());
-        notificationParameter.setUserNotification(notification);
-        NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
-        notification.setParameters(Collections.singleton(createdParameter));
-        return notification;
+    private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order,
+        BigDecimal amountToPay) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        parameters.add(NotificationParameter.builder()
+            .key(AMOUNT_TO_PAY_KEY)
+            .value(String.format("%.2f", amountToPay))
+            .build());
+
+        parameters.add(NotificationParameter.builder()
+            .key(ORDER_NUMBER_KEY)
+            .value(order.getId().toString())
+            .build());
+
+        parameters.add(NotificationParameter.builder()
+            .key(PAY_BUTTON)
+            .value(internalUrlConfigProp.getUnpaidOrderUrl() + order.getId())
+            .build());
+
+        return parameters;
     }
 
     /**
@@ -159,39 +178,9 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyHalfPaidPackage(Order order) {
-        Set<NotificationParameter> parameters = new HashSet<>();
+        BigDecimal amountToPay = getAmountToPay(order);
+        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
-        Long paidAmount = order.getPayment().stream()
-            .filter(payment -> !payment.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED)
-                && !payment.getPaymentStatus().equals(PaymentStatus.UNPAID))
-            .map(Payment::getAmount).reduce(0L, Long::sum) / 100;
-
-        Integer certificatePointsUsed = order.getCertificates().stream()
-            .map(Certificate::getPoints).reduce(0, Integer::sum);
-
-        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
-        Long writeStationSum = order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
-
-        List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
-        Map<Integer, Integer> bagsAmount;
-        if (!order.getExportedQuantity().isEmpty()) {
-            bagsAmount = order.getExportedQuantity();
-        } else if (!order.getConfirmedQuantity().isEmpty()) {
-            bagsAmount = order.getConfirmedQuantity();
-        } else {
-            bagsAmount = order.getAmountOfBagsOrdered();
-        }
-
-        Integer price = bags.stream().map(bag -> bagsAmount.get(bag.getId()) * bag.getFullPrice())
-            .reduce(0, Integer::sum);
-
-        long amountToPay =
-            price - (paidAmount + order.getPointsToUse() + certificatePointsUsed) + ubsCourierSum + writeStationSum;
-
-        parameters.add(NotificationParameter.builder().key("amountToPay")
-            .value(String.format("%.2f", (double) amountToPay)).build());
-        parameters.add(NotificationParameter.builder().key("orderNumber")
-            .value(order.getId().toString()).build());
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
             fillAndSendNotification(parameters, order, NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF);
         } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
@@ -208,40 +197,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyUnpaidOrder(Order order) {
-        Set<NotificationParameter> parameters = new HashSet<>();
+        BigDecimal amountToPay = getAmountToPay(order);
+        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
-        Long totalPrice;
-        Long bonuses = order.getPointsToUse().longValue();
-        Long certificates =
-            order.getCertificates().stream().map(Certificate::getPoints).reduce(0, Integer::sum).longValue();
-        Long paidAmount = order.getPayment().stream()
-            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(payment -> payment.getAmount() / 100)
-            .reduce(0L, Long::sum);
-
-        Long ubsCourierSum = order.getUbsCourierSum() == null ? 0 : order.getUbsCourierSum();
-        Long writeStationSum = order.getWriteOffStationSum() == null ? 0 : order.getWriteOffStationSum();
-
-        List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
-
-        if (!order.getExportedQuantity().isEmpty()) {
-            totalPrice = bags.stream()
-                .map(bag -> order.getExportedQuantity().get(bag.getId()) * bag.getFullPrice().longValue())
-                .reduce(0L, Long::sum);
-        } else if (!order.getConfirmedQuantity().isEmpty()) {
-            totalPrice = bags.stream()
-                .map(bag -> order.getConfirmedQuantity().get(bag.getId()) * bag.getFullPrice().longValue())
-                .reduce(0L, Long::sum);
-        } else {
-            totalPrice = bags.stream()
-                .map(bag -> order.getAmountOfBagsOrdered().get(bag.getId()) * bag.getFullPrice().longValue())
-                .reduce(0L, Long::sum);
-        }
-
-        Long amountToPay = totalPrice - paidAmount - bonuses - certificates + ubsCourierSum + writeStationSum;
-
-        parameters.add(NotificationParameter.builder().key("amountToPay")
-            .value(String.format("%.2f", (double) amountToPay)).build());
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()
                 .map(Event::getEventName)
@@ -255,6 +213,55 @@ public class NotificationServiceImpl implements NotificationService {
                 .count() == 3) {
             fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
         }
+    }
+
+    private BigDecimal getAmountToPay(Order order) {
+        long bonuses = order.getPointsToUse() == null ? 0L : order.getPointsToUse().longValue();
+        long certificates = order.getCertificates() == null ? 0L
+            : order.getCertificates().stream()
+                .map(Certificate::getPoints)
+                .reduce(0, Integer::sum)
+                .longValue();
+
+        long paidAmountCoins = order.getPayment() == null ? 0L
+            : order.getPayment().stream()
+                .filter(payment -> payment.getPaymentStatus() == PaymentStatus.PAID)
+                .map(Payment::getAmount)
+                .reduce(0L, Long::sum);
+
+        int amountOfDecimalsAfterPoint = 2;
+        BigDecimal paidAmountUah =
+            new BigDecimal(paidAmountCoins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
+                amountOfDecimalsAfterPoint, RoundingMode.HALF_UP);
+
+        long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
+        long writeStationSum = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
+
+        List<Bag> bagsType = bagRepository.findBagsByOrderId(order.getId());
+        Map<Integer, Integer> bagsAmount;
+        if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
+            bagsAmount = order.getExportedQuantity();
+        } else if (MapUtils.isNotEmpty(order.getConfirmedQuantity())) {
+            bagsAmount = order.getConfirmedQuantity();
+        } else {
+            bagsAmount = order.getAmountOfBagsOrdered();
+        }
+
+        long totalPrice = bagsAmount.entrySet().stream()
+            .map(entry -> entry.getValue() * getBagPrice(entry.getKey(), bagsType))
+            .reduce(0, Integer::sum)
+            .longValue();
+
+        long unPaidAmount = totalPrice - bonuses - certificates + ubsCourierSum + writeStationSum;
+        return new BigDecimal(unPaidAmount).subtract(paidAmountUah);
+    }
+
+    private int getBagPrice(Integer bagId, List<Bag> bagsType) {
+        return bagsType.stream()
+            .filter(b -> b.getId().equals(bagId))
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + bagId))
+            .getFullPrice();
     }
 
     /**
@@ -478,10 +485,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     private void sendNotificationsForBotsAndEmail(UserNotification notification, long monthsOfAccountInactivity) {
         executor.execute(() -> notificationProviders
-            .forEach(provider -> {
-                provider.sendNotification(notification, MOBILE, monthsOfAccountInactivity);
-                provider.sendNotification(notification, EMAIL, monthsOfAccountInactivity);
-            }));
+            .forEach(provider -> provider.sendNotification(notification, provider.getNotificationType(),
+                monthsOfAccountInactivity)));
     }
 
     /**

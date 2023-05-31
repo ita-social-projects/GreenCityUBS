@@ -14,6 +14,7 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
+import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.notification.NotificationDto;
@@ -89,7 +90,7 @@ public class ModelUtils {
 
     public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
-            .additionalOrders(new HashSet<>(List.of("232534634")))
+            .additionalOrders(new HashSet<>(List.of("12345678")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .orderComment("comment")
             .certificates(Collections.emptySet())
@@ -113,12 +114,13 @@ public class ModelUtils {
             .entranceNumber("7a")
             .houseCorpus("2")
             .houseNumber("7")
-            .street("Gorodotska")
+            .street("Городоцька")
             .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
             .district("Zaliznuchnuy")
             .city("Lviv")
             .region("Lvivskiy")
             .actual(false)
+            .placeId("place_id")
             .build();
     }
 
@@ -434,13 +436,7 @@ public class ModelUtils {
 
     public static NotificationTemplateWithPlatformsUpdateDto getNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
-            .type(NotificationType.UNPAID_ORDER)
-            .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
-            .time(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
-            .schedule("0 0 18 * * ?")
-            .title("Неопачене замовлення")
-            .titleEng("Unpaid order")
-            .notificationStatus(NotificationStatus.ACTIVE)
+            .notificationTemplateMainInfoDto(getNotificationTemplateMainInfoDto())
             .platforms(List.of(
                 getNotificationPlatformDto(NotificationReceiverType.SITE)))
             .build();
@@ -557,6 +553,7 @@ public class ModelUtils {
             .houseNumber("1")
             .houseCorpus("2")
             .entranceNumber("3")
+            .placeId("place_id")
             .build();
     }
 
@@ -587,5 +584,9 @@ public class ModelUtils {
             .email("ubsuser@mail.com")
             .uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
             .build();
+    }
+
+    public static EditLocationDto getEditLocationDto() {
+        return new EditLocationDto().setLocationId(1L).setNameEn("name").setNameUa("назва");
     }
 }

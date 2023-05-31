@@ -5,13 +5,18 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
 import greencity.constants.HttpStatuses;
 import greencity.constant.ValidationConstant;
-import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.*;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.user.PersonalDataDto;
@@ -30,7 +35,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
@@ -197,89 +210,6 @@ public class OrderController {
     }
 
     /**
-     * Controller for getting all addresses for current order.
-     *
-     * @param userUuid {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "Get all addresses for order")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderWithAddressesResponseDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-    })
-    @GetMapping("/findAll-order-address")
-    public ResponseEntity<OrderWithAddressesResponseDto> getAllAddressesForCurrentUser(
-        @ApiIgnore @CurrentUserUuid String userUuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.findAllAddressesForCurrentOrder(userUuid));
-    }
-
-    /**
-     * Controller save address for current order.
-     *
-     * @param dtoRequest {@link CreateAddressRequestDto}.
-     * @param uuid       {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "Save order address")
-    @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = OrderWithAddressesResponseDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-    })
-    @PostMapping("/save-order-address")
-    public ResponseEntity<OrderWithAddressesResponseDto> saveAddressForOrder(
-        @Valid @RequestBody CreateAddressRequestDto dtoRequest,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsClientService.saveCurrentAddressForOrder(dtoRequest, uuid));
-    }
-
-    /**
-     * Controller update address for current order.
-     *
-     * @param dtoRequest {@link OrderAddressDtoRequest}.
-     * @param uuid       {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "Update order address")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderWithAddressesResponseDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PutMapping("/update-order-address")
-    public ResponseEntity<OrderWithAddressesResponseDto> updateAddressForOrder(
-        @Valid @RequestBody OrderAddressDtoRequest dtoRequest,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.updateCurrentAddressForOrder(dtoRequest, uuid));
-    }
-
-    /**
-     * Controller delete order address.
-     *
-     * @param id   {@link Long}.
-     * @param uuid {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "Delete order address")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = OrderWithAddressesResponseDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @DeleteMapping("/order-addresses/{id}")
-    public ResponseEntity<OrderWithAddressesResponseDto> deleteOrderAddress(
-        @Valid @PathVariable("id") Long id,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.deleteCurrentAddressForOrder(id, uuid));
-    }
-
-    /**
      * Controller gets info about user, ubs_user and user violations by order id.
      *
      * @param id   {@link Long}.
@@ -343,30 +273,6 @@ public class OrderController {
         @Valid @RequestBody UbsCustomersDtoUpdate dto, @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.updateUbsUserInfoInOrder(dto, uuid));
-    }
-
-    /**
-     * Controller updates info about order cancellation reason.
-     *
-     * @param id   {@link Long}.
-     * @param dto  {@link OrderCancellationReasonDto}
-     * @param uuid current {@link User}'s uuid.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "updates info about order cancellation reason ")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/order/{id}/cancellation/")
-    public ResponseEntity<OrderCancellationReasonDto> updateCancellationReason(
-        @RequestBody final OrderCancellationReasonDto dto,
-        @PathVariable("id") final Long id,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.updateOrderCancellationReason(id, dto, uuid));
     }
 
     /**

@@ -79,10 +79,8 @@ public class NotificationController {
     @ApiOperation(value = "Get all unread notifications")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping(value = "quantityUnreadenNotifications")
     public ResponseEntity<Long> getAllUnreadenNotificationsForCurrentUser(

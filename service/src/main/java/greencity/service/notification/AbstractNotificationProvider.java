@@ -9,14 +9,17 @@ import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import javax.annotation.PostConstruct;
 
 @RequiredArgsConstructor
+@Getter
 public abstract class AbstractNotificationProvider {
     private final UserRemoteClient userRemoteClient;
     private final NotificationTemplateRepository templateRepository;
+    private final NotificationReceiverType notificationType;
 
     /**
      * Initializes the notification provider.

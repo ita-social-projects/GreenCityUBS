@@ -244,6 +244,42 @@ class UBSManagementServiceImplTest {
         Assertions.assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderExportDetails(100L));
     }
 
+    @ParameterizedTest
+    @MethodSource("provideManualPaymentRequestDto")
+    void saveNewManualPayment(ManualPaymentRequestDto paymentDetails, MultipartFile image) {
+        User user = ModelUtils.getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = ModelUtils.getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        Payment payment = ModelUtils.getManualPayment();
+        Employee employee = ModelUtils.getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, image, "test@gmail.com");
+
+        verify(eventService, times(1))
+            .save("Замовлення Оплачено", "Система", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    private static Stream<Arguments> provideManualPaymentRequestDto() {
+        return Stream.of(Arguments.of(ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
+            Arguments.of(ManualPaymentRequestDto.builder()
+                .settlementdate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
+                Mockito.mock(MultipartFile.class)));
+    }
+
     @Test
     void checkDeleteManualPayment() {
         Employee employee = getEmployee();
@@ -2289,5 +2325,13 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> ubsManagementService.getNotTakenOrderReason(1L));
         verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void saveNewManualPaymentWithoutLinkAndImageTest() {
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).paymentId("1").build();
+        assertThrows(BadRequestException.class,
+            () -> ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com"));
     }
 }
