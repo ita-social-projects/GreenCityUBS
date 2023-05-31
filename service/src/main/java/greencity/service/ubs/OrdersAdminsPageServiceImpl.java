@@ -285,10 +285,14 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         OrderStatus[] orderStatuses = OrderStatus.values();
         for (OrderStatus o : orderStatuses) {
-            String ua = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue())
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getName();
-            String en = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue())
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameEng();
+            String ua = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue()).getName();
+                if (ua == null) {
+                   throw new EntityNotFoundException(ORDER_STATUS_NOT_FOUND + ua);
+                }
+            String en = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue()).getNameEng();
+            if (en == null) {
+                throw new EntityNotFoundException(ORDER_STATUS_NOT_FOUND + ua);
+            }
             optionForColumnDTOS
                 .add(OptionForColumnDTO.builder().key(o.toString()).ua(ua).en(en).filtered(false).build());
         }

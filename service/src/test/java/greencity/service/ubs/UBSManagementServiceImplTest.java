@@ -10,23 +10,7 @@ import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagMappingDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.CounterOrderDetailsDto;
-import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.ExportDetailsDto;
-import greencity.dto.order.ExportDetailsDtoUpdate;
-import greencity.dto.order.NotTakenOrderReasonDto;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderDetailInfoDto;
-import greencity.dto.order.OrderDetailStatusDto;
-import greencity.dto.order.OrderDetailStatusRequestDto;
-import greencity.dto.order.OrderInfoDto;
-import greencity.dto.order.ReadAddressByOrderDto;
-import greencity.dto.order.UpdateAllOrderPageDto;
-import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -908,11 +892,15 @@ class UBSManagementServiceImplTest {
     @Test
     void testSetOrderDetailWhenOrderNotFound() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        Map<Integer, Integer> amountOfBagsConfirmed = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto()
+            .getAmountOfBagsConfirmed();
+        Map<Integer, Integer> amountOfBagsExported = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto()
+            .getAmountOfBagsExported();
         assertThrows(NotFoundException.class,
             () -> ubsManagementService.setOrderDetail(
                 1L,
-                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
-                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+                amountOfBagsConfirmed,
+                amountOfBagsExported,
                 "abc"),
             ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         verify(orderRepository).findById(1L);
@@ -1568,7 +1556,7 @@ class UBSManagementServiceImplTest {
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
         when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+            .thenReturn(getStatusTranslation());
         when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
@@ -1643,7 +1631,7 @@ class UBSManagementServiceImplTest {
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
         when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+            .thenReturn(getStatusTranslation());
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
                 .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
@@ -1686,7 +1674,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
         when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+            .thenReturn(getStatusTranslation());
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
                 .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
@@ -1725,7 +1713,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+            .thenReturn(getStatusTranslation());
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
                 .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
@@ -2001,7 +1989,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
         when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+            .thenReturn(getStatusTranslation());
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
                 .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
@@ -2047,7 +2035,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
         when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+            .thenReturn(getStatusTranslation());
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
                 .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());

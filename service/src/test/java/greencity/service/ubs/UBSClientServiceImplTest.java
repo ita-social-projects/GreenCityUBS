@@ -2569,7 +2569,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+                .thenReturn(orderStatusTranslation);
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
@@ -2627,7 +2627,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+                .thenReturn(orderStatusTranslation);
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
@@ -2676,7 +2676,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+                .thenReturn(orderStatusTranslation);
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
@@ -2725,7 +2725,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+                .thenReturn(orderStatusTranslation);
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
@@ -2764,7 +2764,7 @@ class UBSClientServiceImplTest {
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+                .thenReturn(orderStatusTranslation);
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
@@ -3002,7 +3002,7 @@ class UBSClientServiceImplTest {
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+                .thenReturn(orderStatusTranslation);
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);

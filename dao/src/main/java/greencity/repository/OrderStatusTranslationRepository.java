@@ -19,7 +19,9 @@ public interface OrderStatusTranslationRepository extends JpaRepository<OrderSta
      * @return {@link OrderStatusTranslation}.
      * @author Oleksandr Khomiakov.
      */
-    Optional<OrderStatusTranslation> getOrderStatusTranslationById(Long id);
+    default OrderStatusTranslation getOrderStatusTranslationById(Long id) {
+        return null;
+    }
 
     /**
      * This method which is list statuses.

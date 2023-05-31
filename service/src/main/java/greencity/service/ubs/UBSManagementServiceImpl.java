@@ -453,13 +453,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Order order) {
         OrderStatus orderStatus = order.getOrderStatus();
-        Optional<OrderStatusTranslation> orderStatusTranslation =
+        OrderStatusTranslation orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
-        String currentOrderStatusTranslation =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
-        String currentOrderStatusTranslationEng =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
-                : orderStatus.name();
+        String currentOrderStatusTranslation = orderStatusTranslation.getName();
+        String currentOrderStatusTranslationEng = orderStatusTranslation.getNameEng();
 
         OrderPaymentStatus orderStatusPayment = order.getOrderPaymentStatus();
         OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = orderPaymentStatusTranslationRepository
