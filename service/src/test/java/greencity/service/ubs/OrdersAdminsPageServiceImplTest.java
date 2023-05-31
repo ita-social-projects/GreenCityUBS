@@ -127,33 +127,6 @@ class OrdersAdminsPageServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(orderStatusTranslation2);
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
-            .thenReturn(orderStatusTranslation.setStatusId(2L));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
-            .thenReturn(orderStatusTranslation2.setStatusId(2L));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
-            .thenReturn(orderStatusTranslation.setStatusId(3L));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
-            .thenReturn(orderStatusTranslation2.setStatusId(3L));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(4L))
-            .thenReturn(orderStatusTranslation.setStatusId(4L));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(5L))
-            .thenReturn(orderStatusTranslation2.setStatusId(5L));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(orderStatusTranslation.setStatusId(6L));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(7L))
-            .thenReturn(orderStatusTranslation2.setStatusId(7L));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
-            .thenReturn(orderStatusTranslation.setStatusId(8L));
-
         assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
@@ -219,6 +192,7 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(addressList);
         when(addressRepository.findDistinctCities())
             .thenReturn(addressList);
+
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
