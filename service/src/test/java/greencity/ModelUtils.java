@@ -1849,7 +1849,7 @@ public class ModelUtils {
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
-            .confirmedQuantity(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 0))
             .exportedQuantity(Map.of(1, 1))
             .pointsToUse(100)
             .user(User.builder().id(1L).currentPoints(100).build())
@@ -2815,6 +2815,50 @@ public class ModelUtils {
         return OrderStatusTranslation.builder().id(6L).statusId(2L).name("name").build();
     }
 
+    public static List<OrderStatusTranslation> getOrderStatusTranslations() {
+        return List.of(OrderStatusTranslation.builder()
+            .id(1L)
+            .statusId(6L)
+            .name("Order DONE")
+            .build(),
+            OrderStatusTranslation.builder()
+                .id(2L)
+                .statusId(7L)
+                .name("Order NOT TAKEN OUT")
+                .build(),
+            OrderStatusTranslation.builder().id(3L)
+                .statusId(8L)
+                .name("Order CANCELLED")
+                .build());
+    }
+
+    public static List<OrderPaymentStatusTranslation> getOrderStatusPaymentTranslations() {
+        return List.of(OrderPaymentStatusTranslation.builder()
+            .id(1L)
+            .translationValue("тест")
+            .translationsValueEng("test")
+            .orderPaymentStatusId(1L)
+            .build(),
+            OrderPaymentStatusTranslation.builder()
+                .id(2L)
+                .translationValue("тест2")
+                .translationsValueEng("test2")
+                .orderPaymentStatusId(2L)
+                .build(),
+            OrderPaymentStatusTranslation.builder()
+                .id(3L)
+                .translationValue("тест3")
+                .translationsValueEng("test3")
+                .orderPaymentStatusId(3L)
+                .build(),
+            OrderPaymentStatusTranslation.builder()
+                .id(4L)
+                .translationValue("тест4")
+                .translationsValueEng("test4")
+                .orderPaymentStatusId(4L)
+                .build());
+    }
+
     public static BagInfoDto getBagInfoDto() {
         return BagInfoDto.builder()
             .id(1)
@@ -3501,6 +3545,10 @@ public class ModelUtils {
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.DONE)
             .counterOrderPaymentId(1L)
+            .certificates(Set.of(Certificate.builder()
+                .points(0)
+                .build()))
+            .pointsToUse(0)
             .build();
     }
 
