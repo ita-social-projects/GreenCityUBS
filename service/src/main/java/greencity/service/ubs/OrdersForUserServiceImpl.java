@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.constant.AppConstant;
 import greencity.dto.order.UserOrdersDto;
 import greencity.dto.order.UserWithOrdersDto;
 import greencity.enums.SortingOrder;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +38,8 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
     private UserOrdersDto getAllOrders(Order order) {
         return UserOrdersDto.builder()
             .id(order.getId())
-            .amount(order.getSumTotalAmountWithoutDiscounts())
+            .amount(BigDecimal.valueOf(order.getSumTotalAmountWithoutDiscounts())
+                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
             .orderDate(order.getOrderDate())
             .orderStatus(order.getOrderStatus())
             .orderPaymentStatus(order.getOrderPaymentStatus())

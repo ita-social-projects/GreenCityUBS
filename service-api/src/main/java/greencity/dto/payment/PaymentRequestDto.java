@@ -23,7 +23,7 @@ public class PaymentRequestDto {
     @JsonProperty("currency")
     private String currency;
     @JsonProperty("amount")
-    private Integer amount;
+    private Long amount;
     @JsonProperty("signature")
     private String signature;
     @JsonProperty("response_url")

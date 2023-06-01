@@ -7,15 +7,18 @@ import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Component
-public class GetServiceDtoMapper extends AbstractConverter<Service, GetServiceDto> {
+public class GetServiceDtoToServiceMapper extends AbstractConverter<GetServiceDto, Service> {
     @Override
-    protected GetServiceDto convert(Service source) {
-        return GetServiceDto.builder()
+    protected Service convert(GetServiceDto source) {
+        return Service.builder()
             .id(source.getId())
             .price(BigDecimal.valueOf(source.getPrice())
-                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
+                .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+                .longValue())
             .name(source.getName())
             .nameEng(source.getNameEng())
             .description(source.getDescription())

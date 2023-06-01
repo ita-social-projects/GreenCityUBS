@@ -395,7 +395,7 @@ class UBSManagementServiceImplTest {
 
         order.setUser(ModelUtils.getUser());
 
-        Long sumToPay = 0L;
+        Double sumToPay = 0.;
 
         assertEquals("Зарахування на бонусний рахунок", ubsManagementService.returnOverpaymentInfo(1L, sumToPay, 0L)
             .getPaymentInfoDtos().get(1).getComment());
@@ -410,7 +410,7 @@ class UBSManagementServiceImplTest {
     @Test
     void checkReturnOverpaymentThroweException() {
         Assertions.assertThrows(NotFoundException.class,
-            () -> ubsManagementService.returnOverpaymentInfo(100L, 1L, 1L));
+            () -> ubsManagementService.returnOverpaymentInfo(100L, 1., 1L));
     }
 
     @Test
@@ -418,7 +418,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         when(orderRepository.findUserById(1L)).thenReturn(Optional.of(order));
 
-        Assertions.assertThrows(NotFoundException.class, () -> ubsManagementService.returnOverpaymentInfo(1L, 1L, 1L));
+        Assertions.assertThrows(NotFoundException.class, () -> ubsManagementService.returnOverpaymentInfo(1L, 1., 1L));
     }
 
     @Test
@@ -426,9 +426,9 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setOrderStatus(OrderStatus.DONE);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 800L).getOverpayment());
-        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getPaidAmount());
-        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getUnPaidAmount());
+        assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 800.).getOverpayment());
+        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getPaidAmount());
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getUnPaidAmount());
     }
 
     @Test
@@ -1685,7 +1685,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(modelMapper.map(any(), eq(PaymentInfoDto.class))).thenReturn(paymentInfo);
 
-        assertEquals(ModelUtils.getPaymentTableInfoDto(), ubsManagementService.getPaymentInfo(order.getId(), 100L));
+        assertEquals(ModelUtils.getPaymentTableInfoDto(), ubsManagementService.getPaymentInfo(order.getId(), 100.));
     }
 
     @Test
@@ -1694,14 +1694,14 @@ class UBSManagementServiceImplTest {
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
-        assertEquals(ModelUtils.getPaymentTableInfoDto2(), ubsManagementService.getPaymentInfo(order.getId(), 100L));
+        assertEquals(ModelUtils.getPaymentTableInfoDto2(), ubsManagementService.getPaymentInfo(order.getId(), 100.));
     }
 
     @Test
     void getPaymentInfoExceptionTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.getPaymentInfo(1L, 100L));
+            () -> ubsManagementService.getPaymentInfo(1L, 100.));
     }
 
     @Test
@@ -1836,7 +1836,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setOrderStatus(OrderStatus.DONE);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 1100L).getOverpayment());
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 1100.).getOverpayment());
     }
 
     @Test

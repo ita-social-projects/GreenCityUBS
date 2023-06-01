@@ -1,26 +1,45 @@
 package greencity.service.ubs;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import javax.persistence.EntityNotFoundException;
-
+import greencity.ModelUtils;
+import greencity.client.FondyClient;
+import greencity.client.UserRemoteClient;
+import greencity.constant.ErrorMessage;
+import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDtos;
+import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.RegionDto;
+import greencity.dto.TariffsForLocationDto;
+import greencity.dto.address.AddressDto;
+import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
+import greencity.dto.certificate.CertificateDto;
+import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.MakeOrderAgainDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderClientDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.FondyPaymentResponse;
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.user.AllPointsUserDto;
+import greencity.dto.user.PasswordStatusDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserProfileCreateDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
+import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Event;
@@ -30,8 +49,12 @@ import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.telegram.TelegramBot;
+import greencity.entity.user.Location;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
+import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.CertificateStatus;
@@ -40,6 +63,11 @@ import greencity.enums.LocationStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.TariffStatus;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
+import greencity.exceptions.http.AccessDeniedException;
+import greencity.exceptions.user.UBSuserNotFoundException;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -59,6 +87,8 @@ import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
+import greencity.util.Bot;
+import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,123 +103,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
-import greencity.ModelUtils;
-import greencity.client.FondyClient;
-import greencity.client.UserRemoteClient;
-import greencity.constant.ErrorMessage;
-import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.LocationsDtos;
-import greencity.dto.OrderCourierPopUpDto;
-import greencity.dto.RegionDto;
-import greencity.dto.TariffsForLocationDto;
-import greencity.dto.address.AddressDto;
-import greencity.dto.bag.BagForUserDto;
-import greencity.dto.certificate.CertificateDto;
-import greencity.dto.customer.UbsCustomersDto;
-import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.MakeOrderAgainDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderFondyClientDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.FondyPaymentResponse;
-import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.user.AllPointsUserDto;
-import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
-import greencity.dto.user.UserProfileCreateDto;
-import greencity.entity.coords.Coordinates;
-import greencity.entity.user.Location;
-import greencity.entity.user.User;
-import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSuser;
-import greencity.exceptions.BadRequestException;
-import greencity.exceptions.NotFoundException;
-import greencity.exceptions.http.AccessDeniedException;
-import greencity.exceptions.user.UBSuserNotFoundException;
-import greencity.exceptions.user.UserNotFoundException;
-import greencity.util.Bot;
-import greencity.util.EncryptionUtil;
+import javax.persistence.EntityNotFoundException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-import static greencity.ModelUtils.TEST_BAG_LIST;
-import static greencity.ModelUtils.TEST_EMAIL;
-import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
-import static greencity.ModelUtils.TEST_PAYMENT_LIST;
-import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
-import static greencity.ModelUtils.addressDto;
-import static greencity.ModelUtils.addressDtoList;
-import static greencity.ModelUtils.addressList;
-import static greencity.ModelUtils.bagDto;
-import static greencity.ModelUtils.botList;
-import static greencity.ModelUtils.createCertificateDto;
-import static greencity.ModelUtils.getAddress;
-import static greencity.ModelUtils.getAddressDtoResponse;
-import static greencity.ModelUtils.getAddressRequestDto;
-import static greencity.ModelUtils.getBag1list;
-import static greencity.ModelUtils.getBag4list;
-import static greencity.ModelUtils.getBagTranslationDto;
-import static greencity.ModelUtils.getCancellationDto;
-import static greencity.ModelUtils.getCertificate;
-import static greencity.ModelUtils.getEmployee;
-import static greencity.ModelUtils.getGeocodingResult;
-import static greencity.ModelUtils.getListOfEvents;
-import static greencity.ModelUtils.getLocation;
-import static greencity.ModelUtils.getLocationList;
-import static greencity.ModelUtils.getMaximumAmountOfAddresses;
-import static greencity.ModelUtils.getOrder;
-import static greencity.ModelUtils.getOrderClientDto;
-import static greencity.ModelUtils.getOrderCount;
-import static greencity.ModelUtils.getOrderCountWithPaymentStatusPaid;
-import static greencity.ModelUtils.getOrderDetails;
-import static greencity.ModelUtils.getOrderDetailsWithoutSender;
-import static greencity.ModelUtils.getOrderDoneByUser;
-import static greencity.ModelUtils.getOrderFondyClientDto;
-import static greencity.ModelUtils.getOrderPaymentDetailDto;
-import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
-import static greencity.ModelUtils.getOrderResponseDto;
-import static greencity.ModelUtils.getOrderStatusDto;
-import static greencity.ModelUtils.getOrderStatusTranslation;
-import static greencity.ModelUtils.getOrderTest;
-import static greencity.ModelUtils.getOrderWithEvents;
-import static greencity.ModelUtils.getOrderWithTariffAndLocation;
-import static greencity.ModelUtils.getOrderWithoutPayment;
-import static greencity.ModelUtils.getOrdersDto;
-import static greencity.ModelUtils.getPayment;
-import static greencity.ModelUtils.getPaymentResponseDto;
-import static greencity.ModelUtils.getSuccessfulFondyResponse;
-import static greencity.ModelUtils.getTariffInfo;
-import static greencity.ModelUtils.getTariffInfoWithLimitOfBags;
-import static greencity.ModelUtils.getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag;
-import static greencity.ModelUtils.getTariffLocation;
-import static greencity.ModelUtils.getTariffsForLocationDto;
-import static greencity.ModelUtils.getTelegramBotNotifyTrue;
-import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
-import static greencity.ModelUtils.getTestOrderAddressLocationDto;
-import static greencity.ModelUtils.getTestUser;
-import static greencity.ModelUtils.getUBSuser;
-import static greencity.ModelUtils.getUBSuserWithoutSender;
-import static greencity.ModelUtils.getUbsUsers;
-import static greencity.ModelUtils.getUser;
-import static greencity.ModelUtils.getUserForCreate;
-import static greencity.ModelUtils.getUserInfoDto;
-import static greencity.ModelUtils.getUserPointsAndAllBagsDto;
-import static greencity.ModelUtils.getUserProfileCreateDto;
-import static greencity.ModelUtils.getUserProfileUpdateDto;
-import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
-import static greencity.ModelUtils.getUserWithBotNotifyTrue;
-import static greencity.ModelUtils.getUserWithLastLocation;
-import static greencity.ModelUtils.getViberBotNotifyTrue;
-
+import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
@@ -205,7 +136,6 @@ import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static org.junit.Assert.assertTrue;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -692,7 +622,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -744,7 +674,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -786,7 +716,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -826,7 +756,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -877,7 +807,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -920,7 +850,7 @@ class UBSClientServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
@@ -946,7 +876,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(100);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -1079,7 +1009,7 @@ class UBSClientServiceImplTest {
                     BagOrderDto.builder()
                         .bagId(1)
                         .capacity(10)
-                        .price(100)
+                        .price(100.)
                         .bagAmount(1)
                         .name("name")
                         .nameEng("nameEng")
@@ -1087,7 +1017,7 @@ class UBSClientServiceImplTest {
                     BagOrderDto.builder()
                         .bagId(2)
                         .capacity(10)
-                        .price(100)
+                        .price(100.)
                         .name("name")
                         .nameEng("nameEng")
                         .build()))
@@ -2159,7 +2089,7 @@ class UBSClientServiceImplTest {
         value.put(1, 22);
         order.setAmountOfBagsOrdered(value);
         order.setPointsToUse(100);
-        order.setSumTotalAmountWithoutDiscounts(1000L);
+        order.setSumTotalAmountWithoutDiscounts(1000_00L);
         order.setCertificates(Set.of(getCertificate()));
         order.setPayment(TEST_PAYMENT_LIST);
         User user = getUser();
@@ -2218,7 +2148,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -2273,7 +2203,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser().setId(null);
 
@@ -2325,7 +2255,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(100);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -2369,7 +2299,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -2414,7 +2344,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -2556,7 +2486,7 @@ class UBSClientServiceImplTest {
 
         BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
         bag.setCapacity(120);
-        bag.setFullPrice(1200);
+        bag.setFullPrice(1200_00L);
         order.setAmountOfBagsOrdered(Map.of(1, 10));
         bags.add(bag);
         order.setUser(user);
@@ -2612,7 +2542,7 @@ class UBSClientServiceImplTest {
 
         BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
         bag.setCapacity(120);
-        bag.setFullPrice(1200);
+        bag.setFullPrice(1200_00L);
         order.setAmountOfBagsOrdered(Map.of(1, 10));
         bags.add(bag);
         order.setUser(user);
@@ -2661,7 +2591,7 @@ class UBSClientServiceImplTest {
 
         BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
         bag.setCapacity(120);
-        bag.setFullPrice(1200);
+        bag.setFullPrice(1200_00L);
         order.setExportedQuantity(Map.of(1, 10));
         bags.add(bag);
         order.setUser(user);
@@ -2710,7 +2640,7 @@ class UBSClientServiceImplTest {
 
         BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
         bag.setCapacity(120);
-        bag.setFullPrice(1200);
+        bag.setFullPrice(1200_00L);
         order.setConfirmedQuantity(Map.of(1, 10));
         bags.add(bag);
         order.setUser(user);
@@ -2824,7 +2754,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -2870,7 +2800,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -2913,7 +2843,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setFullPrice(400);
+        bag.setFullPrice(400_00L);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -2990,7 +2920,7 @@ class UBSClientServiceImplTest {
         List<Order> orderList = new ArrayList<>();
 
         bag.setCapacity(120);
-        bag.setFullPrice(1200);
+        bag.setFullPrice(1200_00L);
         bags.add(bag);
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);

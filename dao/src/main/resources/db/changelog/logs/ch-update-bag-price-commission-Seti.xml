@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Seti-9" author="Julia Seti">
+        <modifyDataType tableName="bag" columnName="price" newDataType="bigint"/>
+        <modifyDataType tableName="bag" columnName="commission" newDataType="bigint"/>
+        <modifyDataType tableName="bag" columnName="full_price" newDataType="bigint"/>
+
+        <update tableName="bag">
+            <column name="price" value="23000"/>
+            <column name="commission" value="5000"/>
+            <column name="full_price" value="28000"/>
+            <where>id=1</where>
+        </update>
+
+        <update tableName="bag">
+            <column name="price" value="11000"/>
+            <column name="full_price" value="11000"/>
+            <where>id=2</where>
+        </update>
+
+        <update tableName="bag">
+            <column name="price" value="22000"/>
+            <column name="full_price" value="22000"/>
+            <where>id=3</where>
+        </update>
+
+        <update tableName="bag">
+            <column name="price" value="23000"/>
+            <column name="commission" value="5000"/>
+            <column name="full_price" value="28000"/>
+            <where>id=4</where>
+        </update>
+
+        <update tableName="bag">
+            <column name="price" value="11000"/>
+            <column name="full_price" value="11000"/>
+            <where>id=5</where>
+        </update>
+
+        <update tableName="bag">
+            <column name="price" value="22000"/>
+            <column name="full_price" value="22000"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

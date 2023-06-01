@@ -10,7 +10,7 @@ public class BagForUserDto {
     private String service;
     private String serviceEng;
     private Integer capacity;
-    private Integer fullPrice;
+    private Double fullPrice;
     private Integer count;
-    private Integer totalPrice;
+    private Double totalPrice;
 }

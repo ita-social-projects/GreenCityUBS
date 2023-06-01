@@ -146,6 +146,7 @@ class SuperAdminServiceImplTest {
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.save(bag)).thenReturn(bag);
+        when(modelMapper.map(dto, Bag.class)).thenReturn(bag);
         when(modelMapper.map(bag, GetTariffServiceDto.class)).thenReturn(responseDto);
 
         superAdminService.addTariffService(1L, dto, uuid);
@@ -153,6 +154,7 @@ class SuperAdminServiceImplTest {
         verify(employeeRepository).findByUuid(uuid);
         verify(tariffsInfoRepository).findById(1L);
         verify(bagRepository).save(bag);
+        verify(modelMapper).map(dto, Bag.class);
         verify(modelMapper).map(bag, GetTariffServiceDto.class);
     }
 
@@ -192,13 +194,13 @@ class SuperAdminServiceImplTest {
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
 
         when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
-        when(bagRepository.getAllByTariffsInfoId(1L)).thenReturn(bags);
+        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(bags);
         when(modelMapper.map(bags.get(0), GetTariffServiceDto.class)).thenReturn(dto);
 
         superAdminService.getTariffService(1);
 
         verify(tariffsInfoRepository).existsById(1L);
-        verify(bagRepository).getAllByTariffsInfoId(1L);
+        verify(bagRepository).findBagsByTariffsInfoId(1L);
         verify(modelMapper).map(bags.get(0), GetTariffServiceDto.class);
     }
 
@@ -210,7 +212,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.getTariffService(1));
 
         verify(tariffsInfoRepository).existsById(1L);
-        verify(bagRepository, never()).getAllByTariffsInfoId(1L);
+        verify(bagRepository, never()).findBagsByTariffsInfoId(1L);
     }
 
     @Test
@@ -473,6 +475,7 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(serviceRepository.save(service)).thenReturn(createdService);
+        when(modelMapper.map(serviceDto, Service.class)).thenReturn(service);
         when(modelMapper.map(createdService, GetServiceDto.class)).thenReturn(getServiceDto);
 
         assertEquals(getServiceDto, superAdminService.addService(1L, serviceDto, uuid));
@@ -482,6 +485,7 @@ class SuperAdminServiceImplTest {
         verify(tariffsInfoRepository).findById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(serviceRepository).save(service);
+        verify(modelMapper).map(createdService, GetServiceDto.class);
         verify(modelMapper).map(createdService, GetServiceDto.class);
     }
 

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Seti-11" author="Julia Seti">
+        <dropView viewName="big_order_table"/>
+        <createView
+                viewName="big_order_table"
+                replaceIfExists="true">
+
+            with group_capacity  as
+                     (SELECT this.order_id,
+                             case  when
+                                       ((select sum(obm.confirmed_quantity) from order_bag_mapping obm
+                                         where obm.order_id = this.order_id) is NULL
+                                           and (select sum(obm.exported_quantity) from order_bag_mapping obm
+                                                where obm.order_id = this.order_id) is NULL)
+                                       then concat(bag.capacity,'л - ',sum(amount),'шт')
+                                   when ((select sum(obm.exported_quantity) from order_bag_mapping obm
+                                          where obm.order_id = this.order_id) is NULL
+                                       and (select sum(obm.confirmed_quantity) from order_bag_mapping obm
+                                            where obm.order_id = this.order_id) is not NULL)
+                                       then  concat(bag.capacity,'л - ',sum(confirmed_quantity),'шт')
+                                   when ((select sum(obm.exported_quantity) from order_bag_mapping obm
+                                          where obm.order_id = this.order_id) is not NULL)
+                                       then concat(bag.capacity,'л - ',sum(exported_quantity),'шт')
+                                 end
+                                 as amount_cap
+                      from order_bag_mapping this
+                               left join bag on this.bag_id = bag.id
+                      group by  bag.capacity , this.order_id )
+
+            SELECT
+                o.id as id,
+                o.order_status as order_status ,
+                o.order_payment_status as order_payment_status,
+                cast(o.order_date as date) as order_date,
+                cast ((select  max(cast(p.settlement_date as date)) from payment p where p.order_id = o.id and o.order_payment_status='PAID') as date )  as payment_date,
+                concat_ws(' ',uu.first_name,uu.last_name) as client_name,
+                uu.phone_number as client_phone_number,
+                uu.email as client_email,
+                concat_ws(' ',uu.sender_first_name,uu.sender_last_name ) as sender_name,
+                uu.sender_phone_number as sender_phone,
+                uu.sender_email as sender_email,
+                u.violations as violations_amount,
+                a.region as region,
+                a.city as city,
+                a.district as district,
+                concat_ws(', ',concat(a.street , ' ' , a.house_number),
+                          case when (a.house_corpus) is not null and a.house_corpus != '' then concat('корп.',a.house_corpus) else 'корп.- ' end ,
+                          case when (a.entrance_number) is not null and a.entrance_number != '' then concat('п.', a.entrance_number) else 'п.- ' end)
+                    as address,
+                a.address_comment as comment_to_address_for_client,
+                (select string_agg(amount_cap,'; ')from group_capacity
+                 where order_id = o.id) as bag_amount,
+                o.sum_total_amount_without_discounts as total_order_sum,
+                (select string_agg(c.code,', ') from  certificate c where c.order_id=o.id) as order_certificate_code,
+                cast(coalesce((select sum(c.points) from  certificate c where c.order_id=o.id), 0)
+                    + coalesce(o.points_to_use, 0) as bigint) as general_discount,
+                cast(coalesce(o.sum_total_amount_without_discounts, 0)
+                    - (coalesce((select sum(p.amount) from payment p where p.order_id=o.id and p.payment_status='PAID'), 0)
+                        + (coalesce((select sum(c.points) from certificate c where c.order_id=o.id), 0)
+                        + coalesce(o.points_to_use, 0)) * 100) as bigint ) as amount_due,
+                o.comment as comment_for_order_by_client,
+                cast(coalesce((select sum(p.amount) from payment p where p.order_id=o.id and p.payment_status='PAID'), 0)
+                    + (coalesce((select sum(c.points) from certificate c where c.order_id=o.id), 0) + coalesce(o.points_to_use, 0)) * 100 as bigint) as total_payment,
+                o.date_of_export as date_of_export,
+                concat_ws('-', cast(o.deliver_from as time), cast (o.deliver_to as time)) as time_of_export,
+                (select  string_agg(oe.additional_order, '; ') from order_additional oe where oe.orders_id = o.id) as id_order_from_shop,
+                r.name as receiving_station,
+                r.id as receiving_station_id,
+
+                (select concat_ws(', ',e.first_name,e.last_name) from employee_order_position eop
+                                                                          left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=3 )  as responsible_logic_man,
+                (select e.id from employee_order_position eop
+                                      left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=3 )  as responsible_logic_man_id,
+
+                (select concat_ws(', ',e.first_name,e.last_name) from employee_order_position eop
+                                                                          left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=5 )   as responsible_driver,
+                (select e.id from employee_order_position eop
+                                      left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=5 )  as responsible_driver_id,
+
+                (select concat_ws(', ',e.first_name,e.last_name) from employee_order_position eop
+                                                                          left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=2 )   as responsible_caller,
+                (select e.id from employee_order_position eop
+                                      left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=2 )   as responsible_caller_id,
+
+                (select concat_ws(', ',e.first_name,e.last_name) from employee_order_position eop
+                                                                          left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=4 )   as responsible_navigator,
+                (select e.id from employee_order_position eop
+                                      left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=4 )   as responsible_navigator_id,
+                o.blocked as is_blocked,
+                concat_ws(', ',e.first_name,e.last_name) as blocked_by,
+                a.region_en as region_en,
+                a.city_en as city_en,
+                a.district_en as district_en,
+                concat_ws(', ',concat(a.street_en , ' ' , a.house_number),
+                          case when (a.house_corpus) is not null and a.house_corpus != '' then concat('b.',a.house_corpus) else 'b.- ' end ,
+                          case when (a.entrance_number) is not null and a.entrance_number != '' then concat('e.', a.entrance_number) else 'e.- ' end)
+                    as address_en,
+                o.tariffs_info_id as tariffs_info_id,
+                o.admin_comment as comment_for_order_by_admin
+
+            from orders o
+
+                     left join employees e on o.employee_id = e.id
+                     left join receiving_stations r on o.receiving_station_id = r.id
+                     left join ubs_user uu on o.ubs_user_id = uu.id
+                     left join order_address a on uu.id = a.id
+                     left join users u on o.users_id = u.id
+        </createView>
+
+        <rollback>
+            <dropView viewName="big_order_table"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

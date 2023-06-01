@@ -184,36 +184,36 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Nazar Struk, Ostap Mykhailivskyi
      */
     @Override
-    public PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay) {
+    public PaymentTableInfoDto getPaymentInfo(long orderId, Double sumToPay) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        BigDecimal paidAmount = calculatePaidAmount(order);
-        BigDecimal overpayment = calculateOverpayment(order, sumToPay);
-        BigDecimal unPaidAmount = calculateUnpaidAmount(order, sumToPay, paidAmount);
+        Long sumToPayInCoins = convertBillsIntoCoins(sumToPay);
+        Long paidAmountInCoins = calculatePaidAmount(order);
+        Long overpaymentInCoins = calculateOverpayment(order, sumToPayInCoins);
+        Long unPaidAmountInCoins = calculateUnpaidAmount(order, sumToPayInCoins, paidAmountInCoins);
         PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
-        paymentTableInfoDto.setOverpayment(overpayment.doubleValue());
-        paymentTableInfoDto.setUnPaidAmount(unPaidAmount.doubleValue());
-        paymentTableInfoDto.setPaidAmount(paidAmount.doubleValue());
+        paymentTableInfoDto.setOverpayment(convertCoinsIntoBills(overpaymentInCoins));
+        paymentTableInfoDto.setUnPaidAmount(convertCoinsIntoBills(unPaidAmountInCoins));
+        paymentTableInfoDto.setPaidAmount(convertCoinsIntoBills(paidAmountInCoins));
         List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
             .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
-        paymentTableInfoDto.setPaymentInfoDtos(getAmountInUAH(paymentInfoDtos));
+        paymentTableInfoDto.setPaymentInfoDtos(paymentInfoDtos);
         return paymentTableInfoDto;
     }
 
-    private List<PaymentInfoDto> getAmountInUAH(List<PaymentInfoDto> paymentInfoDtos) {
-        if (!paymentInfoDtos.isEmpty()) {
-            for (PaymentInfoDto paymentInfoDto : paymentInfoDtos) {
-                if (paymentInfoDto != null) {
-                    BigDecimal amountInUAH = BigDecimal.valueOf(paymentInfoDto.getAmount())
-                        .divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
-                            AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY,
-                            RoundingMode.HALF_UP);
-                    paymentInfoDto.setAmount(amountInUAH.doubleValue());
-                }
-            }
-        }
-        return paymentInfoDtos;
+    private Long convertBillsIntoCoins(Double bills) {
+        return BigDecimal.valueOf(bills)
+            .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+            .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+            .longValue();
+    }
+
+    private Double convertCoinsIntoBills(Long coins) {
+        return BigDecimal.valueOf(coins)
+            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+            .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+            .doubleValue();
     }
 
     /**
@@ -221,34 +221,35 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * and done orders.
      *
      * @param orderId  of {@link Long} order id;
-     * @param sumToPay of {@link Long} sum to pay;
+     * @param sumToPay of {@link Double} sum to pay;
      * @param marker   of {@link Long} marker;
      * @return {@link PaymentTableInfoDto }
      * @author Ostap Mykhailivskyi
      */
     @Override
-    public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker) {
+    public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Double sumToPay, Long marker) {
         Order order = orderRepository.findUserById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        BigDecimal overpayment = calculateOverpayment(order, sumToPay);
+        Long overpaymentInCoins = calculateOverpayment(order, convertBillsIntoCoins(sumToPay));
 
         PaymentTableInfoDto dto = getPaymentInfo(orderId, sumToPay);
-        PaymentInfoDto payDto = PaymentInfoDto.builder().amount(overpayment.doubleValue())
-            .settlementdate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)).build();
+        PaymentInfoDto payDto = PaymentInfoDto.builder()
+            .amount(convertCoinsIntoBills(overpaymentInCoins))
+            .settlementdate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
+            .build();
         if (marker == 1L) {
             payDto.setComment(AppConstant.PAYMENT_REFUND);
         } else {
             payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
-            int uahPoints =
-                overpayment.setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.FLOOR).intValue();
+            int uahPoints = convertCoinsIntoBills(overpaymentInCoins).intValue();
 
             User user = order.getUser();
             user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
             orderRepository.save(order);
         }
         dto.getPaymentInfoDtos().add(payDto);
-        BigDecimal previousOverpaymentAmount = new BigDecimal(dto.getOverpayment().toString());
-        dto.setOverpayment(previousOverpaymentAmount.subtract(overpayment).doubleValue());
+        long previousOverpaymentAmount = convertBillsIntoCoins(dto.getOverpayment());
+        dto.setOverpayment(convertCoinsIntoBills(previousOverpaymentAmount - overpaymentInCoins));
         return dto;
     }
 
@@ -360,9 +361,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(bag -> modelMapper.map(bag, BagInfoDto.class))
             .collect(Collectors.toList());
 
-        Integer servicePrice = serviceRepository.findServiceByTariffsInfoId(order.getTariffsInfo().getId())
+        Long servicePriceInCoins = serviceRepository.findServiceByTariffsInfoId(order.getTariffsInfo().getId())
             .map(it -> it.getPrice())
-            .orElse(0);
+            .orElse(0L);
 
         var orderAddress = order.getUbsUser().getOrderAddress();
 
@@ -378,21 +379,23 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressComment(orderAddress.getAddressComment())
             .bags(bagInfoDtoList)
             .orderFullPrice(setTotalPrice(prices))
-            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())
-            .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
-            .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
+            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount()).getUnPaidAmount())
+            .orderBonusDiscount(prices.getBonus())
+            .orderCertificateTotalDiscount(prices.getCertificateBonus())
+            .orderExportedPrice(prices.getSumExported())
+            .orderExportedDiscountedPrice(prices.getTotalSumExported())
             .amountOfBagsOrdered(order.getAmountOfBagsOrdered())
             .amountOfBagsExported(order.getExportedQuantity())
             .amountOfBagsConfirmed(order.getConfirmedQuantity())
             .numbersFromShop(order.getAdditionalOrders())
             .certificates(prices.getCertificate())
-            .paymentTableInfoDto(getPaymentInfo(orderId, setTotalPrice(prices).longValue()))
+            .paymentTableInfoDto(getPaymentInfo(orderId, setTotalPrice(prices)))
             .exportDetailsDto(getOrderExportDetails(orderId))
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId, email))
             .comment(order.getComment())
-            .courierPricePerPackage(servicePrice)
+            .courierPricePerPackage(convertCoinsIntoBills(servicePriceInCoins))
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
-            .writeOffStationSum(order.getWriteOffStationSum())
+            .writeOffStationSum(convertCoinsIntoBills(order.getWriteOffStationSum()))
             .build();
     }
 
@@ -579,9 +582,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public void setOrderDetail(Long orderId,
         Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String email) {
-        final long wasPaid =
+        final long wasPaidInCoins =
             paymentRepository.selectSumPaid(orderId) == null ? 0L
-                : paymentRepository.selectSumPaid(orderId) / 100;
+                : paymentRepository.selectSumPaid(orderId);
         collectEventsAboutSetOrderDetails(confirmed, exported, orderId, email);
         final Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
@@ -616,52 +619,55 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
 
-        long discount = orderRepository.findSumOfCertificatesByOrderId(orderId);
-        long totalPrice = setTotalPrice(getPriceDetails(orderId)).longValue();
-        long needToPay = totalPrice - wasPaid - discount;
+        long discountInCoins = orderRepository.findSumOfCertificatesByOrderId(orderId) * 100L;
+        long totalPriceInCoins = convertBillsIntoCoins(setTotalPrice(getPriceDetails(orderId)));
+        long needToPayInCoins = totalPriceInCoins - wasPaidInCoins - discountInCoins;
 
-        if (needToPay == 0) {
+        if (needToPayInCoins == 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
             return;
         }
-        if (totalPrice - wasPaid >= 0 && needToPay < 0) {
+        if (totalPriceInCoins - wasPaidInCoins >= 0 && needToPayInCoins < 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
-            recalculateCertificates(totalPrice - wasPaid, order);
+            recalculateCertificates(totalPriceInCoins - wasPaidInCoins, order);
             return;
         }
-        if (totalPrice < wasPaid) {
+        if (totalPriceInCoins < wasPaidInCoins) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
             recalculateCertificates(0L, order);
             return;
         }
-        if (needToPay > 0 && wasPaid + discount != 0) {
+        if (needToPayInCoins > 0 && wasPaidInCoins + discountInCoins != 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.HALF_PAID.name());
             notificationService.notifyHalfPaidPackage(order);
             return;
         }
-        if (wasPaid + discount == 0) {
+        if (wasPaidInCoins + discountInCoins == 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.UNPAID.name());
         }
     }
 
-    private void recalculateCertificates(long amount, Order order) {
+    private void recalculateCertificates(long amountInCoins, Order order) {
         Set<Certificate> certificates = order.getCertificates();
         for (Certificate certificate : certificates) {
-            amount = amount - certificate.getPoints();
-            if (amount < 0) {
-                certificate.setPoints(certificate.getPoints() + (int) amount);
+            amountInCoins = amountInCoins - certificate.getPoints() * 100L;
+            if (amountInCoins < 0) {
+                certificate.setPoints(certificate.getPoints() + BigDecimal.valueOf(amountInCoins)
+                    .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                    .setScale(0, RoundingMode.UP).intValue());
                 certificateRepository.save(certificate);
-                amount = 0L;
+                amountInCoins = 0L;
             }
         }
-        recalculatePoints(amount, order);
+        recalculatePoints(BigDecimal.valueOf(convertCoinsIntoBills(amountInCoins))
+            .setScale(0, RoundingMode.HALF_UP).intValue(), order);
     }
 
-    private void recalculatePoints(long amount, Order order) {
+    private void recalculatePoints(int amount, Order order) {
         if (order.getPointsToUse() > amount) {
-            userRepository.updateUserCurrentPoints(order.getUser().getId(), order.getPointsToUse() - (int) amount);
-            order.setPointsToUse((int) amount);
-            orderRepository.updateOrderPointsToUse(order.getId(), (int) amount);
+            userRepository.updateUserCurrentPoints(order.getUser().getId(), order.getPointsToUse() - amount);
+            order.setPointsToUse(amount);
+            orderRepository.updateOrderPointsToUse(order.getId(), amount);
         }
     }
 
@@ -763,11 +769,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.getOrderDetails(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        double totalSumAmount = dto.getTotalSumAmount();
-        double totalSumConfirmed = dto.getTotalSumConfirmed();
-        double totalSumExported = dto.getTotalSumExported();
+        long totalSumAmountInCoins = convertBillsIntoCoins(dto.getTotalSumAmount());
+        long totalSumConfirmedInCoins = convertBillsIntoCoins(dto.getTotalSumConfirmed());
+        long totalSumExportedInCoins = convertBillsIntoCoins(dto.getTotalSumExported());
 
-        updateOrderPaymentStatus(order, totalSumAmount, totalSumConfirmed, totalSumExported);
+        updateOrderPaymentStatus(order, totalSumAmountInCoins, totalSumConfirmedInCoins, totalSumExportedInCoins);
         return dto;
     }
 
@@ -778,15 +784,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Bag> bag = bagRepository.findBagsByOrderId(id);
         final List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
 
-        double sumAmount = 0;
-        double sumConfirmed = 0;
-        double sumExported = 0;
-        double totalSumAmount;
-        double totalSumConfirmed;
-        double totalSumExported;
+        long sumAmountInCoins = 0;
+        long sumConfirmedInCoins = 0;
+        long sumExportedInCoins = 0;
+        long totalSumAmountInCoins;
+        long totalSumConfirmedInCoins;
+        long totalSumExportedInCoins;
         if (!bag.isEmpty()) {
             for (Map.Entry<Integer, Integer> entry : order.getAmountOfBagsOrdered().entrySet()) {
-                sumAmount += entry.getValue() * bag
+                sumAmountInCoins += entry.getValue() * bag
                     .stream()
                     .filter(b -> b.getId().equals(entry.getKey()))
                     .findFirst()
@@ -794,7 +800,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     .getFullPrice();
             }
             for (Map.Entry<Integer, Integer> entry : order.getConfirmedQuantity().entrySet()) {
-                sumConfirmed += entry.getValue() * bag
+                sumConfirmedInCoins += entry.getValue() * bag
                     .stream()
                     .filter(b -> b.getId().equals(entry.getKey()))
                     .findFirst()
@@ -802,7 +808,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     .getFullPrice();
             }
             for (Map.Entry<Integer, Integer> entry : order.getExportedQuantity().entrySet()) {
-                sumExported += entry.getValue() * bag
+                sumExportedInCoins += entry.getValue() * bag
                     .stream()
                     .filter(b -> b.getId().equals(entry.getKey()))
                     .findFirst()
@@ -811,41 +817,36 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
 
             if (order.getExportedQuantity().size() != 0) {
-                sumExported += getUbsCourierOrWriteOffStationSum(order);
+                sumExportedInCoins += getUbsCourierOrWriteOffStationSum(order);
             } else if (order.getConfirmedQuantity().size() != 0) {
-                sumConfirmed += getUbsCourierOrWriteOffStationSum(order);
+                sumConfirmedInCoins += getUbsCourierOrWriteOffStationSum(order);
             } else {
-                sumAmount += getUbsCourierOrWriteOffStationSum(order);
+                sumAmountInCoins += getUbsCourierOrWriteOffStationSum(order);
             }
         }
 
         if (!currentCertificate.isEmpty()) {
-            double totalSumAmountToCheck =
-                (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    + order.getPointsToUse()));
-            totalSumAmount = totalSumAmountToCheck <= 0 ? 0 : totalSumAmountToCheck;
-            totalSumConfirmed =
-                (sumConfirmed
-                    - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                        + order.getPointsToUse()));
-            totalSumExported =
-                (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    + order.getPointsToUse()));
-            dto.setCertificateBonus(
-                currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
-            dto.setCertificate(
-                currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
+            Integer certificateBonus = currentCertificate.stream()
+                .map(Certificate::getPoints).reduce(Integer::sum).orElse(0);
+            long certificatesAndBonusesInCoins = 100L * (certificateBonus + order.getPointsToUse());
+            long totalSumAmountInCoinsToCheck = sumAmountInCoins - certificatesAndBonusesInCoins;
+            totalSumAmountInCoins = totalSumAmountInCoinsToCheck <= 0 ? 0 : totalSumAmountInCoinsToCheck;
+            totalSumConfirmedInCoins = sumConfirmedInCoins - certificatesAndBonusesInCoins;
+            totalSumExportedInCoins = sumExportedInCoins - certificatesAndBonusesInCoins;
+            dto.setCertificateBonus(certificateBonus.doubleValue());
+            dto.setCertificate(currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
         } else {
             dto.setCertificateBonus((double) 0);
-            totalSumAmount = sumAmount - order.getPointsToUse();
-            totalSumConfirmed = sumConfirmed - order.getPointsToUse();
-            totalSumExported = sumExported - order.getPointsToUse();
+            long bonusesInCoins = 100L * order.getPointsToUse();
+            totalSumAmountInCoins = sumAmountInCoins - bonusesInCoins;
+            totalSumConfirmedInCoins = sumConfirmedInCoins - bonusesInCoins;
+            totalSumExportedInCoins = sumExportedInCoins - bonusesInCoins;
         }
         if (order.getConfirmedQuantity().isEmpty()) {
-            totalSumConfirmed = 0;
+            totalSumConfirmedInCoins = 0;
         }
         if (order.getExportedQuantity().isEmpty()) {
-            totalSumExported = 0;
+            totalSumExportedInCoins = 0;
         }
         dto.setTotalAmount(
             order.getAmountOfBagsOrdered().values()
@@ -858,7 +859,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .stream().reduce(Integer::sum).orElse(0).doubleValue());
 
         setDtoInfoFromOrder(dto, order);
-        setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported);
+        setDtoInfo(dto, sumAmountInCoins, sumExportedInCoins, sumConfirmedInCoins,
+            totalSumAmountInCoins, totalSumConfirmedInCoins, totalSumExportedInCoins);
         return dto;
     }
 
@@ -880,33 +882,36 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setBonus(order.getPointsToUse().doubleValue());
     }
 
-    private void setDtoInfo(CounterOrderDetailsDto dto, double sumAmount, double sumExported, double sumConfirmed,
-        double totalSumAmount, double totalSumConfirmed, double totalSumExported) {
-        dto.setSumAmount(sumAmount);
-        dto.setSumConfirmed(sumConfirmed);
-        dto.setSumExported(sumExported);
-        dto.setTotalSumAmount(totalSumAmount);
-        dto.setTotalSumConfirmed(totalSumConfirmed);
-        dto.setTotalSumExported(totalSumExported);
+    private void setDtoInfo(CounterOrderDetailsDto dto, long sumAmountInCoins, long sumExportedInCoins,
+        long sumConfirmedInCoins, long totalSumAmountInCoins, long totalSumConfirmedInCoins,
+        long totalSumExportedInCoins) {
+        dto.setSumAmount(convertCoinsIntoBills(sumAmountInCoins));
+        dto.setSumConfirmed(convertCoinsIntoBills(sumConfirmedInCoins));
+        dto.setSumExported(convertCoinsIntoBills(sumExportedInCoins));
+        dto.setTotalSumAmount(convertCoinsIntoBills(totalSumAmountInCoins));
+        dto.setTotalSumConfirmed(convertCoinsIntoBills(totalSumConfirmedInCoins));
+        dto.setTotalSumExported(convertCoinsIntoBills(totalSumExportedInCoins));
     }
 
-    private void updateOrderPaymentStatus(Order currentOrder, double totalSumAmount, double totalConfirmed,
-        double totalExported) {
-        long paymentsForCurrentOrder = currentOrder.getPayment().stream().filter(payment -> payment.getPaymentStatus()
-            .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(amount -> amount / 100).reduce(Long::sum)
+    private void updateOrderPaymentStatus(Order currentOrder, long totalSumAmountInCoins, long totalConfirmedInCoins,
+        long totalExportedInCoins) {
+        long paymentsForCurrentOrderInCoins = currentOrder.getPayment().stream()
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
+            .map(Payment::getAmount)
+            .reduce(Long::sum)
             .orElse(0L);
 
         if (orderStatusesBeforeShipment.contains(currentOrder.getOrderStatus())) {
-            setOrderPaymentStatusForConfirmedBags(currentOrder, paymentsForCurrentOrder, totalSumAmount,
-                totalConfirmed);
+            setOrderPaymentStatusForConfirmedBags(currentOrder, paymentsForCurrentOrderInCoins, totalSumAmountInCoins,
+                totalConfirmedInCoins);
         } else if (orderStatusesAfterConfirmation.contains(currentOrder.getOrderStatus())) {
-            setOrderPaymentStatusForExportedBags(currentOrder, paymentsForCurrentOrder, totalExported);
+            setOrderPaymentStatusForExportedBags(currentOrder, paymentsForCurrentOrderInCoins, totalExportedInCoins);
         }
         orderRepository.save(currentOrder);
     }
 
     private void setOrderPaymentStatusForConfirmedBags(Order currentOrder, long paymentsForCurrentOrder,
-        double totalSumAmount, double totalConfirmed) {
+        long totalSumAmount, long totalConfirmed) {
         boolean paidCondition = paymentsForCurrentOrder > 0 && paymentsForCurrentOrder >= totalSumAmount
             && paymentsForCurrentOrder >= totalConfirmed;
         boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalSumAmount > paymentsForCurrentOrder
@@ -926,7 +931,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void setOrderPaymentStatusForExportedBags(Order currentOrder, long paymentsForCurrentOrder,
-        double totalExported) {
+        long totalExported) {
         boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalExported > paymentsForCurrentOrder;
         boolean paidCondition = totalExported <= paymentsForCurrentOrder && paymentsForCurrentOrder > 0;
 
@@ -1249,62 +1254,59 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * Method that calculates overpayment on user's order.
+     * Method that calculates overpayment on user's order in coins.
      *
-     * @param order    of {@link Order} order;
-     * @param sumToPay of {@link Long} sum to pay;
-     * @return {@link BigDecimal }
+     * @param order           of {@link Order} order;
+     * @param sumToPayInCoins of {@link Long} sum to pay in coins;
+     * @return {@link Long }
      * @author Ostap Mykhailivskyi
      */
-    private BigDecimal calculateOverpayment(Order order, Long sumToPay) {
-        BigDecimal paidAmount = calculatePaidAmount(order);
+    private Long calculateOverpayment(Order order, Long sumToPayInCoins) {
+        long paidAmountInCoins = calculatePaidAmount(order);
 
         long certificateSum = order.getCertificates().stream()
             .map(Certificate::getPoints)
             .reduce(0, Integer::sum);
-        long bonusOverpayment = certificateSum + order.getPointsToUse() - sumToPay;
+        long bonusOverpaymentInCoins = 100L * (certificateSum + order.getPointsToUse()) - sumToPayInCoins;
 
-        BigDecimal overpayment = paidAmount.add(new BigDecimal(bonusOverpayment));
+        long overpaymentInCoins = paidAmountInCoins + bonusOverpaymentInCoins;
 
         return OrderStatus.CANCELED == order.getOrderStatus()
-            ? paidAmount
-            : overpayment.max(BigDecimal.ZERO);
+            ? paidAmountInCoins
+            : Math.max(overpaymentInCoins, 0L);
     }
 
     /**
-     * Method that calculate paid amount.
+     * Method that calculate paid amount in coins.
      *
      * @param order of {@link Order} order id;
-     * @return {@link BigDecimal }
+     * @return {@link Long } paid amount in coins;
      * @author Ostap Mykhailivskyi
      */
-    private BigDecimal calculatePaidAmount(Order order) {
-        Long coins = order.getPayment().stream()
+    private Long calculatePaidAmount(Order order) {
+        return order.getPayment().stream()
             .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(Payment::getAmount)
             .reduce(0L, Long::sum);
-        return new BigDecimal(coins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
-            AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP);
     }
 
     /**
-     * Method that calculate unpaid amount.
+     * Method that calculate unpaid amount in coins.
      *
-     * @param order      of {@link Order} order id;
-     * @param sumToPay   of {@link Long} sum to pay;
-     * @param paidAmount of {@link BigDecimal} sum to pay;
-     * @return {@link BigDecimal }
+     * @param order             of {@link Order} order id;
+     * @param sumToPayInCoins   of {@link Long} sum to pay in coins;
+     * @param paidAmountInCoins of {@link Long} paid amount in coins;
+     * @return {@link Long } unpaid amount in coins
      * @author Ostap Mykhailivskyi
      */
-    private BigDecimal calculateUnpaidAmount(Order order, Long sumToPay, BigDecimal paidAmount) {
-        sumToPay = sumToPay - ((order.getCertificates().stream()
-            .map(Certificate::getPoints)
-            .reduce(Integer::sum)
-            .orElse(0)) + order.getPointsToUse());
+    private Long calculateUnpaidAmount(Order order, Long sumToPayInCoins, Long paidAmountInCoins) {
+        long unpaidAmountInCoins = sumToPayInCoins - paidAmountInCoins
+            - 100L * (order.getPointsToUse() + (order.getCertificates().stream()
+                .map(Certificate::getPoints)
+                .reduce(Integer::sum)
+                .orElse(0)));
 
-        BigDecimal unpaidAmount = new BigDecimal(sumToPay).subtract(paidAmount);
-
-        return unpaidAmount.max(BigDecimal.ZERO);
+        return Math.max(unpaidAmountInCoins, 0);
     }
 
     /**
@@ -1366,10 +1368,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void updateOrderPaymentStatusForManualPayment(Order order) {
         CounterOrderDetailsDto dto = getPriceDetails(order.getId());
-        long paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
-            .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(payment -> payment / 100).reduce(Long::sum)
-            .orElse(0L);
-        long totalPaidAmount = (long) (paymentsForCurrentOrder + dto.getCertificateBonus() + dto.getBonus());
+        double paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
+            .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(this::convertCoinsIntoBills).reduce(Double::sum)
+            .orElse((double) 0);
+        double totalPaidAmount = paymentsForCurrentOrder + dto.getCertificateBonus() + dto.getBonus();
         double totalAmount = setTotalPrice(dto);
 
         if (paymentsForCurrentOrder > 0 && totalAmount > totalPaidAmount) {
@@ -1620,14 +1622,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void setUbsCourierSumAndWriteOffStationSum(Long orderId, Long writeOffStationSum, Long ubsCourierSum) {
+    private void setUbsCourierSumAndWriteOffStationSum(Long orderId, Double writeOffStationSum, Double ubsCourierSum) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         if (writeOffStationSum != null) {
-            order.setWriteOffStationSum(writeOffStationSum);
+            order.setWriteOffStationSum(convertBillsIntoCoins(writeOffStationSum));
         }
         if (ubsCourierSum != null) {
-            order.setUbsCourierSum(ubsCourierSum);
+            order.setUbsCourierSum(convertBillsIntoCoins(ubsCourierSum));
         }
         orderRepository.save(order);
     }
@@ -1708,8 +1710,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void checkOverpayment(BigDecimal overpayment) {
-        if (overpayment.compareTo(BigDecimal.ZERO) == 0) {
+    private void checkOverpayment(long overpayment) {
+        if (overpayment == 0) {
             throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
         }
     }
@@ -1721,13 +1723,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
-        BigDecimal overpaymentUah = calculateOverpayment(order, setTotalPrice(prices).longValue());
-        checkOverpayment(overpaymentUah);
+        Long overpaymentInCoins = calculateOverpayment(order, convertBillsIntoCoins(setTotalPrice(prices)));
+        checkOverpayment(overpaymentInCoins);
         User currentUser = order.getUser();
-        BigDecimal overpaymentCoins = overpaymentUah.multiply(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH.negate());
 
         order.getPayment().add(Payment.builder()
-            .amount(overpaymentCoins.longValue())
+            .amount(-overpaymentInCoins)
             .settlementDate(addBonusesToUserDto.getSettlementdate())
             .paymentId(addBonusesToUserDto.getPaymentId())
             .receiptLink(addBonusesToUserDto.getReceiptLink())
@@ -1737,7 +1738,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .paymentStatus(PaymentStatus.PAID)
             .build());
 
-        transferPointsToUser(order, currentUser, overpaymentUah);
+        transferPointsToUser(order, currentUser, overpaymentInCoins);
 
         orderRepository.save(order);
         userRepository.save(currentUser);
@@ -1751,12 +1752,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private void transferPointsToUser(Order order, User user, BigDecimal points) {
-        if (points.compareTo(BigDecimal.ZERO) <= 0) {
+    private void transferPointsToUser(Order order, User user, long pointsInCoins) {
+        if (pointsInCoins <= 0) {
             return;
         }
 
-        int uahPoints = points.setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.FLOOR).intValue();
+        int uahPoints = convertCoinsIntoBills(pointsInCoins).intValue();
 
         user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
 

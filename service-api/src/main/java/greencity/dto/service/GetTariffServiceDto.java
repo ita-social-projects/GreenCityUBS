@@ -7,7 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -20,22 +26,46 @@ import javax.validation.constraints.NotNull;
 public class GetTariffServiceDto {
     @NotNull
     private Integer id;
+
+    @Min(1)
+    @Max(999)
     @NotNull
     private Integer capacity;
+
     @NotNull
-    private Integer price;
+    @DecimalMin(value = "0.01")
+    @DecimalMax(value = "999999.99")
+    @Digits(integer = 6, fraction = 2)
+    private Double price;
+
     @NotNull
-    private Integer commission;
+    @DecimalMin(value = "0.00")
+    @DecimalMax(value = "999999.99")
+    @Digits(integer = 6, fraction = 2)
+    private Double commission;
+
     @NotNull
-    private Integer fullPrice;
+    @DecimalMin(value = "0.01")
+    @DecimalMax(value = "999999.99")
+    @Digits(integer = 7, fraction = 2)
+    private Double fullPrice;
+
     @NotNull
+    @Length(min = 1, max = 30)
     private String name;
+
     @NotNull
+    @Length(min = 1, max = 30)
     private String nameEng;
+
     @NotNull
+    @Length(min = 1, max = 255)
     private String description;
+
     @NotNull
+    @Length(min = 1, max = 255)
     private String descriptionEng;
+
     @NotNull
     private Boolean limitIncluded;
 }
