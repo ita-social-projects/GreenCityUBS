@@ -1,20 +1,32 @@
 package greencity.controller;
 
-import java.util.List;
-import java.util.Optional;
-
-import javax.validation.Valid;
-
+import greencity.annotations.CurrentUserUuid;
+import greencity.constants.HttpStatuses;
+import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.courier.AddingReceivingStationDto;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierUpdateDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.CreateCourierTranslationDto;
+import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.location.EditLocationDto;
+import greencity.dto.location.LocationCreateDto;
+import greencity.dto.location.LocationInfoDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.service.ServiceDto;
+import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.entity.order.Courier;
 import greencity.exceptions.BadRequestException;
+import greencity.filters.TariffsInfoFilterCriteria;
+import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -34,25 +46,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import greencity.annotations.CurrentUserUuid;
-import greencity.constants.HttpStatuses;
-import greencity.dto.AddNewTariffDto;
-import greencity.dto.courier.AddingReceivingStationDto;
-import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierUpdateDto;
-import greencity.dto.courier.CreateCourierDto;
-import greencity.dto.courier.CreateCourierTranslationDto;
-import greencity.dto.courier.ReceivingStationDto;
-import greencity.dto.location.EditLocationDto;
-import greencity.dto.location.LocationCreateDto;
-import greencity.dto.location.LocationInfoDto;
-import greencity.dto.service.ServiceDto;
-import greencity.dto.service.TariffServiceDto;
-import greencity.entity.order.Courier;
-import greencity.filters.TariffsInfoFilterCriteria;
-import greencity.service.SuperAdminService;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @Validated
@@ -717,15 +715,16 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for deactivation tariff with chosen parameters.
+     * Controller to switching activation statuses by chosen parameters.
      *
      * @param regionsIds  - list of regions ids.
      * @param citiesIds   - list of cities ids.
      * @param stationsIds - list of receiving stations ids.
      * @param courierId   - courier id.
-     * @author Nikita Korzh.
+     * @author Nikita Korzh, Julia Seti.
      */
-    @ApiOperation(value = "Deactivation tariff with chosen parameters.")
+    @ApiOperation(value = "Switch activation status by chosen parameters. "
+        + "In case of deactivation, the tariff is deactivated")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -735,17 +734,20 @@ class SuperAdminController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_PRICING_CARD', authentication)")
     @PostMapping("/deactivate")
-    public ResponseEntity<HttpStatus> deactivateTariffForChosenParam(
+    public ResponseEntity<HttpStatus> switchActivationStatusByChosenParams(
         @RequestParam(name = "regionsIds", required = false) Optional<List<Long>> regionsIds,
         @RequestParam(name = "citiesIds", required = false) Optional<List<Long>> citiesIds,
         @RequestParam(name = "stationsIds", required = false) Optional<List<Long>> stationsIds,
-        @RequestParam(name = "courierId", required = false) Optional<Long> courierId) {
+        @RequestParam(name = "courierId", required = false) Optional<Long> courierId,
+        @Valid @RequestParam @ApiParam(name = "status", required = true, value = "status",
+            allowableValues = "Active, Deactivated") String status) {
         if (regionsIds.isPresent() || citiesIds.isPresent() || stationsIds.isPresent() || courierId.isPresent()) {
-            superAdminService.deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto.builder()
+            superAdminService.switchActivationStatusByChosenParams(DetailsOfDeactivateTariffsDto.builder()
                 .regionsIds(regionsIds)
                 .citiesIds(citiesIds)
                 .stationsIds(stationsIds)
                 .courierId(courierId)
+                .activationStatus(status)
                 .build());
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {

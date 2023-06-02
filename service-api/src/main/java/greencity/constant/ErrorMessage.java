@@ -44,6 +44,7 @@ public final class ErrorMessage {
     public static final String POSITION_NOT_FOUND = "Position doesn't exist";
     public static final String RECEIVING_STATION_ALREADY_EXISTS = "Receiving station already exists: ";
     public static final String RECEIVING_STATION_NOT_FOUND_BY_ID = "Receiving station with current id doesn't exist: ";
+    public static final String REGION_NOT_FOUND_BY_ID = "Region with current id doesn't exist: ";
     public static final String RECEIVING_STATION_NOT_FOUND = "Receiving station doesn't exist.";
     public static final String EMPLOYEES_ASSIGNED_POSITION = "There are employees assigned to this position.";
     public static final String EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED = "Employee was not successfully saved";
@@ -138,6 +139,8 @@ public final class ErrorMessage {
     public static final String TARIFF_EDIT_RESTRICTION_DUE_TO_DEACTIVATED_COURIER =
         "Tariff has not been edited. Courier deactivated with id: ";
     public static final String UNRESOLVABLE_TARIFF_STATUS = "Unresolvable tariff status. Please choose Active "
+        + "or Deactivated.";
+    public static final String UNRESOLVABLE_ACTIVATION_STATUS = "Unresolvable activation status. Please choose Active "
         + "or Deactivated.";
     public static final String COLUMN_WIDTH_INFO_NOT_FOUND =
         "There is no saved column width configuration for current employee";
