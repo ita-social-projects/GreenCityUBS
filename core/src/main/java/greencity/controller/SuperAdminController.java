@@ -724,7 +724,7 @@ class SuperAdminController {
      * @author Nikita Korzh, Julia Seti.
      */
     @ApiOperation(value = "Switch activation status by chosen parameters. "
-        + "In case of deactivation, the tariff is deactivated")
+        + "If the deactivation status is selected, the tariff will be deactivated")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),

@@ -834,29 +834,33 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void activateByChosenParam(DetailsOfDeactivateTariffsDto details) {
-        if (shouldActivateCourier(details)) {
+        if (details.getCourierId().isPresent() && shouldActivateCourier(details.getCourierId().get())) {
             Courier courier = tryToFindCourierById(details.getCourierId().get());
             courier.setCourierStatus(CourierStatus.ACTIVE);
             courierRepository.save(courier);
         }
 
-        if (shouldActivateReceivingStations(details)) {
+        if (details.getStationsIds().isPresent() && shouldActivateReceivingStations(details.getStationsIds().get())) {
             Set<ReceivingStation> stations = tryToFindReceivingStations(details.getStationsIds().get());
             receivingStationRepository.saveAll(updateReceivingStationsStatusToActive(stations));
         }
 
-        if (shouldActivateAllLocationsInRegions(details)) {
+        if (details.getRegionsIds().isPresent() && details.getCitiesIds().isEmpty()
+            && shouldActivateAllLocationsInRegions(details.getRegionsIds().get())) {
             for (Long regionId : details.getRegionsIds().get()) {
                 List<Location> locations = locationRepository.findLocationsByRegionId(regionId);
                 if (!locations.isEmpty()) {
                     saveLocationsWithActiveStatus(locations);
                 }
             }
-        } else if (shouldActivateFewLocationsInRegion(details)) {
+        } else if (details.getCitiesIds().isPresent() && details.getRegionsIds().isPresent()
+            && shouldActivateFewLocationsInRegion(details.getRegionsIds().get(), details.getCitiesIds().get())) {
             List<Location> locations = details.getCitiesIds().get().stream()
                 .map(this::tryToFindLocationById)
                 .collect(Collectors.toList());
             saveLocationsWithActiveStatus(locations);
+        } else if (details.getRegionsIds().isEmpty() && details.getCitiesIds().isPresent()) {
+            throw new BadRequestException(ENTER_A_REGION);
         }
     }
 
@@ -1199,7 +1203,19 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private boolean shouldDeactivateTariffsByRegionsAndCities(DetailsOfDeactivateTariffsDto details) {
         if (details.getRegionsIds().isPresent() && details.getCitiesIds().isPresent()
             && details.getStationsIds().isEmpty() && details.getCourierId().isEmpty()) {
-            return checkIfRegionAndCitiesExist(details.getRegionsIds().get(), details.getCitiesIds().get());
+            if (details.getRegionsIds().get().size() == 1) {
+                if (regionRepository.existsRegionById(details.getRegionsIds().get().get(0))
+                    && deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(
+                        details.getCitiesIds().get(),
+                        details.getRegionsIds().get().get(0))) {
+                    return true;
+                } else {
+                    throw new NotFoundException(String.format(REGIONS_OR_CITIES_NOT_EXIST_MESSAGE,
+                        details.getRegionsIds().get(), details.getCitiesIds().get()));
+                }
+            } else {
+                throw new BadRequestException(BAD_SIZE_OF_REGIONS_MESSAGE);
+            }
         }
         return false;
     }
@@ -1225,53 +1241,29 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return false;
     }
 
-    private boolean shouldActivateCourier(DetailsOfDeactivateTariffsDto details) {
-        if (details.getCourierId().isPresent()) {
-            if (courierRepository.existsCourierById(details.getCourierId().get())) {
-                return true;
-            } else {
-                throw new NotFoundException(
-                    String.format(COURIER_NOT_EXISTS_MESSAGE, details.getCourierId().get()));
-            }
+    private boolean shouldActivateCourier(Long courierId) {
+        if (courierRepository.existsCourierById(courierId)) {
+            return true;
         }
-        return false;
+        throw new NotFoundException(String.format(COURIER_NOT_EXISTS_MESSAGE, courierId));
     }
 
-    private boolean shouldActivateReceivingStations(DetailsOfDeactivateTariffsDto details) {
-        if (details.getStationsIds().isPresent()) {
-            if (deactivateTariffsForChosenParamRepository
-                .isReceivingStationsExists(details.getStationsIds().get())) {
-                return true;
-            } else {
-                throw new NotFoundException(String.format(RECEIVING_STATIONS_NOT_EXIST_MESSAGE,
-                    details.getStationsIds().get()));
-            }
+    private boolean shouldActivateReceivingStations(List<Long> stationsIds) {
+        if (deactivateTariffsForChosenParamRepository
+            .isReceivingStationsExists(stationsIds)) {
+            return true;
         }
-        return false;
+        throw new NotFoundException(String.format(RECEIVING_STATIONS_NOT_EXIST_MESSAGE, stationsIds));
     }
 
-    private boolean shouldActivateAllLocationsInRegions(DetailsOfDeactivateTariffsDto details) {
-        if (details.getRegionsIds().isPresent() && details.getCitiesIds().isEmpty()) {
-            if (deactivateTariffsForChosenParamRepository.isRegionsExists(details.getRegionsIds().get())) {
-                return true;
-            } else {
-                throw new NotFoundException(String.format(
-                    REGIONS_NOT_EXIST_MESSAGE, details.getRegionsIds().get()));
-            }
+    private boolean shouldActivateAllLocationsInRegions(List<Long> regionsIds) {
+        if (deactivateTariffsForChosenParamRepository.isRegionsExists(regionsIds)) {
+            return true;
         }
-        return false;
+        throw new NotFoundException(String.format(REGIONS_NOT_EXIST_MESSAGE, regionsIds));
     }
 
-    private boolean shouldActivateFewLocationsInRegion(DetailsOfDeactivateTariffsDto details) {
-        if (details.getRegionsIds().isPresent() && details.getCitiesIds().isPresent()) {
-            return checkIfRegionAndCitiesExist(details.getRegionsIds().get(), details.getCitiesIds().get());
-        } else if (details.getRegionsIds().isEmpty() && details.getCitiesIds().isPresent()) {
-            throw new BadRequestException(ENTER_A_REGION);
-        }
-        return false;
-    }
-
-    private boolean checkIfRegionAndCitiesExist(List<Long> regionsIds, List<Long> citiesIds) {
+    private boolean shouldActivateFewLocationsInRegion(List<Long> regionsIds, List<Long> citiesIds) {
         if (regionsIds.size() == 1) {
             if (regionRepository.existsRegionById(regionsIds.get(0))
                 && deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(citiesIds, regionsIds.get(0))) {
