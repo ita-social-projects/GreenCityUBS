@@ -834,27 +834,31 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void activateByChosenParam(DetailsOfDeactivateTariffsDto details) {
-        if (details.getCourierId().isPresent() && shouldActivateCourier(details.getCourierId().get())) {
+        if (details.getCourierId().isPresent()) {
+            checkIfCourierExists(details.getCourierId().get());
             Courier courier = tryToFindCourierById(details.getCourierId().get());
             courier.setCourierStatus(CourierStatus.ACTIVE);
             courierRepository.save(courier);
         }
 
-        if (details.getStationsIds().isPresent() && shouldActivateReceivingStations(details.getStationsIds().get())) {
+        if (details.getStationsIds().isPresent()) {
+            checkIfReceivingStationsExist(details.getStationsIds().get());
             Set<ReceivingStation> stations = tryToFindReceivingStations(details.getStationsIds().get());
             receivingStationRepository.saveAll(updateReceivingStationsStatusToActive(stations));
         }
 
-        if (details.getRegionsIds().isPresent() && details.getCitiesIds().isEmpty()
-            && shouldActivateAllLocationsInRegions(details.getRegionsIds().get())) {
+        if (details.getRegionsIds().isPresent() && details.getCitiesIds().isEmpty()) {
+            checkIfRegionsExist(details.getRegionsIds().get());
             for (Long regionId : details.getRegionsIds().get()) {
                 List<Location> locations = locationRepository.findLocationsByRegionId(regionId);
                 if (!locations.isEmpty()) {
                     saveLocationsWithActiveStatus(locations);
                 }
             }
-        } else if (details.getCitiesIds().isPresent() && details.getRegionsIds().isPresent()
-            && shouldActivateFewLocationsInRegion(details.getRegionsIds().get(), details.getCitiesIds().get())) {
+        }
+
+        if (details.getCitiesIds().isPresent() && details.getRegionsIds().isPresent()) {
+            checkIfRegionAndCitiesExist(details.getRegionsIds().get(), details.getCitiesIds().get());
             List<Location> locations = details.getCitiesIds().get().stream()
                 .map(this::tryToFindLocationById)
                 .collect(Collectors.toList());
@@ -1241,37 +1245,33 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return false;
     }
 
-    private boolean shouldActivateCourier(Long courierId) {
-        if (courierRepository.existsCourierById(courierId)) {
-            return true;
+    private void checkIfCourierExists(Long courierId) {
+        if (!courierRepository.existsCourierById(courierId)) {
+            throw new NotFoundException(String.format(COURIER_NOT_EXISTS_MESSAGE, courierId));
         }
-        throw new NotFoundException(String.format(COURIER_NOT_EXISTS_MESSAGE, courierId));
     }
 
-    private boolean shouldActivateReceivingStations(List<Long> stationsIds) {
-        if (deactivateTariffsForChosenParamRepository
-            .isReceivingStationsExists(stationsIds)) {
-            return true;
+    private void checkIfReceivingStationsExist(List<Long> stationsIds) {
+        if (!deactivateTariffsForChosenParamRepository.isReceivingStationsExists(stationsIds)) {
+            throw new NotFoundException(String.format(RECEIVING_STATIONS_NOT_EXIST_MESSAGE, stationsIds));
         }
-        throw new NotFoundException(String.format(RECEIVING_STATIONS_NOT_EXIST_MESSAGE, stationsIds));
     }
 
-    private boolean shouldActivateAllLocationsInRegions(List<Long> regionsIds) {
-        if (deactivateTariffsForChosenParamRepository.isRegionsExists(regionsIds)) {
-            return true;
+    private void checkIfRegionsExist(List<Long> regionsIds) {
+        if (!deactivateTariffsForChosenParamRepository.isRegionsExists(regionsIds)) {
+            throw new NotFoundException(String.format(REGIONS_NOT_EXIST_MESSAGE, regionsIds));
         }
-        throw new NotFoundException(String.format(REGIONS_NOT_EXIST_MESSAGE, regionsIds));
     }
 
-    private boolean shouldActivateFewLocationsInRegion(List<Long> regionsIds, List<Long> citiesIds) {
+    private void checkIfRegionAndCitiesExist(List<Long> regionsIds, List<Long> citiesIds) {
         if (regionsIds.size() == 1) {
-            if (regionRepository.existsRegionById(regionsIds.get(0))
-                && deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(citiesIds, regionsIds.get(0))) {
-                return true;
+            if (!regionRepository.existsRegionById(regionsIds.get(0))
+                || !deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(citiesIds, regionsIds.get(0))) {
+                throw new NotFoundException(String.format(REGIONS_OR_CITIES_NOT_EXIST_MESSAGE,
+                    regionsIds, citiesIds));
             }
-            throw new NotFoundException(String.format(REGIONS_OR_CITIES_NOT_EXIST_MESSAGE,
-                regionsIds, citiesIds));
+        } else {
+            throw new BadRequestException(BAD_SIZE_OF_REGIONS_MESSAGE);
         }
-        throw new BadRequestException(BAD_SIZE_OF_REGIONS_MESSAGE);
     }
 }
