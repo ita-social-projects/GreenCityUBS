@@ -1804,8 +1804,6 @@ class SuperAdminServiceImplTest {
 
         when(regionRepository.existsRegionById(anyLong())).thenReturn(true);
         when(deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(anyList(), anyLong())).thenReturn(true);
-        when(courierRepository.existsCourierById(anyLong())).thenReturn(true);
-        when(deactivateTariffsForChosenParamRepository.isReceivingStationsExists(anyList())).thenReturn(true);
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(locationRepository.saveAll(List.of(location))).thenReturn(List.of(location));
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
@@ -1819,8 +1817,6 @@ class SuperAdminServiceImplTest {
 
         verify(regionRepository).existsRegionById(anyLong());
         verify(deactivateTariffsForChosenParamRepository).isCitiesExistForRegion(anyList(), anyLong());
-        verify(courierRepository).existsCourierById(1L);
-        verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(anyList());
         verify(locationRepository).findById(anyLong());
         verify(locationRepository).saveAll(List.of(location));
         verify(tariffsLocationRepository)
@@ -2048,11 +2044,9 @@ class SuperAdminServiceImplTest {
         details.setActivationStatus("Active");
         Courier courier = ModelUtils.getCourier();
 
-        when(courierRepository.existsCourierById(anyLong())).thenReturn(true);
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(courierRepository.save(courier)).thenReturn(courier);
         superAdminService.switchActivationStatusByChosenParams(details);
-        verify(courierRepository).existsCourierById(1L);
         verify(courierRepository).findById(1L);
         verify(courierRepository).save(courier);
     }
@@ -2073,22 +2067,9 @@ class SuperAdminServiceImplTest {
         DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourier();
         details.setActivationStatus("Active");
 
-        when(courierRepository.existsCourierById(anyLong())).thenReturn(false);
-        assertThrows(NotFoundException.class,
-            () -> superAdminService.switchActivationStatusByChosenParams(details));
-        verify(courierRepository).existsCourierById(1L);
-    }
-
-    @Test
-    void switchCourierStatusToActiveNotExistingCourierThrows2() {
-        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourier();
-        details.setActivationStatus("Active");
-
-        when(courierRepository.existsCourierById(anyLong())).thenReturn(true);
         when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
             () -> superAdminService.switchActivationStatusByChosenParams(details));
-        verify(courierRepository).existsCourierById(1L);
         verify(courierRepository).findById(anyLong());
     }
 
@@ -2110,13 +2091,11 @@ class SuperAdminServiceImplTest {
         ReceivingStation receivingStation2 = ModelUtils.getReceivingStation();
         receivingStation2.setId(12L);
 
-        when(deactivateTariffsForChosenParamRepository.isReceivingStationsExists(anyList())).thenReturn(true);
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation1));
         when(receivingStationRepository.findById(12L)).thenReturn(Optional.of(receivingStation2));
         when(receivingStationRepository.saveAll(List.of(receivingStation1, receivingStation2)))
             .thenReturn(List.of(receivingStation1, receivingStation2));
         superAdminService.switchActivationStatusByChosenParams(details);
-        verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
         verify(receivingStationRepository, times(2)).findById(anyLong());
         verify(receivingStationRepository).saveAll(anyList());
     }
@@ -2137,22 +2116,9 @@ class SuperAdminServiceImplTest {
         DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithReceivingStations();
         details.setActivationStatus("Active");
 
-        when(deactivateTariffsForChosenParamRepository.isReceivingStationsExists(anyList())).thenReturn(false);
-        assertThrows(NotFoundException.class,
-            () -> superAdminService.switchActivationStatusByChosenParams(details));
-        verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
-    }
-
-    @Test
-    void switchReceivingStationsStatusToActiveNotExistingReceivingStationsThrows2() {
-        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithReceivingStations();
-        details.setActivationStatus("Active");
-
-        when(deactivateTariffsForChosenParamRepository.isReceivingStationsExists(anyList())).thenReturn(true);
         when(receivingStationRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
             () -> superAdminService.switchActivationStatusByChosenParams(details));
-        verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
         verify(receivingStationRepository).findById(anyLong());
     }
 

@@ -834,22 +834,25 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void activateByChosenParam(DetailsOfDeactivateTariffsDto details) {
-        if (details.getCourierId().isPresent()) {
-            checkIfCourierExists(details.getCourierId().get());
-            Courier courier = tryToFindCourierById(details.getCourierId().get());
+        Long courierId = details.getCourierId().orElse(null);
+        List<Long> stationsIds = details.getStationsIds().orElse(null);
+        List<Long> regionsIds = details.getRegionsIds().orElse(null);
+        List<Long> citiesIds = details.getCitiesIds().orElse(null);
+
+        if (courierId != null) {
+            Courier courier = tryToFindCourierById(courierId);
             courier.setCourierStatus(CourierStatus.ACTIVE);
             courierRepository.save(courier);
         }
 
-        if (details.getStationsIds().isPresent()) {
-            checkIfReceivingStationsExist(details.getStationsIds().get());
-            Set<ReceivingStation> stations = tryToFindReceivingStations(details.getStationsIds().get());
+        if (stationsIds != null) {
+            Set<ReceivingStation> stations = tryToFindReceivingStations(stationsIds);
             receivingStationRepository.saveAll(updateReceivingStationsStatusToActive(stations));
         }
 
-        if (details.getRegionsIds().isPresent() && details.getCitiesIds().isEmpty()) {
-            checkIfRegionsExist(details.getRegionsIds().get());
-            for (Long regionId : details.getRegionsIds().get()) {
+        if (regionsIds != null && citiesIds == null) {
+            checkIfRegionsExist(regionsIds);
+            for (Long regionId : regionsIds) {
                 List<Location> locations = locationRepository.findLocationsByRegionId(regionId);
                 if (!locations.isEmpty()) {
                     saveLocationsWithActiveStatus(locations);
@@ -857,13 +860,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             }
         }
 
-        if (details.getCitiesIds().isPresent() && details.getRegionsIds().isPresent()) {
-            checkIfRegionAndCitiesExist(details.getRegionsIds().get(), details.getCitiesIds().get());
-            List<Location> locations = details.getCitiesIds().get().stream()
+        if (regionsIds != null && citiesIds != null) {
+            checkIfRegionAndCitiesExist(regionsIds, citiesIds);
+            List<Location> locations = citiesIds.stream()
                 .map(this::tryToFindLocationById)
                 .collect(Collectors.toList());
             saveLocationsWithActiveStatus(locations);
-        } else if (details.getRegionsIds().isEmpty() && details.getCitiesIds().isPresent()) {
+        } else if (regionsIds == null && citiesIds != null) {
             throw new BadRequestException(ENTER_A_REGION);
         }
     }
@@ -1243,12 +1246,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             }
         }
         return false;
-    }
-
-    private void checkIfCourierExists(Long courierId) {
-        if (!courierRepository.existsCourierById(courierId)) {
-            throw new NotFoundException(String.format(COURIER_NOT_EXISTS_MESSAGE, courierId));
-        }
     }
 
     private void checkIfReceivingStationsExist(List<Long> stationsIds) {
