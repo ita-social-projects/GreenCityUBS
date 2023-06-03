@@ -1248,12 +1248,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return false;
     }
 
-    private void checkIfReceivingStationsExist(List<Long> stationsIds) {
-        if (!deactivateTariffsForChosenParamRepository.isReceivingStationsExists(stationsIds)) {
-            throw new NotFoundException(String.format(RECEIVING_STATIONS_NOT_EXIST_MESSAGE, stationsIds));
-        }
-    }
-
     private void checkIfRegionsExist(List<Long> regionsIds) {
         if (!deactivateTariffsForChosenParamRepository.isRegionsExists(regionsIds)) {
             throw new NotFoundException(String.format(REGIONS_NOT_EXIST_MESSAGE, regionsIds));

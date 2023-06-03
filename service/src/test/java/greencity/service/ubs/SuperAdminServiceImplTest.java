@@ -1892,6 +1892,19 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void switchLocationStatusToActiveByRegionWithoutLocation() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegion();
+        details.setActivationStatus("Active");
+
+        when(deactivateTariffsForChosenParamRepository.isRegionsExists(anyList())).thenReturn(true);
+        when(locationRepository.findLocationsByRegionId(1L)).thenReturn(Collections.emptyList());
+        superAdminService.switchActivationStatusByChosenParams(details);
+        verify(deactivateTariffsForChosenParamRepository).isRegionsExists(anyList());
+        verify(locationRepository).findLocationsByRegionId(1L);
+        verify(locationRepository, never()).saveAll(anyList());
+    }
+
+    @Test
     void deactivateTariffByNotExistingRegionThrows() {
         DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegion();
 
@@ -1999,6 +2012,16 @@ class SuperAdminServiceImplTest {
     void switchLocationStatusToActiveByCitiesAndNotExistingRegionBadRequestException() {
         DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegionAndCities();
         details.setRegionsIds(Optional.empty());
+        details.setActivationStatus("Active");
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.switchActivationStatusByChosenParams(details));
+    }
+
+    @Test
+    void switchLocationStatusToActiveByCitiesAndTwoRegionsBadRequestException() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegionAndCities();
+        details.setRegionsIds(Optional.of(List.of(1L, 2L)));
         details.setActivationStatus("Active");
 
         assertThrows(BadRequestException.class,
