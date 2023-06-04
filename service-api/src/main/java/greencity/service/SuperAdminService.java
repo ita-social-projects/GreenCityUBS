@@ -284,11 +284,11 @@ public interface SuperAdminService {
     void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param);
 
     /**
-     * Method that deactivate tariffs for chosen parameters.
+     * Method that switch activation status by chosen parameters.
      *
      * @param detailsOfDeactivateTariffsDto - contains list of regionsId, list of
-     *                                      citiesId, list of stationsId and
-     *                                      courierId.
+     *                                      citiesId, list of stationsId, courierId
+     *                                      and activation status.
      */
-    void deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto detailsOfDeactivateTariffsDto);
+    void switchActivationStatusByChosenParams(DetailsOfDeactivateTariffsDto detailsOfDeactivateTariffsDto);
 }
