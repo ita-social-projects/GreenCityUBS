@@ -955,7 +955,7 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void deactivateTariffForChosenParamBadRequest() throws Exception {
+    void switchActivationStatusByChosenParamsBadRequest() throws Exception {
         mockMvc.perform(post(ubsLink + "/deactivate"))
             .andExpect(status().isBadRequest());
     }
@@ -971,11 +971,33 @@ class SuperAdminControllerTest {
             .citiesIds(citiesIds)
             .stationsIds(stationsIds)
             .courierId(courierId)
+            .activationStatus("Deactivated")
             .build();
 
-        mockMvc.perform(post(ubsLink + "/deactivate/")
-            .param("regionsIds", "1")).andExpect(status().isOk());
-        verify(superAdminService).deactivateTariffForChosenParam(details);
+        mockMvc.perform(post(ubsLink + "/deactivate")
+            .param("regionsIds", "1")
+            .param("status", "Deactivated")).andExpect(status().isOk());
+        verify(superAdminService).switchActivationStatusByChosenParams(details);
+    }
+
+    @Test
+    void activateTariffFotChosenParam() throws Exception {
+        Optional<List<Long>> regionsIds = Optional.of(List.of(1L));
+        Optional<List<Long>> citiesIds = Optional.empty();
+        Optional<List<Long>> stationsIds = Optional.empty();
+        Optional<Long> courierId = Optional.empty();
+        DetailsOfDeactivateTariffsDto details = DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(regionsIds)
+            .citiesIds(citiesIds)
+            .stationsIds(stationsIds)
+            .courierId(courierId)
+            .activationStatus("Active")
+            .build();
+
+        mockMvc.perform(post(ubsLink + "/deactivate")
+            .param("regionsIds", "1")
+            .param("status", "Active")).andExpect(status().isOk());
+        verify(superAdminService).switchActivationStatusByChosenParams(details);
     }
 
     @Test

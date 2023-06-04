@@ -2525,6 +2525,20 @@ public class ModelUtils {
             .build();
     }
 
+    public static Location getLocationDeactivated() {
+        return Location.builder()
+            .id(1L)
+            .locationStatus(LocationStatus.DEACTIVATED)
+            .nameEn("Kyiv")
+            .nameUk("Київ")
+            .coordinates(Coordinates.builder()
+                .longitude(3.34d)
+                .latitude(1.32d).build())
+            .region(getRegionForMapper())
+            .orderAddresses(new ArrayList<>())
+            .build();
+    }
+
     public static Courier getCourier() {
         return Courier.builder()
             .id(1L)
@@ -4141,6 +4155,7 @@ public class ModelUtils {
             .citiesIds(Optional.empty())
             .stationsIds(Optional.empty())
             .courierId(Optional.empty())
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4150,6 +4165,7 @@ public class ModelUtils {
             .citiesIds(Optional.empty())
             .stationsIds(Optional.empty())
             .courierId(Optional.empty())
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4159,6 +4175,7 @@ public class ModelUtils {
             .citiesIds(Optional.of(List.of(1L, 11L)))
             .stationsIds(Optional.empty())
             .courierId(Optional.empty())
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4168,6 +4185,7 @@ public class ModelUtils {
             .citiesIds(Optional.empty())
             .stationsIds(Optional.empty())
             .courierId(Optional.of(1L))
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4177,6 +4195,7 @@ public class ModelUtils {
             .citiesIds(Optional.empty())
             .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.empty())
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4186,6 +4205,7 @@ public class ModelUtils {
             .citiesIds(Optional.empty())
             .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.of(1L))
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4195,6 +4215,7 @@ public class ModelUtils {
             .citiesIds(Optional.empty())
             .stationsIds(Optional.empty())
             .courierId(Optional.of(1L))
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4204,6 +4225,7 @@ public class ModelUtils {
             .citiesIds(Optional.of(List.of(1L, 11L)))
             .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.empty())
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4213,6 +4235,17 @@ public class ModelUtils {
             .citiesIds(Optional.of(List.of(1L, 11L)))
             .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.of(1L))
+            .activationStatus("Deactivated")
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithStatusActive() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsIds(Optional.of(List.of(1L)))
+            .citiesIds(Optional.of(List.of(1L)))
+            .stationsIds(Optional.of(List.of(1L)))
+            .courierId(Optional.of(1L))
+            .activationStatus("Active")
             .build();
     }
 
@@ -4222,6 +4255,7 @@ public class ModelUtils {
             .citiesIds(Optional.empty())
             .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.empty())
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4231,6 +4265,7 @@ public class ModelUtils {
             .citiesIds(Optional.of(List.of(1L, 11L)))
             .stationsIds(Optional.empty())
             .courierId(Optional.of(1L))
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4240,6 +4275,7 @@ public class ModelUtils {
             .citiesIds(Optional.empty())
             .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.of(1L))
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4249,6 +4285,7 @@ public class ModelUtils {
             .citiesIds(Optional.of(List.of(1L, 11L)))
             .stationsIds(Optional.empty())
             .courierId(Optional.empty())
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4258,6 +4295,7 @@ public class ModelUtils {
             .citiesIds(Optional.of(List.of(1L, 11L)))
             .stationsIds(Optional.empty())
             .courierId(Optional.of(1L))
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4267,6 +4305,7 @@ public class ModelUtils {
             .citiesIds(Optional.of(List.of(1L, 11L)))
             .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.empty())
+            .activationStatus("Deactivated")
             .build();
     }
 
@@ -4276,6 +4315,7 @@ public class ModelUtils {
             .citiesIds(Optional.of(List.of(1L, 11L)))
             .stationsIds(Optional.of(List.of(1L, 12L)))
             .courierId(Optional.of(1L))
+            .activationStatus("Deactivated")
             .build();
     }
 
