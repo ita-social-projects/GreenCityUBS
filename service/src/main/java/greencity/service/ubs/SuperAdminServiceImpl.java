@@ -94,6 +94,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private static final String REGIONS_NOT_EXIST_MESSAGE = "Current region doesn't exist: %s";
     private static final String ENTER_A_REGION = "You should enter a region";
     private static final String REGIONS_OR_CITIES_NOT_EXIST_MESSAGE = "Current regions %s or cities %s don't exist.";
+    private static final String CITI_DOES_NOT_BELONG_TO_REGION_MESSAGE =
+        "The citi: %s does not belong to the region: %s";
     private static final String COURIER_NOT_EXISTS_MESSAGE = "Current courier doesn't exist: %s";
     private static final String RECEIVING_STATIONS_NOT_EXIST_MESSAGE = "Current receiving stations don't exist: %s";
     private static final String RECEIVING_STATIONS_OR_COURIER_NOT_EXIST_MESSAGE =
@@ -442,6 +444,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private Location tryToFindLocationById(Long id) {
         return locationRepository.findById(id).orElseThrow(
             () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID + id));
+    }
+
+    private Location tryToFindLocationByIdForRegion(Long locationId, Long regionId) {
+        return locationRepository.findLocationByIdAndRegionId(locationId, regionId).orElseThrow(
+            () -> new NotFoundException(String.format(CITI_DOES_NOT_BELONG_TO_REGION_MESSAGE,
+                locationId, regionId)));
     }
 
     @Override
@@ -861,9 +869,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
 
         if (regionsIds != null && citiesIds != null) {
-            checkIfRegionAndCitiesExist(regionsIds, citiesIds);
+            checkIfRegionIsUnique(regionsIds);
             List<Location> locations = citiesIds.stream()
-                .map(this::tryToFindLocationById)
+                .map(locationId -> tryToFindLocationByIdForRegion(locationId, regionsIds.get(0)))
                 .collect(Collectors.toList());
             saveLocationsWithActiveStatus(locations);
         } else if (regionsIds == null && citiesIds != null) {
@@ -1254,13 +1262,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
     }
 
-    private void checkIfRegionAndCitiesExist(List<Long> regionsIds, List<Long> citiesIds) {
+    private void checkIfRegionIsUnique(List<Long> regionsIds) {
         if (regionsIds.size() == 1) {
-            if (!regionRepository.existsRegionById(regionsIds.get(0))
-                || !deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(citiesIds, regionsIds.get(0))) {
-                throw new NotFoundException(String.format(REGIONS_OR_CITIES_NOT_EXIST_MESSAGE,
-                    regionsIds, citiesIds));
-            }
+            checkIfRegionsExist(regionsIds);
         } else {
             throw new BadRequestException(BAD_SIZE_OF_REGIONS_MESSAGE);
         }
