@@ -193,6 +193,8 @@ class OrdersAdminsPageServiceImplTest {
         when(addressRepository.findDistinctCities())
             .thenReturn(addressList);
 
+        assertEquals(orderStatusTranslation, orderStatusTranslationRepository.getOrderStatusTranslationById(8L));
+
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
