@@ -6,11 +6,10 @@ import lombok.Data;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "employees_position_view")
+@Table(name = "employees_filters")
 @IdClass(EmployeeFilterViewId.class)
 @Data
 public class EmployeeFilterView {
-
     @Id
     @Column(name = "employee_id")
     private Long employeeId;
@@ -31,8 +30,11 @@ public class EmployeeFilterView {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "image")
+    @Column(name = "image_path")
     private String image;
+
+    @Column(name = "tariffs_info_id")
+    private Long tariffsInfoId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "employee_status")
