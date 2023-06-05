@@ -29,6 +29,20 @@ public interface TariffLocationRepository extends JpaRepository<TariffLocation, 
         @Param("status") String status);
 
     /**
+     * Method for updating tariffsLocation status by location ids.
+     *
+     * @param locationIds - list of location ids where status would be changed
+     * @param status      - status to set
+     * @author - Julia Seti
+     */
+    @Modifying
+    @Query(nativeQuery = true,
+        value = "UPDATE tariffs_locations SET location_status = :status "
+            + "WHERE location_id IN :locationIds ")
+    void changeTariffsLocationStatusByLocationIds(@Param("locationIds") List<Long> locationIds,
+        @Param("status") String status);
+
+    /**
      * Method for finding all TariffLocations where courier already works.
      *
      * @param courierId   - courier id
