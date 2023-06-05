@@ -55,6 +55,33 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     List<Location> findAllByIdAndRegionId(@Param("locIds") List<Long> locIds, @Param("regionId") Long regionId);
 
     /**
+     * Method for getting location from region.
+     *
+     * @param locationId - location id
+     * @param regionId   - region id
+     * @return {@link Optional} of {@link Location}
+     * @author Julia Seti
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * from locations "
+            + "WHERE region_id = :regionId "
+            + "AND id = :locationId")
+    Optional<Location> findLocationByIdAndRegionId(@Param("locationId") Long locationId,
+        @Param("regionId") Long regionId);
+
+    /**
+     * Method for getting list of locations by region.
+     *
+     * @param regionId {@link Long} - id of region
+     * @return list of {@link Location}
+     * @author Julia Seti
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * from locations "
+            + "WHERE region_id = :regionId")
+    List<Location> findLocationsByRegionId(@Param("regionId") Long regionId);
+
+    /**
      * Method for finding out if the location already exists in the specified
      * region.
      *
