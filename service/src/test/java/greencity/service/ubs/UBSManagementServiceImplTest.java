@@ -1558,6 +1558,21 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void getOrderSumDetailsForCanceledPaidOrderWithBags() {
+        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
+        Order order = ModelUtils.getCanceledPaidOrder();
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBag3list());
+
+        doNothing().when(notificationService).notifyPaidOrder(order);
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
+        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
+    }
+
+    @Test
     void getOrderSumDetailsForAdjustmentPaidOrder() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getAdjustmentPaidOrder();
@@ -1578,21 +1593,6 @@ class UBSManagementServiceImplTest {
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBaglist());
-
-        doNothing().when(notificationService).notifyPaidOrder(order);
-        doNothing().when(notificationService).notifyHalfPaidPackage(order);
-        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
-        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
-        Assertions.assertNotNull(order);
-    }
-
-    @Test
-    void getOrderSumDetailsForFormedHalfPaidOrderWithDiffBagList() {
-        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
-        Order order = ModelUtils.getFormedHalfPaidOrder();
-        order.setOrderDate(LocalDateTime.now());
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBag3list());
 
         doNothing().when(notificationService).notifyPaidOrder(order);
         doNothing().when(notificationService).notifyHalfPaidPackage(order);
