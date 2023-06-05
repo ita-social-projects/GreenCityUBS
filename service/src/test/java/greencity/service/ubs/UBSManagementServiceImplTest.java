@@ -404,6 +404,64 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void saveNewManualPaymentWithUnpaidOrder() {
+        User user = ModelUtils.getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = ModelUtils.getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        Payment payment = ModelUtils.getManualPayment();
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+        Employee employee = ModelUtils.getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(eventService, times(1))
+            .save("Додано оплату №1", "Петро  Петренко", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void saveNewManualPaymentWithPaymentRefundedOrder() {
+        User user = ModelUtils.getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = ModelUtils.getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
+        Payment payment = ModelUtils.getManualPayment();
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+        Employee employee = ModelUtils.getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(eventService, times(1))
+            .save("Додано оплату №1", "Петро  Петренко", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
     void checkUpdateManualPaymentWithImage() {
         Employee employee = getEmployee();
         Order order = ModelUtils.getFormedHalfPaidOrder();
