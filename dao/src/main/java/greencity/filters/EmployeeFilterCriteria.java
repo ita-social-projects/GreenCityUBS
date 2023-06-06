@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -15,7 +14,6 @@ import java.util.List;
 @Builder
 public class EmployeeFilterCriteria {
     private String searchLine;
-    //  private String contact;
     private EmployeeStatus employeeStatus;
     private List<Long> positions;
     private List<Long> regions;
