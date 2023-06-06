@@ -1,7 +1,10 @@
 package greencity.entity.user.employee;
 
 import greencity.enums.EmployeeStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
@@ -9,6 +12,9 @@ import javax.persistence.*;
 @Table(name = "employees_filters")
 @IdClass(EmployeeFilterViewId.class)
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class EmployeeFilterView {
     @Id
     @Column(name = "employee_id")

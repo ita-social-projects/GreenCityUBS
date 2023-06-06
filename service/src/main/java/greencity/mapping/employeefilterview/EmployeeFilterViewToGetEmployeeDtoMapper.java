@@ -6,7 +6,7 @@ import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EmployeeFilterViewToGetEmployeeDto extends AbstractConverter<EmployeeFilterView, GetEmployeeDto> {
+public class EmployeeFilterViewToGetEmployeeDtoMapper extends AbstractConverter<EmployeeFilterView, GetEmployeeDto> {
     @Override
     protected GetEmployeeDto convert(EmployeeFilterView employeeFilterView) {
         return GetEmployeeDto.builder()

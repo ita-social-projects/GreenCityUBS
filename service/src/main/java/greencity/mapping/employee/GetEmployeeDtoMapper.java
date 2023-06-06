@@ -10,12 +10,12 @@ public class GetEmployeeDtoMapper extends AbstractConverter<EmployeeFilterView, 
     @Override
     protected GetEmployeeDto convert(EmployeeFilterView source) {
         return GetEmployeeDto.builder()
-                .id(source.getEmployeeId())
-                .firstName(source.getFirstName())
-                .lastName(source.getLastName())
-                .phoneNumber(source.getPhoneNumber())
-                .email(source.getEmail())
-                .image(source.getImage())
-                .build();
+            .id(source.getEmployeeId())
+            .firstName(source.getFirstName())
+            .lastName(source.getLastName())
+            .phoneNumber(source.getPhoneNumber())
+            .email(source.getEmail())
+            .image(source.getImage())
+            .build();
     }
 }

@@ -85,6 +85,10 @@ public class EmployeeCriteriaRepository {
 
     private List<Predicate> getBasicPredicate(EmployeeFilterCriteria employeeFilterCriteria,
         Root<EmployeeFilterView> employeeFilterViewRoot) {
+        return collectAllPredicates(employeeFilterCriteria, employeeFilterViewRoot);
+    }
+
+    private List<Predicate> collectAllPredicates(EmployeeFilterCriteria employeeFilterCriteria, Root<EmployeeFilterView> employeeFilterViewRoot) {
         List<Predicate> predicates = new ArrayList<>();
         if (isStringNotNullAndNotEmpty(employeeFilterCriteria.getSearchLine())) {
             List<Expression<String>> toUpperCaseExpressions =
@@ -93,12 +97,6 @@ public class EmployeeCriteriaRepository {
             predicates.addAll(
                 getAllSearchLinePredicates(employeeFilterCriteria.getSearchLine(), toUpperCaseExpressions));
         }
-        // todo: Probably will be replaced by employee status filtering
-//        if (isStringNotNullAndNotEmpty(employeeFilterCriteria.getContact())) {
-//            predicates.add(criteriaBuilder.equal(
-//                    employeeFilterViewRoot.get("phoneNumber"),
-//                    employeeFilterCriteria.getContact()));
-//        }
         if (employeeFilterCriteria.getEmployeeStatus() != null) {
             predicates.add(criteriaBuilder.equal(
                 employeeFilterViewRoot.get("employeeStatus"),
@@ -120,7 +118,6 @@ public class EmployeeCriteriaRepository {
             predicates.add(employeeFilterViewRoot.get("courierId")
                 .in(employeeFilterCriteria.getCouriers()));
         }
-
         return predicates;
     }
 
@@ -131,7 +128,8 @@ public class EmployeeCriteriaRepository {
             .collect(Collectors.toList());
     }
 
-    private List<Expression<String>> extractPossibleExpressionsForSearchLineFiltering(Root<EmployeeFilterView> employeeFilterViewRoot) {
+    private List<Expression<String>> extractPossibleExpressionsForSearchLineFiltering(
+        Root<EmployeeFilterView> employeeFilterViewRoot) {
         List<Expression<String>> expressions = new ArrayList<>();
         expressions.add(criteriaBuilder.upper(employeeFilterViewRoot.get("firstName")));
         expressions.add(criteriaBuilder.upper(employeeFilterViewRoot.get("lastName")));

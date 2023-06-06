@@ -134,7 +134,7 @@ class UBSManagementEmployeeServiceImplTest {
             Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
 
         when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
-            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
+            .thenReturn(new PageImpl<>(List.of(getEmployeeFilterView()), pageable, 1L));
         employeeService.findAll(employeePage, employeeFilterCriteria);
 
         verify(employeeCriteriaRepository, times(1))
@@ -268,7 +268,7 @@ class UBSManagementEmployeeServiceImplTest {
     void createPositionTest() {
         AddingPositionDto addingPositionDto = AddingPositionDto.builder().name("Водій").build();
         when(positionRepository.existsPositionByName(any())).thenReturn(false, true);
-        lenient().when(modelMapper.map(any(Position.class), eq(PositionDto.class))).thenReturn(getPositionDto());
+        lenient().when(modelMapper.map(any(Position.class), eq(PositionDto.class))).thenReturn(getPositionDto(1L));
         when(positionRepository.save(any())).thenReturn(getPosition(), getPosition());
 
         employeeService.create(addingPositionDto);
@@ -285,7 +285,7 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updatePositionTest() {
-        PositionDto dto = getPositionDto();
+        PositionDto dto = getPositionDto(1L);
         when(positionRepository.existsById(dto.getId())).thenReturn(true, true, false);
         when(positionRepository.existsPositionByName(dto.getName())).thenReturn(false, true);
         when(modelMapper.map(any(), any())).thenReturn(getPosition(), dto);
@@ -309,7 +309,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void getAllPositionTest() {
         when(positionRepository.findAll()).thenReturn(List.of(getPosition()));
-        when(modelMapper.map(any(), any())).thenReturn(getPositionDto());
+        when(modelMapper.map(any(), any())).thenReturn(getPositionDto(1L));
 
         List<PositionDto> positionDtos = employeeService.getAllPositions();
 
@@ -377,11 +377,11 @@ class UBSManagementEmployeeServiceImplTest {
         EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
         Pageable pageable = PageRequest.of(0, 5, Sort.by(
             Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
-        when(employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria))
-            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
-        employeeService.findAllActiveEmployees(employeePage, employeeFilterCriteria);
+        when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
+            .thenReturn(new PageImpl<>(List.of(getEmployeeFilterView()), pageable, 1L));
+        employeeService.findAll(employeePage, employeeFilterCriteria);
         verify(employeeCriteriaRepository, times(1))
-            .findAllActiveEmployees(employeePage, employeeFilterCriteria);
+            .findAll(employeePage, employeeFilterCriteria);
     }
 
     @Test
