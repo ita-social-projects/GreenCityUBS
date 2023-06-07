@@ -77,8 +77,9 @@ public class ManagementEmployeeController {
     @ApiPageable
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/getAll-employees")
-    public ResponseEntity<Page<GetEmployeeDto>> getAllEmployees(EmployeePage employeePage,
-        EmployeeFilterCriteria employeeFilterCriteria) {
+    public ResponseEntity<Page<GetEmployeeDto>> getAllEmployees(
+        @RequestParam EmployeePage employeePage,
+        @RequestParam EmployeeFilterCriteria employeeFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(employeeService.findAll(employeePage, employeeFilterCriteria));
     }
