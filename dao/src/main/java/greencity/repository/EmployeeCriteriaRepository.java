@@ -39,11 +39,13 @@ public class EmployeeCriteriaRepository {
         EmployeeFilterCriteria employeeFilterCriteria) {
         CriteriaQuery<EmployeeFilterView> criteriaQuery = criteriaBuilder.createQuery(EmployeeFilterView.class);
         Root<EmployeeFilterView> employeeRoot = criteriaQuery.from(EmployeeFilterView.class);
-        Predicate predicate = getAllPredicatesForFiltering(employeeFilterCriteria, employeeRoot);
-        criteriaQuery
-            .select(employeeRoot)
-            .where(predicate);
+
+        Predicate predicate = composePredicateForFiltering(employeeFilterCriteria, employeeRoot);
+
+        criteriaQuery.select(employeeRoot).where(predicate);
+
         setOrderBy(employeePage, criteriaQuery, employeeRoot);
+
         return processEmployees(employeePage, criteriaQuery, predicate);
     }
 
@@ -77,19 +79,74 @@ public class EmployeeCriteriaRepository {
             .collect(Collectors.toList()));
     }
 
-    private Predicate getAllPredicatesForFiltering(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<EmployeeFilterView> employeeRoot) {
-        List<Predicate> predicates = getBasicPredicate(employeeFilterCriteria, employeeRoot);
+    private Predicate composePredicateForFiltering(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot) {
+        List<Predicate> predicates = collectAllPredicatesToList(employeeFilterCriteria, employeeFilterViewRoot);
         return criteriaBuilder.and((predicates.toArray(Predicate[]::new)));
     }
 
-    private List<Predicate> getBasicPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+    private List<Predicate> collectAllPredicatesToList(EmployeeFilterCriteria employeeFilterCriteria,
         Root<EmployeeFilterView> employeeFilterViewRoot) {
-        return collectAllPredicates(employeeFilterCriteria, employeeFilterViewRoot);
+        List<Predicate> predicates = new ArrayList<>();
+
+        addSearchLinePredicates(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        addEmployeeStatusPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        addEmployeePositionPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        addRegionPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        addLocationPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        addCourierPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        return predicates;
     }
 
-    private List<Predicate> collectAllPredicates(EmployeeFilterCriteria employeeFilterCriteria, Root<EmployeeFilterView> employeeFilterViewRoot) {
-        List<Predicate> predicates = new ArrayList<>();
+    private void addCourierPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getCouriers())) {
+            predicates.add(employeeFilterViewRoot.get("courierId")
+                .in(employeeFilterCriteria.getCouriers()));
+        }
+    }
+
+    private void addLocationPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getLocations())) {
+            predicates.add(employeeFilterViewRoot.get("locationId")
+                .in(employeeFilterCriteria.getLocations()));
+        }
+    }
+
+    private void addRegionPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getRegions())) {
+            predicates.add(employeeFilterViewRoot.get("regionId")
+                .in(employeeFilterCriteria.getRegions()));
+        }
+    }
+
+    private void addEmployeePositionPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getPositions())) {
+            predicates.add(employeeFilterViewRoot.get("positionId")
+                .in(employeeFilterCriteria.getPositions()));
+        }
+    }
+
+    private void addEmployeeStatusPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (employeeFilterCriteria.getEmployeeStatus() != null) {
+            predicates.add(criteriaBuilder.equal(
+                employeeFilterViewRoot.get("employeeStatus"),
+                employeeFilterCriteria.getEmployeeStatus()));
+        }
+    }
+
+    private void addSearchLinePredicates(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
         if (isStringNotNullAndNotEmpty(employeeFilterCriteria.getSearchLine())) {
             List<Expression<String>> toUpperCaseExpressions =
                 extractPossibleExpressionsForSearchLineFiltering(employeeFilterViewRoot);
@@ -97,28 +154,6 @@ public class EmployeeCriteriaRepository {
             predicates.addAll(
                 getAllSearchLinePredicates(employeeFilterCriteria.getSearchLine(), toUpperCaseExpressions));
         }
-        if (employeeFilterCriteria.getEmployeeStatus() != null) {
-            predicates.add(criteriaBuilder.equal(
-                employeeFilterViewRoot.get("employeeStatus"),
-                employeeFilterCriteria.getEmployeeStatus()));
-        }
-        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getPositions())) {
-            predicates.add(employeeFilterViewRoot.get("positionId")
-                .in(employeeFilterCriteria.getPositions()));
-        }
-        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getRegions())) {
-            predicates.add(employeeFilterViewRoot.get("regionId")
-                .in(employeeFilterCriteria.getRegions()));
-        }
-        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getLocations())) {
-            predicates.add(employeeFilterViewRoot.get("locationId")
-                .in(employeeFilterCriteria.getLocations()));
-        }
-        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getCouriers())) {
-            predicates.add(employeeFilterViewRoot.get("courierId")
-                .in(employeeFilterCriteria.getCouriers()));
-        }
-        return predicates;
     }
 
     private List<Predicate> getAllSearchLinePredicates(String searchLine,

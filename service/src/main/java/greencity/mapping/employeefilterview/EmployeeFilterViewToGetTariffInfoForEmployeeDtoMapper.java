@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmployeeFilterViewToGetTariffInfoForEmployeeDtoMapper
     extends AbstractConverter<EmployeeFilterView, GetTariffInfoForEmployeeDto> {
-
     @Override
     protected GetTariffInfoForEmployeeDto convert(EmployeeFilterView employeeFilterView) {
         return GetTariffInfoForEmployeeDto.builder()

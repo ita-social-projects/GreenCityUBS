@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EmployeeFilterViewToPositionDtoMapper extends AbstractConverter<EmployeeFilterView, PositionDto> {
-
     @Override
     protected PositionDto convert(EmployeeFilterView employeeFilterView) {
         return PositionDto.builder()
