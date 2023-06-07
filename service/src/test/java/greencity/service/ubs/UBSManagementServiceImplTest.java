@@ -1875,6 +1875,46 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void getOrderStatusDataWhenOrderTranslationIsNull() {
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        Employee employee = ModelUtils.getEmployee();
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBaglist());
+        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(orderStatusTranslationRepository.getOne(1L))
+            .thenReturn(getStatusTranslation());
+        when(
+            orderPaymentStatusTranslationRepository.getById(1L))
+                .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+        when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
+
+        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(bagRepository).findBagsByOrderId(1L);
+        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(orderRepository, times(5)).findById(1L);
+        verify(serviceRepository).findServiceByTariffsInfoId(1L);
+        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6L);
+        verify(orderPaymentStatusTranslationRepository).getById(1L);
+        verify(receivingStationRepository).findAll();
+        verify(orderStatusTranslationRepository, times(1)).getOne(1L);
+        verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
     void getOrderStatusDataExceptionTest() {
         Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
         TariffsInfo tariffsInfo = getTariffsInfo();
