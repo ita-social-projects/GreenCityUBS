@@ -44,6 +44,7 @@ public final class ErrorMessage {
     public static final String POSITION_NOT_FOUND = "Position doesn't exist";
     public static final String RECEIVING_STATION_ALREADY_EXISTS = "Receiving station already exists: ";
     public static final String RECEIVING_STATION_NOT_FOUND_BY_ID = "Receiving station with current id doesn't exist: ";
+    public static final String REGION_NOT_FOUND_BY_ID = "Region with current id doesn't exist: ";
     public static final String RECEIVING_STATION_NOT_FOUND = "Receiving station doesn't exist.";
     public static final String EMPLOYEES_ASSIGNED_POSITION = "There are employees assigned to this position.";
     public static final String EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED = "Employee was not successfully saved";
@@ -99,6 +100,7 @@ public final class ErrorMessage {
     public static final String CANNOT_ACCESS_PERSONAL_INFO = "Cannot access another user's personal info";
     public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =
         "Cannot access another user's order cancellation reason";
+    public static final String CANNOT_CREATE_TARIFF = "Cannot create tariff. Courier is deactivated with id: ";
     public static final String USER_WITH_THIS_EMAIL_DOES_NOT_EXIST = "User with this email does not exist: ";
     public static final String LANGUAGE_ERROR = "Invalid language code";
     public static final String TARIFF_NOT_FOUND = "Couldn't found tariff with id: ";
@@ -132,10 +134,20 @@ public final class ErrorMessage {
         "Tariff has not been activated. Please set limits for tariff.";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS =
         "Tariff has not been activated. Please add package for tariff.";
+    public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER =
+        "Tariff has not been activated. Courier deactivated with id: ";
+    public static final String TARIFF_EDIT_RESTRICTION_DUE_TO_DEACTIVATED_COURIER =
+        "Tariff has not been edited. Courier deactivated with id: ";
     public static final String UNRESOLVABLE_TARIFF_STATUS = "Unresolvable tariff status. Please choose Active "
+        + "or Deactivated.";
+    public static final String UNRESOLVABLE_ACTIVATION_STATUS = "Unresolvable activation status. Please choose Active "
         + "or Deactivated.";
     public static final String COLUMN_WIDTH_INFO_NOT_FOUND =
         "There is no saved column width configuration for current employee";
+    public static final String DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER =
+        "Date of export not specified for the order with ID: ";
+    public static final String EMPTY_ORDERS_ID_COLLECTION = "Request should contain at least one order ID";
+    public static final String ORDER_IS_BLOCKED = "The order has been blocked by employee with ID: ";
 
     /**
      * Constructor.

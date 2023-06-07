@@ -201,6 +201,7 @@
     <include file="db/changelog/logs/ch-add-table-notification-platforms-paybutton-Vatuliak.xml"/>
     <include file="db/changelog/logs/ch-add-table-column-width-for-employee-Kulbaba.xml"/>
     <include file="db/changelog/logs/ch-add-table-notification-platforms-paybutton-Lenets.xml"/>
+    <include file="db/changelog/logs/ch-update_big_order_table_view-Lenets.xml"/>
     <include file="db/changelog/logs/ch-update-bag-price-commission-Seti.xml"/>
     <include file="db/changelog/logs/ch-update-service-price-Seti.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Seti.xml"/>
