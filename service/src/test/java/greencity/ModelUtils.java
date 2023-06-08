@@ -180,6 +180,7 @@ import static greencity.enums.NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_N
 import static greencity.enums.NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS;
 import static greencity.enums.NotificationType.UNPAID_ORDER;
 import static greencity.enums.ViolationLevel.MAJOR;
+import static java.util.Collections.*;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -238,7 +239,7 @@ public class ModelUtils {
     public static final List<AdditionalBagInfoDto> TEST_ADDITIONAL_BAG_INFO_DTO_LIST = createAdditionalBagInfoDtoList();
     public static final Map<String, Object> TEST_MAP_ADDITIONAL_BAG = createMap();
     public static final List<Map<String, Object>> TEST_MAP_ADDITIONAL_BAG_LIST =
-        Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
+        singletonList(TEST_MAP_ADDITIONAL_BAG);
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
@@ -276,6 +277,8 @@ public class ModelUtils {
             .phoneNumber("Phone Number")
             .email("employee@gmail.com")
             .image("Image")
+            .employeePositions(emptyList())
+            .tariffs(emptyList())
             .build();
     }
 
@@ -365,10 +368,10 @@ public class ModelUtils {
     public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(List.of("232-534-634")))
-            .bags(Collections.singletonList(new BagDto(3, 999)))
+            .bags(singletonList(new BagDto(3, 999)))
             .locationId(1L)
             .orderComment("comment")
-            .certificates(Collections.emptySet())
+            .certificates(emptySet())
             .pointsToUse(700)
             .shouldBePaid(shouldBePaid)
             .personalData(PersonalDataDto.builder()
@@ -515,7 +518,7 @@ public class ModelUtils {
                 .recipientSurname("Gerasum")
                 .uuid("UUID")
                 .build())
-            .certificates(Collections.emptySet())
+            .certificates(emptySet())
             .pointsToUse(700)
             .adminComment("Admin")
             .cancellationComment("cancelled")
@@ -570,7 +573,7 @@ public class ModelUtils {
                 .recipientSurname("Gerasum")
                 .uuid("UUID")
                 .build())
-            .certificates(Collections.emptySet())
+            .certificates(emptySet())
             .pointsToUse(700)
             .adminComment("Admin")
             .cancellationComment("cancelled")
@@ -624,8 +627,8 @@ public class ModelUtils {
     public static Order getOrderWithoutPayment() {
         return Order.builder()
             .id(1L)
-            .payment(Collections.emptyList())
-            .certificates(Collections.emptySet())
+            .payment(emptyList())
+            .certificates(emptySet())
             .pointsToUse(500)
             .build();
     }
@@ -1074,7 +1077,7 @@ public class ModelUtils {
                 .amount(350L)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .amountOfBagsOrdered(singletonMap(1, 2))
             .build();
     }
 
@@ -1872,7 +1875,7 @@ public class ModelUtils {
                         .build())
                     .build())
                 .build())
-            .certificates(Collections.emptySet())
+            .certificates(emptySet())
             .cancellationComment("Garbage disappeared")
             .cancellationReason(CancellationReason.OTHER)
             .pointsToUse(700)
@@ -1896,8 +1899,8 @@ public class ModelUtils {
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(singletonMap(1, 2))
+            .exportedQuantity(singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .confirmedQuantity(Map.of(1, 1))
             .exportedQuantity(Map.of(1, 1))
@@ -1918,8 +1921,8 @@ public class ModelUtils {
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(singletonMap(1, 2))
+            .exportedQuantity(singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .confirmedQuantity(Map.of(1, 1))
             .exportedQuantity(Map.of(1, 1))
@@ -1940,8 +1943,8 @@ public class ModelUtils {
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(singletonMap(1, 2))
+            .exportedQuantity(singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .confirmedQuantity(Map.of(1, 1))
             .exportedQuantity(Map.of(2, 2))
@@ -1962,8 +1965,8 @@ public class ModelUtils {
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-            .amountOfBagsOrdered(Collections.singletonMap(1, 1))
-            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(singletonMap(1, 1))
+            .exportedQuantity(singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .confirmedQuantity(Map.of(1, 1))
             .exportedQuantity(Map.of(1, 1))
@@ -1984,8 +1987,8 @@ public class ModelUtils {
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-            .amountOfBagsOrdered(Collections.singletonMap(1, 1))
-            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(singletonMap(1, 1))
+            .exportedQuantity(singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .confirmedQuantity(Map.of(1, 1))
             .exportedQuantity(Map.of(1, 1))
@@ -2120,7 +2123,7 @@ public class ModelUtils {
     }
 
     private static List<BagMappingDto> createBagMappingDtoList() {
-        return Collections.singletonList(
+        return singletonList(
             BagMappingDto.builder()
                 .amount(4)
                 .build());
@@ -2215,7 +2218,7 @@ public class ModelUtils {
     }
 
     private static List<AdditionalBagInfoDto> createAdditionalBagInfoDtoList() {
-        return Collections.singletonList(createAdditionalBagInfoDto());
+        return singletonList(createAdditionalBagInfoDto());
     }
 
     private static AdditionalBagInfoDto createAdditionalBagInfoDto() {
@@ -2731,7 +2734,7 @@ public class ModelUtils {
     public static Order getOrderUserFirst() {
         return Order.builder()
             .id(1L)
-            .exportedQuantity(Collections.singletonMap(1, 1))
+            .exportedQuantity(singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .confirmedQuantity(Map.of(1, 1))
             .exportedQuantity(Map.of(1, 1))
@@ -2742,7 +2745,7 @@ public class ModelUtils {
     public static Order getOrderUserSecond() {
         return Order.builder()
             .id(2L)
-            .exportedQuantity(Collections.singletonMap(1, 1))
+            .exportedQuantity(singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .confirmedQuantity(Map.of(1, 1))
             .exportedQuantity(Map.of(1, 1))
@@ -2867,7 +2870,7 @@ public class ModelUtils {
         return PaymentTableInfoDto.builder()
             .paidAmount(0L)
             .unPaidAmount(0L)
-            .paymentInfoDtos(Collections.emptyList())
+            .paymentInfoDtos(emptyList())
             .overpayment(400L)
             .build();
     }
@@ -3405,7 +3408,7 @@ public class ModelUtils {
                     .build())
                 .build())
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").currentPoints(100).build())
-            .certificates(Collections.emptySet())
+            .certificates(emptySet())
             .pointsToUse(700)
             .adminComment("Admin")
             .cancellationComment("cancelled")
@@ -3455,7 +3458,7 @@ public class ModelUtils {
             .confirmedQuantity(hashMap)
             .exportedQuantity(new HashMap<>())
             .pointsToUse(100)
-            .certificates(Collections.emptySet())
+            .certificates(emptySet())
             .orderStatus(OrderStatus.CONFIRMED)
             .user(User.builder().id(1L).currentPoints(100).build())
             .writeOffStationSum(50L)
@@ -3716,7 +3719,7 @@ public class ModelUtils {
                     .build())
                 .build())
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
-            .certificates(Collections.emptySet())
+            .certificates(emptySet())
             .pointsToUse(700)
             .adminComment("Admin")
             .cancellationComment("cancelled")
@@ -3865,7 +3868,7 @@ public class ModelUtils {
             .orderStatusEng(OrderStatus.FORMED.toString())
             .bags(List.of(bagForUserDto))
             .certificate(List.of(certificateDto))
-            .additionalOrders(Collections.emptySet())
+            .additionalOrders(emptySet())
             .build();
     }
 
@@ -3888,7 +3891,7 @@ public class ModelUtils {
             .createdAt(LocalDate.of(2022, 10, 20))
             .max(6000L)
             .min(500L)
-            .orders(Collections.emptyList())
+            .orders(emptyList())
             .receivingStationList(Set.of(ReceivingStation.builder()
                 .id(1L)
                 .name("Петрівка")
@@ -4178,7 +4181,7 @@ public class ModelUtils {
     }
 
     public static List<String> getAllAuthorities() {
-        return Collections.singletonList("SEE_CLIENTS_PAGE");
+        return singletonList("SEE_CLIENTS_PAGE");
     }
 
     public static UserEmployeeAuthorityDto getUserEmployeeAuthorityDto() {

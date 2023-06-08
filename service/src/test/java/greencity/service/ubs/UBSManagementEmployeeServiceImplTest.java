@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
+import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
@@ -124,21 +125,6 @@ class UBSManagementEmployeeServiceImplTest {
             ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeWithTariffsIdDto.getEmployeeDto().getEmail());
 
         verify(repository).existsByEmail(getAddEmployeeDto().getEmail());
-    }
-
-    @Test
-    void findAllTest() {
-        EmployeePage employeePage = new EmployeePage();
-        EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
-        Pageable pageable = PageRequest.of(0, 5, Sort.by(
-            Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
-
-        when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
-            .thenReturn(new PageImpl<>(List.of(getEmployeeFilterView()), pageable, 1L));
-        employeeService.findAll(employeePage, employeeFilterCriteria);
-
-        verify(employeeCriteriaRepository, times(1))
-            .findAll(employeePage, employeeFilterCriteria);
     }
 
     @Test
@@ -369,19 +355,6 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown2 = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.deleteEmployeeImage(1L));
         assertEquals(ErrorMessage.CANNOT_DELETE_DEFAULT_IMAGE, thrown2.getMessage());
-    }
-
-    @Test
-    void findAllActiveEmployeesTest() {
-        EmployeePage employeePage = new EmployeePage();
-        EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
-        Pageable pageable = PageRequest.of(0, 5, Sort.by(
-            Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
-        when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
-            .thenReturn(new PageImpl<>(List.of(getEmployeeFilterView()), pageable, 1L));
-        employeeService.findAll(employeePage, employeeFilterCriteria);
-        verify(employeeCriteriaRepository, times(1))
-            .findAll(employeePage, employeeFilterCriteria);
     }
 
     @Test
