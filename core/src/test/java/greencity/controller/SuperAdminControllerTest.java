@@ -21,6 +21,7 @@ import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.enums.LocationStatus;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -517,7 +518,53 @@ class SuperAdminControllerTest {
     void getActiveLocations() throws Exception {
         mockMvc.perform(get((ubsLink + "/getActiveLocations"))).andExpect(status().isOk());
 
-        verify(superAdminService).getActiveLocations();
+        verify(superAdminService).getLocationsByStatus(LocationStatus.ACTIVE);
+        verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
+    void getActiveLocationsNotFoundTest() throws Exception {
+        String message = "ErrorMessage";
+
+        doThrow(new NotFoundException(message))
+            .when(superAdminService)
+            .getLocationsByStatus(LocationStatus.ACTIVE);
+
+        mockMvc.perform(get(ubsLink + "/getActiveLocations")
+            .principal(principal))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(
+                result -> assertEquals(message, Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).getLocationsByStatus(LocationStatus.ACTIVE);
+        verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
+    void getDeactivatedLocationsTest() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getDeactivatedLocations").principal(principal)).andExpect(status().isOk());
+
+        verify(superAdminService).getLocationsByStatus(LocationStatus.DEACTIVATED);
+        verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
+    void getDeactivatedLocationsNotFoundTest() throws Exception {
+        String message = "ErrorMessage";
+
+        doThrow(new NotFoundException(message))
+            .when(superAdminService)
+            .getLocationsByStatus(LocationStatus.DEACTIVATED);
+
+        mockMvc.perform(get(ubsLink + "/getDeactivatedLocations")
+            .principal(principal))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(
+                result -> assertEquals(message, Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        verify(superAdminService).getLocationsByStatus(LocationStatus.DEACTIVATED);
         verifyNoMoreInteractions(superAdminService);
     }
 
