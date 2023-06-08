@@ -201,6 +201,7 @@ import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
@@ -2823,6 +2824,17 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void getTariffInfoForLocationWhenTariffForCourierAndLocationNotFoundTest() {
+        var expectedErrorMessage = String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, 1L, 1L);
+        when(courierRepository.existsCourierById(1L)).thenReturn(true);
+        var exception = assertThrows(NotFoundException.class,
+            () -> ubsService.getTariffInfoForLocation(1L, 1L));
+
+        assertEquals(expectedErrorMessage, exception.getMessage());
+        verify(courierRepository).existsCourierById(1L);
+    }
+
+    @Test
     void getInfoForCourierOrderingByCourierIdTest() {
         var tariff = getTariffInfo();
 
@@ -2843,9 +2855,10 @@ class UBSClientServiceImplTest {
 
     @Test
     void getInfoForCourierOrderingByCourierIdWhenCourierNotFoundTest() {
+        Optional<String> changeLoc = Optional.empty();
         when(courierRepository.existsCourierById(1L)).thenReturn(false);
         assertThrows(NotFoundException.class, () -> ubsService
-            .getInfoForCourierOrderingByCourierId("35467585763t4sfgchjfuyetf", Optional.empty(), 1L));
+            .getInfoForCourierOrderingByCourierId("35467585763t4sfgchjfuyetf", changeLoc, 1L));
         verify(courierRepository).existsCourierById(1L);
     }
 
