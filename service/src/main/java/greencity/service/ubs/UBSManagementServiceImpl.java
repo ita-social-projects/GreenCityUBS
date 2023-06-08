@@ -203,17 +203,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Long convertBillsIntoCoins(Double bills) {
-        return BigDecimal.valueOf(bills)
-            .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-            .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
-            .longValue();
+        return bills == null ? null
+            : BigDecimal.valueOf(bills)
+                .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+                .longValue();
     }
 
     private Double convertCoinsIntoBills(Long coins) {
-        return BigDecimal.valueOf(coins)
-            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-            .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
-            .doubleValue();
+        return coins == null ? null
+            : BigDecimal.valueOf(coins)
+                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     /**

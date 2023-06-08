@@ -13,6 +13,7 @@ import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -33,19 +34,19 @@ public class GetServiceDto {
     @Digits(integer = 6, fraction = 2)
     private Double price;
 
-    @NotNull
+    @NotBlank
     @Length(min = 1, max = 30)
     private String name;
 
-    @NotNull
+    @NotBlank
     @Length(min = 1, max = 30)
     private String nameEng;
 
-    @NotNull
+    @NotBlank
     @Length(min = 1, max = 255)
     private String description;
 
-    @NotNull
+    @NotBlank
     @Length(min = 1, max = 255)
     private String descriptionEng;
 }

@@ -11,6 +11,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -20,19 +21,19 @@ import javax.validation.constraints.NotNull;
 @Builder
 @ToString
 public class ServiceDto {
-    @NotNull
+    @NotBlank
     @Length(min = 1, max = 30)
     private String name;
 
-    @NotNull
+    @NotBlank
     @Length(min = 1, max = 30)
     private String nameEng;
 
-    @NotNull
+    @NotBlank
     @Length(min = 1, max = 255)
     private String description;
 
-    @NotNull
+    @NotBlank
     @Length(min = 1, max = 255)
     private String descriptionEng;
 

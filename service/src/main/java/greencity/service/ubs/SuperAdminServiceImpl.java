@@ -164,8 +164,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Bag bag = tryToFindBagById(id);
         Employee employee = tryToFindEmployeeByUuid(employeeUuid);
         bag.setCapacity(dto.getCapacity());
-        bag.setPrice(convertIntoCoins(dto.getPrice()));
-        bag.setCommission(convertIntoCoins(dto.getCommission()));
+        bag.setPrice(convertBillsIntoCoins(dto.getPrice()));
+        bag.setCommission(convertBillsIntoCoins(dto.getCommission()));
         bag.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
         bag.setName(dto.getName());
         bag.setNameEng(dto.getNameEng());
@@ -176,11 +176,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
     }
 
-    private Long convertIntoCoins(Double bills) {
-        return BigDecimal.valueOf(bills)
-            .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-            .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
-            .longValue();
+    private Long convertBillsIntoCoins(Double bills) {
+        return bills == null ? null
+            : BigDecimal.valueOf(bills)
+                .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+                .longValue();
     }
 
     private Bag tryToFindBagById(Integer id) {
@@ -189,7 +190,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Long getFullPrice(Double price, Double commission) {
-        return convertIntoCoins(price + commission);
+        return convertBillsIntoCoins(price + commission);
     }
 
     @Override
@@ -228,7 +229,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public GetServiceDto editService(Long id, ServiceDto dto, String employeeUuid) {
         Service service = tryToFindServiceById(id);
         Employee employee = tryToFindEmployeeByUuid(employeeUuid);
-        service.setPrice(convertIntoCoins(dto.getPrice()));
+        service.setPrice(convertBillsIntoCoins(dto.getPrice()));
         service.setName(dto.getName());
         service.setNameEng(dto.getNameEng());
         service.setDescription(dto.getDescription());

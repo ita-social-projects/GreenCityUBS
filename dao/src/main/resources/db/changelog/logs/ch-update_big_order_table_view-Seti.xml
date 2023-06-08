@@ -59,11 +59,11 @@
                     + coalesce(o.points_to_use, 0) as bigint) as general_discount,
                 cast(coalesce(o.sum_total_amount_without_discounts, 0)
                     - (coalesce((select sum(p.amount) from payment p where p.order_id=o.id and p.payment_status='PAID'), 0)
-                        + (coalesce((select sum(c.points) from certificate c where c.order_id=o.id), 0)
-                        + coalesce(o.points_to_use, 0)) * 100) as bigint ) as amount_due,
+                        + (coalesce((select sum(c.points) from certificate c where c.order_id=o.id), 0) * 100
+                        + coalesce(o.points_to_use, 0) * 100)) as bigint ) as amount_due,
                 o.comment as comment_for_order_by_client,
                 cast(coalesce((select sum(p.amount) from payment p where p.order_id=o.id and p.payment_status='PAID'), 0)
-                    + (coalesce((select sum(c.points) from certificate c where c.order_id=o.id), 0) + coalesce(o.points_to_use, 0)) * 100 as bigint) as total_payment,
+                    + (coalesce((select sum(c.points) from certificate c where c.order_id=o.id), 0) * 100 + coalesce(o.points_to_use, 0) * 100) as bigint) as total_payment,
                 o.date_of_export as date_of_export,
                 concat_ws('-', cast(o.deliver_from as time), cast (o.deliver_to as time)) as time_of_export,
                 (select  string_agg(oe.additional_order, '; ') from order_additional oe where oe.orders_id = o.id) as id_order_from_shop,
