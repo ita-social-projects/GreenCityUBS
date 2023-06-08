@@ -124,20 +124,20 @@ class NotificationServiceImplTest {
                 .thenReturn(orders);
 
             doReturn(Optional.empty()).when(userNotificationRepository)
-                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    orders.get(0).getId().toString());
+                .findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(orders.get(0).getId(),
+                    NotificationType.UNPAID_ORDER);
 
             doReturn(Optional.empty()).when(userNotificationRepository)
-                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    orders.get(1).getId().toString());
+                .findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(orders.get(1).getId(),
+                    NotificationType.UNPAID_ORDER);
 
             UserNotification thirdOrderLastNotification = new UserNotification();
             thirdOrderLastNotification.setNotificationType(NotificationType.UNPAID_ORDER);
             thirdOrderLastNotification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(1));
 
             doReturn(Optional.of(thirdOrderLastNotification)).when(userNotificationRepository)
-                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    orders.get(2).getId().toString());
+                .findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(orders.get(2).getId(),
+                    NotificationType.UNPAID_ORDER);
 
             UserNotification created = new UserNotification();
             created.setNotificationType(NotificationType.UNPAID_ORDER);
@@ -366,17 +366,23 @@ class NotificationServiceImplTest {
             notification.setOrder(orders.get(0));
             notification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(2));
 
-            when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(
-                NotificationType.UNPAID_PACKAGE.toString(),
-                orders.get(0).getId().toString())).thenReturn(Optional.of(notification));
+            when(userNotificationRepository.findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(
+                orders.get(0).getId(),
+                NotificationType.UNPAID_PACKAGE,
+                NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF,
+                NotificationType.DONE_OR_CANCELED_UNPAID_ORDER)).thenReturn(Optional.of(notification));
 
-            when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(
-                NotificationType.UNPAID_PACKAGE.toString(),
-                orders.get(1).getId().toString())).thenReturn(Optional.empty());
+            when(userNotificationRepository.findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(
+                orders.get(1).getId(),
+                NotificationType.UNPAID_PACKAGE,
+                NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF,
+                NotificationType.DONE_OR_CANCELED_UNPAID_ORDER)).thenReturn(Optional.empty());
 
-            when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(
-                NotificationType.UNPAID_PACKAGE.toString(),
-                orders.get(2).getId().toString())).thenReturn(Optional.empty());
+            when(userNotificationRepository.findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(
+                orders.get(2).getId(),
+                NotificationType.UNPAID_PACKAGE,
+                NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF,
+                NotificationType.DONE_OR_CANCELED_UNPAID_ORDER)).thenReturn(Optional.empty());
 
             Set<NotificationParameter> parameters = new HashSet<>();
 
