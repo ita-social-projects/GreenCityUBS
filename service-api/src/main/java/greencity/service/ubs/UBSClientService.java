@@ -346,7 +346,7 @@ public interface UBSClientService {
      * has made an order before to get info about tariff.
      *
      * @param uuid      - user's uuid
-     * @param changeLoc - optional param. If it's present provide info about
+     * @param changeLoc - optional param. If it's present provide info about locations
      * @param courierId - id of courier
      * @return {@link OrderCourierPopUpDto}
      * @author Anton Bondar
