@@ -148,6 +148,8 @@ public final class ErrorMessage {
         "Date of export not specified for the order with ID: ";
     public static final String EMPTY_ORDERS_ID_COLLECTION = "Request should contain at least one order ID";
     public static final String ORDER_IS_BLOCKED = "The order has been blocked by employee with ID: ";
+    public static final String REGIONS_NOT_FOUND_BY_LOCATION_STATUS =
+        "Regions containing locations with a status: %s, not found";
 
     /**
      * Constructor.
