@@ -82,7 +82,7 @@ public class EmployeeCriteriaRepository {
     private Predicate composePredicateForFiltering(EmployeeFilterCriteria employeeFilterCriteria,
         Root<EmployeeFilterView> employeeFilterViewRoot) {
         List<Predicate> predicates = collectAllPredicatesToList(employeeFilterCriteria, employeeFilterViewRoot);
-        return criteriaBuilder.and((predicates.toArray(Predicate[]::new)));
+        return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
 
     private List<Predicate> collectAllPredicatesToList(EmployeeFilterCriteria employeeFilterCriteria,
@@ -158,7 +158,7 @@ public class EmployeeCriteriaRepository {
 
     private List<Predicate> getAllSearchLinePredicates(String searchLine,
         List<Expression<String>> toUpperCaseExpressions) {
-        return stream(searchLine.split("\\s"))
+        return stream(searchLine.split("\\s+"))
             .map(searchArgument -> mapSearchArgumentToPredicate(searchArgument, toUpperCaseExpressions))
             .collect(Collectors.toList());
     }
