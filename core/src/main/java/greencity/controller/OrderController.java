@@ -8,6 +8,7 @@ import greencity.constant.ValidationConstant;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
+import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.EventDto;
@@ -368,6 +369,24 @@ public class OrderController {
         @Valid @PathVariable Long courierId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getInfoForCourierOrderingByCourierId(uuid, changeLoc, courierId));
+    }
+
+    /**
+     * Controller for getting all active couriers.
+     *
+     * @return list of {@link CourierDto}
+     *
+     * @author Anton Bondar
+     */
+    @ApiOperation(value = "Get all active couriers")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CourierDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/getAllActiveCouriers")
+    public ResponseEntity<List<CourierDto>> getAllActiveCouriers() {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getAllActiveCouriers());
     }
 
     /**

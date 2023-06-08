@@ -5,6 +5,7 @@ import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.certificate.CertificateDto;
+import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -341,17 +342,6 @@ public interface UBSClientService {
     UserPointDto getUserPoint(String uuid);
 
     /**
-     * Method for getting info about all active locations or if user has made an
-     * order before to get info about tariff.
-     *
-     * @param uuid      - user's uuid
-     * @param changeLoc - optional param. If it's present provide info about
-     *                  locations
-     * @return {@link OrderCourierPopUpDto}
-     */
-    OrderCourierPopUpDto getInfoForCourierOrdering(String uuid, Optional<String> changeLoc);
-
-    /**
      * Method for getting info about all active locations by courier ID or if user
      * has made an order before to get info about tariff.
      *
@@ -362,6 +352,15 @@ public interface UBSClientService {
      * @author Anton Bondar
      */
     OrderCourierPopUpDto getInfoForCourierOrderingByCourierId(String uuid, Optional<String> changeLoc, Long courierId);
+
+    /**
+     * Method for getting all active couriers.
+     *
+     * @return list of {@link CourierDto}
+     *
+     * @author Anton Bondar
+     */
+    List<CourierDto> getAllActiveCouriers();
 
     /**
      * Method for getting info about tariff by courier ID and location ID.

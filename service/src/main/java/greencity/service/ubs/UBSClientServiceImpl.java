@@ -28,6 +28,7 @@ import javax.transaction.Transactional;
 
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.dto.courier.CourierDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
 import greencity.dto.position.PositionAuthoritiesDto;
@@ -57,6 +58,7 @@ import greencity.enums.TariffStatus;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
+import greencity.repository.CourierRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
@@ -164,6 +166,7 @@ import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
+import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
 import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
@@ -179,6 +182,7 @@ import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
 import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
@@ -207,6 +211,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
+    private final CourierRepository courierRepository;
     private final EmployeeRepository employeeRepository;
     private final AddressRepository addressRepo;
     private final OrderAddressRepository orderAddressRepository;
@@ -1736,11 +1741,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return linkTemplate;
     }
 
-    private List<AllActiveLocationsDto> getAllActiveLocations() {
-        List<Location> locations = locationRepository.findAllActive();
-        return getAllActiveLocationsDtos(locations);
-    }
-
     private List<AllActiveLocationsDto> getAllActiveLocationsByCourierId(Long courierId) {
         List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
         return getAllActiveLocationsDtos(locations);
@@ -1766,11 +1766,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public OrderCourierPopUpDto getInfoForCourierOrdering(String uuid, Optional<String> changeLoc) {
+    public OrderCourierPopUpDto getInfoForCourierOrderingByCourierId(String uuid, Optional<String> changeLoc,
+        Long courierId) {
+        if (!courierRepository.existsCourierById(courierId)) {
+            throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
+        }
+
         OrderCourierPopUpDto orderCourierPopUpDto = new OrderCourierPopUpDto();
         if (changeLoc.isPresent()) {
             orderCourierPopUpDto.setOrderIsPresent(false);
-            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocations());
+            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocationsByCourierId(courierId));
             return orderCourierPopUpDto;
         }
         Optional<Order> lastOrder = orderRepository.getLastOrderOfUserByUUIDIfExists(uuid);
@@ -1781,41 +1786,31 @@ public class UBSClientServiceImpl implements UBSClientService {
                     TariffsForLocationDto.class));
         } else {
             orderCourierPopUpDto.setOrderIsPresent(false);
-            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocations());
+            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocationsByCourierId(courierId));
         }
         return orderCourierPopUpDto;
     }
 
     @Override
-    public OrderCourierPopUpDto getInfoForCourierOrderingByCourierId(String uuid, Optional<String> changeLoc,
-        Long courierId) {
-        OrderCourierPopUpDto orderCourierPopUpDto = new OrderCourierPopUpDto();
-        if (changeLoc.isPresent()) {
-            orderCourierPopUpDto.setOrderIsPresent(false);
-            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocationsByCourierId(courierId));
-            return orderCourierPopUpDto;
-        }
-        Optional<Order> lastOrder = orderRepository.getLastOrderOfUserByUUIDIfExists(uuid);
-        if (lastOrder.isPresent()) {
-            orderCourierPopUpDto.setOrderIsPresent(true);
-            orderCourierPopUpDto.setTariffsForLocationDto(
-                modelMapper.map(tariffsInfoRepository.findTariffsInfoByOrdersId(lastOrder.get().getId()),
-                    TariffsForLocationDto.class));
-        } else {
-            orderCourierPopUpDto.setOrderIsPresent(false);
-            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocationsByCourierId(courierId));
-        }
-        return orderCourierPopUpDto;
+    public List<CourierDto> getAllActiveCouriers() {
+        return courierRepository.getAllActiveCouriers().stream()
+            .map(courier -> modelMapper.map(courier, CourierDto.class))
+            .collect(Collectors.toList());
     }
 
     private TariffsInfo findTariffsInfoByCourierAndLocationId(Long courierId, Long locationId) {
         return tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(courierId, locationId)
             .orElseThrow(
-                () -> new NotFoundException(TARIFF_FOR_LOCATION_NOT_EXIST + locationId));
+                () -> new NotFoundException(
+                    String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, courierId, locationId)));
     }
 
     @Override
     public OrderCourierPopUpDto getTariffInfoForLocation(Long courierId, Long locationId) {
+        if (!courierRepository.existsCourierById(courierId)) {
+            throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
+        }
+
         return OrderCourierPopUpDto.builder()
             .orderIsPresent(true)
             .tariffsForLocationDto(modelMapper.map(

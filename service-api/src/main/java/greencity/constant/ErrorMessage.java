@@ -103,6 +103,8 @@ public final class ErrorMessage {
     public static final String LANGUAGE_ERROR = "Invalid language code";
     public static final String TARIFF_NOT_FOUND = "Couldn't found tariff with id: ";
     public static final String TARIFF_FOR_LOCATION_NOT_EXIST = "Could not find tariff for location with id: ";
+    public static final String TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST =
+        "Could not find tariff for courier with id: %d and location with id: %d ";
     public static final String TARIFF_OR_LOCATION_IS_DEACTIVATED = "Tariff or location is deactivated.";
     public static final String TARIFF_IS_ALREADY_EXISTS = "Tariff for such locations is already exists";
     public static final String USER_HAS_NOT_BEEN_DEACTIVATED = "User has not been deactivated";

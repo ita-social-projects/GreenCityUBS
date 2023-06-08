@@ -19,6 +19,7 @@ import javax.persistence.EntityNotFoundException;
 
 import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
+import greencity.dto.courier.CourierDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.entity.order.Bag;
@@ -43,6 +44,7 @@ import greencity.enums.TariffStatus;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
+import greencity.repository.CourierRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
@@ -78,9 +80,7 @@ import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.LocationsDtos;
 import greencity.dto.OrderCourierPopUpDto;
-import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagForUserDto;
@@ -109,7 +109,6 @@ import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -140,11 +139,13 @@ import static greencity.ModelUtils.getBag4list;
 import static greencity.ModelUtils.getBagTranslationDto;
 import static greencity.ModelUtils.getCancellationDto;
 import static greencity.ModelUtils.getCertificate;
+import static greencity.ModelUtils.getCourier;
+import static greencity.ModelUtils.getCourierDto;
+import static greencity.ModelUtils.getCourierDtoList;
 import static greencity.ModelUtils.getEmployee;
 import static greencity.ModelUtils.getGeocodingResult;
 import static greencity.ModelUtils.getListOfEvents;
 import static greencity.ModelUtils.getLocation;
-import static greencity.ModelUtils.getLocationList;
 import static greencity.ModelUtils.getMaximumAmountOfAddresses;
 import static greencity.ModelUtils.getOrder;
 import static greencity.ModelUtils.getOrderClientDto;
@@ -227,53 +228,79 @@ import static org.mockito.Mockito.when;
 class UBSClientServiceImplTest {
     @Mock
     private UserRepository userRepository;
+
     @Mock
     private BagRepository bagRepository;
+
     @Mock
     private UBSuserRepository ubsUserRepository;
+
     @Mock
     private ModelMapper modelMapper;
+
     @Mock
     private CertificateRepository certificateRepository;
+
     @Mock
     private UserRemoteClient userRemoteClient;
+
     @Mock
     private FondyClient fondyClient;
+
     @Mock
     private AddressRepository addressRepository;
+
     @Mock
     private OrderAddressRepository orderAddressRepository;
+
     @Mock
     private OrderRepository orderRepository;
+
+    @Mock
+    private CourierRepository courierRepository;
+
     @Mock
     private EmployeeRepository employeeRepository;
+
     @InjectMocks
     private UBSClientServiceImpl ubsService;
 
     @Mock
     private EncryptionUtil encryptionUtil;
+
     @Mock
     private PaymentRepository paymentRepository;
+
     @Mock
     private EventRepository eventRepository;
+
     @Mock
     private EventService eventService;
+
     @Mock
     private OrdersForUserRepository ordersForUserRepository;
+
     @Mock
     private OrderStatusTranslationRepository orderStatusTranslationRepository;
+
     @Mock
     private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+
     @Mock
     private TariffsInfoRepository tariffsInfoRepository;
+
     @Mock
     private TariffLocationRepository tariffLocationRepository;
+
     @Mock
     private LocationRepository locationRepository;
+
     @Mock
     private GoogleApiService googleApiService;
+
     @Mock
     private TelegramBotRepository telegramBotRepository;
+
     @Mock
     private ViberBotRepository viberBotRepository;
 
@@ -2777,70 +2804,84 @@ class UBSClientServiceImplTest {
     @Test
     void getTariffInfoForLocationTest() {
         var tariff = getTariffInfo();
+        when(courierRepository.existsCourierById(1L)).thenReturn(true);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariff));
         OrderCourierPopUpDto dto = ubsService.getTariffInfoForLocation(1L, 1L);
         assertTrue(dto.getOrderIsPresent());
+        verify(courierRepository).existsCourierById(1L);
         verify(modelMapper).map(tariff, TariffsForLocationDto.class);
         verify(tariffsInfoRepository).findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong());
     }
 
     @Test
-    void getInfoForCourierOrderingTest() {
-        var tariff = getTariffInfo();
-        when(orderRepository.getLastOrderOfUserByUUIDIfExists(anyString()))
-            .thenReturn(Optional.of(getOrder()));
-        when(tariffsInfoRepository.findTariffsInfoByOrdersId(anyLong())).thenReturn(tariff);
-        OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrdering("35467585763t4sfgchjfuyetf", Optional.empty());
-        verify(modelMapper).map(tariff, TariffsForLocationDto.class);
-        assertTrue(dto.getOrderIsPresent());
+    void getTariffInfoForLocationWhenCourierNotFoundTest() {
+        when(courierRepository.existsCourierById(1L)).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> ubsService
+            .getTariffInfoForLocation(1L, 1L));
+        verify(courierRepository).existsCourierById(1L);
     }
 
     @Test
     void getInfoForCourierOrderingByCourierIdTest() {
         var tariff = getTariffInfo();
+
+        when(courierRepository.existsCourierById(1L)).thenReturn(true);
         when(orderRepository.getLastOrderOfUserByUUIDIfExists(anyString()))
             .thenReturn(Optional.of(getOrder()));
         when(tariffsInfoRepository.findTariffsInfoByOrdersId(anyLong())).thenReturn(tariff);
+
         OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrderingByCourierId("35467585763t4sfgchjfuyetf",
             Optional.empty(), 1L);
+        assertTrue(dto.getOrderIsPresent());
+
+        verify(courierRepository).existsCourierById(1L);
         verify(modelMapper).map(tariff, TariffsForLocationDto.class);
         verify(orderRepository).getLastOrderOfUserByUUIDIfExists(anyString());
         verify(tariffsInfoRepository).findTariffsInfoByOrdersId(anyLong());
-        assertTrue(dto.getOrderIsPresent());
+    }
+
+    @Test
+    void getInfoForCourierOrderingByCourierIdWhenCourierNotFoundTest() {
+        when(courierRepository.existsCourierById(1L)).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> ubsService
+            .getInfoForCourierOrderingByCourierId("35467585763t4sfgchjfuyetf", Optional.empty(), 1L));
+        verify(courierRepository).existsCourierById(1L);
     }
 
     @Test
     void getInfoForCourierOrderingByCourierIdWhenOrderIsEmptyTest() {
+        when(courierRepository.existsCourierById(1L)).thenReturn(true);
         when(orderRepository.getLastOrderOfUserByUUIDIfExists(anyString()))
             .thenReturn(Optional.empty());
 
         OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrderingByCourierId("35467585763t4sfgchjfuyetf",
             Optional.empty(), 1L);
-
-        verify(orderRepository).getLastOrderOfUserByUUIDIfExists(anyString());
         assertFalse(dto.getOrderIsPresent());
+
+        verify(courierRepository).existsCourierById(1L);
+        verify(orderRepository).getLastOrderOfUserByUUIDIfExists(anyString());
     }
 
     @Test
     void getInfoForCourierOrderingByCourierIdWhenChangeLocIsPresentTest() {
+        when(courierRepository.existsCourierById(1L)).thenReturn(true);
         var dto = ubsService.getInfoForCourierOrderingByCourierId(
             "35467585763t4sfgchjfuyetf", Optional.of("w"), 1L);
         assertEquals(0, dto.getAllActiveLocationsDtos().size());
+        verify(courierRepository).existsCourierById(1L);
     }
 
     @Test
-    void getInfoForCourierOrderingTest2() {
-        List<Location> list = getLocationList();
-        when(locationRepository.findAllActive()).thenReturn(list);
-        when(modelMapper.map(list.get(0), RegionDto.class))
-            .thenReturn(RegionDto.builder().regionId(1L).nameUk("Київська область ").nameEn("Kyiv region").build());
-        when(modelMapper.map(list.get(0), LocationsDtos.class))
-            .thenReturn(LocationsDtos.builder().locationId(1L).nameEn("Kyiv").nameUk("Київ").build());
-        OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrdering("35467585763t4sfgchjfuyetf", Optional.of("w"));
-        assertEquals(1, dto.getAllActiveLocationsDtos().size());
-        assertFalse(dto.getOrderIsPresent());
+    void getAllActiveCouriersTest() {
+        when(courierRepository.getAllActiveCouriers()).thenReturn(List.of(getCourier()));
+        when(modelMapper.map(getCourier(), CourierDto.class))
+            .thenReturn(getCourierDto());
 
+        assertEquals(getCourierDtoList(), ubsService.getAllActiveCouriers());
+
+        verify(courierRepository).getAllActiveCouriers();
+        verify(modelMapper).map(getCourier(), CourierDto.class);
     }
 
     @Test

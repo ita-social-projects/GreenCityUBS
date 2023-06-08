@@ -73,8 +73,10 @@ class OrderControllerTest {
 
     @Mock
     OrderRepository orderRepository;
+
     @Mock
     NotificationService notificationService;
+
     @InjectMocks
     OrderController orderController;
 
@@ -301,6 +303,11 @@ class OrderControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void getAllActiveCouriersTest() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getAllActiveCouriers")).andExpect(status().isOk());
     }
 
     @Test
