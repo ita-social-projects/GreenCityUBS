@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 public class EmployeeFilterCriteria {
     private String searchLine;
-    private EmployeeStatus employeeStatus;
+    private String employeeStatus;
     private List<Long> positions;
     private List<Long> regions;
     private List<Long> locations;

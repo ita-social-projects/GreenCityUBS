@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.user.employee.EmployeeFilterView;
+import greencity.enums.EmployeeStatus;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import org.springframework.data.domain.*;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static greencity.enums.EmployeeStatus.*;
 import static java.util.Arrays.*;
 
 @Repository
@@ -137,7 +139,7 @@ public class EmployeeCriteriaRepository {
     private void addEmployeeStatusPredicate(EmployeeFilterCriteria employeeFilterCriteria,
         Root<EmployeeFilterView> employeeFilterViewRoot,
         List<Predicate> predicates) {
-        if (employeeFilterCriteria.getEmployeeStatus() != null) {
+        if (employeeStatusExist(employeeFilterCriteria.getEmployeeStatus())) {
             predicates.add(criteriaBuilder.equal(
                 employeeFilterViewRoot.get("employeeStatus"),
                 employeeFilterCriteria.getEmployeeStatus()));
