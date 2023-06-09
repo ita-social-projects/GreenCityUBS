@@ -298,7 +298,8 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/getActiveLocations")
     public ResponseEntity<List<LocationInfoDto>> getActiveLocations() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getLocationsByStatus(LocationStatus.ACTIVE));
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(superAdminService.getLocationsByStatus(LocationStatus.ACTIVE));
     }
 
     /**
