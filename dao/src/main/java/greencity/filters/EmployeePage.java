@@ -11,5 +11,5 @@ public class EmployeePage {
     private int pageNumber = 0;
     private int pageSize = 10;
     private Sort.Direction sortDirection = Sort.Direction.DESC;
-    private String sortBy = "id";
+    private String sortBy = "employeeId";
 }

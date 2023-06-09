@@ -202,4 +202,5 @@
     <include file="db/changelog/logs/ch-add-table-column-width-for-employee-Kulbaba.xml"/>
     <include file="db/changelog/logs/ch-add-table-notification-platforms-paybutton-Lenets.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Lenets.xml"/>
+    <include file="db/changelog/logs/ch-add-view-employees_filters-view-Safarov.xml"/>
 </databaseChangeLog>

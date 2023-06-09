@@ -1,19 +1,21 @@
 package greencity.service.ubs;
 
 import com.netflix.hystrix.exception.HystrixRuntimeException;
-import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.dto.LocationsDtos;
+import greencity.dto.courier.GetReceivingStationDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
+import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.entity.user.employee.Position;
 import greencity.enums.EmployeeStatus;
-import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -26,10 +28,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
@@ -37,8 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -128,24 +126,69 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void findAllTest() {
-        EmployeePage employeePage = new EmployeePage();
-        EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
-        Pageable pageable = PageRequest.of(0, 5, Sort.by(
-            Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
+        var employeePage = new EmployeePage();
+        var employeeFilterCriteria = new EmployeeFilterCriteria();
+        var employeeId = 1L;
+        var tariffsInfoId = 10L;
+        var employeeFilterViews = getEmployeeFilterViewListForOneEmployeeWithDifferentPositions(
+            employeeId, tariffsInfoId);
+        var expectedGetEmployeeDto = getEmployeeDtoWithPositionsAndTariffs();
 
         when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
-            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
-        employeeService.findAll(employeePage, employeeFilterCriteria);
+            .thenReturn(employeeFilterViews);
+        mockModelMapperBehaviourForEmployeeFilterViewCollection(employeeFilterViews);
 
-        verify(employeeCriteriaRepository, times(1))
-            .findAll(employeePage, employeeFilterCriteria);
+        var getEmployeeDtoPage = employeeService.findAll(employeePage, employeeFilterCriteria);
+        var actualGetEmployeeDto = getEmployeeDtoPage.get()
+            .findAny()
+            .orElseThrow();
+
+        assertEquals(expectedGetEmployeeDto, actualGetEmployeeDto);
+        verify(employeeCriteriaRepository).findAll(employeePage, employeeFilterCriteria);
+        verifyAllModelMappersWasInvokedForFirstRecordOfEmployeeFilterViewCollection(employeeFilterViews);
+        verifyOnlyModelMapperToPositionDtoWasInvoked(employeeFilterViews);
+    }
+
+    private void verifyOnlyModelMapperToPositionDtoWasInvoked(List<EmployeeFilterView> employeeFilterViews) {
+        for (int i = 1; i < employeeFilterViews.size(); i++) {
+            verify(modelMapper, never()).map(employeeFilterViews.get(i), GetEmployeeDto.class);
+            verify(modelMapper, never()).map(employeeFilterViews.get(i), GetTariffInfoForEmployeeDto.class);
+            verify(modelMapper, never()).map(employeeFilterViews.get(i), LocationsDtos.class);
+            verify(modelMapper, never()).map(employeeFilterViews.get(i), GetReceivingStationDto.class);
+            verify(modelMapper, times(1)).map(employeeFilterViews.get(i), PositionDto.class);
+        }
+    }
+
+    private void verifyAllModelMappersWasInvokedForFirstRecordOfEmployeeFilterViewCollection(
+        List<EmployeeFilterView> employeeFilterViews) {
+        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), GetEmployeeDto.class);
+        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), GetTariffInfoForEmployeeDto.class);
+        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), LocationsDtos.class);
+        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), GetReceivingStationDto.class);
+        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), PositionDto.class);
+    }
+
+    private void mockModelMapperBehaviourForEmployeeFilterViewCollection(List<EmployeeFilterView> employeeFilterViews) {
+        var firstElement = employeeFilterViews.get(0);
+        when(modelMapper.map(firstElement, GetEmployeeDto.class))
+            .thenReturn(getEmployeeDto());
+        when(modelMapper.map(firstElement, GetTariffInfoForEmployeeDto.class))
+            .thenReturn(getTariffInfoForEmployeeDto2());
+        when(modelMapper.map(firstElement, LocationsDtos.class))
+            .thenReturn(getLocationsDtos(firstElement.getLocationId()));
+        when(modelMapper.map(firstElement, GetReceivingStationDto.class))
+            .thenReturn(getReceivingStationDto2());
+        for (var employeeFilterView : employeeFilterViews) {
+            when(modelMapper.map(employeeFilterView, PositionDto.class))
+                .thenReturn(getPositionDto(employeeFilterView.getPositionId()));
+        }
     }
 
     @Test
     void updateEmployeeTest() {
         Employee employee = getEmployeeForUpdateEmailCheck();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
-        Position position = ModelUtils.getPosition();
+        Position position = getPosition();
 
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
@@ -164,7 +207,7 @@ class UBSManagementEmployeeServiceImplTest {
     void updateEmployeeWhenPositionDoesNotExistsTest() {
         Employee employee = getEmployeeForUpdateEmailCheck();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
-        Position position = ModelUtils.getPosition();
+        Position position = getPosition();
 
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
@@ -180,7 +223,7 @@ class UBSManagementEmployeeServiceImplTest {
     void updateEmployeeWithDefaultImagePathTest() {
         Employee employee = getEmployee();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
-        Position position = ModelUtils.getPosition();
+        Position position = getPosition();
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
@@ -194,13 +237,13 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeeNotFoundTest() {
-        EmployeeWithTariffsIdDto dto = ModelUtils.getEmployeeWithTariffsIdDto();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
         assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
     }
 
     @Test
     void updateEmployeeEmailAlreadyExistsTest() {
-        EmployeeWithTariffsIdDto dto = ModelUtils.getEmployeeWithTariffsIdDto();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
         Employee employee = getEmployee();
 
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
@@ -215,7 +258,7 @@ class UBSManagementEmployeeServiceImplTest {
     void updateEmployeeEmailThrowsExceptionWhenUserWithSuchEmailIsAlreadyExistsTest() {
         Employee employee = getEmployeeForUpdateEmailCheck();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
-        Position position = ModelUtils.getPosition();
+        Position position = getPosition();
 
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
@@ -268,7 +311,7 @@ class UBSManagementEmployeeServiceImplTest {
     void createPositionTest() {
         AddingPositionDto addingPositionDto = AddingPositionDto.builder().name("Водій").build();
         when(positionRepository.existsPositionByName(any())).thenReturn(false, true);
-        lenient().when(modelMapper.map(any(Position.class), eq(PositionDto.class))).thenReturn(getPositionDto());
+        lenient().when(modelMapper.map(any(Position.class), eq(PositionDto.class))).thenReturn(getPositionDto(1L));
         when(positionRepository.save(any())).thenReturn(getPosition(), getPosition());
 
         employeeService.create(addingPositionDto);
@@ -285,7 +328,7 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updatePositionTest() {
-        PositionDto dto = getPositionDto();
+        PositionDto dto = getPositionDto(1L);
         when(positionRepository.existsById(dto.getId())).thenReturn(true, true, false);
         when(positionRepository.existsPositionByName(dto.getName())).thenReturn(false, true);
         when(modelMapper.map(any(), any())).thenReturn(getPosition(), dto);
@@ -309,7 +352,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void getAllPositionTest() {
         when(positionRepository.findAll()).thenReturn(List.of(getPosition()));
-        when(modelMapper.map(any(), any())).thenReturn(getPositionDto());
+        when(modelMapper.map(any(), any())).thenReturn(getPositionDto(1L));
 
         List<PositionDto> positionDtos = employeeService.getAllPositions();
 
@@ -369,19 +412,6 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown2 = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.deleteEmployeeImage(1L));
         assertEquals(ErrorMessage.CANNOT_DELETE_DEFAULT_IMAGE, thrown2.getMessage());
-    }
-
-    @Test
-    void findAllActiveEmployeesTest() {
-        EmployeePage employeePage = new EmployeePage();
-        EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
-        Pageable pageable = PageRequest.of(0, 5, Sort.by(
-            Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
-        when(employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria))
-            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
-        employeeService.findAllActiveEmployees(employeePage, employeeFilterCriteria);
-        verify(employeeCriteriaRepository, times(1))
-            .findAllActiveEmployees(employeePage, employeeFilterCriteria);
     }
 
     @Test
