@@ -87,31 +87,11 @@ public class ManagementEmployeeController {
     @ApiPageable
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/getAll-employees")
-    public ResponseEntity<Page<GetEmployeeDto>> getAllEmployees(EmployeePage employeePage,
+    public ResponseEntity<Page<GetEmployeeDto>> getAllEmployees(
+        EmployeePage employeePage,
         EmployeeFilterCriteria employeeFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(employeeService.findAll(employeePage, employeeFilterCriteria));
-    }
-
-    /**
-     * Controller gets all active employees.
-     *
-     * @return {@link PageableAdvancedDto} pageable active employees.
-     * @author Yurii Kuzo.
-     */
-    @ApiOperation(value = "Get all active employees")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableAdvancedDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @ApiPageable
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
-    @GetMapping("/getAll-active-employees")
-    public ResponseEntity<Page<GetEmployeeDto>> getAllActiveEmployees(EmployeePage employeePage,
-        EmployeeFilterCriteria employeeFilterCriteria) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(employeeService.findAllActiveEmployees(employeePage, employeeFilterCriteria));
     }
 
     /**

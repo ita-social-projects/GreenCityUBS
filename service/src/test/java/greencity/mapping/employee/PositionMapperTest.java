@@ -18,7 +18,7 @@ class PositionMapperTest {
     @Test
     void convert() {
         Position expected = ModelUtils.getPosition();
-        Position actual = positionMapper.convert(ModelUtils.getPositionDto());
+        Position actual = positionMapper.convert(ModelUtils.getPositionDto(1L));
 
         assertEquals(expected, actual);
     }

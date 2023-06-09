@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Safarov-HZ" author="Safarov Renat">
+        <createView viewName="employees_filters"
+                    replaceIfExists="true">
+            select empl.id         as employee_id,
+                   empl.first_name,
+                   empl.last_name,
+                   empl.phone_number,
+                   empl.email,
+                   empl.image_path,
+                   empl.status     as employee_status,
+                   pos.id          as position_id,
+                   pos.name        as position_name,
+                   ti.id           as tariffs_info_id,
+                   reg.id          as region_id,
+                   reg.name_en     as region_name_en,
+                   reg.name_uk     as region_name_uk,
+                   loc.id          as location_id,
+                   loc.name_en     as location_name_en,
+                   loc.name_uk     as location_name_uk,
+                   recev_stat.id   as receiving_station_id,
+                   recev_stat.name as receiving_station_name,
+                   cour.id         as courier_id,
+                   cour.name_en    as courier_name_en,
+                   cour.name_uk    as courier_name_uk
+            from employees empl
+                     left join employee_position ep on empl.id = ep.employee_id
+                     left join positions pos on ep.position_id = pos.id
+                     left join tariff_infos_receiving_employee_mapping tirem on empl.id = tirem.employee_id
+                     left join tariffs_info ti on tirem.tariffs_info_id = ti.id
+                     left join tariffs_locations tl on ti.id = tl.tariffs_info_id
+                     left join locations loc on loc.id = tl.location_id
+                     left join tariffs_info_receiving_stations_mapping tirsm on ti.id = tirsm.tariffs_info_id
+                     left join receiving_stations recev_stat on tirsm.receiving_station_id = recev_stat.id
+                     left join regions reg on loc.region_id = reg.id
+                     left join courier cour on cour.id = ti.courier_id;
+        </createView>
+
+        <rollback>
+            <dropView viewName="employees_filters"/>
+        </rollback>
+
+    </changeSet>
+</databaseChangeLog>

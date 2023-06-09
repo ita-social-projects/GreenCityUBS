@@ -139,10 +139,7 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.entity.user.employee.Employee;
-import greencity.entity.user.employee.EmployeeOrderPosition;
-import greencity.entity.user.employee.Position;
-import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.employee.*;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -254,6 +251,86 @@ public class ModelUtils {
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
+
+    public static EmployeeFilterView getEmployeeFilterView() {
+        return getEmployeeFilterViewWithPassedIds(1L, 5L, 10L);
+    }
+
+    public static EmployeeFilterView getEmployeeFilterViewWithPassedIds(
+        Long employeeId, Long positionId, Long tariffsInfoId) {
+        return EmployeeFilterView.builder()
+            .employeeId(employeeId)
+            .positionId(positionId)
+            .positionName("Водій")
+            .tariffsInfoId(tariffsInfoId)
+            .firstName("First Name")
+            .lastName("Last Name")
+            .phoneNumber("Phone Number")
+            .email("employee@gmail.com")
+            .image("Image")
+            .regionId(15L)
+            .regionNameEn("Kyiv region")
+            .regionNameUk("Київська область")
+            .courierId(20L)
+            .receivingStationId(25L)
+            .receivingStationName("Receiving station")
+            .courierNameEn("Test")
+            .courierNameUk("Тест")
+            .locationId(30L)
+            .locationNameEn("Kyiv")
+            .locationNameUk("Київ")
+            .build();
+    }
+
+    public static List<EmployeeFilterView> getEmployeeFilterViewListForOneEmployeeWithDifferentPositions(
+        Long employeeId, Long tariffsInfoId) {
+        return List.of(
+            getEmployeeFilterViewWithPassedIds(employeeId, 3L, tariffsInfoId),
+            getEmployeeFilterViewWithPassedIds(employeeId, 5L, tariffsInfoId),
+            getEmployeeFilterViewWithPassedIds(employeeId, 7L, tariffsInfoId));
+    }
+
+    public static GetEmployeeDto getEmployeeDtoWithPositionsAndTariffs() {
+        var getEmployeeDto = getEmployeeDto();
+
+        getEmployeeDto.setEmployeePositions(List.of(
+            getPositionDto(3L),
+            getPositionDto(5L),
+            getPositionDto(7L)));
+
+        var getTariffInfoForEmployeeDto = getTariffInfoForEmployeeDto2();
+        getTariffInfoForEmployeeDto.setLocationsDtos(List.of(getLocationsDtos(30L)));
+        getTariffInfoForEmployeeDto.setReceivingStationDtos(List.of(getReceivingStationDto2()));
+        getEmployeeDto.setTariffs(List.of(getTariffInfoForEmployeeDto));
+
+        return getEmployeeDto;
+    }
+
+    public static GetEmployeeDto getEmployeeDto() {
+        return GetEmployeeDto.builder()
+            .id(1L)
+            .firstName("First Name")
+            .lastName("Last Name")
+            .phoneNumber("Phone Number")
+            .email("employee@gmail.com")
+            .image("Image")
+            .build();
+    }
+
+    public static GetReceivingStationDto getReceivingStationDto2() {
+        return GetReceivingStationDto.builder()
+            .stationId(25L)
+            .name("Receiving station")
+            .build();
+    }
+
+    public static GetTariffInfoForEmployeeDto getTariffInfoForEmployeeDto2() {
+        return GetTariffInfoForEmployeeDto.builder()
+            .id(10L)
+            .region(getRegionDto(15L))
+            .courier(getCourierTranslationDto(20L))
+            .build();
+    }
 
     public static CourierUpdateDto getUpdateCourierDto() {
         return CourierUpdateDto.builder()
@@ -1084,16 +1161,15 @@ public class ModelUtils {
                 .nameEn("Kyiv region")
                 .nameUk("Київська область")
                 .build())
-            .locationsDtos(List.of(getLocationsDtos()))
+            .locationsDtos(List.of(getLocationsDtos(1L)))
             .receivingStationDtos(List.of(getGetReceivingStationDto()))
-            .courier(getCourierTranslationDto())
+            .courier(getCourierTranslationDto(1L))
             .build();
     }
 
-    public static LocationsDtos getLocationsDtos() {
-        return LocationsDtos
-            .builder()
-            .locationId(1L)
+    public static LocationsDtos getLocationsDtos(Long id) {
+        return LocationsDtos.builder()
+            .locationId(id)
             .nameUk("Київ")
             .nameEn("Kyiv")
             .build();
@@ -1280,11 +1356,7 @@ public class ModelUtils {
                 .build()))
             .tariffs(List.of(GetTariffInfoForEmployeeDto.builder()
                 .id(1L)
-                .region(RegionDto.builder()
-                    .regionId(1L)
-                    .nameEn("Kyiv region")
-                    .nameUk("Київська область")
-                    .build())
+                .region(getRegionDto(1L))
                 .locationsDtos(List.of(LocationsDtos
                     .builder()
                     .locationId(1L)
@@ -1302,6 +1374,14 @@ public class ModelUtils {
                     .nameEn("Test")
                     .build())
                 .build()))
+            .build();
+    }
+
+    private static RegionDto getRegionDto(Long id) {
+        return RegionDto.builder()
+            .regionId(id)
+            .nameEn("Kyiv region")
+            .nameUk("Київська область")
             .build();
     }
 
@@ -1615,9 +1695,9 @@ public class ModelUtils {
             .build();
     }
 
-    public static PositionDto getPositionDto() {
+    public static PositionDto getPositionDto(Long id) {
         return PositionDto.builder()
-            .id(1L)
+            .id(id)
             .name("Водій")
             .build();
     }
@@ -1969,14 +2049,15 @@ public class ModelUtils {
     }
 
     public static EmployeePositionDtoRequest getEmployeePositionDtoRequest() {
+        Long positionId = 1L;
         Map<PositionDto, List<EmployeeNameIdDto>> allPositionsEmployees = new HashMap<>();
         Map<PositionDto, String> currentPositionEmployees = new HashMap<>();
         String value = getEmployee().getFirstName() + " " + getEmployee().getLastName();
-        allPositionsEmployees.put(getPositionDto(), new ArrayList<>(List.of(EmployeeNameIdDto.builder()
-            .id(getPositionDto().getId())
+        allPositionsEmployees.put(getPositionDto(positionId), new ArrayList<>(List.of(EmployeeNameIdDto.builder()
+            .id(positionId)
             .name(value)
             .build())));
-        currentPositionEmployees.put(getPositionDto(), value);
+        currentPositionEmployees.put(getPositionDto(positionId), value);
         return EmployeePositionDtoRequest.builder()
             .orderId(1L)
             .allPositionsEmployees(allPositionsEmployees)
@@ -4174,9 +4255,9 @@ public class ModelUtils {
             .build();
     }
 
-    public static CourierTranslationDto getCourierTranslationDto() {
+    public static CourierTranslationDto getCourierTranslationDto(Long id) {
         return CourierTranslationDto.builder()
-            .id(1L)
+            .id(id)
             .nameUk("Тест")
             .nameEn("Test")
             .build();
