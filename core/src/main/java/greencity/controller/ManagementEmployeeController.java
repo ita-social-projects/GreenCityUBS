@@ -88,8 +88,8 @@ public class ManagementEmployeeController {
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/getAll-employees")
     public ResponseEntity<Page<GetEmployeeDto>> getAllEmployees(
-        @RequestParam EmployeePage employeePage,
-        @RequestParam EmployeeFilterCriteria employeeFilterCriteria) {
+        EmployeePage employeePage,
+        EmployeeFilterCriteria employeeFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(employeeService.findAll(employeePage, employeeFilterCriteria));
     }
