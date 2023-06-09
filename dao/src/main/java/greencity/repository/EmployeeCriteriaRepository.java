@@ -1,7 +1,6 @@
 package greencity.repository;
 
 import greencity.entity.user.employee.EmployeeFilterView;
-import greencity.enums.EmployeeStatus;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import org.springframework.data.domain.*;
@@ -33,11 +32,11 @@ public class EmployeeCriteriaRepository {
     /**
      * {@inheritDoc}
      */
-    public Page<EmployeeFilterView> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria) {
+    public List<EmployeeFilterView> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria) {
         return getAllEmployees(employeePage, employeeFilterCriteria);
     }
 
-    private Page<EmployeeFilterView> getAllEmployees(EmployeePage employeePage,
+    private List<EmployeeFilterView> getAllEmployees(EmployeePage employeePage,
         EmployeeFilterCriteria employeeFilterCriteria) {
         CriteriaQuery<EmployeeFilterView> criteriaQuery = criteriaBuilder.createQuery(EmployeeFilterView.class);
         Root<EmployeeFilterView> employeeRoot = criteriaQuery.from(EmployeeFilterView.class);
@@ -48,27 +47,15 @@ public class EmployeeCriteriaRepository {
 
         setOrderBy(employeePage, criteriaQuery, employeeRoot);
 
-        return processEmployees(employeePage, criteriaQuery, predicate);
+        return processEmployees(employeePage, criteriaQuery);
     }
 
-    private Page<EmployeeFilterView> processEmployees(EmployeePage employeePage,
-        CriteriaQuery<EmployeeFilterView> criteriaQuery, Predicate predicate) {
+    private List<EmployeeFilterView> processEmployees(EmployeePage employeePage,
+        CriteriaQuery<EmployeeFilterView> criteriaQuery) {
         TypedQuery<EmployeeFilterView> employeeTypedQuery = entityManager.createQuery(criteriaQuery);
         employeeTypedQuery.setFirstResult(employeePage.getPageNumber() * employeePage.getPageSize());
         employeeTypedQuery.setMaxResults(employeePage.getPageSize());
-        Sort sort = Sort.by(employeePage.getSortDirection(), employeePage.getSortBy());
-        Pageable pageable = PageRequest.of(employeePage.getPageNumber(),
-            employeePage.getPageSize(), sort);
-        long employeesCount = getEmployeesCount(predicate);
-        List<EmployeeFilterView> resultEmployees = employeeTypedQuery.getResultList();
-        return new PageImpl<>(resultEmployees, pageable, employeesCount);
-    }
-
-    private long getEmployeesCount(Predicate predicate) {
-        CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-        Root<EmployeeFilterView> countOrderRoot = countQuery.from(EmployeeFilterView.class);
-        countQuery.select(criteriaBuilder.count(countOrderRoot)).where(predicate);
-        return entityManager.createQuery(countQuery).getSingleResult();
+        return employeeTypedQuery.getResultList();
     }
 
     private void setOrderBy(EmployeePage employeePage, CriteriaQuery<EmployeeFilterView> criteriaQuery,
@@ -184,7 +171,7 @@ public class EmployeeCriteriaRepository {
     }
 
     private boolean isListNotNullAndNotEmpty(List<?> parameter) {
-        return parameter != null && parameter.size() > 0;
+        return parameter != null && !parameter.isEmpty();
     }
 
     private boolean isStringNotNullAndNotEmpty(String str) {

@@ -253,11 +253,16 @@ public class ModelUtils {
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
 
     public static EmployeeFilterView getEmployeeFilterView() {
+        return getEmployeeFilterViewWithPassedIds(1L, 5L, 10L);
+    }
+
+    public static EmployeeFilterView getEmployeeFilterViewWithPassedIds(
+        Long employeeId, Long positionId, Long tariffsInfoId) {
         return EmployeeFilterView.builder()
-            .employeeId(1L)
-            .positionId(5L)
+            .employeeId(employeeId)
+            .positionId(positionId)
             .positionName("Водій")
-            .tariffsInfoId(10L)
+            .tariffsInfoId(tariffsInfoId)
             .firstName("First Name")
             .lastName("Last Name")
             .phoneNumber("Phone Number")
@@ -275,6 +280,30 @@ public class ModelUtils {
             .locationNameEn("Kyiv")
             .locationNameUk("Київ")
             .build();
+    }
+
+    public static List<EmployeeFilterView> getEmployeeFilterViewListForOneEmployeeWithDifferentPositions(
+        Long employeeId, Long tariffsInfoId) {
+        return List.of(
+            getEmployeeFilterViewWithPassedIds(employeeId, 3L, tariffsInfoId),
+            getEmployeeFilterViewWithPassedIds(employeeId, 5L, tariffsInfoId),
+            getEmployeeFilterViewWithPassedIds(employeeId, 7L, tariffsInfoId));
+    }
+
+    public static GetEmployeeDto getEmployeeDtoWithPositionsAndTariffs() {
+        var getEmployeeDto = getEmployeeDto();
+
+        getEmployeeDto.setEmployeePositions(List.of(
+            getPositionDto(3L),
+            getPositionDto(5L),
+            getPositionDto(7L)));
+
+        var getTariffInfoForEmployeeDto = getTariffInfoForEmployeeDto2();
+        getTariffInfoForEmployeeDto.setLocationsDtos(List.of(getLocationsDtos(30L)));
+        getTariffInfoForEmployeeDto.setReceivingStationDtos(List.of(getReceivingStationDto2()));
+        getEmployeeDto.setTariffs(List.of(getTariffInfoForEmployeeDto));
+
+        return getEmployeeDto;
     }
 
     public static GetEmployeeDto getEmployeeDto() {

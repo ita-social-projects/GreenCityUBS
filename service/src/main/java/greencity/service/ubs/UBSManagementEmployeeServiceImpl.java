@@ -33,8 +33,7 @@ import greencity.repository.UserRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -112,9 +111,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     public Page<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria) {
-        Page<EmployeeFilterView> employees = employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria);
-        List<EmployeeFilterView> employeeFilterViews = employees.stream()
-            .collect(Collectors.toList());
+        List<EmployeeFilterView> employeeFilterViews =
+            employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria);
 
         Map<Long, GetEmployeeDto> getEmployeeDtoMap = new HashMap<>();
         for (var employeeFilterView : employeeFilterViews) {
@@ -125,8 +123,12 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
             fillGetEmployeeDto(employeeFilterView, getEmployeeDto);
         }
+
         var resultList = new ArrayList<>(getEmployeeDtoMap.values());
-        return new PageImpl<>(resultList, employees.getPageable(), employees.getTotalElements());
+        Sort sort = Sort.by(employeePage.getSortDirection(), employeePage.getSortBy());
+        Pageable pageable = PageRequest.of(employeePage.getPageNumber(),
+            employeePage.getPageSize(), sort);
+        return new PageImpl<>(resultList, pageable, employeeFilterViews.size());
     }
 
     private void fillGetEmployeeDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto) {

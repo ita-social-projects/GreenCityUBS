@@ -1,6 +1,5 @@
 package greencity.filters;
 
-import greencity.enums.EmployeeStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
