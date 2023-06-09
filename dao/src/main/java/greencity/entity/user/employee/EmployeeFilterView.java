@@ -42,9 +42,8 @@ public class EmployeeFilterView {
     @Column(name = "tariffs_info_id")
     private Long tariffsInfoId;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "employee_status")
-    private EmployeeStatus employeeStatus;
+    private String employeeStatus;
 
     @Column(name = "position_name")
     private String positionName;
