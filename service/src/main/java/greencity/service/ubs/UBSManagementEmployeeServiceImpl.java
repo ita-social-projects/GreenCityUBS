@@ -4,6 +4,8 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.dto.LocationsDtos;
+import greencity.dto.courier.GetReceivingStationDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
@@ -14,6 +16,7 @@ import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.entity.user.employee.Position;
 import greencity.enums.EmployeeStatus;
 import greencity.exceptions.BadRequestException;
@@ -30,13 +33,15 @@ import greencity.repository.UserRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -106,23 +111,107 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     public Page<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria) {
-        Page<Employee> employees = employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria);
-        List<GetEmployeeDto> employeeDtos = employees.stream()
-            .map(employee -> modelMapper.map(employee, GetEmployeeDto.class)).collect(Collectors.toList());
-        return new PageImpl<>(employeeDtos, employees.getPageable(), employees.getTotalElements());
+        List<EmployeeFilterView> employeeFilterViews =
+            employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria);
+
+        Map<Long, GetEmployeeDto> getEmployeeDtoMap = new HashMap<>();
+        for (var employeeFilterView : employeeFilterViews) {
+            var getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(
+                employeeFilterView.getEmployeeId(), id -> modelMapper.map(employeeFilterView, GetEmployeeDto.class));
+
+            initializeGetEmployeeDtoCollectionsIfNeeded(getEmployeeDto);
+
+            fillGetEmployeeDto(employeeFilterView, getEmployeeDto);
+        }
+
+        var resultList = new ArrayList<>(getEmployeeDtoMap.values());
+        Sort sort = Sort.by(employeePage.getSortDirection(), employeePage.getSortBy());
+        Pageable pageable = PageRequest.of(employeePage.getPageNumber(),
+            employeePage.getPageSize(), sort);
+        return new PageImpl<>(resultList, pageable, employeeFilterViews.size());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Page<GetEmployeeDto> findAllActiveEmployees(EmployeePage employeePage,
-        EmployeeFilterCriteria employeeFilterCriteria) {
-        Page<Employee> employees =
-            employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria);
-        List<GetEmployeeDto> employeesDto = employees.stream()
-            .map(employee -> modelMapper.map(employee, GetEmployeeDto.class)).collect(Collectors.toList());
-        return new PageImpl<>(employeesDto, employees.getPageable(), employees.getTotalElements());
+    private void fillGetEmployeeDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto) {
+        fillGetTariffInfoForEmployeeDto(emplView, getEmployeeDto);
+        fillPositionDto(emplView, getEmployeeDto);
+    }
+
+    private void fillPositionDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto) {
+        if (isPositionIdAbsent(emplView.getPositionId(), getEmployeeDto)) {
+            var positionDto = modelMapper.map(emplView, PositionDto.class);
+            getEmployeeDto.getEmployeePositions().add(positionDto);
+        }
+    }
+
+    private void fillGetTariffInfoForEmployeeDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto) {
+        GetTariffInfoForEmployeeDto tariffInfoDto;
+        if (isMainInfoAboutCurrentTariffAbsent(emplView.getTariffsInfoId(), getEmployeeDto)) {
+            tariffInfoDto = modelMapper.map(emplView, GetTariffInfoForEmployeeDto.class);
+            initializeTariffInfoDtoCollections(tariffInfoDto);
+            fillGetTariffInfoForEmployeeDtoCollections(emplView, tariffInfoDto);
+            getEmployeeDto.getTariffs().add(tariffInfoDto);
+        } else {
+            tariffInfoDto = extractTariffInfoForEmployeeDto(emplView, getEmployeeDto);
+            fillGetTariffInfoForEmployeeDtoCollections(emplView, tariffInfoDto);
+        }
+    }
+
+    private void fillGetTariffInfoForEmployeeDtoCollections(EmployeeFilterView emplView,
+        GetTariffInfoForEmployeeDto tariffInfoDto) {
+        if (isLocationIdAbsent(emplView.getLocationId(), tariffInfoDto)) {
+            tariffInfoDto.getLocationsDtos().add(modelMapper.map(emplView, LocationsDtos.class));
+        }
+        if (isReceivingStationIdAbsent(emplView.getReceivingStationId(), tariffInfoDto)) {
+            tariffInfoDto.getReceivingStationDtos().add(modelMapper.map(emplView, GetReceivingStationDto.class));
+        }
+    }
+
+    private boolean isMainInfoAboutCurrentTariffAbsent(Long tariffInfoId, GetEmployeeDto getEmployeeDto) {
+        return getEmployeeDto.getTariffs()
+            .stream()
+            .noneMatch(tariffInfoDto -> tariffInfoDto.getId().equals(tariffInfoId));
+    }
+
+    private static boolean isReceivingStationIdAbsent(Long receivingStationId,
+        GetTariffInfoForEmployeeDto tariffInfoDto) {
+        return tariffInfoDto.getReceivingStationDtos()
+            .stream()
+            .noneMatch(dto -> dto.getStationId().equals(receivingStationId));
+    }
+
+    private boolean isLocationIdAbsent(Long locationId, GetTariffInfoForEmployeeDto tariffInfoDto) {
+        return tariffInfoDto.getLocationsDtos()
+            .stream()
+            .noneMatch(locationDto -> locationDto.getLocationId().equals(locationId));
+    }
+
+    private GetTariffInfoForEmployeeDto extractTariffInfoForEmployeeDto(EmployeeFilterView emplView,
+        GetEmployeeDto getEmployeeDto) {
+        return getEmployeeDto.getTariffs()
+            .stream()
+            .filter(tariffInfoDto -> tariffInfoDto.getId().equals(emplView.getTariffsInfoId()))
+            .findAny()
+            .orElseThrow();
+    }
+
+    private void initializeTariffInfoDtoCollections(GetTariffInfoForEmployeeDto tariffInfoDto) {
+        if (tariffInfoDto.getLocationsDtos() == null || tariffInfoDto.getReceivingStationDtos() == null) {
+            tariffInfoDto.setLocationsDtos(new ArrayList<>());
+            tariffInfoDto.setReceivingStationDtos(new ArrayList<>());
+        }
+    }
+
+    private boolean isPositionIdAbsent(Long positionId, GetEmployeeDto getEmployeeDto) {
+        return getEmployeeDto.getEmployeePositions()
+            .stream()
+            .noneMatch(dto -> dto.getId().equals(positionId));
+    }
+
+    private void initializeGetEmployeeDtoCollectionsIfNeeded(GetEmployeeDto getEmployeeDto) {
+        if (getEmployeeDto.getEmployeePositions() == null || getEmployeeDto.getTariffs() == null) {
+            getEmployeeDto.setEmployeePositions(new ArrayList<>());
+            getEmployeeDto.setTariffs(new ArrayList<>());
+        }
     }
 
     /**

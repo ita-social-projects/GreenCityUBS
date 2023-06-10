@@ -1,9 +1,6 @@
 package greencity.repository;
 
-import greencity.enums.EmployeeStatus;
-import greencity.entity.user.employee.Employee;
-import greencity.entity.user.employee.Position;
-import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import org.springframework.data.domain.*;
@@ -13,11 +10,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.nonNull;
+import static greencity.enums.EmployeeStatus.*;
+import static java.util.Arrays.*;
 
 @Repository
 public class EmployeeCriteriaRepository {
@@ -35,146 +32,149 @@ public class EmployeeCriteriaRepository {
     /**
      * {@inheritDoc}
      */
-    public Page<Employee> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria) {
+    public List<EmployeeFilterView> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria) {
         return getAllEmployees(employeePage, employeeFilterCriteria);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Page<Employee> findAllActiveEmployees(EmployeePage employeePage,
+    private List<EmployeeFilterView> getAllEmployees(EmployeePage employeePage,
         EmployeeFilterCriteria employeeFilterCriteria) {
-        return getAllActiveEmployees(employeePage, employeeFilterCriteria);
+        CriteriaQuery<EmployeeFilterView> criteriaQuery = criteriaBuilder.createQuery(EmployeeFilterView.class);
+        Root<EmployeeFilterView> employeeRoot = criteriaQuery.from(EmployeeFilterView.class);
+
+        Predicate predicate = composePredicateForFiltering(employeeFilterCriteria, employeeRoot);
+
+        criteriaQuery.select(employeeRoot).where(predicate);
+
+        setOrderBy(employeePage, criteriaQuery, employeeRoot);
+
+        return processEmployees(employeePage, criteriaQuery);
     }
 
-    private Page<Employee> getAllEmployees(EmployeePage employeePage,
-        EmployeeFilterCriteria employeeFilterCriteria) {
-        CriteriaQuery<Employee> criteriaQuery = criteriaBuilder.createQuery(Employee.class);
-        Root<Employee> employeeRoot = criteriaQuery.from(Employee.class);
-        Predicate predicate = getAllPredicate(employeeFilterCriteria, employeeRoot, criteriaQuery);
-        criteriaQuery.where(predicate);
-        setOrder(employeePage, criteriaQuery, employeeRoot);
-        return processEmployees(employeePage, criteriaQuery, predicate);
-    }
-
-    private Page<Employee> getAllActiveEmployees(EmployeePage employeePage,
-        EmployeeFilterCriteria employeeFilterCriteria) {
-        CriteriaQuery<Employee> criteriaQuery = criteriaBuilder.createQuery(Employee.class);
-        Root<Employee> employeeRoot = criteriaQuery.from(Employee.class);
-        Predicate predicate = getAllActivePredicate(employeeFilterCriteria, employeeRoot, criteriaQuery);
-        criteriaQuery.where(predicate);
-        setOrder(employeePage, criteriaQuery, employeeRoot);
-        return processEmployees(employeePage, criteriaQuery, predicate);
-    }
-
-    private Page<Employee> processEmployees(EmployeePage employeePage, CriteriaQuery<Employee> criteriaQuery,
-        Predicate predicate) {
-        TypedQuery<Employee> employeeTypedQuery = entityManager.createQuery(criteriaQuery);
+    private List<EmployeeFilterView> processEmployees(EmployeePage employeePage,
+        CriteriaQuery<EmployeeFilterView> criteriaQuery) {
+        TypedQuery<EmployeeFilterView> employeeTypedQuery = entityManager.createQuery(criteriaQuery);
         employeeTypedQuery.setFirstResult(employeePage.getPageNumber() * employeePage.getPageSize());
         employeeTypedQuery.setMaxResults(employeePage.getPageSize());
-        Sort sort = Sort.by(employeePage.getSortDirection(), employeePage.getSortBy());
-        Pageable pageable = PageRequest.of(employeePage.getPageNumber(),
-            employeePage.getPageSize(), sort);
-        long employeesCount = getEmployeesCount(predicate);
-        List<Employee> resultEmployees = employeeTypedQuery.getResultList();
-        return new PageImpl<>(resultEmployees, pageable, employeesCount);
+        return employeeTypedQuery.getResultList();
     }
 
-    private long getEmployeesCount(Predicate predicate) {
-        CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-        Root<Employee> countOrderRoot = countQuery.from(Employee.class);
-        countQuery.select(criteriaBuilder.count(countOrderRoot)).where(predicate);
-        return entityManager.createQuery(countQuery).getSingleResult();
-    }
-
-    private void setOrder(EmployeePage employeePage, CriteriaQuery<Employee> criteriaQuery,
-        Root<Employee> employeeRoot) {
+    private void setOrderBy(EmployeePage employeePage, CriteriaQuery<EmployeeFilterView> criteriaQuery,
+        Root<EmployeeFilterView> employeeRoot) {
         String[] split = employeePage.getSortBy().split("\\.");
-        criteriaQuery.orderBy(Arrays.stream(split)
+        criteriaQuery.orderBy(stream(split)
             .map(x -> employeePage.getSortDirection().equals(Sort.Direction.ASC)
                 ? criteriaBuilder.asc(employeeRoot.get(x))
                 : criteriaBuilder.desc(employeeRoot.get(x)))
             .collect(Collectors.toList()));
     }
 
-    private Predicate getAllPredicate(EmployeeFilterCriteria employeeFilterCriteria, Root<Employee> employeeRoot,
-        CriteriaQuery<Employee> criteriaQuery) {
-        List<Predicate> predicates = getBasicPredicate(employeeFilterCriteria, employeeRoot, criteriaQuery);
-        return criteriaBuilder.and(predicates.toArray(predicates.toArray(new Predicate[0])));
+    private Predicate composePredicateForFiltering(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot) {
+        List<Predicate> predicates = collectAllPredicatesToList(employeeFilterCriteria, employeeFilterViewRoot);
+        return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
 
-    private Predicate getAllActivePredicate(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<Employee> employeeRoot, CriteriaQuery<Employee> criteriaQuery) {
-        List<Predicate> predicates = getBasicPredicate(employeeFilterCriteria, employeeRoot, criteriaQuery);
-        CriteriaBuilder.In<EmployeeStatus> employeeStatusIn =
-            criteriaBuilder.in(employeeRoot.get("employeeStatus"));
-        employeeStatusIn.value(EmployeeStatus.ACTIVE);
-        predicates.add(employeeStatusIn);
-        return criteriaBuilder.and(predicates.toArray(predicates.toArray(new Predicate[0])));
-    }
-
-    private List<Predicate> getBasicPredicate(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<Employee> employeeRoot, CriteriaQuery<Employee> criteriaQuery) {
+    private List<Predicate> collectAllPredicatesToList(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot) {
         List<Predicate> predicates = new ArrayList<>();
-        if (Boolean.TRUE.equals(nonNullAndSize(employeeFilterCriteria.getReceivingStations()))) {
-            filterByReceivingStation(employeeRoot, employeeFilterCriteria.getReceivingStations(),
-                predicates, criteriaQuery);
-        }
-        if (Boolean.TRUE.equals(nonNullAndSize(employeeFilterCriteria.getEmployeePositions()))) {
-            filterByEmployeePosition(employeeRoot, employeeFilterCriteria.getEmployeePositions(),
-                predicates, criteriaQuery);
-        }
-        if (nonNull(employeeFilterCriteria.getSearch())) {
-            searchEmployee(employeeFilterCriteria, employeeRoot, predicates);
-        }
+
+        addSearchLinePredicates(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        addEmployeeStatusPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        addEmployeePositionPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        addRegionPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        addLocationPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
+        addCourierPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
         return predicates;
     }
 
-    private void filterByEmployeePosition(Root<Employee> employeeRoot, String[] filters,
-        List<Predicate> predicates, CriteriaQuery<Employee> criteriaQuery) {
-        Subquery<Position> subQuery = criteriaQuery.subquery(Position.class);
-        Root<Employee> root = subQuery.correlate(employeeRoot);
-        SetJoin<Employee, Position> join = root.joinSet("employeePosition", JoinType.LEFT);
-        setFilterAndAddPredicate(join, filters, predicates, subQuery);
+    private void addCourierPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getCouriers())) {
+            predicates.add(employeeFilterViewRoot.get("courierId")
+                .in(employeeFilterCriteria.getCouriers()));
+        }
     }
 
-    private void filterByReceivingStation(Root<Employee> employeeRoot, String[] filters,
-        List<Predicate> predicates, CriteriaQuery<Employee> criteriaQuery) {
-        Subquery<ReceivingStation> subQuery = criteriaQuery.subquery(ReceivingStation.class);
-        Root<Employee> root = subQuery.correlate(employeeRoot);
-        SetJoin<Employee, ReceivingStation> join = root.joinSet("receivingStation", JoinType.LEFT);
-        setFilterAndAddPredicate(join, filters, predicates, subQuery);
+    private void addLocationPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getLocations())) {
+            predicates.add(employeeFilterViewRoot.get("locationId")
+                .in(employeeFilterCriteria.getLocations()));
+        }
     }
 
-    private <T> void setFilterAndAddPredicate(SetJoin<Employee, T> join, String[] filters, List<Predicate> predicates,
-        Subquery<T> subQuery) {
-        CriteriaBuilder.In<String> stringIn = criteriaBuilder.in(criteriaBuilder.upper(join.get("name")));
-        Arrays.stream(filters).map(String::toUpperCase).forEach(stringIn::value);
-        subQuery.select(join).where(stringIn);
-        predicates.add(criteriaBuilder.exists(subQuery));
+    private void addRegionPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getRegions())) {
+            predicates.add(employeeFilterViewRoot.get("regionId")
+                .in(employeeFilterCriteria.getRegions()));
+        }
     }
 
-    private void searchEmployee(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<Employee> employeeRoot, List<Predicate> predicates) {
-        String[] searchWords = employeeFilterCriteria.getSearch().split(" ");
-        Arrays.stream(searchWords).forEach(x -> predicates.add(fromEmployeeLikePredicate(x,
-            employeeRoot)));
+    private void addEmployeePositionPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (isListNotNullAndNotEmpty(employeeFilterCriteria.getPositions())) {
+            predicates.add(employeeFilterViewRoot.get("positionId")
+                .in(employeeFilterCriteria.getPositions()));
+        }
     }
 
-    private Predicate fromEmployeeLikePredicate(String s, Root<Employee> employeeRoot) {
-        Expression<String> firstName = criteriaBuilder.upper(employeeRoot.get("firstName"));
-        Expression<String> lastName = criteriaBuilder.upper(employeeRoot.get("lastName"));
-        Expression<String> phoneNumber = criteriaBuilder.upper(employeeRoot.get("phoneNumber"));
-        Expression<String> email = criteriaBuilder.upper(employeeRoot.get("email"));
-        String likeS = "%" + s.toUpperCase() + "%";
-        return criteriaBuilder.or(
-            criteriaBuilder.like(firstName, likeS),
-            criteriaBuilder.like(lastName, likeS),
-            criteriaBuilder.like(phoneNumber, likeS),
-            criteriaBuilder.like(email, likeS));
+    private void addEmployeeStatusPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (employeeStatusExist(employeeFilterCriteria.getEmployeeStatus())) {
+            predicates.add(criteriaBuilder.equal(
+                employeeFilterViewRoot.get("employeeStatus"),
+                employeeFilterCriteria.getEmployeeStatus()));
+        }
     }
 
-    private Boolean nonNullAndSize(String[] strings) {
-        return nonNull(strings) && strings.length > 0;
+    private void addSearchLinePredicates(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<EmployeeFilterView> employeeFilterViewRoot,
+        List<Predicate> predicates) {
+        if (isStringNotNullAndNotEmpty(employeeFilterCriteria.getSearchLine())) {
+            List<Expression<String>> toUpperCaseExpressions =
+                extractPossibleExpressionsForSearchLineFiltering(employeeFilterViewRoot);
+
+            predicates.addAll(
+                getAllSearchLinePredicates(employeeFilterCriteria.getSearchLine(), toUpperCaseExpressions));
+        }
+    }
+
+    private List<Predicate> getAllSearchLinePredicates(String searchLine,
+        List<Expression<String>> toUpperCaseExpressions) {
+        return stream(searchLine.split("\\s+"))
+            .map(searchArgument -> mapSearchArgumentToPredicate(searchArgument, toUpperCaseExpressions))
+            .collect(Collectors.toList());
+    }
+
+    private List<Expression<String>> extractPossibleExpressionsForSearchLineFiltering(
+        Root<EmployeeFilterView> employeeFilterViewRoot) {
+        List<Expression<String>> expressions = new ArrayList<>();
+        expressions.add(criteriaBuilder.upper(employeeFilterViewRoot.get("firstName")));
+        expressions.add(criteriaBuilder.upper(employeeFilterViewRoot.get("lastName")));
+        expressions.add(criteriaBuilder.upper(employeeFilterViewRoot.get("email")));
+        expressions.add(criteriaBuilder.upper(employeeFilterViewRoot.get("phoneNumber")));
+        return expressions;
+    }
+
+    private Predicate mapSearchArgumentToPredicate(String argument, List<Expression<String>> toUpperCaseExpressions) {
+        var pattern = "%" + argument + "%";
+        var searchLinePredicates = toUpperCaseExpressions.stream()
+            .map(stringExpression -> criteriaBuilder.like(stringExpression, pattern))
+            .toArray(Predicate[]::new);
+        return criteriaBuilder.or(searchLinePredicates);
+    }
+
+    private boolean isListNotNullAndNotEmpty(List<?> parameter) {
+        return parameter != null && !parameter.isEmpty();
+    }
+
+    private boolean isStringNotNullAndNotEmpty(String str) {
+        return str != null && str.length() > 0;
     }
 }

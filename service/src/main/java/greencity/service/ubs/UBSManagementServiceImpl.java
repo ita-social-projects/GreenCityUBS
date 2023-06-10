@@ -372,7 +372,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         UserInfoDto userInfoDto =
             ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
-            getInfoAboutStatusesAndDateFormed(Optional.of(order));
+            getInfoAboutStatusesAndDateFormed(order);
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(orderAddress);
         return OrderStatusPageDto.builder()
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
@@ -412,7 +412,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
-        return dto.getSumConfirmed() != 0 && dto.getSumExported() == 0;
+        return dto.getSumConfirmed() != 0;
     }
 
     private Boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
@@ -456,34 +456,32 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @author Yuriy Bahlay.
      */
-    private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Optional<Order> order) {
-        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
-        Optional<OrderStatusTranslation> orderStatusTranslation =
+    private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Order order) {
+        OrderStatus orderStatus = order.getOrderStatus();
+        OrderStatusTranslation orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
-        String currentOrderStatusTranslation =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
-        String currentOrderStatusTranslationEng =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
-                : orderStatus.name();
+        if (orderStatusTranslation == null) {
+            orderStatusTranslation = orderStatusTranslationRepository.getOne(1L);
+        }
+        String currentOrderStatusTranslation = orderStatusTranslation.getName();
+        String currentOrderStatusTranslationEng = orderStatusTranslation.getNameEng();
 
-        OrderPaymentStatus orderStatusPayment =
-            order.map(Order::getOrderPaymentStatus).orElse(OrderPaymentStatus.UNPAID);
-        Order currentOrder = order.orElseGet(Order::new);
+        OrderPaymentStatus orderStatusPayment = order.getOrderPaymentStatus();
         OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = orderPaymentStatusTranslationRepository
             .getById((long) orderStatusPayment.getStatusValue());
 
         return GeneralOrderInfo.builder()
-            .id(order.isPresent() ? order.get().getId() : 0)
-            .dateFormed(order.map(Order::getOrderDate).orElse(null))
+            .id(order.getId())
+            .dateFormed(order.getOrderDate())
             .orderStatusesDtos(getOrderStatusesTranslation())
             .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation())
-            .orderStatus(order.map(Order::getOrderStatus).orElse(null))
-            .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
+            .orderStatus(order.getOrderStatus())
+            .orderPaymentStatus(order.getOrderPaymentStatus())
             .orderPaymentStatusName(currentOrderStatusPaymentTranslation.getTranslationValue())
             .orderPaymentStatusNameEng(currentOrderStatusPaymentTranslation.getTranslationsValueEng())
             .orderStatusName(currentOrderStatusTranslation)
             .orderStatusNameEng(currentOrderStatusTranslationEng)
-            .adminComment(currentOrder.getAdminComment())
+            .adminComment(order.getAdminComment())
             .build();
     }
 
@@ -1425,7 +1423,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Payment payment = Payment.builder()
             .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
             .amount(paymentRequestDto.getAmount())
-            .paymentStatus(PaymentStatus.PAID)
+            .paymentStatus(verifyPaymentStatusOrder(order))
             .paymentId(paymentRequestDto.getPaymentId())
             .receiptLink(paymentRequestDto.getReceiptLink())
             .currency("UAH")
@@ -1440,8 +1438,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), order);
-        eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+        if (order.getOrderPaymentStatus() != null) {
+            if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAID) {
+                eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            } else {
+                eventService.save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
+            }
+        }
         return payment;
+    }
+
+    private PaymentStatus verifyPaymentStatusOrder(Order order) {
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAID) {
+            return PaymentStatus.PAID;
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.HALF_PAID) {
+            return PaymentStatus.HALF_PAID;
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
+            return PaymentStatus.UNPAID;
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAYMENT_REFUNDED) {
+            return PaymentStatus.PAYMENT_REFUNDED;
+        }
+        return PaymentStatus.UNPAID;
     }
 
     @Override

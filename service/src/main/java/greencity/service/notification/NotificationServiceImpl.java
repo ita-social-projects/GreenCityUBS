@@ -83,8 +83,8 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyUnpaidOrders() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
-                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    order.getId().toString());
+                .findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(order.getId(),
+                    NotificationType.UNPAID_ORDER);
             if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
@@ -267,9 +267,11 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyAllHalfPaidPackages() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.HALF_PAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
-                .findLastNotificationByNotificationTypeAndOrderNumber(
-                    NotificationType.UNPAID_PACKAGE.toString(),
-                    order.getId().toString());
+                .findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(
+                    order.getId(),
+                    NotificationType.UNPAID_PACKAGE,
+                    NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF,
+                    NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
             if (checkIfHalfPaidPackageNeedsNotification(order, lastNotification)) {
                 notifyHalfPaidPackage(order);
             }

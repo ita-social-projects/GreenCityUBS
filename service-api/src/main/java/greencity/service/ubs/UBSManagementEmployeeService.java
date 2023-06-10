@@ -31,12 +31,6 @@ public interface UBSManagementEmployeeService {
     Page<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
 
     /**
-     * {@inheritDoc}
-     */
-    Page<GetEmployeeDto> findAllActiveEmployees(EmployeePage employeePage,
-        EmployeeFilterCriteria employeeFilterCriteria);
-
-    /**
      * Method updates information about employee.
      *
      * @param dto   {@link EmployeeWithTariffsIdDto}
