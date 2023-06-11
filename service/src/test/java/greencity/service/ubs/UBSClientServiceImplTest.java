@@ -206,6 +206,8 @@ class UBSClientServiceImplTest {
     private TelegramBotRepository telegramBotRepository;
     @Mock
     private ViberBotRepository viberBotRepository;
+    @Mock
+    private UBSManagementService ubsManagementService;
 
     @Test
     @Transactional
@@ -2188,6 +2190,24 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void getOrderPaymentDetailIfCertificateAndPointsAbsent() {
+        Order order = getOrder();
+        order.setPayment(List.of(getPayment()));
+        order.setPointsToUse(0);
+        OrderPaymentDetailDto expected = getOrderPaymentDetailDto();
+        expected.setPointsToUse(0);
+        expected.setCertificates(0);
+        expected.setAmountToPay(95000L);
+        expected.setAmount(95000L);
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        OrderPaymentDetailDto actual = ubsService.getOrderPaymentDetail(1L);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void getOrderPaymentDetailIfPaymentIsEmpty() {
         Order order = getOrder();
         order.setPayment(List.of());
@@ -2363,6 +2383,156 @@ class UBSClientServiceImplTest {
         verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
         verify(fondyClient).getCheckoutResponse(any());
 
+    }
+
+    @Test
+    void processOrderFondyClient2() throws Exception {
+        Order order = getOrderCount();
+        Certificate certificate = getCertificate();
+        certificate.setPoints(1500);
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        order.setSumTotalAmountWithoutDiscounts(1000_00L);
+        order.setCertificates(Set.of(certificate));
+        order.setPayment(TEST_PAYMENT_LIST);
+        User user = getUser();
+        user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
+        order.setUser(user);
+
+        OrderFondyClientDto dto = getOrderFondyClientDto();
+        dto.setCertificates(Set.of("1111-1234"));
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        CertificateDto certificateDto = createCertificateDto();
+        certificateDto.setPoints(1500);
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
+        when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
+        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
+        when(modelMapper.map(any(Bag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
+
+        ubsService.processOrderFondyClient(dto, "uuid");
+
+        verify(orderRepository).findById(1L);
+        verify(userRepository).findUserByUuid("uuid");
+        verify(certificateRepository).findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE);
+        verify(bagRepository).findBagsByOrderId(order.getId());
+        verify(modelMapper).map(certificate, CertificateDto.class);
+        verify(modelMapper).map(any(Bag.class), eq(BagForUserDto.class));
+    }
+
+    @Test
+    void processOrderFondyClientCertificeteNotFoundExeption() throws Exception {
+        Order order = getOrderCount();
+        Certificate certificate = getCertificate();
+        certificate.setPoints(1500);
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        order.setSumTotalAmountWithoutDiscounts(1000_00L);
+        order.setCertificates(Set.of(certificate));
+        order.setPayment(TEST_PAYMENT_LIST);
+        User user = getUser();
+        user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
+        order.setUser(user);
+
+        OrderFondyClientDto dto = getOrderFondyClientDto();
+        dto.setCertificates(Set.of("1111-1234"));
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        CertificateDto certificateDto = createCertificateDto();
+        certificateDto.setPoints(1500);
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
+        when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE)).thenReturn(Collections.emptySet());
+        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
+        when(modelMapper.map(any(Bag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
+
+        assertThrows(NotFoundException.class, () -> ubsService.processOrderFondyClient(dto, "uuid"));
+
+        verify(orderRepository).findById(1L);
+        verify(userRepository).findUserByUuid("uuid");
+        verify(certificateRepository).findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE);
+        verify(bagRepository).findBagsByOrderId(order.getId());
+        verify(modelMapper).map(certificate, CertificateDto.class);
+        verify(modelMapper).map(any(Bag.class), eq(BagForUserDto.class));
+    }
+
+    @Test
+    void processOrderFondyClientCertificeteNotFoundExeption2() throws Exception {
+        Order order = getOrderCount();
+        Certificate certificate = getCertificate();
+        certificate.setPoints(1500);
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        order.setSumTotalAmountWithoutDiscounts(1000_00L);
+        order.setCertificates(Set.of(certificate));
+        order.setPayment(TEST_PAYMENT_LIST);
+        User user = getUser();
+        user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
+        order.setUser(user);
+
+        OrderFondyClientDto dto = getOrderFondyClientDto();
+        dto.setCertificates(Set.of("1111-1234", "2222-1234"));
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        CertificateDto certificateDto = createCertificateDto();
+        certificateDto.setPoints(1500);
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
+        when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
+        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
+        when(modelMapper.map(any(Bag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
+
+        assertThrows(NotFoundException.class, () -> ubsService.processOrderFondyClient(dto, "uuid"));
+
+        verify(orderRepository).findById(1L);
+        verify(userRepository).findUserByUuid("uuid");
+        verify(certificateRepository).findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE);
+        verify(bagRepository).findBagsByOrderId(order.getId());
+        verify(modelMapper).map(certificate, CertificateDto.class);
+        verify(modelMapper).map(any(Bag.class), eq(BagForUserDto.class));
     }
 
     @Test

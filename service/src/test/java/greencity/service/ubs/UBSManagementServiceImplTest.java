@@ -1461,6 +1461,46 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void updateOrderAdminPageInfoWithUbsCourierSumAndWriteOffStationSum() {
+        OrderDetailStatusRequestDto orderDetailStatusRequestDto = ModelUtils.getTestOrderDetailStatusRequestDto();
+        Order order = ModelUtils.getOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        Employee employee = ModelUtils.getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(paymentRepository.findAllByOrderId(1L))
+            .thenReturn(List.of(ModelUtils.getPayment()));
+        lenient().when(ubsManagementServiceMock.updateOrderDetailStatus(1L, orderDetailStatusRequestDto, "abc"))
+            .thenReturn(ModelUtils.getTestOrderDetailStatusDto());
+        when(ubsClientService.updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(),
+            "test@gmail.com")).thenReturn(ModelUtils.getUbsCustomersDto());
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
+        updateOrderPageAdminDto.setUbsCourierSum(50.);
+        updateOrderPageAdminDto.setWriteOffStationSum(100.);
+        when(orderAddressRepository.findById(1L))
+            .thenReturn(Optional.of(ModelUtils.getOrderAddress()));
+        when(receivingStationRepository.findAll())
+            .thenReturn(List.of(ModelUtils.getReceivingStation()));
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.getOrderDetails(anyLong()))
+            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
+        UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
+        ubsManagementService.updateOrderAdminPageInfo(emptyDto, 1L, "en", "test@gmail.com");
+
+        verify(ubsClientService, times(1))
+            .updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "test@gmail.com");
+        verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
     void updateOrderAdminPageInfoWithStatusFormedTest() {
         Order order = ModelUtils.getOrder();
         TariffsInfo tariffsInfo = getTariffsInfo();
@@ -1629,6 +1669,22 @@ class UBSManagementServiceImplTest {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getFormedOrder();
         order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+
+        doNothing().when(notificationService).notifyPaidOrder(order);
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
+        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
+    }
+
+    @Test
+    void getOrderSumDetailsForFormedOrderWithUbsCourierSumAndWriteOffStationSum() {
+        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
+        Order order = ModelUtils.getFormedOrder();
+        order.setOrderDate(LocalDateTime.now());
+        order.setUbsCourierSum(50_00L);
+        order.setWriteOffStationSum(100_00L);
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 
         doNothing().when(notificationService).notifyPaidOrder(order);
