@@ -177,7 +177,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Long convertBillsIntoCoins(Double bills) {
-        return bills == null ? null
+        return bills == null
+            ? 0
             : BigDecimal.valueOf(bills)
                 .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
                 .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)

@@ -203,7 +203,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Long convertBillsIntoCoins(Double bills) {
-        return bills == null ? null
+        return bills == null ? 0
             : BigDecimal.valueOf(bills)
                 .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
                 .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
@@ -211,7 +211,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Double convertCoinsIntoBills(Long coins) {
-        return coins == null ? null
+        return coins == null ? 0
             : BigDecimal.valueOf(coins)
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
                 .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
