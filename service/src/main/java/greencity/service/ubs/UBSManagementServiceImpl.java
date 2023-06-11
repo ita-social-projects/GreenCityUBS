@@ -251,7 +251,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         dto.getPaymentInfoDtos().add(payDto);
         long previousOverpaymentAmount = convertBillsIntoCoins(dto.getOverpayment());
-        dto.setOverpayment(convertCoinsIntoBills(previousOverpaymentAmount - overpaymentInCoins));
+        dto.setOverpayment(
+            convertCoinsIntoBills(previousOverpaymentAmount) - convertCoinsIntoBills(overpaymentInCoins));
         return dto;
     }
 
