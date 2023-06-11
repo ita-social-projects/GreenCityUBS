@@ -50,9 +50,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,8 +73,10 @@ class OrderControllerTest {
 
     @Mock
     OrderRepository orderRepository;
+
     @Mock
     NotificationService notificationService;
+
     @InjectMocks
     OrderController orderController;
 
@@ -291,17 +291,23 @@ class OrderControllerTest {
     @Test
     @SneakyThrows
     void getInfoAboutTariffTest() {
-        mockMvc.perform(get(ubsLink + "/tariffinfo-for-location/{locationId}", 1L))
+        mockMvc.perform(get(ubsLink + "/tariffinfo/{locationId}", 1L)
+            .param("courierId", "1"))
             .andExpect(status().isOk());
     }
 
     @Test
     @SneakyThrows
-    void getAllActiveLocations() {
-        mockMvc.perform(get(ubsLink + "/allLocations")
+    void getAllActiveLocationsByCourierIdTest() {
+        mockMvc.perform(get(ubsLink + "/locations/{courierId}", 1L)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void getAllActiveCouriersTest() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getAllActiveCouriers")).andExpect(status().isOk());
     }
 
     @Test
