@@ -319,6 +319,28 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void editTariffServiceIfCommissionIsNull() {
+        Bag bag = ModelUtils.getBag();
+        Employee employee = ModelUtils.getEmployee();
+        TariffServiceDto dto = ModelUtils.getTariffServiceDto();
+        dto.setCommission(null);
+        GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
+        String uuid = UUID.randomUUID().toString();
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        when(bagRepository.save(bag)).thenReturn(bag);
+        when(modelMapper.map(bag, GetTariffServiceDto.class)).thenReturn(editedDto);
+
+        superAdminService.editTariffService(dto, 1, uuid);
+
+        verify(employeeRepository).findByUuid(uuid);
+        verify(bagRepository).findById(1);
+        verify(bagRepository).save(bag);
+        verify(modelMapper).map(bag, GetTariffServiceDto.class);
+    }
+
+    @Test
     void editTariffServiceIfEmployeeNotFoundException() {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         Optional<Bag> bag = ModelUtils.getOptionalBag();

@@ -33,12 +33,6 @@ import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.PaymentInfoDto;
-import greencity.dto.user.AddBonusesToUserDto;
-import greencity.dto.user.AddingPointsToUserDto;
-import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
@@ -557,6 +551,27 @@ class UBSManagementServiceImplTest {
         assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 800.).getOverpayment());
         assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getPaidAmount());
         assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getUnPaidAmount());
+        verify(orderRepository, times(3)).findById(order.getId());
+    }
+
+    @Test
+    void checkGetPaymentInfoIfOrderStatusIsCanceled() {
+        Order order = ModelUtils.getOrder();
+        order.setOrderStatus(OrderStatus.CANCELED);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 800.).getOverpayment());
+        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getPaidAmount());
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getUnPaidAmount());
+        verify(orderRepository, times(3)).findById(order.getId());
+    }
+
+    @Test
+    void checkGetPaymentInfoIfSumToPayIsNull() {
+        Order order = ModelUtils.getOrder();
+        order.setOrderStatus(OrderStatus.DONE);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertEquals(900L, ubsManagementService.getPaymentInfo(order.getId(), null).getOverpayment());
+        verify(orderRepository).findById(order.getId());
     }
 
     @Test
@@ -2359,6 +2374,26 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).save(order);
         verify(userRepository).save(user);
         verify(notificationService).notifyBonuses(order, 809L);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
+    }
+
+    @Test
+    void addBonusesToUserIfOrderStatusIsCanceled() {
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.CANCELED);
+        User user = order.getUser();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findBagsByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+
+        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L, employee.getEmail());
+
+        verify(orderRepository).findById(1L);
+        verify(orderRepository).save(order);
+        verify(userRepository).save(user);
+        verify(notificationService).notifyBonuses(order, 200L);
         verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
     }
 

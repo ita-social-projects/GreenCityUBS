@@ -191,7 +191,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Long getFullPrice(Double price, Double commission) {
-        return convertBillsIntoCoins(price + commission);
+        return convertBillsIntoCoins(price) + convertBillsIntoCoins(commission);
     }
 
     @Override

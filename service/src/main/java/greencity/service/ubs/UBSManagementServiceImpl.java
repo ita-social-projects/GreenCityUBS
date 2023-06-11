@@ -1776,10 +1776,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void transferPointsToUser(Order order, User user, long pointsInCoins) {
-        if (pointsInCoins <= 0) {
-            return;
-        }
-
         int uahPoints = convertCoinsIntoBills(pointsInCoins).intValue();
 
         user.setCurrentPoints(user.getCurrentPoints() + uahPoints);

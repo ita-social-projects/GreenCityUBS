@@ -38,8 +38,10 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
     private UserOrdersDto getAllOrders(Order order) {
         return UserOrdersDto.builder()
             .id(order.getId())
-            .amount(BigDecimal.valueOf(order.getSumTotalAmountWithoutDiscounts())
-                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
+            .amount(order.getSumTotalAmountWithoutDiscounts() == null
+                ? null
+                : BigDecimal.valueOf(order.getSumTotalAmountWithoutDiscounts())
+                    .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
             .orderDate(order.getOrderDate())
             .orderStatus(order.getOrderStatus())
             .orderPaymentStatus(order.getOrderPaymentStatus())
