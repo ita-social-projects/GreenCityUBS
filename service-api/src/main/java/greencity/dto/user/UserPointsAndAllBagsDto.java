@@ -13,5 +13,5 @@ import java.util.List;
 @ToString
 public class UserPointsAndAllBagsDto implements Serializable {
     private List<BagTranslationDto> bags;
-    private int points;
+    private long points;
 }

@@ -27,7 +27,7 @@ public interface UBSManagementService {
      * @return {@link PaymentTableInfoDto};
      * @author Struk Nazar
      */
-    PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay);
+    PaymentTableInfoDto getPaymentInfo(long orderId, Double sumToPay);
 
     /**
      * Method returns overpayment to user.
@@ -35,7 +35,7 @@ public interface UBSManagementService {
      * @return {@link PaymentTableInfoDto};
      * @author Ostap Mykhailivskyi
      */
-    PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker);
+    PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Double sumToPay, Long marker);
 
     /**
      * Method returns all certificates.

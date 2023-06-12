@@ -154,7 +154,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_PRICE_CARD', authentication)")
     @PutMapping("/editTariffService/{id}")
     public ResponseEntity<GetTariffServiceDto> editTariffService(
-        @RequestBody TariffServiceDto dto,
+        @Valid @RequestBody TariffServiceDto dto,
         @Valid @PathVariable Integer id,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editTariffService(dto, id, uuid));

@@ -20,6 +20,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import java.time.LocalDate;
 
 @Entity
@@ -36,22 +39,29 @@ public class Bag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Min(1)
+    @Max(999)
     @Column(nullable = false)
     private Integer capacity;
 
+    @Min(1)
+    @Max(99_999_999)
     @Column(nullable = false)
-    private Integer price;
+    private Long price;
 
+    @Min(0)
+    @Max(99_999_999)
     @Column(nullable = false)
-    private Integer commission;
+    private Long commission;
 
+    @Min(1)
     @Column(nullable = false)
-    private Integer fullPrice;
+    private Long fullPrice;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String nameEng;
 
     @Column(nullable = false)

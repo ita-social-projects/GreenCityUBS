@@ -20,6 +20,6 @@ public class UpdateOrderPageAdminDto {
     private ExportDetailsDtoUpdate exportDetailsDto;
     private UpdateOrderDetailDto orderDetailDto;
     private List<UpdateResponsibleEmployeeDto> updateResponsibleEmployeeDto;
-    private Long writeOffStationSum;
-    private Long ubsCourierSum;
+    private Double writeOffStationSum;
+    private Double ubsCourierSum;
 }

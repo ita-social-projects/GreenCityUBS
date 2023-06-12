@@ -21,5 +21,5 @@ public class UserOrdersDto {
     private LocalDateTime orderDate;
     private OrderStatus orderStatus;
     private OrderPaymentStatus orderPaymentStatus;
-    private Long amount;
+    private Double amount;
 }

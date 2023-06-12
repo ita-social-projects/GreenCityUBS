@@ -93,7 +93,7 @@ class OrdersAdminsPageServiceImplTest {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
-            .thenReturn(orderStatusTranslation);
+            .thenReturn(Optional.ofNullable(orderStatusTranslation));
         assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
@@ -104,10 +104,10 @@ class OrdersAdminsPageServiceImplTest {
         OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation();
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
-            .thenReturn(orderStatusTranslation);
+            .thenReturn(Optional.ofNullable(orderStatusTranslation));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
-            .thenReturn(orderStatusTranslation2);
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
         assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
@@ -122,10 +122,37 @@ class OrdersAdminsPageServiceImplTest {
         employeeList.add(ModelUtils.getEmployee());
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
-            .thenReturn(orderStatusTranslation);
+            .thenReturn(Optional.ofNullable(orderStatusTranslation));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
-            .thenReturn(orderStatusTranslation2);
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(2L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(2L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(3L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(3L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(4L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(4L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(5L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(5L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(6L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(7L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(7L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8L)));
 
         assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
@@ -143,37 +170,37 @@ class OrdersAdminsPageServiceImplTest {
         List<Address> addressList = List.of(ModelUtils.getAddress());
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
-            .thenReturn(orderStatusTranslation);
+            .thenReturn(Optional.ofNullable(orderStatusTranslation));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
-            .thenReturn(orderStatusTranslation2);
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
-            .thenReturn(orderStatusTranslation.setStatusId(2L));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(2L)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
-            .thenReturn(orderStatusTranslation2.setStatusId(2L));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(2L)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
-            .thenReturn(orderStatusTranslation.setStatusId(3L));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(3L)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
-            .thenReturn(orderStatusTranslation2.setStatusId(3L));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(3L)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(4L))
-            .thenReturn(orderStatusTranslation.setStatusId(4L));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(4L)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(5L))
-            .thenReturn(orderStatusTranslation2.setStatusId(5L));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(5L)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(orderStatusTranslation.setStatusId(6L));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(6L)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(7L))
-            .thenReturn(orderStatusTranslation2.setStatusId(7L));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(7L)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
-            .thenReturn(orderStatusTranslation.setStatusId(8L));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8L)));
 
         when(orderPaymentStatusTranslationRepository.getOrderPaymentStatusTranslationById(anyLong()))
             .thenReturn(Optional.ofNullable(orderPaymentStatusTranslation));
@@ -192,8 +219,6 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(addressList);
         when(addressRepository.findDistinctCities())
             .thenReturn(addressList);
-
-        assertEquals(orderStatusTranslation, orderStatusTranslationRepository.getOrderStatusTranslationById(8L));
 
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }

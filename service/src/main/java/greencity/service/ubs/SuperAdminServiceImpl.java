@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -63,6 +64,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -119,28 +122,18 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Bag createBag(long tariffId, TariffServiceDto dto, String employeeUuid) {
-        TariffsInfo tariffsInfo = getTariffById(tariffId);
-        Employee employee = getEmployeeByUuid(employeeUuid);
-        return Bag.builder()
-            .price(dto.getPrice())
-            .capacity(dto.getCapacity())
-            .commission(dto.getCommission())
-            .fullPrice(getFullPrice(dto.getPrice(), dto.getCommission()))
-            .limitIncluded(false)
-            .name(dto.getName())
-            .nameEng(dto.getNameEng())
-            .description(dto.getDescription())
-            .descriptionEng(dto.getDescriptionEng())
-            .tariffsInfo(tariffsInfo)
-            .createdAt(LocalDate.now())
-            .createdBy(employee)
-            .build();
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+        Employee employee = tryToFindEmployeeByUuid(employeeUuid);
+        Bag bag = modelMapper.map(dto, Bag.class);
+        bag.setTariffsInfo(tariffsInfo);
+        bag.setCreatedBy(employee);
+        return bag;
     }
 
     @Override
     public List<GetTariffServiceDto> getTariffService(long tariffId) {
         if (tariffsInfoRepository.existsById(tariffId)) {
-            return bagRepository.getAllByTariffsInfoId(tariffId)
+            return bagRepository.findBagsByTariffsInfoId(tariffId)
                 .stream()
                 .map(it -> modelMapper.map(it, GetTariffServiceDto.class))
                 .collect(Collectors.toList());
@@ -169,10 +162,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer id, String employeeUuid) {
         Bag bag = tryToFindBagById(id);
-        Employee employee = getEmployeeByUuid(employeeUuid);
+        Employee employee = tryToFindEmployeeByUuid(employeeUuid);
         bag.setCapacity(dto.getCapacity());
-        bag.setPrice(dto.getPrice());
-        bag.setCommission(dto.getCommission());
+        bag.setPrice(convertBillsIntoCoins(dto.getPrice()));
+        bag.setCommission(convertBillsIntoCoins(dto.getCommission()));
         bag.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
         bag.setName(dto.getName());
         bag.setNameEng(dto.getNameEng());
@@ -183,9 +176,22 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
     }
 
+    private Long convertBillsIntoCoins(Double bills) {
+        return bills == null
+            ? 0
+            : BigDecimal.valueOf(bills)
+                .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+                .longValue();
+    }
+
     private Bag tryToFindBagById(Integer id) {
         return bagRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
+    }
+
+    private Long getFullPrice(Double price, Double commission) {
+        return convertBillsIntoCoins(price) + convertBillsIntoCoins(commission);
     }
 
     @Override
@@ -195,19 +201,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Service createService(Long tariffId, ServiceDto dto, String employeeUuid) {
-        if (getServiceByTariffsInfoId(tariffId).isEmpty()) {
-            Employee employee = getEmployeeByUuid(employeeUuid);
-            TariffsInfo tariffsInfo = getTariffById(tariffId);
-            return Service.builder()
-                .price(dto.getPrice())
-                .createdAt(LocalDate.now())
-                .createdBy(employee)
-                .name(dto.getName())
-                .nameEng(dto.getNameEng())
-                .description(dto.getDescription())
-                .descriptionEng(dto.getDescriptionEng())
-                .tariffsInfo(tariffsInfo)
-                .build();
+        if (tryToFindServiceByTariffsInfoId(tariffId).isEmpty()) {
+            Employee employee = tryToFindEmployeeByUuid(employeeUuid);
+            TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+            Service service = modelMapper.map(dto, Service.class);
+            service.setCreatedBy(employee);
+            service.setCreatedAt(LocalDate.now());
+            service.setTariffsInfo(tariffsInfo);
+            return service;
         } else {
             throw new ServiceAlreadyExistsException(ErrorMessage.SERVICE_ALREADY_EXISTS + tariffId);
         }
@@ -215,37 +216,36 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetServiceDto getService(long tariffId) {
-        return getServiceByTariffsInfoId(tariffId)
+        return tryToFindServiceByTariffsInfoId(tariffId)
             .map(it -> modelMapper.map(it, GetServiceDto.class))
             .orElse(null);
     }
 
     @Override
     public void deleteService(long id) {
-        serviceRepository.delete(getServiceById(id));
+        serviceRepository.delete(tryToFindServiceById(id));
     }
 
     @Override
     public GetServiceDto editService(Long id, ServiceDto dto, String employeeUuid) {
-        Service service = getServiceById(id);
-        Employee employee = getEmployeeByUuid(employeeUuid);
-        service.setPrice(dto.getPrice());
+        Service service = tryToFindServiceById(id);
+        Employee employee = tryToFindEmployeeByUuid(employeeUuid);
+        service.setPrice(convertBillsIntoCoins(dto.getPrice()));
         service.setName(dto.getName());
         service.setNameEng(dto.getNameEng());
         service.setDescription(dto.getDescription());
         service.setDescriptionEng(dto.getDescriptionEng());
         service.setEditedAt(LocalDate.now());
         service.setEditedBy(employee);
-        serviceRepository.save(service);
-        return modelMapper.map(service, GetServiceDto.class);
+        return modelMapper.map(serviceRepository.save(service), GetServiceDto.class);
     }
 
-    private Employee getEmployeeByUuid(String employeeUuid) {
+    private Employee tryToFindEmployeeByUuid(String employeeUuid) {
         return employeeRepository.findByUuid(employeeUuid)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employeeUuid));
     }
 
-    private Optional<Service> getServiceByTariffsInfoId(long tariffId) {
+    private Optional<Service> tryToFindServiceByTariffsInfoId(long tariffId) {
         if (tariffsInfoRepository.existsById(tariffId)) {
             return serviceRepository.findServiceByTariffsInfoId(tariffId);
         } else {
@@ -253,12 +253,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
     }
 
-    private Service getServiceById(long id) {
+    private Service tryToFindServiceById(long id) {
         return serviceRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
     }
 
-    private TariffsInfo getTariffById(long id) {
+    private TariffsInfo tryToFindTariffById(long id) {
         return tariffsInfoRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + id));
     }
@@ -413,10 +413,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return modelMapper.map(courier, CourierDto.class);
     }
 
-    private Integer getFullPrice(Integer price, Integer commission) {
-        return price + commission;
-    }
-
     @Override
     public List<GetTariffsInfoDto> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
         List<TariffsInfo> tariffs = tariffsInfoRepository.findAll(new TariffsInfoSpecification(filterCriteria));
@@ -428,17 +424,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
-        String enName = dto.getRegionTranslationDtos().stream().filter(x -> x.getLanguageCode().equals("en")).findAny()
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
-            .getRegionName();
-        String uaName = dto.getRegionTranslationDtos().stream().filter(x -> x.getLanguageCode().equals("ua")).findAny()
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
-            .getRegionName();
-
+        String enName = getRegionTranslation(dto, "en");
+        String uaName = getRegionTranslation(dto, "ua");
         return Region.builder()
             .enName(enName)
             .ukrName(uaName)
             .build();
+    }
+
+    private String getRegionTranslation(LocationCreateDto dto, String languageCode) {
+        return dto.getRegionTranslationDtos().stream()
+            .filter(x -> x.getLanguageCode().equals(languageCode))
+            .findAny()
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
+            .getRegionName();
     }
 
     private Location tryToFindLocationById(Long id) {
@@ -518,11 +517,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             throw new NotFoundException("List of receiving stations can not be empty");
         }
         return receivingStations;
-    }
-
-    private TariffsInfo tryToFindTariffById(Long tariffId) {
-        return tariffsInfoRepository.findById(tariffId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
     }
 
     @Override
