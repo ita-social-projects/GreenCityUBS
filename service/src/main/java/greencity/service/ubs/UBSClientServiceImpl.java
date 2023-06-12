@@ -799,10 +799,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Payment> payments = order.getPayment();
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
         OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
-            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
-        if (orderStatusTranslation == null) {
-            orderStatusTranslation = orderStatusTranslationRepository.getOne(1L);
-        }
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue())
+            .orElse(orderStatusTranslationRepository.getOne(1L));
         OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
             .getById(
                 (long) order.getOrderPaymentStatus().getStatusValue());

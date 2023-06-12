@@ -369,7 +369,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         UserInfoDto userInfoDto =
             ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
-            getInfoAboutStatusesAndDateFormed(order);
+            getInfoAboutStatusesAndDateFormed(Optional.of(order));
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(orderAddress);
         return OrderStatusPageDto.builder()
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
@@ -451,32 +451,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @author Yuriy Bahlay.
      */
-    private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Order order) {
-        OrderStatus orderStatus = order != null ? order.getOrderStatus() : OrderStatus.CANCELED;
-        OrderStatusTranslation orderStatusTranslation =
+    private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Optional<Order> order) {
+        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
+        Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
-
-        if (orderStatusTranslation == null) {
-            orderStatusTranslation = orderStatusTranslationRepository.getOne(1L);
-        }
-
-        String currentOrderStatusTranslation = orderStatusTranslation.getName();
-        String currentOrderStatusTranslationEng = orderStatusTranslation.getNameEng();
+        String currentOrderStatusTranslation =
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
+        String currentOrderStatusTranslationEng =
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
+                : orderStatus.name();
 
         OrderPaymentStatus orderStatusPayment =
-            order != null ? order.getOrderPaymentStatus() : OrderPaymentStatus.UNPAID;
+            order.map(Order::getOrderPaymentStatus).orElse(OrderPaymentStatus.UNPAID);
+        Order currentOrder = order.orElseGet(Order::new);
 
-        Order currentOrder = order != null ? order : new Order();
-        OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation =
-            orderPaymentStatusTranslationRepository.getById((long) orderStatusPayment.getStatusValue());
+        OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = orderPaymentStatusTranslationRepository
+            .getById((long) orderStatusPayment.getStatusValue());
 
         return GeneralOrderInfo.builder()
-            .id(order.getId())
-            .dateFormed(order.getOrderDate())
+            .id(order.isPresent() ? order.get().getId() : 0)
+            .dateFormed(order.map(Order::getOrderDate).orElse(null))
             .orderStatusesDtos(getOrderStatusesTranslation())
             .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation())
-            .orderStatus(order.getOrderStatus())
-            .orderPaymentStatus(order.getOrderPaymentStatus())
+            .orderStatus(order.map(Order::getOrderStatus).orElse(null))
+            .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
             .orderPaymentStatusName(currentOrderStatusPaymentTranslation.getTranslationValue())
             .orderPaymentStatusNameEng(currentOrderStatusPaymentTranslation.getTranslationsValueEng())
             .orderStatusName(currentOrderStatusTranslation)

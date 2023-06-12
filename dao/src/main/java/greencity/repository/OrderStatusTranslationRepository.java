@@ -3,7 +3,6 @@ package greencity.repository;
 import greencity.entity.order.OrderStatusTranslation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +19,7 @@ public interface OrderStatusTranslationRepository extends JpaRepository<OrderSta
      * @return {@link OrderStatusTranslation}.
      * @author Oleksandr Khomiakov.
      */
-    OrderStatusTranslation getOrderStatusTranslationById(Long id);
+    Optional<OrderStatusTranslation> getOrderStatusTranslationById(Long id);
 
     /**
      * This method which is list statuses.
