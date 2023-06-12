@@ -19,7 +19,7 @@ public interface OrderStatusTranslationRepository extends JpaRepository<OrderSta
      * @author Oleksandr Khomiakov.
      */
     default OrderStatusTranslation getOrderStatusTranslationById(Long id) {
-        return null;
+        return findById(id).orElse(null);
     }
 
     /**
