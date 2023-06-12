@@ -21,7 +21,7 @@ class CertificateDtoForAddingMapperTest {
     void convert() {
         CertificateDtoForAdding certificateDtoForAdding = ModelUtils.getCertificateDtoForAdding();
 
-        assertEquals(certificateDtoForAdding.getPoints(),
+        assertEquals(certificateDtoForAdding.getPoints() * 100,
             certificateDtoForAddingMapper.convert(certificateDtoForAdding).getPoints());
         assertEquals(certificateDtoForAdding.getCode(),
             certificateDtoForAddingMapper.convert(certificateDtoForAdding).getCode());

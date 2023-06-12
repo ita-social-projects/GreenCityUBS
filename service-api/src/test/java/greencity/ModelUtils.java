@@ -101,7 +101,7 @@ public class ModelUtils {
             .merchantId(2)
             .orderDescription("")
             .currency("USD")
-            .amount(2)
+            .amount(2L)
             .signature("")
             .responseUrl("responseUrl")
             .build();

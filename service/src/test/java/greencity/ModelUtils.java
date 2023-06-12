@@ -34,12 +34,12 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
-import greencity.dto.employee.EmployeeWithTariffsIdDto;
+import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.employee.EmployeeWithTariffsDto;
-import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -58,35 +58,7 @@ import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.BigOrderTableDTO;
-import greencity.dto.order.CounterOrderDetailsDto;
-import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.ExportDetailsDto;
-import greencity.dto.order.ExportDetailsDtoUpdate;
-import greencity.dto.order.GroupedOrderDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderDetailInfoDto;
-import greencity.dto.order.OrderDetailStatusDto;
-import greencity.dto.order.OrderDetailStatusRequestDto;
-import greencity.dto.order.OrderDto;
-import greencity.dto.order.OrderFondyClientDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.order.ReadAddressByOrderDto;
-import greencity.dto.order.RequestToChangeOrdersDataDto;
-import greencity.dto.order.SenderLocation;
-import greencity.dto.order.UpdateAllOrderPageDto;
-import greencity.dto.order.UpdateOrderDetailDto;
-import greencity.dto.order.UpdateOrderPageAdminDto;
-import greencity.dto.order.NotTakenOrderReasonDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -94,10 +66,10 @@ import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.service.TariffServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.service.ServiceDto;
+import greencity.dto.service.TariffServiceDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
@@ -108,9 +80,9 @@ import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
-import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -151,12 +123,12 @@ import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
-import greencity.enums.NotificationType;
 import greencity.enums.NotificationReceiverType;
-import greencity.enums.TariffStatus;
+import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.TariffStatus;
 import greencity.util.Bot;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -2145,7 +2117,10 @@ public class ModelUtils {
     private static BagInfoDto createBagInfoDto() {
         return BagInfoDto.builder()
             .id(1)
-            .capacity(4)
+            .capacity(20)
+            .name("Name")
+            .nameEng("NameEng")
+            .price(100.00)
             .build();
     }
 
@@ -2162,9 +2137,9 @@ public class ModelUtils {
             .name("Name")
             .nameEng("NameEng")
             .capacity(20)
-            .price(100)
-            .commission(0)
-            .fullPrice(100)
+            .price(100_00L)
+            .commission(0L)
+            .fullPrice(100_00L)
             .description("some_description")
             .descriptionEng("some_eng_description")
             .limitIncluded(true)
@@ -2177,12 +2152,12 @@ public class ModelUtils {
 
     private static BagForUserDto createBagForUserDto() {
         return BagForUserDto.builder()
-            .service("some_description")
-            .serviceEng("some_eng_description")
+            .service("Name")
+            .serviceEng("NameEng")
             .capacity(20)
-            .fullPrice(100)
+            .fullPrice(100.0)
             .count(22)
-            .totalPrice(2200)
+            .totalPrice(2200.0)
             .build();
     }
 
@@ -2525,8 +2500,8 @@ public class ModelUtils {
     public static TariffServiceDto TariffServiceDto() {
         return TariffServiceDto.builder()
             .capacity(20)
-            .price(100)
-            .commission(50)
+            .price(100.0)
+            .commission(50.0)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .name("name")
@@ -2538,9 +2513,9 @@ public class ModelUtils {
         return GetTariffServiceDto.builder()
             .id(1)
             .capacity(20)
-            .price(100)
-            .commission(50)
-            .fullPrice(150)
+            .price(100.0)
+            .commission(50.0)
+            .fullPrice(150.0)
             .limitIncluded(false)
             .description("Description")
             .descriptionEng("DescriptionEng")
@@ -2553,9 +2528,9 @@ public class ModelUtils {
         return Optional.of(Bag.builder()
             .id(1)
             .capacity(120)
-            .commission(50)
-            .price(120)
-            .fullPrice(170)
+            .commission(50_00L)
+            .price(120_00L)
+            .fullPrice(170_00L)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
             .editedBy(getEmployee())
@@ -2569,9 +2544,9 @@ public class ModelUtils {
         return Bag.builder()
             .id(1)
             .capacity(120)
-            .commission(50)
-            .price(120)
-            .fullPrice(170)
+            .commission(50_00L)
+            .price(120_00L)
+            .fullPrice(170_00L)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
             .editedBy(getEmployee())
@@ -2585,8 +2560,8 @@ public class ModelUtils {
         return TariffServiceDto.builder()
             .name("Бавовняна сумка")
             .capacity(120)
-            .price(120)
-            .commission(50)
+            .price(120.0)
+            .commission(50.0)
             .description("Description")
             .build();
 
@@ -2651,9 +2626,9 @@ public class ModelUtils {
         return Bag.builder()
             .id(1)
             .capacity(20)
-            .price(100)
-            .commission(50)
-            .fullPrice(150)
+            .price(100_00L)
+            .commission(50_00L)
+            .fullPrice(150_00L)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
             .description("Description")
@@ -2669,7 +2644,7 @@ public class ModelUtils {
         return BagTranslationDto.builder()
             .id(1)
             .capacity(20)
-            .price(150)
+            .price(150.0)
             .name("name")
             .nameEng("nameEng")
             .limitedIncluded(false)
@@ -2679,9 +2654,9 @@ public class ModelUtils {
     public static Bag getNewBag() {
         return Bag.builder()
             .capacity(20)
-            .price(100)
-            .commission(50)
-            .fullPrice(150)
+            .price(100_00L)
+            .commission(50_00L)
+            .fullPrice(150_00L)
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
             .limitIncluded(false)
@@ -2709,7 +2684,7 @@ public class ModelUtils {
         return ServiceDto.builder()
             .name("Name")
             .nameEng("NameEng")
-            .price(100)
+            .price(100.0)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .build();
@@ -2720,7 +2695,7 @@ public class ModelUtils {
             .id(1L)
             .name("Name")
             .nameEng("NameEng")
-            .price(100)
+            .price(100.0)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .build();
@@ -2731,7 +2706,7 @@ public class ModelUtils {
         Employee employee = ModelUtils.getEmployee();
         return Service.builder()
             .id(1L)
-            .price(100)
+            .price(100_00L)
             .createdAt(LocalDate.now())
             .createdBy(employee)
             .description("Description")
@@ -2744,7 +2719,7 @@ public class ModelUtils {
     public static Service getNewService() {
         Employee employee = ModelUtils.getEmployee();
         return Service.builder()
-            .price(100)
+            .price(100_00L)
             .createdAt(LocalDate.now())
             .createdBy(employee)
             .description("Description")
@@ -2760,7 +2735,7 @@ public class ModelUtils {
             .id(1L)
             .name("Name")
             .nameEng("NameEng")
-            .price(100)
+            .price(100_00L)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .editedAt(LocalDate.now())
@@ -2820,10 +2795,10 @@ public class ModelUtils {
     public static List<Bag> getBag1list() {
         return List.of(Bag.builder()
             .id(1)
-            .price(100)
+            .price(100_00L)
             .capacity(20)
-            .commission(50)
-            .fullPrice(1500)
+            .commission(50_00L)
+            .fullPrice(170_00L)
             .name("name")
             .nameEng("nameEng")
             .limitIncluded(false)
@@ -2833,64 +2808,64 @@ public class ModelUtils {
     public static List<Bag> getBaglist() {
         return List.of(Bag.builder()
             .id(1)
-            .price(100)
+            .price(100_00L)
             .capacity(10)
-            .commission(21)
-            .fullPrice(20)
+            .commission(21_00L)
+            .fullPrice(20_00L)
             .build(),
             Bag.builder()
                 .id(2)
-                .price(100)
+                .price(100_00L)
                 .capacity(10)
-                .commission(21)
-                .fullPrice(21)
+                .commission(21_00L)
+                .fullPrice(21_00L)
                 .build());
     }
 
     public static List<Bag> getBag2list() {
         return List.of(Bag.builder()
             .id(1)
-            .price(100)
+            .price(100_00L)
             .capacity(10)
-            .commission(21)
-            .fullPrice(20)
+            .commission(20_00L)
+            .fullPrice(120_00L)
             .build());
     }
 
     public static List<Bag> getBag3list() {
         return List.of(Bag.builder()
             .id(1)
-            .price(100)
+            .price(100_00L)
             .capacity(10)
-            .commission(21)
-            .fullPrice(2000)
+            .commission(21_00L)
+            .fullPrice(2000_00L)
             .build(),
             Bag.builder()
                 .id(2)
-                .price(100)
+                .price(100_00L)
                 .capacity(10)
-                .commission(21)
-                .fullPrice(2100)
+                .commission(20_00L)
+                .fullPrice(120_00L)
                 .build());
     }
 
     public static List<Bag> getBag4list() {
         return List.of(Bag.builder()
             .id(1)
-            .price(100)
+            .price(100_00L)
             .capacity(10)
-            .commission(21)
-            .fullPrice(20)
+            .commission(20_00L)
+            .fullPrice(120_00L)
             .name("name")
             .nameEng("nameEng")
             .limitIncluded(false)
             .build(),
             Bag.builder()
                 .id(2)
-                .price(100)
+                .price(100_00L)
                 .capacity(10)
-                .commission(21)
-                .fullPrice(21)
+                .commission(20_00L)
+                .fullPrice(120_00L)
                 .name("name")
                 .nameEng("nameEng")
                 .limitIncluded(false)
@@ -2959,7 +2934,7 @@ public class ModelUtils {
             .id(1)
             .name("name")
             .nameEng("name")
-            .price(100)
+            .price(100.)
             .capacity(10)
             .build();
     }
@@ -2986,7 +2961,7 @@ public class ModelUtils {
         return PaymentInfoDto.builder()
             .comment("ddd")
             .id(1L)
-            .amount(1000d)
+            .amount(10d)
             .build();
     }
 
@@ -3342,13 +3317,13 @@ public class ModelUtils {
             .setAddressEn("Sichovyh Stril'tsiv, 37, 1, 1")
             .setCommentToAddressForClient("coment")
             .setBagAmount("3")
-            .setTotalOrderSum(500L)
+            .setTotalOrderSum(50000L)
             .setOrderCertificateCode("5489-2789")
             .setGeneralDiscount(100L)
             .setAmountDue(0L)
             .setCommentForOrderByClient("commentForOrderByClient")
             .setCommentForOrderByAdmin("commentForOrderByAdmin")
-            .setTotalPayment(200L)
+            .setTotalPayment(20000L)
             .setDateOfExport(LocalDate.of(2021, 12, 8))
             .setTimeOfExport("from 15:59:52 to 15:59:52")
             .setIdOrderFromShop("3245678765")
@@ -3382,13 +3357,13 @@ public class ModelUtils {
                 new SenderLocation().setUa("Січових Стрільців, 37, 1, 1").setEn("Sichovyh Stril'tsiv, 37, 1, 1"))
             .setCommentToAddressForClient("coment")
             .setBagsAmount("3")
-            .setTotalOrderSum(500L)
+            .setTotalOrderSum(500.)
             .setOrderCertificateCode("5489-2789")
             .setGeneralDiscount(100L)
-            .setAmountDue(0L)
+            .setAmountDue(0.)
             .setCommentForOrderByClient("commentForOrderByClient")
             .setCommentsForOrder("commentForOrderByAdmin")
-            .setTotalPayment(200L)
+            .setTotalPayment(200.)
             .setDateOfExport("2021-12-08")
             .setTimeOfExport("from 15:59:52 to 15:59:52")
             .setIdOrderFromShop("3245678765")
@@ -3443,7 +3418,7 @@ public class ModelUtils {
             .orderStatus(OrderStatus.DONE)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId("1L")
-                .amount(20000L)
+                .amount(200_00L)
                 .currency("UAH")
                 .settlementDate("20.02.1990")
                 .comment("avb")
@@ -3481,7 +3456,7 @@ public class ModelUtils {
                 .build())
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
-            .writeOffStationSum(50L)
+            .writeOffStationSum(50_00L)
             .imageReasonNotTakingBags(List.of("foto"))
 
             .tariffsInfo(TariffsInfo.builder()
@@ -3524,7 +3499,7 @@ public class ModelUtils {
             .certificates(Collections.emptySet())
             .orderStatus(OrderStatus.CONFIRMED)
             .user(User.builder().id(1L).currentPoints(100).build())
-            .writeOffStationSum(50L)
+            .writeOffStationSum(50_00L)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId("1L")
                 .amount(20000L)
@@ -3547,7 +3522,7 @@ public class ModelUtils {
             .counterOrderPaymentId(1L)
             .certificates(Set.of(getCertificate2()))
             .pointsToUse(100)
-            .writeOffStationSum(50L)
+            .writeOffStationSum(50_00L)
             .build();
     }
 
@@ -3899,10 +3874,10 @@ public class ModelUtils {
             .build();
 
         BagForUserDto bagForUserDto = new BagForUserDto();
-        bagForUserDto.setTotalPrice(900);
+        bagForUserDto.setTotalPrice(900.);
         bagForUserDto.setCount(3);
         bagForUserDto.setCapacity(200);
-        bagForUserDto.setFullPrice(300);
+        bagForUserDto.setFullPrice(300.);
         bagForUserDto.setService("Безпечні Відходи");
         bagForUserDto.setServiceEng("Safe Waste");
 
@@ -4532,7 +4507,7 @@ public class ModelUtils {
                     .id(1)
                     .name("name")
                     .capacity(20)
-                    .price(150)
+                    .price(150.)
                     .nameEng("nameEng")
                     .limitedIncluded(false)
                     .build()),

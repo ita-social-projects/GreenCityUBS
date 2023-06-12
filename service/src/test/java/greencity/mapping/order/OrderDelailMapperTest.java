@@ -5,7 +5,6 @@ import greencity.dto.bag.BagMappingDto;
 import greencity.dto.bag.BagTransDto;
 import greencity.dto.order.OrderDetailDto;
 import greencity.dto.order.OrderDetailInfoDto;
-import greencity.mapping.order.OrderDelailMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +25,7 @@ class OrderDelailMapperTest {
         OrderDetailDto orderDetailDto = OrderDetailDto.builder()
             .amount(List.of(BagMappingDto.builder().amount(2).confirmed(2).exported(2).build()))
             .orderId(1L)
-            .capacityAndPrice(List.of(BagInfoDto.builder().price(500).capacity(100).name("BigOne").id(1).build()))
+            .capacityAndPrice(List.of(BagInfoDto.builder().price(500.0).capacity(100).name("BigOne").id(1).build()))
             .name(List.of(BagTransDto.builder().name("BigOne").build()))
             .build();
 
@@ -39,7 +38,7 @@ class OrderDelailMapperTest {
                 .exportedQuantity(2)
                 .name("BigOne")
                 .orderId(1L)
-                .price(500)
+                .price(500.0)
                 .build());
 
         List<OrderDetailInfoDto> actual = orderDelailMapper.convert(orderDetailDto);
