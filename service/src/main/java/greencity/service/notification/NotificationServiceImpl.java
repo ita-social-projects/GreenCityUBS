@@ -112,7 +112,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         parameters.add(NotificationParameter.builder()
             .key(AMOUNT_TO_PAY_KEY)
-            .value(String.valueOf(amountToPay))
+            .value(String.format("%.2f", amountToPay))
             .build());
 
         parameters.add(NotificationParameter.builder()
