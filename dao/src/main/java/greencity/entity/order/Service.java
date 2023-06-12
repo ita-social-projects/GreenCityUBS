@@ -1,6 +1,7 @@
 package greencity.entity.order;
 
 import greencity.entity.user.employee.Employee;
+import greencity.enums.ServiceStatus;
 import lombok.*;
 
 import javax.persistence.*;
@@ -51,4 +52,8 @@ public class Service {
 
     @OneToOne
     private TariffsInfo tariffsInfo;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ServiceStatus status;
 }

@@ -1,15 +1,25 @@
 package greencity.entity.order;
 
 import greencity.entity.user.employee.Employee;
+import greencity.enums.BagStatus;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import lombok.Builder;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
@@ -70,4 +80,8 @@ public class Bag {
     @ManyToOne
     @JoinColumn(nullable = false)
     private TariffsInfo tariffsInfo;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BagStatus status;
 }

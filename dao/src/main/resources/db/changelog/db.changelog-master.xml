@@ -203,4 +203,6 @@
     <include file="db/changelog/logs/ch-add-table-notification-platforms-paybutton-Lenets.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Lenets.xml"/>
     <include file="db/changelog/logs/ch-add-view-employees_filters-view-Safarov.xml"/>
+    <include file="/db/changelog/logs/ch-add-columns-to-order-bag-mapping-table-Seti.xml"/>
+    <include file="/db/changelog/logs/ch-add-column-status-to-bag-and-service-tables-Seti.xml"/>
 </databaseChangeLog>
