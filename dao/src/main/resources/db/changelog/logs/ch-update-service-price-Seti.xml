@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Seti-10" author="Julia Seti">
+        <modifyDataType tableName="service" columnName="price" newDataType="bigint"/>
+
+        <update tableName="service">
+            <column name="price" value="5000"/>
+            <where>price=50</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

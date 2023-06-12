@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -20,22 +21,31 @@ import javax.validation.constraints.NotNull;
 public class GetTariffServiceDto {
     @NotNull
     private Integer id;
+
     @NotNull
     private Integer capacity;
+
     @NotNull
-    private Integer price;
+    private Double price;
+
     @NotNull
-    private Integer commission;
+    private Double commission;
+
     @NotNull
-    private Integer fullPrice;
-    @NotNull
+    private Double fullPrice;
+
+    @NotBlank
     private String name;
-    @NotNull
+
+    @NotBlank
     private String nameEng;
-    @NotNull
+
+    @NotBlank
     private String description;
-    @NotNull
+
+    @NotBlank
     private String descriptionEng;
+
     @NotNull
     private Boolean limitIncluded;
 }

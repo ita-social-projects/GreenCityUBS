@@ -33,12 +33,6 @@ import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.PaymentInfoDto;
-import greencity.dto.user.AddBonusesToUserDto;
-import greencity.dto.user.AddingPointsToUserDto;
-import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
@@ -523,7 +517,7 @@ class UBSManagementServiceImplTest {
 
         order.setUser(ModelUtils.getUser());
 
-        Long sumToPay = 0L;
+        Double sumToPay = 0.;
 
         assertEquals("Зарахування на бонусний рахунок", ubsManagementService.returnOverpaymentInfo(1L, sumToPay, 0L)
             .getPaymentInfoDtos().get(1).getComment());
@@ -538,7 +532,7 @@ class UBSManagementServiceImplTest {
     @Test
     void checkReturnOverpaymentThroweException() {
         Assertions.assertThrows(NotFoundException.class,
-            () -> ubsManagementService.returnOverpaymentInfo(100L, 1L, 1L));
+            () -> ubsManagementService.returnOverpaymentInfo(100L, 1., 1L));
     }
 
     @Test
@@ -546,7 +540,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         when(orderRepository.findUserById(1L)).thenReturn(Optional.of(order));
 
-        Assertions.assertThrows(NotFoundException.class, () -> ubsManagementService.returnOverpaymentInfo(1L, 1L, 1L));
+        Assertions.assertThrows(NotFoundException.class, () -> ubsManagementService.returnOverpaymentInfo(1L, 1., 1L));
     }
 
     @Test
@@ -554,9 +548,30 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setOrderStatus(OrderStatus.DONE);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 800L).getOverpayment());
-        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getPaidAmount());
-        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getUnPaidAmount());
+        assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 800.).getOverpayment());
+        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getPaidAmount());
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getUnPaidAmount());
+        verify(orderRepository, times(3)).findById(order.getId());
+    }
+
+    @Test
+    void checkGetPaymentInfoIfOrderStatusIsCanceled() {
+        Order order = ModelUtils.getOrder();
+        order.setOrderStatus(OrderStatus.CANCELED);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 800.).getOverpayment());
+        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getPaidAmount());
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getUnPaidAmount());
+        verify(orderRepository, times(3)).findById(order.getId());
+    }
+
+    @Test
+    void checkGetPaymentInfoIfSumToPayIsNull() {
+        Order order = ModelUtils.getOrder();
+        order.setOrderStatus(OrderStatus.DONE);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertEquals(900L, ubsManagementService.getPaymentInfo(order.getId(), null).getOverpayment());
+        verify(orderRepository).findById(order.getId());
     }
 
     @Test
@@ -1446,6 +1461,46 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void updateOrderAdminPageInfoWithUbsCourierSumAndWriteOffStationSum() {
+        OrderDetailStatusRequestDto orderDetailStatusRequestDto = ModelUtils.getTestOrderDetailStatusRequestDto();
+        Order order = ModelUtils.getOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        Employee employee = ModelUtils.getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(paymentRepository.findAllByOrderId(1L))
+            .thenReturn(List.of(ModelUtils.getPayment()));
+        lenient().when(ubsManagementServiceMock.updateOrderDetailStatus(1L, orderDetailStatusRequestDto, "abc"))
+            .thenReturn(ModelUtils.getTestOrderDetailStatusDto());
+        when(ubsClientService.updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(),
+            "test@gmail.com")).thenReturn(ModelUtils.getUbsCustomersDto());
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
+        updateOrderPageAdminDto.setUbsCourierSum(50.);
+        updateOrderPageAdminDto.setWriteOffStationSum(100.);
+        when(orderAddressRepository.findById(1L))
+            .thenReturn(Optional.of(ModelUtils.getOrderAddress()));
+        when(receivingStationRepository.findAll())
+            .thenReturn(List.of(ModelUtils.getReceivingStation()));
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.getOrderDetails(anyLong()))
+            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
+        UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
+        ubsManagementService.updateOrderAdminPageInfo(emptyDto, 1L, "en", "test@gmail.com");
+
+        verify(ubsClientService, times(1))
+            .updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "test@gmail.com");
+        verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
     void updateOrderAdminPageInfoWithStatusFormedTest() {
         Order order = ModelUtils.getOrder();
         TariffsInfo tariffsInfo = getTariffsInfo();
@@ -1614,6 +1669,22 @@ class UBSManagementServiceImplTest {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getFormedOrder();
         order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+
+        doNothing().when(notificationService).notifyPaidOrder(order);
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
+        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
+    }
+
+    @Test
+    void getOrderSumDetailsForFormedOrderWithUbsCourierSumAndWriteOffStationSum() {
+        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
+        Order order = ModelUtils.getFormedOrder();
+        order.setOrderDate(LocalDateTime.now());
+        order.setUbsCourierSum(50_00L);
+        order.setWriteOffStationSum(100_00L);
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 
         doNothing().when(notificationService).notifyPaidOrder(order);
@@ -2007,7 +2078,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(modelMapper.map(any(), eq(PaymentInfoDto.class))).thenReturn(paymentInfo);
 
-        assertEquals(ModelUtils.getPaymentTableInfoDto(), ubsManagementService.getPaymentInfo(order.getId(), 100L));
+        assertEquals(ModelUtils.getPaymentTableInfoDto(), ubsManagementService.getPaymentInfo(order.getId(), 100.));
     }
 
     @Test
@@ -2016,14 +2087,14 @@ class UBSManagementServiceImplTest {
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
-        assertEquals(ModelUtils.getPaymentTableInfoDto2(), ubsManagementService.getPaymentInfo(order.getId(), 100L));
+        assertEquals(ModelUtils.getPaymentTableInfoDto2(), ubsManagementService.getPaymentInfo(order.getId(), 100.));
     }
 
     @Test
     void getPaymentInfoExceptionTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.getPaymentInfo(1L, 100L));
+            () -> ubsManagementService.getPaymentInfo(1L, 100.));
     }
 
     @Test
@@ -2158,7 +2229,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setOrderStatus(OrderStatus.DONE);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 1100L).getOverpayment());
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 1100.).getOverpayment());
     }
 
     @Test
@@ -2356,6 +2427,26 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).save(order);
         verify(userRepository).save(user);
         verify(notificationService).notifyBonuses(order, 809L);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
+    }
+
+    @Test
+    void addBonusesToUserIfOrderStatusIsCanceled() {
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.CANCELED);
+        User user = order.getUser();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findBagsByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+
+        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L, employee.getEmail());
+
+        verify(orderRepository).findById(1L);
+        verify(orderRepository).save(order);
+        verify(userRepository).save(user);
+        verify(notificationService).notifyBonuses(order, 200L);
         verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
     }
 

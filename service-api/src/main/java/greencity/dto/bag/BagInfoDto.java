@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 public class BagInfoDto {
     Integer capacity;
-    Integer price;
+    Double price;
     Integer id;
     String name;
     String nameEng;

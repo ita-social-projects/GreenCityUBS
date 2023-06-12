@@ -1,9 +1,12 @@
 package greencity.mapping.bag;
 
+import greencity.constant.AppConstant;
 import greencity.dto.bag.BagInfoDto;
 import greencity.entity.order.Bag;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
 
 @Component
 public class BagInfoDtoMapper extends AbstractConverter<Bag, BagInfoDto> {
@@ -14,7 +17,8 @@ public class BagInfoDtoMapper extends AbstractConverter<Bag, BagInfoDto> {
             .name(bag.getName())
             .nameEng(bag.getNameEng())
             .capacity(bag.getCapacity())
-            .price(bag.getFullPrice())
+            .price(BigDecimal.valueOf(bag.getFullPrice())
+                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
             .build();
     }
 }

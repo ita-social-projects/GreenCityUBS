@@ -18,13 +18,14 @@ class BagInfoDtoMapperTest {
 
     @Test
     void convert() {
+        BagInfoDto expectedBagInfoDto = ModelUtils.TEST_BAG_INFO_DTO;
         Bag bag = ModelUtils.TEST_BAG;
         BagInfoDto actualBagInfoDto = bagInfoDtoMapper.convert(bag);
 
-        assertEquals(bag.getId(), actualBagInfoDto.getId());
-        assertEquals(bag.getName(), actualBagInfoDto.getName());
-        assertEquals(bag.getNameEng(), actualBagInfoDto.getNameEng());
-        assertEquals(bag.getCapacity(), actualBagInfoDto.getCapacity());
-        assertEquals(bag.getFullPrice(), actualBagInfoDto.getPrice());
+        assertEquals(expectedBagInfoDto.getId(), actualBagInfoDto.getId());
+        assertEquals(expectedBagInfoDto.getName(), actualBagInfoDto.getName());
+        assertEquals(expectedBagInfoDto.getNameEng(), actualBagInfoDto.getNameEng());
+        assertEquals(expectedBagInfoDto.getCapacity(), actualBagInfoDto.getCapacity());
+        assertEquals(expectedBagInfoDto.getPrice(), actualBagInfoDto.getPrice());
     }
 }

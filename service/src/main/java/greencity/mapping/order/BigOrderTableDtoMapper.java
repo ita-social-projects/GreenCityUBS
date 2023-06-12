@@ -1,10 +1,14 @@
 package greencity.mapping.order;
 
+import greencity.constant.AppConstant;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.SenderLocation;
 import greencity.entity.order.BigOrderTableViews;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static java.util.Objects.nonNull;
 
@@ -33,11 +37,11 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
             .setCommentForOrderByClient(bigViews.getCommentForOrderByClient())
             .setCommentsForOrder(bigViews.getCommentForOrderByAdmin())
             .setBagsAmount(bigViews.getBagAmount())
-            .setTotalOrderSum(bigViews.getTotalOrderSum())
+            .setTotalOrderSum(convertCoinsIntoBills(bigViews.getTotalOrderSum()))
             .setOrderCertificateCode(bigViews.getOrderCertificateCode())
             .setGeneralDiscount(bigViews.getGeneralDiscount())
-            .setAmountDue(bigViews.getAmountDue())
-            .setTotalPayment(bigViews.getTotalPayment())
+            .setAmountDue(convertCoinsIntoBills(bigViews.getAmountDue()))
+            .setTotalPayment(convertCoinsIntoBills(bigViews.getTotalPayment()))
             .setDateOfExport(nonNull(bigViews.getDateOfExport()) ? bigViews.getDateOfExport().toString() : "")
             .setTimeOfExport(bigViews.getTimeOfExport())
             .setIdOrderFromShop(bigViews.getIdOrderFromShop())
@@ -58,5 +62,13 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
                 : "")
             .setIsBlocked(bigViews.getIsBlocked())
             .setBlockedBy(bigViews.getBlockedBy());
+    }
+
+    private Double convertCoinsIntoBills(Long coins) {
+        return coins == null ? null
+            : BigDecimal.valueOf(coins)
+                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 }

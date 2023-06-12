@@ -85,7 +85,7 @@ public class AdminUbsController {
      * @param userUuid of {@link String}
      * @author Oleh Kulbaba
      */
-    @ApiOperation("Get all parameters for building table of orders")
+    @ApiOperation("Get width of columns for order table")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
@@ -106,7 +106,7 @@ public class AdminUbsController {
      * @param columnWidthDto of {@link ColumnWidthDto}
      * @author Oleh Kulbaba
      */
-    @ApiOperation("Get width of columns for order table")
+    @ApiOperation("Edit width of columns for order table")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
@@ -127,7 +127,7 @@ public class AdminUbsController {
      *
      * @author Liubomyr Pater
      */
-    @ApiOperation(value = "Save width of columns for order table")
+    @ApiOperation(value = "Save changes in orders")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -209,7 +209,7 @@ public class AdminUbsController {
      * @param userId {@link Long}
      * @author Roman Sulymka and Max Bohonko.
      */
-    @ApiOperation("Get users for the table")
+    @ApiOperation("Get user's violations")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
