@@ -3,7 +3,9 @@ package greencity.repository;
 import greencity.entity.order.OrderStatusTranslation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Provides an interface to manage {@link OrderStatusTranslation} entity.
@@ -18,9 +20,7 @@ public interface OrderStatusTranslationRepository extends JpaRepository<OrderSta
      * @return {@link OrderStatusTranslation}.
      * @author Oleksandr Khomiakov.
      */
-    default OrderStatusTranslation getOrderStatusTranslationById(Long id) {
-        return findById(id).orElse(null);
-    }
+    OrderStatusTranslation getOrderStatusTranslationById(Long id);
 
     /**
      * This method which is list statuses.
