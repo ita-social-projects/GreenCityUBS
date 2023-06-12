@@ -452,22 +452,23 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay.
      */
     private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Order order) {
-        OrderStatus orderStatus = order.getOrderStatus();
+        OrderStatus orderStatus = order != null ? order.getOrderStatus() : OrderStatus.CANCELED;
         OrderStatusTranslation orderStatusTranslation =
-            orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
+                orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
+
         if (orderStatusTranslation == null) {
             orderStatusTranslation = orderStatusTranslationRepository.getOne(1L);
         }
-        String currentOrderStatusTranslation =
-            (orderStatusTranslation != null) ? orderStatusTranslation.getName() : orderStatus.name();
-        String currentOrderStatusTranslationEng =
-            (orderStatusTranslation != null) ? orderStatusTranslation.getNameEng() : orderStatus.name();
+
+        String currentOrderStatusTranslation = orderStatusTranslation.getName();
+        String currentOrderStatusTranslationEng = orderStatusTranslation.getNameEng();
 
         OrderPaymentStatus orderStatusPayment =
-            order != null ? order.getOrderPaymentStatus() : OrderPaymentStatus.UNPAID;
+                order != null ? order.getOrderPaymentStatus() : OrderPaymentStatus.UNPAID;
+
         Order currentOrder = order != null ? order : new Order();
-        OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = orderPaymentStatusTranslationRepository
-            .getById((long) orderStatusPayment.getStatusValue());
+        OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation =
+                orderPaymentStatusTranslationRepository.getById((long) orderStatusPayment.getStatusValue());
 
         return GeneralOrderInfo.builder()
             .id(order.getId())
