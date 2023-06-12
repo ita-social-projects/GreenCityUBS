@@ -458,10 +458,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (orderStatusTranslation == null) {
             orderStatusTranslation = orderStatusTranslationRepository.getOne(1L);
         }
-        String currentOrderStatusTranslation = orderStatusTranslation.getName();
-        String currentOrderStatusTranslationEng = orderStatusTranslation.getNameEng();
+        String currentOrderStatusTranslation =
+            (orderStatusTranslation != null) ? orderStatusTranslation.getName() : orderStatus.name();
+        String currentOrderStatusTranslationEng =
+            (orderStatusTranslation != null) ? orderStatusTranslation.getNameEng() : orderStatus.name();
 
-        OrderPaymentStatus orderStatusPayment = order.getOrderPaymentStatus();
+        OrderPaymentStatus orderStatusPayment =
+            order != null ? order.getOrderPaymentStatus() : OrderPaymentStatus.UNPAID;
+        Order currentOrder = order != null ? order : new Order();
         OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = orderPaymentStatusTranslationRepository
             .getById((long) orderStatusPayment.getStatusValue());
 
@@ -476,7 +480,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orderPaymentStatusNameEng(currentOrderStatusPaymentTranslation.getTranslationsValueEng())
             .orderStatusName(currentOrderStatusTranslation)
             .orderStatusNameEng(currentOrderStatusTranslationEng)
-            .adminComment(order.getAdminComment())
+            .adminComment(currentOrder.getAdminComment())
             .build();
     }
 
