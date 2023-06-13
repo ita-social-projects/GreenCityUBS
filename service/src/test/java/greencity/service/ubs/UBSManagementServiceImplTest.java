@@ -355,7 +355,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
-        verify(eventService, times(1)).save(any(), any(), any());
+        verify(eventService, times(2)).save(any(), any(), any());
         verify(fileService, times(0)).delete(null);
         verify(bagRepository).findBagsByOrderId(order.getId());
     }
@@ -495,7 +495,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), file, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
-        verify(eventService, times(1)).save(any(), any(), any());
+        verify(eventService, times(2)).save(any(), any(), any());
     }
 
     @Test
@@ -2116,7 +2116,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.updateManualPayment(payment.getId(), requestDto, file, employee.getUuid());
 
         verify(paymentRepository).save(any(Payment.class));
-        verify(eventService).save(any(), any(), any());
+        verify(eventService, times(2)).save(any(), any(), any());
     }
 
     @Test

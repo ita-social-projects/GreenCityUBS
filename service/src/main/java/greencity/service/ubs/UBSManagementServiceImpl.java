@@ -1317,6 +1317,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
         MultipartFile image, String email) {
         if (Objects.isNull(image) && StringUtils.isBlank(paymentRequestDto.getReceiptLink())) {
@@ -1380,9 +1381,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if (paymentsForCurrentOrder > 0 && totalAmount > totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+            eventService.save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
             notificationService.notifyHalfPaidPackage(order);
         } else if (paymentsForCurrentOrder > 0 && totalAmount <= totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
             notificationService.notifyPaidOrder(order);
         } else if (paymentsForCurrentOrder == 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
@@ -1427,7 +1430,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Payment payment = Payment.builder()
             .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
             .amount(paymentRequestDto.getAmount())
-            .paymentStatus(verifyPaymentStatusOrder(order))
+            .paymentStatus(PaymentStatus.PAID)
             .paymentId(paymentRequestDto.getPaymentId())
             .receiptLink(paymentRequestDto.getReceiptLink())
             .currency("UAH")
@@ -1442,30 +1445,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), order);
-        if (order.getOrderPaymentStatus() != null) {
-            if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAID) {
-                eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-            } else {
-                eventService.save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
-            }
-        }
         return payment;
-    }
-
-    private PaymentStatus verifyPaymentStatusOrder(Order order) {
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAID) {
-            return PaymentStatus.PAID;
-        }
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.HALF_PAID) {
-            return PaymentStatus.HALF_PAID;
-        }
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
-            return PaymentStatus.UNPAID;
-        }
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.PAYMENT_REFUNDED) {
-            return PaymentStatus.PAYMENT_REFUNDED;
-        }
-        return PaymentStatus.UNPAID;
     }
 
     @Override
