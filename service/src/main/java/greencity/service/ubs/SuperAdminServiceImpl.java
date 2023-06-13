@@ -34,6 +34,7 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.BagStatus;
 import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
@@ -125,6 +126,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
         Employee employee = tryToFindEmployeeByUuid(employeeUuid);
         Bag bag = modelMapper.map(dto, Bag.class);
+        bag.setStatus(BagStatus.ACTIVE);
         bag.setTariffsInfo(tariffsInfo);
         bag.setCreatedBy(employee);
         return bag;
@@ -133,7 +135,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<GetTariffServiceDto> getTariffService(long tariffId) {
         if (tariffsInfoRepository.existsById(tariffId)) {
-            return bagRepository.findBagsByTariffsInfoId(tariffId)
+            return bagRepository.findBagsByTariffsInfoIdAndStatus(tariffId, BagStatus.ACTIVE)
                 .stream()
                 .map(it -> modelMapper.map(it, GetTariffServiceDto.class))
                 .collect(Collectors.toList());

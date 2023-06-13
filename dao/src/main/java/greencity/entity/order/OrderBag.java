@@ -1,5 +1,6 @@
 package greencity.entity.order;
 
+import greencity.enums.BagStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -10,6 +11,8 @@ import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -44,10 +47,10 @@ public class OrderBag {
     @Column(nullable = false)
     private Integer amount;
 
-    @Column
+    @Column(name = "confirmed_quantity")
     private Integer confirmedQuantity;
 
-    @Column
+    @Column(name = "exported_quantity")
     private Integer exportedQuantity;
 
     @Column(nullable = false)
@@ -63,5 +66,14 @@ public class OrderBag {
     @Size(min = 1, max = 30)
     @Column(nullable = false)
     private String nameEng;
-}
 
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
+    private String descriptionEng;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BagStatus bagStatus;
+}

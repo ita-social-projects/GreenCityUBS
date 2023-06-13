@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.order.Bag;
+import greencity.enums.BagStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -86,4 +87,15 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Safarov Renat
      */
     List<Bag> findBagsByTariffsInfoId(Long tariffInfoId);
+
+    /**
+     * method, that returns {@link List} of {@link Bag} by tariff id and bag's
+     * status.
+     *
+     * @param tariffsInfoId {@link Long} tariff id
+     * @param status        {@link BagStatus} bag status
+     * @return {@link List} of {@link Bag}
+     * @author Julia Seti
+     */
+    List<Bag> findBagsByTariffsInfoIdAndStatus(Long tariffsInfoId, BagStatus status);
 }

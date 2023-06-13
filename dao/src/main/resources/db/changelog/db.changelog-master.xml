@@ -207,6 +207,6 @@
     <include file="db/changelog/logs/ch-update-service-price-Seti.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Seti.xml"/>
     <include file="/db/changelog/logs/ch-modify-columns-name-name-eng-in-bag-and-service-tables.xml"/>
-    <include file="/db/changelog/logs/ch-add-columns-to-order-bag-mapping-table-Seti.xml"/>
-    <include file="/db/changelog/logs/ch-add-column-status-to-bag-and-service-tables-Seti.xml"/>
+    <include file="db/changelog/logs/ch-add-column-status-to-bag-and-service-tables-Seti.xml"/>
+    <include file="db/changelog/logs/ch-update-order-bag-mapping-table-Seti.xml"/>
 </databaseChangeLog>

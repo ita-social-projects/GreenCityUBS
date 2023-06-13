@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Seti-14" author="Julia Seti">
+        <dropPrimaryKey  tableName= "order_bag_mapping" constraintName="order_bag_mapping_pkey"/>
+
+        <addColumn tableName="order_bag_mapping">
+            <column name="id" position="1" autoIncrement="true" type="bigint"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="capacity" type="int"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="price" type="bigint"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="name" type="varchar(30)"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="name_eng" type="varchar(30)"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="description" type="varchar"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="description_eng" type="varchar"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="bag_status" type="varchar(30)"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="order_bag_mapping"
+                                 baseColumnNames="bag_id"
+                                 constraintName="fk_bag_to_order"
+                                 referencedTableName="bag"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="Seti-15" author="Julia Seti">
+        <sql>update order_bag_mapping set
+                    capacity=bag.capacity,
+                    price=bag.full_price,
+                    name=bag.name,
+                    name_eng=bag.name_eng,
+                    description=bag.description,
+                    description_eng=bag.description_eng,
+                    bag_status=bag.status
+            from bag
+            where bag_id=bag.id
+        </sql>
+
+        <addPrimaryKey tableName="order_bag_mapping" columnNames="id"/>
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="capacity"/>
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="price"/>
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="name"/>
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="name_eng"/>
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="description"/>
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="description_eng"/>
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="bag_status"/>
+    </changeSet>
+
+</databaseChangeLog>
