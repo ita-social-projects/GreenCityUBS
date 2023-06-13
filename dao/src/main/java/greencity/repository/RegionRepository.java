@@ -1,8 +1,9 @@
 package greencity.repository;
 
 import greencity.entity.user.Region;
+import greencity.enums.LocationStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -22,17 +23,15 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
         @Param("UkrName") String nameUk);
 
     /**
-     * Method for get regions with only active locations.
-     * 
-     * @return List of {@link Region} if at least one region exists
-     * @author Safarov Renat
+     * Method that retrieves regions with locations specified by LocationStatus
+     * type.
+     *
+     * @param locationStatus {@link LocationStatus} - status of searched locations.
+     * @return List of {@link Region} if at least one region exists.
+     * @author Maksym Lenets
      */
-    @Query(nativeQuery = true,
-        value = "select * from regions r "
-            + "join locations l on r.id = l.region_id "
-            + "where l.location_status = 'ACTIVE' "
-            + "group by r.id, l.id")
-    List<Region> findRegionsWithActiveLocations();
+    @EntityGraph(attributePaths = "locations")
+    Optional<List<Region>> findAllByLocationsLocationStatus(LocationStatus locationStatus);
 
     /**
      * Method to check if the region exists by regionId.
