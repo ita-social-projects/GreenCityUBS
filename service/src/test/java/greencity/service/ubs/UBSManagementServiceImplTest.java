@@ -33,13 +33,13 @@ import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
+import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.order.Bag;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -48,7 +48,6 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -107,6 +106,7 @@ import java.util.stream.Stream;
 import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
@@ -361,6 +361,110 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void saveNewManualPaymentWithZeroAmount() {
+        User user = ModelUtils.getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = ModelUtils.getFormedOrder();
+        order.setPointsToUse(0);
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        Payment payment = ModelUtils.getManualPayment();
+        payment.setAmount(0L);
+        order.setPayment(singletonList(payment));
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(0L).receiptLink("link").paymentId("1").build();
+        Employee employee = ModelUtils.getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(any(), any(), any());
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(employeeRepository, times(2)).findByEmail(anyString());
+        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
+            "Петро  Петренко", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void saveNewManualPaymentWithHalfPaidAmount() {
+        User user = ModelUtils.getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = ModelUtils.getFormedOrder();
+        order.setPointsToUse(0);
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+        Payment payment = ModelUtils.getManualPayment();
+        payment.setAmount(50_00L);
+        order.setPayment(singletonList(payment));
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(50_00L).receiptLink("link").paymentId("1").build();
+        Employee employee = ModelUtils.getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBag1list());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(any(), any(), any());
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(employeeRepository, times(2)).findByEmail(anyString());
+        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
+            "Петро  Петренко", order);
+        verify(eventService, times(1))
+            .save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void saveNewManualPaymentWithPaidAmount() {
+        User user = ModelUtils.getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = ModelUtils.getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        Payment payment = ModelUtils.getManualPayment();
+        payment.setAmount(500_00L);
+        order.setPayment(singletonList(payment));
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500_00L).receiptLink("link").paymentId("1").build();
+        Employee employee = ModelUtils.getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBag1list());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(any(), any(), any());
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(employeeRepository, times(2)).findByEmail(anyString());
+        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
+            "Петро  Петренко", order);
+        verify(eventService, times(1))
+            .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
     void saveNewManualPaymentWithPaidOrder() {
         User user = ModelUtils.getTestUser();
         user.setRecipientName("Петро");
@@ -399,7 +503,6 @@ class UBSManagementServiceImplTest {
         order.setTariffsInfo(tariffsInfo);
         order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
         Payment payment = ModelUtils.getManualPayment();
-        payment.setPaymentStatus(PaymentStatus.HALF_PAID);
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
             .settlementdate("02-08-2021").amount(200L).receiptLink("link").paymentId("1").build();
         Employee employee = ModelUtils.getEmployee();
