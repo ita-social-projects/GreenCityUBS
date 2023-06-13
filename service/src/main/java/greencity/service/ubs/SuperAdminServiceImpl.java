@@ -298,9 +298,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<LocationInfoDto> getActiveLocations() {
-        return regionRepository.findRegionsWithActiveLocations().stream()
-            .distinct()
+    public List<LocationInfoDto> getLocationsByStatus(LocationStatus locationStatus) {
+        List<Region> regionWithDeactivatedLocations = regionRepository
+            .findAllByLocationsLocationStatus(locationStatus)
+            .orElseThrow(() -> new NotFoundException(
+                String.format(ErrorMessage.REGIONS_NOT_FOUND_BY_LOCATION_STATUS, locationStatus.name())));
+        return regionWithDeactivatedLocations.stream()
             .map(region -> modelMapper.map(region, LocationInfoDto.class))
             .collect(Collectors.toList());
     }

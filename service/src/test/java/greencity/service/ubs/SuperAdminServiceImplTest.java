@@ -620,15 +620,32 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void getActiveLocationsTest() {
+    void getLocationsByStatusTest() {
         List<Region> regionList = ModelUtils.getAllRegion();
 
-        when(regionRepository.findRegionsWithActiveLocations()).thenReturn(regionList);
+        when(regionRepository.findAllByLocationsLocationStatus(LocationStatus.ACTIVE))
+            .thenReturn(Optional.of(regionList));
 
-        superAdminService.getActiveLocations();
+        var result = superAdminService.getLocationsByStatus(LocationStatus.ACTIVE);
 
-        verify(regionRepository).findRegionsWithActiveLocations();
+        verify(regionRepository).findAllByLocationsLocationStatus(LocationStatus.ACTIVE);
         regionList.forEach(region -> verify(modelMapper).map(region, LocationInfoDto.class));
+        verify(modelMapper, times(regionList.size())).map(any(Region.class), eq(LocationInfoDto.class));
+        assertEquals(regionList.size(), result.size());
+    }
+
+    @Test
+    void getLocationsByStatusNotFoundExceptionTest() {
+        when(regionRepository.findAllByLocationsLocationStatus(LocationStatus.ACTIVE))
+            .thenReturn(Optional.empty());
+
+        NotFoundException notFoundException = assertThrows(NotFoundException.class,
+            () -> superAdminService.getLocationsByStatus(LocationStatus.ACTIVE));
+
+        assertEquals(String.format(ErrorMessage.REGIONS_NOT_FOUND_BY_LOCATION_STATUS, LocationStatus.ACTIVE.name()),
+            notFoundException.getMessage());
+
+        verify(regionRepository).findAllByLocationsLocationStatus(LocationStatus.ACTIVE);
     }
 
     @Test
