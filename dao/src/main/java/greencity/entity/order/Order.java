@@ -50,10 +50,10 @@ import java.util.Set;
 @Builder
 @Table(name = "orders")
 @EqualsAndHashCode(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
-    "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 @ToString(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
-    "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 public class Order {
     @Id
@@ -184,11 +184,17 @@ public class Order {
     private Long writeOffStationSum;
 
     @OneToMany(
-            mappedBy = "order",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+        mappedBy = "order",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true)
     private List<OrderBag> orderBags = new ArrayList<>();
 
+    /**
+     * method, that helps to save OrderBag.
+     *
+     * @param orderBag {@link OrderBag}
+     * @author Julia Seti
+     */
     public void addOrderBag(OrderBag orderBag) {
         this.orderBags.add(orderBag);
         orderBag.setOrder(this);

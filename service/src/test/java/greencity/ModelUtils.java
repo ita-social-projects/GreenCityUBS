@@ -98,6 +98,7 @@ import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
+import greencity.entity.order.OrderBag;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
@@ -117,6 +118,7 @@ import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
+import greencity.enums.BagStatus;
 import greencity.enums.CancellationReason;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -128,6 +130,7 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.ServiceStatus;
 import greencity.enums.TariffStatus;
 import greencity.util.Bot;
 import org.springframework.data.domain.Page;
@@ -2524,6 +2527,17 @@ public class ModelUtils {
             .build();
     }
 
+    public static OrderBag getOrderBag() {
+        return OrderBag.builder()
+            .id(1L)
+            .amount(1)
+            .price(150_00L)
+            .capacity(20)
+            .bag(getBag())
+            .order(getOrder())
+            .build();
+    }
+
     public static Optional<Bag> getOptionalBag() {
         return Optional.of(Bag.builder()
             .id(1)
@@ -2550,21 +2564,71 @@ public class ModelUtils {
             .createdAt(LocalDate.now())
             .createdBy(getEmployee())
             .editedBy(getEmployee())
+            .limitIncluded(true)
+            .status(BagStatus.ACTIVE)
+            .tariffsInfo(getTariffInfo())
+            .build();
+    }
+
+    public static Bag getBagDeleted() {
+        return Bag.builder()
+            .id(1)
+            .capacity(120)
+            .commission(50_00L)
+            .price(120_00L)
+            .fullPrice(170_00L)
+            .createdAt(LocalDate.now())
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
             .description("Description")
             .descriptionEng("DescriptionEng")
             .limitIncluded(true)
+            .status(BagStatus.DELETED)
+            .tariffsInfo(getTariffInfo())
             .build();
     }
 
     public static TariffServiceDto getTariffServiceDto() {
         return TariffServiceDto.builder()
             .name("Бавовняна сумка")
-            .capacity(120)
-            .price(120.0)
+            .capacity(20)
+            .price(100.0)
             .commission(50.0)
             .description("Description")
             .build();
 
+    }
+
+    public static Bag getEditedBag() {
+        return Bag.builder()
+            .id(1)
+            .capacity(20)
+            .price(100_00L)
+            .fullPrice(150_00L)
+            .commission(50_00L)
+            .name("Бавовняна сумка")
+            .description("Description")
+            .createdAt(LocalDate.now())
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
+            .editedAt(LocalDate.now())
+            .limitIncluded(true)
+            .status(BagStatus.ACTIVE)
+            .tariffsInfo(getTariffInfo())
+            .build();
+
+    }
+
+    public static OrderBag getEditedOrderBag() {
+        return OrderBag.builder()
+            .id(1L)
+            .amount(1)
+            .price(150_00L)
+            .capacity(20)
+            .name("Бавовняна сумка")
+            .bag(getBag())
+            .order(getOrder())
+            .build();
     }
 
     public static Location getLocation() {
@@ -2664,6 +2728,7 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
+            .status(BagStatus.ACTIVE)
             .build();
     }
 
@@ -2713,6 +2778,22 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("Name")
             .nameEng("NameEng")
+            .status(ServiceStatus.ACTIVE)
+            .build();
+    }
+
+    public static Service getServiceDeleted() {
+        Employee employee = ModelUtils.getEmployee();
+        return Service.builder()
+            .id(1L)
+            .price(100_00L)
+            .createdAt(LocalDate.now())
+            .createdBy(employee)
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("Name")
+            .nameEng("NameEng")
+            .status(ServiceStatus.DELETED)
             .build();
     }
 
@@ -2726,6 +2807,7 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("Name")
             .nameEng("NameEng")
+            .status(ServiceStatus.ACTIVE)
             .build();
     }
 

@@ -20,15 +20,6 @@
         <addColumn tableName="order_bag_mapping">
             <column name="name_eng" type="varchar(30)"/>
         </addColumn>
-        <addColumn tableName="order_bag_mapping">
-            <column name="description" type="varchar"/>
-        </addColumn>
-        <addColumn tableName="order_bag_mapping">
-            <column name="description_eng" type="varchar"/>
-        </addColumn>
-        <addColumn tableName="order_bag_mapping">
-            <column name="bag_status" type="varchar(30)"/>
-        </addColumn>
 
         <addForeignKeyConstraint baseTableName="order_bag_mapping"
                                  baseColumnNames="bag_id"
@@ -42,10 +33,7 @@
                     capacity=bag.capacity,
                     price=bag.full_price,
                     name=bag.name,
-                    name_eng=bag.name_eng,
-                    description=bag.description,
-                    description_eng=bag.description_eng,
-                    bag_status=bag.status
+                    name_eng=bag.name_eng
             from bag
             where bag_id=bag.id
         </sql>
@@ -55,9 +43,6 @@
         <addNotNullConstraint tableName="order_bag_mapping" columnName="price"/>
         <addNotNullConstraint tableName="order_bag_mapping" columnName="name"/>
         <addNotNullConstraint tableName="order_bag_mapping" columnName="name_eng"/>
-        <addNotNullConstraint tableName="order_bag_mapping" columnName="description"/>
-        <addNotNullConstraint tableName="order_bag_mapping" columnName="description_eng"/>
-        <addNotNullConstraint tableName="order_bag_mapping" columnName="bag_status"/>
     </changeSet>
 
 </databaseChangeLog>
