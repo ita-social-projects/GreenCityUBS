@@ -16,6 +16,7 @@ import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.*;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.entity.order.Courier;
+import greencity.enums.LocationStatus;
 import greencity.filters.TariffsInfoFilterCriteria;
 
 import java.util.List;
@@ -114,12 +115,13 @@ public interface SuperAdminService {
     List<LocationInfoDto> getAllLocation();
 
     /**
-     * Method for get all info about active locations.
+     * Method for getting info about locations by LocationStatus.
      *
+     * @param locationStatus {@link LocationStatus} - status of searched locations.
      * @return {@link LocationInfoDto}.
-     * @author Safarov Renat.
+     * @author Maksym Lenets.
      */
-    List<LocationInfoDto> getActiveLocations();
+    List<LocationInfoDto> getLocationsByStatus(LocationStatus locationStatus);
 
     /**
      * Method for adding location.

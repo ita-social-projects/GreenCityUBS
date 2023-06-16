@@ -24,6 +24,7 @@ import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
+import greencity.enums.LocationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
@@ -154,7 +155,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_PRICE_CARD', authentication)")
     @PutMapping("/editTariffService/{id}")
     public ResponseEntity<GetTariffServiceDto> editTariffService(
-        @RequestBody TariffServiceDto dto,
+        @Valid @RequestBody TariffServiceDto dto,
         @Valid @PathVariable Integer id,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editTariffService(dto, id, uuid));
@@ -282,21 +283,43 @@ class SuperAdminController {
     }
 
     /**
-     * Get all info about active locations, and min amount of bag for locations.
+     * Get all info about active locations.
      *
      * @return {@link LocationInfoDto}
      * @author Safarov Renat
      */
-    @ApiOperation(value = "Get info about active locations and min amount of bags for every location")
+    @ApiOperation(value = "Get all active locations")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationInfoDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/getActiveLocations")
     public ResponseEntity<List<LocationInfoDto>> getActiveLocations() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getActiveLocations());
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(superAdminService.getLocationsByStatus(LocationStatus.ACTIVE));
+    }
+
+    /**
+     * Get all deactivated locations.
+     *
+     * @return {@link LocationInfoDto}
+     * @author Maksym Lenets
+     */
+    @ApiOperation(value = "Get all deactivated locations")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationInfoDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
+    @GetMapping("/getDeactivatedLocations")
+    public ResponseEntity<List<LocationInfoDto>> getDeactivatedLocations() {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(superAdminService.getLocationsByStatus(LocationStatus.DEACTIVATED));
     }
 
     /**

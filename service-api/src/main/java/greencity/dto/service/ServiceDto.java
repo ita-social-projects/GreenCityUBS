@@ -6,7 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -16,18 +21,23 @@ import javax.validation.constraints.NotNull;
 @Builder
 @ToString
 public class ServiceDto {
-    @NotNull
+    @NotBlank
+    @Length(max = 30)
     private String name;
 
-    @NotNull
+    @NotBlank
+    @Length(max = 30)
     private String nameEng;
 
-    @NotNull
+    @NotBlank
     private String description;
 
-    @NotNull
+    @NotBlank
     private String descriptionEng;
 
     @NotNull
-    private Integer price;
+    @DecimalMin(value = "0.01")
+    @DecimalMax(value = "999999.99")
+    @Digits(integer = 6, fraction = 2)
+    private Double price;
 }

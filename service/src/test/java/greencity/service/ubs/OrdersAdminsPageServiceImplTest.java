@@ -219,6 +219,7 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(addressList);
         when(addressRepository.findDistinctCities())
             .thenReturn(addressList);
+
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 

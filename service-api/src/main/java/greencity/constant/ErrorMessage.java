@@ -65,7 +65,7 @@ public final class ErrorMessage {
     public static final String INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION =
         "Cannot add a violation to order with this status: ";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
-    public static final String NOT_ENOUGH_BIG_BAGS_EXCEPTION = "Not enough big bags, minimal amount is:";
+    public static final String NOT_ENOUGH_BAGS_EXCEPTION = "Not enough bags, minimal amount is: ";
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
     public static final String NOTIFICATION_STATUS_DOES_NOT_EXIST = "Notification status does not exist ";
     public static final String NOTIFICATION_DOES_NOT_BELONG_TO_USER = "This notification does not belong to user";
@@ -77,7 +77,7 @@ public final class ErrorMessage {
     public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
-    public static final String TO_MUCH_BIG_BAG_EXCEPTION = "You choose to much big bag's max amount is: ";
+    public static final String TO_MUCH_BAG_EXCEPTION = "You choose to much bags, maximum amount is: ";
     public static final String PRICE_OF_ORDER_GREATER_THAN_LIMIT =
         "The price of you're order without discount is greater than allowable limit: ";
     public static final String PRICE_OF_ORDER_LOWER_THAN_LIMIT =
@@ -105,6 +105,8 @@ public final class ErrorMessage {
     public static final String LANGUAGE_ERROR = "Invalid language code";
     public static final String TARIFF_NOT_FOUND = "Couldn't found tariff with id: ";
     public static final String TARIFF_FOR_LOCATION_NOT_EXIST = "Could not find tariff for location with id: ";
+    public static final String TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST =
+        "Could not find tariff for courier with id: %d and location with id: %d ";
     public static final String TARIFF_OR_LOCATION_IS_DEACTIVATED = "Tariff or location is deactivated.";
     public static final String TARIFF_IS_ALREADY_EXISTS = "Tariff for such locations is already exists";
     public static final String USER_HAS_NOT_BEEN_DEACTIVATED = "User has not been deactivated";
@@ -148,6 +150,8 @@ public final class ErrorMessage {
         "Date of export not specified for the order with ID: ";
     public static final String EMPTY_ORDERS_ID_COLLECTION = "Request should contain at least one order ID";
     public static final String ORDER_IS_BLOCKED = "The order has been blocked by employee with ID: ";
+    public static final String REGIONS_NOT_FOUND_BY_LOCATION_STATUS =
+        "Regions containing locations with a status: %s, not found";
 
     /**
      * Constructor.

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -22,17 +23,17 @@ public class GetServiceDto {
     private Long id;
 
     @NotNull
-    private Integer price;
+    private Double price;
 
-    @NotNull
+    @NotBlank
     private String name;
 
-    @NotNull
+    @NotBlank
     private String nameEng;
 
-    @NotNull
+    @NotBlank
     private String description;
 
-    @NotNull
+    @NotBlank
     private String descriptionEng;
 }

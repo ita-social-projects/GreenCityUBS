@@ -310,8 +310,8 @@ public class ModelUtils {
     public static TariffServiceDto getTariffServiceDto() {
         return TariffServiceDto.builder()
             .capacity(120)
-            .commission(10)
-            .price(100)
+            .commission(10.)
+            .price(100.)
             .name("Test")
             .nameEng("a")
             .description("Description")
@@ -323,7 +323,7 @@ public class ModelUtils {
         return ServiceDto.builder()
             .name("Name")
             .nameEng("NameEng")
-            .price(100)
+            .price(100.)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .build();
@@ -334,8 +334,8 @@ public class ModelUtils {
             .id(1)
             .name("Бавовняна сумка")
             .capacity(120)
-            .price(120)
-            .commission(50)
+            .price(120.)
+            .commission(50.)
             .description("Description")
             .limitIncluded(true)
             .build();
@@ -358,7 +358,7 @@ public class ModelUtils {
             .id(1L)
             .name("Name")
             .nameEng("NameEng")
-            .price(100)
+            .price(100.)
             .description("Description")
             .descriptionEng("DescriptionEng")
             .build();

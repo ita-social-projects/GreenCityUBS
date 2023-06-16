@@ -1,6 +1,12 @@
 package greencity.dto.bag;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -12,7 +18,7 @@ import lombok.*;
 public class BagOrderDto {
     private Integer bagId;
     private Integer capacity;
-    private Integer price;
+    private Double price;
     private String name;
     private String nameEng;
     private Integer bagAmount;

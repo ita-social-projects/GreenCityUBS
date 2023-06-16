@@ -11,7 +11,7 @@ import lombok.*;
 public class OrderDetailInfoDto {
     Long orderId;
     Integer capacity;
-    Integer price;
+    Double price;
     Integer amount;
     Integer exportedQuantity;
     Integer confirmedQuantity;

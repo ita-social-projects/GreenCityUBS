@@ -83,12 +83,12 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyUnpaidOrders() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
-                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    order.getId().toString());
+                .findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(order.getId(),
+                    NotificationType.UNPAID_ORDER);
             if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
-                BigDecimal amountToPay = getAmountToPay(order);
+                Double amountToPay = getAmountToPay(order);
                 Set<NotificationParameter> notificationParameters =
                     initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
                 fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
@@ -107,7 +107,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order,
-        BigDecimal amountToPay) {
+        Double amountToPay) {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         parameters.add(NotificationParameter.builder()
@@ -178,7 +178,7 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyHalfPaidPackage(Order order) {
-        BigDecimal amountToPay = getAmountToPay(order);
+        Double amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
@@ -197,7 +197,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyUnpaidOrder(Order order) {
-        BigDecimal amountToPay = getAmountToPay(order);
+        Double amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
@@ -215,27 +215,21 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private BigDecimal getAmountToPay(Order order) {
-        long bonuses = order.getPointsToUse() == null ? 0L : order.getPointsToUse().longValue();
-        long certificates = order.getCertificates() == null ? 0L
-            : order.getCertificates().stream()
+    private Double getAmountToPay(Order order) {
+        long bonusesInCoins = order.getPointsToUse() == null ? 0L : order.getPointsToUse() * 100L;
+        long certificatesInCoins = order.getCertificates() == null ? 0L
+            : 100L * order.getCertificates().stream()
                 .map(Certificate::getPoints)
-                .reduce(0, Integer::sum)
-                .longValue();
+                .reduce(0, Integer::sum);
 
-        long paidAmountCoins = order.getPayment() == null ? 0L
+        long paidAmountInCoins = order.getPayment() == null ? 0L
             : order.getPayment().stream()
                 .filter(payment -> payment.getPaymentStatus() == PaymentStatus.PAID)
                 .map(Payment::getAmount)
                 .reduce(0L, Long::sum);
 
-        int amountOfDecimalsAfterPoint = 2;
-        BigDecimal paidAmountUah =
-            new BigDecimal(paidAmountCoins).divide(AppConstant.AMOUNT_OF_COINS_IN_ONE_UAH,
-                amountOfDecimalsAfterPoint, RoundingMode.HALF_UP);
-
-        long ubsCourierSum = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
-        long writeStationSum = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
+        long ubsCourierSumInCoins = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
+        long writeStationSumInCoins = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
 
         List<Bag> bagsType = bagRepository.findBagsByOrderId(order.getId());
         Map<Integer, Integer> bagsAmount;
@@ -247,16 +241,18 @@ public class NotificationServiceImpl implements NotificationService {
             bagsAmount = order.getAmountOfBagsOrdered();
         }
 
-        long totalPrice = bagsAmount.entrySet().stream()
+        long totalPriceInCoins = bagsAmount.entrySet().stream()
             .map(entry -> entry.getValue() * getBagPrice(entry.getKey(), bagsType))
-            .reduce(0, Integer::sum)
-            .longValue();
+            .reduce(0L, Long::sum);
 
-        long unPaidAmount = totalPrice - bonuses - certificates + ubsCourierSum + writeStationSum;
-        return new BigDecimal(unPaidAmount).subtract(paidAmountUah);
+        long unPaidAmountInCoins = totalPriceInCoins - bonusesInCoins - certificatesInCoins + ubsCourierSumInCoins
+            + writeStationSumInCoins;
+        return BigDecimal.valueOf(unPaidAmountInCoins - paidAmountInCoins)
+            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+            .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP).doubleValue();
     }
 
-    private int getBagPrice(Integer bagId, List<Bag> bagsType) {
+    private long getBagPrice(Integer bagId, List<Bag> bagsType) {
         return bagsType.stream()
             .filter(b -> b.getId().equals(bagId))
             .findFirst()
@@ -271,9 +267,11 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyAllHalfPaidPackages() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.HALF_PAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
-                .findLastNotificationByNotificationTypeAndOrderNumber(
-                    NotificationType.UNPAID_PACKAGE.toString(),
-                    order.getId().toString());
+                .findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(
+                    order.getId(),
+                    NotificationType.UNPAID_PACKAGE,
+                    NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF,
+                    NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
             if (checkIfHalfPaidPackageNeedsNotification(order, lastNotification)) {
                 notifyHalfPaidPackage(order);
             }

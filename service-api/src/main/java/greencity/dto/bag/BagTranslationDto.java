@@ -4,14 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
 import javax.validation.constraints.Min;
 import java.io.Serializable;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
@@ -25,7 +23,7 @@ public class BagTranslationDto implements Serializable {
     @NonNull
     private Integer capacity;
     @NonNull
-    private Integer price;
+    private Double price;
     @NonNull
     private String nameEng;
     @NonNull
