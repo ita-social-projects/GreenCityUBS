@@ -130,7 +130,6 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.ServiceStatus;
 import greencity.enums.TariffStatus;
 import greencity.util.Bot;
 import org.springframework.data.domain.Page;
@@ -2588,6 +2587,23 @@ public class ModelUtils {
             .build();
     }
 
+    public static Bag getBagForOrder() {
+        return Bag.builder()
+            .id(3)
+            .capacity(120)
+            .commission(50_00L)
+            .price(350_00L)
+            .fullPrice(400_00L)
+            .createdAt(LocalDate.now())
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .limitIncluded(true)
+            .tariffsInfo(getTariffInfo())
+            .build();
+    }
+
     public static TariffServiceDto getTariffServiceDto() {
         return TariffServiceDto.builder()
             .name("Бавовняна сумка")
@@ -2778,24 +2794,9 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("Name")
             .nameEng("NameEng")
-            .status(ServiceStatus.ACTIVE)
             .build();
     }
 
-    public static Service getServiceDeleted() {
-        Employee employee = ModelUtils.getEmployee();
-        return Service.builder()
-            .id(1L)
-            .price(100_00L)
-            .createdAt(LocalDate.now())
-            .createdBy(employee)
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .name("Name")
-            .nameEng("NameEng")
-            .status(ServiceStatus.DELETED)
-            .build();
-    }
 
     public static Service getNewService() {
         Employee employee = ModelUtils.getEmployee();
@@ -2807,7 +2808,6 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("Name")
             .nameEng("NameEng")
-            .status(ServiceStatus.ACTIVE)
             .build();
     }
 

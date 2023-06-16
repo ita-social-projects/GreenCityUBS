@@ -190,7 +190,7 @@ public class Order {
     private List<OrderBag> orderBags = new ArrayList<>();
 
     /**
-     * method, that helps to save OrderBag.
+     * method helps to add OrderBag.
      *
      * @param orderBag {@link OrderBag}
      * @author Julia Seti
@@ -198,5 +198,16 @@ public class Order {
     public void addOrderBag(OrderBag orderBag) {
         this.orderBags.add(orderBag);
         orderBag.setOrder(this);
+    }
+
+    /**
+     * method helps to delete OrderBag.
+     *
+     * @param orderBag {@link OrderBag}
+     * @author Julia Seti
+     */
+    public void removeOrderBag(OrderBag orderBag) {
+        this.orderBags.remove(orderBag);
+        orderBag.setOrder(null);
     }
 }

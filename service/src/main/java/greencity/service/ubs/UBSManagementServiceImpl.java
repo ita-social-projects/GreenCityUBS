@@ -364,7 +364,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(bag -> modelMapper.map(bag, BagInfoDto.class))
             .collect(Collectors.toList());
 
-        Long servicePriceInCoins = serviceRepository.findActiveServiceByTariffsInfoId(order.getTariffsInfo().getId())
+        Long servicePriceInCoins = serviceRepository.findServiceByTariffsInfoId(order.getTariffsInfo().getId())
             .map(it -> it.getPrice())
             .orElse(0L);
 

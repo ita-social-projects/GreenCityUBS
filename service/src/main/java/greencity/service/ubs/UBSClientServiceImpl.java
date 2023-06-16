@@ -166,7 +166,7 @@ import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
 import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
-import static greencity.constant.ErrorMessage.NOT_ENOUGH_BIG_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
 import static greencity.constant.ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED;
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
@@ -185,7 +185,7 @@ import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
 import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
-import static greencity.constant.ErrorMessage.TO_MUCH_BIG_BAG_EXCEPTION;
+import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
@@ -242,7 +242,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String resultUrlForPersonalCabinetOfUser;
     @Value("${greencity.redirect.result-url-fondy}")
     private String resultUrlFondy;
-    private static final Integer BAG_CAPACITY = 120;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
@@ -425,7 +424,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap,
             dto.getBags(), tariffsInfo);
-        checkSumIfCourierLimitBySumOfOrder(tariffsInfo, sumToPayWithoutDiscountInCoins);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
 
@@ -1193,10 +1191,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
             && courierLocation.getMin() > countOfBigBag) {
             throw new BadRequestException(
-                NOT_ENOUGH_BIG_BAGS_EXCEPTION + courierLocation.getMin());
+                NOT_ENOUGH_BAGS_EXCEPTION + courierLocation.getMin());
         } else if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
             && courierLocation.getMax() < countOfBigBag) {
-            throw new BadRequestException(TO_MUCH_BIG_BAG_EXCEPTION + courierLocation.getMax());
+            throw new BadRequestException(TO_MUCH_BAG_EXCEPTION + courierLocation.getMax());
         }
     }
 
@@ -1216,18 +1214,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     private long formBagsToBeSavedAndCalculateOrderSum(
         Map<Integer, Integer> map, List<BagDto> bags, TariffsInfo tariffsInfo) {
         long sumToPayInCoins = 0L;
-        int bigBagCounter = 0;
 
         for (BagDto temp : bags) {
             Bag bag = tryToGetBagById(temp.getId());
-            if (bag.getCapacity() >= BAG_CAPACITY) {
-                bigBagCounter += temp.getAmount();
+            if (bag.getLimitIncluded().booleanValue()) {
+                checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, temp.getAmount());
+                checkSumIfCourierLimitBySumOfOrder(tariffsInfo, bag.getFullPrice() * temp.getAmount());
             }
             sumToPayInCoins += bag.getFullPrice() * temp.getAmount();
             map.put(temp.getId(), temp.getAmount());
         }
-
-        checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, bigBagCounter);
         return sumToPayInCoins;
     }
 

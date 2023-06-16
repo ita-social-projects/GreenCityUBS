@@ -24,7 +24,6 @@ import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Courier;
-import greencity.entity.order.OrderBag;
 import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
@@ -325,16 +324,14 @@ class SuperAdminServiceImplTest {
         Employee employee = ModelUtils.getEmployee();
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
-        OrderBag orderBag = ModelUtils.getOrderBag();
-        OrderBag editedOrderBag = ModelUtils.getEditedOrderBag();
         String uuid = UUID.randomUUID().toString();
 
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(editedBag)).thenReturn(editedBag);
         when(modelMapper.map(editedBag, GetTariffServiceDto.class)).thenReturn(editedDto);
-        when(orderBagRepository.findAllOrderBagsForUnpaidOrdersByBagId(1)).thenReturn(List.of(orderBag));
-        when(orderBagRepository.saveAll(List.of(editedOrderBag))).thenReturn(List.of(editedOrderBag));
+        doNothing().when(orderBagRepository)
+                .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 
@@ -343,8 +340,8 @@ class SuperAdminServiceImplTest {
         verify(bagRepository).findActiveBagById(1);
         verify(bagRepository).save(editedBag);
         verify(modelMapper).map(editedBag, GetTariffServiceDto.class);
-        verify(orderBagRepository).findAllOrderBagsForUnpaidOrdersByBagId(1);
-        verify(orderBagRepository).saveAll(List.of(editedOrderBag));
+        verify(orderBagRepository)
+                .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
     }
 
     @Test
@@ -360,7 +357,8 @@ class SuperAdminServiceImplTest {
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(editedBag)).thenReturn(editedBag);
         when(modelMapper.map(editedBag, GetTariffServiceDto.class)).thenReturn(editedDto);
-        when(orderBagRepository.findAllOrderBagsForUnpaidOrdersByBagId(1)).thenReturn(Collections.emptyList());
+        doNothing().when(orderBagRepository)
+                .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 
@@ -369,7 +367,8 @@ class SuperAdminServiceImplTest {
         verify(bagRepository).findActiveBagById(1);
         verify(bagRepository).save(editedBag);
         verify(modelMapper).map(editedBag, GetTariffServiceDto.class);
-        verify(orderBagRepository).findAllOrderBagsForUnpaidOrdersByBagId(1);
+        verify(orderBagRepository)
+                .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         verify(orderBagRepository, never()).saveAll(anyList());
     }
 
@@ -416,26 +415,26 @@ class SuperAdminServiceImplTest {
     @Test
     void deleteService() {
         Service service = ModelUtils.getService();
-        Service deletedService = ModelUtils.getServiceDeleted();
 
-        when(serviceRepository.findActiveServiceById(service.getId())).thenReturn(Optional.of(service));
-        when(serviceRepository.save(deletedService)).thenReturn(deletedService);
+        when(serviceRepository.findById(service.getId())).thenReturn(Optional.of(service));
 
         superAdminService.deleteService(1L);
 
-        verify(serviceRepository).findActiveServiceById(1L);
-        verify(serviceRepository).save(deletedService);
+        verify(serviceRepository).findById(1L);
+        verify(serviceRepository).delete(service);
     }
 
     @Test
     void deleteServiceThrowNotFoundException() {
-        when(serviceRepository.findActiveServiceById(1L)).thenReturn(Optional.empty());
+        Service service = ModelUtils.getService();
+
+        when(serviceRepository.findById(service.getId())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> superAdminService.deleteService(1L));
+                () -> superAdminService.deleteService(1L));
 
-        verify(serviceRepository).findActiveServiceById(1L);
-        verify(serviceRepository, never()).save(any(Service.class));
+        verify(serviceRepository).findById(1L);
+        verify(serviceRepository, never()).delete(service);
     }
 
     @Test
@@ -445,13 +444,13 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(serviceRepository.findActiveServiceByTariffsInfoId(1L)).thenReturn(Optional.of(service));
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(service));
         when(modelMapper.map(service, GetServiceDto.class)).thenReturn(getServiceDto);
 
         assertEquals(getServiceDto, superAdminService.getService(1L));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(serviceRepository).findActiveServiceByTariffsInfoId(1L);
+        verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(modelMapper).map(service, GetServiceDto.class);
     }
 
@@ -460,12 +459,12 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(serviceRepository.findActiveServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
 
         assertNull(superAdminService.getService(1L));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(serviceRepository).findActiveServiceByTariffsInfoId(1L);
+        verify(serviceRepository).findServiceByTariffsInfoId(1L);
     }
 
     @Test
@@ -486,14 +485,14 @@ class SuperAdminServiceImplTest {
         GetServiceDto getServiceDto = ModelUtils.getGetServiceDto();
         String uuid = UUID.randomUUID().toString();
 
-        when(serviceRepository.findActiveServiceById(1L)).thenReturn(Optional.of(service));
+        when(serviceRepository.findById(1L)).thenReturn(Optional.of(service));
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(serviceRepository.save(service)).thenReturn(service);
         when(modelMapper.map(service, GetServiceDto.class)).thenReturn(getServiceDto);
 
         assertEquals(getServiceDto, superAdminService.editService(1L, dto, uuid));
 
-        verify(serviceRepository).findActiveServiceById(1L);
+        verify(serviceRepository).findById(1L);
         verify(employeeRepository).findByUuid(uuid);
         verify(serviceRepository).save(service);
         verify(modelMapper).map(service, GetServiceDto.class);
@@ -504,12 +503,12 @@ class SuperAdminServiceImplTest {
         ServiceDto dto = ModelUtils.getServiceDto();
         String uuid = UUID.randomUUID().toString();
 
-        when(serviceRepository.findActiveServiceById(1L)).thenReturn(Optional.empty());
+        when(serviceRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.editService(1L, dto, uuid));
 
-        verify(serviceRepository).findActiveServiceById(1L);
+        verify(serviceRepository).findById(1L);
         verify(serviceRepository, never()).save(any(Service.class));
         verify(modelMapper, never()).map(any(Service.class), any(GetServiceDto.class));
     }
@@ -520,14 +519,14 @@ class SuperAdminServiceImplTest {
         ServiceDto dto = ModelUtils.getServiceDto();
         String uuid = UUID.randomUUID().toString();
 
-        when(serviceRepository.findActiveServiceById(1L)).thenReturn(Optional.of(service));
+        when(serviceRepository.findById(1L)).thenReturn(Optional.of(service));
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.editService(1L, dto, uuid));
 
         verify(employeeRepository).findByUuid(uuid);
-        verify(serviceRepository).findActiveServiceById(1L);
+        verify(serviceRepository).findById(1L);
         verify(serviceRepository, never()).save(any(Service.class));
         verify(modelMapper, never()).map(any(Service.class), any(GetServiceDto.class));
     }
@@ -542,7 +541,7 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         String uuid = UUID.randomUUID().toString();
 
-        when(serviceRepository.findActiveServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(serviceRepository.save(service)).thenReturn(createdService);
@@ -553,7 +552,7 @@ class SuperAdminServiceImplTest {
 
         verify(employeeRepository).findByUuid(uuid);
         verify(tariffsInfoRepository).findById(1L);
-        verify(serviceRepository).findActiveServiceByTariffsInfoId(1L);
+        verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(serviceRepository).save(service);
         verify(modelMapper).map(createdService, GetServiceDto.class);
         verify(modelMapper).map(createdService, GetServiceDto.class);
@@ -567,13 +566,13 @@ class SuperAdminServiceImplTest {
         String uuid = UUID.randomUUID().toString();
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(serviceRepository.findActiveServiceByTariffsInfoId(1L)).thenReturn(Optional.of(createdService));
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(createdService));
 
         assertThrows(ServiceAlreadyExistsException.class,
             () -> superAdminService.addService(1L, serviceDto, uuid));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(serviceRepository).findActiveServiceByTariffsInfoId(1L);
+        verify(serviceRepository).findServiceByTariffsInfoId(1L);
     }
 
     @Test
@@ -583,14 +582,14 @@ class SuperAdminServiceImplTest {
         String uuid = UUID.randomUUID().toString();
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(serviceRepository.findActiveServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.addService(1L, serviceDto, uuid));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(serviceRepository).findActiveServiceByTariffsInfoId(1L);
+        verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(employeeRepository).findByUuid(uuid);
     }
 

@@ -22,8 +22,8 @@ import javax.validation.constraints.Size;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
+@EqualsAndHashCode(exclude = {"order", "bag"})
+@ToString(exclude = {"order", "bag"})
 @Getter
 @Setter
 @Builder
