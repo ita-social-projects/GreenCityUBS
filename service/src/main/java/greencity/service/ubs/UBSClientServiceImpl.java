@@ -1217,7 +1217,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         for (BagDto temp : bags) {
             Bag bag = tryToGetBagById(temp.getId());
-            if (bag.getLimitIncluded()) {
+            if (bag.getLimitIncluded().booleanValue()) {
                 checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, temp.getAmount());
                 checkSumIfCourierLimitBySumOfOrder(tariffsInfo, bag.getFullPrice() * temp.getAmount());
             }
