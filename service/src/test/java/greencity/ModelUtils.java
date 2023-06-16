@@ -2556,6 +2556,23 @@ public class ModelUtils {
             .build();
     }
 
+    public static Bag getBagForOrder() {
+        return Bag.builder()
+            .id(3)
+            .capacity(120)
+            .commission(50_00L)
+            .price(350_00L)
+            .fullPrice(400_00L)
+            .createdAt(LocalDate.now())
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .limitIncluded(true)
+            .tariffsInfo(getTariffInfo())
+            .build();
+    }
+
     public static TariffServiceDto getTariffServiceDto() {
         return TariffServiceDto.builder()
             .name("Бавовняна сумка")

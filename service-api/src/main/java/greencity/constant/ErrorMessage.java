@@ -65,7 +65,7 @@ public final class ErrorMessage {
     public static final String INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION =
         "Cannot add a violation to order with this status: ";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
-    public static final String NOT_ENOUGH_BIG_BAGS_EXCEPTION = "Not enough big bags, minimal amount is:";
+    public static final String NOT_ENOUGH_BAGS_EXCEPTION = "Not enough bags, minimal amount is: ";
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
     public static final String NOTIFICATION_STATUS_DOES_NOT_EXIST = "Notification status does not exist ";
     public static final String NOTIFICATION_DOES_NOT_BELONG_TO_USER = "This notification does not belong to user";
@@ -77,7 +77,7 @@ public final class ErrorMessage {
     public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
-    public static final String TO_MUCH_BIG_BAG_EXCEPTION = "You choose to much big bag's max amount is: ";
+    public static final String TO_MUCH_BAG_EXCEPTION = "You choose to much bags, maximum amount is: ";
     public static final String PRICE_OF_ORDER_GREATER_THAN_LIMIT =
         "The price of you're order without discount is greater than allowable limit: ";
     public static final String PRICE_OF_ORDER_LOWER_THAN_LIMIT =
