@@ -92,4 +92,14 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      * @return {@code true} if exists, {@code else} otherwise.
      */
     boolean existsByNameUkAndNameEnAndRegion(String nameUk, String nameEn, Region region);
+
+    /**
+     * Method for finding locations by list of locations ids.
+     *
+     * @param locationIds - list of locations ids
+     * @return list of {@link Location}
+     * @author Anton Bondar
+     */
+    @Query(value = "select l from Location l where l.id in (:locationIds)")
+    Optional<List<Location>> findLocationsByLocationsIds(List<Long> locationIds);
 }

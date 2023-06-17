@@ -654,16 +654,17 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deactivateLocation() {
+    void deactivateLocationTest() {
         Location location = ModelUtils.getLocationDto();
         location.setLocationStatus(LocationStatus.ACTIVE);
 
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findLocationsByLocationsIds(List.of(1L, 2L)))
+            .thenReturn(Optional.of(List.of(location)));
 
-        superAdminService.deactivateLocation(1L);
+        superAdminService.deactivateLocations(List.of(1L, 2L));
 
-        verify(locationRepository).findById(1L);
-        verify(locationRepository).save(any());
+        verify(locationRepository).findLocationsByLocationsIds(List.of(1L, 2L));
+        verify(locationRepository).saveAll(any());
     }
 
     @Test
@@ -679,19 +680,20 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deactivateLocationExceptionTest() {
-        assertThrows(NotFoundException.class, () -> superAdminService.deactivateLocation(1L));
-        verify(locationRepository).findById(anyLong());
+    void deactivateLocationThrowNotFoundExceptionTest() {
+        assertThrows(NotFoundException.class, () -> superAdminService.deactivateLocations(List.of(1L, 2L)));
+        verify(locationRepository).findLocationsByLocationsIds(List.of(1L, 2L));
     }
 
     @Test
-    void deactivateLocationException2Test() {
+    void deactivateLocationThrowBadRequestExceptionTest() {
         Location location = ModelUtils.getLocationDto();
         location.setLocationStatus(LocationStatus.DEACTIVATED);
 
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-
-        assertThrows(BadRequestException.class, () -> superAdminService.deactivateLocation(1L));
+        when(locationRepository.findLocationsByLocationsIds(List.of(1L, 2L)))
+            .thenReturn(Optional.of(List.of(location)));
+        assertThrows(BadRequestException.class, () -> superAdminService.deactivateLocations(List.of(1L, 2L)));
+        verify(locationRepository).findLocationsByLocationsIds(List.of(1L, 2L));
     }
 
     @Test

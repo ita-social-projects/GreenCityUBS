@@ -345,23 +345,23 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for deactivating location by Id.
+     * Controller for deactivating locations by list of locations ids.
      *
-     * @param id - id of location
+     * @param locationIds - list of locations ids
      * @return {@link LocationInfoDto}
      * @author Vadym Makitra
      */
-    @ApiOperation(value = "Deactivate location by Id")
+    @ApiOperation(value = "Deactivate locations by locations ids")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationInfoDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION_CARD', authentication)")
-    @PatchMapping("/deactivateLocations/{id}")
+    @PatchMapping("/deactivateLocations")
     public ResponseEntity<HttpStatus> deactivateLocation(
-        @PathVariable Long id) {
-        superAdminService.deactivateLocation(id);
+        @RequestBody List<Long> locationIds) {
+        superAdminService.deactivateLocations(locationIds);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
