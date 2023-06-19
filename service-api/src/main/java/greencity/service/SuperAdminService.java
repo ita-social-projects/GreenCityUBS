@@ -134,9 +134,9 @@ public interface SuperAdminService {
     /**
      * Method for deactivating locations.
      *
-     * @param locationIds - list of locations ids
+     * @param locationsIds - list of locations ids
      */
-    void deactivateLocations(List<Long> locationIds);
+    void deactivateLocations(List<Long> locationsIds);
 
     /**
      * Method for activate location.

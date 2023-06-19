@@ -654,7 +654,7 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deactivateLocationTest() {
+    void deactivateLocationsTest() {
         Location location = ModelUtils.getLocationDto();
         location.setLocationStatus(LocationStatus.ACTIVE);
 
@@ -680,14 +680,14 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deactivateLocationThrowNotFoundExceptionTest() {
+    void deactivateLocationsThrowNotFoundExceptionTest() {
         List<Long> ids = List.of(1L, 2L);
         assertThrows(NotFoundException.class, () -> superAdminService.deactivateLocations(ids));
         verify(locationRepository).findLocationsByLocationsIds(List.of(1L, 2L));
     }
 
     @Test
-    void deactivateLocationThrowBadRequestExceptionTest() {
+    void deactivateLocationsThrowBadRequestExceptionTest() {
         Location location = ModelUtils.getLocationDto();
         location.setLocationStatus(LocationStatus.DEACTIVATED);
         List<Long> ids = List.of(1L, 2L);

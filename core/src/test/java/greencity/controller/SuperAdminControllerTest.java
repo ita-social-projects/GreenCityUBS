@@ -600,7 +600,7 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void deactivateLocation() throws Exception {
+    void deactivateLocationsTest() throws Exception {
         List<Long> ids = List.of(1L, 2L);
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(ids);
