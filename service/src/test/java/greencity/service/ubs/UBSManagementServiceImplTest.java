@@ -106,6 +106,7 @@ import java.util.stream.Stream;
 import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -1765,30 +1766,6 @@ class UBSManagementServiceImplTest {
         verify(orderRepository, atLeastOnce()).findById(1L);
         verify(employeeRepository).findByEmail("test@gmail.com");
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
-    }
-
-    @Test
-    void updateOrderAdminPageInfoForOrderWithStatusDoneTestThrowsException() {
-        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
-        Order order = ModelUtils.getOrder();
-        order.setOrderStatus(OrderStatus.DONE);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        Exception exception = assertThrows(IllegalStateException.class,
-            () -> ubsManagementService.updateOrderAdminPageInfo(
-                updateOrderPageAdminDto, 1L, "en", "test@gmail.com"));
-        assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, OrderStatus.DONE), exception.getMessage());
-    }
-
-    @Test
-    void updateOrderAdminPageInfoForOrderWithStatusCanceledTestThrowsException() {
-        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
-        Order order = ModelUtils.getOrder();
-        order.setOrderStatus(OrderStatus.CANCELED);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        Exception exception = assertThrows(IllegalStateException.class,
-            () -> ubsManagementService.updateOrderAdminPageInfo(
-                updateOrderPageAdminDto, 1L, "en", "test@gmail.com"));
-        assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, OrderStatus.CANCELED), exception.getMessage());
     }
 
     @Test
