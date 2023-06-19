@@ -148,6 +148,7 @@ public final class ErrorMessage {
         "Date of export not specified for the order with ID: ";
     public static final String EMPTY_ORDERS_ID_COLLECTION = "Request should contain at least one order ID";
     public static final String ORDER_IS_BLOCKED = "The order has been blocked by employee with ID: ";
+    public static final String ORDER_CAN_NOT_BE_UPDATED = "An order with the status: %s, can not be updated";
 
     /**
      * Constructor.
