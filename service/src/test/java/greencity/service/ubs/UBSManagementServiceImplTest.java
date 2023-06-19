@@ -1769,20 +1769,21 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void updateOrderAdminPageInfoForOrderWithStatusBroughtItHimselfIgnoreTestThrowsException() {
+    void updateOrderAdminPageInfoForOrderWithStatusBroughtItHimselfTest() {
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         updateOrderPageAdminDto.setGeneralOrderInfo(OrderDetailStatusRequestDto
             .builder()
             .orderStatus(String.valueOf(OrderStatus.DONE))
             .build());
 
+        LocalDateTime orderDate = LocalDateTime.now();
         TariffsInfo tariffsInfo = getTariffsInfo();
         Order expected = ModelUtils.getOrder();
-        expected.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        expected.setOrderDate(orderDate).setTariffsInfo(tariffsInfo);
         expected.setOrderStatus(OrderStatus.DONE);
 
         Order order = ModelUtils.getOrder();
-        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        order.setOrderDate(orderDate).setTariffsInfo(tariffsInfo);
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
 
         Employee employee = ModelUtils.getEmployee();
