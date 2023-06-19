@@ -59,7 +59,8 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Nazar Struk
      * @author José Castellanos
      */
-    @Query(value = "SELECT name, b.capacity, b.price, obm.amount, (b.price * obm.amount) AS summ "
+    @Query(value = "SELECT name, b.capacity, (b.price/100.00) AS price, "
+        + "obm.amount, ((b.price * obm.amount) / 100.00) AS summ "
         + "FROM bag b "
         + "JOIN order_bag_mapping obm on b.id = obm.bag_id "
         + "WHERE obm.ORDER_ID = :orderId", nativeQuery = true)
@@ -85,13 +86,4 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Safarov Renat
      */
     List<Bag> findBagsByTariffsInfoId(Long tariffInfoId);
-
-    /**
-     * method, that returns {@link List} of {@link Bag} by Tariff id.
-     *
-     * @param tariffId {@link Long} - tariff id.
-     * @return {@link List}of{@link Bag}.
-     * @author Julia Seti
-     */
-    List<Bag> getAllByTariffsInfoId(Long tariffId);
 }

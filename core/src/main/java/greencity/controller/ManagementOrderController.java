@@ -17,6 +17,8 @@ import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.GroupedOrderDto;
+import greencity.dto.order.NotTakenOrderReasonDto;
+import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
@@ -25,8 +27,6 @@ import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
-import greencity.dto.order.NotTakenOrderReasonDto;
-import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
@@ -54,12 +54,6 @@ import greencity.service.ubs.manager.BigOrderTableServiceView;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import javax.validation.Valid;
-import javax.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -83,6 +77,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/ubs/management")
@@ -387,7 +388,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/getPaymentInfo")
     public ResponseEntity<PaymentTableInfoDto> paymentInfo(@RequestParam long orderId,
-        @RequestParam Long sumToPay) {
+        @RequestParam Double sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getPaymentInfo(orderId, sumToPay));
     }
@@ -690,7 +691,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/return-overpayment-as-bonuses-info")
     public ResponseEntity<PaymentTableInfoDto> returnOverpaymentAsBonusesInfo(@RequestParam Long orderId,
-        @RequestParam Long sumToPay) {
+        @RequestParam Double sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.returnOverpaymentInfo(orderId, sumToPay, 2L));
     }
@@ -713,7 +714,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/return-overpayment-as-money-info")
     public ResponseEntity<PaymentTableInfoDto> returnOverpaymentAsMoneyInfo(@RequestParam Long orderId,
-        @RequestParam Long sumToPay) {
+        @RequestParam Double sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.returnOverpaymentInfo(orderId, sumToPay, 1L));
     }

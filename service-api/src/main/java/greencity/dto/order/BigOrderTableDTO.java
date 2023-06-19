@@ -28,12 +28,12 @@ public class BigOrderTableDTO {
     private SenderLocation address;
     private String commentToAddressForClient;
     private String bagsAmount;
-    private Long totalOrderSum;
+    private Double totalOrderSum;
     private String orderCertificateCode;
     private Long generalDiscount;
-    private Long amountDue;
+    private Double amountDue;
     private String commentForOrderByClient;
-    private Long totalPayment;
+    private Double totalPayment;
     private String dateOfExport;
     private String timeOfExport;
     private String idOrderFromShop;

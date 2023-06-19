@@ -54,7 +54,6 @@ class ManagementEmployeeControllerTest {
     private final String SAVE_LINK = "/save-employee";
     private final String UPDATE_LINK = "/update-employee";
     private final String FIND_ALL_LINK = "/getAll-employees";
-    private final String FIND_ALL_ACTIVE_LINK = "/getAll-active-employees";
     private final String DELETE_LINK = "/deactivate-employee";
     private final String GET_ALL_POSITIONS_LINK = "/get-all-positions";
     private final String DELETE_IMAGE_LINK = "/delete-employee-image/";
@@ -126,10 +125,10 @@ class ManagementEmployeeControllerTest {
         EmployeePage employeePage = new EmployeePage();
         EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
 
-        mockMvc.perform(get(UBS_LINK + FIND_ALL_ACTIVE_LINK))
+        mockMvc.perform(get(UBS_LINK + FIND_ALL_LINK))
             .andExpect(status().isOk());
 
-        verify(service).findAllActiveEmployees(employeePage, employeeFilterCriteria);
+        verify(service).findAll(employeePage, employeeFilterCriteria);
     }
 
     @Test
