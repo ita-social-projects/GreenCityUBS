@@ -654,19 +654,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deactivateLocation() {
-        Location location = ModelUtils.getLocationDto();
-        location.setLocationStatus(LocationStatus.ACTIVE);
-
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-
-        superAdminService.deactivateLocation(1L);
-
-        verify(locationRepository).findById(1L);
-        verify(locationRepository).save(any());
-    }
-
-    @Test
     void addLocationThrowLocationAlreadyCreatedExceptionTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Location location = ModelUtils.getLocation();
@@ -676,22 +663,6 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
 
         verify(locationRepository).findLocationByNameAndRegionId("Київ", "Kyiv", 1L);
-    }
-
-    @Test
-    void deactivateLocationExceptionTest() {
-        assertThrows(NotFoundException.class, () -> superAdminService.deactivateLocation(1L));
-        verify(locationRepository).findById(anyLong());
-    }
-
-    @Test
-    void deactivateLocationException2Test() {
-        Location location = ModelUtils.getLocationDto();
-        location.setLocationStatus(LocationStatus.DEACTIVATED);
-
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-
-        assertThrows(BadRequestException.class, () -> superAdminService.deactivateLocation(1L));
     }
 
     @Test

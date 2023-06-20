@@ -341,16 +341,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public void deactivateLocation(Long id) {
-        Location location = tryToFindLocationById(id);
-        if (LocationStatus.DEACTIVATED.equals(location.getLocationStatus())) {
-            throw new BadRequestException(ErrorMessage.LOCATION_STATUS_IS_ALREADY_EXIST);
-        }
-        location.setLocationStatus(LocationStatus.DEACTIVATED);
-        locationRepository.save(location);
-    }
-
-    @Override
     public void activateLocation(Long id) {
         Location location = tryToFindLocationById(id);
         if (LocationStatus.ACTIVE.equals(location.getLocationStatus())) {
