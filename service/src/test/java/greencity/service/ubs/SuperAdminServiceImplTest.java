@@ -654,20 +654,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deactivateLocationsTest() {
-        Location location = ModelUtils.getLocationDto();
-        location.setLocationStatus(LocationStatus.ACTIVE);
-
-        when(locationRepository.findLocationsByLocationsIds(List.of(1L, 2L)))
-            .thenReturn(Optional.of(List.of(location)));
-
-        superAdminService.deactivateLocations(List.of(1L, 2L));
-
-        verify(locationRepository).findLocationsByLocationsIds(List.of(1L, 2L));
-        verify(locationRepository).saveAll(any());
-    }
-
-    @Test
     void addLocationThrowLocationAlreadyCreatedExceptionTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Location location = ModelUtils.getLocation();
@@ -677,25 +663,6 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
 
         verify(locationRepository).findLocationByNameAndRegionId("Київ", "Kyiv", 1L);
-    }
-
-    @Test
-    void deactivateLocationsThrowNotFoundExceptionTest() {
-        List<Long> ids = List.of(1L, 2L);
-        assertThrows(NotFoundException.class, () -> superAdminService.deactivateLocations(ids));
-        verify(locationRepository).findLocationsByLocationsIds(List.of(1L, 2L));
-    }
-
-    @Test
-    void deactivateLocationsThrowBadRequestExceptionTest() {
-        Location location = ModelUtils.getLocationDto();
-        location.setLocationStatus(LocationStatus.DEACTIVATED);
-        List<Long> ids = List.of(1L, 2L);
-
-        when(locationRepository.findLocationsByLocationsIds(List.of(1L, 2L)))
-            .thenReturn(Optional.of(List.of(location)));
-        assertThrows(BadRequestException.class, () -> superAdminService.deactivateLocations(ids));
-        verify(locationRepository).findLocationsByLocationsIds(List.of(1L, 2L));
     }
 
     @Test

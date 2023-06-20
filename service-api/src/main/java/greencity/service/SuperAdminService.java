@@ -132,13 +132,6 @@ public interface SuperAdminService {
     void addLocation(List<LocationCreateDto> dto);
 
     /**
-     * Method for deactivating locations.
-     *
-     * @param locationsIds - list of locations ids
-     */
-    void deactivateLocations(List<Long> locationsIds);
-
-    /**
      * Method for activate location.
      *
      * @param id - id of Location

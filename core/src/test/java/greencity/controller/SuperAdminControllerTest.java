@@ -600,19 +600,6 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void deactivateLocationsTest() throws Exception {
-        List<Long> ids = List.of(1L, 2L);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(ids);
-
-        mockMvc.perform(patch(ubsLink + "/deactivateLocations")
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(json))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     void activateException() throws Exception {
         mockMvc.perform(patch(ubsLink + "/activeLocations/" + 1L)).andExpect(status().isOk());
     }
