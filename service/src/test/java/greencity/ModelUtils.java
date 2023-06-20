@@ -3080,7 +3080,7 @@ public class ModelUtils {
         return UpdateOrderPageAdminDto.builder()
             .generalOrderInfo(OrderDetailStatusRequestDto
                 .builder()
-                .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
+                .orderStatus(String.valueOf(OrderStatus.DONE))
                 .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
@@ -3112,14 +3112,14 @@ public class ModelUtils {
         return UpdateOrderPageAdminDto.builder()
             .generalOrderInfo(OrderDetailStatusRequestDto
                 .builder()
-                .orderStatus(String.valueOf(OrderStatus.BROUGHT_IT_HIMSELF))
+                .orderStatus(String.valueOf(OrderStatus.DONE))
                 .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
-                .dateExport(null)
-                .timeDeliveryFrom(null)
-                .timeDeliveryTo(null)
-                .receivingStationId(null)
+                .dateExport("2023-12-16T16:30")
+                .timeDeliveryFrom("2023-12-16T19:00")
+                .timeDeliveryTo("2023-12-16T20:30")
+                .receivingStationId(2L)
                 .build())
             .build();
     }
