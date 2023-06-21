@@ -17,4 +17,6 @@ public class PositionDto {
     private Long id;
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
     private String name;
+    @Pattern(regexp = "[A-Za-z-'\\s.]{1,30}")
+    private String name_eng;
 }

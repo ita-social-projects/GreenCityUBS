@@ -318,7 +318,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
     private Position buildPosition(AddingPositionDto dto) {
         return Position.builder()
-            .name(dto.getName())
+                .name(dto.getName())
+                .name_eng(dto.getName_eng())
             .build();
     }
 
