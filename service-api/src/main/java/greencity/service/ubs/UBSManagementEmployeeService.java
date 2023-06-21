@@ -5,6 +5,7 @@ import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.position.PositionWithTranslateDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
@@ -73,7 +74,7 @@ public interface UBSManagementEmployeeService {
      * @return {@link PositionDto}
      * @author Mykola Danylko
      */
-    List<PositionDto> getAllPositions();
+    List<PositionWithTranslateDto> getAllPositions();
 
     /**
      * Method deletes position by id.

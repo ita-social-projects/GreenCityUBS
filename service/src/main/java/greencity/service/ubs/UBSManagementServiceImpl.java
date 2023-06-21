@@ -1468,7 +1468,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Position> positions = positionRepository.findAll();
         Map<PositionDto, List<EmployeeNameIdDto>> allPositionEmployee = new HashMap<>();
         for (Position position : positions) {
-            PositionDto positionDto = PositionDto.builder().id(position.getId()).name(position.getName()).build();
+            PositionDto positionDto = PositionDto.builder()
+                    .id(position.getId())
+                    .name(position.getName())
+                    .name_eng(position.getName_eng())
+                    .build();
             allPositionEmployee.put(positionDto, listAvailableEmployeeWithPosition(order, position)
                 .stream().map(employee -> EmployeeNameIdDto.builder()
                     .id(employee.getId())
