@@ -207,4 +207,5 @@
     <include file="db/changelog/logs/ch-update-service-price-Seti.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Seti.xml"/>
     <include file="/db/changelog/logs/ch-modify-columns-name-name-eng-in-bag-and-service-tables.xml"/>
+    <include file="/db/changelog/logs/ch-add-column-position-Spodaryk.xml"/>
 </databaseChangeLog>
