@@ -47,6 +47,9 @@ public class EmployeeFilterView {
     @Column(name = "position_name")
     private String positionName;
 
+    @Column(name = "position_name_en")
+    private String positionNameEn;
+
     @Column(name = "region_id")
     private Long regionId;
 
