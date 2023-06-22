@@ -22,6 +22,9 @@ public class Position {
     @Column(nullable = false, length = 30, unique = true)
     private String name;
 
+    @Column(nullable = false, length = 30, unique = true, name = "name_eng")
+    private String nameEN;
+
     @ManyToMany(mappedBy = "employeePosition")
     private Set<Employee> employees;
 
