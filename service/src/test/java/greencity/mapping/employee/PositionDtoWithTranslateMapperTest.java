@@ -1,10 +1,7 @@
 package greencity.mapping.employee;
 
 import greencity.ModelUtils;
-import greencity.dto.position.PositionDto;
 import greencity.dto.position.PositionWithTranslateDto;
-import greencity.entity.user.employee.Position;
-import greencity.mapping.employee.PositionMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
