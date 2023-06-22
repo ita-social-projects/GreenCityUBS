@@ -2,6 +2,7 @@ package greencity.dto.position;
 
 import lombok.*;
 
+import javax.persistence.Column;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
@@ -18,5 +19,5 @@ public class PositionDto {
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
     private String name;
     @Pattern(regexp = "[A-Za-z-'\\s.]{1,30}")
-    private String name_eng;
+    private String nameEN;
 }

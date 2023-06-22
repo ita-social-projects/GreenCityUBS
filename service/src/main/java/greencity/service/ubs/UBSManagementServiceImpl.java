@@ -1461,7 +1461,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (!newList.isEmpty()) {
             Map<PositionDto, String> currentPositionEmployee = new HashMap<>();
             newList.forEach(x -> currentPositionEmployee.put(
-                PositionDto.builder().id(x.getPosition().getId()).name(x.getPosition().getName()).build(),
+                PositionDto.builder()
+                    .id(x.getPosition().getId())
+                    .name(x.getPosition().getName())
+                    .nameEN(x.getPosition().getNameEN())
+                    .build(),
                 x.getEmployee().getFirstName().concat(" ").concat(x.getEmployee().getLastName())));
             dto.setCurrentPositionEmployees(currentPositionEmployee);
         }
@@ -1469,10 +1473,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Map<PositionDto, List<EmployeeNameIdDto>> allPositionEmployee = new HashMap<>();
         for (Position position : positions) {
             PositionDto positionDto = PositionDto.builder()
-                    .id(position.getId())
-                    .name(position.getName())
-                    .name_eng(position.getName_eng())
-                    .build();
+                .id(position.getId())
+                .name(position.getName())
+                .nameEN(position.getNameEN())
+                .build();
             allPositionEmployee.put(positionDto, listAvailableEmployeeWithPosition(order, position)
                 .stream().map(employee -> EmployeeNameIdDto.builder()
                     .id(employee.getId())

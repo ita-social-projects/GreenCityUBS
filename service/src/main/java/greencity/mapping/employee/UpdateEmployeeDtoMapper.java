@@ -13,18 +13,18 @@ public class UpdateEmployeeDtoMapper extends AbstractConverter<EmployeeWithTarif
     @Override
     protected Employee convert(EmployeeWithTariffsIdDto employeeWithTariffsIdDto) {
         return Employee.builder()
-                .id(employeeWithTariffsIdDto.getEmployeeDto().getId())
-                .firstName(employeeWithTariffsIdDto.getEmployeeDto().getFirstName())
-                .lastName(employeeWithTariffsIdDto.getEmployeeDto().getLastName())
-                .email(employeeWithTariffsIdDto.getEmployeeDto().getEmail())
-                .phoneNumber(employeeWithTariffsIdDto.getEmployeeDto().getPhoneNumber())
-                .employeePosition(employeeWithTariffsIdDto.getEmployeeDto().getEmployeePositions().stream().map(
-                                positionDto -> Position.builder()
-                                        .id(positionDto.getId())
-                                        .name(positionDto.getName())
-                                        .name_eng(positionDto.getName_eng())
-                                        .build())
-                        .collect(Collectors.toSet()))
-                .build();
+            .id(employeeWithTariffsIdDto.getEmployeeDto().getId())
+            .firstName(employeeWithTariffsIdDto.getEmployeeDto().getFirstName())
+            .lastName(employeeWithTariffsIdDto.getEmployeeDto().getLastName())
+            .email(employeeWithTariffsIdDto.getEmployeeDto().getEmail())
+            .phoneNumber(employeeWithTariffsIdDto.getEmployeeDto().getPhoneNumber())
+            .employeePosition(employeeWithTariffsIdDto.getEmployeeDto().getEmployeePositions().stream()
+                .map(positionDto -> Position.builder()
+                    .id(positionDto.getId())
+                    .name(positionDto.getName())
+                    .nameEN(positionDto.getNameEN())
+                    .build())
+                .collect(Collectors.toSet()))
+            .build();
     }
 }

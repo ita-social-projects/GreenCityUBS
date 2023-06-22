@@ -96,7 +96,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
                 .map(position -> PositionDto.builder()
                     .id(position.getId())
                     .name(position.getName())
-                        .name_eng(position.getName_eng())
+                    .nameEN(position.getNameEN())
                     .build())
                 .collect(Collectors.toList()))
             .isUbs(true)
@@ -320,8 +320,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
     private Position buildPosition(AddingPositionDto dto) {
         return Position.builder()
-                .name(dto.getName())
-                .name_eng(dto.getName_eng())
+            .name(dto.getName())
+            .nameEN(dto.getNameEN())
             .build();
     }
 

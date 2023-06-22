@@ -12,24 +12,24 @@ import java.util.Map;
 
 /**
  * Class that used by {@link ModelMapper} to map {@link Position} into
- * {@link PositionDto}.
+ * {@link PositionDtoWithTranslateMapper}.
  */
 @Component
 public class PositionDtoWithTranslateMapper extends AbstractConverter<Position, PositionWithTranslateDto> {
     /**
      * Method convert {@link Position} to {@link PositionWithTranslateDto}.
      *
-     * @return {@link PositionDto}
+     * @return {@link PositionDtoWithTranslateMapper}
      */
     @Override
     protected PositionWithTranslateDto convert(Position position) {
         Map<String, String> nameTranslations = new HashMap<>();
         nameTranslations.put("ua", position.getName());
-        nameTranslations.put("en", position.getName_eng());
+        nameTranslations.put("en", position.getNameEN());
 
         return PositionWithTranslateDto.builder()
-                .id(position.getId())
-                .name(nameTranslations)
-                .build();
+            .id(position.getId())
+            .name(nameTranslations)
+            .build();
     }
 }
