@@ -349,6 +349,7 @@ class UBSManagementEmployeeServiceImplTest {
         assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
             + dto.getName());
     }
+
     @Test
     void getAllPositionTest() {
         when(positionRepository.findAll()).thenReturn(List.of(getPosition()));

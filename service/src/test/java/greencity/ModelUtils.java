@@ -1315,6 +1315,7 @@ public class ModelUtils {
                 .employeePositions(List.of(PositionDto.builder()
                     .id(1L)
                     .name("Водій")
+                    .nameEN("Driver")
                     .build()))
                 .build())
             .tariffId(List.of(1L))
