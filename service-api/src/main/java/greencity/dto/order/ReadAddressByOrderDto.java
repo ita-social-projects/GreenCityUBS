@@ -19,7 +19,7 @@ public class ReadAddressByOrderDto implements Serializable {
     private String entranceNumber;
     @Length(max = 5)
     private String houseCorpus;
-    @Length(max = 5)
+    @Length(max = 10)
     private String houseNumber;
     @Length(max = 50)
     private String street;
