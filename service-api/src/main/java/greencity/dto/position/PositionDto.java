@@ -5,13 +5,8 @@ import lombok.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-@EqualsAndHashCode
-@ToString
+@Data
 public class PositionDto {
     @Min(1)
     private Long id;
