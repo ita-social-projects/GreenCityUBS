@@ -349,14 +349,12 @@ class UBSManagementEmployeeServiceImplTest {
         assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
             + dto.getName());
     }
-
     @Test
     void getAllPositionTest() {
         when(positionRepository.findAll()).thenReturn(List.of(getPosition()));
-        when(modelMapper.map(any(), any())).thenReturn(getPositionDto(1L));
+        when(modelMapper.map(any(), any())).thenReturn(getPositionWithTranslateDto(1L));
 
         List<PositionWithTranslateDto> positionWithTranslateDtos = employeeService.getAllPositions();
-
         assertEquals(1, positionWithTranslateDtos.size());
 
         verify(positionRepository, times(1)).findAll();
