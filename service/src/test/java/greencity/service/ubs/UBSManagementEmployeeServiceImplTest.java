@@ -10,6 +10,7 @@ import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.position.PositionWithTranslateDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
@@ -354,9 +355,9 @@ class UBSManagementEmployeeServiceImplTest {
         when(positionRepository.findAll()).thenReturn(List.of(getPosition()));
         when(modelMapper.map(any(), any())).thenReturn(getPositionDto(1L));
 
-        List<PositionDto> positionDtos = employeeService.getAllPositions();
+        List<PositionWithTranslateDto> positionWithTranslateDtos = employeeService.getAllPositions();
 
-        assertEquals(1, positionDtos.size());
+        assertEquals(1, positionWithTranslateDtos.size());
 
         verify(positionRepository, times(1)).findAll();
     }

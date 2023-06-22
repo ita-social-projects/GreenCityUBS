@@ -1,6 +1,5 @@
 package greencity;
 
-//отут протестити дто
 import greencity.configuration.RedirectionConfigProp;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;

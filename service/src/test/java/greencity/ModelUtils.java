@@ -66,6 +66,7 @@ import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.position.PositionWithTranslateDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
@@ -1664,6 +1665,7 @@ public class ModelUtils {
         return Position.builder()
             .id(1L)
             .name("Водій")
+            .nameEN("Driver")
             .build();
     }
 
@@ -1671,6 +1673,7 @@ public class ModelUtils {
         return PositionDto.builder()
             .id(id)
             .name("Водій")
+            .nameEN("Driver")
             .build();
     }
 
@@ -4614,6 +4617,17 @@ public class ModelUtils {
         return PositionAuthoritiesDto.builder()
             .positionId(List.of(1L))
             .authorities(List.of("Auth"))
+            .build();
+    }
+
+    public static PositionWithTranslateDto getPositionWithTranslateDto(Long id) {
+        Map<String, String> nameTranslations = new HashMap<>();
+        nameTranslations.put("ua", "Водій");
+        nameTranslations.put("en", "Driver");
+
+        return PositionWithTranslateDto.builder()
+            .id(id)
+            .name(nameTranslations)
             .build();
     }
 }
