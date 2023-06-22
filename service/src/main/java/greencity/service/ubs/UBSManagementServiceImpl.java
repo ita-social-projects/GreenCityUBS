@@ -1465,7 +1465,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 PositionDto.builder()
                     .id(x.getPosition().getId())
                     .name(x.getPosition().getName())
-                    .nameEN(x.getPosition().getNameEN())
+                    .nameEn(x.getPosition().getNameEn())
                     .build(),
                 x.getEmployee().getFirstName().concat(" ").concat(x.getEmployee().getLastName())));
             dto.setCurrentPositionEmployees(currentPositionEmployee);
@@ -1476,7 +1476,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             PositionDto positionDto = PositionDto.builder()
                 .id(position.getId())
                 .name(position.getName())
-                .nameEN(position.getNameEN())
+                .nameEn(position.getNameEn())
                 .build();
             allPositionEmployee.put(positionDto, listAvailableEmployeeWithPosition(order, position)
                 .stream().map(employee -> EmployeeNameIdDto.builder()

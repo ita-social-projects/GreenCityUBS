@@ -243,7 +243,7 @@ public class ModelUtils {
         return PositionDto.builder()
             .id(1L)
             .name("Водій")
-            .nameEN("Driver")
+            .nameEn("Driver")
             .build();
     }
 
