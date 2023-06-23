@@ -13,6 +13,7 @@ import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.position.PositionWithTranslateDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
@@ -95,6 +96,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
                 .map(position -> PositionDto.builder()
                     .id(position.getId())
                     .name(position.getName())
+                    .nameEn(position.getNameEn())
                     .build())
                 .collect(Collectors.toList()))
             .isUbs(true)
@@ -319,6 +321,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private Position buildPosition(AddingPositionDto dto) {
         return Position.builder()
             .name(dto.getName())
+            .nameEn(dto.getNameEn())
             .build();
     }
 
@@ -326,9 +329,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
-    public List<PositionDto> getAllPositions() {
+    public List<PositionWithTranslateDto> getAllPositions() {
         return positionRepository.findAll().stream()
-            .map(p -> modelMapper.map(p, PositionDto.class))
+            .map(p -> modelMapper.map(p, PositionWithTranslateDto.class))
             .collect(Collectors.toList());
     }
 

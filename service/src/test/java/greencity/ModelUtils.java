@@ -66,6 +66,7 @@ import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.position.PositionWithTranslateDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
@@ -234,6 +235,7 @@ public class ModelUtils {
             .employeeId(employeeId)
             .positionId(positionId)
             .positionName("Водій")
+            .positionNameEn("Driver")
             .tariffsInfoId(tariffsInfoId)
             .firstName("First Name")
             .lastName("Last Name")
@@ -1098,6 +1100,7 @@ public class ModelUtils {
             .employeePositions(List.of(PositionDto.builder()
                 .id(1L)
                 .name("Водій")
+                .nameEn("Driver")
                 .build()))
             .receivingStations(List.of(ReceivingStationDto.builder()
                 .id(1L)
@@ -1118,6 +1121,7 @@ public class ModelUtils {
                 .employeePositions(List.of(PositionDto.builder()
                     .id(1L)
                     .name("Водій")
+                    .nameEn("Driver")
                     .build()))
                 .build())
             .tariffs(List.of(getTariffInfoForEmployeeDto()))
@@ -1167,6 +1171,7 @@ public class ModelUtils {
             .employeePosition(Set.of(Position.builder()
                 .id(1L)
                 .name("Водій")
+                .nameEn("Driver")
                 .build()))
             .tariffInfos(Set.of(TariffsInfo.builder()
                 .id(1L)
@@ -1187,6 +1192,7 @@ public class ModelUtils {
             .employeePosition(Set.of(Position.builder()
                 .id(1L)
                 .name("Водій")
+                .nameEn("Driver")
                 .build()))
             .tariffInfos(Set.of(getTariffsInfo()))
             .imagePath("path")
@@ -1224,6 +1230,7 @@ public class ModelUtils {
             .employeePosition(Set.of(Position.builder()
                 .id(1L)
                 .name("Водій")
+                .nameEn("Driver")
                 .build()))
             .tariffInfos(Set.of(TariffsInfo.builder()
                 .id(1L)
@@ -1245,6 +1252,7 @@ public class ModelUtils {
             .employeePosition(Set.of(Position.builder()
                 .id(1L)
                 .name("Водій")
+                .nameEn("Driver")
                 .build()))
             .tariffInfos(Set.of(TariffsInfo.builder()
                 .id(1L)
@@ -1307,6 +1315,7 @@ public class ModelUtils {
                 .employeePositions(List.of(PositionDto.builder()
                     .id(1L)
                     .name("Водій")
+                    .nameEn("Driver")
                     .build()))
                 .build())
             .tariffId(List.of(1L))
@@ -1325,6 +1334,7 @@ public class ModelUtils {
             .employeePositions(List.of(PositionDto.builder()
                 .id(1L)
                 .name("Водій")
+                .nameEn("Driver")
                 .build()))
             .tariffs(List.of(GetTariffInfoForEmployeeDto.builder()
                 .id(1L)
@@ -1664,6 +1674,7 @@ public class ModelUtils {
         return Position.builder()
             .id(1L)
             .name("Водій")
+            .nameEn("Driver")
             .build();
     }
 
@@ -1671,6 +1682,7 @@ public class ModelUtils {
         return PositionDto.builder()
             .id(id)
             .name("Водій")
+            .nameEn("Driver")
             .build();
     }
 
@@ -3080,7 +3092,7 @@ public class ModelUtils {
         return UpdateOrderPageAdminDto.builder()
             .generalOrderInfo(OrderDetailStatusRequestDto
                 .builder()
-                .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
+                .orderStatus(String.valueOf(OrderStatus.DONE))
                 .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
@@ -3112,14 +3124,14 @@ public class ModelUtils {
         return UpdateOrderPageAdminDto.builder()
             .generalOrderInfo(OrderDetailStatusRequestDto
                 .builder()
-                .orderStatus(String.valueOf(OrderStatus.BROUGHT_IT_HIMSELF))
+                .orderStatus(String.valueOf(OrderStatus.DONE))
                 .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
-                .dateExport(null)
-                .timeDeliveryFrom(null)
-                .timeDeliveryTo(null)
-                .receivingStationId(null)
+                .dateExport("2023-12-16T16:30")
+                .timeDeliveryFrom("2023-12-16T19:00")
+                .timeDeliveryTo("2023-12-16T20:30")
+                .receivingStationId(2L)
                 .build())
             .build();
     }
@@ -4614,6 +4626,17 @@ public class ModelUtils {
         return PositionAuthoritiesDto.builder()
             .positionId(List.of(1L))
             .authorities(List.of("Auth"))
+            .build();
+    }
+
+    public static PositionWithTranslateDto getPositionWithTranslateDto(Long id) {
+        Map<String, String> nameTranslations = new HashMap<>();
+        nameTranslations.put("ua", "Водій");
+        nameTranslations.put("en", "Driver");
+
+        return PositionWithTranslateDto.builder()
+            .id(id)
+            .name(nameTranslations)
             .build();
     }
 }

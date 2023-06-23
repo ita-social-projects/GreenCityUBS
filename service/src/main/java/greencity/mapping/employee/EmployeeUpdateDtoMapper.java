@@ -26,6 +26,7 @@ public class EmployeeUpdateDtoMapper extends AbstractConverter<Employee, Employe
                     .map(position -> PositionDto.builder()
                         .id(position.getId())
                         .name(position.getName())
+                        .nameEn(position.getNameEn())
                         .build())
                     .collect(Collectors.toList()))
                 .build())

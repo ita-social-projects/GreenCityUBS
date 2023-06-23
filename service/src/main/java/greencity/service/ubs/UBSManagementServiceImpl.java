@@ -133,6 +133,7 @@ import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -600,7 +601,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
                 if (Boolean.TRUE
-                    .equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
+                    .equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)
+                    && entry.getValue() != 0) {
                     orderDetailRepository.insertNewRecord(orderId, entry.getKey().longValue());
                     orderDetailRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
@@ -980,8 +982,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             eventService.saveEvent(OrderHistory.ADD_ADMIN_COMMENT, email, order);
             orderRepository.save(order);
         }
-        if (nonNull(dto.getOrderStatus())) {
+        if (nonNull(dto.getOrderStatus())
+            && (isNull(order.getOrderStatus()) || order.getOrderStatus().checkPossibleStatus(dto.getOrderStatus()))) {
             order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
+
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
                 notificationService.notifyCourierItineraryFormed(order);
                 eventService.saveEvent(OrderHistory.ORDER_ADJUSTMENT, email, order);
@@ -1458,14 +1462,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (!newList.isEmpty()) {
             Map<PositionDto, String> currentPositionEmployee = new HashMap<>();
             newList.forEach(x -> currentPositionEmployee.put(
-                PositionDto.builder().id(x.getPosition().getId()).name(x.getPosition().getName()).build(),
+                PositionDto.builder()
+                    .id(x.getPosition().getId())
+                    .name(x.getPosition().getName())
+                    .nameEn(x.getPosition().getNameEn())
+                    .build(),
                 x.getEmployee().getFirstName().concat(" ").concat(x.getEmployee().getLastName())));
             dto.setCurrentPositionEmployees(currentPositionEmployee);
         }
         List<Position> positions = positionRepository.findAll();
         Map<PositionDto, List<EmployeeNameIdDto>> allPositionEmployee = new HashMap<>();
         for (Position position : positions) {
-            PositionDto positionDto = PositionDto.builder().id(position.getId()).name(position.getName()).build();
+            PositionDto positionDto = PositionDto.builder()
+                .id(position.getId())
+                .name(position.getName())
+                .nameEn(position.getNameEn())
+                .build();
             allPositionEmployee.put(positionDto, listAvailableEmployeeWithPosition(order, position)
                 .stream().map(employee -> EmployeeNameIdDto.builder()
                     .id(employee.getId())
@@ -1579,52 +1591,63 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String email) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+
+        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DONE) {
+            throw new IllegalStateException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
+        }
+
         checkAvailableOrderForEmployee(order, email);
-        try {
-            if (nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
-                updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), email);
-            }
-            if (nonNull(updateOrderPageDto.getUserInfoDto())) {
-                ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
-            }
-            if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
-                updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), orderId, email);
-            }
-            setUbsCourierSumAndWriteOffStationSum(orderId, updateOrderPageDto.getWriteOffStationSum(),
-                updateOrderPageDto.getUbsCourierSum());
-            if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
-                updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), email);
-            }
-            if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
-                updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, email);
-            }
-            if (nonNull(updateOrderPageDto.getOrderDetailDto())) {
-                setOrderDetail(
-                    orderId,
-                    updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
-                    updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
-                    email);
-            }
-            if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
-                updateOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
-                    .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),
-                        dto.getEmployeeId().toString(),
-                        dto.getPositionId(),
-                        email));
-            } else {
-                if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
-                    List<EmployeeOrderPosition> employeeOrderPositions = employeeOrderPositionRepository
-                        .findAllByOrderId(orderId);
-                    if (!employeeOrderPositions.isEmpty()) {
-                        employeeOrderPositionRepository.deleteAll(employeeOrderPositions);
+
+        if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+            && nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
+            updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), email);
+        } else {
+            try {
+                if (nonNull(updateOrderPageDto.getUserInfoDto())) {
+                    ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
+                }
+                if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
+                    updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), orderId, email);
+                }
+                setUbsCourierSumAndWriteOffStationSum(orderId, updateOrderPageDto.getWriteOffStationSum(),
+                    updateOrderPageDto.getUbsCourierSum());
+                if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
+                    updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), email);
+                }
+                if (nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
+                    updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), email);
+                }
+                if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
+                    updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, email);
+                }
+                if (nonNull(updateOrderPageDto.getOrderDetailDto())) {
+                    setOrderDetail(
+                        orderId,
+                        updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                        updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
+                        email);
+                }
+                if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
+                    updateOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+                        .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),
+                            dto.getEmployeeId().toString(),
+                            dto.getPositionId(),
+                            email));
+                } else {
+                    if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
+                        List<EmployeeOrderPosition> employeeOrderPositions = employeeOrderPositionRepository
+                            .findAllByOrderId(orderId);
+                        if (!employeeOrderPositions.isEmpty()) {
+                            employeeOrderPositionRepository.deleteAll(employeeOrderPositions);
+                        }
                     }
                 }
+                if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
+                    notificationService.notifyUnpaidOrder(order);
+                }
+            } catch (Exception e) {
+                throw new BadRequestException(e.getMessage());
             }
-            if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-                notificationService.notifyUnpaidOrder(order);
-            }
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
         }
     }
 

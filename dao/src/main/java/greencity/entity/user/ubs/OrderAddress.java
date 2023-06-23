@@ -42,7 +42,7 @@ public class OrderAddress {
     @Column(nullable = false)
     private String district;
 
-    @Size(min = 1, max = 5)
+    @Size(min = 1, max = 10)
     @Column(name = "house_number", nullable = false)
     private String houseNumber;
 

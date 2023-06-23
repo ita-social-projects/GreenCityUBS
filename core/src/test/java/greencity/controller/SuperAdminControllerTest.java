@@ -600,11 +600,6 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void deactivateLocation() throws Exception {
-        mockMvc.perform(patch(ubsLink + "/deactivateLocations/" + 1L)).andExpect(status().isOk());
-    }
-
-    @Test
     void activateException() throws Exception {
         mockMvc.perform(patch(ubsLink + "/activeLocations/" + 1L)).andExpect(status().isOk());
     }

@@ -34,7 +34,7 @@ public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     private String addressHouseCorpus;
     @Length(min = 1, max = 4)
     private String addressEntranceNumber;
-    @Length(max = 5)
+    @Length(max = 10)
     private String addressHouseNumber;
     @Length(max = 15)
     private String addressCity;
