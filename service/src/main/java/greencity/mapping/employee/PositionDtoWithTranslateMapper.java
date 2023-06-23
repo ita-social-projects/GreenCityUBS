@@ -1,6 +1,5 @@
 package greencity.mapping.employee;
 
-import greencity.dto.position.PositionDto;
 import greencity.dto.position.PositionWithTranslateDto;
 import greencity.entity.user.employee.Position;
 import org.modelmapper.AbstractConverter;
