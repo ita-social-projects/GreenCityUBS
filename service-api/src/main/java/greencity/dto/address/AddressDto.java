@@ -47,7 +47,7 @@ public class AddressDto implements Serializable {
     @Length(max = 5)
     @Pattern(regexp = CH_NUM + "{1,5}")
     private String houseCorpus;
-    @Pattern(regexp = CH_NUM + "{1,5}")
+    @Pattern(regexp = CH_NUM + "{1,10}")
     private String houseNumber;
     @Length(max = 50)
     @Pattern(regexp = CH_UA + "{1,50}")

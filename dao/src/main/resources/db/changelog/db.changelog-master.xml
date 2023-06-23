@@ -209,4 +209,5 @@
     <include file="/db/changelog/logs/ch-modify-columns-name-name-eng-in-bag-and-service-tables.xml"/>
     <include file="/db/changelog/logs/ch-add-column-position-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-add-column-employee_filter_view-Spodaryk.xml"/>
+    <include file="/db/changelog/logs/ch-modify-columns-house-number-in-tables-address-and-order-address.xml"/>
 </databaseChangeLog>
