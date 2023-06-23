@@ -64,14 +64,19 @@ class AddressDtoTest {
             Arguments.of("1 G"),
             Arguments.of("ЁёІіЇ"),
             Arguments.of("їҐґЄє"),
-            Arguments.of("1/3"));
+            Arguments.of("1/3"),
+            Arguments.of("35/34"),
+            Arguments.of("35-/34"),
+            Arguments.of("35-/ 34"),
+            Arguments.of("35-/\"34"),
+            Arguments.of("14\"o\""));
     }
 
     private static Stream<Arguments> provideFieldsAndInvalidValues() {
         return Stream.of(
             Arguments.of(""),
             Arguments.of("@#$"),
-            Arguments.of("Testtt"),
-            Arguments.of("Тесттт"));
+            Arguments.of("Testtttttttt"),
+            Arguments.of("Тесттттттттт"));
     }
 }
