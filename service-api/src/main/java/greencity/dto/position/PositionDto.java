@@ -1,7 +1,7 @@
 package greencity.dto.position;
 
-import lombok.*;
-
+import lombok.Data;
+import lombok.Builder;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
