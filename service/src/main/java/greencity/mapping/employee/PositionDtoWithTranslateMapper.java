@@ -1,6 +1,5 @@
 package greencity.mapping.employee;
 
-import greencity.dto.position.PositionDto;
 import greencity.dto.position.PositionWithTranslateDto;
 import greencity.entity.user.employee.Position;
 import org.modelmapper.AbstractConverter;
@@ -25,7 +24,7 @@ public class PositionDtoWithTranslateMapper extends AbstractConverter<Position, 
     protected PositionWithTranslateDto convert(Position position) {
         Map<String, String> nameTranslations = new HashMap<>();
         nameTranslations.put("ua", position.getName());
-        nameTranslations.put("en", position.getNameEN());
+        nameTranslations.put("en", position.getNameEn());
 
         return PositionWithTranslateDto.builder()
             .id(position.getId())
