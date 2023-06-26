@@ -424,7 +424,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * This is private method which formed {@link AddressExportDetailsDto} in order
      * to collect information about Address and order formed data and order id.
-     * 
+     *
      * @param address {@link Address}.
      * @return {@link AddressExportDetailsDto}.
      *
@@ -452,7 +452,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * about order data formed and about current order status and order payment
      * status with some translation with some language and arrays with orderStatuses
      * and OrderPaymentStatuses with translation.
-     * 
+     *
      * @param order {@link Order}.
      * @return {@link GeneralOrderInfo}.
      *
@@ -601,14 +601,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
                 if (Boolean.TRUE
-                    .equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)
-                    && entry.getValue() != 0) {
+                    .equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
                     orderDetailRepository.insertNewRecord(orderId, entry.getKey().longValue());
                     orderDetailRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
                 orderDetailRepository
                     .updateConfirm(entry.getValue(), orderId,
                         entry.getKey().longValue());
+                orderDetailRepository.deleteIfConfirmedQuantityIsZero(orderId, entry.getKey().longValue());
             }
         }
 
@@ -622,6 +622,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 orderDetailRepository
                     .updateExporter(entry.getValue(), orderId,
                         entry.getKey().longValue());
+                orderDetailRepository.deleteIfExportedQuantityIsZero(orderId, entry.getKey().longValue());
             }
         }
 
@@ -1538,7 +1539,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param ecoNumberDto {@link EcoNumberDto}.
      * @param orderId      {@link Long}.
      * @param email        {@link String}.
-     *
      * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
     @Override
@@ -1582,7 +1582,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
      * @param orderId            {@link Long}.
-     *
      * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
     @Override
@@ -1691,10 +1690,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     /**
      * This method checks if Employee is assigned to the order.
-     * 
+     *
      * @param orderId - ID of chosen order {@link Long}.
      * @param email   - employee's email {@link String}.
-     *
      * @return {@link Boolean}
      */
     public Boolean checkEmployeeForOrder(Long orderId, String email) {
