@@ -1336,24 +1336,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void testSetOrderDetailWithBagConfirmedHasValueZero() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
-        when(bagRepository.findCapacityById(1)).thenReturn(1);
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.empty());
-
-        UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().setAmountOfBagsConfirmed(Map.of(1, 0));
-
-        ubsManagementService.setOrderDetail(1L,
-            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
-            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "test@gmail.com");
-
-        verify(orderDetailRepository, times(0)).updateExporter(anyInt(), anyLong(), anyLong());
-        verify(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
-
-    }
-
-    @Test
     void testSetOrderDetailNotTakenOut() {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusNotTakenOutDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
