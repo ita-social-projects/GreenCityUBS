@@ -2444,7 +2444,8 @@ public class ModelUtils {
             .value(String.valueOf(0)).build());
         parameters.add(NotificationParameter.builder().key("paidPackageNumber")
             .value(String.valueOf(0)).build());
-
+        parameters.add(NotificationParameter.builder().key("orderNumber")
+            .value("45").build());
         return parameters;
     }
 
@@ -2453,7 +2454,8 @@ public class ModelUtils {
 
         parameters.add(NotificationParameter.builder().key("returnedPayment")
             .value(String.valueOf(200L)).build());
-
+        parameters.add(NotificationParameter.builder().key("orderNumber")
+            .value("45").build());
         return parameters;
     }
 
