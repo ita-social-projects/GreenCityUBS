@@ -1,17 +1,12 @@
 package greencity.dto.position;
 
-import lombok.*;
-
+import lombok.Data;
+import lombok.Builder;
 import javax.validation.constraints.Min;
 import java.util.Map;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-@EqualsAndHashCode
-@ToString
+@Data
 public class PositionWithTranslateDto {
     @Min(1)
     private Long id;

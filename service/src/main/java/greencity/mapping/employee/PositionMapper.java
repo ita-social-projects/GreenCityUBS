@@ -22,7 +22,7 @@ public class PositionMapper extends AbstractConverter<PositionDto, Position> {
         return Position.builder()
             .id(positionDto.getId())
             .name(positionDto.getName())
-            .nameEN(positionDto.getNameEN())
+            .nameEn(positionDto.getNameEn())
             .build();
     }
 }
