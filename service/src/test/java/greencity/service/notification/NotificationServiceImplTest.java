@@ -265,22 +265,20 @@ class NotificationServiceImplTest {
 
         @Test
         void testNotifyAddViolation() {
-            List<NotificationParameter> parameters = new ArrayList<>();
+            Set<NotificationParameter> parameters = new HashSet<>();
             parameters.add(NotificationParameter.builder()
                 .key("violationDescription")
                 .value("violation description")
                 .build());
             parameters.add(NotificationParameter.builder()
                 .key("orderNumber")
-                .value("45")
+                .value("46")
                 .build());
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
             when(violationRepository.findByOrderId(TEST_ORDER_4.getId())).thenReturn(Optional.of(violation));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_3)).thenReturn(TEST_USER_NOTIFICATION_3);
             parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_3));
-            when(notificationParameterRepository.saveAll(parameters)).thenReturn(parameters);
-            // TEST_NOTIFICATION_PARAMETER.setUserNotification(TEST_USER_NOTIFICATION_3);
-            parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_3));
+            when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
 
             notificationService.notifyAddViolation(TEST_ORDER_4.getId());
 
