@@ -5,10 +5,10 @@ import java.util.Arrays;
 public enum OrderStatus {
     FORMED(1, OrderStatus.ADJUSTMENT_STR, OrderStatus.BROUGHT_IT_HIMSELF_STR, OrderStatus.CANCELED_STR),
     ADJUSTMENT(2, OrderStatus.FORMED_STR, OrderStatus.BROUGHT_IT_HIMSELF_STR, OrderStatus.CONFIRMED_STR,
-            OrderStatus.CANCELED_STR),
+               OrderStatus.CANCELED_STR),
     BROUGHT_IT_HIMSELF(3, OrderStatus.DONE_STR, OrderStatus.CANCELED_STR),
     CONFIRMED(4, OrderStatus.FORMED_STR, OrderStatus.ON_THE_ROUTE_STR, OrderStatus.BROUGHT_IT_HIMSELF_STR,
-            OrderStatus.CANCELED_STR),
+              OrderStatus.CANCELED_STR),
     ON_THE_ROUTE(5, OrderStatus.DONE_STR, OrderStatus.NOT_TAKEN_OUT_STR, OrderStatus.CANCELED_STR),
     DONE(6, OrderStatus.DONE_STR),
     NOT_TAKEN_OUT(7, OrderStatus.ADJUSTMENT_STR, OrderStatus.BROUGHT_IT_HIMSELF_STR, OrderStatus.CANCELED_STR),
