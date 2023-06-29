@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import static greencity.enums.OrderStatus.getConvertedEnumFromLongToEnum;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class OrderStatusTest {
+class OrderStatusTest {
 
     @Test
     void getNumValueTest() {
