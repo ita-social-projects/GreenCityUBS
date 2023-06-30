@@ -216,7 +216,10 @@ public class LocationApiService {
      */
     private LocationDto getLocationDataByCode(int pageSize, int level, String code) {
         UriComponentsBuilder builder =
-            UriComponentsBuilder.fromHttpUrl(API_URL).queryParam("page_size", pageSize).queryParam("code", code)
+            UriComponentsBuilder.fromHttpUrl(API_URL)
+                .queryParam("page", "1")
+                .queryParam("page_size", pageSize)
+                .queryParam("code", code)
                 .queryParam("level", level);
         return getResultFromUrl(builder.build().encode().toUri()).get(0);
     }
@@ -232,7 +235,10 @@ public class LocationApiService {
      */
     private List<LocationDto> getLocationDataByLevel(int pageSize, int level) {
         UriComponentsBuilder builder =
-            UriComponentsBuilder.fromHttpUrl(API_URL).queryParam("page_size", pageSize).queryParam("level", level);
+            UriComponentsBuilder.fromHttpUrl(API_URL)
+                .queryParam("page", "1")
+                .queryParam("page_size", pageSize)
+                .queryParam("level", level);
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
@@ -253,6 +259,7 @@ public class LocationApiService {
             throw new IllegalArgumentException("The name parameter cannot be null");
         }
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL)
+            .queryParam("page", "1")
             .queryParam("page_size", pageSize)
             .queryParam("name", name)
             .queryParam("level", level);
@@ -302,9 +309,11 @@ public class LocationApiService {
             throw new IllegalArgumentException("The upperId parameter cannot be null");
         }
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL)
+            .queryParam("page", "1")
             .queryParam("page_size", pageSize)
-            .queryParam("parent", upperId)
-            .queryParam("level", level);
+
+            .queryParam("level", level)
+            .queryParam("parent", upperId);
         return getResultFromUrl(builder.build().encode().toUri());
     }
 }
