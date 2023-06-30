@@ -12,16 +12,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TableColumnWidthForEmployeeTest {
-    private static Employee employee;
-    private static TableColumnWidthForEmployee tableColumnWidth;
-    static int defaultWidth;
-
-    @BeforeAll
-    public static void setup() {
-        employee = Employee.builder().build();
-        tableColumnWidth = new TableColumnWidthForEmployee(employee);
-        defaultWidth = 120;
-    }
+    private static final Employee employee = Employee.builder().build();
+    private static final TableColumnWidthForEmployee tableColumnWidth = new TableColumnWidthForEmployee(employee);
 
     @Test
     void checkTableColumnWidthEmployee() {
@@ -29,6 +21,7 @@ class TableColumnWidthForEmployeeTest {
     }
 
     static Stream<Arguments> testArguments() {
+        int defaultWidth = 120;
         return Stream.of(
             Arguments.of(defaultWidth, tableColumnWidth.getAddress()),
             Arguments.of(defaultWidth, tableColumnWidth.getAmountDue()),
@@ -68,7 +61,7 @@ class TableColumnWidthForEmployeeTest {
 
     @ParameterizedTest
     @MethodSource("testArguments")
-    void TableColumnWidthForEmployeeWithDefaultWidthTest(int expected, int actual) {
+    void tableColumnWidthForEmployeeWithDefaultWidthTest(int expected, int actual) {
         assertEquals(expected, actual);
     }
 
