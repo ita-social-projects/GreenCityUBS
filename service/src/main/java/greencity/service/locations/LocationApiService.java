@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -214,9 +215,10 @@ public class LocationApiService {
      *         code.
      */
     private LocationDto getLocationDataByCode(int pageSize, int level, String code) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL).queryParam("page_size", pageSize)
-            .queryParam("code", code).queryParam("level", level);
-        return getResultFromUrl(builder.toUriString()).get(0);
+        UriComponentsBuilder builder =
+            UriComponentsBuilder.fromHttpUrl(API_URL).queryParam("page_size", pageSize).queryParam("code", code)
+                .queryParam("level", level);
+        return getResultFromUrl(builder.build().encode().toUri()).get(0);
     }
 
     /**
@@ -231,7 +233,7 @@ public class LocationApiService {
     private List<LocationDto> getLocationDataByLevel(int pageSize, int level) {
         UriComponentsBuilder builder =
             UriComponentsBuilder.fromHttpUrl(API_URL).queryParam("page_size", pageSize).queryParam("level", level);
-        return getResultFromUrl(builder.toUriString());
+        return getResultFromUrl(builder.build().encode().toUri());
     }
 
     /**
@@ -247,17 +249,14 @@ public class LocationApiService {
      *                           can be found.
      */
     private List<LocationDto> getLocationDataByName(int pageSize, int level, String name) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL).queryParam("page_size", pageSize)
-            .queryParam("name", "tmp")
-            .queryParam("level", level);
-        try {
-            String s = builder.toUriString();
-            s = s.replace("tmp", name);
-            return getResultFromUrl(s);
-        } catch (NullPointerException e) {
-            throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL + level + "\n"
-                + ErrorMessage.NOT_FOUND_LOCATION_BY_NAME + name);
+        if (name == null) {
+            throw new IllegalArgumentException("The name parameter cannot be null");
         }
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL)
+            .queryParam("page_size", pageSize)
+            .queryParam("name", name)
+            .queryParam("level", level);
+        return getResultFromUrl(builder.build().encode().toUri());
     }
 
     /**
@@ -267,7 +266,7 @@ public class LocationApiService {
      * @return A List of LocationDto objects, each representing a location fetched
      *         from the URL.
      */
-    public List<LocationDto> getResultFromUrl(String url) {
+    public List<LocationDto> getResultFromUrl(URI url) {
         List<LocationDto> locationDtos = new ArrayList<>();
         ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
         if (response != null && response.getBody() != null) {
@@ -299,10 +298,13 @@ public class LocationApiService {
      *         the provided parameters.
      */
     private List<LocationDto> getLocationDataByUpperId(int pageSize, int level, String upperId) {
+        if (upperId == null) {
+            throw new IllegalArgumentException("The upperId parameter cannot be null");
+        }
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL)
             .queryParam("page_size", pageSize)
             .queryParam("parent", upperId)
             .queryParam("level", level);
-        return getResultFromUrl(builder.toUriString());
+        return getResultFromUrl(builder.build().encode().toUri());
     }
 }
