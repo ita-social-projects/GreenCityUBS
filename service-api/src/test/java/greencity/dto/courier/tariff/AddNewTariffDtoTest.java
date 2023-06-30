@@ -59,7 +59,11 @@ class AddNewTariffDtoTest {
         Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
             validator.validate(dto);
 
-        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolations)
+            .hasSize(1)
+            .extracting(ConstraintViolation::getMessage)
+            .contains("не може бути порожнім");
+        ;
     }
 
     @SneakyThrows
