@@ -37,6 +37,7 @@ class AddNewTariffDtoTest {
     @Test
     void addNewTariffDtoWithValidNullFieldsTest() {
         var dto = ModelUtils.getAddNewTariffWithNullFieldsDto();
+        dto.setReceivingStationsIdList(Collections.singletonList(1L));
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         final Validator validator = factory.getValidator();
