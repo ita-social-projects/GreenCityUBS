@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -263,37 +265,38 @@ public class LocationApiService {
     /**
      * Sends a GET request to a specified URL and processes the response.
      *
-     * @param fullUrl The URL to send the GET request to.
+     * @param url The URL to send the GET request to.
      * @return A List of LocationDto objects, each representing a location fetched
      *         from the URL.
      */
 
-    public List<LocationDto> getResultFromUrl(String fullUrl) {
-        List<LocationDto> locationDtos = new ArrayList<>();
-        ResponseEntity<Map> response = restTemplate.getForEntity(fullUrl, Map.class);
-
-        if (response != null && response.getBody() != null) {
-            try {
-                List<Map<String, Object>> results = (List<Map<String, Object>>) response.getBody().get("results");
-
-                if (results != null) {
-                    for (Map<String, Object> result : results) {
-                        Map<String, String> nameMap = new HashMap<>();
-                        nameMap.put("name", (String) result.get("name"));
-                        nameMap.put("name_en", (String) result.get("name_en"));
-                        locationDtos.add(LocationDto.builder()
-                            .id((String) result.get("code"))
-                            .parentId((String) result.get("parent_id"))
-                            .name(nameMap).build());
-                    }
-                } else {
-                    throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + fullUrl);
-                }
-            } catch (NullPointerException e) {
-                throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + fullUrl);
-            }
+    public List<LocationDto> getResultFromUrl(String url) {
+        URI uri;
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(ErrorMessage.INVALID_URL + url);
         }
 
+        ResponseEntity<Map> response = restTemplate.getForEntity(uri, Map.class);
+        List<LocationDto> locationDtos = new ArrayList<>();
+        if (response.hasBody()) { // this is more expressive and self-explanatory than comparing with null.
+            Map body = response.getBody();
+            List<Map<String, Object>> results = (List<Map<String, Object>>) body.get("results");
+            if (results != null) {
+                for (Map<String, Object> result : results) {
+                    Map<String, String> nameMap = new HashMap<>();
+                    nameMap.put("name", (String) result.get("name"));
+                    nameMap.put("name_en", (String) result.get("name_en"));
+                    locationDtos.add(LocationDto.builder()
+                        .id((String) result.get("code"))
+                        .parentId((String) result.get("parent_id"))
+                        .name(nameMap).build());
+                }
+            }
+        } else {
+            throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url);
+        }
         return locationDtos;
     }
 
