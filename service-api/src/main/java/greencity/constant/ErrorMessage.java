@@ -53,6 +53,11 @@ public final class ErrorMessage {
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
     public static final String ADDRESS_NOT_FOUND = "Address not found";
+    public static final String NOT_FOUND_LOCATION_ON_LEVEL = "Not found locations on level: ";
+    public static final String NOT_FOUND_LOCATION_BY_NAME = "Not found locations by name : ";
+    public static final String NOT_FOUND_LOCATION_BY_URL = "Not found locations by url : ";
+    public static final String REGION_NOT_FOUND = "Region not found: ";
+    public static final String CITY_NOT_FOUND = "City not found: ";
     public static final String ACTUAL_ADDRESS_NOT_FOUND = "Actual address not found";
     public static final String LOCATION_DOESNT_FOUND_BY_ID = "Location does not exist by id: ";
     public static final String LOCATIONS_BELONG_TO_DIFFERENT_REGIONS =
