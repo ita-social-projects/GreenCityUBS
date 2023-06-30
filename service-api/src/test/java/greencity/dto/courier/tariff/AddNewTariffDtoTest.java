@@ -47,6 +47,19 @@ class AddNewTariffDtoTest {
 
         assertThat(constraintViolations).isEmpty();
     }
+    @Test
+    void addNewTariffDtoWithReceivingFieldIsEmpty(){
+        var dto = ModelUtils.getAddNewTariffWithNullFieldsDto();
+        dto.setReceivingStationsIdList(Collections.emptyList());
+
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        final Validator validator = factory.getValidator();
+
+        Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
+                validator.validate(dto);
+
+        assertThat(constraintViolations).hasSize(1);
+    }
 
     @SneakyThrows
     @ParameterizedTest
