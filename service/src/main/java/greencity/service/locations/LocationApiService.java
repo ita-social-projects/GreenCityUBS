@@ -7,14 +7,12 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -274,25 +272,33 @@ public class LocationApiService {
      *         from the URL.
      */
     public List<LocationDto> getResultFromUrl(URI url) {
-        List<LocationDto> locationDtos = new ArrayList<>();
-        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
-        if (response != null && response.getBody() != null) {
-            List<Map<String, Object>> results = (List<Map<String, Object>>) response.getBody().get("results");
-            if (results != null) {
-                for (Map<String, Object> result : results) {
-                    Map<String, String> nameMap = new HashMap<>();
-                    nameMap.put("name", (String) result.get("name"));
-                    nameMap.put("name_en", (String) result.get("name_en"));
-                    locationDtos.add(LocationDto.builder()
-                        .id((String) result.get("code"))
-                        .parentId((String) result.get("parent_id"))
-                        .name(nameMap).build());
-                }
-            }
-        } else {
-            throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url);
+        try {
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            return Optional.ofNullable(response)
+                .map(ResponseEntity::getBody)
+                .map(body -> (List<Map<String, Object>>) body.get("results"))
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url))
+                .stream()
+                .map(this::mapToLocationDto)
+                .collect(Collectors.toList());
+        } catch (RestClientException e) {
+            throw new RuntimeException("Failed to get response from " + url, e);
         }
-        return locationDtos;
+    }
+
+    private LocationDto mapToLocationDto(Map<String, Object> result) {
+        Map<String, String> nameMap = new HashMap<>();
+        nameMap.put("name", getValueFromMap(result, "name"));
+        nameMap.put("name_en", getValueFromMap(result, "name_en"));
+        return LocationDto.builder()
+            .id(getValueFromMap(result, "code"))
+            .parentId(getValueFromMap(result, "parent_id"))
+            .name(nameMap)
+            .build();
+    }
+
+    private <T> T getValueFromMap(Map<String, Object> map, String key) {
+        return (T) map.get(key);
     }
 
     /**
