@@ -63,7 +63,6 @@ class AddNewTariffDtoTest {
             .hasSize(1)
             .extracting(ConstraintViolation::getMessage)
             .contains("не може бути порожнім");
-        ;
     }
 
     @SneakyThrows
