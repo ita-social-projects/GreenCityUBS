@@ -24,6 +24,7 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
@@ -105,6 +106,7 @@ import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
+import greencity.service.locations.LocationApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
@@ -249,6 +251,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
+    private final LocationApiService locationApiService;
 
     @Override
     @Transactional
@@ -1887,5 +1890,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         return modelMapper.map(currentAddress, AddressDto.class);
+    }
+
+    @Override
+    public List<LocationDto> getAllDistrictsForRegionAndCity(String region, String city) {
+        return locationApiService.getAllDistrictsInCityByNames(region, city);
     }
 }

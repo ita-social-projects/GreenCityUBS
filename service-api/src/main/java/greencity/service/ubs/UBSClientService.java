@@ -9,6 +9,7 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
@@ -423,4 +424,15 @@ public interface UBSClientService {
      * @return an {@link AddressDto} object representing the updated address
      */
     AddressDto makeAddressActual(Long addressId, String uuid);
+
+    /**
+     * Retrieves all districts within a specific region and city.
+     *
+     * @param region The name of the region where the districts are located.
+     * @param city   The name of the city within the region where the districts are
+     *               located.
+     * @return A list of LocationDto objects representing all districts in the
+     *         specified region and city.
+     */
+    List<LocationDto> getAllDistrictsForRegionAndCity(String region, String city);
 }

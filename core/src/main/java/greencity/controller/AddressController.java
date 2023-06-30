@@ -4,6 +4,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.user.UserVO;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/ubs")
@@ -141,5 +143,19 @@ public class AddressController {
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.makeAddressActual(addressId, uuid));
+    }
+
+    /**
+     * Controller to get all districts for a given region and city.
+     *
+     * @param region Name of the region.
+     * @param city   Name of the city.
+     * @return A List of LocationDtos containing a list of all districts for the
+     *         specified region and city.
+     */
+    @GetMapping("/get-all-districts")
+    public ResponseEntity<List<LocationDto>> getAllDistrictsForRegionAndCity(String region, String city) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.getAllDistrictsForRegionAndCity(region, city));
     }
 }
