@@ -271,26 +271,29 @@ public class LocationApiService {
     public List<LocationDto> getResultFromUrl(String fullUrl) {
         List<LocationDto> locationDtos = new ArrayList<>();
         ResponseEntity<Map> response = restTemplate.getForEntity(fullUrl, Map.class);
-        try {
-            if (response != null && response.getBody() != null) {
-                List<Map<String, Object>> results = (List<Map<String, Object>>) response.getBody().get("results");
-                if (results != null) {
-                    for (Map<String, Object> result : results) {
-                        Map<String, String> nameMap = new HashMap<>();
-                        nameMap.put("name", (String) result.get("name"));
-                        nameMap.put("name_en", (String) result.get("name_en"));
-                        locationDtos.add(LocationDto.builder()
-                                .id((String) result.get("code"))
-                                .parentId((String) result.get("parent_id"))
-                                .name(nameMap).build());
-                    }
-                }
-            } else {
+
+        if (response != null && response.getBody() != null) {
+            List<Map<String, Object>> results = null;
+            try {
+                results = (List<Map<String, Object>>) response.getBody().get("results");
+            } catch (NullPointerException e) {
                 throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + fullUrl);
             }
-        } catch (NullPointerException e) {
+            if (results != null) {
+                for (Map<String, Object> result : results) {
+                    Map<String, String> nameMap = new HashMap<>();
+                    nameMap.put("name", (String) result.get("name"));
+                    nameMap.put("name_en", (String) result.get("name_en"));
+                    locationDtos.add(LocationDto.builder()
+                        .id((String) result.get("code"))
+                        .parentId((String) result.get("parent_id"))
+                        .name(nameMap).build());
+                }
+            }
+        } else {
             throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + fullUrl);
         }
+
         return locationDtos;
     }
 
