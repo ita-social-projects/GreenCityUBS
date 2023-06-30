@@ -396,10 +396,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkSumIfCourierLimitBySumOfOrder(TariffsInfo tariffsInfo, Long sumWithoutDiscountInCoins) {
         if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(tariffsInfo.getCourierLimit())
-            && sumWithoutDiscountInCoins < tariffsInfo.getMin() * 100) {
+            && tariffsInfo.getMin() != 0 && sumWithoutDiscountInCoins < tariffsInfo.getMin() * 100) {
             throw new BadRequestException(PRICE_OF_ORDER_LOWER_THAN_LIMIT + tariffsInfo.getMin());
         } else if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(tariffsInfo.getCourierLimit())
-            && sumWithoutDiscountInCoins > tariffsInfo.getMax() * 100) {
+            && tariffsInfo.getMax() != null && sumWithoutDiscountInCoins > tariffsInfo.getMax() * 100) {
             throw new BadRequestException(
                 PRICE_OF_ORDER_GREATER_THAN_LIMIT + tariffsInfo.getMax());
         }
@@ -1189,11 +1189,11 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkAmountOfBagsIfCourierLimitByAmountOfBag(TariffsInfo courierLocation, Integer countOfBigBag) {
         if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
-            && courierLocation.getMin() > countOfBigBag) {
+            && courierLocation.getMin() != null && courierLocation.getMin() > countOfBigBag) {
             throw new BadRequestException(
                 NOT_ENOUGH_BAGS_EXCEPTION + courierLocation.getMin());
         } else if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
-            && courierLocation.getMax() < countOfBigBag) {
+            && courierLocation.getMax() != null && courierLocation.getMax() < countOfBigBag) {
             throw new BadRequestException(TO_MUCH_BAG_EXCEPTION + courierLocation.getMax());
         }
     }
