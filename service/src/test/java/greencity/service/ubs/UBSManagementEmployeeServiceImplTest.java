@@ -435,7 +435,6 @@ class UBSManagementEmployeeServiceImplTest {
         verify(tariffsInfoRepository).findAll();
     }
 
-
     @Test
     void getAllDistrictsForRegionAndCityTest() {
         String region = "Львівська";
@@ -445,10 +444,10 @@ class UBSManagementEmployeeServiceImplTest {
         nameMap.put("nameEn", "Lviv");
         List<LocationDto> mockLocationDtoList = new ArrayList<>();
         LocationDto mockLocationDto = LocationDto.builder()
-                .id("UA46060250010015970")
-                .parentId("UA46060250000025047")
-                .name(nameMap)
-                .build();
+            .id("UA46060250010015970")
+            .parentId("UA46060250000025047")
+            .name(nameMap)
+            .build();
         when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(mockLocationDtoList);
 
         List<LocationDto> locationDtoList = locationApiService.getAllDistrictsInCityByNames(region, city);
