@@ -6,8 +6,10 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.service.ubs.UBSClientService;
+import liquibase.pro.packaged.S;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,13 +23,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static greencity.ModelUtils.getPrincipal;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -128,4 +136,29 @@ class AddressControllerTest {
 
         verify(ubsClientService).makeAddressActual(addressId, uuid);
     }
+
+    @Test
+    void getAllDistrictsForRegionAndCity() throws Exception {
+        String region = "Львівська";
+        String city = "Львів";
+        Map<String, String> nameMap = new HashMap<>();
+        nameMap.put("name", "Львів");
+        nameMap.put("nameEn", "Lviv");
+        List<LocationDto> mockLocationDtoList = new ArrayList<>();
+        LocationDto mockLocationDto = LocationDto.builder()
+            .id("UA46060250010015970")
+            .parentId("UA46060250000025047")
+            .name(nameMap)
+            .build();
+        when(ubsClientService.getAllDistrictsForRegionAndCity(region, city)).thenReturn(mockLocationDtoList);
+        mockMvc.perform(get(ubsLink + "/get-all-districts")
+            .param("region", region)
+            .param("city", city)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).getAllDistrictsForRegionAndCity(region, city);
+    }
+
 }
