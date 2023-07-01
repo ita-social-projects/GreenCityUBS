@@ -4,6 +4,8 @@ import greencity.dto.location.api.LocationDto;
 import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
@@ -243,39 +245,20 @@ class LocationApiServiceTest {
         });
     }
 
-    @Test
-    void testNonExistentNameParameterInGetRegionByName() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "NonExistentName",
+        "APIErrors404",
+        "APIErrors500"
+    })
+    void testNonExistentNameParameterInGetRegionByName(String testName) {
         String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
         ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
         when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(NotFoundException.class, () -> {
-            locationApiService.getRegionByName("NonExistentName");
-        });
-    }
-
-    @Test
-    void testAPIErrors404() {
-        String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
-        ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
-        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
-        LocationApiService locationApiService = new LocationApiService(restTemplate);
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getRegionByName("NonExistentName");
-        });
-    }
-
-    @Test
-    void testAPIErrors500() {
-        String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
-        ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
-        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
-        LocationApiService locationApiService = new LocationApiService(restTemplate);
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getRegionByName("NonExistentName");
+            locationApiService.getRegionByName(testName);
         });
     }
 
@@ -751,16 +734,24 @@ class LocationApiServiceTest {
 
     @Test
     void testGetCityByNameAndRegionName_NotFoundException() {
-        LocationDto city1 = LocationDto.builder().id("UA05020030010063857").parentId("UA05020030000031457")
-            .name(Collections.singletonMap("name", "Вінниця")).build();
+        LocationDto city1 = LocationDto.builder()
+            .id("UA05020030010063857")
+            .parentId("UA05020030000031457")
+            .name(Collections.singletonMap("name", "Вінниця"))
+            .build();
 
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        LocationApiService locationApiService = new LocationApiService(restTemplate);
+
         when(restTemplate.getForEntity("https://directory.org.ua/api/katottg?page_size=5000&name=Неіснуюча&level=1",
             Map.class)).thenReturn(null);
 
-        Exception exception = assertThrows(NotFoundException.class,
-            () -> locationApiService.getCityInRegion("Неіснуюча", Arrays.asList(city1)));
+        LocationApiService locationApiService = new LocationApiService(restTemplate);
+
+        String cityName = "Неіснуюча";
+        List<LocationDto> cityList = Arrays.asList(city1);
+
+        Exception exception =
+            assertThrows(NotFoundException.class, () -> locationApiService.getCityInRegion(cityName, cityList));
     }
 
     @Test

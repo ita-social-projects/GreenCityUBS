@@ -235,7 +235,7 @@ public class LocationApiService {
      *         provided level.
      */
     private List<LocationDto> getLocationDataByLevel(int pageSize, int level) {
-        UriComponentsBuilder builder = builderUrl(pageSize).queryParam("level", level);
+        UriComponentsBuilder builder = builderUrl(pageSize).queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
@@ -281,7 +281,7 @@ public class LocationApiService {
                 .map(this::mapToLocationDto)
                 .collect(Collectors.toList());
         } catch (RestClientException e) {
-            throw new RuntimeException("Failed to get response from " + url, e);
+            throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url);
         }
     }
 
@@ -326,7 +326,7 @@ public class LocationApiService {
         if (upperId == null) {
             throw new IllegalArgumentException("The upperId parameter cannot be null");
         }
-        UriComponentsBuilder builder = builderUrl(pageSize).queryParam("level", level)
+        UriComponentsBuilder builder = builderUrl(pageSize).queryParam(LEVEL, level)
             .queryParam(UPPER_ID, upperId);
         return getResultFromUrl(builder.build().encode().toUri());
     }
