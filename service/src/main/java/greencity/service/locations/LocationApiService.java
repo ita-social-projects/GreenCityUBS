@@ -265,11 +265,13 @@ public class LocationApiService {
     }
 
     /**
-     * Sends a GET request to a specified URL and processes the response.
+     * Fetches the result from a given URL and maps it into a list of LocationDto
+     * objects.
      *
-     * @param url The URL to send the GET request to.
-     * @return A List of LocationDto objects, each representing a location fetched
-     *         from the URL.
+     * @param url the URL to fetch results from.
+     * @return a List of LocationDto objects.
+     * @throws RuntimeException if the restTemplate fails to get a response from the
+     *                          provided URL.
      */
     public List<LocationDto> getResultFromUrl(URI url) {
         try {
@@ -286,6 +288,12 @@ public class LocationApiService {
         }
     }
 
+    /**
+     * Maps a result map into a LocationDto object.
+     *
+     * @param result a map containing the result data.
+     * @return a LocationDto object built from the result map.
+     */
     private LocationDto mapToLocationDto(Map<String, Object> result) {
         Map<String, String> nameMap = new HashMap<>();
         nameMap.put("name", getValueFromMap(result, "name"));
@@ -297,6 +305,13 @@ public class LocationApiService {
             .build();
     }
 
+    /**
+     * Gets a value from a map using the provided key.
+     *
+     * @param map the map from which to get the value.
+     * @param key the key of the value to get.
+     * @return the value associated with the provided key.
+     */
     private <T> T getValueFromMap(Map<String, Object> map, String key) {
         return (T) map.get(key);
     }
