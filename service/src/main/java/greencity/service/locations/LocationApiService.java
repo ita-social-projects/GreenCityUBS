@@ -46,9 +46,16 @@ public class LocationApiService {
      * @param cityName   The name of the city.
      * @return A LocationDto object containing the city's data.
      */
-    public LocationDto getCityByName(String regionName, String cityName) {
+    public List<LocationDto> getCitiesByName(String regionName, String cityName) {
         List<LocationDto> allCities = getLocationDataByName(DEFAULT_PAGE_SIZE, 4, cityName);
-        return findLocationByName(allCities, regionName, cityName, ErrorMessage.CITY_NOT_FOUND);
+        if (allCities.isEmpty()) {
+            allCities.add(getCityByNameFromRegionSide(regionName, cityName));
+            return allCities;
+        }
+        return allCities.stream()
+            .filter(location -> location.getName().containsKey(cityName)
+                || location.getName().containsValue(cityName))
+            .collect(Collectors.toList());
     }
 
     /**
@@ -146,12 +153,13 @@ public class LocationApiService {
             return getAllDistrictsInCityByCityID("UA80000000000093317");
         }
         List<LocationDto> allDistricts = null;
-        LocationDto city = getCityByName(regionName, cityName);
+        List<LocationDto> cities = getCitiesByName(regionName, cityName);
+        LocationDto city = getCityInRegion(regionName, cities);
         String cityId = city.getId();
         allDistricts = getAllDistrictsInCityByCityID(cityId);
         if (allDistricts.isEmpty()) {
             String cityNameUK = city.getName().get("name");
-            city = getCityByName(regionName, cityNameUK);
+            city = getCitiesByName(regionName, cityNameUK).get(0);
             allDistricts = getAllDistrictsInCityByCityID(city.getId());
         }
         if (allDistricts.isEmpty()) {

@@ -366,15 +366,15 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder2 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
-            .queryParam("code", "UA46000000000026241")
+            .queryParam("page_size", "2")
+            .queryParam("code", "UA46060000000042587")
             .queryParam("level", "2");
 
         UriComponentsBuilder builder3 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
-            .queryParam("code", "UA46060000000042587")
+            .queryParam("page_size", "2")
+            .queryParam("code", "UA05020030000031457")
             .queryParam("level", "3");
 
         UriComponentsBuilder builder4 = UriComponentsBuilder
@@ -442,18 +442,25 @@ class LocationApiServiceTest {
 
     @Test
     void testGetAllDistrictsInCityByNames_NoDistricts() {
-        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        LocationApiService locationApiService = new LocationApiService(restTemplate);
+
         Map<String, Object> apiResult1 =
             getApiResult("UA01000000000013043", null, "Автономна Республіка Крим", "Avtonomna Respublika Krym");
         Map<String, Object> apiResult2 = getApiResult("UA05000000000010236", null, "Вінницька", "Vinnytska");
         Map<String, Object> apiResult3 = getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
         Map<String, Object> apiResult21 =
-            getApiResult("UA05020000000026686", "UA46000000000026241", "Вінницький", "Vinnytskyi");
-        Map<String, Object> apiResult32 =
-            getApiResult("UA05020030000031457", "UA05020000000026686", "Вінницька", "Vinnytska");
+            getApiResult("UA46060000000042587", "UA46000000000026241", "Львівський", "Lvivskyi");
+        Map<String, Object> apiResult31 =
+            getApiResult("UA46060230000093092", "UA46060000000042587", "Куликівська", "Kulykivska");
         Map<String, Object> apiResult41 =
-            getApiResult("UA05020030010063857", "UA05020030000031457", "Вінниця", "Vinnytsia");
+            getApiResult("UA46060230010099970", "UA46060230000093092", "Куликів", "Kulykiv");
+        Map<String, Object> apiResult42 =
+            getApiResult("UA46060230040034427", "UA46060230000093092", "Віднів", "Vidniv");
+
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+        LocationApiService locationApiService = new LocationApiService(restTemplate);
+
+        when(restTemplate.getForEntity("https://directory.org.ua/api/katottg?page_size=5000&level=1", Map.class))
+            .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
 
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
@@ -464,22 +471,23 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder2 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
-            .queryParam("code", "UA05000000000010236")
+            .queryParam("page_size", "2")
+            .queryParam("code", "UA46060000000042587")
             .queryParam("level", "2");
+//        https://directory.org.ua/api/katottg?page=1&page_size=2&code=UA46060230000093092&level=3
 
         UriComponentsBuilder builder3 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
-            .queryParam("code", "UA05020000000026686")
+            .queryParam("page_size", "2")
+            .queryParam("code", "UA46060230000093092")
             .queryParam("level", "3");
 
         UriComponentsBuilder builder4 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "5000")
-            .queryParam("name", "Вінниця")
+            .queryParam("name", "Віднів")
             .queryParam("level", "4");
 
         UriComponentsBuilder builder5 = UriComponentsBuilder
@@ -487,25 +495,24 @@ class LocationApiServiceTest {
             .queryParam("page", "1")
             .queryParam("page_size", "5000")
             .queryParam("level", "5")
-            .queryParam("parent", "UA05020030010063857");
-
-        when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
+            .queryParam("parent", "UA46060230040034427");
+        when(restTemplate.getForEntity((builder.build().encode().toUri()), (Map.class)))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
-        when(restTemplate.getForEntity((builder2.build().encode().toUri()), Map.class))
+        when(restTemplate.getForEntity((builder2.build().encode().toUri()), (Map.class)))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult21)));
-        when(restTemplate.getForEntity((builder3.build().encode().toUri()), Map.class))
-            .thenReturn(prepareResponseEntity(Arrays.asList(apiResult32)));
-        when(restTemplate.getForEntity((builder4.build().encode().toUri()), Map.class))
-            .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41)));
-        when(restTemplate.getForEntity((builder5.build().encode().toUri()), Map.class))
+        when(restTemplate.getForEntity((builder3.build().encode().toUri()), (Map.class)))
+            .thenReturn(prepareResponseEntity(Arrays.asList(apiResult31)));
+        when(restTemplate.getForEntity((builder4.build().encode().toUri()), (Map.class)))
+            .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42)));
+        when(restTemplate.getForEntity((builder5.build().encode().toUri()), (Map.class)))
             .thenReturn(prepareResponseEntity(new ArrayList<>()));
 
-        List<LocationDto> allDistricts = locationApiService.getAllDistrictsInCityByNames("Вінницька", "Вінниця");
+        List<LocationDto> allDistricts = locationApiService.getAllDistrictsInCityByNames("Львівська", "Віднів");
 
         assertNotNull(allDistricts);
         assertFalse(allDistricts.isEmpty());
         assertEquals(1, allDistricts.size());
-        assertLocationDto(allDistricts.get(0), "UA05020030010063857", "UA05020030000031457", "Вінниця", "Vinnytsia");
+        assertLocationDto(allDistricts.get(0), "UA46060230040034427", "UA46060230000093092", "Віднів", "Vidniv");
     }
 
     @Test
@@ -609,7 +616,7 @@ class LocationApiServiceTest {
         when(restTemplate.getForEntity((builder4.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42)));
 
-        LocationDto result = locationApiService.getCityByName("Вінницька", "Вінниця");
+        LocationDto result = locationApiService.getCitiesByName("Вінницька", "Вінниця").get(0);
         assertNotNull(result);
         assertEquals("UA05020030010063857", result.getId());
         assertEquals("Вінниця", result.getName().get("name"));
@@ -668,7 +675,7 @@ class LocationApiServiceTest {
         when(restTemplate.getForEntity((builder4.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42)));
 
-        LocationDto result = locationApiService.getCityByName("Вінницька", "Vinnytsia");
+        LocationDto result = locationApiService.getCitiesByName("Вінницька", "Vinnytsia").get(0);
         assertNotNull(result);
         assertEquals("UA05020030010063857", result.getId());
         assertEquals("Вінниця", result.getName().get("name"));
