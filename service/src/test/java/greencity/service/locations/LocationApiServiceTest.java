@@ -21,7 +21,6 @@ import java.util.Collections;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 class LocationApiServiceTest {
@@ -70,7 +69,7 @@ class LocationApiServiceTest {
         List<Map<String, Object>> results = Arrays.asList(apiResult1, apiResult2);
         ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
 
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         List<LocationDto> districts = locationApiService.getAllDistrictsInCityByCityID("UA46060250010015970");
@@ -94,7 +93,7 @@ class LocationApiServiceTest {
         List<Map<String, Object>> results = Arrays.asList(apiResult1);
         ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
 
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         LocationDto region = locationApiService.getRegionByName("Вінницька");
@@ -115,7 +114,7 @@ class LocationApiServiceTest {
         List<Map<String, Object>> results = Arrays.asList(apiResult1);
         ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
 
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         LocationDto region = locationApiService.getRegionByName("Vinnytska");
@@ -169,13 +168,13 @@ class LocationApiServiceTest {
         LocationApiService locationApiService = new LocationApiService(restTemplate);
 
         // Mocking RestTemplate responses
-        when(restTemplate.getForEntity((builder.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
-        when(restTemplate.getForEntity((builder2.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder2.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult21)));
-        when(restTemplate.getForEntity((builder3.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder3.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult32)));
-        when(restTemplate.getForEntity((builder4.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder4.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42)));
 
         LocationDto result = locationApiService.getCityInRegion("Вінницька", Arrays.asList(city1, city2));
@@ -189,7 +188,7 @@ class LocationApiServiceTest {
         String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
         ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), (Map.class))).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(IllegalArgumentException.class, () -> {
             locationApiService.getAllDistrictsInCityByCityID(null);
@@ -201,7 +200,7 @@ class LocationApiServiceTest {
         String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
         ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), (Map.class))).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getAllDistrictsInCityByCityID("");
@@ -213,7 +212,7 @@ class LocationApiServiceTest {
         String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
         ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), (Map.class))).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(IllegalArgumentException.class, () -> {
             locationApiService.getRegionByName(null);
@@ -225,7 +224,7 @@ class LocationApiServiceTest {
         String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
         ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), (Map.class))).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getRegionByName("");
@@ -237,7 +236,7 @@ class LocationApiServiceTest {
         String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
         ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), (Map.class))).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getAllDistrictsInCityByCityID("NonExistentParent");
@@ -249,7 +248,7 @@ class LocationApiServiceTest {
         String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
         ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getRegionByName("NonExistentName");
@@ -261,7 +260,7 @@ class LocationApiServiceTest {
         String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
         ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getRegionByName("NonExistentName");
@@ -273,7 +272,7 @@ class LocationApiServiceTest {
         String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
         ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getRegionByName("NonExistentName");
@@ -339,9 +338,9 @@ class LocationApiServiceTest {
             .queryParam("page_size", "5000")
             .queryParam("level", "5")
             .queryParam("parent", "UA80000000000093317");
-        when(restTemplate.getForEntity((builder.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1)));
-        when(restTemplate.getForEntity((builder5.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder5.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult51, apiResult52)));
 
         List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Київська", "Київ");
@@ -450,7 +449,7 @@ class LocationApiServiceTest {
         List<Map<String, Object>> results = Collections.singletonList(apiResult1);
         ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getAllDistrictsInCityByNames("RegionName", "CityName");
@@ -507,15 +506,15 @@ class LocationApiServiceTest {
             .queryParam("level", "5")
             .queryParam("parent", "UA05020030010063857");
 
-        when(restTemplate.getForEntity((builder.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
-        when(restTemplate.getForEntity((builder2.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder2.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult21)));
-        when(restTemplate.getForEntity((builder3.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder3.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult32)));
-        when(restTemplate.getForEntity((builder4.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder4.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41)));
-        when(restTemplate.getForEntity((builder5.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder5.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(new ArrayList<>()));
 
         List<LocationDto> allDistricts = locationApiService.getAllDistrictsInCityByNames("Вінницька", "Вінниця");
@@ -542,10 +541,10 @@ class LocationApiServiceTest {
             .queryParam("page_size", "5000")
             .queryParam("level", "1");
 
-        when(restTemplate.getForEntity((builder.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2)));
 
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
         List<LocationDto> regions = locationApiService.getAllRegions();
         assertEquals(2, regions.size());
         assertLocationDto(regions.get(0), "UA01000000000013043", null, "Автономна Республіка Крим",
@@ -565,7 +564,7 @@ class LocationApiServiceTest {
         List<Map<String, Object>> results = Arrays.asList(apiResult1);
         ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
 
         LocationApiService locationApiService = new LocationApiService(restTemplate);
 
@@ -618,13 +617,13 @@ class LocationApiServiceTest {
             .queryParam("name", "Вінниця")
             .queryParam("level", "4");
 
-        when(restTemplate.getForEntity((builder.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
-        when(restTemplate.getForEntity((builder2.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder2.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult21)));
-        when(restTemplate.getForEntity((builder3.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder3.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult32)));
-        when(restTemplate.getForEntity((builder4.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder4.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42)));
 
         LocationDto result = locationApiService.getCityByName("Вінницька", "Вінниця");
@@ -677,13 +676,13 @@ class LocationApiServiceTest {
             .queryParam("name", "Vinnytsia")
             .queryParam("level", "4");
 
-        when(restTemplate.getForEntity((builder.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
-        when(restTemplate.getForEntity((builder2.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder2.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult21)));
-        when(restTemplate.getForEntity((builder3.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder3.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult32)));
-        when(restTemplate.getForEntity((builder4.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder4.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42)));
 
         LocationDto result = locationApiService.getCityByName("Вінницька", "Vinnytsia");
@@ -735,13 +734,13 @@ class LocationApiServiceTest {
             .queryParam("level", "4")
             .queryParam("parent", "UA05020030000031457");
 
-        when(restTemplate.getForEntity((builder.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
-        when(restTemplate.getForEntity((builder2.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder2.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult21)));
-        when(restTemplate.getForEntity((builder3.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder3.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult32)));
-        when(restTemplate.getForEntity((builder4.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder4.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42)));
 
         LocationDto result = locationApiService.getCityByNameFromRegionSide("Вінницька", "Вінниця");
@@ -780,7 +779,7 @@ class LocationApiServiceTest {
         List<Map<String, Object>> results = Arrays.asList(apiResult1, apiResult2);
         ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((builder.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2)));
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         List<LocationDto> regions = locationApiService.getAllDistrictInTheRegionsById("UA05000000000010236");
@@ -810,7 +809,7 @@ class LocationApiServiceTest {
         List<Map<String, Object>> results = Arrays.asList(apiResult1, apiResult2, apiResult3, apiResult4);
         ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        when(restTemplate.getForEntity((apiUrl), eq(Map.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity((apiUrl), Map.class)).thenReturn(responseEntity);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         List<LocationDto> localCommunities = locationApiService.getAllLocalCommunitiesById("UA05020000000026686");
         assertEquals(4, localCommunities.size());
@@ -842,7 +841,7 @@ class LocationApiServiceTest {
             .queryParam("level", "4")
             .queryParam("parent", "UA46060250000025047");
 
-        when(restTemplate.getForEntity((builder.build().encode().toUri()), eq(Map.class)))
+        when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
 
         List<LocationDto> cities = locationApiService.getAllCitiesById("UA46060250000025047");

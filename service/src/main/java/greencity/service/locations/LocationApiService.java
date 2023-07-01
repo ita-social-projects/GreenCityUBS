@@ -332,9 +332,9 @@ public class LocationApiService {
     }
 
     /**
-     * Builds the URL for an API endpoint using the provided page size.
-     * This method uses UriComponentsBuilder to construct a URL with two query
-     * parameters: - PAGE set to "1" - PAGE_SIZE set to the provided page size.
+     * Builds the URL for an API endpoint using the provided page size. This method
+     * uses UriComponentsBuilder to construct a URL with two query parameters: -
+     * PAGE set to "1" - PAGE_SIZE set to the provided page size.
      *
      * @param pageSize The number of results to display per page.
      * @return A UriComponentsBuilder instance with the built URL.
