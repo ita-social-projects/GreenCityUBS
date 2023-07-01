@@ -20,6 +20,13 @@ import java.util.stream.Collectors;
 public class LocationApiService {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
     private static final int DEFAULT_PAGE_SIZE = 5000;
+    private static final String LEVEL = "level";
+    private static final String PAGE = "page";
+    private static final String NAME = "name";
+    private static final String CODE = "code";
+    private static final String PAGE_SIZE = "page_size";
+    private static final String UPPER_ID = "parent";
+
     private RestTemplate restTemplate;
 
     /**
@@ -138,7 +145,7 @@ public class LocationApiService {
         if (cityName.equals("Київ") || cityName.equals("Kyiv")) {
             return getAllDistrictsInCityByCityID("UA80000000000093317");
         }
-        List<LocationDto> allDistricts = new ArrayList<>();
+        List<LocationDto> allDistricts = null;
         LocationDto city = getCityByName(regionName, cityName);
         String cityId = city.getId();
         allDistricts = getAllDistrictsInCityByCityID(cityId);
@@ -213,12 +220,8 @@ public class LocationApiService {
      *         code.
      */
     private LocationDto getLocationDataByCode(int pageSize, int level, String code) {
-        UriComponentsBuilder builder =
-            UriComponentsBuilder.fromHttpUrl(API_URL)
-                .queryParam("page", "1")
-                .queryParam("page_size", pageSize)
-                .queryParam("code", code)
-                .queryParam("level", level);
+        UriComponentsBuilder builder = builderUrl(pageSize).queryParam("code", code)
+            .queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri()).get(0);
     }
 
@@ -232,11 +235,7 @@ public class LocationApiService {
      *         provided level.
      */
     private List<LocationDto> getLocationDataByLevel(int pageSize, int level) {
-        UriComponentsBuilder builder =
-            UriComponentsBuilder.fromHttpUrl(API_URL)
-                .queryParam("page", "1")
-                .queryParam("page_size", pageSize)
-                .queryParam("level", level);
+        UriComponentsBuilder builder = builderUrl(pageSize).queryParam("level", level);
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
@@ -256,11 +255,9 @@ public class LocationApiService {
         if (name == null) {
             throw new IllegalArgumentException("The name parameter cannot be null");
         }
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL)
-            .queryParam("page", "1")
-            .queryParam("page_size", pageSize)
-            .queryParam("name", name)
-            .queryParam("level", level);
+        UriComponentsBuilder builder = builderUrl(pageSize)
+            .queryParam(NAME, name)
+            .queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
@@ -329,12 +326,22 @@ public class LocationApiService {
         if (upperId == null) {
             throw new IllegalArgumentException("The upperId parameter cannot be null");
         }
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL)
-            .queryParam("page", "1")
-            .queryParam("page_size", pageSize)
-
-            .queryParam("level", level)
-            .queryParam("parent", upperId);
+        UriComponentsBuilder builder = builderUrl(pageSize).queryParam("level", level)
+            .queryParam(UPPER_ID, upperId);
         return getResultFromUrl(builder.build().encode().toUri());
+    }
+
+    /**
+     * Builds the URL for an API endpoint using the provided page size.
+     * This method uses UriComponentsBuilder to construct a URL with two query
+     * parameters: - PAGE set to "1" - PAGE_SIZE set to the provided page size.
+     *
+     * @param pageSize The number of results to display per page.
+     * @return A UriComponentsBuilder instance with the built URL.
+     */
+    public UriComponentsBuilder builderUrl(int pageSize) {
+        return UriComponentsBuilder.fromHttpUrl(API_URL)
+            .queryParam(PAGE, "1")
+            .queryParam(PAGE_SIZE, pageSize);
     }
 }
