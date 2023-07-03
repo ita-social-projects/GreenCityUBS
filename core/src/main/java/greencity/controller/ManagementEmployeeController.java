@@ -153,7 +153,7 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/get-all-positions")
-    public ResponseEntity<List<PositionWithTranslateDto>> getAllPositions() {
+    public ResponseEntity<List<PositionDto>> getAllPositions() {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.getAllPositions());
     }
 

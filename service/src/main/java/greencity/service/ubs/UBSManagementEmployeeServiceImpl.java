@@ -13,7 +13,6 @@ import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.position.PositionWithTranslateDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
@@ -329,9 +328,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
-    public List<PositionWithTranslateDto> getAllPositions() {
+    public List<PositionDto> getAllPositions() {
         return positionRepository.findAll().stream()
-            .map(p -> modelMapper.map(p, PositionWithTranslateDto.class))
+            .map(p -> modelMapper.map(p, PositionDto.class))
             .collect(Collectors.toList());
     }
 
