@@ -4,7 +4,13 @@ import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
-import greencity.dto.order.*;
+import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.MakeOrderAgainDto;
+import greencity.dto.order.OrderClientDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderStatusPageDto;
+import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
@@ -19,7 +25,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
@@ -148,7 +161,7 @@ public class ClientController {
     })
     @PostMapping("/{id}/make-order-again")
     public ResponseEntity<MakeOrderAgainDto> makeOrderAgain(@PathVariable(name = "id") Long orderId,
-        @ApiIgnore @ValidLanguage Locale locale) {
+                                                            @ApiIgnore @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.makeOrderAgain(locale, orderId));
     }
 
@@ -223,7 +236,6 @@ public class ClientController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/user-bonuses")
