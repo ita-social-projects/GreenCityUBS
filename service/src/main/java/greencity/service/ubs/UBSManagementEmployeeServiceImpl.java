@@ -45,7 +45,6 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 @Service
 @Data
 public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeService {
