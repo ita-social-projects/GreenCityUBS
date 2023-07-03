@@ -1577,6 +1577,56 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return String.format("%s: %s; ", orderHistory, String.join("; ", newEcoNumbers));
     }
 
+    private void isOrderStatusCanceledOrDone(Order order) {
+        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DONE) {
+            throw new IllegalStateException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
+        }
+    }
+
+    private void updateOrderPageFields(UpdateOrderPageAdminDto updateOrderPageDto, Order order, String email) {
+        long orderId = order.getId();
+        if (nonNull(updateOrderPageDto.getUserInfoDto())) {
+            ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
+        }
+        if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
+            updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), orderId, email);
+        }
+        setUbsCourierSumAndWriteOffStationSum(orderId, updateOrderPageDto.getWriteOffStationSum(),
+            updateOrderPageDto.getUbsCourierSum());
+        if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
+            updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), email);
+        }
+        if (nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
+            updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), email);
+        }
+        if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
+            updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, email);
+        }
+        if (nonNull(updateOrderPageDto.getOrderDetailDto())) {
+            setOrderDetail(
+                orderId,
+                updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
+                email);
+        }
+        if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
+            updateOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+                .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),
+                    dto.getEmployeeId().toString(),
+                    dto.getPositionId(),
+                    email));
+        } else if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
+            List<EmployeeOrderPosition> employeeOrderPositions = employeeOrderPositionRepository
+                .findAllByOrderId(orderId);
+            if (!employeeOrderPositions.isEmpty()) {
+                employeeOrderPositionRepository.deleteAll(employeeOrderPositions);
+            }
+        }
+        if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
+            notificationService.notifyUnpaidOrder(order);
+        }
+    }
+
     /**
      * This is method which is updates admin page info for order.
      *
@@ -1591,9 +1641,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DONE) {
-            throw new IllegalStateException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
-        }
+        isOrderStatusCanceledOrDone(order);
 
         checkAvailableOrderForEmployee(order, email);
 
@@ -1602,48 +1650,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), email);
         } else {
             try {
-                if (nonNull(updateOrderPageDto.getUserInfoDto())) {
-                    ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
-                }
-                if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
-                    updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), orderId, email);
-                }
-                setUbsCourierSumAndWriteOffStationSum(orderId, updateOrderPageDto.getWriteOffStationSum(),
-                    updateOrderPageDto.getUbsCourierSum());
-                if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
-                    updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), email);
-                }
-                if (nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
-                    updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), email);
-                }
-                if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
-                    updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, email);
-                }
-                if (nonNull(updateOrderPageDto.getOrderDetailDto())) {
-                    setOrderDetail(
-                        orderId,
-                        updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
-                        updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
-                        email);
-                }
-                if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
-                    updateOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
-                        .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),
-                            dto.getEmployeeId().toString(),
-                            dto.getPositionId(),
-                            email));
-                } else {
-                    if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
-                        List<EmployeeOrderPosition> employeeOrderPositions = employeeOrderPositionRepository
-                            .findAllByOrderId(orderId);
-                        if (!employeeOrderPositions.isEmpty()) {
-                            employeeOrderPositionRepository.deleteAll(employeeOrderPositions);
-                        }
-                    }
-                }
-                if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-                    notificationService.notifyUnpaidOrder(order);
-                }
+                updateOrderPageFields(updateOrderPageDto, order, email);
             } catch (Exception e) {
                 throw new BadRequestException(e.getMessage());
             }
