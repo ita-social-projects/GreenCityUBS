@@ -22,7 +22,6 @@ import greencity.enums.EmployeeStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
-import greencity.exceptions.http.RemoteServerUnavailableException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.repository.EmployeeCriteriaRepository;
@@ -103,8 +102,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .build();
         try {
             userRemoteClient.signUpEmployee(signUpDto);
-        } catch (RemoteServerUnavailableException e) {
-            throw new BadRequestException(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED + e.getMessage());
+        } catch (HystrixRuntimeException e) {
+            throw new BadRequestException("User with this email already exists: " + signUpDto.getEmail());
         }
     }
 
