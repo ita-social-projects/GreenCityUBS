@@ -59,7 +59,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EmployeeCriteriaRepository employeeCriteriaRepository;
 
-
     /**
      * {@inheritDoc}
      */
