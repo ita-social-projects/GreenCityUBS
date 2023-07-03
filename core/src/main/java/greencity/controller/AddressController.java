@@ -147,13 +147,13 @@ public class AddressController {
      *         specified region and city.
      */
     @ApiOperation(value = "Get all districts for a given region and city",
-            notes = "Provide a region and a city to look up for associated districts")
+        notes = "Provide a region and a city to look up for associated districts")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-districts")
     public ResponseEntity<List<LocationDto>> getAllDistrictsForRegionAndCity(@RequestParam String region,
