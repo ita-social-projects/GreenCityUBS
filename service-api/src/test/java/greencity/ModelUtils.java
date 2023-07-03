@@ -129,7 +129,7 @@ public class ModelUtils {
         return PositionDto.builder()
             .id(1L)
             .name("Менеджер послуги")
-                .name("Service Manager")
-                .build();
+            .name("Service Manager")
+            .build();
     }
 }
