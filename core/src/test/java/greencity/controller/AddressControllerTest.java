@@ -8,6 +8,7 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.service.locations.LocationApiService;
 import greencity.service.ubs.UBSClientService;
 import liquibase.pro.packaged.S;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +54,9 @@ class AddressControllerTest {
 
     @Mock
     private UBSClientService ubsClientService;
+
+    @Mock
+    private LocationApiService locationApiService;
 
     @Mock
     private UserRemoteClient userRemoteClient;
@@ -150,7 +154,7 @@ class AddressControllerTest {
             .parentId("UA46060250000025047")
             .name(nameMap)
             .build();
-        when(ubsClientService.getAllDistrictsForRegionAndCity(region, city)).thenReturn(mockLocationDtoList);
+        when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(mockLocationDtoList);
         mockMvc.perform(get(ubsLink + "/get-all-districts")
             .param("region", region)
             .param("city", city)
@@ -158,7 +162,7 @@ class AddressControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).getAllDistrictsForRegionAndCity(region, city);
+        verify(locationApiService).getAllDistrictsInCityByNames(region, city);
     }
 
 }
