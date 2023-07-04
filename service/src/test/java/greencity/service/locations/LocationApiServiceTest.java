@@ -238,12 +238,17 @@ class LocationApiServiceTest {
         assertLocationDto(region, "UA05000000000010236", null, "Вінницька", "Vinnytska");
     }
     @Test
+    void testGetCitiesByName() {
+        assertThrows(NotFoundException.class, () -> {
+            locationApiService.getCitiesByName("Львівська","Нема");
+        });
+    }
+    @Test
     void testGetUnrealCityInRegion() {
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getCityInRegion("Львівська",new ArrayList<>());
         });
     }
-
     @Test
     void testgetResultFromUrl_UnrealUrl() {
         RestTemplate restTemplate = mock(RestTemplate.class);
