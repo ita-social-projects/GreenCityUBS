@@ -1891,9 +1891,4 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         return modelMapper.map(currentAddress, AddressDto.class);
     }
-
-    @Override
-    public List<LocationDto> getAllDistrictsForRegionAndCity(String region, String city) {
-        return locationApiService.getAllDistrictsInCityByNames(region, city);
-    }
 }
