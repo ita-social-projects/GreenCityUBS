@@ -154,11 +154,10 @@ public class LocationApiService {
         if (cityName.equals(Kyiv.getName().get(NAME)) || cityName.equals(Kyiv.getName().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(Kyiv.getId());
         }
-        List<LocationDto> allDistricts = null;
         List<LocationDto> cities = getCitiesByName(regionName, cityName);
         LocationDto city = getCityInRegion(regionName, cities);
         String cityId = city.getId();
-        allDistricts = getAllDistrictsInCityByCityID(cityId);
+        List<LocationDto>  allDistricts = getAllDistrictsInCityByCityID(cityId);
         if (allDistricts.isEmpty()) {
             String cityNameUK = city.getName().get(NAME);
             city = getCitiesByName(regionName, cityNameUK).get(0);
