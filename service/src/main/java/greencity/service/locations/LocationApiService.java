@@ -30,7 +30,7 @@ public class LocationApiService {
     private static final String CODE = "code";
     private static final String PAGE_SIZE = "page_size";
     private static final String UPPER_ID = "parent";
-    private static LocationDto Kyiv;
+    private static LocationDto kyiv;
     private RestTemplate restTemplate;
 
     /**
@@ -43,7 +43,7 @@ public class LocationApiService {
         Map<String, String> name = new HashMap<>();
         name.put(NAME, "Київ");
         name.put(NAME_EN, "Kyiv");
-        Kyiv = LocationDto.builder()
+        kyiv = LocationDto.builder()
             .id("UA80000000000093317")
             .parentId(null)
             .name(name)
@@ -164,8 +164,8 @@ public class LocationApiService {
      * @return List of districts, or the city itself if no districts are found.
      */
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
-        if (cityName.equals(Kyiv.getName().get(NAME)) || cityName.equals(Kyiv.getName().get(NAME_EN))) {
-            return getAllDistrictsInCityByCityID(Kyiv.getId());
+        if (cityName.equals(kyiv.getName().get(NAME)) || cityName.equals(kyiv.getName().get(NAME_EN))) {
+            return getAllDistrictsInCityByCityID(kyiv.getId());
         }
         List<LocationDto> cities = getCitiesByName(regionName, cityName);
         LocationDto city = getCityInRegion(regionName, cities);

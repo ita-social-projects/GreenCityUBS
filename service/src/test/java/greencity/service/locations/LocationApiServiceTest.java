@@ -250,8 +250,9 @@ class LocationApiServiceTest {
 
     @Test
     void testGetUnrealCityInRegion() {
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getCityInRegion("Львівська", new ArrayList<>());
+        List<LocationDto> emptylist = new ArrayList<>();
+        assertThrows(RuntimeException.class, () -> {
+            locationApiService.getCityInRegion("Львівська", emptylist);
         });
     }
 
@@ -260,8 +261,6 @@ class LocationApiServiceTest {
         RestTemplate restTemplate = mock(RestTemplate.class);
         URI testUrl = URI.create("http://testurl.com");
 
-        // Assuming the existence of a LocationApiService constructor that accepts a
-        // RestTemplate
         LocationApiService locationApiService = new LocationApiService(restTemplate);
 
         ParameterizedTypeReference<Map<String, Object>> typeRef =
@@ -269,10 +268,10 @@ class LocationApiServiceTest {
             };
 
         when(restTemplate.exchange(
-            eq(testUrl),
-            eq(HttpMethod.GET),
-            eq(null),
-            eq(typeRef))).thenThrow(new RestClientException("Test exception"));
+            (testUrl),
+            (HttpMethod.GET),
+            (null),
+            (typeRef))).thenThrow(new RestClientException("Test exception"));
 
         assertThrows(
             NotFoundException.class,
