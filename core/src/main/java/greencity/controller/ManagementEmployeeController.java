@@ -10,7 +10,6 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.position.PositionWithTranslateDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
@@ -153,7 +152,7 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/get-all-positions")
-    public ResponseEntity<List<PositionWithTranslateDto>> getAllPositions() {
+    public ResponseEntity<List<PositionDto>> getAllPositions() {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.getAllPositions());
     }
 
