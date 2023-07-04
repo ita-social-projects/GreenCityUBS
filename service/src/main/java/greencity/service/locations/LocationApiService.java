@@ -29,7 +29,7 @@ public class LocationApiService {
     private static final String NAME_EN = "name_en";
     private static final String CODE = "code";
     private static final String PAGE_SIZE = "page_size";
-    private static final String UPPER_ID = "parent_id";
+    private static final String UPPER_ID = "parent";
     private static LocationDto Kyiv;
     private RestTemplate restTemplate;
 
@@ -293,7 +293,8 @@ public class LocationApiService {
      */
     public List<LocationDto> getResultFromUrl(URI url) {
         try {
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
+            ParameterizedTypeReference<Map<String, Object>> typeRef = new ParameterizedTypeReference<Map<String, Object>>() {};
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
             return Optional.ofNullable(response)
                 .map(ResponseEntity::getBody)
                 .map(body -> (List<Map<String, Object>>) body.get("results"))
@@ -318,7 +319,7 @@ public class LocationApiService {
         nameMap.put(NAME_EN, getValueFromMap(result, NAME_EN));
         return LocationDto.builder()
             .id(getValueFromMap(result, CODE))
-            .parentId(getValueFromMap(result, UPPER_ID))
+            .parentId(getValueFromMap(result, "parent_id"))
             .name(nameMap)
             .build();
     }
