@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class JwtToolTest {
+class JwtToolTest {
     @Mock
     private HttpServletRequest mockHttpServletRequest;
 
@@ -32,13 +32,13 @@ public class JwtToolTest {
     }
 
     @Test
-    public void testGetAccessTokenKey() {
+    void testGetAccessTokenKey() {
         String accessTokenKey = jwtTool.getAccessTokenKey();
         assertEquals("testAccessTokenKey", accessTokenKey);
     }
 
     @Test
-    public void testGetTokenFromHttpServletRequest() {
+    void testGetTokenFromHttpServletRequest() {
         when(mockHttpServletRequest.getHeader("Authorization")).thenReturn("Bearer testToken");
         String token = jwtTool.getTokenFromHttpServletRequest(mockHttpServletRequest);
         assertEquals("testToken", token);
@@ -46,7 +46,7 @@ public class JwtToolTest {
     }
 
     @Test
-    public void testGetTokenFromHttpServletRequest_NullToken() {
+    void testGetTokenFromHttpServletRequest_NullToken() {
         when(mockHttpServletRequest.getHeader("Authorization")).thenReturn(null);
         String token = jwtTool.getTokenFromHttpServletRequest(mockHttpServletRequest);
         assertNull(token);
@@ -54,7 +54,7 @@ public class JwtToolTest {
     }
 
     @Test
-    public void testCreateAccessToken() {
+    void testCreateAccessToken() {
         String email = "test@example.com";
         int ttl = 60;
         String accessToken = jwtTool.createAccessToken(email, ttl);
@@ -79,7 +79,7 @@ public class JwtToolTest {
     }
 
     @Test
-    public void testGetAuthoritiesFromToken() {
+    void testGetAuthoritiesFromToken() {
         String accessToken = Jwts.builder()
             .setSubject("test@example.com")
             .claim("employee_authorities", Arrays.asList("ROLE_USER", "ROLE_ADMIN"))

@@ -12,12 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FeignClientCallAsyncTest {
+class FeignClientCallAsyncTest {
     @Mock
     private UserRemoteClient userRemoteClient;
 
     @Test
-    public void testGetRecordsAsync() throws Exception {
+    void testGetRecordsAsync() throws Exception {
         String email = "example@example.com";
         UserVO userVO = new UserVO();
         when(userRemoteClient.findNotDeactivatedByEmail(email)).thenReturn(Optional.of(userVO));
