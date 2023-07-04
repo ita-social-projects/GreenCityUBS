@@ -293,7 +293,9 @@ public class LocationApiService {
      */
     public List<LocationDto> getResultFromUrl(URI url) {
         try {
-            ParameterizedTypeReference<Map<String, Object>> typeRef = new ParameterizedTypeReference<Map<String, Object>>() {};
+            ParameterizedTypeReference<Map<String, Object>> typeRef =
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                };
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
             return Optional.ofNullable(response)
                 .map(ResponseEntity::getBody)
