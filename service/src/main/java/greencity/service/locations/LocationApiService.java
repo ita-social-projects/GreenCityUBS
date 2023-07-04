@@ -60,6 +60,10 @@ public class LocationApiService {
      */
     public List<LocationDto> getCitiesByName(String regionName, String cityName) {
         List<LocationDto> allCities = getLocationDataByName(DEFAULT_PAGE_SIZE, 4, cityName);
+        if (allCities.isEmpty()) {
+            allCities.add(getCityByNameFromRegionSide(regionName, cityName));
+            return allCities;
+        }
         return allCities.stream()
             .filter(location -> location.getName().containsKey(cityName)
                 || location.getName().containsValue(cityName))
@@ -97,12 +101,13 @@ public class LocationApiService {
         List<LocationDto> allRegions = new ArrayList<>();
         try {
             allRegions = getLocationDataByName(DEFAULT_PAGE_SIZE, 1, regionName);
+            if(allRegions.isEmpty()){
+                allRegions=getAllRegions();
+            }
         } catch (NotFoundException e) {
             allRegions = getAllRegions();
         }
-        if(allRegions.isEmpty()){
-            allRegions=getAllRegions();
-        }
+
         return allRegions.stream()
             .filter(region -> region.getName().containsKey(regionName) || region.getName()
                 .containsValue(regionName))
@@ -268,7 +273,7 @@ public class LocationApiService {
      * @throws NotFoundException if no location matching the provided name and level
      *                           can be found.
      */
-    private List<LocationDto> getLocationDataByName(int pageSize, int level, String name) {
+    public List<LocationDto> getLocationDataByName(int pageSize, int level, String name) {
         if (name == null) {
             throw new IllegalArgumentException("The name parameter cannot be null");
         }
