@@ -103,7 +103,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         try {
             userRemoteClient.signUpEmployee(signUpDto);
         } catch (HystrixRuntimeException e) {
-            throw new BadRequestException("Error to create user(): User with this email already exists or not valid data ");
+            throw new BadRequestException(
+                "Error to create user(): User with this email already exists or not valid data ");
         }
     }
 
