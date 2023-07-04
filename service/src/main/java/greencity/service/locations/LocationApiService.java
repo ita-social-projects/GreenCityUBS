@@ -107,8 +107,7 @@ public class LocationApiService {
         }
 
         return allRegions.stream()
-            .filter(region -> region.getName().containsKey(regionName) || region.getName()
-                .containsValue(regionName))
+            .filter(region -> region.getName().containsValue(regionName))
             .findFirst()
             .orElseThrow(() -> new NotFoundException(ErrorMessage.REGION_NOT_FOUND + regionName));
     }
