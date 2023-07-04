@@ -2,6 +2,7 @@ package greencity.service.locations;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.location.api.LocationDto;
+import greencity.enums.LocationDivision;
 import greencity.exceptions.NotFoundException;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,10 @@ public class LocationApiService {
     private static final String LEVEL = "level";
     private static final String PAGE = "page";
     private static final String NAME = "name";
+    private static final String NAME_EN = "name_en";
     private static final String CODE = "code";
     private static final String PAGE_SIZE = "page_size";
-    private static final String UPPER_ID = "parent";
+    private static final String UPPER_ID = "parent_id";
     private static LocationDto Kyiv;
     private RestTemplate restTemplate;
 
@@ -37,8 +39,8 @@ public class LocationApiService {
     @Autowired
     public LocationApiService(RestTemplate restTemplate) {
         Map<String, String> name = new HashMap<>();
-        name.put("name", "Київ");
-        name.put("name_en", "Kyiv");
+        name.put(NAME, "Київ");
+        name.put(NAME_EN, "Kyiv");
         Kyiv = LocationDto.builder()
                 .id("UA80000000000093317")
                 .parentId(null)
@@ -148,16 +150,8 @@ public class LocationApiService {
                 .collect(Collectors.toList());
         return findLocationByName(cities, regionName, cityName, ErrorMessage.CITY_NOT_FOUND);
     }
-
-    /**
-     * Retrieves a city in a specific region by its name.
-     *
-     * @param regionName The name of the region where the city is located.
-     * @param cityName   The name of the city.
-     * @return A LocationDto object containing the city's data.
-     */
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
-        if (cityName.equals(Kyiv.getName().get("name")) || cityName.equals(Kyiv.getName().get("name_en"))) {
+        if (cityName.equals(Kyiv.getName().get(NAME)) || cityName.equals(Kyiv.getName().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(Kyiv.getId());
         }
         List<LocationDto> allDistricts = null;
@@ -166,7 +160,7 @@ public class LocationApiService {
         String cityId = city.getId();
         allDistricts = getAllDistrictsInCityByCityID(cityId);
         if (allDistricts.isEmpty()) {
-            String cityNameUK = city.getName().get("name");
+            String cityNameUK = city.getName().get(NAME);
             city = getCitiesByName(regionName, cityNameUK).get(0);
             allDistricts = getAllDistrictsInCityByCityID(city.getId());
         }
@@ -182,7 +176,7 @@ public class LocationApiService {
      * @return A list of all regions.
      */
     public List<LocationDto> getAllRegions() {
-        return getLocationDataByLevel(DEFAULT_PAGE_SIZE, 1);
+        return getLocationDataByLevel(DEFAULT_PAGE_SIZE, LocationDivision.REGION.getLevelId());
     }
 
     /**
@@ -192,7 +186,7 @@ public class LocationApiService {
      * @return A list of all cities in the specified region.
      */
     public List<LocationDto> getAllCitiesById(String upperId) {
-        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, 4, upperId);
+        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, LocationDivision.CITY.getLevelId(), upperId);
     }
 
     /**
@@ -202,7 +196,7 @@ public class LocationApiService {
      * @return A list of all districts in the specified region.
      */
     public List<LocationDto> getAllDistrictInTheRegionsById(String upperId) {
-        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, 2, upperId);
+        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE,  LocationDivision.DISTRICT_IN_REGION.getLevelId(), upperId);
     }
 
     /**
@@ -212,7 +206,7 @@ public class LocationApiService {
      * @return A list of all local communities in the specified region.
      */
     public List<LocationDto> getAllLocalCommunitiesById(String upperId) {
-        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, 3, upperId);
+        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, LocationDivision.LOCAL_COMMUNITY.getLevelId(), upperId);
     }
 
     /**
@@ -223,7 +217,7 @@ public class LocationApiService {
      * city.
      */
     public List<LocationDto> getAllDistrictsInCityByCityID(String upperId) {
-        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, 5, upperId);
+        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, LocationDivision.DISTRICT_IN_CITY.getLevelId(), upperId);
     }
 
     /**
@@ -236,7 +230,7 @@ public class LocationApiService {
      * code.
      */
     private LocationDto getLocationDataByCode(int pageSize, int level, String code) {
-        UriComponentsBuilder builder = builderUrl(pageSize).queryParam("code", code)
+        UriComponentsBuilder builder = builderUrl(pageSize).queryParam(CODE, code)
                 .queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri()).get(0);
     }
@@ -309,11 +303,11 @@ public class LocationApiService {
      */
     private LocationDto mapToLocationDto(Map<String, Object> result) {
         Map<String, String> nameMap = new HashMap<>();
-        nameMap.put("name", getValueFromMap(result, "name"));
-        nameMap.put("name_en", getValueFromMap(result, "name_en"));
+        nameMap.put(NAME, getValueFromMap(result, NAME));
+        nameMap.put(NAME_EN, getValueFromMap(result, NAME_EN));
         return LocationDto.builder()
-                .id(getValueFromMap(result, "code"))
-                .parentId(getValueFromMap(result, "parent_id"))
+                .id(getValueFromMap(result, CODE))
+                .parentId(getValueFromMap(result, UPPER_ID))
                 .name(nameMap)
                 .build();
     }
