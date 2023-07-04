@@ -65,8 +65,7 @@ public class LocationApiService {
             return allCities;
         }
         return allCities.stream()
-            .filter(location -> location.getName().containsKey(cityName)
-                || location.getName().containsValue(cityName))
+            .filter(location -> location.getName().containsValue(cityName))
             .collect(Collectors.toList());
     }
 
@@ -85,8 +84,7 @@ public class LocationApiService {
             return getCityByNameFromRegionSide(regionName, locationName);
         }
         return locations.stream()
-            .filter(location -> location.getName().containsKey(locationName)
-                || location.getName().containsValue(locationName))
+            .filter(location -> location.getName().containsValue(locationName))
             .findFirst()
             .orElseThrow(() -> new NotFoundException(errorMessage + locationName));
     }
