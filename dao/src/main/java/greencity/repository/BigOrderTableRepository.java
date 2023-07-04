@@ -16,6 +16,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
@@ -105,7 +106,16 @@ public class BigOrderTableRepository {
         Root<BigOrderTableViews> orderRoot) {
         orderFilterDataProvider.getFiltersLong().entrySet().stream()
             .filter(e -> e.getValue().apply(sc) != null)
-            .map(e -> criteriaPredicate.filter(e.getValue().apply(sc), orderRoot, e.getKey()))
+            .map(e -> {
+                Long[] values = e.getValue().apply(sc);
+                Predicate predicate;
+                if (Arrays.stream(values).anyMatch(value -> value != null && value != -1L)) {
+                    predicate = criteriaPredicate.filter(values, orderRoot, e.getKey());
+                } else {
+                    predicate = criteriaPredicate.filter(orderRoot, e.getKey());
+                }
+                return predicate;
+            })
             .forEach(predicates::add);
     }
 

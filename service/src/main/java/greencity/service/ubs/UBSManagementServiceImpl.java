@@ -784,6 +784,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto;
     }
 
+    /**
+     * Helper method of {@link #getPriceDetails(Long)} which calculates the total
+     * price in coins based on the provided entries and bag items.
+     *
+     * @param entries the set of entries representing the quantity of bags of
+     *                {@link java.util.Map.Entry}
+     * @param bag     the list of bags to calculate the price from {@link Bag}
+     * @return the total price in coins {@link Long}
+     * @throws NotFoundException if a bag with a specific ID was not found
+     * @author Yurii Midianyi
+     */
+    private Long getSumInCoins(Set<Map.Entry<Integer, Integer>> entries, List<Bag> bag) {
+        long result = 0L;
+        for (Map.Entry<Integer, Integer> entry : entries) {
+            result += entry.getValue() * bag
+                .stream()
+                .filter(b -> b.getId().equals(entry.getKey()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                .getFullPrice();
+        }
+        return result;
+    }
+
     private CounterOrderDetailsDto getPriceDetails(Long id) {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
@@ -798,30 +822,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         long totalSumConfirmedInCoins;
         long totalSumExportedInCoins;
         if (!bag.isEmpty()) {
-            for (Map.Entry<Integer, Integer> entry : order.getAmountOfBagsOrdered().entrySet()) {
-                sumAmountInCoins += entry.getValue() * bag
-                    .stream()
-                    .filter(b -> b.getId().equals(entry.getKey()))
-                    .findFirst()
-                    .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
-                    .getFullPrice();
-            }
-            for (Map.Entry<Integer, Integer> entry : order.getConfirmedQuantity().entrySet()) {
-                sumConfirmedInCoins += entry.getValue() * bag
-                    .stream()
-                    .filter(b -> b.getId().equals(entry.getKey()))
-                    .findFirst()
-                    .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
-                    .getFullPrice();
-            }
-            for (Map.Entry<Integer, Integer> entry : order.getExportedQuantity().entrySet()) {
-                sumExportedInCoins += entry.getValue() * bag
-                    .stream()
-                    .filter(b -> b.getId().equals(entry.getKey()))
-                    .findFirst()
-                    .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
-                    .getFullPrice();
-            }
+            sumAmountInCoins = getSumInCoins(order.getAmountOfBagsOrdered().entrySet(), bag);
+            sumConfirmedInCoins = getSumInCoins(order.getConfirmedQuantity().entrySet(), bag);
+            sumExportedInCoins = getSumInCoins(order.getExportedQuantity().entrySet(), bag);
 
             if (order.getExportedQuantity().size() != 0) {
                 sumExportedInCoins += getUbsCourierOrWriteOffStationSum(order);
