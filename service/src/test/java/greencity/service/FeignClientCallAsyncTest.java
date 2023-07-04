@@ -4,7 +4,6 @@ import greencity.client.UserRemoteClient;
 import greencity.dto.user.UserVO;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.Test;
 import java.util.Optional;
