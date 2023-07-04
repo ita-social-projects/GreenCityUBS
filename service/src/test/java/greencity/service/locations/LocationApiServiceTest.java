@@ -33,6 +33,7 @@ import static org.mockito.Mockito.*;
 
 class LocationApiServiceTest {
     private LocationApiService locationApiService;
+    RestTemplate restTemplate;
 
     Map<String, Object> getApiResult(String code, String parent_id, String name, String nameEn) {
         Map<String, Object> apiResult = new HashMap<>();
@@ -157,7 +158,7 @@ class LocationApiServiceTest {
         Map<String, Object> zaliznychnyiResult =
             getApiResult("UA46060250010259421", "UA46060250010015970", "Залізничний", "Zaliznychnyi");
 
-        RestTemplate restTemplate = mock(RestTemplate.class);
+        restTemplate = mock(RestTemplate.class);
         when(restTemplate.exchange(eq(level1Builder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
                 .thenReturn(
@@ -240,6 +241,37 @@ class LocationApiServiceTest {
     void testGetRegionByNameEn() {
         LocationDto region = locationApiService.getRegionByName("Vinnytska");
         assertLocationDto(region, "UA05000000000010236", null, "Вінницька", "Vinnytska");
+    }
+
+    @Test
+    void testGetDisctrictByNameEn() {
+
+        UriComponentsBuilder lviv = UriComponentsBuilder
+            .fromHttpUrl("https://directory.org.ua/api/katottg")
+            .queryParam("page", "1")
+            .queryParam("page_size", "5000")
+            .queryParam("name", "Lviv")
+            .queryParam("level", "4");
+        UriComponentsBuilder lvivska = UriComponentsBuilder
+            .fromHttpUrl("https://directory.org.ua/api/katottg")
+            .queryParam("page", "1")
+            .queryParam("page_size", "5000")
+            .queryParam("name", "Lvivska")
+            .queryParam("level", "1");
+        when(restTemplate.exchange(eq(lviv.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+            any(ParameterizedTypeReference.class)))
+                .thenReturn(prepareResponseEntity(new ArrayList<>()));
+        when(restTemplate.exchange(eq(lvivska.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+            any(ParameterizedTypeReference.class)))
+                .thenReturn(
+                    prepareResponseEntity(new ArrayList<>()));
+
+        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Lvivska", "Lviv");
+
+        assertEquals(2, districts.size());
+        assertLocationDto(districts.get(0), "UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
+        assertLocationDto(districts.get(1), "UA46060250010259421", "UA46060250010015970", "Залізничний",
+            "Zaliznychnyi");
     }
 
     @Test
