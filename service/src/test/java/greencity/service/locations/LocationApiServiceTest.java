@@ -1,5 +1,6 @@
 package greencity.service.locations;
 
+import greencity.constant.ErrorMessage;
 import greencity.dto.location.api.LocationDto;
 import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -226,13 +228,47 @@ class LocationApiServiceTest {
         LocationDto region = locationApiService.getRegionByName("Вінницька");
         assertLocationDto(region, "UA05000000000010236", null, "Вінницька", "Vinnytska");
     }
-
+    @Test
+    void testGetRegionByName_ListEmpty() {
+        LocationDto region = locationApiService.getRegionByName("Avtonomna Respublika Krym");
+        assertLocationDto(region, "UA01000000000013043", null, "Автономна Республіка Крим", "Avtonomna Respublika Krym");
+    }
     @Test
     void testGetRegionByNameEn() {
         LocationDto region = locationApiService.getRegionByName("Vinnytska");
         assertLocationDto(region, "UA05000000000010236", null, "Вінницька", "Vinnytska");
     }
+    @Test
+    void testGetUnrealCityInRegion() {
+        assertThrows(NotFoundException.class, () -> {
+            locationApiService.getCityInRegion("Львівська",new ArrayList<>());
+        });
+    }
+    @Test
+    void testgetResultFromUrl_UnrealUrl() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+        URI testUrl = URI.create("http://testurl.com");
 
+        // Assuming the existence of a LocationApiService constructor that accepts a RestTemplate
+        LocationApiService locationApiService = new LocationApiService(restTemplate);
+
+        ParameterizedTypeReference<Map<String, Object>> typeRef =
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                };
+
+        when(restTemplate.exchange(
+                eq(testUrl),
+                eq(HttpMethod.GET),
+                eq(null),
+                eq(typeRef)
+        )).thenThrow(new RestClientException("Test exception"));
+
+        assertThrows(
+                NotFoundException.class,
+                () -> locationApiService.getResultFromUrl(testUrl),
+                ErrorMessage.NOT_FOUND_LOCATION_BY_URL + testUrl
+        );
+    }
     @Test
     void testGetCityByNameAndRegionName() {
         UriComponentsBuilder builder = UriComponentsBuilder

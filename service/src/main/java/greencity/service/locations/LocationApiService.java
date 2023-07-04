@@ -60,10 +60,6 @@ public class LocationApiService {
      */
     public List<LocationDto> getCitiesByName(String regionName, String cityName) {
         List<LocationDto> allCities = getLocationDataByName(DEFAULT_PAGE_SIZE, 4, cityName);
-//        if (allCities.isEmpty()) {
-//            allCities.add(getCityByNameFromRegionSide(regionName, cityName));
-//            return allCities;
-//        }
         return allCities.stream()
             .filter(location -> location.getName().containsKey(cityName)
                 || location.getName().containsValue(cityName))
@@ -104,8 +100,8 @@ public class LocationApiService {
         } catch (NotFoundException e) {
             allRegions = getAllRegions();
         }
-        if (allRegions.isEmpty()) {
-            allRegions = getAllRegions();
+        if(allRegions.isEmpty()){
+            allRegions=getAllRegions();
         }
         return allRegions.stream()
             .filter(region -> region.getName().containsKey(regionName) || region.getName()
@@ -131,7 +127,7 @@ public class LocationApiService {
                 return city;
             }
         }
-        throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND + cities.get(0).getName());
+        throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND_IN_REGION+regionID);
     }
 
     /**
