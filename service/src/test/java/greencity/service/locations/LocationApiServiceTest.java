@@ -290,6 +290,20 @@ class LocationApiServiceTest {
     }
 
     @Test
+    void testGetCityInRegion() {
+        Map<String, String> name = new HashMap<>();
+        name.put("name", "Львів");
+        name.put("name_en", "Lviv");
+        LocationDto locationDto = LocationDto.builder()
+            .id("UA46060250010015970")
+            .parentId("UA05020030000031457")
+            .name(name)
+            .build();
+        assertLocationDto(locationApiService.getCityInRegion("Львівська", Arrays.asList(locationDto)),
+            "UA46060250010015970", "UA05020030000031457", "Львів", "Lviv");
+    }
+
+    @Test
     void testgetResultFromUrl_UnrealUrl() {
         RestTemplate restTemplate = mock(RestTemplate.class);
         URI testUrl = URI.create("http://testurl.com");
