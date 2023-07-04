@@ -241,6 +241,7 @@ public class ModelUtils {
             .lastName("Last Name")
             .phoneNumber("Phone Number")
             .email("employee@gmail.com")
+            .employeeStatus("ACTIVE")
             .image("Image")
             .regionId(15L)
             .regionNameEn("Kyiv region")
@@ -287,6 +288,7 @@ public class ModelUtils {
             .lastName("Last Name")
             .phoneNumber("Phone Number")
             .email("employee@gmail.com")
+            .employeeStatus("ACTIVE")
             .image("Image")
             .build();
     }
