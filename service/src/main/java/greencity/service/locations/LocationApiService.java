@@ -241,7 +241,7 @@ public class LocationApiService {
      * @return A LocationDto object representing the location matching the provided
      *         code.
      */
-    private LocationDto getLocationDataByCode(int pageSize, int level, String code) {
+    public LocationDto getLocationDataByCode(int pageSize, int level, String code) {
         UriComponentsBuilder builder = builderUrl(pageSize).queryParam(CODE, code)
             .queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri()).get(0);
