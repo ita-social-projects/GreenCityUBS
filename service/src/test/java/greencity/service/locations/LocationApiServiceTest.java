@@ -50,151 +50,152 @@ class LocationApiServiceTest {
 
     @BeforeEach
     void initialise() {
-        Map<String, Object> apiResult1 =
+        Map<String, Object> autonomousRepublicResult =
             getApiResult("UA01000000000013043", null, "Автономна Республіка Крим", "Avtonomna Respublika Krym");
-        Map<String, Object> apiResult2 = getApiResult("UA05000000000010236", null, "Вінницька", "Vinnytska");
-        Map<String, Object> apiResult3 = getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
-//        Map<String, Object> apiResult22 =
-//            getApiResult("UA46020000000075920", "UA46000000000026241", "Дрогобицький", "Drohobytskyi");
-        Map<String, Object> apiResult21 =
+        Map<String, Object> vinnytskaResult = getApiResult("UA05000000000010236", null, "Вінницька", "Vinnytska");
+        Map<String, Object> lvivskaResult = getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
+        Map<String, Object> lvivDistrictResult =
             getApiResult("UA46060000000042587", "UA46000000000026241", "Львівський", "Lvivskyi");
-        Map<String, Object> apiResult31 =
+        Map<String, Object> kulykivskaResult =
             getApiResult("UA46060230000093092", "UA46060000000042587", "Куликівська", "Kulykivska");
-        Map<String, Object> apiResult41 =
+        Map<String, Object> kulykivResult =
             getApiResult("UA46060230010099970", "UA46060230000093092", "Куликів", "Kulykiv");
-        Map<String, Object> apiResult42 =
+        Map<String, Object> vidnivResult =
             getApiResult("UA46060230040034427", "UA46060230000093092", "Віднів", "Vidniv");
 
-        UriComponentsBuilder builder = UriComponentsBuilder
+        // Level 1 Builder
+        UriComponentsBuilder level1Builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "5000")
             .queryParam("level", "1");
 
-        UriComponentsBuilder builder2 = UriComponentsBuilder
+        // Level 2 Builders
+        UriComponentsBuilder level2BuilderLviv = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "2")
             .queryParam("code", "UA46060000000042587")
             .queryParam("level", "2");
-        UriComponentsBuilder builder2_2 = UriComponentsBuilder
+
+        UriComponentsBuilder level2BuilderLvivParent = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "5000")
             .queryParam("level", "2")
             .queryParam("parent", "UA46000000000026241");
-
-        UriComponentsBuilder builder3_village = UriComponentsBuilder
+        UriComponentsBuilder level3VillageBuilder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "2")
             .queryParam("code", "UA46060230000093092")
             .queryParam("level", "3");
 
-        UriComponentsBuilder builder3_city = UriComponentsBuilder
+        UriComponentsBuilder level3CityBuilder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "2")
             .queryParam("code", "UA05020030000031457")
             .queryParam("level", "3");
 
-        UriComponentsBuilder builder3_3 = UriComponentsBuilder
+        UriComponentsBuilder level3BuilderParentLviv = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "5000")
             .queryParam("level", "3")
             .queryParam("parent", "UA46060000000042587");
 
-        UriComponentsBuilder builder4_2 = UriComponentsBuilder
+        UriComponentsBuilder level4BuilderParentLvivCity = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "5000")
             .queryParam("level", "4")
             .queryParam("parent", "UA05020030000031457");
 
-        UriComponentsBuilder builder4_city = UriComponentsBuilder
+        UriComponentsBuilder level4BuilderLvivCity = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "5000")
             .queryParam("name", "Львів")
             .queryParam("level", "4");
 
-        UriComponentsBuilder builder4_village = UriComponentsBuilder
+        UriComponentsBuilder level4BuilderVillage = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "5000")
             .queryParam("name", "Віднів")
             .queryParam("level", "4");
-//        UriComponentsBuilder builder4_villageEn = UriComponentsBuilder
-//                .fromHttpUrl("https://directory.org.ua/api/katottg")
-//                .queryParam("page", "1")
-//                .queryParam("page_size", "5000")
-//                .queryParam("name", "Vidniv")
-//                .queryParam("level", "4");
-        UriComponentsBuilder builder5_village = UriComponentsBuilder
+
+        UriComponentsBuilder level5BuilderVillage = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "5000")
             .queryParam("level", "5")
             .queryParam("parent", "UA46060230040034427");
 
-        UriComponentsBuilder builder5_city =
+        UriComponentsBuilder level5BuilderCity =
             UriComponentsBuilder.fromHttpUrl("https://directory.org.ua/api/katottg")
                 .queryParam("page", "1")
                 .queryParam("page_size", "5000")
                 .queryParam("level", "5")
                 .queryParam("parent", "UA46060250010015970");
-        UriComponentsBuilder builder_regions = UriComponentsBuilder
+
+        UriComponentsBuilder regionsBuilder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
             .queryParam("page_size", "5000")
             .queryParam("level", "1");
 
-        Map<String, Object> apiResult32 =
+        Map<String, Object> lvivska2Result =
             getApiResult("UA05020030000031457", "UA46060000000042587", "Львівська", "Lvivska");
-        Map<String, Object> apiResult43 = getApiResult("UA46060250010015970", "UA05020030000031457", "Львів", "Lviv");
 
-        Map<String, Object> apiResult51 =
+        Map<String, Object> lvivResult = getApiResult("UA46060250010015970", "UA05020030000031457", "Львів", "Lviv");
+
+        Map<String, Object> halytskyiResult =
             getApiResult("UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
-        Map<String, Object> apiResult52 =
+
+        Map<String, Object> zaliznychnyiResult =
             getApiResult("UA46060250010259421", "UA46060250010015970", "Залізничний", "Zaliznychnyi");
 
         RestTemplate restTemplate = mock(RestTemplate.class);
+        when(restTemplate.exchange(eq(level1Builder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+            any(ParameterizedTypeReference.class)))
+                .thenReturn(
+                    prepareResponseEntity(Arrays.asList(autonomousRepublicResult, vinnytskaResult, lvivskaResult)));
 
-        when(restTemplate.exchange(eq(builder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+        when(restTemplate.exchange(eq(level2BuilderLviv.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
-                .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
-        when(restTemplate.exchange(eq(builder2.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
-            any(ParameterizedTypeReference.class))).thenReturn(prepareResponseEntity(Arrays.asList(apiResult21)));
-        when(restTemplate.exchange(eq(builder2_2.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
-            any(ParameterizedTypeReference.class))).thenReturn(prepareResponseEntity(Arrays.asList(apiResult21)));
-        when(restTemplate.exchange(eq(builder3_village.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
-            any(ParameterizedTypeReference.class))).thenReturn(prepareResponseEntity(Arrays.asList(apiResult31)));
-        when(restTemplate.exchange(eq(builder3_3.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
-            any(ParameterizedTypeReference.class))).thenReturn(prepareResponseEntity(Arrays.asList(apiResult32)));
-        when(restTemplate.exchange(eq(builder4_village.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+                .thenReturn(prepareResponseEntity(Arrays.asList(lvivDistrictResult)));
+
+        when(restTemplate.exchange(eq(level2BuilderLvivParent.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
-                .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42)));
-        when(restTemplate.exchange(eq(builder4_2.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+                .thenReturn(prepareResponseEntity(Arrays.asList(lvivDistrictResult)));
+        when(restTemplate.exchange(eq(level3VillageBuilder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+            any(ParameterizedTypeReference.class))).thenReturn(prepareResponseEntity(Arrays.asList(kulykivskaResult)));
+        when(restTemplate.exchange(eq(level3BuilderParentLviv.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+            any(ParameterizedTypeReference.class))).thenReturn(prepareResponseEntity(Arrays.asList(lvivska2Result)));
+        when(restTemplate.exchange(eq(level4BuilderVillage.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
-                .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42, apiResult43)));
-//        when(restTemplate.exchange(eq(builder4_villageEn.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
-//                any(ParameterizedTypeReference.class)))
-//                .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42)));
-        when(restTemplate.exchange(eq(builder3_city.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
-            any(ParameterizedTypeReference.class))).thenReturn(prepareResponseEntity(Arrays.asList(apiResult32)));
-        when(restTemplate.exchange(eq(builder4_city.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+                .thenReturn(prepareResponseEntity(Arrays.asList(kulykivResult, vidnivResult)));
+        when(restTemplate.exchange(eq(level4BuilderParentLvivCity.build().encode().toUri()), eq(HttpMethod.GET),
+            eq(null),
             any(ParameterizedTypeReference.class)))
-                .thenReturn(prepareResponseEntity(Arrays.asList(apiResult43)));
-        when(restTemplate.exchange(eq(builder5_village.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+                .thenReturn(prepareResponseEntity(Arrays.asList(kulykivResult, vidnivResult, lvivResult)));
+        when(restTemplate.exchange(eq(level3CityBuilder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+            any(ParameterizedTypeReference.class))).thenReturn(prepareResponseEntity(Arrays.asList(lvivska2Result)));
+        when(restTemplate.exchange(eq(level4BuilderLvivCity.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+            any(ParameterizedTypeReference.class)))
+                .thenReturn(prepareResponseEntity(Arrays.asList(lvivResult)));
+        when(restTemplate.exchange(eq(level5BuilderVillage.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
                 .thenReturn(prepareResponseEntity(new ArrayList<>()));
-        when(restTemplate.exchange(eq(builder5_city.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+        when(restTemplate.exchange(eq(level5BuilderCity.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
-                .thenReturn(prepareResponseEntity(Arrays.asList(apiResult51, apiResult52)));
-        when(restTemplate.exchange(eq(builder_regions.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+                .thenReturn(prepareResponseEntity(Arrays.asList(halytskyiResult, zaliznychnyiResult)));
+        when(restTemplate.exchange(eq(regionsBuilder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
-                .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
+                .thenReturn(
+                    prepareResponseEntity(Arrays.asList(autonomousRepublicResult, lvivskaResult, vinnytskaResult)));
 
         locationApiService = new LocationApiService(restTemplate);
     }
@@ -564,7 +565,7 @@ class LocationApiServiceTest {
         assertEquals(3, regions.size());
         assertLocationDto(regions.get(0), "UA01000000000013043", null, "Автономна Республіка Крим",
             "Avtonomna Respublika Krym");
-        assertLocationDto(regions.get(1), "UA05000000000010236", null, "Вінницька", "Vinnytska");
+        assertLocationDto(regions.get(2), "UA05000000000010236", null, "Вінницька", "Vinnytska");
     }
 
     @Test
