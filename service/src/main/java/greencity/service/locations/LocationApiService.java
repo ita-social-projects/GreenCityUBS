@@ -26,7 +26,7 @@ public class LocationApiService {
     private static final String CODE = "code";
     private static final String PAGE_SIZE = "page_size";
     private static final String UPPER_ID = "parent";
-
+    private static LocationDto Kyiv;
     private RestTemplate restTemplate;
 
     /**
@@ -36,6 +36,14 @@ public class LocationApiService {
      */
     @Autowired
     public LocationApiService(RestTemplate restTemplate) {
+        Map<String, String> name = new HashMap<>();
+        name.put("name", "Київ");
+        name.put("name_en", "Kyiv");
+        Kyiv = LocationDto.builder()
+                .id("UA80000000000093317")
+                .parentId(null)
+                .name(name)
+                .build();
         this.restTemplate = restTemplate;
     }
 
@@ -53,9 +61,9 @@ public class LocationApiService {
             return allCities;
         }
         return allCities.stream()
-            .filter(location -> location.getName().containsKey(cityName)
-                || location.getName().containsValue(cityName))
-            .collect(Collectors.toList());
+                .filter(location -> location.getName().containsKey(cityName)
+                        || location.getName().containsValue(cityName))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -68,15 +76,15 @@ public class LocationApiService {
      * @return A LocationDto object containing the location's data.
      */
     private LocationDto findLocationByName(List<LocationDto> locations, String regionName, String locationName,
-        String errorMessage) {
+                                           String errorMessage) {
         if (locations.isEmpty()) {
             return getCityByNameFromRegionSide(regionName, locationName);
         }
         return locations.stream()
-            .filter(location -> location.getName().containsKey(locationName)
-                || location.getName().containsValue(locationName))
-            .findFirst()
-            .orElseThrow(() -> new NotFoundException(errorMessage + locationName));
+                .filter(location -> location.getName().containsKey(locationName)
+                        || location.getName().containsValue(locationName))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(errorMessage + locationName));
     }
 
     /**
@@ -96,10 +104,10 @@ public class LocationApiService {
             allRegions = getAllRegions();
         }
         return allRegions.stream()
-            .filter(region -> region.getName().containsKey(regionName) || region.getName()
-                .containsValue(regionName))
-            .findFirst()
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.REGION_NOT_FOUND + regionName));
+                .filter(region -> region.getName().containsKey(regionName) || region.getName()
+                        .containsValue(regionName))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.REGION_NOT_FOUND + regionName));
     }
 
     /**
@@ -133,11 +141,11 @@ public class LocationApiService {
         LocationDto region = getRegionByName(regionName);
         List<LocationDto> districts = getAllDistrictInTheRegionsById(region.getId());
         List<LocationDto> localCommunities = districts.stream()
-            .flatMap(district -> getAllLocalCommunitiesById(district.getId()).stream())
-            .collect(Collectors.toList());
+                .flatMap(district -> getAllLocalCommunitiesById(district.getId()).stream())
+                .collect(Collectors.toList());
         List<LocationDto> cities = localCommunities.stream()
-            .flatMap(community -> getAllCitiesById(community.getId()).stream())
-            .collect(Collectors.toList());
+                .flatMap(community -> getAllCitiesById(community.getId()).stream())
+                .collect(Collectors.toList());
         return findLocationByName(cities, regionName, cityName, ErrorMessage.CITY_NOT_FOUND);
     }
 
@@ -149,8 +157,8 @@ public class LocationApiService {
      * @return A LocationDto object containing the city's data.
      */
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
-        if (cityName.equals("Київ") || cityName.equals("Kyiv")) {
-            return getAllDistrictsInCityByCityID("UA80000000000093317");
+        if (cityName.equals(Kyiv.getName().get("name")) || cityName.equals(Kyiv.getName().get("name_en"))) {
+            return getAllDistrictsInCityByCityID(Kyiv.getId());
         }
         List<LocationDto> allDistricts = null;
         List<LocationDto> cities = getCitiesByName(regionName, cityName);
@@ -212,7 +220,7 @@ public class LocationApiService {
      *
      * @param upperId The ID of the city.
      * @return A List of LocationDto objects, each representing a district in the
-     *         city.
+     * city.
      */
     public List<LocationDto> getAllDistrictsInCityByCityID(String upperId) {
         return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, 5, upperId);
@@ -225,11 +233,11 @@ public class LocationApiService {
      * @param level    The hierarchical level of the location (e.g., city, region).
      * @param code     The code representing the specific location to fetch.
      * @return A LocationDto object representing the location matching the provided
-     *         code.
+     * code.
      */
     private LocationDto getLocationDataByCode(int pageSize, int level, String code) {
         UriComponentsBuilder builder = builderUrl(pageSize).queryParam("code", code)
-            .queryParam(LEVEL, level);
+                .queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri()).get(0);
     }
 
@@ -240,7 +248,7 @@ public class LocationApiService {
      * @param level    The hierarchical level of the locations to fetch (e.g., city,
      *                 region).
      * @return A List of LocationDto objects representing all locations at the
-     *         provided level.
+     * provided level.
      */
     private List<LocationDto> getLocationDataByLevel(int pageSize, int level) {
         UriComponentsBuilder builder = builderUrl(pageSize).queryParam(LEVEL, level);
@@ -255,7 +263,7 @@ public class LocationApiService {
      *                 region).
      * @param name     The name of the location to fetch.
      * @return A List of LocationDto objects representing the locations matching the
-     *         provided name.
+     * provided name.
      * @throws NotFoundException if no location matching the provided name and level
      *                           can be found.
      */
@@ -264,8 +272,8 @@ public class LocationApiService {
             throw new IllegalArgumentException("The name parameter cannot be null");
         }
         UriComponentsBuilder builder = builderUrl(pageSize)
-            .queryParam(NAME, name)
-            .queryParam(LEVEL, level);
+                .queryParam(NAME, name)
+                .queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
@@ -282,12 +290,12 @@ public class LocationApiService {
         try {
             ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
             return Optional.ofNullable(response)
-                .map(ResponseEntity::getBody)
-                .map(body -> (List<Map<String, Object>>) body.get("results"))
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url))
-                .stream()
-                .map(this::mapToLocationDto)
-                .collect(Collectors.toList());
+                    .map(ResponseEntity::getBody)
+                    .map(body -> (List<Map<String, Object>>) body.get("results"))
+                    .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url))
+                    .stream()
+                    .map(this::mapToLocationDto)
+                    .collect(Collectors.toList());
         } catch (RestClientException e) {
             throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url);
         }
@@ -304,10 +312,10 @@ public class LocationApiService {
         nameMap.put("name", getValueFromMap(result, "name"));
         nameMap.put("name_en", getValueFromMap(result, "name_en"));
         return LocationDto.builder()
-            .id(getValueFromMap(result, "code"))
-            .parentId(getValueFromMap(result, "parent_id"))
-            .name(nameMap)
-            .build();
+                .id(getValueFromMap(result, "code"))
+                .parentId(getValueFromMap(result, "parent_id"))
+                .name(nameMap)
+                .build();
     }
 
     /**
@@ -328,14 +336,14 @@ public class LocationApiService {
      * @param level    The level of location to fetch.
      * @param upperId  The upper ID of the location.
      * @return A List of LocationDto objects, each representing a location matching
-     *         the provided parameters.
+     * the provided parameters.
      */
     private List<LocationDto> getLocationDataByUpperId(int pageSize, int level, String upperId) {
         if (upperId == null) {
             throw new IllegalArgumentException("The upperId parameter cannot be null");
         }
         UriComponentsBuilder builder = builderUrl(pageSize).queryParam(LEVEL, level)
-            .queryParam(UPPER_ID, upperId);
+                .queryParam(UPPER_ID, upperId);
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
@@ -349,7 +357,7 @@ public class LocationApiService {
      */
     public UriComponentsBuilder builderUrl(int pageSize) {
         return UriComponentsBuilder.fromHttpUrl(API_URL)
-            .queryParam(PAGE, "1")
-            .queryParam(PAGE_SIZE, pageSize);
+                .queryParam(PAGE, "1")
+                .queryParam(PAGE_SIZE, pageSize);
     }
 }
