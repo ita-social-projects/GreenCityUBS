@@ -60,10 +60,10 @@ public class LocationApiService {
      */
     public List<LocationDto> getCitiesByName(String regionName, String cityName) {
         List<LocationDto> allCities = getLocationDataByName(DEFAULT_PAGE_SIZE, 4, cityName);
-        if (allCities.isEmpty()) {
-            allCities.add(getCityByNameFromRegionSide(regionName, cityName));
-            return allCities;
-        }
+//        if (allCities.isEmpty()) {
+//            allCities.add(getCityByNameFromRegionSide(regionName, cityName));
+//            return allCities;
+//        }
         return allCities.stream()
             .filter(location -> location.getName().containsKey(cityName)
                 || location.getName().containsValue(cityName))
@@ -79,8 +79,8 @@ public class LocationApiService {
      * @param errorMessage The error message to use if the location is not found.
      * @return A LocationDto object containing the location's data.
      */
-    private LocationDto findLocationByName(List<LocationDto> locations, String regionName, String locationName,
-        String errorMessage) {
+    LocationDto findLocationByName(List<LocationDto> locations, String regionName, String locationName,
+                                   String errorMessage) {
         if (locations.isEmpty()) {
             return getCityByNameFromRegionSide(regionName, locationName);
         }
