@@ -30,7 +30,7 @@ public class LocationApiService {
     private static final String CODE = "code";
     private static final String PAGE_SIZE = "page_size";
     private static final String UPPER_ID = "parent";
-    private static LocationDto kyiv;
+    private LocationDto kyiv;
     private RestTemplate restTemplate;
 
     /**
