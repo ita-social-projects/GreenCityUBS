@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -639,6 +640,27 @@ class SuperAdminServiceImplTest {
         verify(locationRepository).findLocationByNameAndRegionId("Київ", "Kyiv", 1L);
         verify(regionRepository).findRegionByEnNameAndUkrName("Kyiv region", "Київська область");
         verify(locationRepository).save(location);
+    }
+
+    @Test
+    void deleteLocationTest() {
+        Location location = ModelUtils.getLocationDto();
+        location
+            .setTariffLocations(Set.of(TariffLocation.builder().location(Location.builder().id(2L).build()).build()));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        superAdminService.deleteLocation(1L);
+        verify(locationRepository).findById(1L);
+        verify(locationRepository).delete(any(Location.class));
+    }
+
+    @Test
+    void deleteLocationThrowsBadRequestExceptionTest() {
+        Location location = ModelUtils.getLocationDto();
+        location
+            .setTariffLocations(Set.of(TariffLocation.builder().location(Location.builder().id(1L).build()).build()));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        assertThrows(BadRequestException.class, () -> superAdminService.deleteLocation(1L));
+        verify(locationRepository).findById(1L);
     }
 
     @Test
