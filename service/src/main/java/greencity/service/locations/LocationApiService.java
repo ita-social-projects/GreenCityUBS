@@ -80,7 +80,7 @@ public class LocationApiService {
      * @return A LocationDto object containing the location's data.
      */
     LocationDto findLocationByName(List<LocationDto> locations, String regionName, String locationName,
-                                   String errorMessage) {
+        String errorMessage) {
         if (locations.isEmpty()) {
             return getCityByNameFromRegionSide(regionName, locationName);
         }
@@ -101,8 +101,8 @@ public class LocationApiService {
         List<LocationDto> allRegions = new ArrayList<>();
         try {
             allRegions = getLocationDataByName(DEFAULT_PAGE_SIZE, 1, regionName);
-            if(allRegions.isEmpty()){
-                allRegions=getAllRegions();
+            if (allRegions.isEmpty()) {
+                allRegions = getAllRegions();
             }
         } catch (NotFoundException e) {
             allRegions = getAllRegions();
@@ -132,7 +132,7 @@ public class LocationApiService {
                 return city;
             }
         }
-        throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND_IN_REGION+regionID);
+        throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND_IN_REGION + regionID);
     }
 
     /**

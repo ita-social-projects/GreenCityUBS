@@ -236,7 +236,7 @@ class UBSClientServiceImplTest {
     @Mock
     private UBSManagementService ubsManagementService;
     @Mock
-    private  UBSClientServiceImpl ubsClientService;
+    private UBSClientServiceImpl ubsClientService;
 
     @Test
     @Transactional
@@ -390,11 +390,11 @@ class UBSClientServiceImplTest {
 
     @Test
     void testGetAllDistrictsForRegionAndCity() {
-        List<LocationDto> districts =             ubsClientService.getAllDistrictsForRegionAndCity("RegionName", "CityName");
-
+        List<LocationDto> districts = ubsClientService.getAllDistrictsForRegionAndCity("RegionName", "CityName");
 
         verify(ubsClientService).getAllDistrictsForRegionAndCity("RegionName", "CityName");
     }
+
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenTariffDoesNotExist() {
         var user = getUser();
