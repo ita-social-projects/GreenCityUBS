@@ -1212,6 +1212,7 @@ public class ModelUtils {
                 .employeePosition(Set.of(Position.builder()
                     .id(6L)
                     .name("Супер адмін")
+                    .nameEn("Super admin")
                     .build()))
                 .tariffInfos(new HashSet<>())
                 .imagePath("path")
