@@ -255,8 +255,7 @@ public class LocationApiService {
             .queryParam(LEVEL, level);
         List<LocationDto> resultFromUrl = getResultFromUrl(builder.build().encode().toUri());
         if (resultFromUrl == null || resultFromUrl.isEmpty()) {
-            throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL + level + "\n"
-                + ErrorMessage.NOT_FOUND_LOCATION_BY_CODE + code);
+            throw new NotFoundException(  String.format(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE, level,code));
         }
         return resultFromUrl.get(0);
     }
