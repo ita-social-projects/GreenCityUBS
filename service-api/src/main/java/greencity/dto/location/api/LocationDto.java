@@ -10,5 +10,5 @@ import java.util.Map;
 public class LocationDto {
     private String parentId;
     private String id;
-    private Map<String, String> name;
+    private Map<String, String> locationNameMap;
 }
