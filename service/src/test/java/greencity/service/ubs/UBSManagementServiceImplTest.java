@@ -1094,6 +1094,19 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void testSetOrderDetailIdNotFound() {
+        Long orderId = 123L;
+        when(orderRepository.findById(Mockito.eq(orderId))).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> {
+            ubsManagementService.setOrderDetail(orderId,
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+                "testEmail@gmail.com");
+        });
+        verify(orderRepository).findById(anyLong());
+    }
+
+    @Test
     void testSetOrderDetailNeedToChangeStatusToHALF_PAID() {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusDoneDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
