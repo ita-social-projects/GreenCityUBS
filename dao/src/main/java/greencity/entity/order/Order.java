@@ -190,24 +190,23 @@ public class Order {
     private List<OrderBag> orderBags = new ArrayList<>();
 
     /**
-     * method helps to add OrderBag.
+     * method helps to delete bag from order.
      *
      * @param orderBag {@link OrderBag}
      * @author Julia Seti
      */
-    public void addOrderBag(OrderBag orderBag) {
-        this.orderBags.add(orderBag);
-        orderBag.setOrder(this);
+    public void removeBagFromOrder(OrderBag orderBag) {
+        this.orderBags.remove(orderBag);
     }
 
     /**
-     * method helps to delete OrderBag.
+     * method helps to set bags for order.
      *
-     * @param orderBag {@link OrderBag}
+     * @param orderBags {@link List} of {@link OrderBag}
      * @author Julia Seti
      */
-    public void removeOrderBag(OrderBag orderBag) {
-        this.orderBags.remove(orderBag);
-        orderBag.setOrder(null);
+    public void setBagsForOrder(List<OrderBag> orderBags) {
+        orderBags.forEach(it -> it.setOrder(this));
+        this.setOrderBags(orderBags);
     }
 }

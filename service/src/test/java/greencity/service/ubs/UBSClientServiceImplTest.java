@@ -75,6 +75,7 @@ import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
 import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
@@ -146,6 +147,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
@@ -236,6 +238,8 @@ class UBSClientServiceImplTest {
     private ViberBotRepository viberBotRepository;
     @Mock
     private UBSManagementService ubsManagementService;
+    @Mock
+    private OrderBagRepository orderBagRepository;
 
     @Test
     @Transactional
@@ -2394,12 +2398,15 @@ class UBSClientServiceImplTest {
     @Test
     void deleteOrder() {
         Order order = getOrder();
+        order.setOrderBags(Collections.emptyList());
         when(ordersForUserRepository.getAllByUserUuidAndId(order.getUser().getUuid(), order.getId()))
             .thenReturn(order);
+        doNothing().when(orderBagRepository).deleteAll(anyList());
 
         ubsService.deleteOrder(order.getUser().getUuid(), 1L);
 
         verify(orderRepository).delete(order);
+        verify(orderBagRepository).deleteAll(anyList());
     }
 
     @Test

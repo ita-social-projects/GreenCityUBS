@@ -24,6 +24,7 @@ import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Courier;
+import greencity.entity.order.Order;
 import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
@@ -49,6 +50,7 @@ import greencity.repository.DeactivateChosenEntityRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.LocationRepository;
 import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderRepository;
 import greencity.repository.ReceivingStationRepository;
 import greencity.repository.RegionRepository;
 import greencity.repository.ServiceRepository;
@@ -134,6 +136,8 @@ class SuperAdminServiceImplTest {
     private DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
     @Mock
     private OrderBagRepository orderBagRepository;
+    @Mock
+    private OrderRepository orderRepository;
 
     @AfterEach
     void afterEach() {
@@ -150,7 +154,8 @@ class SuperAdminServiceImplTest {
             tariffsInfoRepository,
             tariffsLocationRepository,
             deactivateTariffsForChosenParamRepository,
-            orderBagRepository);
+            orderBagRepository,
+            orderRepository);
     }
 
     @Test
@@ -318,20 +323,24 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void editTariffService() {
+    void editTariffServiceWithUnpaidOrder() {
         Bag bag = ModelUtils.getBag();
         Bag editedBag = ModelUtils.getEditedBag();
         Employee employee = ModelUtils.getEmployee();
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
+        Order order = ModelUtils.getOrder();
         String uuid = UUID.randomUUID().toString();
+        order.setOrderBags(List.of(ModelUtils.getOrderBag()));
 
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(editedBag)).thenReturn(editedBag);
         when(modelMapper.map(editedBag, GetTariffServiceDto.class)).thenReturn(editedDto);
         doNothing().when(orderBagRepository)
-                .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+            .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+        when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(List.of(order));
+        when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 
@@ -341,11 +350,79 @@ class SuperAdminServiceImplTest {
         verify(bagRepository).save(editedBag);
         verify(modelMapper).map(editedBag, GetTariffServiceDto.class);
         verify(orderBagRepository)
-                .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+            .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+        verify(orderRepository).findAllUnpaidOrdersByBagId(1);
+        verify(orderRepository).saveAll(anyList());
     }
 
     @Test
-    void editTariffServiceIfOrderBagsListIsEmpty() {
+    void editTariffServiceWithUnpaidOrderAndBagConfirmedAmount() {
+        Bag bag = ModelUtils.getBag();
+        Bag editedBag = ModelUtils.getEditedBag();
+        Employee employee = ModelUtils.getEmployee();
+        TariffServiceDto dto = ModelUtils.getTariffServiceDto();
+        GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
+        Order order = ModelUtils.getOrder();
+        String uuid = UUID.randomUUID().toString();
+        order.setOrderBags(List.of(ModelUtils.getOrderBagWithConfirmedAmount()));
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
+        when(bagRepository.save(editedBag)).thenReturn(editedBag);
+        when(modelMapper.map(editedBag, GetTariffServiceDto.class)).thenReturn(editedDto);
+        doNothing().when(orderBagRepository)
+            .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+        when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(List.of(order));
+        when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
+
+        GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
+
+        assertEquals(editedDto, actual);
+        verify(employeeRepository).findByUuid(uuid);
+        verify(bagRepository).findActiveBagById(1);
+        verify(bagRepository).save(editedBag);
+        verify(modelMapper).map(editedBag, GetTariffServiceDto.class);
+        verify(orderBagRepository)
+            .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+        verify(orderRepository).findAllUnpaidOrdersByBagId(1);
+        verify(orderRepository).saveAll(anyList());
+    }
+
+    @Test
+    void editTariffServiceWithUnpaidOrderAndBagExportedAmount() {
+        Bag bag = ModelUtils.getBag();
+        Bag editedBag = ModelUtils.getEditedBag();
+        Employee employee = ModelUtils.getEmployee();
+        TariffServiceDto dto = ModelUtils.getTariffServiceDto();
+        GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
+        Order order = ModelUtils.getOrder();
+        String uuid = UUID.randomUUID().toString();
+        order.setOrderBags(List.of(ModelUtils.getOrderBagWithExportedAmount()));
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
+        when(bagRepository.save(editedBag)).thenReturn(editedBag);
+        when(modelMapper.map(editedBag, GetTariffServiceDto.class)).thenReturn(editedDto);
+        doNothing().when(orderBagRepository)
+            .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+        when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(List.of(order));
+        when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
+
+        GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
+
+        assertEquals(editedDto, actual);
+        verify(employeeRepository).findByUuid(uuid);
+        verify(bagRepository).findActiveBagById(1);
+        verify(bagRepository).save(editedBag);
+        verify(modelMapper).map(editedBag, GetTariffServiceDto.class);
+        verify(orderBagRepository)
+            .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+        verify(orderRepository).findAllUnpaidOrdersByBagId(1);
+        verify(orderRepository).saveAll(anyList());
+    }
+
+    @Test
+    void editTariffServiceWithoutUnpaidOrder() {
         Bag bag = ModelUtils.getBag();
         Bag editedBag = ModelUtils.getEditedBag();
         Employee employee = ModelUtils.getEmployee();
@@ -358,7 +435,8 @@ class SuperAdminServiceImplTest {
         when(bagRepository.save(editedBag)).thenReturn(editedBag);
         when(modelMapper.map(editedBag, GetTariffServiceDto.class)).thenReturn(editedDto);
         doNothing().when(orderBagRepository)
-                .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+            .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+        when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(Collections.emptyList());
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 
@@ -368,8 +446,9 @@ class SuperAdminServiceImplTest {
         verify(bagRepository).save(editedBag);
         verify(modelMapper).map(editedBag, GetTariffServiceDto.class);
         verify(orderBagRepository)
-                .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
-        verify(orderBagRepository, never()).saveAll(anyList());
+            .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
+        verify(orderRepository).findAllUnpaidOrdersByBagId(1);
+        verify(orderRepository, never()).saveAll(anyList());
     }
 
     @Test
@@ -431,7 +510,7 @@ class SuperAdminServiceImplTest {
         when(serviceRepository.findById(service.getId())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-                () -> superAdminService.deleteService(1L));
+            () -> superAdminService.deleteService(1L));
 
         verify(serviceRepository).findById(1L);
         verify(serviceRepository, never()).delete(service);

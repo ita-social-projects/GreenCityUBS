@@ -176,6 +176,7 @@ public class ModelUtils {
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
     public static final Bag TEST_BAG = createBag();
+    public static final OrderBag TEST_ORDER_BAG = createOrderBag();
     public static final BagForUserDto TEST_BAG_FOR_USER_DTO = createBagForUserDto();
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
@@ -2152,6 +2153,18 @@ public class ModelUtils {
             .build();
     }
 
+    private static OrderBag createOrderBag() {
+        return OrderBag.builder()
+            .id(1L)
+            .name("Name")
+            .nameEng("NameEng")
+            .capacity(20)
+            .price(100_00L)
+            .order(createOrder())
+            .bag(createBag())
+            .build();
+    }
+
     private static BagForUserDto createBagForUserDto() {
         return BagForUserDto.builder()
             .service("Name")
@@ -2526,17 +2539,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderBag getOrderBag() {
-        return OrderBag.builder()
-            .id(1L)
-            .amount(1)
-            .price(150_00L)
-            .capacity(20)
-            .bag(getBag())
-            .order(getOrder())
-            .build();
-    }
-
     public static Optional<Bag> getOptionalBag() {
         return Optional.of(Bag.builder()
             .id(1)
@@ -2566,6 +2568,48 @@ public class ModelUtils {
             .limitIncluded(true)
             .status(BagStatus.ACTIVE)
             .tariffsInfo(getTariffInfo())
+            .build();
+    }
+
+    public static OrderBag getOrderBag() {
+        return OrderBag.builder()
+            .id(1L)
+            .capacity(120)
+            .price(120_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(1)
+            .bag(getBag())
+            .order(getOrder())
+            .build();
+    }
+
+    public static OrderBag getOrderBagWithConfirmedAmount() {
+        return OrderBag.builder()
+            .id(1L)
+            .capacity(120)
+            .price(120_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(1)
+            .confirmedQuantity(2)
+            .bag(getBag())
+            .order(getOrder())
+            .build();
+    }
+
+    public static OrderBag getOrderBagWithExportedAmount() {
+        return OrderBag.builder()
+            .id(1L)
+            .capacity(120)
+            .price(120_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(1)
+            .confirmedQuantity(2)
+            .exportedQuantity(2)
+            .bag(getBag())
+            .order(getOrder())
             .build();
     }
 
@@ -2796,7 +2840,6 @@ public class ModelUtils {
             .nameEng("NameEng")
             .build();
     }
-
 
     public static Service getNewService() {
         Employee employee = ModelUtils.getEmployee();

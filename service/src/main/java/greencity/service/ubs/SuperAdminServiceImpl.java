@@ -27,6 +27,8 @@ import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Courier;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderBag;
 import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
@@ -38,6 +40,7 @@ import greencity.enums.BagStatus;
 import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
+import greencity.enums.OrderPaymentStatus;
 import greencity.enums.StationStatus;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
@@ -54,6 +57,7 @@ import greencity.repository.DeactivateChosenEntityRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.LocationRepository;
 import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderRepository;
 import greencity.repository.ReceivingStationRepository;
 import greencity.repository.RegionRepository;
 import greencity.repository.ServiceRepository;
@@ -74,6 +78,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -95,6 +100,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final TariffLocationRepository tariffsLocationRepository;
     private final DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
     private final OrderBagRepository orderBagRepository;
+    private final OrderRepository orderRepository;
 
     private static final String BAD_SIZE_OF_REGIONS_MESSAGE =
         "Region ids size should be 1 if several params are selected";
@@ -154,6 +160,22 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setStatus(BagStatus.DELETED);
         bagRepository.save(bag);
         checkDeletedBagLimitAndUpdateTariffsInfo(bag);
+        orderRepository.findAllByBagId(bagId).forEach(it -> deleteBagFromOrder(it, bagId));
+    }
+
+    private void deleteBagFromOrder(Order order, Integer bagId) {
+        Map<Integer, Integer> amount = UBSClientServiceImpl.getActualBagsAmountForOrder(order.getOrderBags());
+        Integer totalBagsAmount = amount.values().stream().reduce(0, Integer::sum);
+        if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
+            if (totalBagsAmount.equals(amount.get(bagId))) {
+                order.setOrderBags(new ArrayList<>());
+                orderRepository.delete(order);
+                return;
+            }
+            order.getOrderBags().stream().filter(it -> it.getBag().getId().equals(bagId)).findFirst()
+                .ifPresent(order::removeBagFromOrder);
+            orderRepository.save(order);
+        }
     }
 
     private void checkDeletedBagLimitAndUpdateTariffsInfo(Bag bag) {
@@ -179,9 +201,28 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setEditedBy(employee);
 
         orderBagRepository.updateAllByBagIdForUnpaidOrders(
-                bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
+            bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
 
+        List<Order> orders = orderRepository.findAllUnpaidOrdersByBagId(bagId);
+        if (!orders.isEmpty()) {
+            orders.forEach(it -> updateOrderSumToPay(it, bag));
+            orderRepository.saveAll(orders);
+        }
         return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
+    }
+
+    private void updateOrderSumToPay(Order order, Bag bag) {
+        Map<Integer, Integer> amount = UBSClientServiceImpl.getActualBagsAmountForOrder(order.getOrderBags());
+        Long sumToPayInCoins = order.getOrderBags().stream()
+            .map(it -> amount.get(it.getBag().getId()) * getActualBagPrice(it, bag))
+            .reduce(0L, Long::sum);
+        order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
+    }
+
+    private Long getActualBagPrice(OrderBag orderBag, Bag bag) {
+        return bag.getId().equals(orderBag.getBag().getId())
+            ? bag.getFullPrice()
+            : orderBag.getPrice();
     }
 
     private void updateTariffService(TariffServiceDto dto, Bag bag) {
