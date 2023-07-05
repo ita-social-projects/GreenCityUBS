@@ -27,13 +27,16 @@ import java.util.stream.Collectors;
 public class LocationApiService {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
     private static final int DEFAULT_PAGE_SIZE = 100;
+    private static final int DEFAULT_PAGE_VALUE = 1;
     private static final String LEVEL = "level";
     private static final String PAGE = "page";
     private static final String NAME = "name";
     private static final String NAME_EN = "name_en";
     private static final String CODE = "code";
     private static final String PAGE_SIZE = "page_size";
-    private static final String UPPER_ID = "parent";
+    private static final String PARENT = "parent";
+    private static final String PARENT_ID = "parent_id";
+
     private LocationDto kyiv;
     private RestTemplate restTemplate;
 
@@ -325,7 +328,7 @@ public class LocationApiService {
         nameMap.put(NAME_EN, getValueFromMap(result, NAME_EN));
         return LocationDto.builder()
             .id(getValueFromMap(result, CODE))
-            .parentId(getValueFromMap(result, "parent_id"))
+            .parentId(getValueFromMap(result, PARENT_ID))
             .name(nameMap)
             .build();
     }
@@ -355,7 +358,7 @@ public class LocationApiService {
             throw new IllegalArgumentException("The upperId parameter cannot be null");
         }
         UriComponentsBuilder builder = builderUrl().queryParam(LEVEL, level)
-            .queryParam(UPPER_ID, upperId);
+            .queryParam(PARENT, upperId);
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
@@ -367,7 +370,7 @@ public class LocationApiService {
      */
     private UriComponentsBuilder builderUrl() {
         return UriComponentsBuilder.fromHttpUrl(API_URL)
-            .queryParam(PAGE, "1")
+            .queryParam(PAGE, DEFAULT_PAGE_VALUE)
             .queryParam(PAGE_SIZE, DEFAULT_PAGE_SIZE);
     }
 }
