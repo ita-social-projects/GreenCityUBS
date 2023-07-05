@@ -23,6 +23,12 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +38,8 @@ import static org.mockito.Mockito.*;
 class LocationApiServiceTest {
     private LocationApiService locationApiService;
     RestTemplate restTemplate;
-
+    private static final String PAGE_SIZE = "100";
+    private static final String PAGE = "1";
     Map<String, Object> getApiResult(String code, String parent_id, String name, String nameEn) {
         Map<String, Object> apiResult = new HashMap<>();
         apiResult.put("code", code);
@@ -67,7 +74,7 @@ class LocationApiServiceTest {
         UriComponentsBuilder level1Builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "1");
 
         UriComponentsBuilder level2BuilderLviv = UriComponentsBuilder
@@ -80,7 +87,7 @@ class LocationApiServiceTest {
         UriComponentsBuilder level2BuilderLvivParent = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "2")
             .queryParam("parent", "UA46000000000026241");
         UriComponentsBuilder level3VillageBuilder = UriComponentsBuilder
@@ -100,49 +107,49 @@ class LocationApiServiceTest {
         UriComponentsBuilder level3BuilderParentLviv = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "3")
             .queryParam("parent", "UA46060000000042587");
 
         UriComponentsBuilder level4BuilderParentLvivCity = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "4")
             .queryParam("parent", "UA05020030000031457");
 
         UriComponentsBuilder level4BuilderLvivCity = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("name", "Львів")
             .queryParam("level", "4");
 
         UriComponentsBuilder level4BuilderVillage = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("name", "Віднів")
             .queryParam("level", "4");
 
         UriComponentsBuilder level5BuilderVillage = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "5")
             .queryParam("parent", "UA46060230040034427");
 
         UriComponentsBuilder level5BuilderCity =
             UriComponentsBuilder.fromHttpUrl("https://directory.org.ua/api/katottg")
                 .queryParam("page", "1")
-                .queryParam("page_size", "5000")
+                .queryParam("page_size", PAGE_SIZE)
                 .queryParam("level", "5")
                 .queryParam("parent", "UA46060250010015970");
 
         UriComponentsBuilder regionsBuilder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "1");
 
         Map<String, Object> lvivska2Result =
@@ -248,13 +255,13 @@ class LocationApiServiceTest {
         UriComponentsBuilder lviv = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("name", "Lviv")
             .queryParam("level", "4");
         UriComponentsBuilder lvivska = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("name", "Lvivska")
             .queryParam("level", "1");
         when(restTemplate.exchange(eq(lviv.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
@@ -318,7 +325,7 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder_regions = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "1");
 
         Map<String, Object> apiResult2 = getApiResult("UA05000000000010236", null, "Вінницька", "Vinnytska");
@@ -414,7 +421,7 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder_regions = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "1");
 
         Map<String, Object> apiResult1 =
@@ -581,13 +588,13 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "1");
 
         UriComponentsBuilder builder5 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "5")
             .queryParam("parent", "UA80000000000093317");
         when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
@@ -625,13 +632,13 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "1");
 
         UriComponentsBuilder builder5 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "5")
             .queryParam("parent", "UA80000000000093317");
         when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
@@ -769,28 +776,28 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("name", "Вінницька")
             .queryParam("level", "1");
 
         UriComponentsBuilder builder2 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "2")
             .queryParam("parent", "UA05000000000010236");
 
         UriComponentsBuilder builder3 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "3")
             .queryParam("parent", "UA05020000000026686");
 
         UriComponentsBuilder builder4 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "4")
             .queryParam("parent", "UA05020030000031457");
 
@@ -841,7 +848,7 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "2")
             .queryParam("parent", "UA05000000000010236");
 
@@ -869,7 +876,7 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder =
             UriComponentsBuilder.fromHttpUrl("https://directory.org.ua/api/katottg")
                 .queryParam("page", "1")
-                .queryParam("page_size", "5000")
+                .queryParam("page_size", PAGE_SIZE)
                 .queryParam("level", "3")
                 .queryParam("parent", "UA05020000000026686");
         URI apiUrl = builder.build().encode().toUri();
@@ -921,7 +928,7 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam("page", "1")
-            .queryParam("page_size", "5000")
+            .queryParam("page_size", PAGE_SIZE)
             .queryParam("level", "4")
             .queryParam("parent", "UA46060250000025047");
         when(restTemplate.exchange(eq(builder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
