@@ -3,6 +3,7 @@ package greencity.service.locations;
 import com.azure.core.http.rest.Page;
 import greencity.constant.ErrorMessage;
 import greencity.dto.location.api.LocationDto;
+import greencity.enums.LocationDivision;
 import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,14 +34,23 @@ import static org.mockito.Mockito.*;
 class LocationApiServiceTest {
     private LocationApiService locationApiService;
     RestTemplate restTemplate;
-    private static final String PAGE_SIZE = "100";
-    private static final String PAGE = "1";
+    private static final String PAGE_VALUE = "1";
+    private static final String PAGE_SIZE_VALUE = "100";
+    private static final String LEVEL = "level";
+    private static final String PAGE = "page";
+    private static final String NAME = "name";
+    private static final String NAME_EN = "name_en";
+    private static final String CODE = "code";
+    private static final String PAGE_SIZE = "page_size";
+    private static final String PARENT = "parent";
+    private static final String PARENT_ID = "parent_id";
+
     Map<String, Object> getApiResult(String code, String parent_id, String name, String nameEn) {
         Map<String, Object> apiResult = new HashMap<>();
-        apiResult.put("code", code);
-        apiResult.put("parent_id", parent_id);
-        apiResult.put("name", name);
-        apiResult.put("name_en", nameEn);
+        apiResult.put(CODE, code);
+        apiResult.put(PARENT_ID, parent_id);
+        apiResult.put(NAME, name);
+        apiResult.put(NAME_EN, nameEn);
         return apiResult;
     }
 
@@ -49,7 +59,6 @@ class LocationApiServiceTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @BeforeEach
     void initialise() {
         Map<String, Object> autonomousRepublicResult =
             getApiResult("UA01000000000013043", null, "Автономна Республіка Крим", "Avtonomna Respublika Krym");
@@ -68,84 +77,86 @@ class LocationApiServiceTest {
 
         UriComponentsBuilder level1Builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "1");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.REGION.getLevelId());
 
         UriComponentsBuilder level2BuilderLviv = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("code", "UA46060000000042587")
-            .queryParam("level", "2");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(CODE, "UA46060000000042587")
+            .queryParam(LEVEL,         LocationDivision.DISTRICT_IN_REGION.getLevelId());
 
         UriComponentsBuilder level2BuilderLvivParent = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "2")
-            .queryParam("parent", "UA46000000000026241");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.DISTRICT_IN_REGION.getLevelId())
+            .queryParam(PARENT, "UA46000000000026241");
         UriComponentsBuilder level3VillageBuilder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("code", "UA46060230000093092")
-            .queryParam("level", "3");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(CODE, "UA46060230000093092")
+            .queryParam(LEVEL, LocationDivision.LOCAL_COMMUNITY.getLevelId());
 
         UriComponentsBuilder level3CityBuilder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("code", "UA05020030000031457")
-            .queryParam("level", "3");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(CODE, "UA05020030000031457")
+            .queryParam(LEVEL, LocationDivision.LOCAL_COMMUNITY.getLevelId());
 
         UriComponentsBuilder level3BuilderParentLviv = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "3")
-            .queryParam("parent", "UA46060000000042587");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL, LocationDivision.LOCAL_COMMUNITY.getLevelId())
+            .queryParam(PARENT, "UA46060000000042587");
 
         UriComponentsBuilder level4BuilderParentLvivCity = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "4")
-            .queryParam("parent", "UA05020030000031457");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL, LocationDivision.CITY.getLevelId())
+            .queryParam(PARENT, "UA05020030000031457");
 
         UriComponentsBuilder level4BuilderLvivCity = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("name", "Львів")
-            .queryParam("level", "4");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(NAME, "Львів")
+            .queryParam(LEVEL, LocationDivision.CITY.getLevelId());
 
         UriComponentsBuilder level4BuilderVillage = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("name", "Віднів")
-            .queryParam("level", "4");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(NAME, "Віднів")
+            .queryParam(LEVEL, LocationDivision.CITY.getLevelId());
 
         UriComponentsBuilder level5BuilderVillage = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "5")
-            .queryParam("parent", "UA46060230040034427");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL, LocationDivision.DISTRICT_IN_CITY.getLevelId()
+)
+            .queryParam(PARENT, "UA46060230040034427");
 
         UriComponentsBuilder level5BuilderCity =
             UriComponentsBuilder.fromHttpUrl("https://directory.org.ua/api/katottg")
-                .queryParam("page", PAGE)
-                .queryParam("page_size", PAGE_SIZE)
-                .queryParam("level", "5")
-                .queryParam("parent", "UA46060250010015970");
+                .queryParam(PAGE, PAGE_VALUE)
+                .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+                .queryParam(LEVEL, LocationDivision.DISTRICT_IN_CITY.getLevelId()
+)
+                .queryParam(PARENT, "UA46060250010015970");
 
         UriComponentsBuilder regionsBuilder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", PAGE)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "1");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.REGION.getLevelId());
 
         Map<String, Object> lvivska2Result =
             getApiResult("UA05020030000031457", "UA46060000000042587", "Львівська", "Lvivska");
@@ -212,12 +223,13 @@ class LocationApiServiceTest {
         String expectedName, String expectedNameEn) {
         assertEquals(expectedId, locationDto.getId());
         assertEquals(expectedParentId, locationDto.getParentId());
-        assertEquals(expectedName, locationDto.getName().get("name"));
-        assertEquals(expectedNameEn, locationDto.getName().get("name_en"));
+        assertEquals(expectedName, locationDto.getName().get(NAME));
+        assertEquals(expectedNameEn, locationDto.getName().get(NAME_EN));
     }
 
     @Test
     void testGetAllDistrictsInCityByCityID() {
+        initialise();
         List<LocationDto> districts = locationApiService.getAllDistrictsInCityByCityID("UA46060250010015970");
         assertEquals(2, districts.size());
         assertLocationDto(districts.get(0), "UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
@@ -227,12 +239,14 @@ class LocationApiServiceTest {
 
     @Test
     void testGetRegionByName() {
+        initialise();
         LocationDto region = locationApiService.getRegionByName("Вінницька");
         assertLocationDto(region, "UA05000000000010236", null, "Вінницька", "Vinnytska");
     }
 
     @Test
     void testGetRegionByName_ListEmpty() {
+        initialise();
         LocationDto region = locationApiService.getRegionByName("Avtonomna Respublika Krym");
         assertLocationDto(region, "UA01000000000013043", null, "Автономна Республіка Крим",
             "Avtonomna Respublika Krym");
@@ -240,25 +254,27 @@ class LocationApiServiceTest {
 
     @Test
     void testGetRegionByNameEn() {
+        initialise();
         LocationDto region = locationApiService.getRegionByName("Vinnytska");
         assertLocationDto(region, "UA05000000000010236", null, "Вінницька", "Vinnytska");
     }
 
     @Test
     void testGetDisctrictByNameEn() {
+        initialise();
 
         UriComponentsBuilder lviv = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("name", "Lviv")
-            .queryParam("level", "4");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(NAME, "Lviv")
+            .queryParam(LEVEL, LocationDivision.CITY.getLevelId());
         UriComponentsBuilder lvivska = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("name", "Lvivska")
-            .queryParam("level", "1");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(NAME, "Lvivska")
+            .queryParam(LEVEL,         LocationDivision.REGION.getLevelId());
         when(restTemplate.exchange(eq(lviv.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
                 .thenReturn(prepareResponseEntity(new ArrayList<>()));
@@ -277,6 +293,7 @@ class LocationApiServiceTest {
 
     @Test
     void testGetCitiesByName() {
+        initialise();
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getCitiesByName("Львівська", "Нема");
         });
@@ -294,34 +311,34 @@ class LocationApiServiceTest {
     void testGetCityInRegion() {
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", 1)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "1");
+            .queryParam(PAGE, 1)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.REGION.getLevelId());
 
         UriComponentsBuilder builder2 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("code", "UA05020000000026686")
-            .queryParam("level", "2");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(CODE, "UA05020000000026686")
+            .queryParam(LEVEL,         LocationDivision.DISTRICT_IN_REGION.getLevelId());
 
         UriComponentsBuilder builder3 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", 1)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("code", "UA05020030000031457")
-            .queryParam("level", 3);
+            .queryParam(PAGE, 1)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(CODE, "UA05020030000031457")
+            .queryParam(LEVEL, 3);
 
         UriComponentsBuilder builder4 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("parent", "UA05020030000031457")
-            .queryParam("level", 4);
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(PARENT, "UA05020030000031457")
+            .queryParam(LEVEL, 4);
         UriComponentsBuilder builder_regions = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "1");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.REGION.getLevelId());
 
         Map<String, Object> apiResult2 = getApiResult("UA05000000000010236", null, "Вінницька", "Vinnytska");
         Map<String, Object> apiResult3 = getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
@@ -340,9 +357,9 @@ class LocationApiServiceTest {
             getApiResult("UA05020030010063857", "UA05020030000031457", "Львів", "Lviv");
 
         LocationDto city1 = LocationDto.builder().id("UA05020030010063857").parentId("UA05020030000031457")
-            .name(Collections.singletonMap("name", "Львів")).build();
+            .name(Collections.singletonMap(NAME, "Львів")).build();
         LocationDto city2 = LocationDto.builder().id("UA05020030020063505").parentId("UA05020030000031457")
-            .name(Collections.singletonMap("name", "Львів")).build();
+            .name(Collections.singletonMap(NAME, "Львів")).build();
         RestTemplate restTemplate = mock(RestTemplate.class);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         when(restTemplate.exchange(eq(builder_regions.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
@@ -390,34 +407,34 @@ class LocationApiServiceTest {
     void testGetCityByNameAndRegionName() {
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", 1)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "1");
+            .queryParam(PAGE, 1)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.REGION.getLevelId());
 
         UriComponentsBuilder builder2 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("code", "UA05020000000026686")
-            .queryParam("level", "2");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(CODE, "UA05020000000026686")
+            .queryParam(LEVEL,         LocationDivision.DISTRICT_IN_REGION.getLevelId());
 
         UriComponentsBuilder builder3 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", 1)
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("code", "UA05020030000031457")
-            .queryParam("level", 3);
+            .queryParam(PAGE, 1)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(CODE, "UA05020030000031457")
+            .queryParam(LEVEL, 3);
 
         UriComponentsBuilder builder4 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("parent", "UA05020030000031457")
-            .queryParam("level", 4);
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(PARENT, "UA05020030000031457")
+            .queryParam(LEVEL, 4);
         UriComponentsBuilder builder_regions = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "1");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.REGION.getLevelId());
 
         Map<String, Object> apiResult1 =
             getApiResult("UA01000000000013043", null, "Автономна Республіка Крим", "Avtonomna Respublika Krym");
@@ -431,9 +448,9 @@ class LocationApiServiceTest {
             getApiResult("UA05020030010063857", "UA05020030000031457", "Вінниця", "Vinnytsia");
         Map<String, Object> apiResult42 = getApiResult("UA05020030020063505", "UA05020030000031457", "Десна", "Desna");
         LocationDto city1 = LocationDto.builder().id("UA05020030010063857").parentId("UA05020030000031457")
-            .name(Collections.singletonMap("name", "Вінниця")).build();
+            .name(Collections.singletonMap(NAME, "Вінниця")).build();
         LocationDto city2 = LocationDto.builder().id("UA05020030020063505").parentId("UA05020030000031457")
-            .name(Collections.singletonMap("name", "Десна")).build();
+            .name(Collections.singletonMap(NAME, "Десна")).build();
         RestTemplate restTemplate = mock(RestTemplate.class);
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         when(restTemplate.exchange(eq(builder_regions.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
@@ -453,7 +470,7 @@ class LocationApiServiceTest {
         LocationDto result = locationApiService.getCityInRegion("Вінницька", Arrays.asList(city1, city2));
         assertNotNull(result);
         assertEquals("UA05020030010063857", result.getId());
-        assertEquals("Вінниця", result.getName().get("name"));
+        assertEquals("Вінниця", result.getName().get(NAME));
     }
 
     @Test
@@ -470,6 +487,7 @@ class LocationApiServiceTest {
 
     @Test
     void testEmptyParentParameter() {
+        initialise();
         String apiUrl = "https://directory.org.ua/api/katottg?page_size=5000&parent=UA46060250010015970&level=5";
         ResponseEntity<Map> responseEntity = prepareResponseEntity(null);
         RestTemplate restTemplate = mock(RestTemplate.class);
@@ -582,16 +600,17 @@ class LocationApiServiceTest {
 
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "1");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.REGION.getLevelId());
 
         UriComponentsBuilder builder5 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "5")
-            .queryParam("parent", "UA80000000000093317");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL, LocationDivision.DISTRICT_IN_CITY.getLevelId()
+)
+            .queryParam(PARENT, "UA80000000000093317");
         when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1)));
         when(restTemplate.getForEntity((builder5.build().encode().toUri()), Map.class))
@@ -626,16 +645,17 @@ class LocationApiServiceTest {
 
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "1");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.REGION.getLevelId());
 
         UriComponentsBuilder builder5 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "5")
-            .queryParam("parent", "UA80000000000093317");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL, LocationDivision.DISTRICT_IN_CITY.getLevelId()
+)
+            .queryParam(PARENT, "UA80000000000093317");
         when(restTemplate.getForEntity((builder.build().encode().toUri()), Map.class))
             .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1)));
         when(restTemplate.getForEntity((builder5.build().encode().toUri()), Map.class))
@@ -659,16 +679,14 @@ class LocationApiServiceTest {
 
     @Test
     void testGetAllDistrictsInCityByNames_Error() {
+        initialise();
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getAllDistrictsInCityByNames("Вінницька", "Львів");        });
-
-
     }
     @Test
     void testGetAllDistrictsInCityByNames() {
-
+        initialise();
         List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Львівська", "Львів");
-
         assertEquals(2, districts.size());
         assertLocationDto(districts.get(0), "UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
         assertLocationDto(districts.get(1), "UA46060250010259421", "UA46060250010015970", "Залізничний",
@@ -707,9 +725,9 @@ class LocationApiServiceTest {
 
     @Test
     void testGetAllDistrictsInCityByNames_NoDistricts() {
+        initialise();
 
         List<LocationDto> allDistricts = locationApiService.getAllDistrictsInCityByNames("Львівська", "Віднів");
-
         assertNotNull(allDistricts);
         assertFalse(allDistricts.isEmpty());
         assertEquals(1, allDistricts.size());
@@ -718,6 +736,7 @@ class LocationApiServiceTest {
 
     @Test
     void testGetRegion() {
+        initialise();
         List<LocationDto> regions = locationApiService.getAllRegions();
         assertEquals(3, regions.size());
         assertLocationDto(regions.get(0), "UA01000000000013043", null, "Автономна Республіка Крим",
@@ -731,7 +750,7 @@ class LocationApiServiceTest {
         LocationDto city1 = LocationDto.builder()
             .id("UA05020030010063857")
             .parentId(null)
-            .name(Collections.singletonMap("name", "НЕМАЄ"))
+            .name(Collections.singletonMap(NAME, "НЕМАЄ"))
             .build();
         Map<String, Object> apiResult1 = getApiResult("UA05000000000010236", null, "Вінницька", "Vinnytska");
         List<Map<String, Object>> results = Arrays.asList(apiResult1);
@@ -748,14 +767,16 @@ class LocationApiServiceTest {
 
     @Test
     void testGetCityByName() {
+        initialise();
         LocationDto result = locationApiService.getCitiesByName("Львівська", "Львів").get(0);
         assertNotNull(result);
         assertEquals("UA46060250010015970", result.getId());
-        assertEquals("Львів", result.getName().get("name"));
+        assertEquals("Львів", result.getName().get(NAME));
     }
 
     @Test
     void getRegionByName_whenAllCitiesIsEmpty() {
+        initialise();
         List<LocationDto> result = locationApiService.getAllDistrictsInCityByNames("Lvivska", "Львів");
         assertEquals(2, result.size());
     }
@@ -777,31 +798,31 @@ class LocationApiServiceTest {
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("name", "Вінницька")
-            .queryParam("level", "1");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(NAME, "Вінницька")
+            .queryParam(LEVEL,         LocationDivision.REGION.getLevelId());
 
         UriComponentsBuilder builder2 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "2")
-            .queryParam("parent", "UA05000000000010236");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.DISTRICT_IN_REGION.getLevelId())
+            .queryParam(PARENT, "UA05000000000010236");
 
         UriComponentsBuilder builder3 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "3")
-            .queryParam("parent", "UA05020000000026686");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL, LocationDivision.LOCAL_COMMUNITY.getLevelId())
+            .queryParam(PARENT, "UA05020000000026686");
 
         UriComponentsBuilder builder4 = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "4")
-            .queryParam("parent", "UA05020030000031457");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL, LocationDivision.CITY.getLevelId())
+            .queryParam(PARENT, "UA05020030000031457");
 
         when(restTemplate.exchange(eq(builder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
@@ -820,7 +841,7 @@ class LocationApiServiceTest {
         LocationDto result = locationApiService.getCityByNameFromRegionSide("Вінницька", "Вінниця");
         assertNotNull(result);
         assertEquals("UA05020030010063857", result.getId());
-        assertEquals("Вінниця", result.getName().get("name"));
+        assertEquals("Вінниця", result.getName().get(NAME));
     }
 
     @Test
@@ -828,7 +849,7 @@ class LocationApiServiceTest {
         LocationDto city1 = LocationDto.builder()
             .id("UA05020030010063857")
             .parentId("UA05020030000031457")
-            .name(Collections.singletonMap("name", "Вінниця"))
+            .name(Collections.singletonMap(NAME, "Вінниця"))
             .build();
 
         RestTemplate restTemplate = mock(RestTemplate.class);
@@ -849,10 +870,10 @@ class LocationApiServiceTest {
     void testGetDistrictInTheRegion() {
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "2")
-            .queryParam("parent", "UA05000000000010236");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL,         LocationDivision.DISTRICT_IN_REGION.getLevelId())
+            .queryParam(PARENT, "UA05000000000010236");
 
         Map<String, Object> apiResult1 =
             getApiResult("UA05020000000026686", "UA05000000000010236", "Вінницький", "Vinnytskyi");
@@ -877,10 +898,10 @@ class LocationApiServiceTest {
     void testGetLocalCommunity() {
         UriComponentsBuilder builder =
             UriComponentsBuilder.fromHttpUrl("https://directory.org.ua/api/katottg")
-                .queryParam("page", "1")
-                .queryParam("page_size", PAGE_SIZE)
-                .queryParam("level", "3")
-                .queryParam("parent", "UA05020000000026686");
+                .queryParam(PAGE, PAGE_VALUE)
+                .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+                .queryParam(LEVEL, LocationDivision.LOCAL_COMMUNITY.getLevelId())
+                .queryParam(PARENT, "UA05020000000026686");
         URI apiUrl = builder.build().encode().toUri();
 
         Map<String, Object> apiResult1 =
@@ -929,10 +950,10 @@ class LocationApiServiceTest {
         LocationApiService locationApiService = new LocationApiService(restTemplate);
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
-            .queryParam("page", "1")
-            .queryParam("page_size", PAGE_SIZE)
-            .queryParam("level", "4")
-            .queryParam("parent", "UA46060250000025047");
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(LEVEL, LocationDivision.CITY.getLevelId())
+            .queryParam(PARENT, "UA46060250000025047");
         when(restTemplate.exchange(eq(builder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
                 .thenReturn(prepareResponseEntity(Arrays.asList(apiResult1, apiResult2, apiResult3)));
@@ -945,11 +966,11 @@ class LocationApiServiceTest {
 
     @Test
     void testFindLocationByName_WhenLocationsEmpty_ThenCallGetCityByNameFromRegionSide() {
-
+        initialise();
         LocationDto result =
             locationApiService.findLocationByName(new ArrayList<>(), "Львівська", "Львів", "Location not found: ");
         assertNotNull(result);
-        assertEquals("Львів", result.getName().get("name"));
+        assertEquals("Львів", result.getName().get(NAME));
     }
 
 }
