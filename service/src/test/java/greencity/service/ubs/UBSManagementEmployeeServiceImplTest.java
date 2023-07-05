@@ -452,7 +452,7 @@ class UBSManagementEmployeeServiceImplTest {
         LocationDto mockLocationDto = LocationDto.builder()
             .id("UA46060250010015970")
             .parentId("UA46060250000025047")
-            .name(nameMap)
+            .locationNameMap(nameMap)
             .build();
         when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(mockLocationDtoList);
 
