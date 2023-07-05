@@ -53,7 +53,7 @@ public class LocationApiService {
         kyiv = LocationDto.builder()
             .id(kyivId)
             .parentId(null)
-            .name(name)
+            .locationNameMap(name)
             .build();
         this.restTemplate = restTemplate;
     }
@@ -72,7 +72,7 @@ public class LocationApiService {
             return allCities;
         }
         return allCities.stream()
-            .filter(location -> location.getName().containsValue(cityName))
+            .filter(location -> location.getLocationNameMap().containsValue(cityName))
             .collect(Collectors.toList());
     }
 
@@ -85,7 +85,7 @@ public class LocationApiService {
      */
     private LocationDto findLocationByName(List<LocationDto> locations, String locationName) {
         return locations.stream()
-            .filter(location -> location.getName().containsValue(locationName))
+            .filter(location -> location.getLocationNameMap().containsValue(locationName))
             .findFirst()
             .orElseThrow(() -> new NotFoundException(ErrorMessage.CITY_NOT_FOUND + locationName));
     }
@@ -131,7 +131,7 @@ public class LocationApiService {
         }
 
         return allRegions.stream()
-            .filter(region -> region.getName().containsValue(regionName))
+            .filter(region -> region.getLocationNameMap().containsValue(regionName))
             .findFirst()
             .orElseThrow(() -> new NotFoundException(ErrorMessage.REGION_NOT_FOUND + regionName));
     }
@@ -175,7 +175,7 @@ public class LocationApiService {
      * @return A list of LocationDto that represent districts in the city.
      */
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
-        if (cityName.equals(kyiv.getName().get(NAME)) || cityName.equals(kyiv.getName().get(NAME_EN))) {
+        if (cityName.equals(kyiv.getLocationNameMap().get(NAME)) || cityName.equals(kyiv.getLocationNameMap().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(kyiv.getId());
         }
         List<LocationDto> cities = getCitiesByName(regionName, cityName);
@@ -326,7 +326,7 @@ public class LocationApiService {
         return LocationDto.builder()
             .id(getValueFromMap(result, CODE))
             .parentId(getValueFromMap(result, PARENT_ID))
-            .name(nameMap)
+            .locationNameMap(nameMap)
             .build();
     }
 
