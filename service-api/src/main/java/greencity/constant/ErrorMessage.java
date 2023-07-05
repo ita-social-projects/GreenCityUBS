@@ -162,6 +162,7 @@ public final class ErrorMessage {
     public static final String INVALID_URL = "Invalid URL: ";
     public static final String LOCATION_CAN_NOT_BE_DELETED =
         "Such location cannot be deleted as it is linked to the tariff";
+
     /**
      * Constructor.
      */
