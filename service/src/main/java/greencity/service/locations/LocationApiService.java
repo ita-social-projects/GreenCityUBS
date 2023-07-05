@@ -56,11 +56,11 @@ public class LocationApiService {
     }
 
     /**
-     * Retrieves a city by its name.
+     * Retrieves a list of cities by name.
      *
-     * @param regionName The name of the region where the city is located.
+     * @param regionName The name of the region.
      * @param cityName   The name of the city.
-     * @return A LocationDto object containing the city's data.
+     * @return A list of matching city locations.
      */
     public List<LocationDto> getCitiesByName(String regionName, String cityName) {
         List<LocationDto> allCities = getLocationDataByName(LocationDivision.CITY.getLevelId(), cityName);
@@ -74,15 +74,15 @@ public class LocationApiService {
     }
 
     /**
-     * Finds a location by its name in a list of locations.
+     * Finds a location by its name.
      *
-     * @param locations    The list of locations to search.
-     * @param regionName   The name of the region where the location is located.
-     * @param locationName The name of the location.
-     * @param errorMessage The error message to use if the location is not found.
-     * @return A LocationDto object containing the location's data.
+     * @param locations    The list of locations.
+     * @param regionName   The region name.
+     * @param locationName The location name.
+     * @param errorMessage The error message.
+     * @return A LocationDto matching the provided name.
      */
-    public  LocationDto findLocationByName(List<LocationDto> locations, String regionName, String locationName,
+    public LocationDto findLocationByName(List<LocationDto> locations, String regionName, String locationName,
         String errorMessage) {
         if (locations.isEmpty()) {
             return getCityByNameFromRegionSide(regionName, locationName);
@@ -94,10 +94,10 @@ public class LocationApiService {
     }
 
     /**
-     * Retrieves a region by its name.
+     * Retrieves a region by name.
      *
      * @param regionName The name of the region.
-     * @return A LocationDto object containing the region's data.
+     * @return The region matching the provided name.
      */
     public LocationDto getRegionByName(String regionName) {
         List<LocationDto> allRegions = new ArrayList<>();
@@ -117,18 +117,21 @@ public class LocationApiService {
     }
 
     /**
-     * Retrieves a city in a specific region.
+     * Retrieves the city in a specified region.
      *
      * @param regionName The name of the region.
-     * @param cities     A list of LocationDto objects representing cities.
-     * @return A LocationDto object containing the city's data.
+     * @param cities     A list of LocationDto that represent cities.
+     * @return The LocationDto that represents the city in the specified region.
+     * @throws NotFoundException if the city is not found in the region.
      */
     public LocationDto getCityInRegion(String regionName, List<LocationDto> cities) {
         LocationDto region = getRegionByName(regionName);
         String regionID = region.getId();
         for (LocationDto city : cities) {
-            LocationDto localCommunity = (getLocationDataByCode( LocationDivision.LOCAL_COMMUNITY.getLevelId(), city.getParentId()));
-            LocationDto districtRegion = (getLocationDataByCode( LocationDivision.DISTRICT_IN_REGION.getLevelId(), localCommunity.getParentId()));
+            LocationDto localCommunity =
+                (getLocationDataByCode(LocationDivision.LOCAL_COMMUNITY.getLevelId(), city.getParentId()));
+            LocationDto districtRegion =
+                (getLocationDataByCode(LocationDivision.DISTRICT_IN_REGION.getLevelId(), localCommunity.getParentId()));
             if (districtRegion.getParentId().equals(regionID)) {
                 return city;
             }
@@ -137,11 +140,12 @@ public class LocationApiService {
     }
 
     /**
-     * Retrieves a city by its name from the regional side.
+     * Retrieves a city by name from a specified region.
      *
-     * @param regionName The name of the region where the city is located.
+     * @param regionName The name of the region.
      * @param cityName   The name of the city.
-     * @return A LocationDto object containing the city's data.
+     * @return The LocationDto that represents the city in the specified region.
+     * @throws NotFoundException if the city is not found.
      */
     public LocationDto getCityByNameFromRegionSide(String regionName, String cityName) {
         LocationDto region = getRegionByName(regionName);
@@ -156,13 +160,19 @@ public class LocationApiService {
     }
 
     /**
-     * Fetches districts in a city. Directly retrieves for Kyiv, otherwise searches
-     * by city name in a given region. If no districts are found, attempts to search
-     * again using the Ukrainian name. If still unsuccessful, returns city itself.
-     *
-     * @param regionName The region name.
-     * @param cityName   The city name.
-     * @return List of districts, or the city itself if no districts are found.
+     * Retrieves all districts in a city by the city's name. There's a special case
+     * for Kyiv, the capital of Ukraine. In the system, due to the API having
+     * references only to the previous element, the search for districts occurs
+     * sequentially: region -> district in region -> local community -> city ->
+     * district. Generally, the city corresponds to level 4 in the hierarchical
+     * structure. However, Kyiv is unique in that it is at level 1, and its
+     * districts are at level 5. Therefore, a separate logic is implemented because
+     * the system can't go through all the steps from level 1 to level 4, and has to
+     * directly access the districts from level 5 when dealing with Kyiv.
+     * 
+     * @param regionName The name of the region.
+     * @param cityName   The name of the city.
+     * @return A list of LocationDto that represent districts in the city.
      */
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
         if (cityName.equals(kyiv.getName().get(NAME)) || cityName.equals(kyiv.getName().get(NAME_EN))) {
@@ -181,60 +191,61 @@ public class LocationApiService {
     /**
      * Retrieves all regions.
      *
-     * @return A list of all regions.
+     * @return A list of LocationDto that represent all regions.
      */
+
     public List<LocationDto> getAllRegions() {
-        return getLocationDataByLevel( LocationDivision.REGION.getLevelId());
+        return getLocationDataByLevel(LocationDivision.REGION.getLevelId());
     }
 
     /**
-     * Retrieves all cities in a specific region.
+     * Retrieves all cities by their ID.
      *
-     * @param upperId The id of the upper region.
-     * @return A list of all cities in the specified region.
+     * @param upperId The ID of the city.
+     * @return A list of LocationDto that represent the cities.
      */
+
     public List<LocationDto> getAllCitiesById(String upperId) {
         return getLocationDataByUpperId(LocationDivision.CITY.getLevelId(), upperId);
     }
 
     /**
-     * Retrieves all districts in a specific region.
+     * Retrieves all districts in the region by the region's ID.
      *
-     * @param upperId The id of the upper region.
-     * @return A list of all districts in the specified region.
+     * @param upperId The ID of the region.
+     * @return A list of LocationDto that represent districts in the region.
      */
     public List<LocationDto> getAllDistrictInTheRegionsById(String upperId) {
         return getLocationDataByUpperId(LocationDivision.DISTRICT_IN_REGION.getLevelId(), upperId);
     }
 
     /**
-     * Retrieves all local communities in a specific region.
+     * Retrieves all local communities by their ID.
      *
-     * @param upperId The id of the upper region.
-     * @return A list of all local communities in the specified region.
+     * @param upperId The ID of the local community.
+     * @return A list of LocationDto that represent local communities.
      */
     public List<LocationDto> getAllLocalCommunitiesById(String upperId) {
-        return getLocationDataByUpperId( LocationDivision.LOCAL_COMMUNITY.getLevelId(), upperId);
+        return getLocationDataByUpperId(LocationDivision.LOCAL_COMMUNITY.getLevelId(), upperId);
     }
 
     /**
-     * Fetches a list of all districts in a city specified by the upper ID.
+     * Retrieves all districts in a city by the city's ID.
      *
      * @param upperId The ID of the city.
-     * @return A List of LocationDto objects, each representing a district in the
-     *         city.
+     * @return A list of LocationDto that represent districts in the city.
      */
     public List<LocationDto> getAllDistrictsInCityByCityID(String upperId) {
         return getLocationDataByUpperId(LocationDivision.DISTRICT_IN_CITY.getLevelId(), upperId);
     }
 
     /**
-     * Fetches location data by the provided code.
+     * Retrieves location data by level and code.
      *
-     * @param level    The hierarchical level of the location (e.g., city, region).
-     * @param code     The code representing the specific location to fetch.
-     * @return A LocationDto object representing the location matching the provided
-     *         code.
+     * @param level The hierarchical level of the location.
+     * @param code  The code of the location.
+     * @return The LocationDto that matches the specified level and code.
+     * @throws NotFoundException if the location is not found.
      */
     public LocationDto getLocationDataByCode(int level, String code) {
         UriComponentsBuilder builder = builderUrl().queryParam(CODE, code)
@@ -243,30 +254,26 @@ public class LocationApiService {
     }
 
     /**
-     * Fetches all location data at the provided level.
+     * Fetches a list of location data by level.
      *
-     * @param level    The hierarchical level of the locations to fetch (e.g., city,
-     *                 region).
-     * @return A List of LocationDto objects representing all locations at the
-     *         provided level.
+     * @param level The level of the location.
+     * @return A list of LocationDto for the specified level.
      */
-    public List<LocationDto> getLocationDataByLevel( int level) {
+    public List<LocationDto> getLocationDataByLevel(int level) {
         UriComponentsBuilder builder = builderUrl().queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
     /**
-     * Fetches location data by the provided name.
+     * Retrieves a list of location data by level and name.
      *
-     * @param level    The hierarchical level of the location to fetch (e.g., city,
-     *                 region).
-     * @param name     The name of the location to fetch.
-     * @return A List of LocationDto objects representing the locations matching the
-     *         provided name.
-     * @throws NotFoundException if no location matching the provided name and level
-     *                           can be found.
+     * @param level The hierarchical level of the location.
+     * @param name  The name of the location.
+     * @return A list of LocationDto that matches the specified level and name.
+     * @throws IllegalArgumentException if the name is null.
      */
-    private List<LocationDto> getLocationDataByName( int level, String name) {
+
+    private List<LocationDto> getLocationDataByName(int level, String name) {
         if (name == null) {
             throw new IllegalArgumentException("The name parameter cannot be null");
         }
@@ -277,13 +284,10 @@ public class LocationApiService {
     }
 
     /**
-     * Fetches the result from a given URL and maps it into a list of LocationDto
-     * objects.
+     * Extracts location data from a URL.
      *
-     * @param url the URL to fetch results from.
-     * @return a List of LocationDto objects.
-     * @throws RuntimeException if the restTemplate fails to get a response from the
-     *                          provided URL.
+     * @param url The URL to retrieve the data from.
+     * @return A list of LocationDto.
      */
     public List<LocationDto> getResultFromUrl(URI url) {
         try {
@@ -304,10 +308,10 @@ public class LocationApiService {
     }
 
     /**
-     * Maps a result map into a LocationDto object.
+     * Transforms a map into a LocationDto.
      *
-     * @param result a map containing the result data.
-     * @return a LocationDto object built from the result map.
+     * @param result The map with location data.
+     * @return The transformed LocationDto.
      */
     private LocationDto mapToLocationDto(Map<String, Object> result) {
         Map<String, String> nameMap = new HashMap<>();
@@ -321,25 +325,26 @@ public class LocationApiService {
     }
 
     /**
-     * Gets a value from a map using the provided key.
+     * Retrieves a value from a map based on a specified key.
      *
-     * @param map the map from which to get the value.
-     * @param key the key of the value to get.
-     * @return the value associated with the provided key.
+     * @param <T> The type of the object being returned.
+     * @param map The map from which to retrieve the value.
+     * @param key The key associated with the value to retrieve.
+     * @return The value associated with the specified key.
      */
     private <T> T getValueFromMap(Map<String, Object> map, String key) {
         return (T) map.get(key);
     }
 
     /**
-     * Fetches a list of location data specified by upper ID and level.
+     * Retrieves location data by its upper Id.
      *
-     * @param level    The level of location to fetch.
-     * @param upperId  The upper ID of the location.
-     * @return A List of LocationDto objects, each representing a location matching
-     *         the provided parameters.
+     * @param level   The hierarchical level of the location.
+     * @param upperId The upperId associated with the location.
+     * @return A list of LocationDto associated with the specified upperId.
+     * @throws IllegalArgumentException if the upperId is null.
      */
-    private List<LocationDto> getLocationDataByUpperId( int level, String upperId) {
+    private List<LocationDto> getLocationDataByUpperId(int level, String upperId) {
         if (upperId == null) {
             throw new IllegalArgumentException("The upperId parameter cannot be null");
         }
@@ -349,11 +354,10 @@ public class LocationApiService {
     }
 
     /**
-     * Builds the URL for an API endpoint using the provided page size. This method
-     * uses UriComponentsBuilder to construct a URL with two query parameters: -
-     * PAGE set to "1" - PAGE_SIZE set to the provided page size.
+     * Constructs a URL using UriComponentsBuilder.
      *
-     * @return A UriComponentsBuilder instance with the built URL.
+     * @return A UriComponentsBuilder instance with the API URL, page, and page size
+     *         parameters set.
      */
     private UriComponentsBuilder builderUrl() {
         return UriComponentsBuilder.fromHttpUrl(API_URL)
