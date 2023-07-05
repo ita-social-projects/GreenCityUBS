@@ -54,6 +54,7 @@ public final class ErrorMessage {
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
     public static final String ADDRESS_NOT_FOUND = "Address not found";
     public static final String NOT_FOUND_LOCATION_ON_LEVEL = "Not found locations on level: ";
+    public static final String NOT_FOUND_LOCATION_BY_CODE = "Not found locations by code: ";
     public static final String NOT_FOUND_LOCATION_BY_NAME = "Not found locations by name : ";
     public static final String NOT_FOUND_LOCATION_BY_URL = "Not found locations by url : ";
     public static final String REGION_NOT_FOUND = "Region not found: ";

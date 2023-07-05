@@ -248,9 +248,15 @@ public class LocationApiService {
      * @throws NotFoundException if the location is not found.
      */
     public LocationDto getLocationDataByCode(int level, String code) {
-        UriComponentsBuilder builder = builderUrl().queryParam(CODE, code)
+        UriComponentsBuilder builder = builderUrl()
+            .queryParam(CODE, code)
             .queryParam(LEVEL, level);
-        return getResultFromUrl(builder.build().encode().toUri()).get(0);
+        List<LocationDto> resultFromUrl = getResultFromUrl(builder.build().encode().toUri());
+        if (resultFromUrl == null || resultFromUrl.size() > 1) {
+            throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL + level + "\n"
+                + ErrorMessage.NOT_FOUND_LOCATION_BY_CODE + code);
+        }
+        return resultFromUrl.get(0);
     }
 
     /**

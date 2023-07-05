@@ -258,6 +258,30 @@ class LocationApiServiceTest {
     }
 
     @Test
+    void testGetLocationDataByCode() {
+        restTemplate = mock(RestTemplate.class);
+
+        Map<String, Object> lvivskaResult = getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
+
+        UriComponentsBuilder lvivska = UriComponentsBuilder
+            .fromHttpUrl("https://directory.org.ua/api/katottg")
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(CODE, "UA05000000000010236")
+            .queryParam(LEVEL, LocationDivision.REGION.getLevelId());
+
+        when(restTemplate.exchange(eq(lvivska.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+            any(ParameterizedTypeReference.class)))
+                .thenReturn(
+                    prepareResponseEntity(Arrays.asList(lvivskaResult, lvivskaResult)));
+        locationApiService = new LocationApiService(restTemplate);
+
+        assertThrows(NotFoundException.class, () -> {
+            locationApiService.getLocationDataByCode(LocationDivision.REGION.getLevelId(), "UA05000000000010236");
+        });
+    }
+
+    @Test
     void testGetDisctrictByNameEn() {
         initialise();
 
