@@ -63,7 +63,7 @@ public class LocationApiService {
      * @return A LocationDto object containing the city's data.
      */
     public List<LocationDto> getCitiesByName(String regionName, String cityName) {
-        List<LocationDto> allCities = getLocationDataByName(DEFAULT_PAGE_SIZE, LocationDivision.CITY.getLevelId(), cityName);
+        List<LocationDto> allCities = getLocationDataByName(LocationDivision.CITY.getLevelId(), cityName);
         if (allCities.isEmpty()) {
             allCities.add(getCityByNameFromRegionSide(regionName, cityName));
             return allCities;
@@ -82,7 +82,7 @@ public class LocationApiService {
      * @param errorMessage The error message to use if the location is not found.
      * @return A LocationDto object containing the location's data.
      */
-    LocationDto findLocationByName(List<LocationDto> locations, String regionName, String locationName,
+    public  LocationDto findLocationByName(List<LocationDto> locations, String regionName, String locationName,
         String errorMessage) {
         if (locations.isEmpty()) {
             return getCityByNameFromRegionSide(regionName, locationName);
@@ -102,7 +102,7 @@ public class LocationApiService {
     public LocationDto getRegionByName(String regionName) {
         List<LocationDto> allRegions = new ArrayList<>();
         try {
-            allRegions = getLocationDataByName(DEFAULT_PAGE_SIZE, 1, regionName);
+            allRegions = getLocationDataByName(1, regionName);
             if (allRegions.isEmpty()) {
                 allRegions = getAllRegions();
             }
@@ -174,6 +174,10 @@ public class LocationApiService {
         List<LocationDto> allDistricts = getAllDistrictsInCityByCityID(cityId);
         if (allDistricts.isEmpty()) {
             String cityNameUK = city.getName().get(NAME);
+            List<LocationDto> allCitiesWithName =  getCitiesByName(regionName, cityNameUK);
+            if(allCitiesWithName.isEmpty()){
+                throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND_IN_REGION + regionName);
+            }
             city = getCitiesByName(regionName, cityNameUK).get(0);
             allDistricts = getAllDistrictsInCityByCityID(city.getId());
         }
@@ -257,7 +261,7 @@ public class LocationApiService {
      * @return A List of LocationDto objects representing all locations at the
      *         provided level.
      */
-    private List<LocationDto> getLocationDataByLevel(int pageSize, int level) {
+    public List<LocationDto> getLocationDataByLevel(int pageSize, int level) {
         UriComponentsBuilder builder = builderUrl(pageSize).queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri());
     }
@@ -265,7 +269,6 @@ public class LocationApiService {
     /**
      * Fetches location data by the provided name.
      *
-     * @param pageSize The maximum number of results to return.
      * @param level    The hierarchical level of the location to fetch (e.g., city,
      *                 region).
      * @param name     The name of the location to fetch.
@@ -274,11 +277,11 @@ public class LocationApiService {
      * @throws NotFoundException if no location matching the provided name and level
      *                           can be found.
      */
-    public List<LocationDto> getLocationDataByName(int pageSize, int level, String name) {
+    private List<LocationDto> getLocationDataByName( int level, String name) {
         if (name == null) {
             throw new IllegalArgumentException("The name parameter cannot be null");
         }
-        UriComponentsBuilder builder = builderUrl(pageSize)
+        UriComponentsBuilder builder = builderUrl(DEFAULT_PAGE_SIZE)
             .queryParam(NAME, name)
             .queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri());
@@ -364,7 +367,7 @@ public class LocationApiService {
      * @param pageSize The number of results to display per page.
      * @return A UriComponentsBuilder instance with the built URL.
      */
-    public UriComponentsBuilder builderUrl(int pageSize) {
+    private UriComponentsBuilder builderUrl(int pageSize) {
         return UriComponentsBuilder.fromHttpUrl(API_URL)
             .queryParam(PAGE, "1")
             .queryParam(PAGE_SIZE, pageSize);
