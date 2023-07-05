@@ -1,24 +1,18 @@
 package greencity.service.locations;
 
-import greencity.constant.ErrorMessage;
 import greencity.dto.location.api.LocationDto;
 import greencity.enums.LocationDivision;
 import greencity.exceptions.NotFoundException;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -28,8 +22,11 @@ import java.util.Collections;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class LocationApiServiceTest {
     private static final String API_URL = "https://directory.org.ua/api/katottg";

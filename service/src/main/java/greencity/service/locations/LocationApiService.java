@@ -4,7 +4,6 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.location.api.LocationDto;
 import greencity.enums.LocationDivision;
 import greencity.exceptions.NotFoundException;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -26,7 +25,6 @@ public class LocationApiService {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
     private static final int DEFAULT_PAGE_SIZE = 100;
     private static final String LEVEL = "level";
-    private static final String PAGE = "page";
     private static final String NAME = "name";
     private static final String NAME_EN = "name_en";
     private static final String CODE = "code";
@@ -36,9 +34,9 @@ public class LocationApiService {
     private static final String RESULTS = "results";
 
     private static LocationDto kyiv;
-    private static String nameKyivUa="Київ";
-    private static String nameKyivEn="Kyiv";
-    private static String kyivId="UA80000000000093317";
+    private static String nameKyivUa = "Київ";
+    private static String nameKyivEn = "Kyiv";
+    private static String kyivId = "UA80000000000093317";
 
     private RestTemplate restTemplate;
 
@@ -50,7 +48,7 @@ public class LocationApiService {
     @Autowired
     public LocationApiService(RestTemplate restTemplate) {
         Map<String, String> name = new HashMap<>();
-        name.put(NAME,nameKyivUa);
+        name.put(NAME, nameKyivUa);
         name.put(NAME_EN, nameKyivEn);
         kyiv = LocationDto.builder()
             .id(kyivId)
@@ -89,7 +87,7 @@ public class LocationApiService {
         return locations.stream()
             .filter(location -> location.getName().containsValue(locationName))
             .findFirst()
-            .orElseThrow(() -> new NotFoundException( ErrorMessage.CITY_NOT_FOUND + locationName));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.CITY_NOT_FOUND + locationName));
     }
 
     /**
@@ -255,7 +253,8 @@ public class LocationApiService {
             .queryParam(LEVEL, level);
         List<LocationDto> resultFromUrl = getResultFromUrl(builder.build().encode().toUri());
         if (resultFromUrl == null || resultFromUrl.isEmpty()) {
-            throw new NotFoundException(  String.format(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE, level,code));
+            throw new NotFoundException(
+                String.format(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE, level, code));
         }
         return resultFromUrl.get(0);
     }
