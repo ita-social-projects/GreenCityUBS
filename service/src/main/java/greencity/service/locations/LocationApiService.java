@@ -32,10 +32,11 @@ public class LocationApiService {
     private static final String PARENT_ID = "parent_id";
     private static final String RESULTS = "results";
 
-    private static LocationDto kyiv;
     private static String nameKyivUa = "Київ";
     private static String nameKyivEn = "Kyiv";
     private static String kyivId = "UA80000000000093317";
+    private static LocationDto kyiv = LocationDto.builder().id(kyivId).parentId(null)
+        .build();
 
     private RestTemplate restTemplate;
 
@@ -49,11 +50,7 @@ public class LocationApiService {
         Map<String, String> name = new HashMap<>();
         name.put(NAME, nameKyivUa);
         name.put(NAME_EN, nameKyivEn);
-        kyiv = LocationDto.builder()
-            .id(kyivId)
-            .parentId(null)
-            .locationNameMap(name)
-            .build();
+        kyiv.setLocationNameMap(name);
         this.restTemplate = restTemplate;
     }
 
