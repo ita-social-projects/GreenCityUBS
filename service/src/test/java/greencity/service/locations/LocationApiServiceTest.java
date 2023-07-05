@@ -256,12 +256,19 @@ class LocationApiServiceTest {
         assertLocationDto(region, "UA05000000000010236", null, "Вінницька", "Vinnytska");
     }
 
+//
     @Test
     void testGetLocationDataByCode() {
         restTemplate = mock(RestTemplate.class);
-
         Map<String, Object> lvivskaResult = getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
-
+        Map<String, String> name = new HashMap<>();
+        name.put(NAME, "Львівська");
+        name.put(NAME_EN, "Lvivska");
+        LocationDto lvivskadto = LocationDto.builder()
+            .id("UA46000000000026241")
+            .parentId(null)
+            .name(name)
+            .build();
         UriComponentsBuilder lvivska = UriComponentsBuilder
             .fromHttpUrl("https://directory.org.ua/api/katottg")
             .queryParam(PAGE, PAGE_VALUE)
@@ -274,10 +281,9 @@ class LocationApiServiceTest {
                 .thenReturn(
                     prepareResponseEntity(Arrays.asList(lvivskaResult, lvivskaResult)));
         locationApiService = new LocationApiService(restTemplate);
-
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getLocationDataByCode(LocationDivision.REGION.getLevelId(), "UA05000000000010236");
-        });
+        LocationDto result =
+            locationApiService.findLocationByName(Arrays.asList(lvivskadto, lvivskadto), "Львівська", "Львівська", "");
+        assertLocationDto(result, "UA46000000000026241", null, "Львівська", "Lvivska");
     }
 
     @Test
@@ -465,6 +471,9 @@ class LocationApiServiceTest {
             getApiResult("UA05020000000026686", "UA05000000000010236", "Вінницький", "Vinnytskyi");
         Map<String, Object> apiResult32 =
             getApiResult("UA05020030000031457", "UA05020000000026686", "Вінницька", "Vinnytska");
+        Map<String, Object> apiResult33 =
+            getApiResult("UA05020030000031457", "UA05020000000026686", "Test", "Test");
+
         Map<String, Object> apiResult41 =
             getApiResult("UA05020030010063857", "UA05020030000031457", "Вінниця", "Vinnytsia");
         Map<String, Object> apiResult42 = getApiResult("UA05020030020063505", "UA05020030000031457", "Десна", "Desna");
@@ -483,7 +492,8 @@ class LocationApiServiceTest {
         when(restTemplate.exchange(eq(builder2.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class))).thenReturn(prepareResponseEntity(Arrays.asList(apiResult21)));
         when(restTemplate.exchange(eq(builder3.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
-            any(ParameterizedTypeReference.class))).thenReturn(prepareResponseEntity(Arrays.asList(apiResult32)));
+            any(ParameterizedTypeReference.class)))
+                .thenReturn(prepareResponseEntity(Arrays.asList(apiResult32, apiResult33)));
         when(restTemplate.exchange(eq(builder4.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
                 .thenReturn(prepareResponseEntity(Arrays.asList(apiResult41, apiResult42)));
@@ -988,10 +998,38 @@ class LocationApiServiceTest {
     @Test
     void testFindLocationByName_WhenLocationsEmpty_ThenCallGetCityByNameFromRegionSide() {
         initialise();
-        LocationDto result =
-            locationApiService.findLocationByName(new ArrayList<>(), "Львівська", "Львів", "Location not found: ");
-        assertNotNull(result);
-        assertEquals("Львів", result.getName().get(NAME));
+        UriComponentsBuilder builder =
+            UriComponentsBuilder.fromHttpUrl("https://directory.org.ua/api/katottg")
+                .queryParam(PAGE, PAGE_VALUE)
+                .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+                .queryParam(LEVEL, LocationDivision.DISTRICT_IN_REGION.getLevelId())
+                .queryParam(PARENT, "UA05000000000010236");
+        when(restTemplate.exchange(eq(builder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+            any(ParameterizedTypeReference.class)))
+                .thenReturn(prepareResponseEntity(new ArrayList<>()));
+        assertThrows(NotFoundException.class, () -> {
+            locationApiService.getCityByNameFromRegionSide("Вінницька", "Test");
+        });
+    }
+
+    @Test
+    void testGetLocationDataByCode_Exception() {
+        restTemplate = mock(RestTemplate.class);
+        UriComponentsBuilder lvivska = UriComponentsBuilder
+            .fromHttpUrl("https://directory.org.ua/api/katottg")
+            .queryParam(PAGE, PAGE_VALUE)
+            .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
+            .queryParam(CODE, "Test")
+            .queryParam(LEVEL, LocationDivision.REGION.getLevelId());
+
+        when(restTemplate.exchange(eq(lvivska.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
+            any(ParameterizedTypeReference.class)))
+                .thenReturn(
+                    prepareResponseEntity(new ArrayList<>()));
+        locationApiService = new LocationApiService(restTemplate);
+        assertThrows(NotFoundException.class, () -> {
+            locationApiService.getLocationDataByCode(1, "Test");
+        });
     }
 
 }

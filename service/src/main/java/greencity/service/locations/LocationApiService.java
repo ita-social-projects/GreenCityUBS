@@ -87,13 +87,33 @@ public class LocationApiService {
      */
     public LocationDto findLocationByName(List<LocationDto> locations, String regionName, String locationName,
         String errorMessage) {
-        if (locations.isEmpty()) {
-            return getCityByNameFromRegionSide(regionName, locationName);
-        }
         return locations.stream()
             .filter(location -> location.getName().containsValue(locationName))
             .findFirst()
             .orElseThrow(() -> new NotFoundException(errorMessage + locationName));
+    }
+
+    /**
+     * Retrieves a city by name from a specified region.
+     *
+     * @param regionName The name of the region.
+     * @param cityName   The name of the city.
+     * @return The LocationDto that represents the city in the specified region.
+     * @throws NotFoundException if the city is not found.
+     */
+    public LocationDto getCityByNameFromRegionSide(String regionName, String cityName) {
+        LocationDto region = getRegionByName(regionName);
+        List<LocationDto> districts = getAllDistrictInTheRegionsById(region.getId());
+        List<LocationDto> localCommunities = districts.stream()
+            .flatMap(district -> getAllLocalCommunitiesById(district.getId()).stream())
+            .collect(Collectors.toList());
+        List<LocationDto> cities = localCommunities.stream()
+            .flatMap(community -> getAllCitiesById(community.getId()).stream())
+            .collect(Collectors.toList());
+        if (cities.isEmpty()) {
+            throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND + cityName);
+        }
+        return findLocationByName(cities, regionName, cityName, ErrorMessage.CITY_NOT_FOUND);
     }
 
     /**
@@ -103,7 +123,7 @@ public class LocationApiService {
      * @return The region matching the provided name.
      */
     public LocationDto getRegionByName(String regionName) {
-        List<LocationDto> allRegions = new ArrayList<>();
+        List<LocationDto> allRegions;
         try {
             allRegions = getLocationDataByName(LocationDivision.REGION.getLevelId(), regionName);
             if (allRegions.isEmpty()) {
@@ -140,26 +160,6 @@ public class LocationApiService {
             }
         }
         throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND_IN_REGION + regionID);
-    }
-
-    /**
-     * Retrieves a city by name from a specified region.
-     *
-     * @param regionName The name of the region.
-     * @param cityName   The name of the city.
-     * @return The LocationDto that represents the city in the specified region.
-     * @throws NotFoundException if the city is not found.
-     */
-    public LocationDto getCityByNameFromRegionSide(String regionName, String cityName) {
-        LocationDto region = getRegionByName(regionName);
-        List<LocationDto> districts = getAllDistrictInTheRegionsById(region.getId());
-        List<LocationDto> localCommunities = districts.stream()
-            .flatMap(district -> getAllLocalCommunitiesById(district.getId()).stream())
-            .collect(Collectors.toList());
-        List<LocationDto> cities = localCommunities.stream()
-            .flatMap(community -> getAllCitiesById(community.getId()).stream())
-            .collect(Collectors.toList());
-        return findLocationByName(cities, regionName, cityName, ErrorMessage.CITY_NOT_FOUND);
     }
 
     /**
@@ -255,7 +255,7 @@ public class LocationApiService {
             .queryParam(CODE, code)
             .queryParam(LEVEL, level);
         List<LocationDto> resultFromUrl = getResultFromUrl(builder.build().encode().toUri());
-        if (resultFromUrl == null) {
+        if (resultFromUrl == null || resultFromUrl.isEmpty()) {
             throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL + level + "\n"
                 + ErrorMessage.NOT_FOUND_LOCATION_BY_CODE + code);
         }
