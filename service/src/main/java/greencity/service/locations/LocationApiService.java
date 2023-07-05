@@ -102,7 +102,7 @@ public class LocationApiService {
     public LocationDto getRegionByName(String regionName) {
         List<LocationDto> allRegions = new ArrayList<>();
         try {
-            allRegions = getLocationDataByName(1, regionName);
+            allRegions = getLocationDataByName(LocationDivision.REGION.getLevelId(), regionName);
             if (allRegions.isEmpty()) {
                 allRegions = getAllRegions();
             }
@@ -127,8 +127,8 @@ public class LocationApiService {
         LocationDto region = getRegionByName(regionName);
         String regionID = region.getId();
         for (LocationDto city : cities) {
-            LocationDto localCommunity = (getLocationDataByCode(DEFAULT_PAGE_SIZE, LocationDivision.LOCAL_COMMUNITY.getLevelId(), city.getParentId()));
-            LocationDto districtRegion = (getLocationDataByCode(DEFAULT_PAGE_SIZE, LocationDivision.DISTRICT_IN_REGION.getLevelId(), localCommunity.getParentId()));
+            LocationDto localCommunity = (getLocationDataByCode( LocationDivision.LOCAL_COMMUNITY.getLevelId(), city.getParentId()));
+            LocationDto districtRegion = (getLocationDataByCode( LocationDivision.DISTRICT_IN_REGION.getLevelId(), localCommunity.getParentId()));
             if (districtRegion.getParentId().equals(regionID)) {
                 return city;
             }
@@ -184,7 +184,7 @@ public class LocationApiService {
      * @return A list of all regions.
      */
     public List<LocationDto> getAllRegions() {
-        return getLocationDataByLevel(DEFAULT_PAGE_SIZE, LocationDivision.REGION.getLevelId());
+        return getLocationDataByLevel( LocationDivision.REGION.getLevelId());
     }
 
     /**
@@ -231,14 +231,13 @@ public class LocationApiService {
     /**
      * Fetches location data by the provided code.
      *
-     * @param pageSize The maximum number of results to return.
      * @param level    The hierarchical level of the location (e.g., city, region).
      * @param code     The code representing the specific location to fetch.
      * @return A LocationDto object representing the location matching the provided
      *         code.
      */
-    public LocationDto getLocationDataByCode(int pageSize, int level, String code) {
-        UriComponentsBuilder builder = builderUrl(pageSize).queryParam(CODE, code)
+    public LocationDto getLocationDataByCode(int level, String code) {
+        UriComponentsBuilder builder = builderUrl().queryParam(CODE, code)
             .queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri()).get(0);
     }
@@ -246,14 +245,13 @@ public class LocationApiService {
     /**
      * Fetches all location data at the provided level.
      *
-     * @param pageSize The maximum number of results to return.
      * @param level    The hierarchical level of the locations to fetch (e.g., city,
      *                 region).
      * @return A List of LocationDto objects representing all locations at the
      *         provided level.
      */
-    public List<LocationDto> getLocationDataByLevel(int pageSize, int level) {
-        UriComponentsBuilder builder = builderUrl(pageSize).queryParam(LEVEL, level);
+    public List<LocationDto> getLocationDataByLevel( int level) {
+        UriComponentsBuilder builder = builderUrl().queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
@@ -272,7 +270,7 @@ public class LocationApiService {
         if (name == null) {
             throw new IllegalArgumentException("The name parameter cannot be null");
         }
-        UriComponentsBuilder builder = builderUrl(DEFAULT_PAGE_SIZE)
+        UriComponentsBuilder builder = builderUrl()
             .queryParam(NAME, name)
             .queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri());
@@ -345,7 +343,7 @@ public class LocationApiService {
         if (upperId == null) {
             throw new IllegalArgumentException("The upperId parameter cannot be null");
         }
-        UriComponentsBuilder builder = builderUrl(DEFAULT_PAGE_SIZE).queryParam(LEVEL, level)
+        UriComponentsBuilder builder = builderUrl().queryParam(LEVEL, level)
             .queryParam(UPPER_ID, upperId);
         return getResultFromUrl(builder.build().encode().toUri());
     }
@@ -355,12 +353,11 @@ public class LocationApiService {
      * uses UriComponentsBuilder to construct a URL with two query parameters: -
      * PAGE set to "1" - PAGE_SIZE set to the provided page size.
      *
-     * @param pageSize The number of results to display per page.
      * @return A UriComponentsBuilder instance with the built URL.
      */
-    private UriComponentsBuilder builderUrl(int pageSize) {
+    private UriComponentsBuilder builderUrl() {
         return UriComponentsBuilder.fromHttpUrl(API_URL)
             .queryParam(PAGE, "1")
-            .queryParam(PAGE_SIZE, pageSize);
+            .queryParam(PAGE_SIZE, DEFAULT_PAGE_SIZE);
     }
 }
