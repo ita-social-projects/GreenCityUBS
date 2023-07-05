@@ -34,7 +34,7 @@ class LocationApiServiceTest {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
     private LocationApiService locationApiService;
     RestTemplate restTemplate;
-    private static final String PAGE_SIZE_VALUE = "100";
+    private static final String PAGE_SIZE_VALUE = "30";
     private static final String LEVEL = "level";
     private static final String NAME = "name";
     private static final String NAME_EN = "name_en";
