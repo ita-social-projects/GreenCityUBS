@@ -20,6 +20,7 @@ public class GetEmployeeDto {
     private String phoneNumber;
     private String email;
     private String image;
+    private String employeeStatus;
     private List<PositionDto> employeePositions;
     private List<GetTariffInfoForEmployeeDto> tariffs;
 }

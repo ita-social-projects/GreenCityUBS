@@ -586,6 +586,11 @@ class SuperAdminControllerTest {
     }
 
     @Test
+    void deleteLocationTest() throws Exception {
+        mockMvc.perform(delete(ubsLink + "/deleteLocation/" + 1L).principal(principal)).andExpect(status().isOk());
+    }
+
+    @Test
     void addLocationInterceptLocationAlreadyCreatedException() throws Exception {
         List<LocationCreateDto> dto = ModelUtils.getLocationCreateDtoList();
         ObjectMapper objectMapper = new ObjectMapper();
