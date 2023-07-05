@@ -15,14 +15,18 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
 @Data
 public class LocationApiService {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
-    private static final int DEFAULT_PAGE_SIZE = 5000;
+    private static final int DEFAULT_PAGE_SIZE = 100;
     private static final String LEVEL = "level";
     private static final String PAGE = "page";
     private static final String NAME = "name";
@@ -59,7 +63,7 @@ public class LocationApiService {
      * @return A LocationDto object containing the city's data.
      */
     public List<LocationDto> getCitiesByName(String regionName, String cityName) {
-        List<LocationDto> allCities = getLocationDataByName(DEFAULT_PAGE_SIZE, 4, cityName);
+        List<LocationDto> allCities = getLocationDataByName(DEFAULT_PAGE_SIZE, LocationDivision.CITY.getLevelId(), cityName);
         if (allCities.isEmpty()) {
             allCities.add(getCityByNameFromRegionSide(regionName, cityName));
             return allCities;
@@ -195,7 +199,7 @@ public class LocationApiService {
      * @return A list of all cities in the specified region.
      */
     public List<LocationDto> getAllCitiesById(String upperId) {
-        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, LocationDivision.CITY.getLevelId(), upperId);
+        return getLocationDataByUpperId(LocationDivision.CITY.getLevelId(), upperId);
     }
 
     /**
@@ -205,7 +209,7 @@ public class LocationApiService {
      * @return A list of all districts in the specified region.
      */
     public List<LocationDto> getAllDistrictInTheRegionsById(String upperId) {
-        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, LocationDivision.DISTRICT_IN_REGION.getLevelId(), upperId);
+        return getLocationDataByUpperId(LocationDivision.DISTRICT_IN_REGION.getLevelId(), upperId);
     }
 
     /**
@@ -215,7 +219,7 @@ public class LocationApiService {
      * @return A list of all local communities in the specified region.
      */
     public List<LocationDto> getAllLocalCommunitiesById(String upperId) {
-        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, LocationDivision.LOCAL_COMMUNITY.getLevelId(), upperId);
+        return getLocationDataByUpperId( LocationDivision.LOCAL_COMMUNITY.getLevelId(), upperId);
     }
 
     /**
@@ -226,7 +230,7 @@ public class LocationApiService {
      *         city.
      */
     public List<LocationDto> getAllDistrictsInCityByCityID(String upperId) {
-        return getLocationDataByUpperId(DEFAULT_PAGE_SIZE, LocationDivision.DISTRICT_IN_CITY.getLevelId(), upperId);
+        return getLocationDataByUpperId(LocationDivision.DISTRICT_IN_CITY.getLevelId(), upperId);
     }
 
     /**
@@ -338,17 +342,16 @@ public class LocationApiService {
     /**
      * Fetches a list of location data specified by upper ID and level.
      *
-     * @param pageSize The number of locations to fetch.
      * @param level    The level of location to fetch.
      * @param upperId  The upper ID of the location.
      * @return A List of LocationDto objects, each representing a location matching
      *         the provided parameters.
      */
-    private List<LocationDto> getLocationDataByUpperId(int pageSize, int level, String upperId) {
+    private List<LocationDto> getLocationDataByUpperId( int level, String upperId) {
         if (upperId == null) {
             throw new IllegalArgumentException("The upperId parameter cannot be null");
         }
-        UriComponentsBuilder builder = builderUrl(pageSize).queryParam(LEVEL, level)
+        UriComponentsBuilder builder = builderUrl(DEFAULT_PAGE_SIZE).queryParam(LEVEL, level)
             .queryParam(UPPER_ID, upperId);
         return getResultFromUrl(builder.build().encode().toUri());
     }
