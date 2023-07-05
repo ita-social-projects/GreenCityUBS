@@ -172,15 +172,15 @@ public class LocationApiService {
         LocationDto city = getCityInRegion(regionName, cities);
         String cityId = city.getId();
         List<LocationDto> allDistricts = getAllDistrictsInCityByCityID(cityId);
-        if (allDistricts.isEmpty()) {
-            String cityNameUK = city.getName().get(NAME);
-            List<LocationDto> allCitiesWithName =  getCitiesByName(regionName, cityNameUK);
-            if(allCitiesWithName.isEmpty()){
-                throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND_IN_REGION + regionName);
-            }
-            city = getCitiesByName(regionName, cityNameUK).get(0);
-            allDistricts = getAllDistrictsInCityByCityID(city.getId());
-        }
+//        if (allDistricts.isEmpty()) {
+//            String cityNameUK = city.getName().get(NAME);
+//            List<LocationDto> allCitiesWithName =  getCitiesByName(regionName, cityNameUK);
+//            if(allCitiesWithName.isEmpty()){
+//                throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND_IN_REGION + regionName);
+//            }
+//            city = getCitiesByName(regionName, cityNameUK).get(0);
+//            allDistricts = getAllDistrictsInCityByCityID(city.getId());
+//        }
         if (allDistricts.isEmpty()) {
             allDistricts.add(city);
         }
