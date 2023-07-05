@@ -79,11 +79,10 @@ public class JwtTool {
      *
      */
     public List<String> getAuthoritiesFromToken(String accessToken) {
-        List<String> authorities = (List<String>) Jwts.parser()
+        return (List<String>) Jwts.parser()
             .setSigningKey(getAccessTokenKey())
             .parseClaimsJws(accessToken)
             .getBody()
             .get("employee_authorities");
-        return authorities;
     }
 }
