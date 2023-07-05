@@ -55,7 +55,7 @@ public final class ErrorMessage {
     public static final String ADDRESS_NOT_FOUND = "Address not found";
     public static final String NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE =
         "Not found locations on level: %s, and by code: %s";
-    public static final String UPPER_ID_CAN_NOT_BE_NULL = "The upperId parameter cannot be null";
+    public static final String VALUE_CAN_NOT_BE_NULL_OR_EMPTY = "The value parameter cannot be null or empty";
     public static final String NOT_FOUND_LOCATION_BY_URL = "Not found locations by url: ";
     public static final String REGION_NOT_FOUND = "Region not found: ";
     public static final String CITY_NOT_FOUND = "City not found: ";

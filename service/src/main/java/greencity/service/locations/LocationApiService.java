@@ -9,7 +9,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -175,7 +174,10 @@ public class LocationApiService {
      * @return A list of LocationDto that represent districts in the city.
      */
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
-        if (cityName.equals(kyiv.getLocationNameMap().get(NAME)) || cityName.equals(kyiv.getLocationNameMap().get(NAME_EN))) {
+        checkIfNotNull(regionName);
+        checkIfNotNull(cityName);
+        if (cityName.equals(kyiv.getLocationNameMap().get(NAME))
+            || cityName.equals(kyiv.getLocationNameMap().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(kyiv.getId());
         }
         List<LocationDto> cities = getCitiesByName(regionName, cityName);
@@ -270,6 +272,13 @@ public class LocationApiService {
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
+    private boolean checkIfNotNull(String name) {
+        if ((name == null) || (name.equals(""))) {
+            throw new IllegalArgumentException(ErrorMessage.VALUE_CAN_NOT_BE_NULL_OR_EMPTY);
+        }
+        return true;
+    }
+
     /**
      * Retrieves a list of location data by level and name.
      *
@@ -280,9 +289,6 @@ public class LocationApiService {
      */
 
     private List<LocationDto> getLocationDataByName(int level, String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("The name parameter cannot be null");
-        }
         UriComponentsBuilder builder = buildUrl()
             .queryParam(NAME, name)
             .queryParam(LEVEL, level);
@@ -296,21 +302,17 @@ public class LocationApiService {
      * @return A list of LocationDto.
      */
     private List<LocationDto> getResultFromUrl(URI url) {
-        try {
-            ParameterizedTypeReference<Map<String, Object>> typeRef =
-                new ParameterizedTypeReference<Map<String, Object>>() {
-                };
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
-            return Optional.ofNullable(response)
-                .map(ResponseEntity::getBody)
-                .map(body -> (List<Map<String, Object>>) body.get(RESULTS))
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url))
-                .stream()
-                .map(this::mapToLocationDto)
-                .collect(Collectors.toList());
-        } catch (RestClientException e) {
-            throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url);
-        }
+        ParameterizedTypeReference<Map<String, Object>> typeRef =
+            new ParameterizedTypeReference<Map<String, Object>>() {
+            };
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
+        return Optional.ofNullable(response)
+            .map(ResponseEntity::getBody)
+            .map(body -> (List<Map<String, Object>>) body.get(RESULTS))
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url))
+            .stream()
+            .map(this::mapToLocationDto)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -351,9 +353,6 @@ public class LocationApiService {
      * @throws IllegalArgumentException if the upperId is null.
      */
     private List<LocationDto> getLocationDataByUpperId(int level, String upperId) {
-        if (upperId == null) {
-            throw new IllegalArgumentException(ErrorMessage.UPPER_ID_CAN_NOT_BE_NULL);
-        }
         UriComponentsBuilder builder = buildUrl().queryParam(LEVEL, level)
             .queryParam(PARENT, upperId);
         return getResultFromUrl(builder.build().encode().toUri());
