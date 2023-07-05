@@ -127,8 +127,8 @@ public class LocationApiService {
         LocationDto region = getRegionByName(regionName);
         String regionID = region.getId();
         for (LocationDto city : cities) {
-            LocationDto localCommunity = (getLocationDataByCode(2, 3, city.getParentId()));
-            LocationDto districtRegion = (getLocationDataByCode(2, 2, localCommunity.getParentId()));
+            LocationDto localCommunity = (getLocationDataByCode(DEFAULT_PAGE_SIZE, LocationDivision.LOCAL_COMMUNITY.getLevelId(), city.getParentId()));
+            LocationDto districtRegion = (getLocationDataByCode(DEFAULT_PAGE_SIZE, LocationDivision.DISTRICT_IN_REGION.getLevelId(), localCommunity.getParentId()));
             if (districtRegion.getParentId().equals(regionID)) {
                 return city;
             }
