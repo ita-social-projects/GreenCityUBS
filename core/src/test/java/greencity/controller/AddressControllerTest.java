@@ -10,7 +10,6 @@ import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.service.locations.LocationApiService;
 import greencity.service.ubs.UBSClientService;
-import liquibase.pro.packaged.S;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
