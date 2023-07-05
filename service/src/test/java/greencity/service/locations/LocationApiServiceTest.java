@@ -1,6 +1,5 @@
 package greencity.service.locations;
 
-import com.azure.core.http.rest.Page;
 import greencity.constant.ErrorMessage;
 import greencity.dto.location.api.LocationDto;
 import greencity.enums.LocationDivision;
