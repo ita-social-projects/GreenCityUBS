@@ -21,7 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 @Service
 public class LocationApiService {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
-    private static final int DEFAULT_PAGE_SIZE = 30;
+    private static final int DEFAULT_PAGE_SIZE = 125;
     private static final String LEVEL = "level";
     private static final String NAME = "name";
     private static final String NAME_EN = "name_en";

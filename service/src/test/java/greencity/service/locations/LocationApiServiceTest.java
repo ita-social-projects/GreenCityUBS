@@ -44,7 +44,6 @@ class LocationApiServiceTest {
     private static final String RESULTS = "results";
     @InjectMocks
     LocationApiService locationApiService;
-
     @Mock
     RestTemplate restTemplate;
 
