@@ -53,6 +53,13 @@ public final class ErrorMessage {
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
     public static final String ADDRESS_NOT_FOUND = "Address not found";
+    public static final String NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE =
+        "Not found locations on level: %s, and by code: %s";
+    public static final String VALUE_CAN_NOT_BE_NULL_OR_EMPTY = "The value parameter cannot be null or empty";
+    public static final String NOT_FOUND_LOCATION_BY_URL = "Not found locations by url: ";
+    public static final String REGION_NOT_FOUND = "Region not found: ";
+    public static final String CITY_NOT_FOUND = "City not found: ";
+    public static final String CITY_NOT_FOUND_IN_REGION = "City not found in region: ";
     public static final String ACTUAL_ADDRESS_NOT_FOUND = "Actual address not found";
     public static final String LOCATION_DOESNT_FOUND_BY_ID = "Location does not exist by id: ";
     public static final String LOCATIONS_BELONG_TO_DIFFERENT_REGIONS =
@@ -153,6 +160,7 @@ public final class ErrorMessage {
     public static final String REGIONS_NOT_FOUND_BY_LOCATION_STATUS =
         "Regions containing locations with a status: %s, not found";
     public static final String ORDER_CAN_NOT_BE_UPDATED = "An order with the status: %s, can not be updated";
+    public static final String INVALID_URL = "Invalid URL: ";
     public static final String LOCATION_CAN_NOT_BE_DELETED =
         "Such location cannot be deleted as it is linked to the tariff";
 

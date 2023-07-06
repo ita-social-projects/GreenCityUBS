@@ -8,9 +8,9 @@ import greencity.dto.LocationsDtos;
 import greencity.dto.courier.GetReceivingStationDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.position.PositionWithTranslateDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
@@ -23,6 +23,7 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.repository.*;
+import greencity.service.locations.LocationApiService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,15 +31,25 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
-
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.Set;
-
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementEmployeeServiceImplTest {
@@ -60,6 +71,8 @@ class UBSManagementEmployeeServiceImplTest {
     private UBSManagementEmployeeServiceImpl employeeService;
     @Mock
     private EmployeeCriteriaRepository employeeCriteriaRepository;
+    @Mock
+    private LocationApiService locationApiService;
 
     @Test
     void saveEmployeeTest() {
@@ -427,4 +440,28 @@ class UBSManagementEmployeeServiceImplTest {
         verify(modelMapper, times(1)).map(any(), any());
         verify(tariffsInfoRepository).findAll();
     }
+
+    @Test
+    void getAllDistrictsForRegionAndCityTest() {
+        String region = "Львівська";
+        String city = "Львів";
+        Map<String, String> nameMap = new HashMap<>();
+        nameMap.put("name", "Львів");
+        nameMap.put("nameEn", "Lviv");
+        List<LocationDto> mockLocationDtoList = new ArrayList<>();
+        LocationDto mockLocationDto = LocationDto.builder()
+            .id("UA46060250010015970")
+            .parentId("UA46060250000025047")
+            .locationNameMap(nameMap)
+            .build();
+        when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(mockLocationDtoList);
+
+        List<LocationDto> locationDtoList = locationApiService.getAllDistrictsInCityByNames(region, city);
+
+        assertNotNull(locationDtoList);
+        assertEquals(mockLocationDtoList, locationDtoList);
+
+        verify(locationApiService, times(1)).getAllDistrictsInCityByNames(region, city);
+    }
+
 }
