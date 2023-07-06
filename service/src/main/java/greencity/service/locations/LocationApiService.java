@@ -14,10 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -38,13 +35,7 @@ public class LocationApiService {
     private static final String KYIV_ID = "UA80000000000093317";
     private static final LocationDto KYIV = LocationDto.builder()
         .id(KYIV_ID)
-        .locationNameMap(
-            new HashMap<>() {
-                {
-                    put(NAME, NAME_KYIV_UA);
-                    put(NAME_EN, NAME_KYIV_EN);
-                }
-            })
+        .locationNameMap(Map.of(NAME, NAME_KYIV_UA, NAME_EN, NAME_KYIV_EN))
         .build();
     private RestTemplate restTemplate;
 

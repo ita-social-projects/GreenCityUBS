@@ -5,6 +5,8 @@ import greencity.enums.LocationDivision;
 import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -27,13 +29,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class LocationApiServiceTest {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
-    private LocationApiService locationApiService;
-    RestTemplate restTemplate;
     private static final String PAGE_SIZE_VALUE = "30";
     private static final String LEVEL = "level";
     private static final String NAME = "name";
@@ -43,6 +42,11 @@ class LocationApiServiceTest {
     private static final String PARENT = "parent";
     private static final String PARENT_ID = "parent_id";
     private static final String RESULTS = "results";
+    @InjectMocks
+    LocationApiService locationApiService;
+
+    @Mock
+    RestTemplate restTemplate;
 
     static Map<String, Object> getApiResult(String code, String parent_id, String name, String nameEn) {
         Map<String, Object> apiResult = new HashMap<>();
@@ -56,8 +60,6 @@ class LocationApiServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        restTemplate = mock(RestTemplate.class);
-        locationApiService = new LocationApiService(restTemplate);
     }
 
     private UriComponentsBuilder buildCode(String code, int level) {
@@ -103,7 +105,7 @@ class LocationApiServiceTest {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    void assertLocationDto(LocationDto locationDto, String expectedId, String expectedParentId,
+    private void assertLocationDto(LocationDto locationDto, String expectedId, String expectedParentId,
         String expectedName, String expectedNameEn) {
         assertEquals(expectedId, locationDto.getId());
         assertEquals(expectedParentId, locationDto.getParentId());
@@ -111,7 +113,7 @@ class LocationApiServiceTest {
         assertEquals(expectedNameEn, locationDto.getLocationNameMap().get(NAME_EN));
     }
 
-    public void initLviv() {
+    private void initLviv() {
         Map<String, Object> lvivskaResult =
             getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
         Map<String, Object> lviv2Result =
@@ -126,8 +128,6 @@ class LocationApiServiceTest {
             getApiResult("UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
         Map<String, Object> zaliznychnyiResult =
             getApiResult("UA46060250010259421", "UA46060250010015970", "Залізничний", "Zaliznychnyi");
-        restTemplate = mock(RestTemplate.class);
-        locationApiService = new LocationApiService(restTemplate);
         UriComponentsBuilder level1Builder = build(LocationDivision.REGION.getLevelId());
         UriComponentsBuilder level2BuilderLviv =
             buildCode("UA46060000000042587", LocationDivision.DISTRICT_IN_REGION.getLevelId());
@@ -147,7 +147,6 @@ class LocationApiServiceTest {
         UriComponentsBuilder level5BuilderCity =
             buildParent(LocationDivision.DISTRICT_IN_CITY.getLevelId(), "UA46060250010015970");
 
-        restTemplate = mock(RestTemplate.class);
         respond(level1Builder, Arrays.asList(lvivskaResult));
         respond(level2BuilderLviv, Arrays.asList(lvivDistrictResult));
         respond(level2BuilderLvivParent, Arrays.asList(lvivDistrictResult));
@@ -159,19 +158,16 @@ class LocationApiServiceTest {
         respond(level4BuilderLviv2City, Arrays.asList(lviv2Result));
         respond(level5BuilderVillage, new ArrayList<>());
         respond(level5BuilderCity, Arrays.asList(halytskyiResult, zaliznychnyiResult));
-        locationApiService = new LocationApiService(restTemplate);
 
     }
 
-    public void initKyiv() {
+    private void initKyiv() {
         Map<String, Object> kyivResult = getApiResult("UA80000000000093317", null, "Київ", "Kyiv");
         Map<String, Object> holosiivskyiResult =
             getApiResult("UA80000000000126643", "UA80000000000093317", "Голосіївський", "Holosiivskyi");
         Map<String, Object> darnytskyiResult =
             getApiResult("UA80000000000210193", "UA80000000000093317", "Дарницький", "Darnytskyi");
 
-        restTemplate = mock(RestTemplate.class);
-        locationApiService = new LocationApiService(restTemplate);
         UriComponentsBuilder kyivBuilder = build(LocationDivision.REGION.getLevelId());
         UriComponentsBuilder kyivDistrictsBuilder =
             buildParent(LocationDivision.DISTRICT_IN_CITY.getLevelId(), "UA80000000000093317");
@@ -237,8 +233,6 @@ class LocationApiServiceTest {
 
     @Test
     void testGetAllDistrictsInCityByNames_whenCityNotFound() {
-        restTemplate = mock(RestTemplate.class);
-        locationApiService = new LocationApiService(restTemplate);
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getAllDistrictsInCityByNames("Львівська", "UNREAL");
         });
@@ -249,9 +243,7 @@ class LocationApiServiceTest {
         Map<String, Object> apiResult1 = getApiResult("UA000000001", "UA000000000", "No Community", "No Community En");
         List<Map<String, Object>> results = Collections.singletonList(apiResult1);
         ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
-        RestTemplate restTemplate = mock(RestTemplate.class);
         when(restTemplate.getForEntity((API_URL), Map.class)).thenReturn(responseEntity);
-        LocationApiService locationApiService = new LocationApiService(restTemplate);
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getAllDistrictsInCityByNames("RegionName", "CityName");
         });
@@ -271,8 +263,6 @@ class LocationApiServiceTest {
             getApiResult("UA46060230010099970", "UA46060230000093092", "Куликів", "Kulykiv");
         Map<String, Object> vidnivResult =
             getApiResult("UA46060230040034427", "UA46060230000093092", "Віднів", "Vidniv");
-        restTemplate = mock(RestTemplate.class);
-        locationApiService = new LocationApiService(restTemplate);
         UriComponentsBuilder level1Builder = build(LocationDivision.REGION.getLevelId());
         UriComponentsBuilder level2BuilderLviv =
             buildCode("UA46060000000042587", LocationDivision.DISTRICT_IN_REGION.getLevelId());
@@ -366,8 +356,6 @@ class LocationApiServiceTest {
         Map<String, Object> mykolaiv2Result =
             getApiResult("UA74040050200013786", "UA74040050000013413", "Миколаїв", "Mykolaiv");
 
-        restTemplate = mock(RestTemplate.class);
-        locationApiService = new LocationApiService(restTemplate);
         UriComponentsBuilder builder = build(LocationDivision.REGION.getLevelId());
         UriComponentsBuilder builder4 = buildName("Миколаїв", LocationDivision.CITY.getLevelId());
         UriComponentsBuilder builder3 = buildCode("UA74040050000013413", LocationDivision.LOCAL_COMMUNITY.getLevelId());
@@ -398,8 +386,6 @@ class LocationApiServiceTest {
             getApiResult("UA74040000000028062", "UA74000000000025378", "Ніжинський", "Nizhynskyi");
         Map<String, Object> bobrovytskaDistrictResult =
             getApiResult("UA74040050000013413", "UA74040000000028062", "Бобровицька", "Bobrovytska");
-        restTemplate = mock(RestTemplate.class);
-        locationApiService = new LocationApiService(restTemplate);
         UriComponentsBuilder builder = build(LocationDivision.REGION.getLevelId());
         UriComponentsBuilder builder4 = buildName("Миколаїв", LocationDivision.CITY.getLevelId());
         UriComponentsBuilder builder3 = buildCode("UA74040050000013413", LocationDivision.LOCAL_COMMUNITY.getLevelId());
@@ -441,8 +427,6 @@ class LocationApiServiceTest {
         Map<String, Object> mykolaiv2Result =
             getApiResult("UA74040050200013786", "UA74040050000013413", "Миколаїв", "Mykolaiv");
 
-        restTemplate = mock(RestTemplate.class);
-        locationApiService = new LocationApiService(restTemplate);
         UriComponentsBuilder builder = build(LocationDivision.REGION.getLevelId());
         UriComponentsBuilder builder4 = buildName("Миколаїв", LocationDivision.CITY.getLevelId());
         UriComponentsBuilder builder3 = buildCode("UA74040050000013413", LocationDivision.LOCAL_COMMUNITY.getLevelId());
