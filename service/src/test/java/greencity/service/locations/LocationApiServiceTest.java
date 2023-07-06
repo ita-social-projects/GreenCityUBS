@@ -111,101 +111,6 @@ class LocationApiServiceTest {
         assertEquals(expectedNameEn, locationDto.getLocationNameMap().get(NAME_EN));
     }
 
-    @Test
-    void testGetDisctrictByNameEn() {
-        initLviv();
-        UriComponentsBuilder lvivBuilder = buildName("Lviv", LocationDivision.CITY.getLevelId());
-        UriComponentsBuilder lvivskaBuilder = buildName("Lvivska", LocationDivision.REGION.getLevelId());
-        respond(lvivBuilder, new ArrayList<>());
-        respond(lvivskaBuilder, new ArrayList<>());
-        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Lvivska", "Lviv");
-        assertEquals(2, districts.size());
-        assertLocationDto(districts.get(0), "UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
-        assertLocationDto(districts.get(1), "UA46060250010259421", "UA46060250010015970", "Залізничний",
-            "Zaliznychnyi");
-    }
-
-    @Test
-    void testGetAllDistrictsInCityByNames_Kyiv() {
-        initKyiv();
-        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Київська", "Київ");
-        assertEquals(2, districts.size());
-        assertLocationDto(districts.get(0), "UA80000000000126643", "UA80000000000093317", "Голосіївський",
-            "Holosiivskyi");
-        assertLocationDto(districts.get(1), "UA80000000000210193", "UA80000000000093317", "Дарницький", "Darnytskyi");
-
-    }
-
-    public void initKyiv() {
-        Map<String, Object> kyivResult = getApiResult("UA80000000000093317", null, "Київ", "Kyiv");
-        Map<String, Object> holosiivskyiResult =
-            getApiResult("UA80000000000126643", "UA80000000000093317", "Голосіївський", "Holosiivskyi");
-        Map<String, Object> darnytskyiResult =
-            getApiResult("UA80000000000210193", "UA80000000000093317", "Дарницький", "Darnytskyi");
-
-        restTemplate = mock(RestTemplate.class);
-        locationApiService = new LocationApiService(restTemplate);
-        UriComponentsBuilder kyivBuilder = build(LocationDivision.REGION.getLevelId());
-        UriComponentsBuilder kyivDistrictsBuilder =
-            buildParent(LocationDivision.DISTRICT_IN_CITY.getLevelId(), "UA80000000000093317");
-        respond(kyivBuilder, Arrays.asList(kyivResult));
-        respond(kyivDistrictsBuilder, Arrays.asList(holosiivskyiResult, darnytskyiResult));
-
-    }
-
-    @Test
-    void testGetAllDistrictsInCityByNames_KyivEn() {
-        initKyiv();
-        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Київська", "Kyiv");
-        assertEquals(2, districts.size());
-        assertLocationDto(districts.get(0), "UA80000000000126643", "UA80000000000093317", "Голосіївський",
-            "Holosiivskyi");
-        assertLocationDto(districts.get(1), "UA80000000000210193", "UA80000000000093317", "Дарницький", "Darnytskyi");
-
-    }
-
-    @Test
-    void testGetAllDistrictsInCityByNames_Error() {
-        initLviv();
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Вінницька", "Львів");
-        });
-    }
-
-    @Test
-    void testGetAllDistrictsInCityByNames() {
-        initLviv();
-        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Львівська", "Львів");
-        assertEquals(2, districts.size());
-        assertLocationDto(districts.get(0), "UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
-        assertLocationDto(districts.get(1), "UA46060250010259421", "UA46060250010015970", "Залізничний",
-            "Zaliznychnyi");
-
-    }
-
-    @Test
-    void testGetAllDistrictsInCityByNames_CityNotFound() {
-        restTemplate = mock(RestTemplate.class);
-        locationApiService = new LocationApiService(restTemplate);
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Львівська", "UNREAL");
-        });
-    }
-
-    @Test
-    void testGetAllDistrictsInCityByNames_LocalCommunityNotFound() {
-        Map<String, Object> apiResult1 = getApiResult("UA000000001", "UA000000000", "No Community", "No Community En");
-        List<Map<String, Object>> results = Collections.singletonList(apiResult1);
-        ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
-        RestTemplate restTemplate = mock(RestTemplate.class);
-        when(restTemplate.getForEntity((API_URL), Map.class)).thenReturn(responseEntity);
-        LocationApiService locationApiService = new LocationApiService(restTemplate);
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("RegionName", "CityName");
-        });
-
-    }
-
     public void initLviv() {
         Map<String, Object> lvivskaResult =
             getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
@@ -258,8 +163,103 @@ class LocationApiServiceTest {
 
     }
 
+    public void initKyiv() {
+        Map<String, Object> kyivResult = getApiResult("UA80000000000093317", null, "Київ", "Kyiv");
+        Map<String, Object> holosiivskyiResult =
+            getApiResult("UA80000000000126643", "UA80000000000093317", "Голосіївський", "Holosiivskyi");
+        Map<String, Object> darnytskyiResult =
+            getApiResult("UA80000000000210193", "UA80000000000093317", "Дарницький", "Darnytskyi");
+
+        restTemplate = mock(RestTemplate.class);
+        locationApiService = new LocationApiService(restTemplate);
+        UriComponentsBuilder kyivBuilder = build(LocationDivision.REGION.getLevelId());
+        UriComponentsBuilder kyivDistrictsBuilder =
+            buildParent(LocationDivision.DISTRICT_IN_CITY.getLevelId(), "UA80000000000093317");
+        respond(kyivBuilder, Arrays.asList(kyivResult));
+        respond(kyivDistrictsBuilder, Arrays.asList(holosiivskyiResult, darnytskyiResult));
+
+    }
+
     @Test
-    void testGetAllDistrictsInCityByNames_NoDistricts() {
+    void testGetDisctrictByName_whenNameEn() {
+        initLviv();
+        UriComponentsBuilder lvivBuilder = buildName("Lviv", LocationDivision.CITY.getLevelId());
+        UriComponentsBuilder lvivskaBuilder = buildName("Lvivska", LocationDivision.REGION.getLevelId());
+        respond(lvivBuilder, new ArrayList<>());
+        respond(lvivskaBuilder, new ArrayList<>());
+        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Lvivska", "Lviv");
+        assertEquals(2, districts.size());
+        assertLocationDto(districts.get(0), "UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
+        assertLocationDto(districts.get(1), "UA46060250010259421", "UA46060250010015970", "Залізничний",
+            "Zaliznychnyi");
+    }
+
+    @Test
+    void testGetAllDistrictsInCityByNames_whenKyiv() {
+        initKyiv();
+        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Київська", "Київ");
+        assertEquals(2, districts.size());
+        assertLocationDto(districts.get(0), "UA80000000000126643", "UA80000000000093317", "Голосіївський",
+            "Holosiivskyi");
+        assertLocationDto(districts.get(1), "UA80000000000210193", "UA80000000000093317", "Дарницький", "Darnytskyi");
+
+    }
+
+    @Test
+    void testGetAllDistrictsInCityByNames_whenKyivEn() {
+        initKyiv();
+        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Київська", "Kyiv");
+        assertEquals(2, districts.size());
+        assertLocationDto(districts.get(0), "UA80000000000126643", "UA80000000000093317", "Голосіївський",
+            "Holosiivskyi");
+        assertLocationDto(districts.get(1), "UA80000000000210193", "UA80000000000093317", "Дарницький", "Darnytskyi");
+
+    }
+
+    @Test
+    void testGetAllDistrictsInCityByNames_whenCityNotExist() {
+        initLviv();
+        assertThrows(NotFoundException.class, () -> {
+            locationApiService.getAllDistrictsInCityByNames("Вінницька", "Львів");
+        });
+    }
+
+    @Test
+    void testGetAllDistrictsInCityByNames() {
+        initLviv();
+        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Львівська", "Львів");
+        assertEquals(2, districts.size());
+        assertLocationDto(districts.get(0), "UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
+        assertLocationDto(districts.get(1), "UA46060250010259421", "UA46060250010015970", "Залізничний",
+            "Zaliznychnyi");
+
+    }
+
+    @Test
+    void testGetAllDistrictsInCityByNames_whenCityNotFound() {
+        restTemplate = mock(RestTemplate.class);
+        locationApiService = new LocationApiService(restTemplate);
+        assertThrows(NotFoundException.class, () -> {
+            locationApiService.getAllDistrictsInCityByNames("Львівська", "UNREAL");
+        });
+    }
+
+    @Test
+    void testGetAllDistrictsInCityByNames_whenLocalCommunityNotFound() {
+        Map<String, Object> apiResult1 = getApiResult("UA000000001", "UA000000000", "No Community", "No Community En");
+        List<Map<String, Object>> results = Collections.singletonList(apiResult1);
+        ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        when(restTemplate.getForEntity((API_URL), Map.class)).thenReturn(responseEntity);
+        LocationApiService locationApiService = new LocationApiService(restTemplate);
+        assertThrows(NotFoundException.class, () -> {
+            locationApiService.getAllDistrictsInCityByNames("RegionName", "CityName");
+        });
+
+    }
+
+    @Test
+    void testGetAllDistrictsInCityByNames_whenNoDistricts() {
 
         Map<String, Object> lvivskaResult =
             getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
@@ -302,14 +302,14 @@ class LocationApiServiceTest {
     }
 
     @Test
-    void getRegionByName_whenAllCitiesIsEmpty() {
+    void testGetAllDistrictsInCityByNames_whenNameEn() {
         initLviv();
         List<LocationDto> result = locationApiService.getAllDistrictsInCityByNames("Lvivska", "Львів");
         assertEquals(2, result.size());
     }
 
     @Test
-    void getGetAllDistrictsInCityByNames_whenCityValueNulOrEmpty() {
+    void testGetGetAllDistrictsInCityByNames_whenCityValueNulOrEmpty() {
         assertThrows(IllegalArgumentException.class, () -> {
             locationApiService.getAllDistrictsInCityByNames("Lvivska", null);
         });
@@ -319,7 +319,7 @@ class LocationApiServiceTest {
     }
 
     @Test
-    void getGetAllDistrictsInCityByNames_whenRegionValueNullOrEmpty() {
+    void testGetGetAllDistrictsInCityByNames_whenRegionValueNullOrEmpty() {
         assertThrows(IllegalArgumentException.class, () -> {
             locationApiService.getAllDistrictsInCityByNames(null, "Lviv");
         });
@@ -329,7 +329,7 @@ class LocationApiServiceTest {
     }
 
     @Test
-    void getGetAllDistrictsInCityByNames_whenValuesNullOrEmpty() {
+    void testGetGetAllDistrictsInCityByNames_whenValuesNullOrEmpty() {
         assertThrows(IllegalArgumentException.class, () -> {
             locationApiService.getAllDistrictsInCityByNames(null, null);
         });
@@ -339,7 +339,7 @@ class LocationApiServiceTest {
     }
 
     @Test
-    void getGetAllDistrictsInCityByNames_whenResultEmpty() {
+    void testGetGetAllDistrictsInCityByNames_whenResultEmpty() {
         initLviv();
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getAllDistrictsInCityByNames("Львівська", "Тест");
@@ -347,14 +347,14 @@ class LocationApiServiceTest {
     }
 
     @Test
-    void getGetAllDistrictsInCityByNames_whenUrlEmpty() {
+    void testGetGetAllDistrictsInCityByNames_whenUrlEmpty() {
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getAllDistrictsInCityByNames("Тест", "Тест");
         });
     }
 
     @Test
-    void testGetCityByNameFromRegionSide_noCities_throwsNotFoundException() {
+    void testGetGetAllDistrictsInCityByNames_noCities() {
         Map<String, Object> mykolaivskaResult =
             getApiResult("UA48000000000039575", null, "Миколаївська", "Mykolaivska");
         Map<String, Object> chernihivskaResult =
@@ -385,7 +385,7 @@ class LocationApiServiceTest {
     }
 
     @Test
-    void testGetCityByNameFromRegionSide_noCitiesEmptyList_throwsNotFoundException() {
+    void testGetGetAllDistrictsInCityByNames_noCitiesEmptyList() {
         Map<String, Object> mykolaivskaResult =
             getApiResult("UA48000000000039575", null, "Миколаївська", "Mykolaivska");
         Map<String, Object> mykolaivskyiResult =
