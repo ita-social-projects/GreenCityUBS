@@ -4,6 +4,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.location.api.LocationDto;
 import greencity.enums.LocationDivision;
 import greencity.exceptions.NotFoundException;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 
 @Service
 public class LocationApiService {
@@ -31,13 +33,19 @@ public class LocationApiService {
     private static final String PARENT = "parent";
     private static final String PARENT_ID = "parent_id";
     private static final String RESULTS = "results";
-
-    private static String nameKyivUa = "Київ";
-    private static String nameKyivEn = "Kyiv";
-    private static String kyivId = "UA80000000000093317";
-    private static LocationDto kyiv = LocationDto.builder().id(kyivId).parentId(null)
+    private static final String NAME_KYIV_UA = "Київ";
+    private static final String NAME_KYIV_EN = "Kyiv";
+    private static final String KYIV_ID = "UA80000000000093317";
+    private static final LocationDto KYIV = LocationDto.builder()
+        .id(KYIV_ID)
+        .locationNameMap(
+            new HashMap<>() {
+                {
+                    put(NAME, NAME_KYIV_UA);
+                    put(NAME_EN, NAME_KYIV_EN);
+                }
+            })
         .build();
-
     private RestTemplate restTemplate;
 
     /**
@@ -47,11 +55,38 @@ public class LocationApiService {
      */
     @Autowired
     public LocationApiService(RestTemplate restTemplate) {
-        Map<String, String> name = new HashMap<>();
-        name.put(NAME, nameKyivUa);
-        name.put(NAME_EN, nameKyivEn);
-        kyiv.setLocationNameMap(name);
         this.restTemplate = restTemplate;
+    }
+
+    /**
+     * Retrieves all districts in a city by the city's name. There's a special case
+     * for Kyiv, the capital of Ukraine. In the system, due to the API having
+     * references only to the previous element, the search for districts occurs
+     * sequentially: region -> district in region -> local community -> city ->
+     * district. Generally, the city corresponds to level 4 in the hierarchical
+     * structure. However, Kyiv is unique in that it is at level 1, and its
+     * districts are at level 5. Therefore, a separate logic is implemented because
+     * the system can't go through all the steps from level 1 to level 4, and has to
+     * directly access the districts from level 5 when dealing with Kyiv.
+     *
+     * @param regionName The name of the region.
+     * @param cityName   The name of the city.
+     * @return A list of LocationDto that represent districts in the city.
+     */
+    public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
+        checkIfNotNull(regionName, cityName);
+        if (cityName.equals(KYIV.getLocationNameMap().get(NAME))
+            || cityName.equals(KYIV.getLocationNameMap().get(NAME_EN))) {
+            return getAllDistrictsInCityByCityID(KYIV.getId());
+        }
+        List<LocationDto> cities = getCitiesByName(regionName, cityName);
+        LocationDto city = getCityInRegion(regionName, cities);
+        String cityId = city.getId();
+        List<LocationDto> allDistricts = getAllDistrictsInCityByCityID(cityId);
+        if (allDistricts.isEmpty()) {
+            allDistricts.add(city);
+        }
+        return allDistricts;
     }
 
     /**
@@ -156,38 +191,6 @@ public class LocationApiService {
     }
 
     /**
-     * Retrieves all districts in a city by the city's name. There's a special case
-     * for Kyiv, the capital of Ukraine. In the system, due to the API having
-     * references only to the previous element, the search for districts occurs
-     * sequentially: region -> district in region -> local community -> city ->
-     * district. Generally, the city corresponds to level 4 in the hierarchical
-     * structure. However, Kyiv is unique in that it is at level 1, and its
-     * districts are at level 5. Therefore, a separate logic is implemented because
-     * the system can't go through all the steps from level 1 to level 4, and has to
-     * directly access the districts from level 5 when dealing with Kyiv.
-     * 
-     * @param regionName The name of the region.
-     * @param cityName   The name of the city.
-     * @return A list of LocationDto that represent districts in the city.
-     */
-    public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
-        checkIfNotNull(regionName);
-        checkIfNotNull(cityName);
-        if (cityName.equals(kyiv.getLocationNameMap().get(NAME))
-            || cityName.equals(kyiv.getLocationNameMap().get(NAME_EN))) {
-            return getAllDistrictsInCityByCityID(kyiv.getId());
-        }
-        List<LocationDto> cities = getCitiesByName(regionName, cityName);
-        LocationDto city = getCityInRegion(regionName, cities);
-        String cityId = city.getId();
-        List<LocationDto> allDistricts = getAllDistrictsInCityByCityID(cityId);
-        if (allDistricts.isEmpty()) {
-            allDistricts.add(city);
-        }
-        return allDistricts;
-    }
-
-    /**
      * Retrieves all regions.
      *
      * @return A list of LocationDto that represent all regions.
@@ -251,7 +254,7 @@ public class LocationApiService {
             .queryParam(CODE, code)
             .queryParam(LEVEL, level);
         List<LocationDto> resultFromUrl = getResultFromUrl(builder.build().encode().toUri());
-        if (resultFromUrl == null || resultFromUrl.isEmpty()) {
+        if (CollectionUtils.isEmpty(resultFromUrl)) {
             throw new NotFoundException(
                 String.format(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE, level, code));
         }
@@ -269,9 +272,11 @@ public class LocationApiService {
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
-    private boolean checkIfNotNull(String name) {
-        if ((name == null) || (name.equals(""))) {
-            throw new IllegalArgumentException(ErrorMessage.VALUE_CAN_NOT_BE_NULL_OR_EMPTY);
+    private boolean checkIfNotNull(String... names) {
+        for (String name : names) {
+            if (StringUtils.isBlank(name)) {
+                throw new IllegalArgumentException(ErrorMessage.VALUE_CAN_NOT_BE_NULL_OR_EMPTY);
+            }
         }
         return true;
     }
