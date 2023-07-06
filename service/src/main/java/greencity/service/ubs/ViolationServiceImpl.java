@@ -116,6 +116,7 @@ public class ViolationServiceImpl implements ViolationService {
         for (Long id : tariffsInfoIds) {
             if (id.equals(order.getTariffsInfo().getId())) {
                 status = true;
+                break;
             }
         }
         if (!status) {
