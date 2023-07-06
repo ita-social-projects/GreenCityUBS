@@ -450,4 +450,48 @@ class LocationApiServiceTest {
         });
     }
 
+    @Test
+    void testGetCityByNameFromRegionSide_RegionListEmpty() {
+        Map<String, Object> mykolaivskaResult =
+            getApiResult("UA48000000000039575", null, "Миколаївська", "Mykolaivska");
+        Map<String, Object> mykolaivskyiResult =
+            getApiResult("UA48060000000094390", "UA48000000000039575", "Миколаївський", "Mykolaivskyi");
+        Map<String, Object> mykolaivskaDistrictResult =
+            getApiResult("UA48060150000071713", "UA48060000000094390", "Миколаївська", "Mykolaivska");
+        Map<String, Object> chernihivskaResult =
+            getApiResult("UA74000000000025378", null, "Чернігівська", "Chernihivska");
+        Map<String, Object> nizhynskyiResult =
+            getApiResult("UA74040000000028062", "UA74000000000025378", "Ніжинський", "Nizhynskyi");
+        Map<String, Object> bobrovytskaDistrictResult =
+            getApiResult("UA74040050000013413", "UA74040000000028062", "Бобровицька", "Bobrovytska");
+        Map<String, Object> mykolaiv2Result =
+            getApiResult("UA74040050200013786", "UA74040050000013413", "Миколаїв", "Mykolaiv");
+
+        UriComponentsBuilder builder = build(LocationDivision.REGION.getLevelId());
+        UriComponentsBuilder builder_2 = buildName("Миколаївська", LocationDivision.REGION.getLevelId());
+
+        UriComponentsBuilder builder4 = buildName("Миколаїв", LocationDivision.CITY.getLevelId());
+        UriComponentsBuilder builder3 = buildCode("UA74040050000013413", LocationDivision.LOCAL_COMMUNITY.getLevelId());
+        UriComponentsBuilder builder2 =
+            buildCode("UA74040000000028062", LocationDivision.DISTRICT_IN_REGION.getLevelId());
+        UriComponentsBuilder builder2_2 =
+            buildParent(LocationDivision.DISTRICT_IN_REGION.getLevelId(), "UA48000000000039575");
+        UriComponentsBuilder builder3_2 =
+            buildParent(LocationDivision.LOCAL_COMMUNITY.getLevelId(), "UA48060000000094390");
+        UriComponentsBuilder builder4_2 = buildParent(LocationDivision.CITY.getLevelId(), "UA48060150000071713");
+
+        respond(builder, Arrays.asList(mykolaivskaResult, chernihivskaResult));
+        respond(builder_2, Arrays.asList(chernihivskaResult));
+        respond(builder4, new ArrayList<>());
+        respond(builder3, Arrays.asList(bobrovytskaDistrictResult));
+        respond(builder2, new ArrayList<>());
+        respond(builder2_2, Arrays.asList(mykolaivskyiResult));
+        respond(builder3_2, Arrays.asList(mykolaivskaDistrictResult));
+        respond(builder4_2, Arrays.asList(mykolaiv2Result));
+
+        assertThrows(NotFoundException.class, () -> {
+            locationApiService.getAllDistrictsInCityByNames("Миколаївська", "Миколаїв");
+        });
+    }
+
 }
