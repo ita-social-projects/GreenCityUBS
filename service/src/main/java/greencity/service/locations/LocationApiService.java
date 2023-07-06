@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Arrays;
 import org.apache.commons.collections4.CollectionUtils;
 
 @Service
@@ -172,16 +173,17 @@ public class LocationApiService {
     private LocationDto getCityInRegion(String regionName, List<LocationDto> cities) {
         LocationDto region = getRegionByName(regionName);
         String regionID = region.getId();
-        for (LocationDto city : cities) {
-            LocationDto localCommunity =
-                (getLocationDataByCode(LocationDivision.LOCAL_COMMUNITY.getLevelId(), city.getParentId()));
-            LocationDto districtRegion =
-                (getLocationDataByCode(LocationDivision.DISTRICT_IN_REGION.getLevelId(), localCommunity.getParentId()));
-            if (districtRegion.getParentId().equals(regionID)) {
-                return city;
-            }
-        }
-        throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND_IN_REGION + regionID);
+
+        return cities.stream()
+            .filter(city -> {
+                LocationDto localCommunity =
+                    getLocationDataByCode(LocationDivision.LOCAL_COMMUNITY.getLevelId(), city.getParentId());
+                LocationDto districtRegion = getLocationDataByCode(LocationDivision.DISTRICT_IN_REGION.getLevelId(),
+                    localCommunity.getParentId());
+                return districtRegion.getParentId().equals(regionID);
+            })
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.CITY_NOT_FOUND_IN_REGION + regionID));
     }
 
     /**
@@ -267,10 +269,8 @@ public class LocationApiService {
     }
 
     private boolean checkIfNotNull(String... names) {
-        for (String name : names) {
-            if (StringUtils.isBlank(name)) {
-                throw new IllegalArgumentException(ErrorMessage.VALUE_CAN_NOT_BE_NULL_OR_EMPTY);
-            }
+        if (Arrays.stream(names).anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException(ErrorMessage.VALUE_CAN_NOT_BE_NULL_OR_EMPTY);
         }
         return true;
     }
