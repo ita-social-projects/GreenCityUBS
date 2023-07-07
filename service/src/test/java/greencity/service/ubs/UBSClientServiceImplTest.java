@@ -251,18 +251,17 @@ class UBSClientServiceImplTest {
         Map<String, String> nameMap = new HashMap<>();
         nameMap.put("name", "Львів");
         nameMap.put("nameEn", "Lviv");
-        List<LocationDto> mockLocationDtoList = new ArrayList<>();
         LocationDto mockLocationDto = LocationDto.builder()
             .id("UA46060250010015970")
             .parentId("UA46060250000025047")
             .locationNameMap(nameMap)
             .build();
-        when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(mockLocationDtoList);
+        when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(Arrays.asList(mockLocationDto));
 
         List<LocationDto> locationDtoList = locationApiService.getAllDistrictsInCityByNames(region, city);
 
         assertNotNull(locationDtoList);
-        assertEquals(mockLocationDtoList, locationDtoList);
+        assertEquals(Arrays.asList(mockLocationDto), locationDtoList);
 
         verify(locationApiService, times(1)).getAllDistrictsInCityByNames(region, city);
     }

@@ -72,7 +72,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Mock
     private LocationApiService locationApiService;
     @Mock
-    private UBSClientService ubsClientService;
+    private UBSClientServiceImpl ubsClientService;
 
     @Test
     void saveEmployeeTest() {
