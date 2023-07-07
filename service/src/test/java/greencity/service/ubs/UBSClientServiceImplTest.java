@@ -58,13 +58,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
-import greencity.enums.AddressStatus;
-import greencity.enums.CertificateStatus;
-import greencity.enums.CourierLimit;
-import greencity.enums.LocationStatus;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.TariffStatus;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
@@ -94,21 +88,32 @@ import greencity.service.locations.LocationApiService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import javax.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -144,17 +149,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -237,33 +232,28 @@ class UBSClientServiceImplTest {
     private ViberBotRepository viberBotRepository;
     @Mock
     private UBSManagementService ubsManagementService;
-    @Mock
+    @InjectMocks
     private UBSClientServiceImpl ubsClientService;
+
     @Mock
     private LocationApiService locationApiService;
 
     @Test
-    @Transactional
-    void testGetAllDistricts() {
+    public void testGetAllDistricts() {
 
-        String region = "Львівська";
-        String city = "Львів";
-        Map<String, String> nameMap = new HashMap<>();
-        nameMap.put("name", "Львів");
-        nameMap.put("nameEn", "Lviv");
-        LocationDto mockLocationDto = LocationDto.builder()
-            .id("UA46060250010015970")
-            .parentId("UA46060250000025047")
-            .locationNameMap(nameMap)
-            .build();
-        when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(Arrays.asList(mockLocationDto));
+        List<LocationDto> locationDtos;
+        List<DistrictDto> districtDtos;
+        locationDtos = Arrays.asList(LocationDto.builder().build(), LocationDto.builder().build());
+        districtDtos = Arrays.asList(DistrictDto.builder().build(), DistrictDto.builder().build());
 
-        List<LocationDto> locationDtoList = locationApiService.getAllDistrictsInCityByNames(region, city);
+        when(locationApiService.getAllDistrictsInCityByNames(anyString(), anyString())).thenReturn(locationDtos);
+        when(modelMapper.map(any(LocationDto.class), eq(DistrictDto.class))).thenAnswer(i -> new DistrictDto());
 
-        assertNotNull(locationDtoList);
-        assertEquals(Arrays.asList(mockLocationDto), locationDtoList);
+        List<DistrictDto> results = ubsClientService.getAllDistricts("region", "city");
 
-        verify(locationApiService, times(1)).getAllDistrictsInCityByNames(region, city);
+        assertEquals(districtDtos.size(), results.size());
+        verify(locationApiService, times(1)).getAllDistrictsInCityByNames(anyString(), anyString());
+        verify(modelMapper, times(locationDtos.size())).map(any(LocationDto.class), eq(DistrictDto.class));
     }
 
     @Test

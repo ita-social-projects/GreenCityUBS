@@ -29,14 +29,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Arrays;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -445,23 +443,6 @@ class UBSManagementEmployeeServiceImplTest {
         assertEquals(1, dtos.size());
         verify(modelMapper, times(1)).map(any(), any());
         verify(tariffsInfoRepository).findAll();
-    }
-
-    @Test
-    void getAllDistrictsForRegionAndCityTest() {
-        String region = "Львівська";
-        String city = "Львів";
-        DistrictDto districtDto = DistrictDto.builder()
-            .nameUa("Львів")
-            .nameEn("Lviv")
-            .build();
-        List<DistrictDto> mockLocationDtoList = Arrays.asList(districtDto);
-        when(ubsClientService.getAllDistricts(region, city)).thenReturn(mockLocationDtoList);
-        List<DistrictDto> locationDtoList = ubsClientService.getAllDistricts(region, city);
-        assertNotNull(locationDtoList);
-        assertEquals(mockLocationDtoList, locationDtoList);
-
-        verify(ubsClientService, times(1)).getAllDistricts(region, city);
     }
 
 }
