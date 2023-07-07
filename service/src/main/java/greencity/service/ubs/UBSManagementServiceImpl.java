@@ -16,6 +16,7 @@ import greencity.dto.courier.CourierInfoDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
+import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -86,6 +87,7 @@ import greencity.repository.ReceivingStationRepository;
 import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
+import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -163,6 +165,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
     private final OrdersAdminsPageService ordersAdminsPageService;
+    private final LocationApiService locationApiService;
 
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
 
@@ -444,6 +447,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressHouseNumber(address.getHouseNumber())
             .addressRegion(address.getRegion())
             .addressRegionEng(address.getRegionEn())
+            .addressRegionDistrictList(
+                locationApiService.getAllDistrictsInCityByNames(address.getRegion(), address.getCity()).stream()
+                    .map(p -> modelMapper.map(p, DistrictDto.class))
+                    .collect(Collectors.toList()))
             .build();
     }
 
