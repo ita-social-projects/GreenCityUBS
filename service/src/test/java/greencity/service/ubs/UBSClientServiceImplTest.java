@@ -239,23 +239,32 @@ class UBSClientServiceImplTest {
     private UBSManagementService ubsManagementService;
     @Mock
     private UBSClientServiceImpl ubsClientService;
+    @Mock
+    private LocationApiService locationApiService;
 
     @Test
     @Transactional
     void testGetAllDistricts() {
+
         String region = "Львівська";
         String city = "Львів";
-        DistrictDto districtDto = DistrictDto.builder()
-            .nameUa("Львів")
-            .nameEn("Lviv")
+        Map<String, String> nameMap = new HashMap<>();
+        nameMap.put("name", "Львів");
+        nameMap.put("nameEn", "Lviv");
+        List<LocationDto> mockLocationDtoList = new ArrayList<>();
+        LocationDto mockLocationDto = LocationDto.builder()
+            .id("UA46060250010015970")
+            .parentId("UA46060250000025047")
+            .locationNameMap(nameMap)
             .build();
-        List<DistrictDto> mockLocationDtoList = Arrays.asList(districtDto);
-        when(ubsClientService.getAllDistricts(region, city)).thenReturn(mockLocationDtoList);
-        List<DistrictDto> locationDtoList = ubsClientService.getAllDistricts(region, city);
+        when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(mockLocationDtoList);
+
+        List<LocationDto> locationDtoList = locationApiService.getAllDistrictsInCityByNames(region, city);
+
         assertNotNull(locationDtoList);
         assertEquals(mockLocationDtoList, locationDtoList);
 
-        verify(ubsClientService, times(1)).getAllDistricts(region, city);
+        verify(locationApiService, times(1)).getAllDistrictsInCityByNames(region, city);
     }
 
     @Test

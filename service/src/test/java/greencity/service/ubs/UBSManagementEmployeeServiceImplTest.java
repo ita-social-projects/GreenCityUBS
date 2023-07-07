@@ -8,6 +8,7 @@ import greencity.dto.LocationsDtos;
 import greencity.dto.courier.GetReceivingStationDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
+import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
@@ -31,12 +32,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ArrayList;
-import java.util.Set;
+
+import java.util.*;
+
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,6 +71,8 @@ class UBSManagementEmployeeServiceImplTest {
     private EmployeeCriteriaRepository employeeCriteriaRepository;
     @Mock
     private LocationApiService locationApiService;
+    @Mock
+    private UBSClientService ubsClientService;
 
     @Test
     void saveEmployeeTest() {
@@ -445,23 +445,17 @@ class UBSManagementEmployeeServiceImplTest {
     void getAllDistrictsForRegionAndCityTest() {
         String region = "Львівська";
         String city = "Львів";
-        Map<String, String> nameMap = new HashMap<>();
-        nameMap.put("name", "Львів");
-        nameMap.put("nameEn", "Lviv");
-        List<LocationDto> mockLocationDtoList = new ArrayList<>();
-        LocationDto mockLocationDto = LocationDto.builder()
-            .id("UA46060250010015970")
-            .parentId("UA46060250000025047")
-            .locationNameMap(nameMap)
+        DistrictDto districtDto = DistrictDto.builder()
+            .nameUa("Львів")
+            .nameEn("Lviv")
             .build();
-        when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(mockLocationDtoList);
-
-        List<LocationDto> locationDtoList = locationApiService.getAllDistrictsInCityByNames(region, city);
-
+        List<DistrictDto> mockLocationDtoList = Arrays.asList(districtDto);
+        when(ubsClientService.getAllDistricts(region, city)).thenReturn(mockLocationDtoList);
+        List<DistrictDto> locationDtoList = ubsClientService.getAllDistricts(region, city);
         assertNotNull(locationDtoList);
         assertEquals(mockLocationDtoList, locationDtoList);
 
-        verify(locationApiService, times(1)).getAllDistrictsInCityByNames(region, city);
+        verify(ubsClientService, times(1)).getAllDistricts(region, city);
     }
 
 }
