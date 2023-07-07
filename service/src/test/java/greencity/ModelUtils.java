@@ -1674,6 +1674,13 @@ public class ModelUtils {
             .build();
     }
 
+    public static List<LocationDto> getLocationApiDtoList() {
+        LocationDto locationDto1 = LocationDto.builder()
+            .locationNameMap(Map.of("name", "Вінниця", "name_en", "Vinnytsa"))
+            .build();
+        return Arrays.asList(locationDto1);
+    }
+
     public static DistrictDto getDistrictDto() {
         return DistrictDto.builder()
             .nameUa("Вінниця")
