@@ -34,6 +34,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.position.PositionDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.PersonalDataDto;
@@ -253,8 +254,8 @@ class UBSClientServiceImplTest {
         List<DistrictDto> locationDtoList = ubsClientService.getAllDistricts(region, city);
         assertNotNull(locationDtoList);
         assertEquals(mockLocationDtoList, locationDtoList);
-        List<DistrictDto> locationDtos = ubsClientService.getAllDistricts(region, city);
-        assertEquals(1, locationDtos.size());
+
+        verify(ubsClientService, times(1)).getAllDistricts(region, city);
     }
 
     @Test
