@@ -1,11 +1,9 @@
 package greencity.mapping.user;
 
-import greencity.dto.OptionForColumnDTO;
 import greencity.dto.address.AddressDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
 import greencity.service.locations.LocationApiService;
 import org.modelmapper.AbstractConverter;
