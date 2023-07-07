@@ -10,6 +10,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.service.locations.LocationApiService;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,17 +25,8 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
     /**
      * Service for getting districts in city.
      */
+    @Autowired
     private LocationApiService locationApiService;
-
-    /**
-     * Constructor for the AddressToAddressDtoMapper class.
-     *
-     * @param locationApiService The service to be used for location related
-     *                           operations.
-     */
-    public AddressToAddressDtoMapper(LocationApiService locationApiService) {
-        this.locationApiService = locationApiService;
-    }
 
     /**
      * Method convert {@link Address} to {@link AddressDto}.

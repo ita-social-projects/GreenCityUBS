@@ -140,6 +140,7 @@ public class ModelUtils {
             .region("Регіон")
             .cityEn("Lviv")
             .city("Львів")
+            .addressRegionDistrictList(new ArrayList<>())
             .actual(false)
             .build());
         list.add(AddressDto.builder().id(2L)
@@ -155,6 +156,8 @@ public class ModelUtils {
             .region("Регіон")
             .city("Львів")
             .cityEn("Lviv")
+            .addressRegionDistrictList(new ArrayList<>())
+
             .actual(false)
             .build());
         return list;

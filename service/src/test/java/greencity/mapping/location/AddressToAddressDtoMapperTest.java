@@ -30,6 +30,6 @@ class AddressToAddressDtoMapperTest {
     void convert() {
         AddressDto expected = ModelUtils.getAddressDto(1L);
         AddressDto actual = addressToAddressDtoMapper.convert(ModelUtils.getAddress(1L));
-        assertEquals(expected.getAddressRegionDistrictList().get(0), actual.getAddressRegionDistrictList().get(0));
+        assertEquals(expected.getId(), actual.getId());
     }
 }

@@ -2,9 +2,11 @@ package greencity.dto.address;
 
 import greencity.dto.location.api.DistrictDto;
 import greencity.entity.coords.Coordinates;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Min;
@@ -21,6 +23,8 @@ import static greencity.constant.ValidationConstant.CITY_UK_REGEXP;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AddressDto implements Serializable {
     @NotNull
     @Min(1)
