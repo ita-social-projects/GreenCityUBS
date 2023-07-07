@@ -238,7 +238,7 @@ class UBSClientServiceImplTest {
     @Mock
     private UBSManagementService ubsManagementService;
     @Mock
-    private UBSClientService ubsClientService;
+    private UBSClientServiceImpl ubsClientService;
 
     @Test
     @Transactional
