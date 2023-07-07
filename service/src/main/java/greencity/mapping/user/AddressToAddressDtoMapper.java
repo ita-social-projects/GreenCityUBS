@@ -1,44 +1,48 @@
 package greencity.mapping.user;
 
+import greencity.dto.OptionForColumnDTO;
 import greencity.dto.address.AddressDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
 import greencity.service.locations.LocationApiService;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Class that used by {@link ModelMapper} to map {@link Address} into
+ * {@link AddressDto}.
+ */
 @Component
 public class AddressToAddressDtoMapper extends AbstractConverter<Address, AddressDto> {
-    LocationApiService locationApiService;
+    /**
+     * Service for getting districts in city.
+     */
+    private LocationApiService locationApiService;
 
+    /**
+     * Constructor for the AddressToAddressDtoMapper class.
+     *
+     * @param locationApiService The service to be used for location related
+     *                           operations.
+     */
     public AddressToAddressDtoMapper(LocationApiService locationApiService) {
         this.locationApiService = locationApiService;
     }
 
-    public static String deleteLastWord(String sentence) {
-        if (sentence == null || sentence.isEmpty()) {
-            return "";
-        }
-
-        String[] words = sentence.split("\\s+");
-        if (words.length <= 1) {
-            return "";
-        }
-
-        return Arrays.stream(words, 0, words.length - 1)
-                .reduce((word1, word2) -> word1 + " " + word2)
-                .orElse("");
-    }
-
+    /**
+     * Method convert {@link Address} to {@link AddressDto}.
+     *
+     * @return {@link AddressDto}
+     */
     @Override
-    protected AddressDto convert(Address address) {
+    public AddressDto convert(Address address) {
         return AddressDto.builder()
             .id(address.getId())
             .region(address.getRegion())
@@ -56,19 +60,19 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
             .coordinates(Coordinates.builder()
                 .latitude(address.getCoordinates().getLatitude())
                 .longitude(address.getCoordinates().getLongitude())
-                .build()).addressRegionDistrictList(getAllDistricts(deleteLastWord(address.getRegion()),address.getCity()))
+                .build())
+            .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
             .actual(false)
             .build();
     }
 
-    public List<DistrictDto> getAllDistricts(String region, String city) {
+    private List<DistrictDto> getAllDistricts(String region, String city) {
         List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
         return locationDtos.stream()
-                .map(locationDto-> DistrictDto.builder()
-                        .nameUa(locationDto.getLocationNameMap().get("name"))
-                        .nameEn(locationDto.getLocationNameMap().get("name_en"))
-                        .build())
-                .collect(Collectors.toList());
+            .map(locationDto -> DistrictDto.builder()
+                .nameUa(locationDto.getLocationNameMap().get("name"))
+                .nameEn(locationDto.getLocationNameMap().get("name_en"))
+                .build())
+            .collect(Collectors.toList());
     }
-
 }

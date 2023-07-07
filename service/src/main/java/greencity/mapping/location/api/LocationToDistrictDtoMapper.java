@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LocationToDistrictDtoMapper extends AbstractConverter<LocationDto, DistrictDto> {
     @Override
-    protected DistrictDto convert(LocationDto locationDto) {
+    public DistrictDto convert(LocationDto locationDto) {
         return DistrictDto.builder()
             .nameUa(locationDto.getLocationNameMap().get("name"))
             .nameEn(locationDto.getLocationNameMap().get("name_en"))

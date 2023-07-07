@@ -50,6 +50,8 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.location.LocationTranslationDto;
 import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
+import greencity.dto.location.api.DistrictDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationShortDto;
@@ -1639,6 +1641,67 @@ public class ModelUtils {
             .cityEn("CityEng")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
+            .build();
+    }
+
+    public static Address getAddress(long id) {
+        return Address.builder()
+            .id(id)
+            .region("Вінницька")
+            .city("Вінниця")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(false)
+            .addressStatus(AddressStatus.NEW)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng")
+            .build();
+    }
+
+    public static LocationDto getLocationApiDto() {
+        return LocationDto.builder()
+            .locationNameMap(Map.of("name", "Вінниця", "name_en", "Vinnytsa"))
+            .build();
+    }
+
+    public static DistrictDto getDistrictDto() {
+        return DistrictDto.builder()
+            .nameUa("Вінниця")
+            .nameEn("Vinnytsa")
+            .build();
+    }
+
+    public static AddressDto getAddressDto(long id) {
+        return AddressDto.builder()
+            .id(id)
+            .region("Вінницька")
+            .city("Вінниця")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(false)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng")
+            .addressRegionDistrictList(Arrays.asList(getDistrictDto()))
             .build();
     }
 

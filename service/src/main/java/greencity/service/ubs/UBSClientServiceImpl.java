@@ -1313,7 +1313,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<AddressDto> addressDto =
             allAddress.stream()
                 .map(a -> modelMapper.map(a, AddressDto.class))
-                    .collect(toList());
+                .collect(toList());
         userProfileDto.setAddressDto(addressDto);
         userProfileDto.setBotList(botList);
         userProfileDto.setHasPassword(userRemoteClient.getPasswordStatus().isHasPassword());
@@ -1902,6 +1902,4 @@ public class UBSClientServiceImpl implements UBSClientService {
         return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
             .collect(Collectors.toList());
     }
-
-
 }
