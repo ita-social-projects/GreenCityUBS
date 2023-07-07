@@ -17,6 +17,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
@@ -88,6 +89,7 @@ import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
+import greencity.service.locations.LocationApiService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
@@ -138,9 +140,7 @@ import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -238,6 +238,24 @@ class UBSClientServiceImplTest {
     private UBSManagementService ubsManagementService;
     @Mock
     private UBSClientServiceImpl ubsClientService;
+
+    @Test
+    @Transactional
+    void testGetAllDistricts() {
+        String region = "Львівська";
+        String city = "Львів";
+        DistrictDto districtDto = DistrictDto.builder()
+            .nameUa("Львів")
+            .nameEn("Lviv")
+            .build();
+        List<DistrictDto> mockLocationDtoList = Arrays.asList(districtDto);
+        when(ubsClientService.getAllDistricts(region, city)).thenReturn(mockLocationDtoList);
+        List<DistrictDto> locationDtoList = ubsClientService.getAllDistricts(region, city);
+        assertNotNull(locationDtoList);
+        assertEquals(mockLocationDtoList, locationDtoList);
+        List<DistrictDto> locationDtos = ubsClientService.getAllDistricts(region, city);
+        assertEquals(1, locationDtos.size());
+    }
 
     @Test
     @Transactional
