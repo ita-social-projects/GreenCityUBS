@@ -1,20 +1,18 @@
 package greencity.service.ubs;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
-import org.bouncycastle.math.raw.Mod;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,10 +45,8 @@ import greencity.repository.UserRepository;
 import greencity.repository.UserViolationsTableRepo;
 import greencity.repository.ViolationRepository;
 import greencity.service.notification.NotificationServiceImpl;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
@@ -239,10 +235,26 @@ class ViolationServiceImplTest {
     void checkAvailableOrderForEmployeeWhenStatusIsFalseTest() {
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
         Order order = ModelUtils.getOrder();
-        Employee employee = ModelUtils.getEmployee();
+        Employee employee = Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .uuid("Test")
+            .tariffInfos(Set.of(
+                TariffsInfo.builder()
+                    .id(2L)
+                    .service(ModelUtils.getService())
+                    .build()))
+            .imagePath("path")
+            .build();
 
+        order.setTariffsInfo(ModelUtils.getTariffsInfo());
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(order));
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(employee));
+        when(employeeRepository.findTariffsInfoForEmployee(anyLong()))
+            .thenReturn(employee.getTariffInfos().stream().map(TariffsInfo::getId).collect(Collectors.toList()));
         assertThrows(BadRequestException.class, () -> {
             violationService.addUserViolation(add, new MultipartFile[2], "test@gmail.com");
         });
@@ -251,7 +263,7 @@ class ViolationServiceImplTest {
     }
 
     @Test
-    public void testAddUserViolationWithMultipartFiles() {
+    void testAddUserViolationWithMultipartFiles() {
         Employee employee = ModelUtils.getEmployee();
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
@@ -277,7 +289,7 @@ class ViolationServiceImplTest {
     }
 
     @Test
-    public void testAddUserViolationWithoutMultipartFiles() {
+    void testAddUserViolationWithoutMultipartFiles() {
         Employee employee = ModelUtils.getEmployee();
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
@@ -302,7 +314,7 @@ class ViolationServiceImplTest {
     }
 
     @Test
-    public void testUpdateViolationWhenImagesIsNotEmpty() {
+    void testUpdateViolationWhenImagesIsNotEmpty() {
         Employee employee = ModelUtils.getEmployee();
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
@@ -317,5 +329,60 @@ class ViolationServiceImplTest {
 
         verify(employeeRepository).findByUuid(anyString());
         verify(violationRepository).findByOrderId(order.getId());
+    }
+
+    @Test
+    void testUpdateViolationWhenMultipartFilesAreEmpty() {
+        Employee employee = ModelUtils.getEmployee();
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        Violation violation = ModelUtils.getViolation();
+        violation.setImages(Arrays.asList("img", "test"));
+        MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
+        UpdateViolationToUserDto add = ModelUtils.getUpdateViolationToUserDto();
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(employee));
+        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(violation));
+
+        violationService.updateUserViolation(add, multipartFiles, "uuid");
+        verify(employeeRepository).findByUuid(anyString());
+        verify(violationRepository).findByOrderId(order.getId());
+    }
+
+    @Test
+    void testUpdateViolationWhenImagesToDeleteAreNull() {
+        Employee employee = ModelUtils.getEmployee();
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        Violation violation = ModelUtils.getViolation();
+        violation.setImages(Arrays.asList("img", "test"));
+        MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
+
+        UpdateViolationToUserDto add = UpdateViolationToUserDto.builder()
+            .orderID(1L)
+            .violationDescription("String1 string1 string1")
+            .violationLevel("low")
+            .imagesToDelete(null)
+            .build();
+
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(employee));
+        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(violation));
+
+        violationService.updateUserViolation(add, multipartFiles, "uuid");
+        verify(employeeRepository).findByUuid(anyString());
+        verify(violationRepository).findByOrderId(order.getId());
+    }
+
+    @Test
+    void testDeleteViolationWhenImagesAreNull() {
+        Employee user = ModelUtils.getEmployee();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(user));
+        Violation violation = ModelUtils.getViolation();
+        Long id = ModelUtils.getViolation().getOrder().getId();
+        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
+        doNothing().when(violationRepository).deleteById(1L);
+        violationService.deleteViolation(1L, "abc");
+
+        verify(violationRepository, times(1)).deleteById(id);
+        verify(employeeRepository, times(1)).findByUuid(anyString());
     }
 }
