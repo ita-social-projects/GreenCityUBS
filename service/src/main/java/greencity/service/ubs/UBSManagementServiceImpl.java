@@ -55,6 +55,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
+import greencity.entity.order.Refund;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -83,6 +84,7 @@ import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
+import greencity.repository.RefundRepository;
 import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
@@ -163,6 +165,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
     private final OrdersAdminsPageService ordersAdminsPageService;
+    private final RefundRepository refundRepository;
 
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
 
@@ -1830,5 +1833,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .description(order.getReasonNotTakingBagDescription())
             .images(order.getImageReasonNotTakingBags())
             .build();
+    }
+
+    @Override
+    public void saveOrderIdForRefund(Long orderId) {
+        orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        refundRepository.save(Refund.builder().orderId(orderId).build());
     }
 }
