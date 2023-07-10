@@ -239,7 +239,7 @@ class UBSClientServiceImplTest {
     private LocationApiService locationApiService;
 
     @Test
-    public void testGetAllDistricts() {
+    void testGetAllDistricts() {
 
         List<LocationDto> locationDtos;
         List<DistrictDto> districtDtos;
