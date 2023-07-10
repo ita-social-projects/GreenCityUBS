@@ -17,6 +17,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
@@ -103,7 +104,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -144,18 +144,19 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -240,6 +241,8 @@ class UBSClientServiceImplTest {
     private UBSManagementService ubsManagementService;
     @Mock
     private OrderBagRepository orderBagRepository;
+    @Mock
+    private UBSClientServiceImpl ubsClientService;
 
     @Test
     @Transactional

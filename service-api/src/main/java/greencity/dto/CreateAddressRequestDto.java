@@ -22,7 +22,7 @@ public class CreateAddressRequestDto {
     private static final String validationMessage = "use only English,or Ukrainian letter";
     private static final String notEmptyValidationMessage = "name must not be empty";
     private static final String houseNumberNotValid = "House number is invalid";
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ]*", message = validationMessage)
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ—/\"\\s]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
     private String searchAddress;
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ]*", message = validationMessage)
@@ -37,7 +37,7 @@ public class CreateAddressRequestDto {
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
     private String region;
-    @Pattern(regexp = "^(?:[1-9][0-9]{0,2})(?:[A-Za-zА-Яа-яЇїІіЄєҐґ])?$", message = houseNumberNotValid)
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ—/\"\\s]" + "{1,10}", message = houseNumberNotValid)
     @NotBlank(message = notEmptyValidationMessage)
     private String houseNumber;
     private String entranceNumber;

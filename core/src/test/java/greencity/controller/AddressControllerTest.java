@@ -6,7 +6,9 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.service.locations.LocationApiService;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static greencity.ModelUtils.getPrincipal;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,6 +51,9 @@ class AddressControllerTest {
 
     @Mock
     private UBSClientService ubsClientService;
+
+    @Mock
+    private LocationApiService locationApiService;
 
     @Mock
     private UserRemoteClient userRemoteClient;
@@ -128,4 +137,29 @@ class AddressControllerTest {
 
         verify(ubsClientService).makeAddressActual(addressId, uuid);
     }
+
+    @Test
+    void getAllDistrictsForRegionAndCity() throws Exception {
+        String region = "Львівська";
+        String city = "Львів";
+        Map<String, String> nameMap = new HashMap<>();
+        nameMap.put("name", "Львів");
+        nameMap.put("nameEn", "Lviv");
+        List<LocationDto> mockLocationDtoList = new ArrayList<>();
+        LocationDto mockLocationDto = LocationDto.builder()
+            .id("UA46060250010015970")
+            .parentId("UA46060250000025047")
+            .locationNameMap(nameMap)
+            .build();
+        when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(mockLocationDtoList);
+        mockMvc.perform(get(ubsLink + "/get-all-districts")
+            .param("region", region)
+            .param("city", city)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(locationApiService).getAllDistrictsInCityByNames(region, city);
+    }
+
 }

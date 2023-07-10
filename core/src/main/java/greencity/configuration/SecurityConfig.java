@@ -224,10 +224,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/notifications",
                 "/notifications/**",
                 "/notifications/quantityUnreadenNotifications")
-            .hasAnyRole(USER, ADMIN)
+            .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PUT,
                 UBS_LINK + "/userProfile/**",
                 UBS_LINK + "/update-order-address")
+            .hasAnyRole(USER, ADMIN)
+            .antMatchers(HttpMethod.GET,
+                UBS_LINK + "/userProfile/**",
+                UBS_LINK + "/get-all-districts")
             .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.PATCH,
                 UBS_LINK + "/userProfile/**",

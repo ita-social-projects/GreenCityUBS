@@ -12,6 +12,7 @@ public class EmployeeFilterViewToPositionDtoMapper extends AbstractConverter<Emp
         return PositionDto.builder()
             .id(employeeFilterView.getPositionId())
             .name(employeeFilterView.getPositionName())
+            .nameEn(employeeFilterView.getPositionNameEn())
             .build();
     }
 }

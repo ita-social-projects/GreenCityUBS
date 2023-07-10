@@ -345,23 +345,23 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for deactivating location by Id.
+     * Controller for deleting location.
      *
-     * @param id - id of location
-     * @return {@link LocationInfoDto}
-     * @author Vadym Makitra
+     * @param id {@link Long} - location id.
+     * @author Anton Bondar
      */
-    @ApiOperation(value = "Deactivate location by Id")
+    @ApiOperation(value = "Delete location")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationInfoDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION_CARD', authentication)")
-    @PatchMapping("/deactivateLocations/{id}")
-    public ResponseEntity<HttpStatus> deactivateLocation(
-        @PathVariable Long id) {
-        superAdminService.deactivateLocation(id);
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_LOCATION_CARD', authentication)")
+    @DeleteMapping("/deleteLocation/{id}")
+    public ResponseEntity<HttpStatus> deleteLocation(@PathVariable Long id) {
+        superAdminService.deleteLocation(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

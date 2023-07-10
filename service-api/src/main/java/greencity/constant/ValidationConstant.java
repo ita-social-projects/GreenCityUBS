@@ -10,10 +10,11 @@ public class ValidationConstant {
         + "name cannot starts with a number or not a capital letter and could contain numbers and whitespaces";
     public static final String CITY_UK_REGEXP =
         "^([А-ЯЇІЄҐ][а-яіїєґ]{0,39}[ʼ'`ʹ]?[а-яіїєґ]{1,39}($|[ -](?=[А-ЯЇІЄҐ]))){1,10}$";
-    public static final String CITY_EN_REGEXP = "^([A-Z][a-z]{0,39}[ʼ'`ʹ]?[a-z]{1,39}($|[ -](?=[A-Z]))){1,10}$";
+    public static final String CITY_EN_REGEXP =
+        "^([A-Z][a-z]{0,39}[ʼ'`ʹ]?[a-z]{0,39}'?[a-z]{0,39}($|[ -](?=[A-Z]))){1,10}$";
     public static final String CH_EN = "[A-Za-z\\s-ʼ'`ʹ,.]";
     public static final String CH_UA = "[ЁёІіЇїҐґЄєА-Яа-я\\s-ʼ'`ʹ,.]";
-    public static final String CH_NUM = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z0-9/\\s-.]";
+    public static final String CH_NUM = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ—/\"\\s]";
     public static final String COURIER_NAME_EN_REGEXP = "^[A-Z][A-Za-zА0-9'\\s]{1,29}$";
     public static final String COURIER_NAME_UK_REGEXP = "^[ЁІЇҐЄА-Я][ЁёІіЇїҐґЄєА-Яа-яA[0-9]'\\s]{1,29}$";
 

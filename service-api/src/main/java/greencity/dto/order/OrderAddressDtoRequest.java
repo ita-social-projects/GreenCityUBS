@@ -39,8 +39,8 @@ public class OrderAddressDtoRequest {
     @Length(max = 5)
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Z0-9a-z-.]{0,5}")
     private String houseCorpus;
-    @Length(max = 5)
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Z0-9a-z-.]{1,4}")
+    @Length(max = 10)
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ—/\"\\s]" + "{1,10}")
     private String houseNumber;
     @Length(max = 50)
     @Pattern(regexp = CH_UA + "{3,40}")

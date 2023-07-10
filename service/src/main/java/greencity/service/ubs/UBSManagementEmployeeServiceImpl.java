@@ -95,6 +95,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
                 .map(position -> PositionDto.builder()
                     .id(position.getId())
                     .name(position.getName())
+                    .nameEn(position.getNameEn())
                     .build())
                 .collect(Collectors.toList()))
             .isUbs(true)
@@ -102,7 +103,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         try {
             userRemoteClient.signUpEmployee(signUpDto);
         } catch (HystrixRuntimeException e) {
-            throw new BadRequestException("User with this email already exists: " + signUpDto.getEmail());
+            throw new BadRequestException(
+                "Error to create user(): User with this email already exists or not valid data ");
         }
     }
 
@@ -319,6 +321,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private Position buildPosition(AddingPositionDto dto) {
         return Position.builder()
             .name(dto.getName())
+            .nameEn(dto.getNameEn())
             .build();
     }
 

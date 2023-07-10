@@ -346,6 +346,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         });
     }
 
+    @Override
+    public void deleteLocation(Long id) {
+        Location location = tryToFindLocationById(id);
+        if (location.getTariffLocations().stream().anyMatch(tl -> tl.getLocation().getId().equals(id))) {
+            throw new BadRequestException(ErrorMessage.LOCATION_CAN_NOT_BE_DELETED);
+        }
+        locationRepository.delete(location);
+    }
+
     private Location createNewLocation(LocationCreateDto dto, Region region) {
         return Location.builder()
             .locationStatus(LocationStatus.ACTIVE)
@@ -393,16 +402,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             region = regionRepository.save(region);
         }
         return region;
-    }
-
-    @Override
-    public void deactivateLocation(Long id) {
-        Location location = tryToFindLocationById(id);
-        if (LocationStatus.DEACTIVATED.equals(location.getLocationStatus())) {
-            throw new BadRequestException(ErrorMessage.LOCATION_STATUS_IS_ALREADY_EXIST);
-        }
-        location.setLocationStatus(LocationStatus.DEACTIVATED);
-        locationRepository.save(location);
     }
 
     @Override

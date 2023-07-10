@@ -22,6 +22,7 @@ public class PositionDtoMapper extends AbstractConverter<Position, PositionDto> 
         return PositionDto.builder()
             .id(position.getId())
             .name(position.getName())
+            .nameEn(position.getNameEn())
             .build();
     }
 }

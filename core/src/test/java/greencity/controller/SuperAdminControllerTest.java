@@ -586,6 +586,11 @@ class SuperAdminControllerTest {
     }
 
     @Test
+    void deleteLocationTest() throws Exception {
+        mockMvc.perform(delete(ubsLink + "/deleteLocation/" + 1L).principal(principal)).andExpect(status().isOk());
+    }
+
+    @Test
     void addLocationInterceptLocationAlreadyCreatedException() throws Exception {
         List<LocationCreateDto> dto = ModelUtils.getLocationCreateDtoList();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -597,11 +602,6 @@ class SuperAdminControllerTest {
             .content(requestJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void deactivateLocation() throws Exception {
-        mockMvc.perform(patch(ubsLink + "/deactivateLocations/" + 1L)).andExpect(status().isOk());
     }
 
     @Test

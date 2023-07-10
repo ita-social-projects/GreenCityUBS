@@ -106,6 +106,7 @@ import java.util.stream.Stream;
 import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -119,6 +120,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -710,8 +712,8 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getOrderStatus(), producedObject.getOrderStatus());
         assertEquals(expectedObject.getPaymentStatus(), producedObject.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObject.getDate());
-        testOrderDetail.setOrderStatus(OrderStatus.ADJUSTMENT.toString());
-        expectedObject.setOrderStatus(OrderStatus.ADJUSTMENT.toString());
+        testOrderDetail.setOrderStatus(OrderStatus.FORMED.toString());
+        expectedObject.setOrderStatus(OrderStatus.FORMED.toString());
         OrderDetailStatusDto producedObjectAdjustment = ubsManagementService
             .updateOrderDetailStatus(order.getId(), testOrderDetail, "test@gmail.com");
 
@@ -719,8 +721,8 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectAdjustment.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectAdjustment.getDate());
 
-        testOrderDetail.setOrderStatus(OrderStatus.CONFIRMED.toString());
-        expectedObject.setOrderStatus(OrderStatus.CONFIRMED.toString());
+        testOrderDetail.setOrderStatus(OrderStatus.ADJUSTMENT.toString());
+        expectedObject.setOrderStatus(OrderStatus.ADJUSTMENT.toString());
         OrderDetailStatusDto producedObjectConfirmed = ubsManagementService
             .updateOrderDetailStatus(order.getId(), testOrderDetail, "test@gmail.com");
 
@@ -728,8 +730,8 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectConfirmed.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectConfirmed.getDate());
 
-        testOrderDetail.setOrderStatus(OrderStatus.NOT_TAKEN_OUT.toString());
-        expectedObject.setOrderStatus(OrderStatus.NOT_TAKEN_OUT.toString());
+        testOrderDetail.setOrderStatus(OrderStatus.CONFIRMED.toString());
+        expectedObject.setOrderStatus(OrderStatus.CONFIRMED.toString());
         OrderDetailStatusDto producedObjectNotTakenOut = ubsManagementService
             .updateOrderDetailStatus(order.getId(), testOrderDetail, "test@gmail.com");
 
@@ -748,6 +750,7 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getDate(), producedObjectCancelled.getDate());
         assertEquals(0, order.getPointsToUse());
 
+        order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
         testOrderDetail.setOrderStatus(OrderStatus.DONE.toString());
         expectedObject.setOrderStatus(OrderStatus.DONE.toString());
         OrderDetailStatusDto producedObjectDone = ubsManagementService
@@ -758,6 +761,7 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getDate(), producedObjectDone.getDate());
 
         order.setPointsToUse(0);
+        order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
         testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
         expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
         OrderDetailStatusDto producedObjectCancelled2 = ubsManagementService
@@ -768,6 +772,7 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getDate(), producedObjectCancelled2.getDate());
         assertEquals(0, order.getPointsToUse());
 
+        order.setOrderStatus(OrderStatus.ADJUSTMENT);
         testOrderDetail.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF.toString());
         expectedObject.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF.toString());
         OrderDetailStatusDto producedObjectBroughtItHimself = ubsManagementService
@@ -1625,7 +1630,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
 
         verify(orderRepository, times(4)).findById(1L);
-        verify(orderRepository, times(3)).save(order);
+        verify(orderRepository, times(2)).save(order);
         verify(employeeRepository, times(1)).findByEmail("test@gmail.com");
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
         verify(paymentRepository).findAllByOrderId(1L);
@@ -1643,41 +1648,51 @@ class UBSManagementServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
         order.setOrderStatus(OrderStatus.CANCELED);
-        EmployeeOrderPosition employeeOrderPosition = ModelUtils.getEmployeeOrderPosition();
-        Employee employee = ModelUtils.getEmployee();
         UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDtoWithStatusCanceled();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.save(order)).thenReturn(order);
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
-        when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(ModelUtils.getPayment()));
-        when(receivingStationRepository.findAll()).thenReturn(List.of(ModelUtils.getReceivingStation()));
-        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(List.of(employeeOrderPosition));
 
-        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com"));
 
-        verify(orderRepository, times(4)).findById(1L);
-        verify(orderRepository, times(3)).save(order);
-        verify(employeeRepository, times(1)).findByEmail("test@gmail.com");
-        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
-        verify(paymentRepository).findAllByOrderId(1L);
-        verify(receivingStationRepository).findAll();
-        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
-        verify(employeeOrderPositionRepository).deleteAll(List.of(employeeOrderPosition));
-        verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
-        verifyNoMoreInteractions(orderRepository, employeeRepository, paymentRepository, receivingStationRepository,
-            employeeOrderPositionRepository, tariffsInfoRepository);
+        assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, OrderStatus.CANCELED), exception.getMessage());
+
+        verify(orderRepository).findById(1L);
+        verify(orderRepository, never()).save(any(Order.class));
+    }
+
+    @Test
+    void updateOrderAdminPageInfoWithStatusDoneTest() {
+        Order order = ModelUtils.getOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        order.setOrderStatus(OrderStatus.DONE);
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDtoWithStatusCanceled();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com"));
+
+        assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, OrderStatus.DONE), exception.getMessage());
+
+        verify(orderRepository).findById(1L);
+        verify(orderRepository, never()).save(any(Order.class));
     }
 
     @Test
     void updateOrderAdminPageInfoWithStatusBroughtItHimselfTest() {
         Order order = ModelUtils.getOrder();
+        LocalDateTime orderDate = LocalDateTime.of(2023, 6, 10, 12, 10);
+        LocalDateTime deliverFrom = LocalDateTime.of(2023, 6, 16, 15, 30);
+        LocalDateTime deliverTo = LocalDateTime.of(2023, 6, 16, 19, 30);
         TariffsInfo tariffsInfo = getTariffsInfo();
-        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        order.setOrderDate(orderDate);
+        order.setDateOfExport(deliverFrom.toLocalDate());
+        order.setDeliverFrom(deliverFrom);
+        order.setDeliverTo(deliverTo);
+        order.setTariffsInfo(tariffsInfo);
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
-        EmployeeOrderPosition employeeOrderPosition = ModelUtils.getEmployeeOrderPosition();
         Employee employee = ModelUtils.getEmployee();
         UpdateOrderPageAdminDto updateOrderPageAdminDto =
             ModelUtils.updateOrderPageAdminDtoWithStatusBroughtItHimself();
@@ -1688,22 +1703,19 @@ class UBSManagementServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(ModelUtils.getPayment()));
-        when(receivingStationRepository.findAll()).thenReturn(List.of(ModelUtils.getReceivingStation()));
-        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(List.of(employeeOrderPosition));
 
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
 
-        verify(orderRepository, times(4)).findById(1L);
-        verify(orderRepository, times(3)).save(order);
-        verify(employeeRepository, times(1)).findByEmail("test@gmail.com");
+        assertEquals(1L, order.getReceivingStation().getId());
+        assertEquals(deliverFrom.toLocalDate(), order.getDateOfExport());
+        assertEquals(deliverFrom, order.getDeliverFrom());
+        assertEquals(deliverTo, order.getDeliverTo());
+        verify(orderRepository, times(2)).findById(1L);
+        verify(orderRepository).save(order);
+        verify(employeeRepository).findByEmail("test@gmail.com");
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
         verify(paymentRepository).findAllByOrderId(1L);
-        verify(receivingStationRepository).findAll();
-        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
-        verify(employeeOrderPositionRepository).deleteAll(List.of(employeeOrderPosition));
-        verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
-        verifyNoMoreInteractions(orderRepository, employeeRepository, paymentRepository, receivingStationRepository,
-            employeeOrderPositionRepository, tariffsInfoRepository);
+        verifyNoMoreInteractions(orderRepository, employeeRepository, paymentRepository);
     }
 
     @Test
@@ -1711,8 +1723,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
-        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
-        EmployeeOrderPosition employeeOrderPosition = ModelUtils.getEmployeeOrderPosition();
+        order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
         Employee employee = ModelUtils.getEmployee();
         UpdateOrderPageAdminDto updateOrderPageAdminDto =
             ModelUtils.updateOrderPageAdminDtoWithNullFields();
@@ -1755,6 +1766,40 @@ class UBSManagementServiceImplTest {
         verify(orderRepository, atLeastOnce()).findById(1L);
         verify(employeeRepository).findByEmail("test@gmail.com");
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void updateOrderAdminPageInfoForOrderWithStatusBroughtItHimselfTest() {
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        updateOrderPageAdminDto.setGeneralOrderInfo(OrderDetailStatusRequestDto
+            .builder()
+            .orderStatus(String.valueOf(OrderStatus.DONE))
+            .build());
+
+        LocalDateTime orderDate = LocalDateTime.now();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        Order expected = ModelUtils.getOrder();
+        expected.setOrderDate(orderDate).setTariffsInfo(tariffsInfo);
+        expected.setOrderStatus(OrderStatus.DONE);
+
+        Order order = ModelUtils.getOrder();
+        order.setOrderDate(orderDate).setTariffsInfo(tariffsInfo);
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+
+        Employee employee = ModelUtils.getEmployee();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
+
+        verify(orderRepository, times(2)).findById(1L);
+        verify(employeeRepository).findByEmail("test@gmail.com");
+        verify(orderRepository).save(order);
+        assertEquals(expected, order);
     }
 
     @Test
