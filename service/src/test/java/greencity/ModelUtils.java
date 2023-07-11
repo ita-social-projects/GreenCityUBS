@@ -104,6 +104,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
+import greencity.entity.order.Refund;
 import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
@@ -4713,5 +4714,9 @@ public class ModelUtils {
             .id(id)
             .name(nameTranslations)
             .build();
+    }
+
+    public static Refund getRefund(Long id) {
+        return Refund.builder().orderId(id).build();
     }
 }
