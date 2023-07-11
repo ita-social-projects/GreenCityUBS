@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.service.locations.LocationApiService;
@@ -64,7 +65,7 @@ class AddressControllerTest {
     private final Principal principal = getPrincipal();
 
     @BeforeEach
-    void setup() {
+    private void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(addressController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRemoteClient))
@@ -142,16 +143,12 @@ class AddressControllerTest {
     void getAllDistrictsForRegionAndCity() throws Exception {
         String region = "Львівська";
         String city = "Львів";
-        Map<String, String> nameMap = new HashMap<>();
-        nameMap.put("name", "Львів");
-        nameMap.put("nameEn", "Lviv");
-        List<LocationDto> mockLocationDtoList = new ArrayList<>();
-        LocationDto mockLocationDto = LocationDto.builder()
-            .id("UA46060250010015970")
-            .parentId("UA46060250000025047")
-            .locationNameMap(nameMap)
+        List<DistrictDto> mockLocationDtoList = new ArrayList<>();
+        DistrictDto mockLocationDto = DistrictDto.builder()
+            .nameUa("Львів")
+            .nameEn("Lviv")
             .build();
-        when(locationApiService.getAllDistrictsInCityByNames(region, city)).thenReturn(mockLocationDtoList);
+        when(ubsClientService.getAllDistricts(region, city)).thenReturn(mockLocationDtoList);
         mockMvc.perform(get(ubsLink + "/get-all-districts")
             .param("region", region)
             .param("city", city)
@@ -159,7 +156,7 @@ class AddressControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(locationApiService).getAllDistrictsInCityByNames(region, city);
+        verify(ubsClientService).getAllDistricts(region, city);
     }
 
 }

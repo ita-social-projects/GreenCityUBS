@@ -24,6 +24,8 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.api.DistrictDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
@@ -105,6 +107,7 @@ import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
+import greencity.service.locations.LocationApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
@@ -227,6 +230,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final RegionRepository regionRepository;
     private final TelegramBotRepository telegramBotRepository;
     private final ViberBotRepository viberBotRepository;
+    private final LocationApiService locationApiService;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -1887,5 +1891,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         return modelMapper.map(currentAddress, AddressDto.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<DistrictDto> getAllDistricts(String region, String city) {
+        List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
+        return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
+            .collect(Collectors.toList());
     }
 }
