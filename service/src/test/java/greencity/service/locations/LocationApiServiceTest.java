@@ -42,8 +42,6 @@ class LocationApiServiceTest {
     private static final String PARENT = "parent";
     private static final String PARENT_ID = "parent_id";
     private static final String RESULTS = "results";
-    private static final String NAME_APK_UA = "Автономна Республіка Крим";
-    private static final String NAME_ARK_EN = "Avtonomna Respublika Krym";
     @InjectMocks
     LocationApiService locationApiService;
     @Mock
@@ -341,28 +339,6 @@ class LocationApiServiceTest {
     void testGetGetAllDistrictsInCityByNames_whenUrlEmpty() {
         assertThrows(NotFoundException.class, () -> {
             locationApiService.getAllDistrictsInCityByNames("Тест", "Тест");
-        });
-    }
-
-    @Test
-    void testGetGetAllDistrictsInCityByNames_ARK() {
-        Map<String, Object> arkResult =
-            getApiResult("UA48000000000039575", null, NAME_APK_UA, NAME_ARK_EN);
-        UriComponentsBuilder builder = build(LocationDivision.REGION.getLevelId());
-        respond(builder, Arrays.asList(arkResult));
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames(NAME_APK_UA, "Миколаїв");
-        });
-    }
-
-    @Test
-    void testGetGetAllDistrictsInCityByNames_EN() {
-        Map<String, Object> arkResult =
-            getApiResult("UA48000000000039575", null, NAME_APK_UA, NAME_ARK_EN);
-        UriComponentsBuilder builder = build(LocationDivision.REGION.getLevelId());
-        respond(builder, Arrays.asList(arkResult));
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames(NAME_APK_UA, "Миколаїв");
         });
     }
 

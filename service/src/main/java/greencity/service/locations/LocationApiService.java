@@ -36,8 +36,6 @@ public class LocationApiService {
     private static final String RESULTS = "results";
     private static final String NAME_KYIV_UA = "Київ";
     private static final String NAME_KYIV_EN = "Kyiv";
-    private static final String NAME_APK_UA = "Автономна Республіка Крим";
-    private static final String NAME_ARK_EN = "Avtonomna Respublika Krym";
     private static final String KYIV_ID = "UA80000000000093317";
     private static final LocationDto KYIV = LocationDto.builder()
         .id(KYIV_ID)
@@ -261,14 +259,10 @@ public class LocationApiService {
     }
 
     private static String removeLastWord(String sentence) {
-        if (sentence.equals(NAME_ARK_EN) || sentence.equals(NAME_APK_UA)) {
-            return sentence;
-        }
-        int lastSpaceIndex = sentence.lastIndexOf(" ");
-        if (lastSpaceIndex == -1) {
-            return "";
-        }
-        return sentence.substring(0, lastSpaceIndex);
+        String withoutSpaces = sentence.replaceAll(" ", "");
+        String withoutRegion = withoutSpaces.replaceAll("(?i)region", "");
+        String finalSentence = withoutRegion.replaceAll("(?i)область", "");
+        return finalSentence;
     }
 
     /**
