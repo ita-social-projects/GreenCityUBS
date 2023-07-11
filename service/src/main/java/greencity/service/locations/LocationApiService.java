@@ -70,6 +70,7 @@ public class LocationApiService {
      */
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
         checkIfNotNull(regionName, cityName);
+        regionName = removeLastWord(regionName);
         if (cityName.equals(KYIV.getLocationNameMap().get(NAME))
             || cityName.equals(KYIV.getLocationNameMap().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(KYIV.getId());
@@ -257,6 +258,12 @@ public class LocationApiService {
         return resultFromUrl.get(0);
     }
 
+    private static String removeLastWord(String sentence) {
+        String withoutSpaces = sentence.replace(" ", "");
+        String withoutRegion = withoutSpaces.replaceAll("(?iu)region", "");
+        return withoutRegion.replaceAll("(?iu)область", "");
+    }
+
     /**
      * Fetches a list of location data by level.
      *
@@ -268,7 +275,7 @@ public class LocationApiService {
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
-    private boolean checkIfNotNull(String... names) {
+    private static boolean checkIfNotNull(String... names) {
         if (Arrays.stream(names).anyMatch(StringUtils::isBlank)) {
             throw new IllegalArgumentException(ErrorMessage.VALUE_CAN_NOT_BE_NULL_OR_EMPTY);
         }
