@@ -36,6 +36,8 @@ public class LocationApiService {
     private static final String RESULTS = "results";
     private static final String NAME_KYIV_UA = "Київ";
     private static final String NAME_KYIV_EN = "Kyiv";
+    private static final String NAME_APK_UA = "Автономна Республіка Крим";
+    private static final String NAME_ARK_EN = "Avtonomna Respublika Krym";
     private static final String KYIV_ID = "UA80000000000093317";
     private static final LocationDto KYIV = LocationDto.builder()
         .id(KYIV_ID)
@@ -70,6 +72,7 @@ public class LocationApiService {
      */
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
         checkIfNotNull(regionName, cityName);
+        regionName = removeLastWord(regionName);
         if (cityName.equals(KYIV.getLocationNameMap().get(NAME))
             || cityName.equals(KYIV.getLocationNameMap().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(KYIV.getId());
@@ -257,6 +260,17 @@ public class LocationApiService {
         return resultFromUrl.get(0);
     }
 
+    private static String removeLastWord(String sentence) {
+        if (sentence.equals(NAME_ARK_EN) || sentence.equals(NAME_APK_UA)) {
+            return sentence;
+        }
+        int lastSpaceIndex = sentence.lastIndexOf(" ");
+        if (lastSpaceIndex == -1) {
+            return "";
+        }
+        return sentence.substring(0, lastSpaceIndex);
+    }
+
     /**
      * Fetches a list of location data by level.
      *
@@ -268,7 +282,7 @@ public class LocationApiService {
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
-    private boolean checkIfNotNull(String... names) {
+    private static boolean checkIfNotNull(String... names) {
         if (Arrays.stream(names).anyMatch(StringUtils::isBlank)) {
             throw new IllegalArgumentException(ErrorMessage.VALUE_CAN_NOT_BE_NULL_OR_EMPTY);
         }
