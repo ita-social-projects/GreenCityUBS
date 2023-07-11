@@ -24,7 +24,7 @@ class UserToUserProfileUpdateDtoMapperTest {
     @InjectMocks
     private UserToUserProfileUpdateDtoMapper mapper;
     @Mock
-    LocationApiService locationApiService;
+    private LocationApiService locationApiService;
 
     @Test
     void convert() {

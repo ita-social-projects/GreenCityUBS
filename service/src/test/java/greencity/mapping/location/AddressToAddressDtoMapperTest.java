@@ -28,10 +28,10 @@ import static org.mockito.Mockito.when;
 class AddressToAddressDtoMapperTest {
 
     @Mock
-    LocationApiService locationApiService;
+    private LocationApiService locationApiService;
 
     @InjectMocks
-    AddressToAddressDtoMapper addressToAddressDtoMapper;
+    private AddressToAddressDtoMapper addressToAddressDtoMapper;
 
     @Test
     void convert() {

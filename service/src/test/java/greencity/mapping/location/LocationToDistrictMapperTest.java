@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(MockitoExtension.class)
 class LocationToDistrictMapperTest {
     @InjectMocks
-    LocationToDistrictDtoMapper locationToDistrictDtoMapper;
+    private LocationToDistrictDtoMapper locationToDistrictDtoMapper;
 
     @Test
     void convert() {
