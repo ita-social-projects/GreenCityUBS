@@ -1,14 +1,13 @@
 package greencity.dto.address;
 
-import lombok.*;
+import greencity.dto.location.api.DistrictDto;
+import lombok.Builder;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+import java.util.List;
+
 @Builder
-@EqualsAndHashCode
+@Data
 public class AddressExportDetailsDto {
     private Long addressId;
     private String addressCity;
@@ -22,4 +21,5 @@ public class AddressExportDetailsDto {
     private String addressHouseNumber;
     private String addressStreet;
     private String addressStreetEng;
+    private List<DistrictDto> addressRegionDistrictList;
 }
