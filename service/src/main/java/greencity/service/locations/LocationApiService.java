@@ -261,7 +261,8 @@ public class LocationApiService {
     private static String removeLastWord(String sentence) {
         String withoutSpaces = sentence.replace("\\s", "");
         String withoutRegion = withoutSpaces.replace("(?iu)region", "");
-        return withoutRegion.replace("(?iu)область", "");
+        String finalSentence = withoutRegion.replace("(?iu)область", "");
+        return finalSentence;
     }
 
     /**
