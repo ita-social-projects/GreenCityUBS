@@ -1,6 +1,7 @@
 package greencity.mapping.user;
 
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressDtoWithoutDistricts;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.user.UserProfileUpdateDto;
@@ -18,22 +19,15 @@ import java.util.stream.Collectors;
 @Component
 public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, UserProfileUpdateDto> {
     /**
-     * Service for getting districts in city.
-     */
-    @Autowired
-    private LocationApiService locationApiService;
-
-    /**
      * Method convert {@link User} to {@link UserProfileUpdateDto}.
      *
      * @return {@link UserProfileUpdateDto}
      */
     @Override
     protected UserProfileUpdateDto convert(User user) {
-        List<AddressDto> addressDtoList = user.getAddresses().stream()
+        List<AddressDtoWithoutDistricts> addressDtoList = user.getAddresses().stream()
             .map(this::createAddressDto)
             .collect(Collectors.toList());
-
         return UserProfileUpdateDto.builder()
             .recipientName(user.getRecipientName())
             .recipientSurname(user.getRecipientSurname())
@@ -45,8 +39,8 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
             .build();
     }
 
-    private AddressDto createAddressDto(Address address) {
-        return AddressDto.builder()
+    private AddressDtoWithoutDistricts createAddressDto(Address address) {
+        return AddressDtoWithoutDistricts.builder()
             .id(address.getId())
             .city(address.getCity())
             .cityEn(address.getCityEn())
@@ -65,17 +59,6 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
                 .longitude(address.getCoordinates().getLongitude())
                 .build())
             .actual(address.getActual())
-            .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
             .build();
-    }
-
-    private List<DistrictDto> getAllDistricts(String region, String city) {
-        List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
-        return locationDtos.stream()
-            .map(locationDto -> DistrictDto.builder()
-                .nameUa(locationDto.getLocationNameMap().get("name"))
-                .nameEn(locationDto.getLocationNameMap().get("name_en"))
-                .build())
-            .collect(Collectors.toList());
     }
 }

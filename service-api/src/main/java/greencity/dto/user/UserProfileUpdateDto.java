@@ -2,6 +2,7 @@ package greencity.dto.user;
 
 import greencity.annotations.ValidPhoneNumber;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressDtoWithoutDistricts;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -39,7 +40,7 @@ public class UserProfileUpdateDto implements Serializable {
     @ValidPhoneNumber
     private String recipientPhone;
     @Valid
-    private List<AddressDto> addressDto;
+    private List<AddressDtoWithoutDistricts> addressDto;
     @NonNull
     private Boolean telegramIsNotify;
     @NonNull
