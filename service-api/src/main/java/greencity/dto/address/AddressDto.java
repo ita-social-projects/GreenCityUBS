@@ -70,5 +70,4 @@ public class AddressDto implements Serializable {
     private String districtEn;
 
     private String placeId;
-    private List<DistrictDto> addressRegionDistrictList;
 }

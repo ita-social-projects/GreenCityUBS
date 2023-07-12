@@ -15,6 +15,7 @@ import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
+import greencity.dto.address.AddressWithDistrictsDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
@@ -1709,10 +1710,31 @@ public class ModelUtils {
             .cityEn("CityEng")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
-            .addressRegionDistrictList(Arrays.asList(getDistrictDto()))
             .build();
     }
-
+    public static AddressWithDistrictsDto getAddressWithDistrictsDto(long id) {
+        return AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
+                .id(id)
+                .region("Вінницька")
+                .city("Вінниця")
+                .street("Street")
+                .district("Distinct")
+                .houseNumber("25")
+                .houseCorpus("2")
+                .entranceNumber("7a")
+                .addressComment("Address Comment")
+                .actual(false)
+                .coordinates(Coordinates.builder()
+                        .latitude(50.4459068)
+                        .longitude(30.4477005)
+                        .build())
+                .regionEn("RegionEng")
+                .cityEn("CityEng")
+                .streetEn("StreetEng")
+                .districtEn("DistinctEng").build())
+                .addressRegionDistrictList(Arrays.asList(getDistrictDto()))
+                .build();
+    }
     public static OrderAddress getOrderAddress() {
         return OrderAddress.builder()
             .region("Region")

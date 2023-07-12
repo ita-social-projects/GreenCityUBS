@@ -1,6 +1,7 @@
 package greencity.mapping.user;
 
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressWithDistrictsDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.entity.coords.Coordinates;
@@ -16,10 +17,10 @@ import java.util.stream.Collectors;
 
 /**
  * Class that used by {@link ModelMapper} to map {@link Address} into
- * {@link AddressDto}.
+ * {@link AddressWithDistrictsDto}.
  */
 @Component
-public class AddressToAddressDtoMapper extends AbstractConverter<Address, AddressDto> {
+public class AddressToAddressWithDistrictsDtoMapper extends AbstractConverter<Address, AddressWithDistrictsDto> {
     /**
      * Service for getting districts in city.
      */
@@ -27,13 +28,13 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
     private LocationApiService locationApiService;
 
     /**
-     * Method convert {@link Address} to {@link AddressDto}.
+     * Method convert {@link Address} to {@link AddressWithDistrictsDto}.
      *
-     * @return {@link AddressDto}
+     * @return {@link AddressWithDistrictsDto}
      */
     @Override
-    public AddressDto convert(Address address) {
-        return AddressDto.builder()
+    public AddressWithDistrictsDto convert(Address address) {
+        return AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
             .id(address.getId())
             .region(address.getRegion())
             .regionEn(address.getRegionEn())
@@ -51,9 +52,10 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
                 .latitude(address.getCoordinates().getLatitude())
                 .longitude(address.getCoordinates().getLongitude())
                 .build())
-            .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
-            .actual(address.getActual())
-            .build();
+            .actual(address.getActual()).build())
+                .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
+
+                .build();
     }
 
     private List<DistrictDto> getAllDistricts(String region, String city) {
