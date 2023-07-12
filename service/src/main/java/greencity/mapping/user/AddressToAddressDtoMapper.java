@@ -52,7 +52,7 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
                 .longitude(address.getCoordinates().getLongitude())
                 .build())
             .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
-            .actual(false)
+            .actual(address.getActual())
             .build();
     }
 

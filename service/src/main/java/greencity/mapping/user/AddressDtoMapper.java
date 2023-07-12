@@ -30,7 +30,7 @@ public class AddressDtoMapper extends AbstractConverter<AddressDto, Address> {
                 .latitude(addressDto.getCoordinates().getLatitude())
                 .longitude(addressDto.getCoordinates().getLongitude())
                 .build())
-            .actual(false)
+            .actual(addressDto.getActual())
             .build();
     }
 }
