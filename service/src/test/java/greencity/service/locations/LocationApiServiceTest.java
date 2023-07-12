@@ -203,7 +203,7 @@ class LocationApiServiceTest {
     @Test
     void testGetAllDistrictsInCityByNames_whenKyivEn() {
         initKyiv();
-        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Київська область", "Kyiv");
+        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Київська область", "city Kyiv");
         assertEquals(2, districts.size());
         assertLocationDto(districts.get(0), "UA80000000000126643", "UA80000000000093317", "Голосіївський",
             "Holosiivskyi");
@@ -222,7 +222,8 @@ class LocationApiServiceTest {
     @Test
     void testGetAllDistrictsInCityByNames() {
         initLviv();
-        List<LocationDto> districts = locationApiService.getAllDistrictsInCityByNames("Львівська область", "Львів");
+        List<LocationDto> districts =
+            locationApiService.getAllDistrictsInCityByNames("Львівська область", "місто Львів");
         assertEquals(2, districts.size());
         assertLocationDto(districts.get(0), "UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
         assertLocationDto(districts.get(1), "UA46060250010259421", "UA46060250010015970", "Залізничний",
@@ -313,7 +314,7 @@ class LocationApiServiceTest {
             locationApiService.getAllDistrictsInCityByNames(null, "Lviv");
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("", "Lviv");
+            locationApiService.getAllDistrictsInCityByNames("", "city Lviv");
         });
     }
 
