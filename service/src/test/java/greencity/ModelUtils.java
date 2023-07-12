@@ -14,6 +14,7 @@ import greencity.dto.OptionForColumnDTO;
 import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressDtoWithoutDistricts;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagDto;
@@ -1440,6 +1441,34 @@ public class ModelUtils {
             .recipientPhoneNumber("095123456").build();
     }
 
+    public static List<AddressDtoWithoutDistricts> addressDtoWithoutDistrictList() {
+        List<AddressDtoWithoutDistricts> list = new ArrayList<>();
+        list.add(AddressDtoWithoutDistricts.builder()
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .placeId("place_id")
+            .build());
+        list.add(AddressDtoWithoutDistricts.builder().id(2L)
+            .entranceNumber("9a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Shevchenka")
+            .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .placeId("place_id")
+            .build());
+        return list;
+    }
+
     public static List<AddressDto> addressDtoList() {
         List<AddressDto> list = new ArrayList<>();
         list.add(AddressDto.builder()
@@ -1523,7 +1552,7 @@ public class ModelUtils {
 
     public static UserProfileUpdateDto getUserProfileUpdateDto() {
         User user = getUserWithBotNotifyTrue();
-        return UserProfileUpdateDto.builder().addressDto(addressDtoList())
+        return UserProfileUpdateDto.builder().addressDto(addressDtoWithoutDistrictList())
             .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
             .recipientPhone(user.getRecipientPhone())
             .alternateEmail("test@email.com")
@@ -1534,7 +1563,7 @@ public class ModelUtils {
 
     public static UserProfileUpdateDto getUserProfileUpdateDtoWithBotsIsNotifyFalse() {
         User user = getUserWithBotNotifyTrue();
-        return UserProfileUpdateDto.builder().addressDto(addressDtoList())
+        return UserProfileUpdateDto.builder().addressDto(addressDtoWithoutDistrictList())
             .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
             .recipientPhone(user.getRecipientPhone())
             .alternateEmail("test@email.com")
@@ -3276,7 +3305,7 @@ public class ModelUtils {
             .recipientName("Taras")
             .recipientSurname("Ivanov")
             .recipientPhone("962473289")
-            .addressDto(addressDtoList())
+            .addressDto(addressDtoWithoutDistrictList())
             .telegramIsNotify(true)
             .viberIsNotify(false)
             .build();

@@ -8,6 +8,7 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressDtoWithoutDistricts;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagOrderDto;
@@ -1518,7 +1519,7 @@ class UBSClientServiceImplTest {
         User user = getUserWithBotNotifyTrue();
         TelegramBot telegramBot = getTelegramBotNotifyTrue();
         ViberBot viberBot = getViberBotNotifyTrue();
-        List<AddressDto> addressDto = addressDtoList();
+        List<AddressDtoWithoutDistricts> addressDto = addressDtoWithoutDistrictList();
         List<Bot> botList = botList();
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
         String uuid = UUID.randomUUID().toString();
@@ -1601,7 +1602,7 @@ class UBSClientServiceImplTest {
         UBSClientServiceImpl ubsClientService = spy(ubsService);
 
         User user = getUserWithBotNotifyTrue();
-        List<AddressDto> addressDto = addressDtoList();
+        List<AddressDtoWithoutDistricts> addressDto = addressDtoWithoutDistrictList();
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDtoWithBotsIsNotifyFalse();
         String uuid = UUID.randomUUID().toString();
         OrderAddressDtoRequest updateAddressRequestDto = getTestOrderAddressDtoRequest();
