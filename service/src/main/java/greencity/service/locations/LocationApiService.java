@@ -70,7 +70,8 @@ public class LocationApiService {
      */
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
         checkIfNotNull(regionName, cityName);
-        regionName = removeLastWord(regionName);
+        regionName = removeWordRegion(regionName);
+        cityName = removeWordCity(cityName);
         if (cityName.equals(KYIV.getLocationNameMap().get(NAME))
             || cityName.equals(KYIV.getLocationNameMap().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(KYIV.getId());
@@ -258,10 +259,16 @@ public class LocationApiService {
         return resultFromUrl.get(0);
     }
 
-    private static String removeLastWord(String sentence) {
+    private static String removeWordRegion(String sentence) {
         String withoutSpaces = sentence.replace(" ", "");
         String withoutRegion = withoutSpaces.replaceAll("(?iu)region", "");
         return withoutRegion.replaceAll("(?iu)область", "");
+    }
+
+    private static String removeWordCity(String sentence) {
+        String withoutSpaces = sentence.replace(" ", "");
+        String withoutRegion = withoutSpaces.replaceAll("(?iu)city", "");
+        return withoutRegion.replaceAll("(?iu)місто", "");
     }
 
     /**
