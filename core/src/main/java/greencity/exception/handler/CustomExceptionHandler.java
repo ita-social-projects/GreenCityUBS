@@ -131,8 +131,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler({FoundException.class})
-    public final ResponseEntity<Object> handleFoundExeption(FoundException ex,
-        WebRequest webRequest) {
+    public final ResponseEntity<Object> handleFoundException(FoundException ex,
+                                                             WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponce);
