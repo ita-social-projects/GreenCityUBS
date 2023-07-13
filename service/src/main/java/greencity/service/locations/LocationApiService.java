@@ -87,11 +87,11 @@ public class LocationApiService {
     }
 
     static String replaceAllQuotes(String input) {
-        Pattern pattern = Pattern.compile("[`‘’“”‛‟ʼ«»\"]");
+        Pattern pattern = Pattern.compile("[`'‘’“”‛‟ʼ«»\"]");
         Matcher matcher = pattern.matcher(input);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
-            matcher.appendReplacement(sb, "'");
+            matcher.appendReplacement(sb, "’");
         }
         matcher.appendTail(sb);
         return sb.toString();
