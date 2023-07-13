@@ -14,12 +14,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.Arrays;
+
 import org.apache.commons.collections4.CollectionUtils;
 
 @Service
@@ -76,14 +75,26 @@ public class LocationApiService {
             || cityName.equals(KYIV.getLocationNameMap().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(KYIV.getId());
         }
+
         List<LocationDto> cities = getCitiesByName(regionName, cityName);
         LocationDto city = getCityInRegion(regionName, cities);
         String cityId = city.getId();
         List<LocationDto> allDistricts = getAllDistrictsInCityByCityID(cityId);
         if (allDistricts.isEmpty()) {
-            allDistricts.add(city);
+            return Arrays.asList(city);
         }
         return allDistricts;
+    }
+
+    static String replaceAllQuotes(String input) {
+        Pattern pattern = Pattern.compile("[`‘’“”‛‟ʼ«»\"]");
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "'");
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 
     /**
@@ -178,6 +189,9 @@ public class LocationApiService {
 
         return cities.stream()
             .filter(city -> {
+                if (checkIfRegionIdEqualsUpperId(region.getId(), city.getParentId())) {
+                    return true;
+                }
                 LocationDto localCommunity =
                     getLocationDataByCode(LocationDivision.LOCAL_COMMUNITY.getLevelId(), city.getParentId());
                 LocationDto districtRegion = getLocationDataByCode(LocationDivision.DISTRICT_IN_REGION.getLevelId(),
@@ -259,16 +273,20 @@ public class LocationApiService {
         return resultFromUrl.get(0);
     }
 
+    private boolean checkIfRegionIdEqualsUpperId(String regionId, String cityUpperId) {
+        return regionId.equals(cityUpperId);
+    }
+
     private static String removeWordRegion(String sentence) {
         String withoutSpaces = sentence.replace(" ", "");
         String withoutRegion = withoutSpaces.replaceAll("(?iu)region", "");
-        return withoutRegion.replaceAll("(?iu)область", "");
+        return replaceAllQuotes(withoutRegion.replaceAll("(?iu)область", ""));
     }
 
     private static String removeWordCity(String sentence) {
         String withoutSpaces = sentence.replace(" ", "");
         String withoutRegion = withoutSpaces.replaceAll("(?iu)city", "");
-        return withoutRegion.replaceAll("(?iu)місто", "");
+        return replaceAllQuotes(withoutRegion.replaceAll("(?iu)місто", ""));
     }
 
     /**

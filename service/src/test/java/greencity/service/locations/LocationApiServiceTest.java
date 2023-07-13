@@ -127,6 +127,7 @@ class LocationApiServiceTest {
             getApiResult("UA46060250010121390", "UA46060250010015970", "Галицький", "Halytskyi");
         Map<String, Object> zaliznychnyiResult =
             getApiResult("UA46060250010259421", "UA46060250010015970", "Залізничний", "Zaliznychnyi");
+
         UriComponentsBuilder level1Builder = build(LocationDivision.REGION.getLevelId());
         UriComponentsBuilder level2BuilderLviv =
             buildCode("UA46060000000042587", LocationDivision.DISTRICT_IN_REGION.getLevelId());
@@ -173,6 +174,25 @@ class LocationApiServiceTest {
         respond(kyivBuilder, Arrays.asList(kyivResult));
         respond(kyivDistrictsBuilder, Arrays.asList(holosiivskyiResult, darnytskyiResult));
 
+    }
+
+    @Test
+    void testGetAllDistrictsInCityByNames_WhenParentIdEqualsRegionId() {
+        Map<String, Object> lvivskaResult =
+            getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
+        Map<String, Object> prypiatResult =
+            getApiResult("UA32000000010085013", "UA46000000000026241", "Прип'ять", "Prypiat");
+        UriComponentsBuilder level1Builder = build(LocationDivision.REGION.getLevelId());
+        UriComponentsBuilder levelBuilderPrypiat =
+            buildName("Прип'ять", LocationDivision.CITY.getLevelId());
+        UriComponentsBuilder levelBuilderPrypiat5 =
+            buildParent(LocationDivision.DISTRICT_IN_CITY.getLevelId(), "UA32000000010085013");
+        respond(level1Builder, Arrays.asList(lvivskaResult));
+        respond(levelBuilderPrypiat, Arrays.asList(prypiatResult));
+        respond(levelBuilderPrypiat5, new ArrayList<>());
+        List<LocationDto> districts =
+            locationApiService.getAllDistrictsInCityByNames("Львівська область", "Прип’ять");
+        assertEquals(1, districts.size());
     }
 
     @Test
