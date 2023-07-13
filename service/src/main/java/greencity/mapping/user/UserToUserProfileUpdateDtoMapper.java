@@ -1,16 +1,11 @@
 package greencity.mapping.user;
 
 import greencity.dto.address.AddressDto;
-import greencity.dto.address.AddressWithDistrictsDto;
-import greencity.dto.location.api.DistrictDto;
-import greencity.dto.location.api.LocationDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
-import greencity.service.locations.LocationApiService;
 import org.modelmapper.AbstractConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,7 +13,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, UserProfileUpdateDto> {
-
     /**
      * Method convert {@link User} to {@link UserProfileUpdateDto}.
      *
@@ -63,5 +57,4 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
             .actual(address.getActual())
             .build();
     }
-
 }

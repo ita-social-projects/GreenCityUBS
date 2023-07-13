@@ -1,9 +1,13 @@
 package greencity.dto.order;
 
-import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressWithDistrictsDto;
-import lombok.*;
-
+import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 import java.util.List;
 
 @Getter

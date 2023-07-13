@@ -1,7 +1,6 @@
 package greencity.dto.user;
 
 import greencity.annotations.ValidPhoneNumber;
-import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressWithDistrictsDto;
 import greencity.util.Bot;
 import lombok.AllArgsConstructor;
