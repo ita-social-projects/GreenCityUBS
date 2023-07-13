@@ -8,6 +8,7 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressWithDistrictsDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagOrderDto;
@@ -1669,15 +1670,15 @@ class UBSClientServiceImplTest {
         user.setId(13L);
         when(userRepository.findByUuid(uuid)).thenReturn(user);
 
-        List<AddressDto> testAddressesDto = getTestAddressesDto();
+        List<AddressWithDistrictsDto> testAddressesDto = getAddressWithDistrictsDtoList();
 
         OrderWithAddressesResponseDto expected = new OrderWithAddressesResponseDto(testAddressesDto);
 
         List<Address> addresses = getTestAddresses(user);
 
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(modelMapper.map(addresses.get(0), AddressDto.class)).thenReturn(testAddressesDto.get(0));
-        when(modelMapper.map(addresses.get(1), AddressDto.class)).thenReturn(testAddressesDto.get(1));
+        when(modelMapper.map(addresses.get(0), AddressWithDistrictsDto.class)).thenReturn(testAddressesDto.get(0));
+        when(modelMapper.map(addresses.get(1), AddressWithDistrictsDto.class)).thenReturn(testAddressesDto.get(1));
 
         OrderWithAddressesResponseDto actual = ubsService.findAllAddressesForCurrentOrder(uuid);
 
@@ -1700,6 +1701,48 @@ class UBSClientServiceImplTest {
             .build();
 
         return Arrays.asList(address1, address2);
+    }
+
+    public static List<AddressWithDistrictsDto> getAddressWithDistrictsDtoList() {
+        List<AddressWithDistrictsDto> list = new ArrayList<>();
+        list.add(AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
+                        .id(1L)
+                        .entranceNumber("7a")
+                        .houseCorpus("2")
+                        .houseNumber("7")
+                        .street("Городоцька")
+                        .streetEn("Gorodotska")
+                        .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+                        .district("Залізничний")
+                        .districtEn("Zaliznuchnuy")
+                        .regionEn("Region")
+                        .region("Регіон")
+                        .cityEn("Lviv")
+                        .city("Львів")
+                        .actual(false).build())
+                .addressRegionDistrictList(new ArrayList<>())
+
+                .build());
+        list.add(AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
+                        .id(2L)
+
+                        .entranceNumber("9a")
+                        .houseCorpus("2")
+                        .houseNumber("7")
+                        .street("Шевченка")
+                        .streetEn("Shevchenka")
+                        .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
+                        .district("Залізничний")
+                        .districtEn("Zaliznuchnuy")
+                        .regionEn("Region")
+                        .region("Регіон")
+                        .city("Львів")
+                        .cityEn("Lviv").
+                        actual(false).build())
+                .addressRegionDistrictList(new ArrayList<>())
+
+                .build());
+        return list;
     }
 
     private List<AddressDto> getTestAddressesDto() {
@@ -1735,8 +1778,8 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(any(),
             eq(Address.class))).thenReturn(addressToSave);
         when(modelMapper.map(addresses.get(0),
-            AddressDto.class))
-                .thenReturn(addressDto());
+            AddressWithDistrictsDto.class))
+                .thenReturn(getAddressWithDistrictsDto(1L));
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
@@ -1815,8 +1858,8 @@ class UBSClientServiceImplTest {
 
         when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
         when(modelMapper.map(addresses.get(0),
-            AddressDto.class))
-                .thenReturn(addressDto());
+                AddressWithDistrictsDto.class))
+                .thenReturn(getAddressWithDistrictsDto(1L));
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);

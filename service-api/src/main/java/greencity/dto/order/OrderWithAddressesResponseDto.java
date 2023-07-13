@@ -1,6 +1,7 @@
 package greencity.dto.order;
 
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressWithDistrictsDto;
 import lombok.*;
 
 import java.util.List;
@@ -13,5 +14,5 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 public class OrderWithAddressesResponseDto {
-    private List<AddressDto> addressList;
+    private List<AddressWithDistrictsDto> addressList;
 }

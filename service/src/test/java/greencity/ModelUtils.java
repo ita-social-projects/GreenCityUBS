@@ -4325,21 +4325,7 @@ public class ModelUtils {
 
     public static OrderWithAddressesResponseDto getAddressDtoResponse() {
         return OrderWithAddressesResponseDto.builder()
-            .addressList(List.of(
-                AddressDto.builder()
-                    .id(1L)
-                    .city("City")
-                    .district("Distinct")
-                    .entranceNumber("7a")
-                    .houseCorpus("2")
-                    .houseNumber("25")
-                    .street("Street")
-                    .coordinates(Coordinates.builder()
-                        .latitude(50.4459068)
-                        .longitude(30.4477005)
-                        .build())
-                    .actual(false)
-                    .build()))
+            .addressList(List.of(getAddressWithDistrictsDto(1L)))
             .build();
     }
 

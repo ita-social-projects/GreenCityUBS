@@ -15,6 +15,7 @@ import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
+import greencity.dto.address.AddressWithDistrictsDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagOrderDto;
@@ -534,10 +535,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
         Long id = userRepository.findByUuid(uuid).getId();
-        List<AddressDto> addressDtoList = addressRepo.findAllNonDeletedAddressesByUserId(id)
+        List<AddressWithDistrictsDto> addressDtoList = addressRepo.findAllNonDeletedAddressesByUserId(id)
             .stream()
             .sorted(Comparator.comparing(Address::getId))
-            .map(u -> modelMapper.map(u, AddressDto.class))
+            .map(u -> modelMapper.map(u, AddressWithDistrictsDto.class))
             .collect(toList());
         return new OrderWithAddressesResponseDto(addressDtoList);
     }
