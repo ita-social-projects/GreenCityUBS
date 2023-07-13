@@ -1,5 +1,6 @@
 package greencity.dto.address;
 
+import greencity.dto.location.api.DistrictDto;
 import greencity.entity.coords.Coordinates;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.util.List;
 
 import static greencity.constant.ValidationConstant.CH_EN;
 import static greencity.constant.ValidationConstant.CH_NUM;
@@ -68,4 +70,5 @@ public class AddressDto implements Serializable {
     private String districtEn;
 
     private String placeId;
+    private List<DistrictDto> addressRegionDistrictList;
 }
