@@ -8,6 +8,7 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressWithDistrictsDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagOrderDto;
@@ -93,32 +94,22 @@ import greencity.service.locations.LocationApiService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1636,7 +1627,7 @@ class UBSClientServiceImplTest {
         String uuid = UUID.randomUUID().toString();
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         UserProfileDto userProfileDto = new UserProfileDto();
-        List<AddressDto> addressDto = addressDtoList();
+        List<AddressWithDistrictsDto> addressDto = getAddressWithDistrictsDtoList();
         userProfileDto.setAddressDto(addressDto);
         List<Address> address = addressList();
         List<Bot> botList = botList();
@@ -1669,15 +1660,15 @@ class UBSClientServiceImplTest {
         user.setId(13L);
         when(userRepository.findByUuid(uuid)).thenReturn(user);
 
-        List<AddressDto> testAddressesDto = getTestAddressesDto();
+        List<AddressWithDistrictsDto> testAddressesDto = getAddressWithDistrictsDtoList();
 
         OrderWithAddressesResponseDto expected = new OrderWithAddressesResponseDto(testAddressesDto);
 
         List<Address> addresses = getTestAddresses(user);
 
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(modelMapper.map(addresses.get(0), AddressDto.class)).thenReturn(testAddressesDto.get(0));
-        when(modelMapper.map(addresses.get(1), AddressDto.class)).thenReturn(testAddressesDto.get(1));
+        when(modelMapper.map(addresses.get(0), AddressWithDistrictsDto.class)).thenReturn(testAddressesDto.get(0));
+        when(modelMapper.map(addresses.get(1), AddressWithDistrictsDto.class)).thenReturn(testAddressesDto.get(1));
 
         OrderWithAddressesResponseDto actual = ubsService.findAllAddressesForCurrentOrder(uuid);
 
@@ -1700,6 +1691,44 @@ class UBSClientServiceImplTest {
             .build();
 
         return Arrays.asList(address1, address2);
+    }
+
+    public static List<AddressWithDistrictsDto> getAddressWithDistrictsDtoList() {
+        List<AddressWithDistrictsDto> list = new ArrayList<>();
+        list.add(AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Городоцька")
+            .streetEn("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Залізничний")
+            .districtEn("Zaliznuchnuy")
+            .regionEn("Region")
+            .region("Регіон")
+            .cityEn("Lviv")
+            .city("Львів")
+            .actual(false).build())
+            .addressRegionDistrictList(new ArrayList<>())
+            .build());
+        list.add(AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
+            .id(2L)
+            .entranceNumber("9a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Шевченка")
+            .streetEn("Shevchenka")
+            .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
+            .district("Залізничний")
+            .districtEn("Zaliznuchnuy")
+            .regionEn("Region")
+            .region("Регіон")
+            .city("Львів")
+            .cityEn("Lviv").actual(false).build())
+            .addressRegionDistrictList(new ArrayList<>())
+            .build());
+        return list;
     }
 
     private List<AddressDto> getTestAddressesDto() {
@@ -1735,8 +1764,8 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(any(),
             eq(Address.class))).thenReturn(addressToSave);
         when(modelMapper.map(addresses.get(0),
-            AddressDto.class))
-                .thenReturn(addressDto());
+            AddressWithDistrictsDto.class))
+                .thenReturn(getAddressWithDistrictsDto(1L));
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
@@ -1815,8 +1844,8 @@ class UBSClientServiceImplTest {
 
         when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
         when(modelMapper.map(addresses.get(0),
-            AddressDto.class))
-                .thenReturn(addressDto());
+            AddressWithDistrictsDto.class))
+                .thenReturn(getAddressWithDistrictsDto(1L));
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
