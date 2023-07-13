@@ -1,7 +1,7 @@
 package greencity.dto.user;
 
 import greencity.annotations.ValidPhoneNumber;
-import greencity.dto.address.AddressWithDistrictsDto;
+import greencity.dto.address.AddressDto;
 import greencity.util.Bot;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,7 +40,7 @@ public class UserProfileDto {
     @NotBlank
     @ValidPhoneNumber
     private String recipientPhone;
-    private List<AddressWithDistrictsDto> addressDto;
+    private List<AddressDto> addressDto;
     private List<Bot> botList;
     private Boolean hasPassword;
     @NonNull
