@@ -234,7 +234,6 @@ public class ModelUtils {
             .city("Львів")
             .cityEn("Lviv").actual(false).build())
             .addressRegionDistrictList(new ArrayList<>())
-
             .build());
         return list;
     }
