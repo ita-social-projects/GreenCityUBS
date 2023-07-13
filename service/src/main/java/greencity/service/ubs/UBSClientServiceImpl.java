@@ -1311,9 +1311,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> allAddress = addressRepo.findAllNonDeletedAddressesByUserId(user.getId());
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         List<Bot> botList = getListOfBots(user.getUuid());
-        List<AddressDto> addressDto =
+        List<AddressWithDistrictsDto> addressDto =
             allAddress.stream()
-                .map(a -> modelMapper.map(a, AddressDto.class))
+                .map(a -> modelMapper.map(a, AddressWithDistrictsDto.class))
                 .collect(toList());
         userProfileDto.setAddressDto(addressDto);
         userProfileDto.setBotList(botList);

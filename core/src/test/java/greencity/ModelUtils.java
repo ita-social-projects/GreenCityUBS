@@ -17,6 +17,7 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
+import greencity.dto.location.api.DistrictDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
@@ -70,11 +71,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static greencity.enums.ViolationLevel.MAJOR;
@@ -163,6 +160,37 @@ public class ModelUtils {
             .actual(false)
             .build());
         return list;
+    }
+
+    public static AddressWithDistrictsDto getAddressWithDistrictsDto(long id) {
+        return AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
+            .id(id)
+            .region("Вінницька")
+            .city("Вінниця")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(false)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng").build())
+            .addressRegionDistrictList(Arrays.asList(getDistrictDto()))
+            .build();
+    }
+
+    public static DistrictDto getDistrictDto() {
+        return DistrictDto.builder()
+            .nameUa("Вінниця")
+            .nameEn("Vinnytsa")
+            .build();
     }
 
     public static List<AddressWithDistrictsDto> addressWithDistrictsDtoList() {

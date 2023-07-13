@@ -1637,7 +1637,7 @@ class UBSClientServiceImplTest {
         String uuid = UUID.randomUUID().toString();
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         UserProfileDto userProfileDto = new UserProfileDto();
-        List<AddressDto> addressDto = addressDtoList();
+        List<AddressWithDistrictsDto> addressDto = getAddressWithDistrictsDtoList();
         userProfileDto.setAddressDto(addressDto);
         List<Address> address = addressList();
         List<Bot> botList = botList();
