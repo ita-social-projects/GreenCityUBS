@@ -168,42 +168,41 @@ public class ModelUtils {
     public static List<AddressWithDistrictsDto> addressWithDistrictsDtoList() {
         List<AddressWithDistrictsDto> list = new ArrayList<>();
         list.add(AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
-                .id(1L)
-                .entranceNumber("7a")
-                .houseCorpus("2")
-                .houseNumber("7")
-                .street("Городоцька")
-                .streetEn("Gorodotska")
-                .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
-                .district("Залізничний")
-                .districtEn("Zaliznuchnuy")
-                .regionEn("Region")
-                .region("Регіон")
-                .cityEn("Lviv")
-                .city("Львів")
-                .actual(false).build())
-                .addressRegionDistrictList(new ArrayList<>())
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Городоцька")
+            .streetEn("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Залізничний")
+            .districtEn("Zaliznuchnuy")
+            .regionEn("Region")
+            .region("Регіон")
+            .cityEn("Lviv")
+            .city("Львів")
+            .actual(false).build())
+            .addressRegionDistrictList(new ArrayList<>())
 
-                .build());
+            .build());
         list.add(AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
-                        .id(2L)
+            .id(2L)
 
-                        .entranceNumber("9a")
-                .houseCorpus("2")
-                .houseNumber("7")
-                .street("Шевченка")
-                .streetEn("Shevchenka")
-                .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
-                .district("Залізничний")
-                .districtEn("Zaliznuchnuy")
-                .regionEn("Region")
-                .region("Регіон")
-                .city("Львів")
-                .cityEn("Lviv").
-                        actual(false).build())
-                .addressRegionDistrictList(new ArrayList<>())
+            .entranceNumber("9a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Шевченка")
+            .streetEn("Shevchenka")
+            .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
+            .district("Залізничний")
+            .districtEn("Zaliznuchnuy")
+            .regionEn("Region")
+            .region("Регіон")
+            .city("Львів")
+            .cityEn("Lviv").actual(false).build())
+            .addressRegionDistrictList(new ArrayList<>())
 
-                .build());
+            .build());
         return list;
     }
 

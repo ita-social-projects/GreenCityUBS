@@ -21,6 +21,6 @@ import static greencity.constant.ValidationConstant.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddressWithDistrictsDto implements Serializable {
-   private AddressDto addressDto;
+    private AddressDto addressDto;
     private List<DistrictDto> addressRegionDistrictList;
 }

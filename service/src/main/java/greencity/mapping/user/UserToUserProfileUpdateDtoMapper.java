@@ -68,28 +68,29 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
             .actual(address.getActual())
             .build();
     }
+
     private AddressWithDistrictsDto createAddressWithDistrictDto(Address address) {
         return AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
-                .id(address.getId())
-                .city(address.getCity())
-                .cityEn(address.getCityEn())
-                .district(address.getDistrict())
-                .districtEn(address.getDistrictEn())
-                .region(address.getRegion())
-                .regionEn(address.getRegionEn())
-                .entranceNumber(address.getEntranceNumber())
-                .houseCorpus(address.getHouseCorpus())
-                .houseNumber(address.getHouseNumber())
-                .street(address.getStreet())
-                .streetEn(address.getStreetEn())
-                .addressComment(address.getAddressComment())
-                .coordinates(Coordinates.builder()
-                        .latitude(address.getCoordinates().getLatitude())
-                        .longitude(address.getCoordinates().getLongitude())
-                        .build())
-                .actual(address.getActual())   .build())
-                .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
-                .build();
+            .id(address.getId())
+            .city(address.getCity())
+            .cityEn(address.getCityEn())
+            .district(address.getDistrict())
+            .districtEn(address.getDistrictEn())
+            .region(address.getRegion())
+            .regionEn(address.getRegionEn())
+            .entranceNumber(address.getEntranceNumber())
+            .houseCorpus(address.getHouseCorpus())
+            .houseNumber(address.getHouseNumber())
+            .street(address.getStreet())
+            .streetEn(address.getStreetEn())
+            .addressComment(address.getAddressComment())
+            .coordinates(Coordinates.builder()
+                .latitude(address.getCoordinates().getLatitude())
+                .longitude(address.getCoordinates().getLongitude())
+                .build())
+            .actual(address.getActual()).build())
+            .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
+            .build();
     }
 
     private List<DistrictDto> getAllDistricts(String region, String city) {
