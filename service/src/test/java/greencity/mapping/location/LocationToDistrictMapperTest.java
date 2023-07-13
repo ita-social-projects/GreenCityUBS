@@ -4,7 +4,6 @@ import greencity.ModelUtils;
 import greencity.dto.address.AddressDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.mapping.location.api.LocationToDistrictDtoMapper;
-import greencity.mapping.user.AddressToAddressDtoMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

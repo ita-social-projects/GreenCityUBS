@@ -7,6 +7,7 @@ import greencity.configuration.SecurityConfig;
 import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressWithDistrictsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.ubs.UBSClientService;
@@ -72,7 +73,7 @@ class UserProfileControllerTest {
     @Test
     void saveUserDate() throws Exception {
         UserProfileDto userProfileDto = ModelUtils.userProfileDto();
-        List<AddressDto> addressDto = ModelUtils.addressDto();
+        List<AddressWithDistrictsDto> addressDto = ModelUtils.userProfileDto().getAddressDto();
         userProfileDto.setAddressDto(addressDto);
 
         ObjectMapper objectMapper = new ObjectMapper();
