@@ -94,32 +94,22 @@ import greencity.service.locations.LocationApiService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1721,11 +1711,9 @@ class UBSClientServiceImplTest {
             .city("Львів")
             .actual(false).build())
             .addressRegionDistrictList(new ArrayList<>())
-
             .build());
         list.add(AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
             .id(2L)
-
             .entranceNumber("9a")
             .houseCorpus("2")
             .houseNumber("7")
@@ -1739,7 +1727,6 @@ class UBSClientServiceImplTest {
             .city("Львів")
             .cityEn("Lviv").actual(false).build())
             .addressRegionDistrictList(new ArrayList<>())
-
             .build());
         return list;
     }

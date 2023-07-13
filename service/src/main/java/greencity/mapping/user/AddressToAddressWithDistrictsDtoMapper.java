@@ -54,7 +54,6 @@ public class AddressToAddressWithDistrictsDtoMapper extends AbstractConverter<Ad
                 .build())
             .actual(address.getActual()).build())
             .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
-
             .build();
     }
 

@@ -31,5 +31,7 @@ class AddressToAddressDtoMapperTest {
             .thenReturn(ModelUtils.getLocationApiDtoList());
         AddressWithDistrictsDto actual = addressToAddressWithDistrictsDtoMapper.convert(ModelUtils.getAddress(1L));
         assertEquals(expected.getAddressRegionDistrictList().size(), actual.getAddressRegionDistrictList().size());
+        assertEquals(expected.getAddressRegionDistrictList().get(0), actual.getAddressRegionDistrictList().get(0));
+
     }
 }
