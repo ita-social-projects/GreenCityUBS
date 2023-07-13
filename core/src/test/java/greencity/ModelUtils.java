@@ -4,7 +4,6 @@ import greencity.configuration.RedirectionConfigProp;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
-import greencity.dto.address.AddressWithDistrictsDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagLimitDto;
 import greencity.dto.courier.CourierDto;
@@ -17,7 +16,6 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
-import greencity.dto.location.api.DistrictDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
@@ -76,7 +74,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import static greencity.enums.ViolationLevel.MAJOR;
@@ -147,6 +144,7 @@ public class ModelUtils {
             .region("Регіон")
             .cityEn("Lviv")
             .city("Львів")
+            .addressRegionDistrictList(new ArrayList<>())
             .actual(false)
             .build());
         list.add(AddressDto.builder().id(2L)
@@ -162,78 +160,9 @@ public class ModelUtils {
             .region("Регіон")
             .city("Львів")
             .cityEn("Lviv")
-            .actual(false)
-            .build());
-        return list;
-    }
-
-    public static AddressWithDistrictsDto getAddressWithDistrictsDto(long id) {
-        return AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
-            .id(id)
-            .region("Вінницька")
-            .city("Вінниця")
-            .street("Street")
-            .district("Distinct")
-            .houseNumber("25")
-            .houseCorpus("2")
-            .entranceNumber("7a")
-            .addressComment("Address Comment")
-            .actual(false)
-            .coordinates(Coordinates.builder()
-                .latitude(50.4459068)
-                .longitude(30.4477005)
-                .build())
-            .regionEn("RegionEng")
-            .cityEn("CityEng")
-            .streetEn("StreetEng")
-            .districtEn("DistinctEng").build())
-            .addressRegionDistrictList(Arrays.asList(getDistrictDto()))
-            .build();
-    }
-
-    public static DistrictDto getDistrictDto() {
-        return DistrictDto.builder()
-            .nameUa("Вінниця")
-            .nameEn("Vinnytsa")
-            .build();
-    }
-
-    public static List<AddressWithDistrictsDto> addressWithDistrictsDtoList() {
-        List<AddressWithDistrictsDto> list = new ArrayList<>();
-        list.add(AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
-            .id(1L)
-            .entranceNumber("7a")
-            .houseCorpus("2")
-            .houseNumber("7")
-            .street("Городоцька")
-            .streetEn("Gorodotska")
-            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
-            .district("Залізничний")
-            .districtEn("Zaliznuchnuy")
-            .regionEn("Region")
-            .region("Регіон")
-            .cityEn("Lviv")
-            .city("Львів")
-            .actual(false).build())
             .addressRegionDistrictList(new ArrayList<>())
 
-            .build());
-        list.add(AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
-            .id(2L)
-
-            .entranceNumber("9a")
-            .houseCorpus("2")
-            .houseNumber("7")
-            .street("Шевченка")
-            .streetEn("Shevchenka")
-            .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
-            .district("Залізничний")
-            .districtEn("Zaliznuchnuy")
-            .regionEn("Region")
-            .region("Регіон")
-            .city("Львів")
-            .cityEn("Lviv").actual(false).build())
-            .addressRegionDistrictList(new ArrayList<>())
+            .actual(false)
             .build());
         return list;
     }

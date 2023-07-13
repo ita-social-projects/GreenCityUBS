@@ -1,7 +1,6 @@
 package greencity.mapping.user;
 
 import greencity.dto.address.AddressDto;
-import greencity.dto.address.AddressWithDistrictsDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.entity.coords.Coordinates;
@@ -17,10 +16,10 @@ import java.util.stream.Collectors;
 
 /**
  * Class that used by {@link ModelMapper} to map {@link Address} into
- * {@link AddressWithDistrictsDto}.
+ * {@link AddressDto}.
  */
 @Component
-public class AddressToAddressWithDistrictsDtoMapper extends AbstractConverter<Address, AddressWithDistrictsDto> {
+public class AddressToAddressDtoMapper extends AbstractConverter<Address, AddressDto> {
     /**
      * Service for getting districts in city.
      */
@@ -28,13 +27,13 @@ public class AddressToAddressWithDistrictsDtoMapper extends AbstractConverter<Ad
     private LocationApiService locationApiService;
 
     /**
-     * Method convert {@link Address} to {@link AddressWithDistrictsDto}.
+     * Method convert {@link Address} to {@link AddressDto}.
      *
-     * @return {@link AddressWithDistrictsDto}
+     * @return {@link AddressDto}
      */
     @Override
-    public AddressWithDistrictsDto convert(Address address) {
-        return AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
+    public AddressDto convert(Address address) {
+        return AddressDto.builder()
             .id(address.getId())
             .region(address.getRegion())
             .regionEn(address.getRegionEn())
@@ -52,8 +51,8 @@ public class AddressToAddressWithDistrictsDtoMapper extends AbstractConverter<Ad
                 .latitude(address.getCoordinates().getLatitude())
                 .longitude(address.getCoordinates().getLongitude())
                 .build())
-            .actual(address.getActual()).build())
             .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
+            .actual(address.getActual())
             .build();
     }
 

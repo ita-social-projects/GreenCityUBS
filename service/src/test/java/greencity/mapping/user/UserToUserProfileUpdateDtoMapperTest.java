@@ -6,23 +6,33 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
+import greencity.service.locations.LocationApiService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserToUserProfileUpdateDtoMapperTest {
     @InjectMocks
     private UserToUserProfileUpdateDtoMapper mapper;
+    @Mock
+    private LocationApiService locationApiService;
 
     @Test
     void convert() {
 
         MockitoAnnotations.initMocks(this);
         AddressDto expected = ModelUtils.getAddressDto(1L);
+        when(locationApiService.getAllDistrictsInCityByNames(anyString(), anyString()))
+            .thenReturn(ModelUtils.getLocationApiDtoList());
         UserProfileUpdateDto userProfileUpdateDto = ModelUtils.updateUserProfileDto();
         User user = ModelUtils.getUserWithBotNotifyTrue();
         UserProfileUpdateDto converted = mapper.convert(user);

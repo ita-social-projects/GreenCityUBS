@@ -15,7 +15,6 @@ import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
-import greencity.dto.address.AddressWithDistrictsDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
@@ -1710,29 +1709,6 @@ public class ModelUtils {
             .cityEn("CityEng")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
-            .build();
-    }
-
-    public static AddressWithDistrictsDto getAddressWithDistrictsDto(long id) {
-        return AddressWithDistrictsDto.builder().addressDto(AddressDto.builder()
-            .id(id)
-            .region("Вінницька")
-            .city("Вінниця")
-            .street("Street")
-            .district("Distinct")
-            .houseNumber("25")
-            .houseCorpus("2")
-            .entranceNumber("7a")
-            .addressComment("Address Comment")
-            .actual(false)
-            .coordinates(Coordinates.builder()
-                .latitude(50.4459068)
-                .longitude(30.4477005)
-                .build())
-            .regionEn("RegionEng")
-            .cityEn("CityEng")
-            .streetEn("StreetEng")
-            .districtEn("DistinctEng").build())
             .addressRegionDistrictList(Arrays.asList(getDistrictDto()))
             .build();
     }
@@ -4327,7 +4303,21 @@ public class ModelUtils {
 
     public static OrderWithAddressesResponseDto getAddressDtoResponse() {
         return OrderWithAddressesResponseDto.builder()
-            .addressList(List.of(getAddressWithDistrictsDto(1L)))
+            .addressList(List.of(
+                AddressDto.builder()
+                    .id(1L)
+                    .city("City")
+                    .district("Distinct")
+                    .entranceNumber("7a")
+                    .houseCorpus("2")
+                    .houseNumber("25")
+                    .street("Street")
+                    .coordinates(Coordinates.builder()
+                        .latitude(50.4459068)
+                        .longitude(30.4477005)
+                        .build())
+                    .actual(false)
+                    .build()))
             .build();
     }
 
