@@ -1645,6 +1645,30 @@ public class ModelUtils {
             .build();
     }
 
+    public static Address getAddressTrue() {
+        return Address.builder()
+            .id(1L)
+            .region("Region")
+            .city("City")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(true)
+            .addressStatus(AddressStatus.NEW)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng")
+            .build();
+    }
+
     public static Address getAddress(long id) {
         return Address.builder()
             .id(id)
@@ -1862,6 +1886,22 @@ public class ModelUtils {
             .uuid("uuid")
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
+            .build();
+    }
+
+    public static User getUserWithBotNotifyTrue_AddressTrue() {
+        return User.builder()
+            .id(1L)
+            .addresses(singletonList(getAddressTrue()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .uuid("uuid")
+            .ubsUsers(getUbsUsers())
+            .currentPoints(100)
+            .telegramBot(getTelegramBotNotifyTrue())
             .build();
     }
 
