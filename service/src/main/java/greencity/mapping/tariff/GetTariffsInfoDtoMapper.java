@@ -6,11 +6,14 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Region;
+import greencity.enums.LocationStatus;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,6 +40,7 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
                 .email(source.getCreator().getEmail()).build())
             .tariffStatus(source.getTariffStatus())
             .locationInfoDtos(source.getTariffLocations().stream()
+                .filter(obj -> obj.getLocation().getLocationStatus().equals(LocationStatus.ACTIVE))
                 .map(location -> LocationsDtos.builder()
                     .locationId(location.getLocation().getId())
                     .nameEn(location.getLocation().getNameEn())
