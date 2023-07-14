@@ -13,9 +13,9 @@ import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.certificate.CertificateDto;
+import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.courier.CourierDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
@@ -93,32 +93,22 @@ import greencity.service.locations.LocationApiService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -133,8 +123,80 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static greencity.ModelUtils.*;
+import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
+import static greencity.ModelUtils.TEST_BAG_LIST;
+import static greencity.ModelUtils.TEST_EMAIL;
+import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
+import static greencity.ModelUtils.TEST_PAYMENT_LIST;
+import static greencity.ModelUtils.addressDto;
+import static greencity.ModelUtils.addressDtoList;
+import static greencity.ModelUtils.addressList;
+import static greencity.ModelUtils.bagDto;
+import static greencity.ModelUtils.botList;
+import static greencity.ModelUtils.createCertificateDto;
+import static greencity.ModelUtils.getAddress;
+import static greencity.ModelUtils.getAddressDtoResponse;
+import static greencity.ModelUtils.getAddressRequestDto;
+import static greencity.ModelUtils.getBag;
+import static greencity.ModelUtils.getBag1list;
+import static greencity.ModelUtils.getBag4list;
 import static greencity.ModelUtils.getBagForOrder;
+import static greencity.ModelUtils.getBagTranslationDto;
+import static greencity.ModelUtils.getCancellationDto;
+import static greencity.ModelUtils.getCertificate;
+import static greencity.ModelUtils.getCourier;
+import static greencity.ModelUtils.getCourierDto;
+import static greencity.ModelUtils.getCourierDtoList;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getGeocodingResult;
+import static greencity.ModelUtils.getListOfEvents;
+import static greencity.ModelUtils.getLocation;
+import static greencity.ModelUtils.getMaximumAmountOfAddresses;
+import static greencity.ModelUtils.getOrder;
+import static greencity.ModelUtils.getOrderClientDto;
+import static greencity.ModelUtils.getOrderCount;
+import static greencity.ModelUtils.getOrderCountWithPaymentStatusPaid;
+import static greencity.ModelUtils.getOrderDetails;
+import static greencity.ModelUtils.getOrderDetailsWithoutSender;
+import static greencity.ModelUtils.getOrderDoneByUser;
+import static greencity.ModelUtils.getOrderFondyClientDto;
+import static greencity.ModelUtils.getOrderPaymentDetailDto;
+import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
+import static greencity.ModelUtils.getOrderResponseDto;
+import static greencity.ModelUtils.getOrderStatusDto;
+import static greencity.ModelUtils.getOrderStatusTranslation;
+import static greencity.ModelUtils.getOrderTest;
+import static greencity.ModelUtils.getOrderWithEvents;
+import static greencity.ModelUtils.getOrderWithTariffAndLocation;
+import static greencity.ModelUtils.getOrderWithoutPayment;
+import static greencity.ModelUtils.getOrdersDto;
+import static greencity.ModelUtils.getPayment;
+import static greencity.ModelUtils.getPaymentResponseDto;
+import static greencity.ModelUtils.getSuccessfulFondyResponse;
+import static greencity.ModelUtils.getTariffInfo;
+import static greencity.ModelUtils.getTariffInfoWithLimitOfBags;
+import static greencity.ModelUtils.getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag;
+import static greencity.ModelUtils.getTariffLocation;
+import static greencity.ModelUtils.getTariffsForLocationDto;
+import static greencity.ModelUtils.getTariffsInfo;
+import static greencity.ModelUtils.getTelegramBotNotifyTrue;
+import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
+import static greencity.ModelUtils.getTestOrderAddressLocationDto;
+import static greencity.ModelUtils.getTestUser;
+import static greencity.ModelUtils.getUBSuser;
+import static greencity.ModelUtils.getUBSuserWithoutSender;
+import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
+import static greencity.ModelUtils.getUbsUsers;
+import static greencity.ModelUtils.getUser;
+import static greencity.ModelUtils.getUserForCreate;
+import static greencity.ModelUtils.getUserInfoDto;
+import static greencity.ModelUtils.getUserPointsAndAllBagsDto;
+import static greencity.ModelUtils.getUserProfileCreateDto;
+import static greencity.ModelUtils.getUserProfileUpdateDto;
+import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
+import static greencity.ModelUtils.getUserWithBotNotifyTrue;
+import static greencity.ModelUtils.getUserWithLastLocation;
+import static greencity.ModelUtils.getViberBotNotifyTrue;
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
@@ -151,10 +213,22 @@ import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -1455,41 +1529,18 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void updatesUbsUserInfoInOrder2() {
-        UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
-            .recipientId(1L)
-            .build();
+    void updateUbsUserInfoInOrderThrowUBSuserNotFoundExceptionTest() {
+        UbsCustomersDtoUpdate request = getUbsCustomersDtoUpdate();
 
-        Optional<UBSuser> user = Optional.of(getUBSuser());
-        when(ubsUserRepository.findById(1L)).thenReturn(user);
-        when(ubsUserRepository.save(user.get())).thenReturn(user.get());
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.empty());
 
-        UbsCustomersDto expected = UbsCustomersDto.builder()
-            .name("oleh ivanov")
-            .email("mail@mail.ua")
-            .phoneNumber("067894522")
-            .build();
-
-        UbsCustomersDto actual = ubsService.updateUbsUserInfoInOrder(request, "abc");
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void updatesUbsUserInfoInOrderShouldThrowUBSuserNotFoundException() {
-        UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
-            .recipientId(1L)
-            .recipientName("Anatolii Petyrov")
-            .recipientEmail("anatolii.andr@gmail.com")
-            .recipientPhoneNumber("095123456").build();
-
-        when(ubsUserRepository.findById(1L))
-            .thenThrow(UBSuserNotFoundException.class);
         assertThrows(UBSuserNotFoundException.class,
             () -> ubsService.updateUbsUserInfoInOrder(request, "abc"));
+        verify(ubsUserRepository).findById(1L);
     }
 
     @Test
-    void updatesUbsUserInfoInOrder() {
+    void updateUbsUserInfoInOrderTest() {
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
             .recipientId(1L)
             .recipientName("Anatolii")
@@ -1509,6 +1560,9 @@ class UBSClientServiceImplTest {
 
         UbsCustomersDto actual = ubsService.updateUbsUserInfoInOrder(request, "abc");
         assertEquals(expected, actual);
+
+        verify(ubsUserRepository).findById(1L);
+        verify(ubsUserRepository).save(user.get());
     }
 
     @Test

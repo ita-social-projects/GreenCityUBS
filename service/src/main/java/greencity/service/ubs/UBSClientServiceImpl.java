@@ -996,9 +996,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
         eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().get(0));
         return UbsCustomersDto.builder()
-            .name(user.getFirstName() + " " + user.getLastName())
-            .email(user.getEmail())
-            .phoneNumber(user.getPhoneNumber())
+            .name(user.getSenderFirstName() + " " + user.getSenderLastName())
+            .email(user.getSenderEmail())
+            .phoneNumber(user.getSenderPhoneNumber())
             .build();
     }
 
@@ -1020,21 +1020,21 @@ public class UBSClientServiceImpl implements UBSClientService {
         return user.getId();
     }
 
-    private UBSuser updateRecipientDataInOrder(UBSuser ubSuser, UbsCustomersDtoUpdate dto) {
+    private UBSuser updateRecipientDataInOrder(UBSuser ubsUser, UbsCustomersDtoUpdate dto) {
         if (nonNull(dto.getRecipientEmail())) {
-            ubSuser.setEmail(dto.getRecipientEmail());
+            ubsUser.setSenderEmail(dto.getRecipientEmail());
         }
         if (nonNull(dto.getRecipientName())) {
-            ubSuser.setFirstName(dto.getRecipientName());
+            ubsUser.setSenderFirstName(dto.getRecipientName());
         }
         if (nonNull(dto.getRecipientSurName())) {
-            ubSuser.setLastName(dto.getRecipientSurName());
+            ubsUser.setSenderLastName(dto.getRecipientSurName());
         }
         if (nonNull(dto.getRecipientPhoneNumber())) {
-            ubSuser.setPhoneNumber(dto.getRecipientPhoneNumber());
+            ubsUser.setSenderPhoneNumber(dto.getRecipientPhoneNumber());
         }
 
-        return ubSuser;
+        return ubsUser;
     }
 
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
