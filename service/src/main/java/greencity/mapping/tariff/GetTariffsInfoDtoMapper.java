@@ -6,14 +6,11 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Region;
 import greencity.enums.LocationStatus;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
