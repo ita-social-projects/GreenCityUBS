@@ -31,6 +31,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     @Override
     protected UserProfileUpdateDto convert(User user) {
         List<AddressDto> addressDtoList = user.getAddresses().stream()
+            .filter(obj -> obj.getActual())
             .map(this::createAddressDto)
             .collect(Collectors.toList());
 
