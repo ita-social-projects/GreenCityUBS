@@ -4014,8 +4014,8 @@ public class ModelUtils {
             .tariffLocations(Set.of(TariffLocation.builder()
                 .tariffsInfo(ModelUtils.getTariffInfoWithLimitOfBags())
                 .locationStatus(LocationStatus.ACTIVE)
-
-                .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE)
+                .location(Location.builder().id(1L)
+                    .locationStatus(LocationStatus.ACTIVE)
                     .region(ModelUtils.getRegion())
                     .nameUk("Київ")
                     .nameEn("Kyiv")

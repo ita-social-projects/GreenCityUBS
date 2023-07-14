@@ -8,7 +8,6 @@ import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Region;
-
 import greencity.enums.LocationStatus;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
