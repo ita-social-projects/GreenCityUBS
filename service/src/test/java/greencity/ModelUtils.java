@@ -2865,7 +2865,6 @@ public class ModelUtils {
     public static Service getService() {
         Employee employee = ModelUtils.getEmployee();
         return Service.builder()
-                .status()
             .id(1L)
             .price(100_00L)
             .createdAt(LocalDate.now())
