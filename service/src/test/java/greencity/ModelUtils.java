@@ -2172,7 +2172,6 @@ public class ModelUtils {
     private static OrderBag createOrderBag() {
         return OrderBag.builder()
 
-
             .id(1L)
             .name("Name")
             .nameEng("NameEng")
@@ -2561,7 +2560,7 @@ public class ModelUtils {
 
     public static Optional<Bag> getOptionalBag() {
         return Optional.of(Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .capacity(120)
             .commission(50_00L)
@@ -2578,7 +2577,7 @@ public class ModelUtils {
 
     public static Bag getBag() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .capacity(120)
             .commission(50_00L)
@@ -2609,7 +2608,6 @@ public class ModelUtils {
     public static OrderBag getOrderBagWithConfirmedAmount() {
         return OrderBag.builder()
 
-
             .id(1L)
             .capacity(120)
             .price(120_00L)
@@ -2624,7 +2622,6 @@ public class ModelUtils {
 
     public static OrderBag getOrderBagWithExportedAmount() {
         return OrderBag.builder()
-
 
             .id(1L)
             .capacity(120)
@@ -2673,10 +2670,9 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .limitIncluded(true)
             .tariffsInfo(getTariffInfo())
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .build();
     }
-
 
     public static TariffServiceDto getTariffServiceDto() {
         return TariffServiceDto.builder()
@@ -2712,7 +2708,6 @@ public class ModelUtils {
 
     public static OrderBag getEditedOrderBag() {
         return OrderBag.builder()
-
 
             .id(1L)
             .amount(1)
