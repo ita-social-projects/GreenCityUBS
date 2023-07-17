@@ -41,14 +41,7 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.*;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -736,6 +729,8 @@ class UBSClientServiceImplTest {
                 f.set(ubsService, "1");
             }
         }
+
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong())).thenReturn(Optional.of(tariffsInfo));
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
@@ -2645,19 +2640,15 @@ class UBSClientServiceImplTest {
                 f.set(ubsService, "1");
             }
         }
-
+order.setPointsToUse(-10000);
         Certificate certificate = getCertificate();
         CertificateDto certificateDto = createCertificateDto();
-
+order.setOrderBags(Arrays.asList(getOrderBag()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
-
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
-        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
-        when(modelMapper.map(any(Bag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
-
+        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         ubsService.processOrderFondyClient(dto, "uuid");
 
         verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
