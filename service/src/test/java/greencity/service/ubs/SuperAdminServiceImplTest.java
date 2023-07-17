@@ -155,8 +155,7 @@ class SuperAdminServiceImplTest {
             tariffsInfoRepository,
             tariffsLocationRepository,
             deactivateTariffsForChosenParamRepository,
-            orderBagRepository,
-            orderRepository);
+            orderBagRepository);
     }
 
     @Test
