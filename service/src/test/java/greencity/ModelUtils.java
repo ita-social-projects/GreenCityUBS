@@ -2150,7 +2150,8 @@ public class ModelUtils {
     }
 
     private static Bag createBag() {
-        return Bag.builder()
+        return Bag.builder().status(BagStatus.ACTIVE)
+
             .id(1)
             .name("Name")
             .nameEng("NameEng")
@@ -2170,6 +2171,8 @@ public class ModelUtils {
 
     private static OrderBag createOrderBag() {
         return OrderBag.builder()
+
+
             .id(1L)
             .name("Name")
             .nameEng("NameEng")
@@ -2558,6 +2561,7 @@ public class ModelUtils {
 
     public static Optional<Bag> getOptionalBag() {
         return Optional.of(Bag.builder()
+                .status(BagStatus.ACTIVE)
             .id(1)
             .capacity(120)
             .commission(50_00L)
@@ -2574,6 +2578,7 @@ public class ModelUtils {
 
     public static Bag getBag() {
         return Bag.builder()
+                .status(BagStatus.ACTIVE)
             .id(1)
             .capacity(120)
             .commission(50_00L)
@@ -2603,6 +2608,8 @@ public class ModelUtils {
 
     public static OrderBag getOrderBagWithConfirmedAmount() {
         return OrderBag.builder()
+
+
             .id(1L)
             .capacity(120)
             .price(120_00L)
@@ -2617,6 +2624,8 @@ public class ModelUtils {
 
     public static OrderBag getOrderBagWithExportedAmount() {
         return OrderBag.builder()
+
+
             .id(1L)
             .capacity(120)
             .price(120_00L)
@@ -2631,7 +2640,8 @@ public class ModelUtils {
     }
 
     public static Bag getBagDeleted() {
-        return Bag.builder()
+        return Bag.builder().status(BagStatus.ACTIVE)
+
             .id(1)
             .capacity(120)
             .commission(50_00L)
@@ -2649,7 +2659,8 @@ public class ModelUtils {
     }
 
     public static Bag getBagForOrder() {
-        return Bag.builder()
+        return Bag.builder().status(BagStatus.ACTIVE)
+
             .id(3)
             .capacity(120)
             .commission(50_00L)
@@ -2662,25 +2673,10 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .limitIncluded(true)
             .tariffsInfo(getTariffInfo())
+                .status(BagStatus.ACTIVE)
             .build();
     }
 
-    public static Bag getBagForOrder() {
-        return Bag.builder()
-            .id(3)
-            .capacity(120)
-            .commission(50_00L)
-            .price(350_00L)
-            .fullPrice(400_00L)
-            .createdAt(LocalDate.now())
-            .createdBy(getEmployee())
-            .editedBy(getEmployee())
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .limitIncluded(true)
-            .tariffsInfo(getTariffInfo())
-            .build();
-    }
 
     public static TariffServiceDto getTariffServiceDto() {
         return TariffServiceDto.builder()
@@ -2694,7 +2690,8 @@ public class ModelUtils {
     }
 
     public static Bag getEditedBag() {
-        return Bag.builder()
+        return Bag.builder().status(BagStatus.ACTIVE)
+
             .id(1)
             .capacity(20)
             .price(100_00L)
@@ -2715,6 +2712,8 @@ public class ModelUtils {
 
     public static OrderBag getEditedOrderBag() {
         return OrderBag.builder()
+
+
             .id(1L)
             .amount(1)
             .price(150_00L)
@@ -2781,7 +2780,8 @@ public class ModelUtils {
     }
 
     public static Bag getTariffBag() {
-        return Bag.builder()
+        return Bag.builder().status(BagStatus.ACTIVE)
+
             .id(1)
             .capacity(20)
             .price(100_00L)
@@ -2810,7 +2810,8 @@ public class ModelUtils {
     }
 
     public static Bag getNewBag() {
-        return Bag.builder()
+        return Bag.builder().status(BagStatus.ACTIVE)
+
             .capacity(20)
             .price(100_00L)
             .commission(50_00L)
@@ -2864,6 +2865,7 @@ public class ModelUtils {
     public static Service getService() {
         Employee employee = ModelUtils.getEmployee();
         return Service.builder()
+                .status()
             .id(1L)
             .price(100_00L)
             .createdAt(LocalDate.now())
@@ -2952,7 +2954,8 @@ public class ModelUtils {
     }
 
     public static List<Bag> getBag1list() {
-        return List.of(Bag.builder()
+        return List.of(Bag.builder().status(BagStatus.ACTIVE)
+
             .id(1)
             .price(100_00L)
             .capacity(20)
@@ -2965,14 +2968,16 @@ public class ModelUtils {
     }
 
     public static List<Bag> getBaglist() {
-        return List.of(Bag.builder()
+        return List.of(Bag.builder().status(BagStatus.ACTIVE)
+
             .id(1)
             .price(100_00L)
             .capacity(10)
             .commission(21_00L)
             .fullPrice(20_00L)
             .build(),
-            Bag.builder()
+            Bag.builder().status(BagStatus.ACTIVE)
+
                 .id(2)
                 .price(100_00L)
                 .capacity(10)
@@ -2982,7 +2987,8 @@ public class ModelUtils {
     }
 
     public static List<Bag> getBag2list() {
-        return List.of(Bag.builder()
+        return List.of(Bag.builder().status(BagStatus.ACTIVE)
+
             .id(1)
             .price(100_00L)
             .capacity(10)
@@ -2992,14 +2998,16 @@ public class ModelUtils {
     }
 
     public static List<Bag> getBag3list() {
-        return List.of(Bag.builder()
+        return List.of(Bag.builder().status(BagStatus.ACTIVE)
+
             .id(1)
             .price(100_00L)
             .capacity(10)
             .commission(21_00L)
             .fullPrice(2000_00L)
             .build(),
-            Bag.builder()
+            Bag.builder().status(BagStatus.ACTIVE)
+
                 .id(2)
                 .price(100_00L)
                 .capacity(10)
@@ -3009,7 +3017,8 @@ public class ModelUtils {
     }
 
     public static List<Bag> getBag4list() {
-        return List.of(Bag.builder()
+        return List.of(Bag.builder().status(BagStatus.ACTIVE)
+
             .id(1)
             .price(100_00L)
             .capacity(10)
@@ -3019,7 +3028,8 @@ public class ModelUtils {
             .nameEng("nameEng")
             .limitIncluded(false)
             .build(),
-            Bag.builder()
+            Bag.builder().status(BagStatus.ACTIVE)
+
                 .id(2)
                 .price(100_00L)
                 .capacity(10)
@@ -3292,7 +3302,8 @@ public class ModelUtils {
     }
 
     public static Bag bagDto() {
-        return Bag.builder()
+        return Bag.builder().status(BagStatus.ACTIVE)
+
             .id(1)
             .limitIncluded(false)
             .description("Description")
