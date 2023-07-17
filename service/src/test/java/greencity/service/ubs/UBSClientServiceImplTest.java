@@ -653,13 +653,15 @@ class UBSClientServiceImplTest {
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
+        order.setOrderBags(Arrays.asList(getOrderBag()));
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
 
         Bag bag = getBagForOrder();
-        TariffsInfo tariffsInfo = getTariffInfo();
 
+        TariffsInfo tariffsInfo = getTariffInfo();
+tariffsInfo.setBags(Arrays.asList(bag));
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
@@ -678,17 +680,17 @@ class UBSClientServiceImplTest {
                 f.set(ubsService, "1");
             }
         }
-
+        when( bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
-        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
+
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
