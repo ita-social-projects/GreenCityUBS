@@ -629,7 +629,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             AddressComponentType.ROUTE, dtoRequest::setStreet,
             AddressComponentType.STREET_NUMBER, dtoRequest::setHouseNumber,
             AddressComponentType.SUBLOCALITY, dtoRequest::setDistrict,
-            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegion);
+            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_3, dtoRequest::setRegion);
     }
 
     private Map<AddressComponentType, Consumer<String>> initializeEnglishGeoCodingResult(
@@ -638,7 +638,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             AddressComponentType.LOCALITY, dtoRequest::setCityEn,
             AddressComponentType.ROUTE, dtoRequest::setStreetEn,
             AddressComponentType.SUBLOCALITY, dtoRequest::setDistrictEn,
-            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegionEn);
+            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_3, dtoRequest::setRegionEn);
     }
 
     private void initializeGeoCodingResults(Map<AddressComponentType, Consumer<String>> initializedMap,
