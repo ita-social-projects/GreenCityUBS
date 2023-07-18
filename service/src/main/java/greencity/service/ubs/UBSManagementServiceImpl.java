@@ -1094,7 +1094,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (isNull(pointsToReturn) || pointsToReturn == 0) {
             return;
         }
-        order.setPointsToUse(0);
         User user = order.getUser();
         if (isNull(user.getCurrentPoints())) {
             user.setCurrentPoints(0);
