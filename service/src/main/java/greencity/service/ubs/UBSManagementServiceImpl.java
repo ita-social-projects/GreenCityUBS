@@ -48,14 +48,7 @@ import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -71,21 +64,7 @@ import greencity.enums.PaymentType;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeOrderPositionRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderDetailRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -112,15 +91,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
@@ -141,6 +112,8 @@ import static java.util.Objects.nonNull;
 @AllArgsConstructor
 @Slf4j
 public class UBSManagementServiceImpl implements UBSManagementService {
+    @Autowired
+    private OrderBagRepository orderBagRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final OrderRepository orderRepository;
     private final OrderAddressRepository orderAddressRepository;
@@ -808,13 +781,26 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return result;
     }
 
+    private Long findPrice(List<OrderBag> orderBags, Integer id) {
+        return orderBags.stream()
+            .filter(ob -> ob.getBag().getId().equals(id))
+            .map(OrderBag::getPrice)
+            .findFirst()
+            .orElseThrow(() -> new NoSuchElementException("No Bag found with id " + id));
+    }
+
     private CounterOrderDetailsDto getPriceDetails(Long id) {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        List<Bag> bag = bagRepository.findBagsByOrderId(id);
+        List<OrderBag> orderBags = orderBagRepository.findAll().stream()
+            .filter(obj -> obj.getOrder().getId().equals(order.getId())).collect(Collectors.toList());
+        List<Bag> bag = orderBags.stream()
+            .filter(o -> o.getOrder().getId().equals(order.getId()))
+            .map(OrderBag::getBag)
+            .peek(b -> b.setFullPrice(findPrice(orderBags, b.getId())))
+            .collect(Collectors.toList());
         final List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
-
         long sumAmountInCoins = 0;
         long sumConfirmedInCoins = 0;
         long sumExportedInCoins = 0;
