@@ -2657,7 +2657,7 @@ public class ModelUtils {
 
     public static Bag getBagForOrder() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(3)
             .capacity(120)
             .commission(50_00L)
@@ -3664,7 +3664,7 @@ public class ModelUtils {
             .orderStatus(OrderStatus.CONFIRMED)
             .user(User.builder().id(1L).currentPoints(100).build())
             .writeOffStationSum(50_00L)
-                .orderBags(Collections.emptyList())
+            .orderBags(Collections.emptyList())
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId("1L")
                 .amount(20000L)

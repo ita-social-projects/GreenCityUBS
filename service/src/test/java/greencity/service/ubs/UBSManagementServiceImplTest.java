@@ -187,6 +187,7 @@ class UBSManagementServiceImplTest {
     TariffsInfoRepository tariffsInfoRepository;
     @Mock
     private OrderBagRepository orderBagRepository;
+
     @Test
     void getAllCertificates() {
         Pageable pageable =

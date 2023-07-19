@@ -1002,11 +1002,8 @@ class UBSClientServiceImplTest {
         tariffsInfo.setBags(Arrays.asList(bag));
         order.setTariffsInfo(tariffsInfo);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
-        when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
 
         assertThrows(BadRequestException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
@@ -1014,7 +1011,6 @@ class UBSClientServiceImplTest {
         verify(userRepository, times(1)).findByUuid(anyString());
         verify(tariffsInfoRepository, times(1))
             .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
-        verify(bagRepository, times(1)).findById(any());
     }
 
     @Test
@@ -1100,7 +1096,6 @@ class UBSClientServiceImplTest {
         verify(userRepository, times(1)).findByUuid(anyString());
         verify(tariffsInfoRepository, times(1))
             .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
-        verify(bagRepository).findById(3);
 
     }
 
@@ -1135,10 +1130,8 @@ class UBSClientServiceImplTest {
         tariffsInfo.setBags(Arrays.asList(bag));
         order.setTariffsInfo(tariffsInfo);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-//        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-//            .thenReturn(Optional.of(getTariffInfo()));
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
@@ -1150,7 +1143,7 @@ class UBSClientServiceImplTest {
         verify(userRepository, times(1)).findByUuid("35467585763t4sfgchjfuyetf");
         verify(tariffsInfoRepository, times(1))
             .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
-        verify(bagRepository, times(2)).findById(any());
+//        verify(bagRepository, times(2)).findById(any());
         verify(ubsUserRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(dto.getPersonalData(), UBSuser.class);
         verify(orderRepository, times(1)).findById(anyLong());
@@ -1193,6 +1186,7 @@ class UBSClientServiceImplTest {
         Bag bag = getBagForOrder();
         TariffsInfo tariffsInfo = getTariffInfoWithLimitOfBags();
         bag.setTariffsInfo(tariffsInfo);
+        tariffsInfo.setBags(Arrays.asList(bag));
 
         UBSuser ubSuser = getUBSuser();
 
@@ -2474,7 +2468,6 @@ class UBSClientServiceImplTest {
 
     }
 
-
     @Test
     void processOrderFondyClientCertificeteNotFoundExeption() throws Exception {
         Order order = getOrderCount();
@@ -2505,6 +2498,11 @@ class UBSClientServiceImplTest {
 
         CertificateDto certificateDto = createCertificateDto();
         certificateDto.setPoints(1500);
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        tariffsInfo.setBags(Arrays.asList(getBag()));
+        order.setTariffsInfo(tariffsInfo);
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+                .thenReturn(Optional.of(tariffsInfo));
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
@@ -2685,7 +2683,7 @@ class UBSClientServiceImplTest {
         dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         order.setPayment(null);
-        order.setOrderBags(Arrays.asList(getOrderBag(),getOrderBag()));
+        order.setOrderBags(Arrays.asList(getOrderBag(), getOrderBag()));
 
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -2719,7 +2717,7 @@ class UBSClientServiceImplTest {
         tariffsInfo.setBags(Arrays.asList(bag));
         order.setTariffsInfo(tariffsInfo);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -2973,7 +2971,8 @@ class UBSClientServiceImplTest {
 
         List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
-
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        bag.setTariffsInfo(tariffsInfo);
         BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
@@ -2982,7 +2981,10 @@ class UBSClientServiceImplTest {
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
-
+        tariffsInfo.setBags(bags);
+        order.setTariffsInfo(tariffsInfo);
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+                .thenReturn(Optional.of(tariffsInfo));
         when(ordersForUserRepository.getAllByUserUuidAndId(user.getUuid(), order.getId()))
             .thenReturn(order);
         when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(bags);
@@ -3366,7 +3368,7 @@ class UBSClientServiceImplTest {
         tariffsInfo.setBags(Arrays.asList(bag));
         order.setTariffsInfo(tariffsInfo);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
 //        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
 //            .thenReturn(Optional.of(getTariffInfo()));
@@ -3408,7 +3410,7 @@ class UBSClientServiceImplTest {
         tariffsInfo.setBags(Arrays.asList(bag));
         order.setTariffsInfo(tariffsInfo);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
 //        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
 //            .thenReturn(Optional.of(getTariffInfo()));
