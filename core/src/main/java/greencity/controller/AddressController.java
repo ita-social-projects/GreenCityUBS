@@ -4,12 +4,11 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
-import greencity.dto.location.api.LocationDto;
+import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.user.UserVO;
-import greencity.service.locations.LocationApiService;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -40,7 +39,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AddressController {
     private final UBSClientService ubsClientService;
-    private final LocationApiService locationApiService;
 
     /**
      * Controller for getting all addresses for current order.
@@ -168,9 +166,9 @@ public class AddressController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-districts")
-    public ResponseEntity<List<LocationDto>> getAllDistrictsForRegionAndCity(@RequestParam String region,
+    public ResponseEntity<List<DistrictDto>> getAllDistrictsForRegionAndCity(@RequestParam String region,
         @RequestParam String city) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(locationApiService.getAllDistrictsInCityByNames(region, city));
+            .body(ubsClientService.getAllDistricts(region, city));
     }
 }

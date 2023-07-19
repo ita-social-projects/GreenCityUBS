@@ -10,7 +10,6 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
-import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.service.GetServiceDto;
@@ -1875,18 +1874,6 @@ class SuperAdminServiceImplTest {
 
         verify(tariffsInfoRepository).findById(1L);
         verify(tariffsInfoRepository).save(tariffInfo);
-    }
-
-    @Test
-    void editLocation() {
-        Location location = ModelUtils.getLocation();
-        when(locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
-        EditLocationDto dto = new EditLocationDto(1L, "Lviv", "Львів");
-        superAdminService.editLocations(List.of(dto));
-        verify(locationRepository).save(location);
-        verify(locationRepository).findById(anyLong());
-        verify(locationRepository).existsByNameUkAndNameEnAndRegion("Львів", "Lviv", location.getRegion());
-        assertEquals(location.getNameEn(), dto.getNameEn());
     }
 
     @Test

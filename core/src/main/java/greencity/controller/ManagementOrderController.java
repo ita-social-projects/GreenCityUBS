@@ -1041,4 +1041,27 @@ public class ManagementOrderController {
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.updateOrderCancellationReason(id, dto, uuid));
     }
+
+    /**
+     * Controller saves order ID of order for which we need to make a refund.
+     *
+     * @param orderId {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     *
+     * @author Anton Bondar
+     */
+    @ApiOperation(value = "saves order ID of order for which we need to make a refund")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @ResponseStatus(value = HttpStatus.CREATED)
+    @PostMapping("/save-order-for-refund/{orderId}")
+    public ResponseEntity<HttpStatus> saveOrderIdForRefund(
+        @Valid @PathVariable("orderId") Long orderId) {
+        ubsManagementService.saveOrderIdForRefund(orderId);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
 }
