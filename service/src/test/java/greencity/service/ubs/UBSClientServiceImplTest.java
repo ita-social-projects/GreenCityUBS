@@ -17,7 +17,6 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
@@ -144,11 +143,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 @ExtendWith({MockitoExtension.class})
@@ -707,7 +704,9 @@ class UBSClientServiceImplTest {
         Bag bag1 = getBagForOrder();
         bag1.setId(1);
         bag1.setLimitIncluded(false);
+        bag1.setCapacity(100);
         Bag bag3 = getBagForOrder();
+        bag3.setCapacity(1000);
         TariffsInfo tariffsInfo = getTariffInfo();
         tariffsInfo.setBags(Arrays.asList(bag1, bag3));
 
@@ -721,7 +720,8 @@ class UBSClientServiceImplTest {
         Payment payment1 = getPayment();
         payment1.setId(1L);
         order1.getPayment().add(payment1);
-
+        order.setOrderBags(Arrays.asList(getOrderBag(), getOrderBag(), getOrderBag()));
+        order1.setOrderBags(Arrays.asList(getOrderBag(), getOrderBag(), getOrderBag()));
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
             if (f.getName().equals("merchantId")) {
@@ -729,8 +729,8 @@ class UBSClientServiceImplTest {
                 f.set(ubsService, "1");
             }
         }
-
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong())).thenReturn(Optional.of(tariffsInfo));
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
@@ -2404,15 +2404,10 @@ class UBSClientServiceImplTest {
         List<OrderBag> orderBags = Collections.emptyList();
         order.setOrderBags(orderBags);
         when(ordersForUserRepository.getAllByUserUuidAndId(order.getUser().getUuid(), order.getId()))
-                .thenReturn(order);
-//        doNothing().when(orderBagRepository).deleteAll(orderBags);
-
+            .thenReturn(order);
         ubsService.deleteOrder(order.getUser().getUuid(), 1L);
-
         verify(orderRepository).delete(order);
-//        verify(orderBagRepository).deleteAll(orderBags);
     }
-
 
     @Test
     void deleteOrderFail() {
@@ -2435,6 +2430,7 @@ class UBSClientServiceImplTest {
         order.setSumTotalAmountWithoutDiscounts(1000_00L);
         order.setCertificates(Set.of(getCertificate()));
         order.setPayment(TEST_PAYMENT_LIST);
+        order.setOrderBags(Arrays.asList(getOrderBag()));
         User user = getUser();
         user.setCurrentPoints(100);
         user.setChangeOfPointsList(new ArrayList<>());
@@ -2451,15 +2447,13 @@ class UBSClientServiceImplTest {
 
         Certificate certificate = getCertificate();
         CertificateDto certificateDto = createCertificateDto();
-
+        order.setPointsToUse(-1000);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
-
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
-        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
-        when(modelMapper.map(any(Bag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
+        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
 
         ubsService.processOrderFondyClient(dto, "uuid");
 
@@ -2480,6 +2474,7 @@ class UBSClientServiceImplTest {
         order.setSumTotalAmountWithoutDiscounts(1000_00L);
         order.setCertificates(Set.of(certificate));
         order.setPayment(TEST_PAYMENT_LIST);
+        order.setOrderBags(Arrays.asList(getOrderBag()));
         User user = getUser();
         user.setCurrentPoints(100);
         user.setChangeOfPointsList(new ArrayList<>());
@@ -2498,14 +2493,13 @@ class UBSClientServiceImplTest {
 
         CertificateDto certificateDto = createCertificateDto();
         certificateDto.setPoints(1500);
-
+        order.setPointsToUse(-1000);
+        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
         when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
             CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
-        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
-        when(modelMapper.map(any(Bag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
 
         ubsService.processOrderFondyClient(dto, "uuid");
 
@@ -2513,9 +2507,8 @@ class UBSClientServiceImplTest {
         verify(userRepository).findUserByUuid("uuid");
         verify(certificateRepository).findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
             CertificateStatus.ACTIVE);
-        verify(bagRepository).findBagsByOrderId(order.getId());
         verify(modelMapper).map(certificate, CertificateDto.class);
-        verify(modelMapper).map(any(Bag.class), eq(BagForUserDto.class));
+        verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
     }
 
     @Test
@@ -2584,7 +2577,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(100);
         user.setChangeOfPointsList(new ArrayList<>());
         order.setUser(user);
-order.setOrderBags(Arrays.asList(getOrderBag()));
+        order.setOrderBags(Arrays.asList(getOrderBag()));
         OrderFondyClientDto dto = getOrderFondyClientDto();
         dto.setCertificates(Set.of("1111-1234", "2222-1234"));
 
@@ -2615,7 +2608,7 @@ order.setOrderBags(Arrays.asList(getOrderBag()));
             CertificateStatus.ACTIVE);
 //        verify(bagRepository).findBagsByOrderId(order.getId());
         verify(modelMapper).map(certificate, CertificateDto.class);
-        verify(modelMapper).map(any(Bag.class), eq(BagForUserDto.class));
+        verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
     }
 
     @Test
@@ -2642,10 +2635,10 @@ order.setOrderBags(Arrays.asList(getOrderBag()));
                 f.set(ubsService, "1");
             }
         }
-order.setPointsToUse(-10000);
+        order.setPointsToUse(-10000);
         Certificate certificate = getCertificate();
         CertificateDto certificateDto = createCertificateDto();
-order.setOrderBags(Arrays.asList(getOrderBag()));
+        order.setOrderBags(Arrays.asList(getOrderBag()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
