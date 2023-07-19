@@ -2656,8 +2656,8 @@ public class ModelUtils {
     }
 
     public static Bag getBagForOrder() {
-        return Bag.builder().status(BagStatus.ACTIVE)
-
+        return Bag.builder()
+                .status(BagStatus.ACTIVE)
             .id(3)
             .capacity(120)
             .commission(50_00L)
