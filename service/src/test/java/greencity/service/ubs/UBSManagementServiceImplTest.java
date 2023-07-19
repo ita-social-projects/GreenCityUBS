@@ -51,21 +51,7 @@ import greencity.enums.OrderStatus;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeOrderPositionRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderDetailRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.notification.NotificationServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -200,6 +186,8 @@ class UBSManagementServiceImplTest {
     @Mock
     TariffsInfoRepository tariffsInfoRepository;
 
+    @Mock
+    private OrderBagRepository orderBagRepository;
     @Test
     void getAllCertificates() {
         Pageable pageable =
