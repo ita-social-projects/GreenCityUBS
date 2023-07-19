@@ -2005,7 +2005,6 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
-        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBag2list());
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
         when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
@@ -2021,7 +2020,6 @@ class UBSManagementServiceImplTest {
         ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
 
         verify(orderRepository).getOrderDetails(1L);
-        verify(bagRepository).findBagsByOrderId(1L);
         verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(certificateRepository).findCertificate(1L);
         verify(orderRepository, times(5)).findById(1L);

@@ -3783,7 +3783,20 @@ public class ModelUtils {
             .certificates(Set.of(Certificate.builder()
                 .points(0)
                 .build()))
+            .orderBags(Arrays.asList(orderBag(), orderBag()))
             .pointsToUse(0)
+            .build();
+    }
+
+    public static OrderBag orderBag() {
+        return OrderBag.builder()
+            .id(1L)
+            .capacity(1200)
+            .price(12000_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(10)
+            .bag(getBag())
             .build();
     }
 
