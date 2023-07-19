@@ -917,17 +917,21 @@ class UBSClientServiceImplTest {
 
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().get(0).setAmount(1);
+        Bag bag = getBagForOrder();
+
         Order order = getOrder();
+        order.setOrderBags(Arrays.asList(getOrderBag()));
+        TariffsInfo tariffsInfo = getTariffInfo();
+        tariffsInfo.setBags(Arrays.asList(bag));
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
 
-        Bag bag = getBagForOrder();
-
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-            .thenReturn(Optional.of(getTariffInfo()));
+            .thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
 
         assertThrows(BadRequestException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
@@ -2463,7 +2467,7 @@ class UBSClientServiceImplTest {
     void processOrderFondyClient2() throws Exception {
         Order order = getOrderCount();
         Certificate certificate = getCertificate();
-        certificate.setPoints(1500);
+        certificate.setPoints(500);
         HashMap<Integer, Integer> value = new HashMap<>();
         value.put(1, 22);
         order.setAmountOfBagsOrdered(value);
@@ -2490,14 +2494,20 @@ class UBSClientServiceImplTest {
 
         CertificateDto certificateDto = createCertificateDto();
         certificateDto.setPoints(1500);
-        order.setPointsToUse(-1000);
+        Bag bag = getBag();
+        bag.setCapacity(100);
+        bag.setFullPrice(400_00L);
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        bag.setTariffsInfo(tariffsInfo);
+
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
         when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
             CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
-
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+                .thenReturn(Optional.of(tariffsInfo));
         ubsService.processOrderFondyClient(dto, "uuid");
 
         verify(orderRepository).findById(1L);
