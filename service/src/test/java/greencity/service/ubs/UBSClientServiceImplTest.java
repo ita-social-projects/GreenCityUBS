@@ -2971,35 +2971,27 @@ class UBSClientServiceImplTest {
 
         List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
-        TariffsInfo tariffsInfo = getTariffsInfo();
-        bag.setTariffsInfo(tariffsInfo);
-        BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
         order.setAmountOfBagsOrdered(Map.of(1, 10));
         bags.add(bag);
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        order.setOrderBags(Arrays.asList(getOrderBag()));
         orderList.add(order);
-        tariffsInfo.setBags(bags);
-        order.setTariffsInfo(tariffsInfo);
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
         when(ordersForUserRepository.getAllByUserUuidAndId(user.getUuid(), order.getId()))
             .thenReturn(order);
-        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(bags);
-        when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
                 .thenReturn(Optional.of(orderStatusTranslation));
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
+        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
 
         ubsService.getOrderForUser(user.getUuid(), 1L);
 
-        verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
-        verify(bagRepository).findBagsByOrderId(order.getId());
+        verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
         verify(orderStatusTranslationRepository, times(orderList.size()))
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
