@@ -185,7 +185,6 @@ class UBSManagementServiceImplTest {
 
     @Mock
     TariffsInfoRepository tariffsInfoRepository;
-
     @Mock
     private OrderBagRepository orderBagRepository;
     @Test
@@ -399,6 +398,7 @@ class UBSManagementServiceImplTest {
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
             .settlementdate("02-08-2021").amount(50_00L).receiptLink("link").paymentId("1").build();
         Employee employee = ModelUtils.getEmployee();
+
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
@@ -408,7 +408,9 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(any(), any(), any());
+
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
             "Петро  Петренко", order);
@@ -1092,6 +1094,7 @@ class UBSManagementServiceImplTest {
         when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         when(bagRepository.findBagsByOrderId(1L)).thenReturn(ModelUtils.getBag1list());
         when(paymentRepository.selectSumPaid(1L)).thenReturn(5000L);
+
         doNothing().when(orderRepository).updateOrderPaymentStatus(1L, OrderPaymentStatus.HALF_PAID.name());
 
         ubsManagementService.setOrderDetail(1L,

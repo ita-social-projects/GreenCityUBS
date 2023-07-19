@@ -709,7 +709,6 @@ class UBSClientServiceImplTest {
         bag3.setCapacity(1000);
         TariffsInfo tariffsInfo = getTariffInfo();
         tariffsInfo.setBags(Arrays.asList(bag1, bag3));
-
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
@@ -729,17 +728,17 @@ class UBSClientServiceImplTest {
                 f.set(ubsService, "1");
             }
         }
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag1));
-        when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag3));
+        when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag3));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
+
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
@@ -2450,14 +2449,12 @@ class UBSClientServiceImplTest {
         order.setPointsToUse(-1000);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
 
         ubsService.processOrderFondyClient(dto, "uuid");
 
-        verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
         verify(fondyClient).getCheckoutResponse(any());
 
     }
@@ -2596,7 +2593,6 @@ class UBSClientServiceImplTest {
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
         when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
             CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
-        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
 
@@ -2606,7 +2602,6 @@ class UBSClientServiceImplTest {
         verify(userRepository).findUserByUuid("uuid");
         verify(certificateRepository).findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
             CertificateStatus.ACTIVE);
-//        verify(bagRepository).findBagsByOrderId(order.getId());
         verify(modelMapper).map(certificate, CertificateDto.class);
         verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
     }
