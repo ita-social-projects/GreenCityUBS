@@ -2683,6 +2683,19 @@ public class ModelUtils {
             .build());
     }
 
+
+    public static OrderBag getOrderBag2() {
+        return OrderBag.builder()
+                .id(2L)
+                .capacity(2200)
+                .price(22000_00L)
+                .name("name")
+                .nameEng("name eng")
+                .amount(20)
+                .bag(getBag().setId(2))
+                .order(getOrder())
+                .build();
+    }
     public static Bag getBag() {
         return Bag.builder()
             .id(1)
@@ -3662,6 +3675,7 @@ public class ModelUtils {
         hashMap.put(2, 1);
 
         return Order.builder()
+                .orderBags(Arrays.asList(getOrderBag(), getOrderBag2()))
             .id(1L)
             .amountOfBagsOrdered(hashMap)
             .confirmedQuantity(hashMap)
