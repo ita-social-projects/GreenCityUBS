@@ -77,7 +77,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      */
     @Query(nativeQuery = true,
         value = "SELECT * FROM bag "
-            + "WHERE id = :bagId AND status = 'ACTIVE'")
+            + "WHERE id = :bagId")
     Optional<Bag> findActiveBagById(Integer bagId);
 
     /**
@@ -89,6 +89,6 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      */
     @Query(nativeQuery = true,
         value = "SELECT * FROM bag "
-            + "WHERE tariffs_info_id = :tariffInfoId AND status = 'ACTIVE'")
+            + "WHERE tariffs_info_id = :tariffInfoId")
     List<Bag> findAllActiveBagsByTariffsInfoId(Long tariffInfoId);
 }

@@ -122,7 +122,7 @@ import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
-import greencity.enums.BagStatus;
+ 
 import greencity.enums.CancellationReason;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -2694,7 +2694,7 @@ public class ModelUtils {
             .createdBy(getEmployee())
             .editedBy(getEmployee())
             .limitIncluded(true)
-            .status(BagStatus.ACTIVE)
+             
             .tariffsInfo(getTariffInfo())
             .build();
     }
@@ -2754,7 +2754,6 @@ public class ModelUtils {
             .description("Description")
             .descriptionEng("DescriptionEng")
             .limitIncluded(true)
-            .status(BagStatus.DELETED)
             .tariffsInfo(getTariffInfo())
             .build();
     }
@@ -2801,7 +2800,7 @@ public class ModelUtils {
             .editedBy(getEmployee())
             .editedAt(LocalDate.now())
             .limitIncluded(true)
-            .status(BagStatus.ACTIVE)
+             
             .tariffsInfo(getTariffInfo())
             .build();
 
@@ -2916,7 +2915,7 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
-            .status(BagStatus.ACTIVE)
+             
             .build();
     }
 
