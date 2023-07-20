@@ -1,9 +1,11 @@
 package greencity.repository;
 
+import greencity.entity.order.Bag;
 import greencity.entity.order.OrderBag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,16 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
         + "from orders o "
         + "where o.id = obm.order_id and obm.bag_id = :bagId and o.order_payment_status = 'UNPAID'", nativeQuery = true)
     void updateAllByBagIdForUnpaidOrders(Integer bagId, Integer capacity, Long price, String name, String nameEng);
+
+    /**
+     * Retrieves a list of order bags based on the given order ID.
+     *
+     * @param "orderId" the ID of the order
+     * @return a list of order bags matching the order ID
+     */
+    @Query(value = "SELECT   * FROM ORDER_BAG_MAPPING as OBM "
+        + "where OBM.ORDER_ID = :orderId", nativeQuery = true)
+    List<OrderBag> findOrderBagsByOrderId(@Param("orderId") Long id);
 
     /**
      * method returns all OrderBags by bag id.
