@@ -196,7 +196,5 @@ public class Order {
      * @author Julia Seti
      */
     public void removeBagFromOrder(OrderBag orderBag) {
-        this.orderBags.remove(orderBag);
     }
-
 }
