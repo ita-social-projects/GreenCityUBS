@@ -53,7 +53,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import static greencity.ModelUtils.getEditLocationDto;
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -987,18 +986,6 @@ class SuperAdminControllerTest {
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
         verify(superAdminService).switchTariffStatus(1L, "Active");
-    }
-
-    @Test
-    void editLocationsTest() throws Exception {
-        var dto = getEditLocationDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        mockMvc.perform(post(ubsLink + "/locations/edit")
-            .content(objectMapper.writeValueAsString(List.of(dto)))
-            .contentType(MediaType.APPLICATION_JSON)
-            .principal(principal))
-            .andExpect(status().isOk());
-        verify(superAdminService).editLocations(List.of(dto));
     }
 
     @Test

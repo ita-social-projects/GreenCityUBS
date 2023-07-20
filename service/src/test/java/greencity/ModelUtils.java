@@ -50,6 +50,8 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.location.LocationTranslationDto;
 import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
+import greencity.dto.location.api.DistrictDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationShortDto;
@@ -103,6 +105,7 @@ import greencity.entity.order.OrderBag;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
+import greencity.entity.order.Refund;
 import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
@@ -1645,6 +1648,98 @@ public class ModelUtils {
             .build();
     }
 
+    public static Address getAddressTrue() {
+        return Address.builder()
+            .id(1L)
+            .region("Region")
+            .city("City")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(true)
+            .addressStatus(AddressStatus.NEW)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng")
+            .build();
+    }
+
+    public static Address getAddress(long id) {
+        return Address.builder()
+            .id(id)
+            .region("Вінницька")
+            .city("Вінниця")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(false)
+            .addressStatus(AddressStatus.NEW)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng")
+            .build();
+    }
+
+    public static LocationDto getLocationApiDto() {
+        return LocationDto.builder()
+            .locationNameMap(Map.of("name", "Вінниця", "name_en", "Vinnytsa"))
+            .build();
+    }
+
+    public static List<LocationDto> getLocationApiDtoList() {
+        LocationDto locationDto1 = LocationDto.builder()
+            .locationNameMap(Map.of("name", "Вінниця", "name_en", "Vinnytsa"))
+            .build();
+        return Arrays.asList(locationDto1);
+    }
+
+    public static DistrictDto getDistrictDto() {
+        return DistrictDto.builder()
+            .nameUa("Вінниця")
+            .nameEn("Vinnytsa")
+            .build();
+    }
+
+    public static AddressDto getAddressDto(long id) {
+        return AddressDto.builder()
+            .id(id)
+            .region("Вінницька")
+            .city("Вінниця")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(false)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng")
+            .addressRegionDistrictList(Arrays.asList(getDistrictDto()))
+            .build();
+    }
+
     public static OrderAddress getOrderAddress() {
         return OrderAddress.builder()
             .region("Region")
@@ -1794,6 +1889,22 @@ public class ModelUtils {
             .uuid("uuid")
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
+            .build();
+    }
+
+    public static User getUserWithBotNotifyTrue_AddressTrue() {
+        return User.builder()
+            .id(1L)
+            .addresses(singletonList(getAddressTrue()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .uuid("uuid")
+            .ubsUsers(getUbsUsers())
+            .currentPoints(100)
+            .telegramBot(getTelegramBotNotifyTrue())
             .build();
     }
 
@@ -2644,23 +2755,6 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .limitIncluded(true)
             .status(BagStatus.DELETED)
-            .tariffsInfo(getTariffInfo())
-            .build();
-    }
-
-    public static Bag getBagForOrder() {
-        return Bag.builder()
-            .id(3)
-            .capacity(120)
-            .commission(50_00L)
-            .price(350_00L)
-            .fullPrice(400_00L)
-            .createdAt(LocalDate.now())
-            .createdBy(getEmployee())
-            .editedBy(getEmployee())
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .limitIncluded(true)
             .tariffsInfo(getTariffInfo())
             .build();
     }
@@ -4067,7 +4161,9 @@ public class ModelUtils {
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .tariffLocations(Set.of(TariffLocation.builder()
                 .tariffsInfo(ModelUtils.getTariffInfoWithLimitOfBags())
+                .locationStatus(LocationStatus.ACTIVE)
                 .location(Location.builder().id(1L)
+                    .locationStatus(LocationStatus.ACTIVE)
                     .region(ModelUtils.getRegion())
                     .nameUk("Київ")
                     .nameEn("Kyiv")
@@ -4768,5 +4864,9 @@ public class ModelUtils {
             .id(id)
             .name(nameTranslations)
             .build();
+    }
+
+    public static Refund getRefund(Long id) {
+        return Refund.builder().orderId(id).build();
     }
 }

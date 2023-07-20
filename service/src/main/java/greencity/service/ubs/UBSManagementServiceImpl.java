@@ -16,6 +16,7 @@ import greencity.dto.courier.CourierInfoDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
+import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -55,6 +56,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
+import greencity.entity.order.Refund;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -83,9 +85,11 @@ import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
+import greencity.repository.RefundRepository;
 import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
+import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -127,13 +131,13 @@ import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -163,7 +167,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
     private final OrdersAdminsPageService ordersAdminsPageService;
-
+    private final LocationApiService locationApiService;
+    private final RefundRepository refundRepository;
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
 
     private final Set<OrderStatus> orderStatusesBeforeShipment =
@@ -444,6 +449,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressHouseNumber(address.getHouseNumber())
             .addressRegion(address.getRegion())
             .addressRegionEng(address.getRegionEn())
+            .addressRegionDistrictList(
+                locationApiService.getAllDistrictsInCityByNames(address.getRegion(), address.getCity()).stream()
+                    .map(p -> modelMapper.map(p, DistrictDto.class))
+                    .collect(Collectors.toList()))
             .build();
     }
 
@@ -1085,7 +1094,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (isNull(pointsToReturn) || pointsToReturn == 0) {
             return;
         }
-        order.setPointsToUse(0);
         User user = order.getUser();
         if (isNull(user.getCurrentPoints())) {
             user.setCurrentPoints(0);
@@ -1830,5 +1838,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .description(order.getReasonNotTakingBagDescription())
             .images(order.getImageReasonNotTakingBags())
             .build();
+    }
+
+    @Override
+    public void saveOrderIdForRefund(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        refundRepository.save(Refund.builder().orderId(order.getId()).build());
     }
 }
