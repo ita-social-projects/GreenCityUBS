@@ -199,14 +199,4 @@ public class Order {
         this.orderBags.remove(orderBag);
     }
 
-    /**
-     * method helps to set bags for order.
-     *
-     * @param orderBags {@link List} of {@link OrderBag}
-     * @author Julia Seti
-     */
-    public void setBagsForOrder(List<OrderBag> orderBags) {
-        orderBags.forEach(it -> it.setOrder(this));
-        this.setOrderBags(orderBags);
-    }
 }

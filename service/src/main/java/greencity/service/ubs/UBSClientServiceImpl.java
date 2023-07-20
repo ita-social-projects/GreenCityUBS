@@ -1047,7 +1047,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
-        order.setBagsForOrder(bagsOrdered);
+        order.setOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(
