@@ -232,7 +232,6 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.spy;
 
-
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
     @Mock
@@ -1258,16 +1257,17 @@ class UBSClientServiceImplTest {
 
     private static OrderBag getOrderBag() {
         return OrderBag.builder()
-                .id(1L)
-                .capacity(1200)
-                .price(12000_00L)
-                .name("name")
-                .nameEng("name eng")
-                .amount(10)
-                .bag(getBag())
-                .order(getOrder())
-                .build();
+            .id(1L)
+            .capacity(1200)
+            .price(12000_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(10)
+            .bag(getBag())
+            .order(getOrder())
+            .build();
     }
+
     @Test
     void saveToDBFailPaidOrder() {
         User user = getUserWithLastLocation();

@@ -2706,12 +2706,25 @@ public class ModelUtils {
     public static OrderBag getOrderBag() {
         return OrderBag.builder()
             .id(1L)
-            .capacity(1200)
-            .price(12000_00L)
+            .capacity(1000)
+            .price(10000_00L)
             .name("name")
             .nameEng("name eng")
             .amount(10)
             .bag(getBag())
+            .order(getOrder())
+            .build();
+    }
+
+    public static OrderBag getOrderBag2() {
+        return OrderBag.builder()
+            .id(2L)
+            .capacity(2200)
+            .price(22000_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(20)
+            .bag(getBag().setId(2))
             .order(getOrder())
             .build();
     }
@@ -3103,22 +3116,23 @@ public class ModelUtils {
     }
 
     public static List<Bag> getBag3list() {
-        return List.of(Bag.builder().status(BagStatus.ACTIVE)
+        Bag bag1 = Bag.builder().status(BagStatus.ACTIVE)
 
             .id(1)
             .price(100_00L)
             .capacity(10)
             .commission(21_00L)
             .fullPrice(2000_00L)
-            .build(),
-            Bag.builder().status(BagStatus.ACTIVE)
+            .build();
+        Bag bag2 = Bag.builder().status(BagStatus.ACTIVE)
+            .id(2)
+            .price(90_00L)
+            .capacity(10)
+            .commission(20_00L)
+            .fullPrice(120_00L)
+            .build();
+        return Arrays.asList(bag1, bag2);
 
-                .id(2)
-                .price(100_00L)
-                .capacity(10)
-                .commission(20_00L)
-                .fullPrice(120_00L)
-                .build());
     }
 
     public static List<Bag> getBag4list() {
@@ -3683,8 +3697,8 @@ public class ModelUtils {
         Map<Integer, Integer> hashMap = new HashMap<>();
         hashMap.put(1, 1);
         hashMap.put(2, 1);
-
         return Order.builder()
+            .orderBags(Arrays.asList(getOrderBag(), getOrderBag2()))
             .id(1L)
             .amountOfBagsOrdered(hashMap)
             .confirmedQuantity(hashMap)
@@ -3895,6 +3909,7 @@ public class ModelUtils {
                 .points(0)
                 .build()))
             .orderBags(Arrays.asList(orderBag(), orderBag()))
+            .tariffsInfo(getTariffsInfo())
             .pointsToUse(0)
             .build();
     }
