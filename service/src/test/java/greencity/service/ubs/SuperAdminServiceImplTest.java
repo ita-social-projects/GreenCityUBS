@@ -31,10 +31,7 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.enums.CourierStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.StationStatus;
-import greencity.enums.TariffStatus;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -68,12 +65,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.TEST_USER;
@@ -257,10 +249,32 @@ class SuperAdminServiceImplTest {
         Bag bag = ModelUtils.getBag();
         Bag bagDeleted = ModelUtils.getBagDeleted();
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
-
+        Order order = ModelUtils.getOrder();
+        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bagDeleted);
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
+
+        superAdminService.deleteTariffService(1);
+
+        verify(bagRepository).findActiveBagById(1);
+        verify(bagRepository).save(bag);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository, never()).save(tariffsInfo);
+    }
+
+    @Test
+    void deleteTariffServiceWhenTariffBagsWithLimits_UnPaidOrder() {
+        Bag bag = ModelUtils.getBag();
+        Bag bagDeleted = ModelUtils.getBagDeleted();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        Order order = ModelUtils.getOrder();
+        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag2()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
+        when(bagRepository.save(bag)).thenReturn(bagDeleted);
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
 
         superAdminService.deleteTariffService(1);
 
