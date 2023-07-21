@@ -122,7 +122,6 @@ import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
-
 import greencity.enums.CancellationReason;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -141,7 +140,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -157,7 +155,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import static greencity.enums.NotificationReceiverType.EMAIL;
 import static greencity.enums.NotificationReceiverType.MOBILE;
 import static greencity.enums.NotificationReceiverType.SITE;
@@ -233,7 +230,6 @@ public class ModelUtils {
     public static final Bag TEST_BAG2 = createBag().setFullPrice(100000L);
     public static final Bag TEST_BAG2_2 = createBag().setFullPrice(100000L).setId(2);
     public static final Bag TEST_BAG2_3 = createBag().setFullPrice(100000L).setId(3);
-
     public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(TEST_BAG2, TEST_BAG2, TEST_BAG2_2, TEST_BAG2_3);
 
     public static EmployeeFilterView getEmployeeFilterView() {
