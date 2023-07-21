@@ -10,7 +10,13 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.filters.StringListConverter;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -19,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
 
 @Entity
 @NoArgsConstructor
@@ -28,10 +35,10 @@ import java.util.Set;
 @Builder
 @Table(name = "orders")
 @EqualsAndHashCode(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
-    "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 @ToString(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
-    "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 public class Order {
     @Id
@@ -160,4 +167,10 @@ public class Order {
 
     @Column(name = "write_off_station_sum")
     private Long writeOffStationSum;
+
+    @OneToMany(
+        mappedBy = "order",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true)
+    private List<OrderBag> orderBags = new ArrayList<>();
 }
