@@ -1,9 +1,12 @@
 package greencity.service.ubs;
 
+import greencity.constant.ErrorMessage;
 import greencity.entity.order.Bag;
+import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,7 @@ import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 @Slf4j
 public class OrderBagService {
     private final OrderBagRepository orderBagRepository;
+    private final OrderRepository orderRepository;
 
     private Long getActualPrice(List<OrderBag> orderBags, Integer id) {
         return orderBags.stream()
@@ -61,4 +65,14 @@ public class OrderBagService {
             })
             .collect(Collectors.toList());
     }
+    /**
+     * method helps to delete bag from order.
+     *
+     * @param orderBag {@link OrderBag}
+     */
+    public void removeBagFromOrder(OrderBag orderBag) {
+       Order order= orderRepository.findById(orderBag.getOrder().getId()).orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_NOT_FOUND + orderBag.getOrder().getId()));
+        order.getOrderBags().remove(orderBag);
+    }
+
 }

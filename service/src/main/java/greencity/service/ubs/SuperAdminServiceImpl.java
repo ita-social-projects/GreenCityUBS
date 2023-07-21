@@ -100,6 +100,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
     private final OrderBagRepository orderBagRepository;
     private final OrderRepository orderRepository;
+    private final OrderBagService orderBagService;
 
     private static final String BAD_SIZE_OF_REGIONS_MESSAGE =
         "Region ids size should be 1 if several params are selected";
@@ -169,8 +170,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 orderRepository.delete(order);
                 return;
             }
-            order.getOrderBags().stream().filter(it -> it.getBag().getId().equals(bagId)).findFirst()
-                .ifPresent(order::removeBagFromOrder);
+            order.getOrderBags()
+                    .stream()
+                    .filter(it -> it.getBag().getId().equals(bagId))
+                    .findFirst()
+                    .ifPresent(orderBagService::removeBagFromOrder);
             orderRepository.save(order);
         }
     }
