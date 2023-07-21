@@ -122,7 +122,7 @@ import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
- 
+
 import greencity.enums.CancellationReason;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -230,6 +230,10 @@ public class ModelUtils {
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
+    public static final Bag TEST_BAG2 = createBag().setFullPrice(100000L);
+    public static final Bag TEST_BAG2_2 = createBag().setFullPrice(100000L).setId(2);
+
+    public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(TEST_BAG2, TEST_BAG2, TEST_BAG2_2);
 
     public static EmployeeFilterView getEmployeeFilterView() {
         return getEmployeeFilterViewWithPassedIds(1L, 5L, 10L);
@@ -2683,19 +2687,19 @@ public class ModelUtils {
             .build());
     }
 
-
     public static OrderBag getOrderBag2() {
         return OrderBag.builder()
-                .id(2L)
-                .capacity(2200)
-                .price(22000_00L)
-                .name("name")
-                .nameEng("name eng")
-                .amount(20)
-                .bag(getBag().setId(2))
-                .order(getOrder())
-                .build();
+            .id(2L)
+            .capacity(2200)
+            .price(22000_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(20)
+            .bag(getBag().setId(2))
+            .order(getOrder())
+            .build();
     }
+
     public static Bag getBag() {
         return Bag.builder()
             .id(1)
@@ -2707,7 +2711,7 @@ public class ModelUtils {
             .createdBy(getEmployee())
             .editedBy(getEmployee())
             .limitIncluded(true)
-             
+
             .tariffsInfo(getTariffInfo())
             .build();
     }
@@ -2813,7 +2817,7 @@ public class ModelUtils {
             .editedBy(getEmployee())
             .editedAt(LocalDate.now())
             .limitIncluded(true)
-             
+
             .tariffsInfo(getTariffInfo())
             .build();
 
@@ -2928,7 +2932,7 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
-             
+
             .build();
     }
 
@@ -3675,7 +3679,7 @@ public class ModelUtils {
         hashMap.put(2, 1);
 
         return Order.builder()
-                .orderBags(Arrays.asList(getOrderBag(), getOrderBag2()))
+            .orderBags(Arrays.asList(getOrderBag(), getOrderBag2()))
             .id(1L)
             .amountOfBagsOrdered(hashMap)
             .confirmedQuantity(hashMap)
