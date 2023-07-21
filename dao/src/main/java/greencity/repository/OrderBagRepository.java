@@ -34,7 +34,7 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
     /**
      * Retrieves a list of order bags based on the given order ID.
      *
-     * @param "orderId" the ID of the order
+     * @param id the ID of the order
      * @return a list of order bags matching the order ID
      */
     @Query(value = "SELECT   * FROM ORDER_BAG_MAPPING as OBM "

@@ -35,7 +35,7 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
- 
+
 import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;

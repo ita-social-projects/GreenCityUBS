@@ -73,7 +73,7 @@ import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
- 
+
 import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;

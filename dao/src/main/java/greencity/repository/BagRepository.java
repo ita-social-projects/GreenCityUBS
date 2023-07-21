@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @Repository
 public interface BagRepository extends JpaRepository<Bag, Integer> {
-
     /**
      * This is method which find capacity by id.
      * 
