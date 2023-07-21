@@ -1,6 +1,5 @@
 package greencity.repository;
 
-import greencity.entity.order.Bag;
 import greencity.entity.order.OrderBag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

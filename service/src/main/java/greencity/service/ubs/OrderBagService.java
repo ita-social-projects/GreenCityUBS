@@ -37,7 +37,10 @@ public class OrderBagService {
     public List<Bag> findBagsByOrderId(List<OrderBag> orderBags) {
         return orderBags.stream()
             .map(OrderBag::getBag)
-            .peek(b -> b.setFullPrice(getActualPrice(orderBags, b.getId())))
+            .map(b -> {
+                b.setFullPrice(getActualPrice(orderBags, b.getId()));
+                return b;
+            })
             .collect(Collectors.toList());
     }
 
@@ -50,9 +53,12 @@ public class OrderBagService {
     public List<Bag> findBagsByOrderId(Long id) {
         List<OrderBag> orderBags = orderBagRepository.findAll();
         return orderBags.stream()
-            .filter(ob -> ob.getBag().getId().equals(id))
+            .filter(ob -> ob.getBag().getId().longValue() == id)
             .map(OrderBag::getBag)
-            .peek(b -> b.setFullPrice(getActualPrice(orderBags, b.getId())))
+            .map(b -> {
+                b.setFullPrice(getActualPrice(orderBags, b.getId()));
+                return b;
+            })
             .collect(Collectors.toList());
     }
 }
