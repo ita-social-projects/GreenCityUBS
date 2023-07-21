@@ -232,8 +232,9 @@ public class ModelUtils {
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
     public static final Bag TEST_BAG2 = createBag().setFullPrice(100000L);
     public static final Bag TEST_BAG2_2 = createBag().setFullPrice(100000L).setId(2);
+    public static final Bag TEST_BAG2_3 = createBag().setFullPrice(100000L).setId(3);
 
-    public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(TEST_BAG2, TEST_BAG2, TEST_BAG2_2);
+    public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(TEST_BAG2, TEST_BAG2, TEST_BAG2_2, TEST_BAG2_3);
 
     public static EmployeeFilterView getEmployeeFilterView() {
         return getEmployeeFilterViewWithPassedIds(1L, 5L, 10L);
