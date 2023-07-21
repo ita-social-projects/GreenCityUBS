@@ -2692,7 +2692,7 @@ public class ModelUtils {
             .name("name")
             .nameEng("name eng")
             .amount(20)
-            .bag(getBag().setId(2))
+            .bag(getBag2())
             .order(getOrder())
             .build();
     }
@@ -2700,6 +2700,22 @@ public class ModelUtils {
     public static Bag getBag() {
         return Bag.builder()
             .id(1)
+            .capacity(120)
+            .commission(50_00L)
+            .price(120_00L)
+            .fullPrice(170_00L)
+            .createdAt(LocalDate.now())
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
+            .limitIncluded(true)
+
+            .tariffsInfo(getTariffInfo())
+            .build();
+    }
+
+    public static Bag getBag2() {
+        return Bag.builder()
+            .id(2)
             .capacity(120)
             .commission(50_00L)
             .price(120_00L)

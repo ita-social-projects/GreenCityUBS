@@ -824,7 +824,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        List<Bag> bag = orderBagService.findBagsByOrderId(orderBagRepository.findOrderBagsByOrderId(id));
+        List<Bag> bag = orderBagService.findAllBagsInOrderBags(orderBagRepository.findOrderBagsByOrderId(id));
         final List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
 
         long sumAmountInCoins = 0;

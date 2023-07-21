@@ -489,7 +489,7 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(any(), any(), any());
-        when(orderBagService.findBagsByOrderId(anyList())).thenReturn(TEST_BAG_LIST2);
+        when(orderBagService.findAllBagsInOrderBags(anyList())).thenReturn(TEST_BAG_LIST2);
 
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
 
@@ -1172,7 +1172,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
         when(orderRepository.findSumOfCertificatesByOrderId(1L)).thenReturn(10L);
-        when(orderBagService.findBagsByOrderId(anyList())).thenReturn(TEST_BAG_LIST2);
+        when(orderBagService.findAllBagsInOrderBags(anyList())).thenReturn(TEST_BAG_LIST2);
 
         doNothing().when(orderRepository).updateOrderPaymentStatus(1L, OrderPaymentStatus.HALF_PAID.name());
 
@@ -1195,7 +1195,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
         when(paymentRepository.selectSumPaid(1L)).thenReturn(null);
-        when(orderBagService.findBagsByOrderId(anyList())).thenReturn(TEST_BAG_LIST2);
+        when(orderBagService.findAllBagsInOrderBags(anyList())).thenReturn(TEST_BAG_LIST2);
 
         doNothing().when(orderRepository).updateOrderPaymentStatus(1L, OrderPaymentStatus.UNPAID.name());
 
@@ -1258,7 +1258,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(orderDetailDto));
         when(paymentRepository.selectSumPaid(1L)).thenReturn(0L);
         when(orderRepository.findSumOfCertificatesByOrderId(1L)).thenReturn(0L);
-        when(orderBagService.findBagsByOrderId(anyList())).thenReturn(TEST_BAG_LIST2);
+        when(orderBagService.findAllBagsInOrderBags(anyList())).thenReturn(TEST_BAG_LIST2);
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -2670,7 +2670,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
-        when(orderBagService.findBagsByOrderId(anyList())).thenReturn(TEST_BAG_LIST2);
+        when(orderBagService.findAllBagsInOrderBags(anyList())).thenReturn(TEST_BAG_LIST2);
 
         AddBonusesToUserDto addBonusesToUserDto = getAddBonusesToUserDto();
         assertThrows(BadRequestException.class,

@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class OrderBagService {
      * @return A list of Bag instances associated with the provided OrderBag
      *         instances.
      */
-    public List<Bag> findBagsByOrderId(List<OrderBag> orderBags) {
+    public List<Bag> findAllBagsInOrderBags(List<OrderBag> orderBags) {
         return orderBags.stream()
             .map(OrderBag::getBag)
             .map(b -> {
@@ -57,7 +58,7 @@ public class OrderBagService {
     public List<Bag> findBagsByOrderId(Long id) {
         List<OrderBag> orderBags = orderBagRepository.findAll();
         return orderBags.stream()
-            .filter(ob -> ob.getBag().getId().longValue() == id)
+            .filter(ob -> ob.getOrder().getId().equals(id))
             .map(OrderBag::getBag)
             .map(b -> {
                 b.setFullPrice(getActualPrice(orderBags, b.getId()));
@@ -74,7 +75,8 @@ public class OrderBagService {
     public void removeBagFromOrder(OrderBag orderBag) {
         Order order = orderRepository.findById(orderBag.getOrder().getId())
             .orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_NOT_FOUND + orderBag.getOrder().getId()));
-        order.getOrderBags().remove(orderBag);
+        List<OrderBag> modifiableList = new ArrayList<>(order.getOrderBags());
+        modifiableList.remove(orderBag);
+        order.setOrderBags(modifiableList);
     }
-
 }
