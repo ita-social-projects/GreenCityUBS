@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.order.Bag;
 import greencity.entity.order.OrderBag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,7 +21,7 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      * @param price    {@link Long} bag full price in coins
      * @param name     {@link String} bag name
      * @param nameEng  {@link String} bag english name
-     * @author Julia Seti
+     * @author Oksana Spodaryk
      */
     @Transactional
     @Modifying
@@ -35,17 +36,18 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      *
      * @param id the ID of the order
      * @return a list of order bags matching the order ID
+     * @author Oksana Spodaryk
      */
-    @Query(value = "SELECT   * FROM ORDER_BAG_MAPPING as OBM "
-        + "where OBM.ORDER_ID = :orderId", nativeQuery = true)
-    List<OrderBag> findOrderBagsByOrderId(@Param("orderId") Long id);
+//    @Query(value = "SELECT   * FROM ORDER_BAG_MAPPING as OBM "
+//            + "where OBM.ORDER_ID = :orderId", nativeQuery = true)
+  List<OrderBag> findOrderBagsByOrderId(@Param("orderId") Long id);
 
     /**
      * method returns all OrderBags by bag id.
      *
      * @param bagId {@link Integer} bag id
      * @return {@link List} of {@link OrderBag}
-     * @author Julia Seti
+     * @author Oksana Spodaryk
      */
     List<OrderBag> findAllByBagId(Integer bagId);
 }

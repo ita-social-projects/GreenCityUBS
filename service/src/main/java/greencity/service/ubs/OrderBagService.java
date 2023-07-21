@@ -25,13 +25,13 @@ public class OrderBagService {
     private final OrderBagRepository orderBagRepository;
     private final OrderRepository orderRepository;
 
-//    private Long getActualPrice(List<OrderBag> orderBags, Integer id) {
-//        return orderBags.stream()
-//            .filter(ob -> ob.getBag().getId().equals(id))
-//            .map(OrderBag::getPrice)
-//            .findFirst()
-//            .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
-//    }
+    private Long getActualPrice(List<OrderBag> orderBags, Integer id) {
+        return orderBags.stream()
+            .filter(ob -> ob.getBag().getId().equals(id))
+            .map(OrderBag::getPrice)
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
+    }
 
     /**
      * Finds all bags belonging to a specific list of OrderBag instances.
@@ -40,35 +40,28 @@ public class OrderBagService {
      * @return A list of Bag instances associated with the provided OrderBag
      *         instances.
      */
-//    public List<Bag> findAllBagsInOrderBags(List<OrderBag> orderBags) {
-//        return orderBags.stream()
-//            .map(OrderBag::getBag)
-//            .map(b -> {
-//                b.setFullPrice(getActualPrice(orderBags, b.getId()));
-//                return b;
-//            })
-//            .collect(Collectors.toList());
-//    }
+    public List<Bag> findAllBagsInOrderBagsList(List<OrderBag> orderBags) {
+        return orderBags.stream()
+            .map(OrderBag::getBag)
+            .map(b -> {
+                b.setFullPrice(getActualPrice(orderBags, b.getId()));
+                return b;
+            })
+            .collect(Collectors.toList());
+    }
 
     /**
      * Finds all bags belonging to a specific OrderBag based on the provided ID.
      *
-     * @param  The ID of the OrderBag to search for.
+     * @param  id The ID of the OrderBag to search for.
      * @return A list of Bag instances associated with the provided OrderBag ID.
      */
-//    public List<Bag> findBagsByOrderId(Long id) {
-//        List<OrderBag> orderBags = orderBagRepository.findAll();
-//        return orderBags.stream()
-//            .filter(ob -> ob.getOrder().getId().equals(id))
-//            .map(OrderBag::getBag)
-//            .map(b -> {
-//                b.setFullPrice(getActualPrice(orderBags, b.getId()));
-//                return b;
-//            })
-//            .collect(Collectors.toList());
-//    }
+    public List<Bag> findBagsByOrderId(Long id) {
+        List<OrderBag> orderBags = orderBagRepository.findOrderBagsByOrderId(id);
+        return findAllBagsInOrderBagsList(orderBags);
+    }
 
-    static Map<Integer, Integer> getActualBagsAmountForOrder(List<OrderBag> bagsForOrder) {
+    public Map<Integer, Integer> getActualBagsAmountForOrder(List<OrderBag> bagsForOrder) {
         if (bagsForOrder.stream().allMatch(it -> it.getExportedQuantity() != null)) {
             return bagsForOrder.stream()
                 .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getExportedQuantity));
@@ -83,17 +76,4 @@ public class OrderBagService {
         }
         return new HashMap<>();
     }
-
-    /**
-     * method helps to delete bag from order.
-     *
-     * @param orderBag {@link OrderBag}
-     */
-//    public void removeBagFromOrder(OrderBag orderBag) {
-//        Order order = orderRepository.findById(orderBag.getOrder().getId())
-//            .orElseThrow(() -> new NotFoundException());
-//        List<OrderBag> modifiableList = new ArrayList<>(order.getOrderBags());
-//        modifiableList.remove(orderBag);
-//        order.setOrderBags(modifiableList);
-//    }
 }
