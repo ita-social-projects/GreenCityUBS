@@ -94,20 +94,7 @@ import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.Bag;
-import greencity.entity.order.BigOrderTableViews;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Courier;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.Refund;
-import greencity.entity.order.Service;
-import greencity.entity.order.TariffLocation;
-import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.telegram.TelegramBot;
@@ -227,6 +214,11 @@ public class ModelUtils {
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
+    public static final OrderBag TEST_ORDER_BAG = createOrderBag();
+    public static final Bag TEST_BAG2 = createBag().setFullPrice(100000L);
+    public static final Bag TEST_BAG2_2 = createBag().setFullPrice(100000L).setId(2);
+    public static final Bag TEST_BAG2_3 = createBag().setFullPrice(100000L).setId(3);
+    public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(TEST_BAG2, TEST_BAG2, TEST_BAG2_2, TEST_BAG2_3);
 
     public static EmployeeFilterView getEmployeeFilterView() {
         return getEmployeeFilterViewWithPassedIds(1L, 5L, 10L);
@@ -2668,22 +2660,6 @@ public class ModelUtils {
             .build());
     }
 
-    public static Bag getBag() {
-        return Bag.builder()
-            .id(1)
-            .capacity(120)
-            .commission(50_00L)
-            .price(120_00L)
-            .fullPrice(170_00L)
-            .createdAt(LocalDate.now())
-            .createdBy(getEmployee())
-            .editedBy(getEmployee())
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .limitIncluded(true)
-            .build();
-    }
-
     public static Bag getBagForOrder() {
         return Bag.builder()
             .id(3)
@@ -4760,5 +4736,104 @@ public class ModelUtils {
 
     public static Refund getRefund(Long id) {
         return Refund.builder().orderId(id).build();
+    }
+
+    private static OrderBag createOrderBag() {
+        return OrderBag.builder()
+            .id(1L)
+            .name("Name")
+            .nameEng("NameEng")
+            .capacity(20)
+            .price(100_00L)
+            .order(createOrder())
+            .bag(createBag())
+            .build();
+    }
+
+    public static OrderBag getOrderBag2() {
+        return OrderBag.builder()
+            .id(2L)
+            .capacity(2200)
+            .price(22000_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(20)
+            .bag(getBag2())
+            .order(getOrder())
+            .build();
+    }
+
+    public static Bag getBag2() {
+        return Bag.builder()
+            .id(2)
+            .capacity(120)
+            .commission(50_00L)
+            .price(120_00L)
+            .fullPrice(170_00L)
+            .createdAt(LocalDate.now())
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
+            .limitIncluded(true)
+
+            .tariffsInfo(getTariffInfo())
+            .build();
+    }
+
+    public static OrderBag getOrderBag() {
+        return OrderBag.builder()
+            .id(1L)
+            .capacity(120)
+            .price(120_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(1)
+            .bag(getBag())
+            .order(getOrder())
+            .build();
+    }
+
+    public static OrderBag getOrderBagWithConfirmedAmount() {
+        return OrderBag.builder()
+            .id(1L)
+            .capacity(120)
+            .price(120_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(1)
+            .confirmedQuantity(2)
+            .bag(getBag())
+            .order(getOrder())
+            .build();
+    }
+
+    public static OrderBag getOrderBagWithExportedAmount() {
+        return OrderBag.builder()
+            .id(1L)
+            .capacity(120)
+            .price(120_00L)
+            .name("name")
+            .nameEng("name eng")
+            .amount(1)
+            .confirmedQuantity(2)
+            .exportedQuantity(2)
+            .bag(getBag())
+            .order(getOrder())
+            .build();
+    }
+
+    public static Bag getBag() {
+        return Bag.builder()
+            .id(1)
+            .capacity(120)
+            .commission(50_00L)
+            .price(120_00L)
+            .fullPrice(170_00L)
+            .createdAt(LocalDate.now())
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
+            .limitIncluded(true)
+
+            .tariffsInfo(getTariffInfo())
+            .build();
     }
 }
