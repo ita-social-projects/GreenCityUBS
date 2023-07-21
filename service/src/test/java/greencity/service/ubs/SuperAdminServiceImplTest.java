@@ -42,17 +42,7 @@ import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
-import greencity.repository.BagRepository;
-import greencity.repository.CourierRepository;
-import greencity.repository.DeactivateChosenEntityRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RegionRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.TariffLocationRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -131,6 +121,12 @@ class SuperAdminServiceImplTest {
     private TariffLocationRepository tariffsLocationRepository;
     @Mock
     private DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
+    @Mock
+    private OrderBagService orderBagService;
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    private OrderBagRepository orderBagRepository;
 
     @AfterEach
     void afterEach() {

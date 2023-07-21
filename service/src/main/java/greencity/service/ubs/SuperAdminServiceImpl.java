@@ -25,8 +25,10 @@ import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
+import greencity.entity.order.OrderBag;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
+import greencity.entity.order.Order;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
@@ -46,7 +48,9 @@ import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
+import greencity.repository.OrderBagRepository;
 import greencity.repository.BagRepository;
+import greencity.repository.OrderRepository;
 import greencity.repository.CourierRepository;
 import greencity.repository.DeactivateChosenEntityRepository;
 import greencity.repository.EmployeeRepository;
@@ -74,6 +78,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -91,6 +96,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final ModelMapper modelMapper;
     private final TariffLocationRepository tariffsLocationRepository;
     private final DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
+    private final OrderBagRepository orderBagRepository;
+    private final OrderRepository orderRepository;
+    private final OrderBagService orderBagService;
     private static final String BAD_SIZE_OF_REGIONS_MESSAGE =
         "Region ids size should be 1 if several params are selected";
     private static final String REGIONS_NOT_EXIST_MESSAGE = "Current region doesn't exist: %s";
@@ -159,9 +167,39 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer id, String employeeUuid) {
-        Bag bag = tryToFindBagById(id);
+    @Transactional
+    public GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer bagId, String employeeUuid) {
+        Bag bag = tryToFindBagById(bagId);
         Employee employee = tryToFindEmployeeByUuid(employeeUuid);
+        updateTariffService(dto, bag);
+        bag.setEditedBy(employee);
+
+        orderBagRepository.updateAllByBagIdForUnpaidOrders(
+            bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
+
+        List<Order> orders = orderRepository.findAllUnpaidOrdersByBagId(bagId);
+        if (!orders.isEmpty()) {
+            orders.forEach(it -> updateOrderSumToPay(it, bag));
+            orderRepository.saveAll(orders);
+        }
+        return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
+    }
+
+    private void updateOrderSumToPay(Order order, Bag bag) {
+        Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
+        Long sumToPayInCoins = order.getOrderBags().stream()
+            .map(it -> amount.get(it.getBag().getId()) * getActualBagPrice(it, bag))
+            .reduce(0L, Long::sum);
+        order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
+    }
+
+    private Long getActualBagPrice(OrderBag orderBag, Bag bag) {
+        return bag.getId().equals(orderBag.getBag().getId())
+            ? bag.getFullPrice()
+            : orderBag.getPrice();
+    }
+
+    private void updateTariffService(TariffServiceDto dto, Bag bag) {
         bag.setCapacity(dto.getCapacity());
         bag.setPrice(convertBillsIntoCoins(dto.getPrice()));
         bag.setCommission(convertBillsIntoCoins(dto.getCommission()));
@@ -171,8 +209,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setDescription(dto.getDescription());
         bag.setDescriptionEng(dto.getDescriptionEng());
         bag.setEditedAt(LocalDate.now());
-        bag.setEditedBy(employee);
-        return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
     }
 
     private Long convertBillsIntoCoins(Double bills) {
