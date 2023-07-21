@@ -1,17 +1,23 @@
 package greencity.service.ubs;
 
 import greencity.entity.order.Bag;
+import greencity.entity.order.Order;
 import greencity.repository.OrderBagRepository;
 import java.util.List;
 import static greencity.ModelUtils.getOrderBag;
+
+import greencity.repository.OrderRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Arrays;
+import java.util.Optional;
+
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
@@ -21,9 +27,11 @@ public class OrderBagServiceTest {
     private OrderBagService orderBagService;
     @Mock
     private OrderBagRepository orderBagRepository;
+    @Mock
+    private OrderRepository orderRepository;
 
     @Test
-    public void testFindBagsByOrderId() {
+    void testFindBagsByOrderId() {
         when(orderBagRepository.findAll()).thenReturn(Arrays.asList(getOrderBag(), getOrderBag2()));
         List<Bag> bags = orderBagService.findBagsByOrderId(1L);
         assertNotNull(bags);
@@ -36,7 +44,7 @@ public class OrderBagServiceTest {
     }
 
     @Test
-    public void testFindBagsByOrdersList() {
+    void testFindBagsByOrdersList() {
         List<Bag> bags = orderBagService.findAllBagsInOrderBags(Arrays.asList(getOrderBag(), getOrderBag2()));
 
         Bag bag1 = getBag().setFullPrice(getOrderBag().getPrice());
@@ -44,5 +52,15 @@ public class OrderBagServiceTest {
         assertNotNull(bags);
         assertEquals(bag1, bags.get(0));
         assertEquals(bag2, bags.get(1));
+    }
+
+    @Test
+    void testRemoveBagFromOrder() {
+        Order order = getOrder();
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+        order.setOrderBags(Arrays.asList(getOrderBag(), getOrderBag2()));
+        int size = order.getOrderBags().size();
+        orderBagService.removeBagFromOrder(getOrderBag());
+        assertNotEquals(order.getOrderBags().size(), size);
     }
 }
