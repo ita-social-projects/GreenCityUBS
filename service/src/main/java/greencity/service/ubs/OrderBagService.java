@@ -65,13 +65,15 @@ public class OrderBagService {
             })
             .collect(Collectors.toList());
     }
+
     /**
      * method helps to delete bag from order.
      *
      * @param orderBag {@link OrderBag}
      */
     public void removeBagFromOrder(OrderBag orderBag) {
-       Order order= orderRepository.findById(orderBag.getOrder().getId()).orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_NOT_FOUND + orderBag.getOrder().getId()));
+        Order order = orderRepository.findById(orderBag.getOrder().getId())
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_NOT_FOUND + orderBag.getOrder().getId()));
         order.getOrderBags().remove(orderBag);
     }
 

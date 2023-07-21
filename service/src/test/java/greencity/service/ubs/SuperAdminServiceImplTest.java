@@ -74,6 +74,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.TEST_USER;
@@ -138,6 +139,8 @@ class SuperAdminServiceImplTest {
     private OrderBagRepository orderBagRepository;
     @Mock
     private OrderRepository orderRepository;
+    @Mock
+    private OrderBagService orderBagService;
 
     @AfterEach
     void afterEach() {
@@ -257,11 +260,32 @@ class SuperAdminServiceImplTest {
         Bag bag = ModelUtils.getBag();
         Bag bagDeleted = ModelUtils.getBagDeleted();
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
-
+        Order order = ModelUtils.getOrder();
+        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bagDeleted);
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
 
+        superAdminService.deleteTariffService(1);
+
+        verify(bagRepository).findActiveBagById(1);
+        verify(bagRepository).save(bag);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository, never()).save(tariffsInfo);
+    }
+
+    @Test
+    void deleteTariffServiceWhenTariffBagsWithLimits_UnPaidOrder() {
+        Bag bag = ModelUtils.getBag();
+        Bag bagDeleted = ModelUtils.getBagDeleted();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        Order order = ModelUtils.getOrder();
+        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag2()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
+        when(bagRepository.save(bag)).thenReturn(bagDeleted);
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findActiveBagById(1);

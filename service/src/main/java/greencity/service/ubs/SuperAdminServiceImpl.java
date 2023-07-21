@@ -171,10 +171,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 return;
             }
             order.getOrderBags()
-                    .stream()
-                    .filter(it -> it.getBag().getId().equals(bagId))
-                    .findFirst()
-                    .ifPresent(orderBagService::removeBagFromOrder);
+                .stream()
+                .filter(it -> it.getBag().getId().equals(bagId))
+                .findFirst()
+                .ifPresent(orderBagService::removeBagFromOrder);
             orderRepository.save(order);
         }
     }
