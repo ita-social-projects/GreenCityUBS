@@ -66,6 +66,7 @@ import greencity.service.SuperAdminService;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -121,7 +122,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         "Current region: %s or cities: %s or receiving stations: %s or courier: %s don't exist.";
     private final OrderBagRepository orderBagRepository;
     private final OrderRepository orderRepository;
-
+    @Autowired
+    private OrderBagService orderBagService;
     @Override
     public GetTariffServiceDto addTariffService(long tariffId, TariffServiceDto dto, String employeeUuid) {
         Bag bag = bagRepository.save(createBag(tariffId, dto, employeeUuid));
@@ -167,8 +169,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 orderRepository.delete(order);
                 return;
             }
-            order.getOrderBags().stream().filter(it -> it.getBag().getId().equals(bagId)).findFirst()
-                .ifPresent(order::removeBagFromOrder);
+            order.getOrderBags().stream().filter(it -> it.getBag().getId().equals(bagId))
+                    .findFirst()
+                .ifPresent(obj->orderBagService.removeBagFromOrder(order.getId(),obj));
             orderRepository.save(order);
         }
     }

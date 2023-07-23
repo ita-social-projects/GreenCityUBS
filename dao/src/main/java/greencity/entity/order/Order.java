@@ -188,25 +188,4 @@ public class Order {
         cascade = CascadeType.ALL,
         orphanRemoval = true)
     private List<OrderBag> orderBags = new ArrayList<>();
-
-    /**
-     * method helps to delete bag from order.
-     *
-     * @param orderBag {@link OrderBag}
-     * @author Julia Seti
-     */
-    public void removeBagFromOrder(OrderBag orderBag) {
-        this.orderBags.remove(orderBag);
-    }
-
-    /**
-     * method helps to set bags for order.
-     *
-     * @param orderBags {@link List} of {@link OrderBag}
-     * @author Julia Seti
-     */
-    public void setBagsForOrder(List<OrderBag> orderBags) {
-        orderBags.forEach(it -> it.setOrder(this));
-        this.setOrderBags(orderBags);
-    }
 }

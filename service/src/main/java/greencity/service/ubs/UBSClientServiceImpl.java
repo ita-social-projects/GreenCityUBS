@@ -236,6 +236,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
+    @Autowired
+    private OrderBagService orderBagService;
     @Value("${greencity.payment.fondy-payment-key}")
     private String fondyPaymentKey;
     @Value("${greencity.payment.merchant-id}")
@@ -1046,7 +1048,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
-        order.setBagsForOrder(bagsOrdered);
+        orderBagService.setBagsForOrder(order,bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(
@@ -1067,6 +1069,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.getPayment().add(payment);
 
         orderRepository.save(order);
+
         return order;
     }
 
