@@ -163,10 +163,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
-@Autowired
-private final OrderBagService orderBagService;
-@Autowired
-private OrderBagRepository orderBagRepository;
+    @Autowired
+    private final OrderBagService orderBagService;
+    @Autowired
+    private OrderBagRepository orderBagRepository;
 
     /**
      * Method gets all order payments, count paid amount, amount which user should

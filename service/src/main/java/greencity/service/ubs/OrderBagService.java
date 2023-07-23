@@ -96,16 +96,17 @@ public class OrderBagService {
         }
         return new HashMap<>();
     }
+
     /**
      * method helps to delete bag from order.
      *
      * @param orderBag {@link OrderBag}
      * @author Oksana Spodaryk
      */
-    public void removeBagFromOrder(Long orderId,OrderBag orderBag) {
-      Order order=  orderRepository.findById(orderId)
-              .orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_NOT_FOUND + orderId));
-      order.getOrderBags().remove(orderBag);
+    public void removeBagFromOrder(Long orderId, OrderBag orderBag) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_NOT_FOUND + orderId));
+        order.getOrderBags().remove(orderBag);
         orderRepository.save(order);
     }
 
@@ -115,8 +116,8 @@ public class OrderBagService {
      * @param orderBags {@link List} of {@link OrderBag}
      * @author Oksana Spodaryk
      */
-    public void setBagsForOrder(Order order,List<OrderBag> orderBags) {
-      orderBags.forEach(it -> it.setOrder(order));
+    public void setBagsForOrder(Order order, List<OrderBag> orderBags) {
+        orderBags.forEach(it -> it.setOrder(order));
         order.setOrderBags(orderBags);
     }
 }
