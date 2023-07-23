@@ -2773,7 +2773,6 @@ public class ModelUtils {
             .build();
     }
 
-
     public static TariffServiceDto getTariffServiceDto() {
         return TariffServiceDto.builder()
             .name("Бавовняна сумка")
