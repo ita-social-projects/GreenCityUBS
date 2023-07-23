@@ -23,6 +23,7 @@ import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
+import greencity.service.ubs.OrderBagService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -84,7 +85,8 @@ class NotificationServiceImplTest {
     private Clock fixedClock;
 
     ExecutorService mockExecutor = MoreExecutors.newDirectExecutorService();
-
+@Mock
+private OrderBagService orderBagService;
     @Nested
     class ClockNotification {
         @BeforeEach
@@ -301,7 +303,7 @@ class NotificationServiceImplTest {
                 List.of(abstractNotificationProvider),
                 templateRepository,
                 mockExecutor,
-                internalUrlConfigProp);
+                internalUrlConfigProp,orderBagService);
             User user = User.builder().id(42L).build();
             User user1 = User.builder().id(43L).build();
             UserNotification notification = new UserNotification();
@@ -409,7 +411,7 @@ class NotificationServiceImplTest {
             parameters.add(NotificationParameter.builder().key("orderNumber")
                 .value(orders.get(0).getId().toString()).build());
 
-            when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag1list());
+            when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag1list());
             when(userNotificationRepository.save(any())).thenReturn(notification);
             when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
 
@@ -510,7 +512,7 @@ class NotificationServiceImplTest {
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-        when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyUnpaidOrder(order);
 
@@ -541,7 +543,7 @@ class NotificationServiceImplTest {
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-        when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag4list());
         notificationService.notifyUnpaidOrder(order);
 
         verify(userNotificationRepository).save(any());
@@ -572,7 +574,7 @@ class NotificationServiceImplTest {
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-        when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyUnpaidOrder(order);
 
@@ -603,7 +605,7 @@ class NotificationServiceImplTest {
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-        when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyHalfPaidPackage(order);
 
@@ -630,7 +632,7 @@ class NotificationServiceImplTest {
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-        when(bagRepository.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyHalfPaidPackage(order);
 
