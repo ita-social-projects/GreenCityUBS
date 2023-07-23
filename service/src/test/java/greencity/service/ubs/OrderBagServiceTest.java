@@ -31,7 +31,8 @@ public class OrderBagServiceTest {
 
     @Test
     void testFindBagsByOrderId() {
-        when(orderBagRepository.findOrderBagsByOrderId(anyLong())).thenReturn(Arrays.asList(getOrderBag(), getOrderBag2()));
+        when(orderBagRepository.findOrderBagsByOrderId(anyLong()))
+            .thenReturn(Arrays.asList(getOrderBag(), getOrderBag2()));
         List<Bag> bags = orderBagService.findBagsByOrderId(1L);
         assertNotNull(bags);
         Bag bag1 = getBag().setFullPrice(getOrderBag().getPrice());
