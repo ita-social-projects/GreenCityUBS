@@ -73,7 +73,23 @@ import greencity.enums.PaymentType;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.*;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderBagRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.OrderDetailRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.PositionRepository;
+import greencity.repository.RefundRepository;
+import greencity.repository.EmployeeOrderPositionRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.ServiceRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
@@ -94,7 +110,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
 import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -809,7 +824,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        List<Bag> bag = orderBagService.findBagsByOrderId(id);
+        List<Bag> bag = orderBagService.findAllBagsInOrderBagsList(orderBagRepository.findOrderBagsByOrderId(id));
         final List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
 
         long sumAmountInCoins = 0;

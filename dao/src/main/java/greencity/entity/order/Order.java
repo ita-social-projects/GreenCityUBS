@@ -1,14 +1,14 @@
 package greencity.entity.order;
 
-import greencity.enums.CancellationReason;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.enums.CancellationReason;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import greencity.filters.StringListConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,10 +37,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.ArrayList;
 
 @Entity
 @NoArgsConstructor

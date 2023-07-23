@@ -2,12 +2,12 @@ package greencity.entity.order;
 
 import greencity.entity.user.employee.Employee;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import lombok.Builder;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

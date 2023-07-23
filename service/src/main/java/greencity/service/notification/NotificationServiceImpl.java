@@ -39,7 +39,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
@@ -52,7 +51,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-
 import static greencity.constant.ErrorMessage.*;
 import static greencity.enums.NotificationReceiverType.*;
 import static java.util.Objects.isNull;
@@ -69,7 +67,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final OrderRepository orderRepository;
     private final ViolationRepository violationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
-    private final OrderBagService orderBagService;
+
     @Autowired
     @Qualifier("kyivZonedClock")
     private Clock clock;
@@ -83,6 +81,7 @@ public class NotificationServiceImpl implements NotificationService {
     private static final String ORDER_NUMBER_KEY = "orderNumber";
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
     private static final String PAY_BUTTON = "payButton";
+    private final OrderBagService orderBagService;
 
     /**
      * {@inheritDoc}
