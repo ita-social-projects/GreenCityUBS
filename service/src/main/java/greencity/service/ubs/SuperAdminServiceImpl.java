@@ -124,6 +124,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final OrderRepository orderRepository;
     @Autowired
     private OrderBagService orderBagService;
+
     @Override
     public GetTariffServiceDto addTariffService(long tariffId, TariffServiceDto dto, String employeeUuid) {
         Bag bag = bagRepository.save(createBag(tariffId, dto, employeeUuid));
@@ -155,9 +156,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public void deleteTariffService(Integer bagId) {
         Bag bag = tryToFindBagById(bagId);
-        bagRepository.save(bag);
         checkDeletedBagLimitAndUpdateTariffsInfo(bag);
         orderRepository.findAllByBagId(bagId).forEach(it -> deleteBagFromOrder(it, bagId));
+        TariffsInfo tariffsInfo = bag.getTariffsInfo();
+        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
+        tariffsInfoRepository.save(tariffsInfo);
     }
 
     private void deleteBagFromOrder(Order order, Integer bagId) {
@@ -170,8 +173,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 return;
             }
             order.getOrderBags().stream().filter(it -> it.getBag().getId().equals(bagId))
-                    .findFirst()
-                .ifPresent(obj->orderBagService.removeBagFromOrder(order.getId(),obj));
+                .findFirst()
+                .ifPresent(obj -> orderBagService.removeBagFromOrder(order.getId(), obj));
             orderRepository.save(order);
         }
     }
