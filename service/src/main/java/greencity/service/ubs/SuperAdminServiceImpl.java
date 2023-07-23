@@ -156,11 +156,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public void deleteTariffService(Integer bagId) {
         Bag bag = tryToFindBagById(bagId);
-        checkDeletedBagLimitAndUpdateTariffsInfo(bag);
+        checkDeletedBagLimitAndDeleteTariffsInfo(bag);
         orderRepository.findAllByBagId(bagId).forEach(it -> deleteBagFromOrder(it, bagId));
-        TariffsInfo tariffsInfo = bag.getTariffsInfo();
-        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
-        tariffsInfoRepository.save(tariffsInfo);
     }
 
     private void deleteBagFromOrder(Order order, Integer bagId) {
@@ -193,6 +190,19 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
     }
 
+    private void checkDeletedBagLimitAndDeleteTariffsInfo(Bag bag) {
+        TariffsInfo tariffsInfo = bag.getTariffsInfo();
+        List<Bag> bags = bagRepository.findBagsByTariffsInfoId(tariffsInfo.getId());
+        if (bags.isEmpty() || bags.stream().noneMatch(Bag::getLimitIncluded)) {
+            tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
+            tariffsInfo.setBags(bags);
+            tariffsInfo.setMax(null);
+            tariffsInfo.setMin(null);
+            tariffsInfo.setLimitDescription(null);
+            tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+            tariffsInfoRepository.save(tariffsInfo);
+        }
+    }
     @Override
     @Transactional
     public GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer bagId, String employeeUuid) {
