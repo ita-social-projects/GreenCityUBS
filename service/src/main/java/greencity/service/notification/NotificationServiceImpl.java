@@ -18,8 +18,15 @@ import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
-import greencity.repository.*;
+import greencity.repository.ViolationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.UserNotificationRepository;
+import greencity.repository.NotificationParameterRepository;
+import greencity.repository.NotificationTemplateRepository;
 import greencity.service.ubs.NotificationService;
+import greencity.service.ubs.OrderBagService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
@@ -62,6 +69,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final OrderRepository orderRepository;
     private final ViolationRepository violationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
+    private final OrderBagService orderBagService;
     @Autowired
     @Qualifier("kyivZonedClock")
     private Clock clock;
@@ -239,7 +247,7 @@ public class NotificationServiceImpl implements NotificationService {
         long ubsCourierSumInCoins = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
         long writeStationSumInCoins = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
 
-        List<Bag> bagsType = bagRepository.findBagsByOrderId(order.getId());
+        List<Bag> bagsType = orderBagService.findBagsByOrderId(order.getId());
         Map<Integer, Integer> bagsAmount;
         if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
             bagsAmount = order.getExportedQuantity();

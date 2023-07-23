@@ -2,7 +2,6 @@ package greencity.mapping.bag;
 
 import greencity.constant.AppConstant;
 import greencity.dto.bag.BagForUserDto;
-import greencity.entity.order.Bag;
 import greencity.entity.order.OrderBag;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;

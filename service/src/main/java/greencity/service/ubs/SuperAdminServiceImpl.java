@@ -236,9 +236,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Service createService(Long tariffId, ServiceDto dto, String employeeUuid) {
-        if (tryToFindServiceByTariffsInfoId(tariffId).isEmpty()) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+        if (serviceRepository.findServiceByTariffsInfoId(tariffId).isEmpty()) {
             Employee employee = tryToFindEmployeeByUuid(employeeUuid);
-            TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
             Service service = modelMapper.map(dto, Service.class);
             service.setCreatedBy(employee);
             service.setCreatedAt(LocalDate.now());
@@ -251,14 +251,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetServiceDto getService(long tariffId) {
-        return tryToFindServiceByTariffsInfoId(tariffId)
+        tryToFindTariffById(tariffId);
+        return serviceRepository.findServiceByTariffsInfoId(tariffId)
             .map(it -> modelMapper.map(it, GetServiceDto.class))
-            .orElse(null);
+            .orElseGet(() -> null);
     }
 
     @Override
     public void deleteService(long id) {
-        serviceRepository.delete(tryToFindServiceById(id));
+        Service service = tryToFindServiceById(id);
+        serviceRepository.delete(service);
     }
 
     @Override
@@ -278,14 +280,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private Employee tryToFindEmployeeByUuid(String employeeUuid) {
         return employeeRepository.findByUuid(employeeUuid)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employeeUuid));
-    }
-
-    private Optional<Service> tryToFindServiceByTariffsInfoId(long tariffId) {
-        if (tariffsInfoRepository.existsById(tariffId)) {
-            return serviceRepository.findServiceByTariffsInfoId(tariffId);
-        } else {
-            throw new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId);
-        }
     }
 
     private Service tryToFindServiceById(long id) {
