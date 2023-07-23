@@ -302,6 +302,7 @@ class UBSClientServiceImplTest {
     private OrderBagService orderBagService;
     @Mock
     private OrderBagRepository orderBagRepository;
+
     @Test
     void testGetAllDistricts() {
 

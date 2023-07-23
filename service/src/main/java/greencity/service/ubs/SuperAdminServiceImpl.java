@@ -203,6 +203,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             tariffsInfoRepository.save(tariffsInfo);
         }
     }
+
     @Override
     @Transactional
     public GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer bagId, String employeeUuid) {
