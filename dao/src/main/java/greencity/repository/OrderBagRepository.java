@@ -4,6 +4,7 @@ import greencity.entity.order.OrderBag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +12,15 @@ import java.util.List;
 
 @Repository
 public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
+    /**
+     * Retrieves a list of order bags based on the given order ID.
+     *
+     * @param id the ID of the order
+     * @return a list of order bags matching the order ID
+     */
+    @Query(value = "SELECT   * FROM ORDER_BAG_MAPPING as OBM "
+            + "where OBM.ORDER_ID = :orderId", nativeQuery = true)
+    List<OrderBag> findOrderBagsByOrderId(@Param("orderId") Long id);
     /**
      * method updates the bag data of OrderBag for all unpaid orders.
      *

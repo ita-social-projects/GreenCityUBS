@@ -57,9 +57,8 @@ public class OrderBagService {
      * @return A list of Bag instances associated with the provided OrderBag ID.
      */
     public List<Bag> findBagsByOrderId(Long id) {
-//        List<OrderBag> orderBags = orderBagRepository.findOrderBagsByOrderId(id);
-//        return findAllBagsInOrderBagsList(orderBags);
-        return null;
+        List<OrderBag> orderBags = orderBagRepository.findOrderBagsByOrderId(id);
+        return findAllBagsInOrderBagsList(orderBags);
     }
 
     /**
