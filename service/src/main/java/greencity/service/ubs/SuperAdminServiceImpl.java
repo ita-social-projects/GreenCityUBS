@@ -11,7 +11,6 @@ import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.AddLocationTranslationDto;
-import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.service.GetServiceDto;
@@ -843,24 +842,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER
                 + tariffsInfo.getCourier().getId());
         }
-    }
-
-    @Override
-    public void editLocations(List<EditLocationDto> editLocationDtoList) {
-        editLocationDtoList.forEach(this::editLocation);
-    }
-
-    private void editLocation(EditLocationDto editLocationDto) {
-        Location location = tryToFindLocationById(editLocationDto.getLocationId());
-        if (!locationExists(editLocationDto.getNameUa(), editLocationDto.getNameEn(), location.getRegion())) {
-            location.setNameUk(editLocationDto.getNameUa());
-            location.setNameEn(editLocationDto.getNameEn());
-            locationRepository.save(location);
-        }
-    }
-
-    private boolean locationExists(String nameUk, String nameEn, Region region) {
-        return locationRepository.existsByNameUkAndNameEnAndRegion(nameUk, nameEn, region);
     }
 
     @Override

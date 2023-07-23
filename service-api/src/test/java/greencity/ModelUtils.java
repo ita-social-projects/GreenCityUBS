@@ -121,7 +121,7 @@ public class ModelUtils {
             .regionId(null)
             .courierId(1L)
             .locationIdList(List.of(1L))
-            .receivingStationsIdList(null)
+            .receivingStationsIdList(List.of(1L))
             .build();
     }
 

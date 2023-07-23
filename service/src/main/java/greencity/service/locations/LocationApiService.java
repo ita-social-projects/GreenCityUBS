@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.collections4.CollectionUtils;
 
 @Service
@@ -70,18 +73,32 @@ public class LocationApiService {
      */
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
         checkIfNotNull(regionName, cityName);
+        regionName = removeWordRegion(regionName);
+        cityName = removeWordCity(cityName);
         if (cityName.equals(KYIV.getLocationNameMap().get(NAME))
             || cityName.equals(KYIV.getLocationNameMap().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(KYIV.getId());
         }
+
         List<LocationDto> cities = getCitiesByName(regionName, cityName);
         LocationDto city = getCityInRegion(regionName, cities);
         String cityId = city.getId();
         List<LocationDto> allDistricts = getAllDistrictsInCityByCityID(cityId);
         if (allDistricts.isEmpty()) {
-            allDistricts.add(city);
+            return Arrays.asList(city);
         }
         return allDistricts;
+    }
+
+    static String replaceAllQuotes(String input) {
+        Pattern pattern = Pattern.compile("[`'‘’“”‛‟ʼ«»\"]");
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "’");
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 
     /**
@@ -176,6 +193,9 @@ public class LocationApiService {
 
         return cities.stream()
             .filter(city -> {
+                if (checkIfRegionIdEqualsUpperId(region.getId(), city.getParentId())) {
+                    return true;
+                }
                 LocationDto localCommunity =
                     getLocationDataByCode(LocationDivision.LOCAL_COMMUNITY.getLevelId(), city.getParentId());
                 LocationDto districtRegion = getLocationDataByCode(LocationDivision.DISTRICT_IN_REGION.getLevelId(),
@@ -257,6 +277,22 @@ public class LocationApiService {
         return resultFromUrl.get(0);
     }
 
+    private boolean checkIfRegionIdEqualsUpperId(String regionId, String cityUpperId) {
+        return regionId.equals(cityUpperId);
+    }
+
+    private static String removeWordRegion(String sentence) {
+        String withoutSpaces = sentence.replace(" ", "");
+        String withoutRegion = withoutSpaces.replaceAll("(?iu)region", "");
+        return replaceAllQuotes(withoutRegion.replaceAll("(?iu)область", ""));
+    }
+
+    private static String removeWordCity(String sentence) {
+        String withoutSpaces = sentence.replace(" ", "");
+        String withoutRegion = withoutSpaces.replaceAll("(?iu)city", "");
+        return replaceAllQuotes(withoutRegion.replaceAll("(?iu)місто", ""));
+    }
+
     /**
      * Fetches a list of location data by level.
      *
@@ -268,7 +304,7 @@ public class LocationApiService {
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
-    private boolean checkIfNotNull(String... names) {
+    private static boolean checkIfNotNull(String... names) {
         if (Arrays.stream(names).anyMatch(StringUtils::isBlank)) {
             throw new IllegalArgumentException(ErrorMessage.VALUE_CAN_NOT_BE_NULL_OR_EMPTY);
         }

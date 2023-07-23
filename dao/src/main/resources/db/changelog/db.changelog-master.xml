@@ -214,4 +214,5 @@
     <include file="/db/changelog/logs/ch-upd-notification-platforms-body-body_eng-Lenets.xml"/>
     <include file="/db/changelog/logs/ch-update_big_order_table_view-with-bags-sorting-Lenets.xml"/>
     <include file="/db/changelog/logs/ch-upd-notification-templates-titles-Lenets.xml"/>
+    <include file="db/changelog/logs/ch-add-table-refunds-Bondar.xml"/>
 </databaseChangeLog>
