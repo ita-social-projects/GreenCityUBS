@@ -71,7 +71,6 @@ import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
-import greencity.enums.BagStatus;
 import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -1226,7 +1225,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         List<Integer> orderedBagsIds = bags.stream().map(BagDto::getId).collect(toList());
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
-            .filter(it -> it.getStatus() == BagStatus.ACTIVE && !orderedBagsIds.contains(it.getId()))
+            .filter(it ->  !orderedBagsIds.contains(it.getId()))
             .map(this::createOrderBag).collect(toList());
         notOrderedBags.forEach(it -> it.setAmount(0));
         orderBagList.addAll(notOrderedBags);

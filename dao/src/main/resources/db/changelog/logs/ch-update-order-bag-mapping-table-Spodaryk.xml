@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-    <changeSet id="Seti-14" author="Julia Seti">
+    <changeSet id="Spodaryk-4" author="Oksana Spodaryk">
         <dropPrimaryKey  tableName= "order_bag_mapping" constraintName="order_bag_mapping_pkey"/>
 
         <addColumn tableName="order_bag_mapping">
@@ -28,14 +28,14 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
-    <changeSet id="Seti-15" author="Julia Seti">
+    <changeSet id="Spodaryk-5" author="Oksana Spodaryk">
         <sql>update order_bag_mapping set
-                    capacity=bag.capacity,
-                    price=bag.full_price,
-                    name=bag.name,
-                    name_eng=bag.name_eng
+                                          capacity=bag.capacity,
+                                          price=bag.full_price,
+                                          name=bag.name,
+                                          name_eng=bag.name_eng
             from bag
-            where bag_id=bag.id
+             where bag_id=bag.id
         </sql>
 
         <addPrimaryKey tableName="order_bag_mapping" columnNames="id"/>

@@ -1,7 +1,6 @@
 package greencity.entity.order;
 
 import greencity.entity.user.employee.Employee;
-import greencity.enums.BagStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -91,7 +90,4 @@ public class Bag {
     @JoinColumn(nullable = false)
     private TariffsInfo tariffsInfo;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private BagStatus status;
 }

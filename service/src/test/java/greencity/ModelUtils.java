@@ -119,7 +119,6 @@ import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
-import greencity.enums.BagStatus;
 import greencity.enums.CancellationReason;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -2583,7 +2582,6 @@ public class ModelUtils {
             .createdBy(getEmployee())
             .editedBy(getEmployee())
             .limitIncluded(true)
-            .status(BagStatus.ACTIVE)
             .tariffsInfo(getTariffInfo())
             .build();
     }
@@ -2643,7 +2641,6 @@ public class ModelUtils {
             .description("Description")
             .descriptionEng("DescriptionEng")
             .limitIncluded(true)
-            .status(BagStatus.DELETED)
             .tariffsInfo(getTariffInfo())
             .build();
     }
@@ -2665,22 +2662,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static Bag getBagForOrder() {
-        return Bag.builder()
-            .id(3)
-            .capacity(120)
-            .commission(50_00L)
-            .price(350_00L)
-            .fullPrice(400_00L)
-            .createdAt(LocalDate.now())
-            .createdBy(getEmployee())
-            .editedBy(getEmployee())
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .limitIncluded(true)
-            .tariffsInfo(getTariffInfo())
-            .build();
-    }
 
     public static TariffServiceDto getTariffServiceDto() {
         return TariffServiceDto.builder()
@@ -2707,7 +2688,6 @@ public class ModelUtils {
             .editedBy(getEmployee())
             .editedAt(LocalDate.now())
             .limitIncluded(true)
-            .status(BagStatus.ACTIVE)
             .tariffsInfo(getTariffInfo())
             .build();
 
@@ -2822,7 +2802,6 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
-            .status(BagStatus.ACTIVE)
             .build();
     }
 
