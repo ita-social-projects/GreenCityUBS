@@ -89,5 +89,4 @@ public class Bag {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private TariffsInfo tariffsInfo;
-
 }

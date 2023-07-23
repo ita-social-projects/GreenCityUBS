@@ -356,7 +356,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,
         Integer userPoints) {
-        var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
+        var bagTranslationDtoList = bagRepository.findBagsByTariffsInfoId(tariffId).stream()
             .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
             .collect(toList());
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
@@ -460,7 +460,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Bag tryToGetActiveBagById(Integer id) {
-        return bagRepository.findActiveBagById(id)
+        return bagRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
     }
 
@@ -1229,7 +1229,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         List<Integer> orderedBagsIds = bags.stream().map(BagDto::getId).collect(toList());
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
-            .filter(it ->  !orderedBagsIds.contains(it.getId()))
+            .filter(it -> !orderedBagsIds.contains(it.getId()))
             .map(this::createOrderBag).collect(toList());
         notOrderedBags.forEach(it -> it.setAmount(0));
         orderBagList.addAll(notOrderedBags);
