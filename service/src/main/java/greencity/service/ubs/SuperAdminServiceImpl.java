@@ -13,10 +13,10 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
+import greencity.dto.service.TariffServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
-import greencity.dto.service.ServiceDto;
-import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffDto;
@@ -24,10 +24,10 @@ import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Courier;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
@@ -36,9 +36,9 @@ import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierLimit;
+import greencity.enums.OrderPaymentStatus;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
-import greencity.enums.OrderPaymentStatus;
 import greencity.enums.StationStatus;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
@@ -51,11 +51,11 @@ import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.BagRepository;
 import greencity.repository.CourierRepository;
+import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderRepository;
 import greencity.repository.DeactivateChosenEntityRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.LocationRepository;
-import greencity.repository.OrderBagRepository;
-import greencity.repository.OrderRepository;
 import greencity.repository.ReceivingStationRepository;
 import greencity.repository.RegionRepository;
 import greencity.repository.ServiceRepository;
@@ -97,9 +97,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final ModelMapper modelMapper;
     private final TariffLocationRepository tariffsLocationRepository;
     private final DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
-    private final OrderBagRepository orderBagRepository;
-    private final OrderRepository orderRepository;
-
     private static final String BAD_SIZE_OF_REGIONS_MESSAGE =
         "Region ids size should be 1 if several params are selected";
     private static final String REGIONS_NOT_EXIST_MESSAGE = "Current region doesn't exist: %s";
@@ -122,6 +119,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         "Current region: %s or cities: %s or receiving stations: %s don't exist.";
     private static final String REGION_OR_CITIES_OR_RECEIVING_STATIONS_OR_COURIER_NOT_EXIST_MESSAGE =
         "Current region: %s or cities: %s or receiving stations: %s or courier: %s don't exist.";
+    private final OrderBagRepository orderBagRepository;
+    private final OrderRepository orderRepository;
 
     @Override
     public GetTariffServiceDto addTariffService(long tariffId, TariffServiceDto dto, String employeeUuid) {
