@@ -2,8 +2,11 @@ package greencity.service.ubs;
 
 import greencity.entity.order.Bag;
 import greencity.entity.order.Order;
+import greencity.entity.order.OrderBag;
 import greencity.repository.OrderBagRepository;
-import java.util.List;
+
+import java.util.*;
+
 import static greencity.ModelUtils.getOrderBag;
 
 import greencity.repository.OrderRepository;
@@ -12,8 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.Arrays;
-import java.util.Optional;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,5 +62,89 @@ public class OrderBagServiceTest {
         int size = order.getOrderBags().size();
         orderBagService.removeBagFromOrder(order, getOrderBag());
         assertNotEquals(order.getOrderBags().size(), size);
+    }
+
+    @Test
+    void testGetActualBagsAmountForOrder_WithExportedQuantity() {
+        List<OrderBag> bagsForOrder = new ArrayList<>();
+        OrderBag bag1 = createOrderBagWithExportedQuantity(1, 10);
+        OrderBag bag2 = createOrderBagWithExportedQuantity(2, 20);
+        bagsForOrder.add(bag1);
+        bagsForOrder.add(bag2);
+
+        Map<Integer, Integer> result = orderBagService.getActualBagsAmountForOrder(bagsForOrder);
+
+        Map<Integer, Integer> expected = new HashMap<>();
+        expected.put(1, 10);
+        expected.put(2, 20);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetActualBagsAmountForOrder_WithConfirmedQuantity() {
+        List<OrderBag> bagsForOrder = new ArrayList<>();
+        OrderBag bag1 = createOrderBagWithConfirmedQuantity(1, 5);
+        OrderBag bag2 = createOrderBagWithConfirmedQuantity(2, 15);
+        bagsForOrder.add(bag1);
+        bagsForOrder.add(bag2);
+
+        Map<Integer, Integer> result = orderBagService.getActualBagsAmountForOrder(bagsForOrder);
+
+        Map<Integer, Integer> expected = new HashMap<>();
+        expected.put(1, 5);
+        expected.put(2, 15);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetActualBagsAmountForOrder_WithAmount() {
+        List<OrderBag> bagsForOrder = new ArrayList<>();
+        OrderBag bag1 = createOrderBagWithAmount(1, 3);
+        OrderBag bag2 = createOrderBagWithAmount(2, 7);
+        bagsForOrder.add(bag1);
+        bagsForOrder.add(bag2);
+
+        Map<Integer, Integer> result = orderBagService.getActualBagsAmountForOrder(bagsForOrder);
+
+        Map<Integer, Integer> expected = new HashMap<>();
+        expected.put(1, 3);
+        expected.put(2, 7);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetActualBagsAmountForOrder_WithNoMatch() {
+        List<OrderBag> bagsForOrder = new ArrayList<>();
+        Map<Integer, Integer> result = orderBagService.getActualBagsAmountForOrder(bagsForOrder);
+
+        Map<Integer, Integer> expected = new HashMap<>();
+        assertEquals(expected, result);
+    }
+
+    private OrderBag createOrderBagWithExportedQuantity(int bagId, int exportedQuantity) {
+        OrderBag orderBag = new OrderBag();
+        Bag bag = new Bag();
+        bag.setId(bagId);
+        orderBag.setBag(bag);
+        orderBag.setExportedQuantity(exportedQuantity);
+        return orderBag;
+    }
+
+    private OrderBag createOrderBagWithConfirmedQuantity(int bagId, int confirmedQuantity) {
+        OrderBag orderBag = new OrderBag();
+        Bag bag = new Bag();
+        bag.setId(bagId);
+        orderBag.setBag(bag);
+        orderBag.setConfirmedQuantity(confirmedQuantity);
+        return orderBag;
+    }
+
+    private OrderBag createOrderBagWithAmount(int bagId, int amount) {
+        OrderBag orderBag = new OrderBag();
+        Bag bag = new Bag();
+        bag.setId(bagId);
+        orderBag.setBag(bag);
+        orderBag.setAmount(amount);
+        return orderBag;
     }
 }
