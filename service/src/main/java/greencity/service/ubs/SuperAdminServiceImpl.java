@@ -174,20 +174,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
     }
 
-    private void checkDeletedBagLimitAndUpdateTariffsInfo(Bag bag) {
-        TariffsInfo tariffsInfo = bag.getTariffsInfo();
-        List<Bag> bags = bagRepository.findBagsByTariffsInfoId(tariffsInfo.getId());
-        if (bags.isEmpty() || bags.stream().noneMatch(Bag::getLimitIncluded)) {
-            tariffsInfo.setTariffStatus(TariffStatus.NEW);
-            tariffsInfo.setBags(bags);
-            tariffsInfo.setMax(null);
-            tariffsInfo.setMin(null);
-            tariffsInfo.setLimitDescription(null);
-            tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-            tariffsInfoRepository.save(tariffsInfo);
-        }
-    }
-
     private void checkDeletedBagLimitAndDeleteTariffsInfo(Bag bag) {
         TariffsInfo tariffsInfo = bag.getTariffsInfo();
         List<Bag> bags = bagRepository.findBagsByTariffsInfoId(tariffsInfo.getId());

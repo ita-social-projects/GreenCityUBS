@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
-public class OrderBagServiceTest {
+class OrderBagServiceTest {
 
     @InjectMocks
     private OrderBagService orderBagService;
@@ -113,6 +113,18 @@ public class OrderBagServiceTest {
     @Test
     void testGetActualBagsAmountForOrder_WithNoMatch() {
         List<OrderBag> bagsForOrder = new ArrayList<>();
+        OrderBag bag1 = createOrderBagWithAmount(1, 3);
+        bag1.setExportedQuantity(null);
+        bag1.setConfirmedQuantity(null);
+        bag1.setAmount(null);
+
+        OrderBag bag2 = createOrderBagWithAmount(2, 7);
+        bag2.setExportedQuantity(null);
+        bag2.setConfirmedQuantity(null);
+        bag2.setAmount(null);
+        bagsForOrder.add(bag1);
+        bagsForOrder.add(bag2);
+
         Map<Integer, Integer> result = orderBagService.getActualBagsAmountForOrder(bagsForOrder);
 
         Map<Integer, Integer> expected = new HashMap<>();
