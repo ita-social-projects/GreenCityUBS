@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,7 @@ import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 @Slf4j
 @Data
 public class OrderBagService {
-    private final OrderBagRepository orderBagRepository;
-    private final OrderRepository orderRepository;
+    private OrderBagRepository orderBagRepository;
 
     private Long getActualPrice(List<OrderBag> orderBags, Integer id) {
         return orderBags.stream()
@@ -106,10 +106,9 @@ public class OrderBagService {
      * @param orderBag {@link OrderBag}
      * @author Oksana Spodaryk
      */
-    public void removeBagFromOrder(Long orderId, OrderBag orderBag) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_NOT_FOUND + orderId));
-        order.getOrderBags().remove(orderBag);
-        orderRepository.save(order);
+    public void removeBagFromOrder(Order order, OrderBag orderBag) {
+        List<OrderBag> modifiableList = new ArrayList<>(order.getOrderBags());
+        modifiableList.remove(orderBag);
+        order.setOrderBags(modifiableList);
     }
 }

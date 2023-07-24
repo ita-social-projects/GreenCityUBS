@@ -122,8 +122,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         "Current region: %s or cities: %s or receiving stations: %s or courier: %s don't exist.";
     private final OrderBagRepository orderBagRepository;
     private final OrderRepository orderRepository;
-    @Autowired
-    private OrderBagService orderBagService;
+    private final OrderBagService orderBagService;
 
     @Override
     public GetTariffServiceDto addTariffService(long tariffId, TariffServiceDto dto, String employeeUuid) {
@@ -161,7 +160,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void deleteBagFromOrder(Order order, Integer bagId) {
-        Map<Integer, Integer> amount = UBSClientServiceImpl.getActualBagsAmountForOrder(order.getOrderBags());
+        Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
         Integer totalBagsAmount = amount.values().stream().reduce(0, Integer::sum);
         if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
             if (totalBagsAmount.equals(amount.get(bagId))) {
@@ -171,7 +170,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             }
             order.getOrderBags().stream().filter(it -> it.getBag().getId().equals(bagId))
                 .findFirst()
-                .ifPresent(obj -> orderBagService.removeBagFromOrder(order.getId(), obj));
+                .ifPresent(obj -> orderBagService.removeBagFromOrder(order, obj));
             orderRepository.save(order);
         }
     }
@@ -224,7 +223,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void updateOrderSumToPay(Order order, Bag bag) {
-        Map<Integer, Integer> amount = UBSClientServiceImpl.getActualBagsAmountForOrder(order.getOrderBags());
+        Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
         Long sumToPayInCoins = order.getOrderBags().stream()
             .map(it -> amount.get(it.getBag().getId()) * getActualBagPrice(it, bag))
             .reduce(0L, Long::sum);

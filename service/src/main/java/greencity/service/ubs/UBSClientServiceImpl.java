@@ -231,6 +231,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final ViberBotRepository viberBotRepository;
     private final LocationApiService locationApiService;
     private final OrderBagRepository orderBagRepository;
+    private final OrderBagService orderBagService;
+
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -886,26 +888,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
         List<OrderBag> bagsForOrder = order.getOrderBags();
-        Map<Integer, Integer> actualBagsAmount = getActualBagsAmountForOrder(bagsForOrder);
+        Map<Integer, Integer> actualBagsAmount = orderBagService.getActualBagsAmountForOrder(bagsForOrder);
         return bagsForOrder.stream()
             .map(orderBag -> buildBagForUserDto(orderBag, actualBagsAmount.get(orderBag.getBag().getId())))
             .collect(toList());
-    }
-
-    static Map<Integer, Integer> getActualBagsAmountForOrder(List<OrderBag> bagsForOrder) {
-        if (bagsForOrder.stream().allMatch(it -> it.getExportedQuantity() != null)) {
-            return bagsForOrder.stream()
-                .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getExportedQuantity));
-        }
-        if (bagsForOrder.stream().allMatch(it -> it.getConfirmedQuantity() != null)) {
-            return bagsForOrder.stream()
-                .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getConfirmedQuantity));
-        }
-        if (bagsForOrder.stream().allMatch(it -> it.getAmount() != null)) {
-            return bagsForOrder.stream()
-                .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getAmount));
-        }
-        return new HashMap<>();
     }
 
     private BagForUserDto buildBagForUserDto(OrderBag orderBag, int count) {

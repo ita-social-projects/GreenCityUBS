@@ -3686,6 +3686,13 @@ public class ModelUtils {
             .setResponsibleNavigator(null);
     }
 
+    public static Map<Integer, Integer> getAmount() {
+        Map<Integer, Integer> hashMap = new HashMap<>();
+        hashMap.put(1, 1);
+        hashMap.put(2, 1);
+        return hashMap;
+    }
+
     public static Order getOrderForGetOrderStatusData2Test() {
         Map<Integer, Integer> hashMap = new HashMap<>();
         hashMap.put(1, 1);
