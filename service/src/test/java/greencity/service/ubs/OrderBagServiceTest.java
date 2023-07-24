@@ -28,8 +28,6 @@ public class OrderBagServiceTest {
     private OrderBagService orderBagService;
     @Mock
     private OrderBagRepository orderBagRepository;
-    @Mock
-    private OrderRepository orderRepository;
 
     @Test
     void testFindBagsByOrderId() {

@@ -1,15 +1,12 @@
 package greencity.service.ubs;
 
-import greencity.constant.ErrorMessage;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.OrderBagRepository;
-import greencity.repository.OrderRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

@@ -66,7 +66,6 @@ import greencity.service.SuperAdminService;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
