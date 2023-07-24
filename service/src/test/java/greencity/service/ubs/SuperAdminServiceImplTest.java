@@ -271,6 +271,56 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void deleteTariffService2() {
+        Bag bag = ModelUtils.getBag();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfoWithStatusNew();
+        tariffsInfo.setBags(Arrays.asList(bag));
+        bag.setTariffsInfo(tariffsInfo);
+        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
+        Map<Integer, Integer> amount = new HashMap<>();
+        amount.put(1, 3);
+        amount.put(2, 7);
+
+        Order order = ModelUtils.getOrder();
+        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
+        when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
+        when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
+        superAdminService.deleteTariffService(1);
+
+        verify(bagRepository).findById(1);
+        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository).save(tariffsInfo);
+    }
+
+    @Test
+    void deleteTariffService3() {
+        Bag bag = ModelUtils.getBag();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfoWithStatusNew();
+        tariffsInfo.setBags(Arrays.asList(bag));
+        bag.setTariffsInfo(tariffsInfo);
+        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
+        Map<Integer, Integer> amount = new HashMap<>();
+        amount.put(1, 3);
+        amount.put(2, 7);
+        Order order = ModelUtils.getOrder();
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
+        when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
+        when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
+        superAdminService.deleteTariffService(1);
+
+        verify(bagRepository).findById(1);
+        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository).save(tariffsInfo);
+    }
+
+    @Test
     void deleteTariffServiceWhenTariffBagsListIsEmpty() {
         Bag bag = ModelUtils.getBag();
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfoWithStatusNew();
