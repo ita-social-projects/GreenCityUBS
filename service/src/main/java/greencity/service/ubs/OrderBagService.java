@@ -8,6 +8,8 @@ import greencity.exceptions.NotFoundException;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderRepository;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 @Service
 @AllArgsConstructor
 @Slf4j
+@Data
 public class OrderBagService {
     private final OrderBagRepository orderBagRepository;
     private final OrderRepository orderRepository;
@@ -108,16 +111,5 @@ public class OrderBagService {
             .orElseThrow(() -> new NotFoundException(ErrorMessage.ORDER_NOT_FOUND + orderId));
         order.getOrderBags().remove(orderBag);
         orderRepository.save(order);
-    }
-
-    /**
-     * method helps to set bags for order.
-     *
-     * @param orderBags {@link List} of {@link OrderBag}
-     * @author Oksana Spodaryk
-     */
-    public void setBagsForOrder(Order order, List<OrderBag> orderBags) {
-        orderBags.forEach(it -> it.setOrder(order));
-        order.setOrderBags(orderBags);
     }
 }

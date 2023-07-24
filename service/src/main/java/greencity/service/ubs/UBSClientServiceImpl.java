@@ -205,7 +205,6 @@ import static java.util.stream.Collectors.toMap;
 public class UBSClientServiceImpl implements UBSClientService {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
-    private final OrderBagRepository orderBagRepository;
     private final UBSuserRepository ubsUserRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
@@ -231,11 +230,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final TelegramBotRepository telegramBotRepository;
     private final ViberBotRepository viberBotRepository;
     private final LocationApiService locationApiService;
+    private final OrderBagRepository orderBagRepository;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
-    @Autowired
-    private OrderBagService orderBagService;
     @Value("${greencity.payment.fondy-payment-key}")
     private String fondyPaymentKey;
     @Value("${greencity.payment.merchant-id}")
@@ -1046,7 +1044,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
-        orderBagService.setBagsForOrder(order, bagsOrdered);
+        bagsOrdered.forEach(it -> it.setOrder(order));
+        order.setOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(
