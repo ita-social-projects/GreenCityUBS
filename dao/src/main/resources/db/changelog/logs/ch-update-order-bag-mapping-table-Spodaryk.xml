@@ -47,14 +47,8 @@
                 <columnExists tableName="order_bag_mapping" columnName="name_eng"/>
             </not>
         </preConditions>
+        <sqlFile path="sql/ch-update-order-bag-mapping-table-Spodaryk.sql" relativeToChangelogFile="true"/>
 
-        <sql>update order_bag_mapping
-             set capacity=bag.capacity,
-                 price=bag.full_price,
-                 name=bag.name,
-                 name_eng=bag.name_eng from bag
-             where bag_id=bag.id
-        </sql>
 
         <addPrimaryKey tableName="order_bag_mapping" columnNames="id"/>
 

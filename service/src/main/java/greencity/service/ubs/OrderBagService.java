@@ -43,10 +43,7 @@ public class OrderBagService {
     public List<Bag> findAllBagsInOrderBagsList(List<OrderBag> orderBags) {
         return orderBags.stream()
             .map(OrderBag::getBag)
-            .map(b -> {
-                b.setFullPrice(getActualPrice(orderBags, b.getId()));
-                return b;
-            })
+            .peek(b -> b.setFullPrice(getActualPrice(orderBags, b.getId())))
             .collect(Collectors.toList());
     }
 
