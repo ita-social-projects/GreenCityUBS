@@ -59,6 +59,7 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
+import greencity.entity.order.OrderBag;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
@@ -94,6 +95,7 @@ import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
 import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
@@ -114,7 +116,6 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,7 +137,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -148,7 +148,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.BAD_ORDER_STATUS_REQUEST;
@@ -192,7 +191,6 @@ import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -231,6 +229,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final TelegramBotRepository telegramBotRepository;
     private final ViberBotRepository viberBotRepository;
     private final LocationApiService locationApiService;
+    private final OrderBagRepository orderBagRepository;
+    private final OrderBagService orderBagService;
+
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -419,14 +420,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
         final User currentUser = userRepository.findByUuid(uuid);
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
-        Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
+        List<OrderBag> bagsOrdered = new ArrayList<>();
 
         if (!dto.isShouldBePaid()) {
             dto.setCertificates(Collections.emptySet());
             dto.setPointsToUse(0);
         }
 
-        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap,
+        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(bagsOrdered,
             dto.getBags(), tariffsInfo);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
@@ -439,7 +440,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         UBSuser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
-        getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPayInCoins, order, orderCertificates, userData);
+        getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
@@ -457,7 +458,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .collect(Collectors.toList());
     }
 
-    private Bag tryToGetBagById(Integer id) {
+    private Bag findBagById(Integer id) {
         return bagRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
     }
@@ -885,31 +886,17 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
-        Map<Integer, Integer> actualBagAmounts = getActualBagAmountsForOrder(order);
-        List<Bag> bagsForOrder = bagRepository.findBagsByOrderId(order.getId());
+        List<OrderBag> bagsForOrder = order.getOrderBags();
+        Map<Integer, Integer> actualBagsAmount = orderBagService.getActualBagsAmountForOrder(bagsForOrder);
         return bagsForOrder.stream()
-            .filter(bag -> actualBagAmounts.containsKey(bag.getId()))
-            .map(bag -> buildBagForUserDto(bag, actualBagAmounts.get(bag.getId())))
+            .map(orderBag -> buildBagForUserDto(orderBag, actualBagsAmount.get(orderBag.getBag().getId())))
             .collect(toList());
     }
 
-    private Map<Integer, Integer> getActualBagAmountsForOrder(Order order) {
-        if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
-            return order.getExportedQuantity();
-        }
-        if (MapUtils.isNotEmpty(order.getConfirmedQuantity())) {
-            return order.getConfirmedQuantity();
-        }
-        if (MapUtils.isNotEmpty(order.getAmountOfBagsOrdered())) {
-            return order.getAmountOfBagsOrdered();
-        }
-        return new HashMap<>();
-    }
-
-    private BagForUserDto buildBagForUserDto(Bag bag, int count) {
-        BagForUserDto bagDto = modelMapper.map(bag, BagForUserDto.class);
+    private BagForUserDto buildBagForUserDto(OrderBag orderBag, int count) {
+        BagForUserDto bagDto = modelMapper.map(orderBag, BagForUserDto.class);
         bagDto.setCount(count);
-        bagDto.setTotalPrice(convertCoinsIntoBills(count * bag.getFullPrice()));
+        bagDto.setTotalPrice(convertCoinsIntoBills(count * orderBag.getPrice()));
         return bagDto;
     }
 
@@ -1038,15 +1025,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
-        Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
+        List<OrderBag> bagsOrdered, UBSuser userData,
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
-        order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
+        bagsOrdered.forEach(orderBag -> orderBag.setOrder(order));
+        order.setOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(
-            formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap));
+            calculateOrderSumWithoutDiscounts(bagsOrdered));
         setOrderPaymentStatus(order, sumToPayInCoins);
 
         Payment payment = Payment.builder()
@@ -1202,33 +1190,44 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private long formBagsToBeSavedAndCalculateOrderSumClient(
-        Map<Integer, Integer> getOrderBagsAndQuantity) {
-        long sumToPayInCoins = 0L;
-
-        for (Map.Entry<Integer, Integer> temp : getOrderBagsAndQuantity.entrySet()) {
-            Integer amount = getOrderBagsAndQuantity.get(temp.getKey());
-            Bag bag = bagRepository.findById(temp.getKey())
-                .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + temp.getKey()));
-            sumToPayInCoins += bag.getFullPrice() * amount;
-        }
-        return sumToPayInCoins;
+    private long calculateOrderSumWithoutDiscounts(List<OrderBag> getOrderBagsAndQuantity) {
+        return getOrderBagsAndQuantity.stream()
+            .map(orderBag -> orderBag.getPrice() * orderBag.getAmount())
+            .reduce(0L, Long::sum);
     }
 
     private long formBagsToBeSavedAndCalculateOrderSum(
-        Map<Integer, Integer> map, List<BagDto> bags, TariffsInfo tariffsInfo) {
+        List<OrderBag> orderBagList, List<BagDto> bags, TariffsInfo tariffsInfo) {
         long sumToPayInCoins = 0L;
 
         for (BagDto temp : bags) {
-            Bag bag = tryToGetBagById(temp.getId());
+            Bag bag = findBagById(temp.getId());
             if (bag.getLimitIncluded().booleanValue()) {
                 checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, temp.getAmount());
                 checkSumIfCourierLimitBySumOfOrder(tariffsInfo, bag.getFullPrice() * temp.getAmount());
             }
             sumToPayInCoins += bag.getFullPrice() * temp.getAmount();
-            map.put(temp.getId(), temp.getAmount());
+            OrderBag orderBag = createOrderBag(bag);
+            orderBag.setAmount(temp.getAmount());
+            orderBagList.add(orderBag);
         }
+        List<Integer> orderedBagsIds = bags.stream().map(BagDto::getId).collect(toList());
+        List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
+            .filter(orderBag -> !orderedBagsIds.contains(orderBag.getId()))
+            .map(this::createOrderBag).collect(toList());
+        notOrderedBags.forEach(orderBag -> orderBag.setAmount(0));
+        orderBagList.addAll(notOrderedBags);
         return sumToPayInCoins;
+    }
+
+    private OrderBag createOrderBag(Bag bag) {
+        return OrderBag.builder()
+            .bag(bag)
+            .capacity(bag.getCapacity())
+            .price(bag.getFullPrice())
+            .name(bag.getName())
+            .nameEng(bag.getNameEng())
+            .build();
     }
 
     private void validateCertificate(Certificate certificate) {
@@ -1384,9 +1383,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         return sumToPayInCoins;
     }
 
-    private void getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
+    private void getOrder(OrderResponseDto dto, User currentUser, List<OrderBag> amountOfBagsOrdered,
         long sumToPayInCoins, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
-        formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPayInCoins);
+        formAndSaveOrder(order, orderCertificates, amountOfBagsOrdered, userData, currentUser, sumToPayInCoins);
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
     }
@@ -1431,6 +1430,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (order == null) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
+        order.setOrderBags(new ArrayList<>());
         orderRepository.delete(order);
     }
 
