@@ -26,7 +26,7 @@ public class OrderBagService {
     private OrderBagRepository orderBagRepository;
 
     private Long getActualPrice(List<OrderBag> orderBags, Integer id) {
-        return orderBagRepository.findOrderBagsByBagId(id).stream()
+        return orderBags.stream()
             .filter(ob -> ob.getBag().getId().equals(id))
             .map(OrderBag::getPrice)
             .findFirst()
@@ -82,17 +82,17 @@ public class OrderBagService {
      * @throws NullPointerException if 'bagsForOrder' is null.
      */
     public Map<Integer, Integer> getActualBagsAmountForOrder(List<OrderBag> bagsForOrder) {
-        if (bagsForOrder.stream().allMatch(orderBag -> orderBag.getExportedQuantity() != null)) {
+        if (bagsForOrder.stream().allMatch(it -> it.getExportedQuantity() != null)) {
             return bagsForOrder.stream()
-                .collect(Collectors.toMap(orderBag -> orderBag.getBag().getId(), OrderBag::getExportedQuantity));
+                .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getExportedQuantity));
         }
-        if (bagsForOrder.stream().allMatch(orderBag -> orderBag.getConfirmedQuantity() != null)) {
+        if (bagsForOrder.stream().allMatch(it -> it.getConfirmedQuantity() != null)) {
             return bagsForOrder.stream()
-                .collect(Collectors.toMap(orderBag -> orderBag.getBag().getId(), OrderBag::getConfirmedQuantity));
+                .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getConfirmedQuantity));
         }
-        if (bagsForOrder.stream().allMatch(orderBag -> orderBag.getAmount() != null)) {
+        if (bagsForOrder.stream().allMatch(it -> it.getAmount() != null)) {
             return bagsForOrder.stream()
-                .collect(Collectors.toMap(orderBag -> orderBag.getBag().getId(), OrderBag::getAmount));
+                .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getAmount));
         }
         return new HashMap<>();
     }
@@ -104,6 +104,8 @@ public class OrderBagService {
      * @author Oksana Spodaryk
      */
     public void removeBagFromOrder(Order order, OrderBag orderBag) {
-        order.getOrderBags().remove(orderBag);
+        List<OrderBag> modifiableList = new ArrayList<>(order.getOrderBags());
+        modifiableList.remove(orderBag);
+        order.setOrderBags(modifiableList);
     }
 }
