@@ -303,7 +303,7 @@ class UBSClientServiceImplTest {
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
             .thenReturn(Optional.of(tariffLocation));
-        when(bagRepository.findBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
         when(modelMapper.map(bags.get(0), BagTranslationDto.class)).thenReturn(bagTranslationDto);
 
         var userPointsAndAllBagsDtoActual =
@@ -323,7 +323,7 @@ class UBSClientServiceImplTest {
         verify(tariffsInfoRepository).findById(tariffsInfoId);
         verify(locationRepository).findById(locationId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
-        verify(bagRepository).findBagsByTariffsInfoId(tariffsInfoId);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(tariffsInfoId);
         verify(modelMapper).map(bags.get(0), BagTranslationDto.class);
     }
 
@@ -356,7 +356,7 @@ class UBSClientServiceImplTest {
         verify(locationRepository).findById(locationId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
 
-        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
     }
 
@@ -387,7 +387,7 @@ class UBSClientServiceImplTest {
         verify(locationRepository).findById(locationId);
 
         verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
-        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
     }
 
@@ -417,7 +417,7 @@ class UBSClientServiceImplTest {
 
         verify(locationRepository, never()).findById(anyLong());
         verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
-        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), anyLong());
     }
 
@@ -444,7 +444,7 @@ class UBSClientServiceImplTest {
         verify(tariffsInfoRepository, never()).findById(anyLong());
         verify(locationRepository, never()).findById(anyLong());
         verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
-        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
     }
 
@@ -474,7 +474,7 @@ class UBSClientServiceImplTest {
         verify(locationRepository).findById(locationId);
 
         verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
-        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
     }
 
@@ -504,7 +504,7 @@ class UBSClientServiceImplTest {
         verify(locationRepository).findById(locationId);
 
         verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
-        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
     }
 
@@ -541,7 +541,7 @@ class UBSClientServiceImplTest {
         verify(locationRepository).findById(locationId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
 
-        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
     }
 
@@ -569,7 +569,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
             .thenReturn(Optional.of(tariffLocation));
-        when(bagRepository.findBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
         when(modelMapper.map(bags.get(0), BagTranslationDto.class)).thenReturn(bagTranslationDto);
 
         var userPointsAndAllBagsDtoActual =
@@ -588,7 +588,7 @@ class UBSClientServiceImplTest {
         verify(userRepository).findUserByUuid(uuid);
         verify(orderRepository).findById(orderId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
-        verify(bagRepository).findBagsByTariffsInfoId(tariffsInfoId);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(tariffsInfoId);
         verify(modelMapper).map(bags.get(0), BagTranslationDto.class);
     }
 
@@ -611,7 +611,7 @@ class UBSClientServiceImplTest {
 
         verify(orderRepository, never()).findById(anyLong());
         verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
-        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
     }
 
@@ -637,7 +637,7 @@ class UBSClientServiceImplTest {
         verify(orderRepository).findById(orderId);
 
         verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
-        verify(bagRepository, never()).findBagsByTariffsInfoId(anyLong());
+        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
     }
 

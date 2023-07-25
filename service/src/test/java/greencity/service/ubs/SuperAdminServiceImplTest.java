@@ -219,13 +219,13 @@ class SuperAdminServiceImplTest {
         GetTariffServiceDto dto = ModelUtils.getGetTariffServiceDto();
 
         when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
-        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(bags);
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(bags);
         when(modelMapper.map(bags.get(0), GetTariffServiceDto.class)).thenReturn(dto);
 
         superAdminService.getTariffService(1);
 
         verify(tariffsInfoRepository).existsById(1L);
-        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(modelMapper).map(bags.get(0), GetTariffServiceDto.class);
     }
 
@@ -234,13 +234,13 @@ class SuperAdminServiceImplTest {
         List<Bag> bags = Collections.emptyList();
 
         when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
-        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(bags);
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(bags);
 
         List<GetTariffServiceDto> dtos = superAdminService.getTariffService(1);
 
         assertEquals(Collections.emptyList(), dtos);
         verify(tariffsInfoRepository).existsById(1L);
-        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
     }
 
     @Test
@@ -251,7 +251,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.getTariffService(1));
 
         verify(tariffsInfoRepository).existsById(1L);
-        verify(bagRepository, never()).findBagsByTariffsInfoId(1L);
+        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(1L);
     }
 
     @Test
@@ -261,12 +261,12 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
 
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
 
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findById(1);
-        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(tariffsInfoRepository, never()).save(tariffsInfo);
     }
 
@@ -284,14 +284,14 @@ class SuperAdminServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
         when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findById(1);
-        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(tariffsInfoRepository).save(tariffsInfo);
     }
 
@@ -309,14 +309,14 @@ class SuperAdminServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
         when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findById(1);
-        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(tariffsInfoRepository).save(tariffsInfo);
     }
 
@@ -333,14 +333,14 @@ class SuperAdminServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
         when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findById(1);
-        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(tariffsInfoRepository).save(tariffsInfo);
     }
 
@@ -356,14 +356,14 @@ class SuperAdminServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
         when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findById(1);
-        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(tariffsInfoRepository).save(tariffsInfo);
     }
 
@@ -382,13 +382,13 @@ class SuperAdminServiceImplTest {
         tariffsInfoNew.setTariffStatus(TariffStatus.DEACTIVATED);
 
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagRepository.findBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
         when(tariffsInfoRepository.save(tariffsInfoNew)).thenReturn(tariffsInfoNew);
 
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findById(1);
-        verify(bagRepository).findBagsByTariffsInfoId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(tariffsInfoRepository).save(tariffsInfoNew);
     }
 

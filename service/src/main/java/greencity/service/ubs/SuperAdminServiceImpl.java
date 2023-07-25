@@ -141,7 +141,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<GetTariffServiceDto> getTariffService(long tariffId) {
         if (tariffsInfoRepository.existsById(tariffId)) {
-            return bagRepository.findBagsByTariffsInfoId(tariffId)
+            return bagRepository.findAllActiveBagsByTariffsInfoId(tariffId)
                 .stream()
                 .map(it -> modelMapper.map(it, GetTariffServiceDto.class))
                 .collect(Collectors.toList());
@@ -176,7 +176,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private void checkDeletedBagLimitAndDeleteTariffsInfo(Bag bag) {
         TariffsInfo tariffsInfo = bag.getTariffsInfo();
-        List<Bag> bags = bagRepository.findBagsByTariffsInfoId(tariffsInfo.getId());
+        List<Bag> bags = bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfo.getId());
         if (bags.isEmpty() || bags.stream().noneMatch(Bag::getLimitIncluded)) {
             tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
             tariffsInfo.setBags(bags);

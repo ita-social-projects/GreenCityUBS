@@ -370,7 +370,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         checkAvailableOrderForEmployee(order, email);
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
 
-        var bagInfoDtoList = bagRepository.findBagsByTariffsInfoId(order.getTariffsInfo().getId()).stream()
+        var bagInfoDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(order.getTariffsInfo().getId()).stream()
             .map(bag -> modelMapper.map(bag, BagInfoDto.class))
             .collect(Collectors.toList());
 
