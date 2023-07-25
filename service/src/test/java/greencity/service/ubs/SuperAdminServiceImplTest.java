@@ -286,7 +286,7 @@ class SuperAdminServiceImplTest {
 
         Order order = ModelUtils.getOrder();
         order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
-        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
+//        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
         when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
