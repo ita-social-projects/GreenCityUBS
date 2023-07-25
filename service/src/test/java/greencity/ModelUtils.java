@@ -2264,7 +2264,7 @@ public class ModelUtils {
 
     private static Bag createBag() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .name("Name")
             .nameEng("NameEng")
@@ -2672,7 +2672,7 @@ public class ModelUtils {
 
     public static Optional<Bag> getOptionalBag() {
         return Optional.of(Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .capacity(120)
             .commission(50_00L)
@@ -2702,7 +2702,7 @@ public class ModelUtils {
 
     public static Bag getBag() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .capacity(120)
             .commission(50_00L)
@@ -2719,7 +2719,7 @@ public class ModelUtils {
 
     public static Bag getBag2() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(2)
             .capacity(120)
             .commission(50_00L)
@@ -2777,7 +2777,7 @@ public class ModelUtils {
 
     public static Bag getBagDeleted() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .capacity(120)
             .commission(50_00L)
@@ -2796,7 +2796,7 @@ public class ModelUtils {
 
     public static Bag getBagForOrder() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(3)
             .capacity(120)
             .commission(50_00L)
@@ -2825,7 +2825,7 @@ public class ModelUtils {
 
     public static Bag getEditedBag() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .capacity(20)
             .price(100_00L)
@@ -2913,7 +2913,7 @@ public class ModelUtils {
 
     public static Bag getTariffBag() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .capacity(20)
             .price(100_00L)
@@ -2943,7 +2943,7 @@ public class ModelUtils {
 
     public static Bag getNewBag() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .capacity(20)
             .price(100_00L)
             .commission(50_00L)
@@ -3086,7 +3086,7 @@ public class ModelUtils {
 
     public static List<Bag> getBag1list() {
         return List.of(Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .price(100_00L)
             .capacity(20)
@@ -3100,7 +3100,7 @@ public class ModelUtils {
 
     public static List<Bag> getBaglist() {
         return List.of(Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .price(100_00L)
             .capacity(10)
@@ -3119,7 +3119,7 @@ public class ModelUtils {
 
     public static List<Bag> getBag2list() {
         return List.of(Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .price(100_00L)
             .capacity(10)
@@ -3130,7 +3130,7 @@ public class ModelUtils {
 
     public static List<Bag> getBag3list() {
         return List.of(Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .price(100_00L)
             .capacity(10)
@@ -3149,7 +3149,7 @@ public class ModelUtils {
 
     public static List<Bag> getBag4list() {
         return List.of(Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .price(100_00L)
             .capacity(10)
@@ -3434,7 +3434,7 @@ public class ModelUtils {
 
     public static Bag bagDto() {
         return Bag.builder()
-                .status(BagStatus.ACTIVE)
+            .status(BagStatus.ACTIVE)
             .id(1)
             .limitIncluded(false)
             .description("Description")
