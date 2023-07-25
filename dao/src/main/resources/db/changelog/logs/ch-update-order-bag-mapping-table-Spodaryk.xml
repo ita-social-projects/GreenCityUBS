@@ -3,7 +3,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <changeSet id="Spodaryk-4" author="Oksana Spodaryk">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="WARN">
             <primaryKeyExists tableName="order_bag_mapping"/>
         </preConditions>
         <dropPrimaryKey tableName="order_bag_mapping" constraintName="order_bag_mapping_pkey"/>
@@ -33,7 +33,7 @@
 
     <changeSet id="Spodaryk-5" author="Oksana Spodaryk">
 
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="WARN">
             <not>
                 <columnExists tableName="order_bag_mapping" columnName="capacity"/>
             </not>

@@ -45,10 +45,10 @@ public class OrderBag {
     @Column(nullable = false)
     private Integer amount;
 
-    @Column
+    @Column(name = "confirmed_quantity")
     private Integer confirmedQuantity;
 
-    @Column
+    @Column(name = "exported_quantity")
     private Integer exportedQuantity;
 
     @Column(nullable = false)
@@ -56,10 +56,12 @@ public class OrderBag {
 
     @Column(nullable = false)
     private Long price;
+
     @NotBlank
     @Size(min = 1, max = 30)
     @Column(nullable = false)
     private String name;
+
     @NotBlank
     @Size(min = 1, max = 30)
     @Column(nullable = false)
