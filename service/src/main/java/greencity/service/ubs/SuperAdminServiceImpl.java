@@ -160,7 +160,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setStatus(BagStatus.DELETED);
         bagRepository.save(bag);
         checkDeletedBagLimitAndDeleteTariffsInfo(bag);
-        orderRepository.findAllByBagId(bagId).forEach(it -> deleteBagFromOrder(it, bagId));
+        orderRepository.findAllByBagId(bagId).forEach(order -> deleteBagFromOrder(order, bagId));
     }
 
     private void deleteBagFromOrder(Order order, Integer bagId) {

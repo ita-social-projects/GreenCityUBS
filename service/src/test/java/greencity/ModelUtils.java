@@ -2712,7 +2712,6 @@ public class ModelUtils {
             .createdBy(getEmployee())
             .editedBy(getEmployee())
             .limitIncluded(true)
-
             .tariffsInfo(getTariffInfo())
             .build();
     }
@@ -2955,7 +2954,6 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
-            .status(BagStatus.ACTIVE)
             .build();
     }
 
