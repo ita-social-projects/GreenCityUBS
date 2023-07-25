@@ -167,9 +167,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 orderRepository.delete(order);
                 return;
             }
-            order.getOrderBags().stream().filter(it -> it.getBag().getId().equals(bagId))
+            order.getOrderBags().stream().filter(orderBag -> orderBag.getBag().getId().equals(bagId))
                 .findFirst()
-                .ifPresent(obj -> orderBagService.removeBagFromOrder(order, obj));
+                .ifPresent(orderBag -> orderBagService.removeBagFromOrder(order, orderBag));
             orderRepository.save(order);
         }
     }
@@ -200,7 +200,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
 
         List<Order> orders = orderRepository.findAllUnpaidOrdersByBagId(bagId);
-        if (!orders.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(orders)) {
             orders.forEach(it -> updateOrderSumToPay(it, bag));
             orderRepository.saveAll(orders);
         }
@@ -210,12 +210,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private void updateOrderSumToPay(Order order, Bag bag) {
         Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
         Long sumToPayInCoins = order.getOrderBags().stream()
-            .map(it -> amount.get(it.getBag().getId()) * getActualBagPrice(it, bag))
+            .map(orderBag -> amount.get(orderBag.getBag().getId()) * getBagPrice(orderBag, bag))
             .reduce(0L, Long::sum);
         order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
     }
 
-    private Long getActualBagPrice(OrderBag orderBag, Bag bag) {
+    private Long getBagPrice(OrderBag orderBag, Bag bag) {
         return bag.getId().equals(orderBag.getBag().getId())
             ? bag.getFullPrice()
             : orderBag.getPrice();

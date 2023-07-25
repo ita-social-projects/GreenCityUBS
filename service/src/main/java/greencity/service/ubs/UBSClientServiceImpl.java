@@ -458,7 +458,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .collect(Collectors.toList());
     }
 
-    private Bag tryToGetActiveBagById(Integer id) {
+    private Bag findBagById(Integer id) {
         return bagRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
     }
@@ -1029,7 +1029,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
-        bagsOrdered.forEach(it -> it.setOrder(order));
+        bagsOrdered.forEach(orderBag -> orderBag.setOrder(order));
         order.setOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
@@ -1192,7 +1192,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private long calculateOrderSumWithoutDiscounts(List<OrderBag> getOrderBagsAndQuantity) {
         return getOrderBagsAndQuantity.stream()
-            .map(it -> it.getPrice() * it.getAmount())
+            .map(orderBag -> orderBag.getPrice() * orderBag.getAmount())
             .reduce(0L, Long::sum);
     }
 
@@ -1201,7 +1201,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         long sumToPayInCoins = 0L;
 
         for (BagDto temp : bags) {
-            Bag bag = tryToGetActiveBagById(temp.getId());
+            Bag bag = findBagById(temp.getId());
             if (bag.getLimitIncluded().booleanValue()) {
                 checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, temp.getAmount());
                 checkSumIfCourierLimitBySumOfOrder(tariffsInfo, bag.getFullPrice() * temp.getAmount());
@@ -1213,9 +1213,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         List<Integer> orderedBagsIds = bags.stream().map(BagDto::getId).collect(toList());
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
-            .filter(it -> !orderedBagsIds.contains(it.getId()))
+            .filter(orderBag -> !orderedBagsIds.contains(orderBag.getId()))
             .map(this::createOrderBag).collect(toList());
-        notOrderedBags.forEach(it -> it.setAmount(0));
+        notOrderedBags.forEach(orderBag -> orderBag.setAmount(0));
         orderBagList.addAll(notOrderedBags);
         return sumToPayInCoins;
     }
