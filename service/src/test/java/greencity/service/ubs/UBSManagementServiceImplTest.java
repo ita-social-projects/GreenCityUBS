@@ -1140,7 +1140,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         when(paymentRepository.selectSumPaid(1L)).thenReturn(5000L);
 
         ubsManagementService.setOrderDetail(1L,
@@ -1182,7 +1182,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         when(paymentRepository.selectSumPaid(1L)).thenReturn(null);
         doNothing().when(orderRepository).updateOrderPaymentStatus(1L, OrderPaymentStatus.UNPAID.name());
         when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
@@ -1203,7 +1203,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         when(paymentRepository.selectSumPaid(1L)).thenReturn(null);
 
         ubsManagementService.setOrderDetail(1L,
@@ -1282,7 +1282,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto2()));
 //        when(orderBagService.findBagsByOrderId(1L)).thenReturn(getBaglist());
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.setOrderDetail(order.getId(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1300,8 +1300,8 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
@@ -1317,7 +1317,7 @@ class UBSManagementServiceImplTest {
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         when(orderDetailRepository.ifRecordExist(any(), any())).thenReturn(1L);
         when(orderDetailRepository.getAmount(any(), any())).thenReturn(1L);
         ubsManagementService.setOrderDetail(1L,
@@ -1341,7 +1341,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         when(orderDetailRepository.ifRecordExist(any(), any())).thenReturn(1L);
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1362,7 +1362,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1376,7 +1376,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.empty());
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.empty());
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1395,8 +1395,8 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1414,7 +1414,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1433,7 +1433,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
@@ -1451,7 +1451,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
@@ -1469,7 +1469,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1609,7 +1609,7 @@ class UBSManagementServiceImplTest {
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
         UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
@@ -1649,7 +1649,7 @@ class UBSManagementServiceImplTest {
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "test@gmail.com");
         UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();

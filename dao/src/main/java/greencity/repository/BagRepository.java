@@ -66,6 +66,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         value = "SELECT * FROM order_bag_mapping AS obm JOIN bag AS b ON obm.bag_id = b.id "
             + "WHERE obm.order_id = :orderId")
     List<Bag> findAllByOrder(@Param("orderId") Long orderId);
+
     /**
      * method, that returns {@link List} of {@link Bag} by id.
      *
@@ -74,8 +75,8 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Oksana Spodaryk
      */
     @Query(nativeQuery = true,
-            value = "SELECT * FROM bag "
-                    + "WHERE id = :bagId AND status = 'ACTIVE'")
+        value = "SELECT * FROM bag "
+            + "WHERE id = :bagId AND status = 'ACTIVE'")
     Optional<Bag> findActiveBagById(Integer bagId);
 
     /**
@@ -86,7 +87,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Oksana Spodaryk
      */
     @Query(nativeQuery = true,
-            value = "SELECT * FROM bag "
-                    + "WHERE tariffs_info_id = :tariffInfoId AND status = 'ACTIVE'")
+        value = "SELECT * FROM bag "
+            + "WHERE tariffs_info_id = :tariffInfoId AND status = 'ACTIVE'")
     List<Bag> findAllActiveBagsByTariffsInfoId(Long tariffInfoId);
 }

@@ -35,10 +35,12 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.BagStatus;
 import greencity.enums.CourierLimit;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
+import greencity.enums.OrderPaymentStatus;
 import greencity.enums.StationStatus;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
@@ -133,6 +135,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
         Employee employee = tryToFindEmployeeByUuid(employeeUuid);
         Bag bag = modelMapper.map(dto, Bag.class);
+        bag.setStatus(BagStatus.ACTIVE);
         bag.setTariffsInfo(tariffsInfo);
         bag.setCreatedBy(employee);
         return bag;
@@ -154,6 +157,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public void deleteTariffService(Integer bagId) {
         Bag bag = tryToFindBagById(bagId);
+        bag.setStatus(BagStatus.DELETED);
+        bagRepository.save(bag);
         checkDeletedBagLimitAndDeleteTariffsInfo(bag);
         orderRepository.findAllByBagId(bagId).forEach(it -> deleteBagFromOrder(it, bagId));
     }
@@ -243,7 +248,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Bag tryToFindBagById(Integer id) {
-        return bagRepository.findById(id).orElseThrow(
+        return bagRepository.findActiveBagById(id).orElseThrow(
             () -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
     }
 
