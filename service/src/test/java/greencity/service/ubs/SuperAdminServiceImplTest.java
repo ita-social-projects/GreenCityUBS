@@ -263,7 +263,6 @@ class SuperAdminServiceImplTest {
 
         superAdminService.deleteTariffService(1);
 
-        verify(orderBagRepository).deleteOrderBagByBagIdAndOrderId(any(), anyLong());
         verify(bagRepository).findActiveBagById(1);
         verify(bagRepository).save(bag);
         verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
@@ -273,33 +272,14 @@ class SuperAdminServiceImplTest {
     @Test
     void deleteTariffServiceWhenTariffBagsListIsEmpty() {
         Bag bag = ModelUtils.getBag();
-        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfoWithStatusNew();
-        tariffsInfo.setBags(Arrays.asList(bag));
-        bag.setTariffsInfo(tariffsInfo);
-        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
-        Map<Integer, Integer> amount = new HashMap<>();
-        amount.put(1, 0);
-        Order order = ModelUtils.getOrder();
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
-        Bag bagDeleted = ModelUtils.getBagDeleted();
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
-        when(bagRepository.save(bag)).thenReturn(bagDeleted);
-        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
-        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
-
-        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
-        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(Collections.emptyList());
-        when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
-        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
-        when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
-        when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
 
         superAdminService.deleteTariffService(1);
 
         verify(orderBagRepository).findOrderBagsByBagId(any());
         verify(bagRepository).findActiveBagById(1);
-        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
-        verify(tariffsInfoRepository).save(tariffsInfo);
+        verify(bagRepository).delete(any());
+
     }
 
     @Test
