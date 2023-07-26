@@ -1884,7 +1884,7 @@ class UBSClientServiceImplTest {
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
 
-        assertEquals(KYIV_REGION_UA, actualWithSearchAddress.getAddressList().get(0).getRegionEn());
+        assertEquals(KYIV_REGION_UA, actualWithSearchAddress.getAddressList().get(0).getRegion());
 
         verify(userRepository, times(2)).findByUuid(user.getUuid());
         verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
