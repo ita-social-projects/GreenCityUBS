@@ -684,7 +684,6 @@ class UBSClientServiceImplTest {
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
-
     }
 
     @Test
