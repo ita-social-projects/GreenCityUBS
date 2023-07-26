@@ -40,7 +40,6 @@ import greencity.enums.CourierLimit;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
-import greencity.enums.OrderPaymentStatus;
 import greencity.enums.StationStatus;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;

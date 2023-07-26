@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BagStatusTest {
+class BagStatusTest {
     private static Bag getBag(BagStatus status) {
         return Bag.builder()
             .status(status)
@@ -21,12 +21,12 @@ public class BagStatusTest {
     }
 
     @Test
-    public void testGetStatus() {
+    void testGetStatus() {
         assertEquals(BagStatus.ACTIVE, getBag(BagStatus.ACTIVE).getStatus());
     }
 
     @Test
-    public void testSetStatus() {
+    void testSetStatus() {
         assertEquals(BagStatus.DELETED, getBag(BagStatus.DELETED).getStatus());
     }
 }
