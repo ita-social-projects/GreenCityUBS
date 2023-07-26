@@ -76,15 +76,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static greencity.ModelUtils.TEST_USER;
-import static greencity.ModelUtils.getAllTariffsInfoDto;
-import static greencity.ModelUtils.getCourier;
-import static greencity.ModelUtils.getCourierDto;
-import static greencity.ModelUtils.getCourierDtoList;
-import static greencity.ModelUtils.getDeactivatedCourier;
-import static greencity.ModelUtils.getEmployee;
-import static greencity.ModelUtils.getReceivingStation;
-import static greencity.ModelUtils.getReceivingStationDto;
+import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -267,6 +259,7 @@ class SuperAdminServiceImplTest {
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(ModelUtils.getAmount());
+        when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
 
         superAdminService.deleteTariffService(1);
 
@@ -298,6 +291,8 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
+        when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
+
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findActiveBagById(1);
@@ -333,6 +328,8 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
+        when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
+
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findActiveBagById(1);
@@ -363,6 +360,8 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
+        when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
+
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findActiveBagById(1);
@@ -392,6 +391,8 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag()))).thenReturn(amount);
+        when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
+
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).findActiveBagById(1);
@@ -411,6 +412,7 @@ class SuperAdminServiceImplTest {
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bagDeleted);
         when(tariffsInfoRepository.save(tariffsInfoNew)).thenReturn(tariffsInfoNew);
+        when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
 
         superAdminService.deleteTariffService(1);
 

@@ -53,15 +53,6 @@ class OrderBagServiceTest {
     }
 
     @Test
-    void testRemoveBagFromOrder() {
-        Order order = getOrder();
-        order.setOrderBags(Arrays.asList(getOrderBag(), getOrderBag2()));
-        int size = order.getOrderBags().size();
-        orderBagService.removeBagFromOrder(order, getOrderBag());
-        assertNotEquals(order.getOrderBags().size(), size);
-    }
-
-    @Test
     void testGetActualBagsAmountForOrder_WithExportedQuantity() {
         List<OrderBag> bagsForOrder = new ArrayList<>();
         OrderBag bag1 = createOrderBagWithExportedQuantity(1, 10);
