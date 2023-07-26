@@ -1337,7 +1337,25 @@ class UBSClientServiceImplTest {
 
         assertEquals(expected, actual);
     }
+    @Test
+    void getSecondPageData_ubsUser_isEmpty() {
+        String uuid = "35467585763t4sfgchjfuyetf";
+        PersonalDataDto expected = getOrderResponseDto().getPersonalData();
 
+        User user = getTestUser()
+                .setUuid(uuid)
+                .setRecipientEmail("mail@mail.ua")
+                .setRecipientPhone("067894522")
+                .setAlternateEmail("my@email.com");
+        List<UBSuser> ubsUser = Arrays.asList(getUBSuser());
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(Collections.emptyList());
+        when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
+
+        PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
+
+        assertEquals(expected, actual);
+    }
     @Test
     void getSecondPageDataWithUserFounded() {
 
