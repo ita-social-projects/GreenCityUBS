@@ -713,7 +713,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            Optional<Bag> bagOptional = bagRepository.findActiveBagById(entry.getKey());
+            Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
             if (bagOptional.isPresent() && checkOrderStatusAboutConfirmWaste(order)) {
                 Optional<Long> confirmWasteWas = Optional.empty();
                 Optional<Long> initialAmount = Optional.empty();
@@ -740,7 +740,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            Optional<Bag> bagOptional = bagRepository.findActiveBagById(entry.getKey());
+            Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
             if (bagOptional.isPresent() && checkOrderStatusAboutExportedWaste(order)) {
                 Optional<Long> exporterWasteWas = Optional.empty();
                 Optional<Long> confirmWasteWas = Optional.empty();
