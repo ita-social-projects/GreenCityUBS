@@ -4401,7 +4401,7 @@ public class ModelUtils {
         streetNumber.types = new AddressComponentType[] {AddressComponentType.STREET_NUMBER};
 
         AddressComponent region = new AddressComponent();
-        region.longName = KYIV_REGION_EN;
+        region.longName = "Kyiv";
         region.types = new AddressComponentType[] {AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
 
         AddressComponent sublocality = new AddressComponent();
@@ -4434,7 +4434,7 @@ public class ModelUtils {
         streetNumber2.types = new AddressComponentType[] {AddressComponentType.STREET_NUMBER};
 
         AddressComponent region2 = new AddressComponent();
-        region2.longName = KYIV_REGION_UA;
+        region2.longName = "місто Київ";
         region2.types = new AddressComponentType[] {AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
 
         AddressComponent sublocality2 = new AddressComponent();
