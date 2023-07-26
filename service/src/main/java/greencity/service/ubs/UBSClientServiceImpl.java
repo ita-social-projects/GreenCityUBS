@@ -253,6 +253,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
+    private static final String KYIV_REGION_EN = "Kyiv Oblast";
+    private static final String KYIV_REGION_UA = "Київська область";
+    private static final String KYIV_EN = "kyiv";
+    private static final String KYIV_UA = "місто київ";
 
     @Override
     @Transactional
@@ -662,7 +666,27 @@ public class UBSClientServiceImpl implements UBSClientService {
         double longitude = resultsEn.geometry.location.lng;
         orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
 
+        checkIfAddressBelongToKyiv(orderAddressDtoRequest);
+
         return orderAddressDtoRequest;
+    }
+
+    /**
+     * When Google API sets region name, there's a special case for Kyiv, the
+     * capital of Ukraine. Google API sets the 'Kyiv' as the name of region for
+     * addresses from Kyiv instead of Kyiv Region. Therefore, a separate logic is
+     * implemented to set 'Kyiv Region' name for such addresses instead of 'Kyiv'.
+     *
+     * @param request OrderAddressDtoRequest.
+     */
+    private void checkIfAddressBelongToKyiv(OrderAddressDtoRequest request) {
+        if (request.getRegion().equalsIgnoreCase(KYIV_UA)) {
+            request.setRegion(KYIV_REGION_UA);
+        }
+
+        if (request.getRegionEn().equalsIgnoreCase(KYIV_EN)) {
+            request.setRegionEn(KYIV_REGION_EN);
+        }
     }
 
     private void checkNullFieldsOnGoogleResponse(OrderAddressDtoRequest dtoRequest,
