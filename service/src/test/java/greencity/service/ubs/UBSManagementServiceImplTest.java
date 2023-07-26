@@ -1320,7 +1320,7 @@ class UBSManagementServiceImplTest {
 
         verify(orderRepository, times(2)).findById(1L);
         verify(bagRepository, times(2)).findCapacityById(1);
-        verify(bagRepository, times(2)).findActiveBagById(1);
+        verify(bagRepository, times(2)).findById(1);
         verify(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         verify(orderDetailRepository, times(0)).updateExporter(anyInt(), anyLong(), anyLong());
     }
@@ -1342,7 +1342,7 @@ class UBSManagementServiceImplTest {
 
         verify(orderRepository, times(2)).findById(1L);
         verify(bagRepository, times(2)).findCapacityById(1);
-        verify(bagRepository, times(2)).findActiveBagById(1);
+        verify(bagRepository, times(2)).findById(1);
         verify(orderDetailRepository, times(2)).ifRecordExist(any(), any());
         verify(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
