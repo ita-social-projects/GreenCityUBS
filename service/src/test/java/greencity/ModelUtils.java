@@ -129,7 +129,6 @@ import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
-import greencity.entity.order.OrderBag;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
@@ -172,6 +171,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -187,6 +187,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import static greencity.enums.NotificationReceiverType.EMAIL;
 import static greencity.enums.NotificationReceiverType.MOBILE;
 import static greencity.enums.NotificationReceiverType.SITE;
@@ -209,7 +210,6 @@ public class ModelUtils {
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
     public static final Bag TEST_BAG = createBag();
-    public static final OrderBag TEST_ORDER_BAG = createOrderBag();
     public static final BagForUserDto TEST_BAG_FOR_USER_DTO = createBagForUserDto();
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
@@ -259,10 +259,6 @@ public class ModelUtils {
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
-    public static final Bag TEST_BAG2 = createBag().setFullPrice(100000L);
-    public static final Bag TEST_BAG2_2 = createBag().setFullPrice(100000L).setId(2);
-    public static final Bag TEST_BAG2_3 = createBag().setFullPrice(100000L).setId(3);
-    public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(TEST_BAG2, TEST_BAG2, TEST_BAG2_2, TEST_BAG2_3);
 
     public static final String KYIV_REGION_EN = "Kyiv Oblast";
     public static final String KYIV_REGION_UA = "Київська область";
@@ -2334,18 +2330,6 @@ public class ModelUtils {
             .build();
     }
 
-    private static OrderBag createOrderBag() {
-        return OrderBag.builder()
-            .id(1L)
-            .name("Name")
-            .nameEng("NameEng")
-            .capacity(20)
-            .price(100_00L)
-            .order(createOrder())
-            .bag(createBag())
-            .build();
-    }
-
     private static BagForUserDto createBagForUserDto() {
         return BagForUserDto.builder()
             .service("Name")
@@ -2738,94 +2722,7 @@ public class ModelUtils {
             .build());
     }
 
-    public static OrderBag getOrderBag2() {
-        return OrderBag.builder()
-            .id(2L)
-            .capacity(2200)
-            .price(22000_00L)
-            .name("name")
-            .nameEng("name eng")
-            .amount(20)
-            .bag(getBag2())
-            .order(getOrder())
-            .build();
-    }
-
     public static Bag getBag() {
-        return Bag.builder()
-            .id(1)
-            .capacity(120)
-            .commission(50_00L)
-            .price(120_00L)
-            .fullPrice(170_00L)
-            .createdAt(LocalDate.now())
-            .createdBy(getEmployee())
-            .editedBy(getEmployee())
-            .limitIncluded(true)
-
-            .tariffsInfo(getTariffInfo())
-            .build();
-    }
-
-    public static Bag getBag2() {
-        return Bag.builder()
-            .id(2)
-            .capacity(120)
-            .commission(50_00L)
-            .price(120_00L)
-            .fullPrice(170_00L)
-            .createdAt(LocalDate.now())
-            .createdBy(getEmployee())
-            .editedBy(getEmployee())
-            .limitIncluded(true)
-
-            .tariffsInfo(getTariffInfo())
-            .build();
-    }
-
-    public static OrderBag getOrderBag() {
-        return OrderBag.builder()
-            .id(1L)
-            .capacity(120)
-            .price(120_00L)
-            .name("name")
-            .nameEng("name eng")
-            .amount(1)
-            .bag(getBag())
-            .order(getOrder())
-            .build();
-    }
-
-    public static OrderBag getOrderBagWithConfirmedAmount() {
-        return OrderBag.builder()
-            .id(1L)
-            .capacity(120)
-            .price(120_00L)
-            .name("name")
-            .nameEng("name eng")
-            .amount(1)
-            .confirmedQuantity(2)
-            .bag(getBag())
-            .order(getOrder())
-            .build();
-    }
-
-    public static OrderBag getOrderBagWithExportedAmount() {
-        return OrderBag.builder()
-            .id(1L)
-            .capacity(120)
-            .price(120_00L)
-            .name("name")
-            .nameEng("name eng")
-            .amount(1)
-            .confirmedQuantity(2)
-            .exportedQuantity(2)
-            .bag(getBag())
-            .order(getOrder())
-            .build();
-    }
-
-    public static Bag getBagDeleted() {
         return Bag.builder()
             .id(1)
             .capacity(120)
@@ -2838,7 +2735,6 @@ public class ModelUtils {
             .description("Description")
             .descriptionEng("DescriptionEng")
             .limitIncluded(true)
-            .tariffsInfo(getTariffInfo())
             .build();
     }
 
@@ -2862,44 +2758,12 @@ public class ModelUtils {
     public static TariffServiceDto getTariffServiceDto() {
         return TariffServiceDto.builder()
             .name("Бавовняна сумка")
-            .capacity(20)
-            .price(100.0)
+            .capacity(120)
+            .price(120.0)
             .commission(50.0)
             .description("Description")
             .build();
 
-    }
-
-    public static Bag getEditedBag() {
-        return Bag.builder()
-            .id(1)
-            .capacity(20)
-            .price(100_00L)
-            .fullPrice(150_00L)
-            .commission(50_00L)
-            .name("Бавовняна сумка")
-            .description("Description")
-            .createdAt(LocalDate.now())
-            .createdBy(getEmployee())
-            .editedBy(getEmployee())
-            .editedAt(LocalDate.now())
-            .limitIncluded(true)
-
-            .tariffsInfo(getTariffInfo())
-            .build();
-
-    }
-
-    public static OrderBag getEditedOrderBag() {
-        return OrderBag.builder()
-            .id(1L)
-            .amount(1)
-            .price(150_00L)
-            .capacity(20)
-            .name("Бавовняна сумка")
-            .bag(getBag())
-            .order(getOrder())
-            .build();
     }
 
     public static Location getLocation() {
@@ -2999,7 +2863,6 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
-
             .build();
     }
 
@@ -3740,20 +3603,12 @@ public class ModelUtils {
             .setResponsibleNavigator(null);
     }
 
-    public static Map<Integer, Integer> getAmount() {
-        Map<Integer, Integer> hashMap = new HashMap<>();
-        hashMap.put(1, 1);
-        hashMap.put(2, 1);
-        return hashMap;
-    }
-
     public static Order getOrderForGetOrderStatusData2Test() {
         Map<Integer, Integer> hashMap = new HashMap<>();
         hashMap.put(1, 1);
         hashMap.put(2, 1);
 
         return Order.builder()
-            .orderBags(Arrays.asList(getOrderBag(), getOrderBag2()))
             .id(1L)
             .amountOfBagsOrdered(hashMap)
             .confirmedQuantity(hashMap)
