@@ -779,9 +779,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
-
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
-
         Assertions.assertNotNull(result);
 
     }
@@ -1017,7 +1015,6 @@ class UBSClientServiceImplTest {
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().get(0).setAmount(1);
         Bag bag = getBagForOrder();
-
         Order order = getOrder();
         order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         TariffsInfo tariffsInfo = getTariffInfo();
@@ -1332,7 +1329,6 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
-
         PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
 
         assertEquals(expected, actual);
@@ -3482,6 +3478,7 @@ class UBSClientServiceImplTest {
         bag.setTariffsInfo(tariffsInfo);
         tariffsInfo.setBags(Arrays.asList(bag));
         order.setTariffsInfo(tariffsInfo);
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
@@ -3529,6 +3526,7 @@ class UBSClientServiceImplTest {
         bag.setTariffsInfo(tariffsInfo);
         tariffsInfo.setBags(Arrays.asList(bag));
         order.setTariffsInfo(tariffsInfo);
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
