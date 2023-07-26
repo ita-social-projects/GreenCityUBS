@@ -72,7 +72,16 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
-import greencity.enums.*;
+import greencity.enums.AddressStatus;
+import greencity.enums.BagStatus;
+import greencity.enums.BotType;
+import greencity.enums.CertificateStatus;
+import greencity.enums.CourierLimit;
+import greencity.enums.LocationStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
@@ -451,7 +460,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Bag findBagById(Integer id) {
-        return bagRepository.findById(id)
+        return bagRepository.findActiveBagById(id)
             .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
     }
 
