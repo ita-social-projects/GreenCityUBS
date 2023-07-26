@@ -377,8 +377,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     public PersonalDataDto getSecondPageData(String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         List<UBSuser> ubsUser = ubsUserRepository.findUBSuserByUser(currentUser);
+
         if (ubsUser.isEmpty()) {
-            ubsUser.add(UBSuser.builder().id(null).build());
+            UBSuser ubSuser = UBSuser.builder().id(null).build();
+            List<UBSuser> mutableUbsUserList = new ArrayList<>(ubsUser);
+            mutableUbsUserList.add(ubSuser);
+            ubsUser = mutableUbsUserList;
         }
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
         dto.setUbsUserId(ubsUser.get(0).getId());
