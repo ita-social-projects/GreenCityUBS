@@ -13,6 +13,18 @@ import java.util.List;
 @Repository
 public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
     /**
+     * Deletes the OrderBag from the ORDER_BAG_MAPPING table where the bagId and
+     * orderId match the provided values.
+     *
+     * @param bagId   The ID of the bag to be deleted.
+     * @param orderId The ID of the order to which the bag is associated.
+     */
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM ORDER_BAG_MAPPING WHERE BAG_ID = :bagId AND ORDER_ID = :orderId", nativeQuery = true)
+    void deleteOrderBagByBagIdAndOrderId(@Param("bagId") Integer bagId, @Param("orderId") Long orderId);
+
+    /**
      * Retrieves a list of order bags based on the given bag ID.
      *
      * @param id the ID of the order

@@ -156,6 +156,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public void deleteTariffService(Integer bagId) {
         Bag bag = tryToFindBagById(bagId);
+        if (orderBagRepository.findOrderBagsByBagId(bagId).isEmpty()) {
+            bagRepository.delete(bag);
+            return;
+        }
         bag.setStatus(BagStatus.DELETED);
         bagRepository.save(bag);
         checkDeletedBagLimitAndDeleteTariffsInfo(bag);
@@ -165,7 +169,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private void deleteBagFromOrder(Order order, Integer bagId) {
         Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
         Integer totalBagsAmount = amount.values().stream().reduce(0, Integer::sum);
-        if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
+        if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
             if (totalBagsAmount.equals(amount.get(bagId))) {
                 order.setOrderBags(new ArrayList<>());
                 orderRepository.delete(order);
@@ -173,7 +177,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             }
             order.getOrderBags().stream().filter(orderBag -> orderBag.getBag().getId().equals(bagId))
                 .findFirst()
-                .ifPresent(orderBag -> orderBagService.removeBagFromOrder(order, orderBag));
+                .ifPresent(orderBag -> orderBagRepository.deleteOrderBagByBagIdAndOrderId(bagId, order.getId()));
             orderRepository.save(order);
         }
     }
