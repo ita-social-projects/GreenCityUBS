@@ -24,6 +24,8 @@ import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderBag;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
@@ -34,6 +36,7 @@ import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierLimit;
+import greencity.enums.OrderPaymentStatus;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.StationStatus;
@@ -48,6 +51,8 @@ import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.BagRepository;
 import greencity.repository.CourierRepository;
+import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderRepository;
 import greencity.repository.DeactivateChosenEntityRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.LocationRepository;
@@ -71,6 +76,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -113,6 +119,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         "Current region: %s or cities: %s or receiving stations: %s don't exist.";
     private static final String REGION_OR_CITIES_OR_RECEIVING_STATIONS_OR_COURIER_NOT_EXIST_MESSAGE =
         "Current region: %s or cities: %s or receiving stations: %s or courier: %s don't exist.";
+    private final OrderBagRepository orderBagRepository;
+    private final OrderRepository orderRepository;
+    private final OrderBagService orderBagService;
 
     @Override
     public GetTariffServiceDto addTariffService(long tariffId, TariffServiceDto dto, String employeeUuid) {
@@ -142,13 +151,34 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
+    @Transactional
     public void deleteTariffService(Integer bagId) {
         Bag bag = tryToFindBagById(bagId);
+        checkDeletedBagLimitAndDeleteTariffsInfo(bag);
+        orderRepository.findAllByBagId(bagId).forEach(it -> deleteBagFromOrder(it, bagId));
+    }
+
+    private void deleteBagFromOrder(Order order, Integer bagId) {
+        Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
+        Integer totalBagsAmount = amount.values().stream().reduce(0, Integer::sum);
+        if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
+            if (totalBagsAmount.equals(amount.get(bagId))) {
+                order.setOrderBags(new ArrayList<>());
+                orderRepository.delete(order);
+                return;
+            }
+            order.getOrderBags().stream().filter(orderBag -> orderBag.getBag().getId().equals(bagId))
+                .findFirst()
+                .ifPresent(orderBag -> orderBagService.removeBagFromOrder(order, orderBag));
+            orderRepository.save(order);
+        }
+    }
+
+    private void checkDeletedBagLimitAndDeleteTariffsInfo(Bag bag) {
         TariffsInfo tariffsInfo = bag.getTariffsInfo();
-        bagRepository.delete(bag);
         List<Bag> bags = bagRepository.findBagsByTariffsInfoId(tariffsInfo.getId());
         if (bags.isEmpty() || bags.stream().noneMatch(Bag::getLimitIncluded)) {
-            tariffsInfo.setTariffStatus(TariffStatus.NEW);
+            tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
             tariffsInfo.setBags(bags);
             tariffsInfo.setMax(null);
             tariffsInfo.setMin(null);
@@ -159,9 +189,39 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer id, String employeeUuid) {
-        Bag bag = tryToFindBagById(id);
+    @Transactional
+    public GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer bagId, String employeeUuid) {
+        Bag bag = tryToFindBagById(bagId);
         Employee employee = tryToFindEmployeeByUuid(employeeUuid);
+        updateTariffService(dto, bag);
+        bag.setEditedBy(employee);
+
+        orderBagRepository.updateAllByBagIdForUnpaidOrders(
+            bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
+
+        List<Order> orders = orderRepository.findAllUnpaidOrdersByBagId(bagId);
+        if (CollectionUtils.isNotEmpty(orders)) {
+            orders.forEach(it -> updateOrderSumToPay(it, bag));
+            orderRepository.saveAll(orders);
+        }
+        return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
+    }
+
+    private void updateOrderSumToPay(Order order, Bag bag) {
+        Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
+        Long sumToPayInCoins = order.getOrderBags().stream()
+            .map(orderBag -> amount.get(orderBag.getBag().getId()) * getBagPrice(orderBag, bag))
+            .reduce(0L, Long::sum);
+        order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
+    }
+
+    private Long getBagPrice(OrderBag orderBag, Bag bag) {
+        return bag.getId().equals(orderBag.getBag().getId())
+            ? bag.getFullPrice()
+            : orderBag.getPrice();
+    }
+
+    private void updateTariffService(TariffServiceDto dto, Bag bag) {
         bag.setCapacity(dto.getCapacity());
         bag.setPrice(convertBillsIntoCoins(dto.getPrice()));
         bag.setCommission(convertBillsIntoCoins(dto.getCommission()));
@@ -171,8 +231,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setDescription(dto.getDescription());
         bag.setDescriptionEng(dto.getDescriptionEng());
         bag.setEditedAt(LocalDate.now());
-        bag.setEditedBy(employee);
-        return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
     }
 
     private Long convertBillsIntoCoins(Double bills) {
@@ -185,8 +243,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Bag tryToFindBagById(Integer id) {
-        return bagRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
+        return bagRepository.findById(id).orElseThrow(
+            () -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
     }
 
     private Long getFullPrice(Double price, Double commission) {
@@ -200,9 +258,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Service createService(Long tariffId, ServiceDto dto, String employeeUuid) {
-        if (tryToFindServiceByTariffsInfoId(tariffId).isEmpty()) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+        if (serviceRepository.findServiceByTariffsInfoId(tariffId).isEmpty()) {
             Employee employee = tryToFindEmployeeByUuid(employeeUuid);
-            TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
             Service service = modelMapper.map(dto, Service.class);
             service.setCreatedBy(employee);
             service.setCreatedAt(LocalDate.now());
@@ -215,14 +273,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetServiceDto getService(long tariffId) {
-        return tryToFindServiceByTariffsInfoId(tariffId)
+        tryToFindTariffById(tariffId);
+        return serviceRepository.findServiceByTariffsInfoId(tariffId)
             .map(it -> modelMapper.map(it, GetServiceDto.class))
-            .orElse(null);
+            .orElseGet(() -> null);
     }
 
     @Override
     public void deleteService(long id) {
-        serviceRepository.delete(tryToFindServiceById(id));
+        Service service = tryToFindServiceById(id);
+        serviceRepository.delete(service);
     }
 
     @Override
@@ -242,14 +302,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private Employee tryToFindEmployeeByUuid(String employeeUuid) {
         return employeeRepository.findByUuid(employeeUuid)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employeeUuid));
-    }
-
-    private Optional<Service> tryToFindServiceByTariffsInfoId(long tariffId) {
-        if (tariffsInfoRepository.existsById(tariffId)) {
-            return serviceRepository.findServiceByTariffsInfoId(tariffId);
-        } else {
-            throw new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId);
-        }
     }
 
     private Service tryToFindServiceById(long id) {

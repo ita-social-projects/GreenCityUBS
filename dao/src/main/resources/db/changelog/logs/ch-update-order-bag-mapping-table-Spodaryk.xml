@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Spodaryk-4" author="Oksana Spodaryk">
+        <preConditions onFail="WARN">
+            <primaryKeyExists tableName="order_bag_mapping"/>
+        </preConditions>
+        <dropPrimaryKey tableName="order_bag_mapping" constraintName="order_bag_mapping_pkey"/>
+
+        <addColumn tableName="order_bag_mapping">
+            <column name="id" position="1" autoIncrement="true" type="bigint"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="capacity" type="int"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="price" type="bigint"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="name" type="varchar(30)"/>
+        </addColumn>
+        <addColumn tableName="order_bag_mapping">
+            <column name="name_eng" type="varchar(30)"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="order_bag_mapping"
+                                 baseColumnNames="bag_id"
+                                 constraintName="fk_bag_to_order"
+                                 referencedTableName="bag"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="Spodaryk-5" author="Oksana Spodaryk">
+
+        <preConditions onFail="WARN">
+            <not>
+                <columnExists tableName="order_bag_mapping" columnName="capacity"/>
+            </not>
+            <not>
+                <columnExists tableName="order_bag_mapping" columnName="price"/>
+            </not>
+            <not>
+                <columnExists tableName="order_bag_mapping" columnName="name"/>
+            </not>
+            <not>
+                <columnExists tableName="order_bag_mapping" columnName="name_eng"/>
+            </not>
+        </preConditions>
+        <sqlFile path="sql/ch-update-order-bag-mapping-table-Spodaryk.sql" relativeToChangelogFile="true"/>
+
+
+        <addPrimaryKey tableName="order_bag_mapping" columnNames="id"/>
+
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="capacity"/>
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="price"/>
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="name"/>
+        <addNotNullConstraint tableName="order_bag_mapping" columnName="name_eng"/>
+    </changeSet>
+</databaseChangeLog>
