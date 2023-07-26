@@ -261,7 +261,6 @@ class UBSClientServiceImplTest {
         verify(eventService, times(1))
             .save("Замовлення Оплачено", "Система", order);
         verify(paymentRepository, times(1)).save(payment);
-
     }
 
     @Test
