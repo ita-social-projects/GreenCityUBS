@@ -163,11 +163,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setStatus(BagStatus.DELETED);
         bagRepository.save(bag);
         checkDeletedBagLimitAndDeleteTariffsInfo(bag);
-        orderRepository.findAllByBagId(bagId).forEach(order -> deleteBagFromOrder(order, bagId));
+        orderRepository.findAllByBagId(bagId).forEach(order -> deleteBagFromOrder(order, bag));
     }
 
-    private void deleteBagFromOrder(Order order, Integer bagId) {
-        Bag bag = tryToFindBagById(bagId);
+    private void deleteBagFromOrder(Order order, Bag bag) {
+        Integer bagId = bag.getId();
         Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
         Integer totalBagsAmount = amount.values().stream().reduce(0, Integer::sum);
         if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {

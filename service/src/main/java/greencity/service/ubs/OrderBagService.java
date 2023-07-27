@@ -94,7 +94,6 @@ public class OrderBagService {
         return new HashMap<>();
     }
 
-
     /**
      * method helps to delete bag from order.
      *
