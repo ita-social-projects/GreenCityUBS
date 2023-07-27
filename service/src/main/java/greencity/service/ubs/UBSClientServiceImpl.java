@@ -255,8 +255,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
     private static final String KYIV_REGION_EN = "Kyiv Oblast";
     private static final String KYIV_REGION_UA = "Київська область";
-    private static final String KYIV_EN = "kyiv";
-    private static final String KYIV_UA = "місто київ";
+    private static final String KYIV_EN = "Kyiv";
+    private static final String KYIV_UA = "місто Київ";
 
     @Override
     @Transactional
