@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.entity.order.Bag;
+import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.OrderBagRepository;
@@ -9,6 +10,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,5 +92,18 @@ public class OrderBagService {
                 .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getAmount));
         }
         return new HashMap<>();
+    }
+
+
+    /**
+     * method helps to delete bag from order.
+     *
+     * @param orderBag {@link OrderBag}
+     * @author Oksana Spodaryk
+     */
+    public void removeBagFromOrder(Order order, OrderBag orderBag) {
+        List<OrderBag> modifiableList = new ArrayList<>(order.getOrderBags());
+        modifiableList.remove(orderBag);
+        order.setOrderBags(modifiableList);
     }
 }

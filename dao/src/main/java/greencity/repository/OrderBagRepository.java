@@ -61,4 +61,13 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
         + "from orders o "
         + "where o.id = obm.order_id and obm.bag_id = :bagId and o.order_payment_status = 'UNPAID'", nativeQuery = true)
     void updateAllByBagIdForUnpaidOrders(Integer bagId, Integer capacity, Long price, String name, String nameEng);
+
+    /**
+     * method returns all OrderBags by bag id.
+     *
+     * @param bagId {@link Integer} bag id
+     * @return {@link List} of {@link OrderBag}
+     * @author Julia Seti
+     */
+    List<OrderBag> findAllByBagId(Integer bagId);
 }

@@ -21,7 +21,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.time.LocalDate;
