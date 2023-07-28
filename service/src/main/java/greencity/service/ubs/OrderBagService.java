@@ -93,16 +93,4 @@ public class OrderBagService {
         }
         return new HashMap<>();
     }
-
-    /**
-     * method helps to delete bag from order.
-     *
-     * @param orderBag {@link OrderBag}
-     * @author Oksana Spodaryk
-     */
-    public void removeBagFromOrder(Order order, OrderBag orderBag) {
-        List<OrderBag> modifiableList = new ArrayList<>(order.getOrderBags());
-        modifiableList.remove(orderBag);
-        order.setOrderBags(modifiableList);
-    }
 }
