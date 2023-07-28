@@ -785,6 +785,116 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testSaveToDB_AddressNotEqualsUsers() throws IllegalAccessException {
+        User user = getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+        dto.setAddressId(1L);
+        dto.setLocationId(1L);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = getBagForOrder();
+        TariffsInfo tariffsInfo = getTariffInfo();
+
+        UBSuser ubSuser = getUBSuser();
+
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+        tariffsInfo.setBags(Arrays.asList(bag));
+        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user.setId(null), user);
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser.setId(null)));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser.setId(null));
+        when(addressRepository.findById(any())).thenReturn(Optional.of(getAddress().setUser(getTestUser())));
+        when(locationRepository.findById(any())).thenReturn(Optional.of(getLocation()));
+
+        assertThrows(NotFoundException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+
+    }
+
+    @Test
+    void testSaveToDB_AddressStatusDeleted() throws IllegalAccessException {
+        User user = getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+        dto.setAddressId(1L);
+        dto.setLocationId(1L);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = getBagForOrder();
+        TariffsInfo tariffsInfo = getTariffInfo();
+
+        UBSuser ubSuser = getUBSuser();
+
+        OrderAddress orderAddress = ubSuser.getOrderAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+        tariffsInfo.setBags(Arrays.asList(bag));
+        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user.setId(null), user);
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser.setId(null)));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser.setId(null));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
+        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
+        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
+        when(addressRepository.findById(any()))
+            .thenReturn(Optional.of(getAddress().setAddressStatus(AddressStatus.DELETED)));
+        when(locationRepository.findById(any())).thenReturn(Optional.of(getLocation()));
+        assertThrows(NotFoundException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+
+    }
+
+    @Test
     void testSaveToDBWithTwoBags() throws IllegalAccessException {
         User user = getUserWithLastLocation();
         user.setAlternateEmail("test@mail.com");
