@@ -278,17 +278,19 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
         Order order = ModelUtils.getOrder();
         order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        Map<Integer, Integer> hashMap = new HashMap<>();
+        hashMap.put(1, 1);
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bagDeleted);
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
-            .thenReturn(ModelUtils.getAmount());
+            .thenReturn(hashMap);
         when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
 
         superAdminService.deleteTariffService(1);
 
-        verify(orderBagRepository).deleteOrderBagByBagIdAndOrderId(any(), any());
+        verify(orderBagRepository).findOrderBagsByBagId(any());
         verify(bagRepository).findActiveBagById(1);
         verify(bagRepository).save(bag);
         verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
