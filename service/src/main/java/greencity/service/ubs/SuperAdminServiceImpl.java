@@ -171,7 +171,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
         Integer totalBagsAmount = amount.values().stream().reduce(0, Integer::sum);
         if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-            if (totalBagsAmount.equals(amount.get(bagId)) || bag.getLimitIncluded()) {
+            if (totalBagsAmount.equals(amount.get(bagId))) {
                 order.setOrderBags(new ArrayList<>());
                 orderRepository.delete(order);
                 return;
