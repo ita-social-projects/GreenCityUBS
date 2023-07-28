@@ -247,6 +247,31 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void deleteTariffServiceWhenThereAreMoreThan1TypeOfBag() {
+        Bag bag = ModelUtils.getBag();
+        Bag bagDeleted = ModelUtils.getBagDeleted();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        Order order = ModelUtils.getOrder();
+        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag2()));
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
+        when(bagRepository.save(bag)).thenReturn(bagDeleted);
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag, getBag2()));
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
+        when(orderBagService
+            .getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag2())))
+                .thenReturn(ModelUtils.getAmount());
+        when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
+
+        superAdminService.deleteTariffService(1);
+
+        verify(orderBagRepository).deleteOrderBagByBagIdAndOrderId(any(), any());
+        verify(bagRepository).findActiveBagById(1);
+        verify(bagRepository).save(bag);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
+        verify(tariffsInfoRepository, never()).save(tariffsInfo);
+    }
+
+    @Test
     void deleteTariffServiceWhenTariffBagsWithLimits() {
         Bag bag = ModelUtils.getBag();
         Bag bagDeleted = ModelUtils.getBagDeleted();
