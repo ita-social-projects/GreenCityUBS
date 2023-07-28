@@ -288,6 +288,7 @@ class SuperAdminServiceImplTest {
 
         superAdminService.deleteTariffService(1);
 
+        verify(orderBagRepository).deleteOrderBagByBagIdAndOrderId(any(), any());
         verify(bagRepository).findActiveBagById(1);
         verify(bagRepository).save(bag);
         verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
