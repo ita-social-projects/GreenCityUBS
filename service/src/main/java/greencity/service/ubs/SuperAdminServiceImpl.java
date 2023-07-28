@@ -156,7 +156,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public void deleteTariffService(Integer bagId) {
         Bag bag = tryToFindBagById(bagId);
-        if (orderBagRepository.findOrderBagsByBagId(bagId).isEmpty()) {
+        if (CollectionUtils.isEmpty(orderBagRepository.findOrderBagsByBagId(bagId))) {
             bagRepository.delete(bag);
             return;
         }

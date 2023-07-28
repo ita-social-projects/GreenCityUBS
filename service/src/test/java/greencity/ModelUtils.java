@@ -2776,7 +2776,6 @@ public class ModelUtils {
 
     public static Bag getBagDeleted() {
         return Bag.builder()
-            .status(BagStatus.ACTIVE)
             .id(1)
             .capacity(120)
             .commission(50_00L)
