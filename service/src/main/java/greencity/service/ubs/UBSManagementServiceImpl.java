@@ -370,7 +370,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         checkAvailableOrderForEmployee(order, email);
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
 
-        var bagInfoDtoList = bagRepository.findBagsByTariffsInfoId(order.getTariffsInfo().getId()).stream()
+        var bagInfoDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(order.getTariffsInfo().getId()).stream()
             .map(bag -> modelMapper.map(bag, BagInfoDto.class))
             .collect(Collectors.toList());
 
@@ -713,7 +713,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
+            Optional<Bag> bagOptional = bagRepository.findActiveBagById(entry.getKey());
             if (bagOptional.isPresent() && checkOrderStatusAboutConfirmWaste(order)) {
                 Optional<Long> confirmWasteWas = Optional.empty();
                 Optional<Long> initialAmount = Optional.empty();
@@ -740,7 +740,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
+            Optional<Bag> bagOptional = bagRepository.findActiveBagById(entry.getKey());
             if (bagOptional.isPresent() && checkOrderStatusAboutExportedWaste(order)) {
                 Optional<Long> exporterWasteWas = Optional.empty();
                 Optional<Long> confirmWasteWas = Optional.empty();

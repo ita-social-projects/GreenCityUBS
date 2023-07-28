@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public interface BagRepository extends JpaRepository<Bag, Integer> {
@@ -67,11 +68,26 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
     List<Bag> findAllByOrder(@Param("orderId") Long orderId);
 
     /**
-     * method, that returns {@link List} of {@link Bag} by tariff id.
+     * method, that returns {@link List} of {@link Bag} by id.
      *
-     * @param tariffInfoId tariff id {@link Long}
-     * @return {@link List} of {@link Bag} by tariffInfoId.
-     * @author Safarov Renat
+     * @param bagId {@link Integer} tariff service id
+     * @return {@link Optional} of {@link Bag}
+     * @author Oksana Spodaryk
      */
-    List<Bag> findBagsByTariffsInfoId(Long tariffInfoId);
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM bag "
+            + "WHERE id = :bagId AND status = 'ACTIVE'")
+    Optional<Bag> findActiveBagById(Integer bagId);
+
+    /**
+     * method, that returns {@link List} of active {@link Bag} by tariff id.
+     *
+     * @param tariffInfoId {@link Long} tariff id
+     * @return {@link List} of {@link Bag}
+     * @author Oksana Spodaryk
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM bag "
+            + "WHERE tariffs_info_id = :tariffInfoId AND status = 'ACTIVE'")
+    List<Bag> findAllActiveBagsByTariffsInfoId(Long tariffInfoId);
 }

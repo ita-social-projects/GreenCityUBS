@@ -73,6 +73,7 @@ import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
+import greencity.enums.BagStatus;
 import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -355,7 +356,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,
         Integer userPoints) {
-        var bagTranslationDtoList = bagRepository.findBagsByTariffsInfoId(tariffId).stream()
+        var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
             .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
             .collect(toList());
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
@@ -376,8 +377,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     public PersonalDataDto getSecondPageData(String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         List<UBSuser> ubsUser = ubsUserRepository.findUBSuserByUser(currentUser);
+
         if (ubsUser.isEmpty()) {
-            ubsUser.add(UBSuser.builder().id(null).build());
+            UBSuser ubSuser = UBSuser.builder().id(null).build();
+            List<UBSuser> mutableUbsUserList = new ArrayList<>(ubsUser);
+            mutableUbsUserList.add(ubSuser);
+            ubsUser = mutableUbsUserList;
         }
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
         dto.setUbsUserId(ubsUser.get(0).getId());
@@ -459,7 +464,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Bag findBagById(Integer id) {
-        return bagRepository.findById(id)
+        return bagRepository.findActiveBagById(id)
             .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
     }
 
@@ -1213,7 +1218,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         List<Integer> orderedBagsIds = bags.stream().map(BagDto::getId).collect(toList());
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
-            .filter(orderBag -> !orderedBagsIds.contains(orderBag.getId()))
+            .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !orderedBagsIds.contains(orderBag.getId()))
             .map(this::createOrderBag).collect(toList());
         notOrderedBags.forEach(orderBag -> orderBag.setAmount(0));
         orderBagList.addAll(notOrderedBags);

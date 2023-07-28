@@ -1,6 +1,7 @@
 package greencity.entity.order;
 
 import greencity.entity.user.employee.Employee;
+import greencity.enums.BagStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.time.LocalDate;
@@ -87,4 +90,8 @@ public class Bag {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private TariffsInfo tariffsInfo;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BagStatus status;
 }

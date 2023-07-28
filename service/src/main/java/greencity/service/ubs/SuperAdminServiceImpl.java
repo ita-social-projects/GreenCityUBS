@@ -35,6 +35,7 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.BagStatus;
 import greencity.enums.CourierLimit;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.CourierStatus;
@@ -133,6 +134,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
         Employee employee = tryToFindEmployeeByUuid(employeeUuid);
         Bag bag = modelMapper.map(dto, Bag.class);
+        bag.setStatus(BagStatus.ACTIVE);
         bag.setTariffsInfo(tariffsInfo);
         bag.setCreatedBy(employee);
         return bag;
@@ -141,7 +143,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<GetTariffServiceDto> getTariffService(long tariffId) {
         if (tariffsInfoRepository.existsById(tariffId)) {
-            return bagRepository.findBagsByTariffsInfoId(tariffId)
+            return bagRepository.findAllActiveBagsByTariffsInfoId(tariffId)
                 .stream()
                 .map(it -> modelMapper.map(it, GetTariffServiceDto.class))
                 .collect(Collectors.toList());
@@ -154,29 +156,36 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public void deleteTariffService(Integer bagId) {
         Bag bag = tryToFindBagById(bagId);
+        if (CollectionUtils.isEmpty(orderBagRepository.findOrderBagsByBagId(bagId))) {
+            bagRepository.delete(bag);
+            return;
+        }
+        bag.setStatus(BagStatus.DELETED);
+        bagRepository.save(bag);
         checkDeletedBagLimitAndDeleteTariffsInfo(bag);
-        orderRepository.findAllByBagId(bagId).forEach(it -> deleteBagFromOrder(it, bagId));
+        orderRepository.findAllByBagId(bagId).forEach(order -> deleteBagFromOrder(order, bag));
     }
 
-    private void deleteBagFromOrder(Order order, Integer bagId) {
+    private void deleteBagFromOrder(Order order, Bag bag) {
+        Integer bagId = bag.getId();
         Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
         Integer totalBagsAmount = amount.values().stream().reduce(0, Integer::sum);
-        if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
-            if (totalBagsAmount.equals(amount.get(bagId))) {
+        if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
+            if (totalBagsAmount.equals(amount.get(bagId)) || bag.getLimitIncluded()) {
                 order.setOrderBags(new ArrayList<>());
                 orderRepository.delete(order);
                 return;
             }
             order.getOrderBags().stream().filter(orderBag -> orderBag.getBag().getId().equals(bagId))
                 .findFirst()
-                .ifPresent(orderBag -> orderBagService.removeBagFromOrder(order, orderBag));
+                .ifPresent(orderBag -> orderBagRepository.deleteOrderBagByBagIdAndOrderId(bagId, order.getId()));
             orderRepository.save(order);
         }
     }
 
     private void checkDeletedBagLimitAndDeleteTariffsInfo(Bag bag) {
         TariffsInfo tariffsInfo = bag.getTariffsInfo();
-        List<Bag> bags = bagRepository.findBagsByTariffsInfoId(tariffsInfo.getId());
+        List<Bag> bags = bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfo.getId());
         if (bags.isEmpty() || bags.stream().noneMatch(Bag::getLimitIncluded)) {
             tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
             tariffsInfo.setBags(bags);
@@ -243,7 +252,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Bag tryToFindBagById(Integer id) {
-        return bagRepository.findById(id).orElseThrow(
+        return bagRepository.findActiveBagById(id).orElseThrow(
             () -> new NotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
     }
 
