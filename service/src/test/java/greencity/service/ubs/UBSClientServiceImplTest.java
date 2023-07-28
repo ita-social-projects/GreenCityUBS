@@ -877,7 +877,7 @@ class UBSClientServiceImplTest {
         order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user.setId(null), user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser.setId(null)));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
