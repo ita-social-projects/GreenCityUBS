@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UserProfileUpdateDtoTest {
+class UserProfileUpdateDtoTest {
     void checkRegexPattern(String fieldName, String name, boolean validates) throws NoSuchFieldException {
         Field field = UserProfileUpdateDto.class.getDeclaredField(fieldName);
         javax.validation.constraints.Pattern[] annotations =
