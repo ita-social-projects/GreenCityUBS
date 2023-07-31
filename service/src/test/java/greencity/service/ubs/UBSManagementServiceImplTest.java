@@ -1012,7 +1012,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(TEST_ORDER));
         when(modelMapper.map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
         }.getType())).thenReturn(TEST_BAG_MAPPING_DTO_LIST);
-        when(orderBagService.findBagsByOrderId(1L)).thenReturn(TEST_BAG_LIST);
+        when(orderBagService.findAllBagsByOrderId(1L)).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(TEST_BAG, BagInfoDto.class)).thenReturn(TEST_BAG_INFO_DTO);
         when(bagRepository.findAllByOrder(1L)).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
@@ -1025,7 +1025,7 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).getOrderDetails(1L);
         verify(modelMapper).map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
         }.getType());
-        verify(orderBagService).findBagsByOrderId(1L);
+        verify(orderBagService).findAllBagsByOrderId(1L);
         verify(bagRepository, times(1)).findAllByOrder(anyLong());
         verify(modelMapper).map(TEST_BAG, BagInfoDto.class);
         verify(modelMapper).map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
@@ -2604,7 +2604,7 @@ class UBSManagementServiceImplTest {
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-//        when(orderBagService.findBagsByOrderId(1L)).thenReturn(getBaglist());
+//        when(orderBagService.findAllBagsByOrderId(1L)).thenReturn(getBaglist());
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
 
         ubsManagementService.addBonusesToUser(getAddBonusesToUserDto(), 1L, employee.getEmail());

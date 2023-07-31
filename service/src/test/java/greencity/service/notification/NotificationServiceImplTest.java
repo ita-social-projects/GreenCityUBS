@@ -412,7 +412,7 @@ class NotificationServiceImplTest {
             parameters.add(NotificationParameter.builder().key("orderNumber")
                 .value(orders.get(0).getId().toString()).build());
 
-            when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag1list());
+            when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag1list());
             when(userNotificationRepository.save(any())).thenReturn(notification);
             when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
 
@@ -513,7 +513,7 @@ class NotificationServiceImplTest {
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-        when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyUnpaidOrder(order);
 
@@ -544,7 +544,7 @@ class NotificationServiceImplTest {
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-        when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
         notificationService.notifyUnpaidOrder(order);
 
         verify(userNotificationRepository).save(any());
@@ -575,7 +575,7 @@ class NotificationServiceImplTest {
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-        when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyUnpaidOrder(order);
 
@@ -606,7 +606,7 @@ class NotificationServiceImplTest {
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-        when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyHalfPaidPackage(order);
 
@@ -633,7 +633,7 @@ class NotificationServiceImplTest {
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
-        when(orderBagService.findBagsByOrderId(any())).thenReturn(getBag4list());
+        when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyHalfPaidPackage(order);
 

@@ -242,7 +242,7 @@ public class NotificationServiceImpl implements NotificationService {
         long ubsCourierSumInCoins = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
         long writeStationSumInCoins = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
 
-        List<Bag> bagsType = orderBagService.findBagsByOrderId(order.getId());
+        List<Bag> bagsType = orderBagService.findAllBagsByOrderId(order.getId());
         Map<Integer, Integer> bagsAmount;
         if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
             bagsAmount = order.getExportedQuantity();

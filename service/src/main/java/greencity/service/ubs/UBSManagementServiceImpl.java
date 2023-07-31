@@ -1064,7 +1064,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
 
-        dto.setCapacityAndPrice(orderBagService.findBagsByOrderId(order.getId())
+        dto.setCapacityAndPrice(orderBagService.findAllBagsByOrderId(order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagInfoDto.class))
             .collect(Collectors.toList()));

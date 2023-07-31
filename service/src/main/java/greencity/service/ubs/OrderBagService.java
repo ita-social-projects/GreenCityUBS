@@ -4,9 +4,7 @@ import greencity.entity.order.Bag;
 import greencity.entity.order.OrderBag;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.OrderBagRepository;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -17,13 +15,11 @@ import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 
 @Service
-@AllArgsConstructor
-@Slf4j
 @Data
-public class OrderBagService {
+public final class OrderBagService {
     private OrderBagRepository orderBagRepository;
 
-    private Long getActualPrice(List<OrderBag> orderBags, Integer id) {
+    private Long getBagPrice(List<OrderBag> orderBags, Integer id) {
         return orderBags.stream()
             .filter(ob -> ob.getBag().getId().equals(id))
             .map(OrderBag::getPrice)
@@ -41,7 +37,7 @@ public class OrderBagService {
     public List<Bag> findAllBagsInOrderBagsList(List<OrderBag> orderBags) {
         return orderBags.stream()
             .map(OrderBag::getBag)
-            .peek(b -> b.setFullPrice(getActualPrice(orderBags, b.getId())))
+            .peek(b -> b.setFullPrice(getBagPrice(orderBags, b.getId())))
             .collect(Collectors.toList());
     }
 
@@ -51,7 +47,7 @@ public class OrderBagService {
      * @param id The ID of the OrderBag to search for.
      * @return A list of Bag instances associated with the provided OrderBag ID.
      */
-    public List<Bag> findBagsByOrderId(Long id) {
+    public List<Bag> findAllBagsByOrderId(Long id) {
         List<OrderBag> orderBags = orderBagRepository.findOrderBagsByOrderId(id);
         return findAllBagsInOrderBagsList(orderBags);
     }
@@ -77,17 +73,17 @@ public class OrderBagService {
      * @throws NullPointerException if 'bagsForOrder' is null.
      */
     public Map<Integer, Integer> getActualBagsAmountForOrder(List<OrderBag> bagsForOrder) {
-        if (bagsForOrder.stream().allMatch(it -> it.getExportedQuantity() != null)) {
+        if (bagsForOrder.stream().allMatch(orderBag -> orderBag.getExportedQuantity() != null)) {
             return bagsForOrder.stream()
-                .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getExportedQuantity));
+                .collect(Collectors.toMap(orderBag -> orderBag.getBag().getId(), OrderBag::getExportedQuantity));
         }
-        if (bagsForOrder.stream().allMatch(it -> it.getConfirmedQuantity() != null)) {
+        if (bagsForOrder.stream().allMatch(orderBag -> orderBag.getConfirmedQuantity() != null)) {
             return bagsForOrder.stream()
-                .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getConfirmedQuantity));
+                .collect(Collectors.toMap(orderBag -> orderBag.getBag().getId(), OrderBag::getConfirmedQuantity));
         }
-        if (bagsForOrder.stream().allMatch(it -> it.getAmount() != null)) {
+        if (bagsForOrder.stream().allMatch(orderBag -> orderBag.getAmount() != null)) {
             return bagsForOrder.stream()
-                .collect(Collectors.toMap(it -> it.getBag().getId(), OrderBag::getAmount));
+                .collect(Collectors.toMap(orderBag -> orderBag.getBag().getId(), OrderBag::getAmount));
         }
         return new HashMap<>();
     }
