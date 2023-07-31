@@ -291,9 +291,9 @@ class SuperAdminServiceImplTest {
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(hashMap);
         when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
-
+        assertEquals(bag.getStatus(), BagStatus.ACTIVE);
         superAdminService.deleteTariffService(1);
-
+        assertEquals(bag.getStatus(), BagStatus.DELETED);
         verify(orderBagRepository).findOrderBagsByBagId(any());
         verify(bagRepository).findActiveBagById(1);
         verify(bagRepository).save(bag);
