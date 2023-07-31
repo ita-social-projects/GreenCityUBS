@@ -67,7 +67,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,7 +78,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
-
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
