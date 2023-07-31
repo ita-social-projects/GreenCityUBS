@@ -177,7 +177,7 @@ public class ModelUtils {
     public static final List<Payment> TEST_PAYMENT_LIST = createPaymentList();
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
-    public static final Bag TEST_BAG = createBag();
+    public static final Bag TEST_BAG = createBag(1);
     public static final OrderBag TEST_ORDER_BAG = createOrderBag();
     public static final BagForUserDto TEST_BAG_FOR_USER_DTO = createBagForUserDto();
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
@@ -228,10 +228,7 @@ public class ModelUtils {
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
-    public static final Bag TEST_BAG2 = createBag().setFullPrice(100000L);
-    public static final Bag TEST_BAG2_2 = createBag().setFullPrice(100000L).setId(2);
-    public static final Bag TEST_BAG2_3 = createBag().setFullPrice(100000L).setId(3);
-    public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(TEST_BAG2, TEST_BAG2, TEST_BAG2_2, TEST_BAG2_3);
+    public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(createBag(1), createBag(2), createBag(3));
 
     public static EmployeeFilterView getEmployeeFilterView() {
         return getEmployeeFilterViewWithPassedIds(1L, 5L, 10L);
@@ -2251,7 +2248,7 @@ public class ModelUtils {
             .capacity(20)
             .name("Name")
             .nameEng("NameEng")
-            .price(100.00)
+            .price(1000.00)
             .build();
     }
 
@@ -2262,10 +2259,10 @@ public class ModelUtils {
                 .build());
     }
 
-    private static Bag createBag() {
-        return Bag.builder()
+    private static Bag createBag(int id) {
+        Bag bag = Bag.builder()
             .status(BagStatus.ACTIVE)
-            .id(1)
+            .id(id)
             .name("Name")
             .nameEng("NameEng")
             .capacity(20)
@@ -2280,6 +2277,7 @@ public class ModelUtils {
                 .id(1L)
                 .build())
             .build();
+        return bag.setFullPrice(100000L);
     }
 
     private static OrderBag createOrderBag() {
@@ -2290,7 +2288,7 @@ public class ModelUtils {
             .capacity(20)
             .price(100_00L)
             .order(createOrder())
-            .bag(createBag())
+            .bag(createBag(1))
             .build();
     }
 
