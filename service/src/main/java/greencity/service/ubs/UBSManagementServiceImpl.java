@@ -1521,7 +1521,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setCurrentUser(order.getUser().getRecipientName() + " " + order.getUser().getRecipientSurname());
         order.setImageReasonNotTakingBags(pictures);
         order.setReasonNotTakingBagDescription(description);
-        order.setOrderStatus(OrderStatus.CANCELED);
         orderRepository.save(order);
         return dto;
     }
