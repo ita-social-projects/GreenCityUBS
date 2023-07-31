@@ -182,7 +182,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Autowired
     private final OrderBagService orderBagService;
     @Autowired
-    private OrderBagRepository orderBagRepository;
+    private final OrderBagRepository orderBagRepository;
 
     /**
      * Method gets all order payments, count paid amount, amount which user should

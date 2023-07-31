@@ -1218,8 +1218,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
             .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
             .map(this::createOrderBag).collect(toList());
-        notOrderedBags.forEach(orderBag -> orderBag.setAmount(0));
-        orderBagList.addAll(notOrderedBags);
+        orderBagList.addAll(notOrderedBags.stream().peek(orderBag -> orderBag.setAmount(0)).collect(toList()));
         return sumToPayInCoins;
     }
 
@@ -1433,7 +1432,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (order == null) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
-        order.setOrderBags(new ArrayList<>());
+        order.setOrderBags(Collections.emptyList());
         orderRepository.delete(order);
     }
 
