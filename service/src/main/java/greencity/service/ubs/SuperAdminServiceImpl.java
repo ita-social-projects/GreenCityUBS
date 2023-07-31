@@ -162,7 +162,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setStatus(BagStatus.DELETED);
         bagRepository.save(bag);
-        checkDeletedBagLimitAndDeleteTariffsInfo(bag);
+        deleteTariffsInfo(bag);
         orderRepository.findAllByBagId(bagId).forEach(order -> deleteBagFromOrder(order, bag));
     }
 
@@ -183,7 +183,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
     }
 
-    private void checkDeletedBagLimitAndDeleteTariffsInfo(Bag bag) {
+    private void deleteTariffsInfo(Bag bag) {
         TariffsInfo tariffsInfo = bag.getTariffsInfo();
         List<Bag> bags = bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfo.getId());
         if (bags.isEmpty() || bags.stream().noneMatch(Bag::getLimitIncluded)) {
@@ -285,7 +285,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tryToFindTariffById(tariffId);
         return serviceRepository.findServiceByTariffsInfoId(tariffId)
             .map(it -> modelMapper.map(it, GetServiceDto.class))
-            .orElseGet(() -> null);
+            .orElse(null);
     }
 
     @Override

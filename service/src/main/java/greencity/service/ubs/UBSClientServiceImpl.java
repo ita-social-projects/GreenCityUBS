@@ -425,14 +425,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
         final User currentUser = userRepository.findByUuid(uuid);
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
-        List<OrderBag> bagsOrdered = new ArrayList<>();
 
         if (!dto.isShouldBePaid()) {
             dto.setCertificates(Collections.emptySet());
             dto.setPointsToUse(0);
         }
 
-        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(bagsOrdered,
+        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(
             dto.getBags(), tariffsInfo);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
@@ -444,7 +443,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         UBSuser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
-
+        List<OrderBag> bagsOrdered = new ArrayList<>();
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
@@ -463,7 +462,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .collect(Collectors.toList());
     }
 
-    private Bag findBagById(Integer id) {
+    private Bag findActiveBagById(Integer id) {
         return bagRepository.findActiveBagById(id)
             .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
     }
@@ -891,9 +890,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
-        List<OrderBag> bagsForOrder = order.getOrderBags();
-        Map<Integer, Integer> actualBagsAmount = orderBagService.getActualBagsAmountForOrder(bagsForOrder);
-        return bagsForOrder.stream()
+        List<OrderBag> bagsAmountInOrder = order.getOrderBags();
+        Map<Integer, Integer> actualBagsAmount = orderBagService.getActualBagsAmountForOrder(bagsAmountInOrder);
+        return bagsAmountInOrder.stream()
             .map(orderBag -> buildBagForUserDto(orderBag, actualBagsAmount.get(orderBag.getBag().getId())))
             .collect(toList());
     }
@@ -1201,12 +1200,11 @@ public class UBSClientServiceImpl implements UBSClientService {
             .reduce(0L, Long::sum);
     }
 
-    private long formBagsToBeSavedAndCalculateOrderSum(
-        List<OrderBag> orderBagList, List<BagDto> bags, TariffsInfo tariffsInfo) {
+    private long formBagsToBeSavedAndCalculateOrderSum(List<BagDto> bags, TariffsInfo tariffsInfo) {
         long sumToPayInCoins = 0L;
-
+        List<OrderBag> orderBagList = new ArrayList(bags.size());
         for (BagDto temp : bags) {
-            Bag bag = findBagById(temp.getId());
+            Bag bag = findActiveBagById(temp.getId());
             if (bag.getLimitIncluded().booleanValue()) {
                 checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, temp.getAmount());
                 checkSumIfCourierLimitBySumOfOrder(tariffsInfo, bag.getFullPrice() * temp.getAmount());
@@ -1216,9 +1214,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderBag.setAmount(temp.getAmount());
             orderBagList.add(orderBag);
         }
-        List<Integer> orderedBagsIds = bags.stream().map(BagDto::getId).collect(toList());
+        List<Integer> bagIds = bags.stream().map(BagDto::getId).collect(toList());
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
-            .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !orderedBagsIds.contains(orderBag.getId()))
+            .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
             .map(this::createOrderBag).collect(toList());
         notOrderedBags.forEach(orderBag -> orderBag.setAmount(0));
         orderBagList.addAll(notOrderedBags);
