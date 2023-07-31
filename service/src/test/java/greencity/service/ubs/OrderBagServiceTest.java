@@ -33,12 +33,11 @@ class OrderBagServiceTest {
         when(orderBagRepository.findOrderBagsByOrderId(any())).thenReturn(Arrays.asList(getOrderBag(), getOrderBag2()));
         List<Bag> bags = orderBagService.findAllBagsByOrderId(1L);
         assertNotNull(bags);
-        Bag bag1 = getBag().setFullPrice(getOrderBag().getPrice());
-        Bag bag2 = getBag2().setFullPrice(getOrderBag2().getPrice());
+        Bag bag1 = getBag();
+        Bag bag2 = getBag2();
 
         assertEquals(bag1, bags.get(0));
         assertEquals(bag2, bags.get(1));
-
     }
 
     @Test
