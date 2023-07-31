@@ -276,6 +276,15 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void testBagStatus() {
+        Bag bag = ModelUtils.getBag();
+        bag.setStatus(BagStatus.ACTIVE);
+        assertEquals(BagStatus.ACTIVE, bag.getStatus());
+        bag.setStatus(BagStatus.DELETED);
+        assertEquals(BagStatus.DELETED, bag.getStatus());
+    }
+
+    @Test
     void deleteTariffServiceWhenTariffBagsWithLimits() {
         Bag bag = ModelUtils.getBag();
         Bag bagDeleted = ModelUtils.getBagDeleted();
@@ -291,9 +300,9 @@ class SuperAdminServiceImplTest {
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(hashMap);
         when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
-        assertEquals(bag.getStatus(), BagStatus.ACTIVE);
+        assertEquals(BagStatus.ACTIVE, bag.getStatus());
         superAdminService.deleteTariffService(1);
-        assertEquals(bag.getStatus(), BagStatus.DELETED);
+        assertEquals(BagStatus.DELETED, bag.getStatus());
         verify(orderBagRepository).findOrderBagsByBagId(any());
         verify(bagRepository).findActiveBagById(1);
         verify(bagRepository).save(bag);
