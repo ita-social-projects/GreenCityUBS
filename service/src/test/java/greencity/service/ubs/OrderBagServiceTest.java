@@ -1,22 +1,24 @@
 package greencity.service.ubs;
 
 import greencity.entity.order.Bag;
-import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
 import greencity.repository.OrderBagRepository;
-
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 import static greencity.ModelUtils.getOrderBag;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static greencity.ModelUtils.getBag;
+import static greencity.ModelUtils.getBag2;
+import static greencity.ModelUtils.getOrderBag2;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -43,9 +45,9 @@ class OrderBagServiceTest {
     @Test
     void testFindBagsByOrdersList() {
         List<Bag> bags = orderBagService.findAllBagsInOrderBagsList(Arrays.asList(getOrderBag(), getOrderBag2()));
+        Bag bag1 = getBag();
+        Bag bag2 = getBag2();
 
-        Bag bag1 = getBag().setFullPrice(getOrderBag().getPrice());
-        Bag bag2 = getBag2().setFullPrice(getOrderBag2().getPrice());
         assertNotNull(bags);
         assertEquals(bag1, bags.get(0));
         assertEquals(bag2, bags.get(1));
