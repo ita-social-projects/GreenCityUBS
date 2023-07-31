@@ -8,16 +8,16 @@ import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserProfileUpdateDtoTest {
-    void checkRegexPattern(String fieldName, String name, boolean validates) throws NoSuchFieldException {
+    void checkRegexPattern(String fieldName, String testValue, boolean validates) throws NoSuchFieldException {
         Field field = UserProfileUpdateDto.class.getDeclaredField(fieldName);
         javax.validation.constraints.Pattern[] annotations =
             field.getAnnotationsByType(javax.validation.constraints.Pattern.class);
-        assertEquals(name.matches(annotations[0].regexp()), validates);
+        assertEquals(testValue.matches(annotations[0].regexp()), validates);
     }
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"John Doe", "абвгґіїьяюєАБВГҐІЇЬЯЮЄ-ʼ'`ʹ", "John-Doe", "John Doe12", "John Doe 12", "Johnʼ'`ʹDoe",
+        strings = {"John Doe", "абвгґіїьяюєёАБВГҐІЇЬЯЮЄЁ-ʼ'`ʹ", "John-Doe", "John Doe12", "John Doe 12", "Johnʼ'`ʹDoe",
             "ValidNameWithMaxLengthEquals30"})
     void testValidRecipientName(String name) throws NoSuchFieldException {
         checkRegexPattern("recipientName", name, true);
@@ -32,7 +32,7 @@ class UserProfileUpdateDtoTest {
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"John Doe", "абвгґіїьяюєАБВГҐІЇЬЯЮЄ-ʼ'`ʹ", "John-Doe", "John Doe12", "John Doe 12", "Johnʼ'`ʹDoe",
+        strings = {"John Doe", "абвгґіїьяюєёАБВГҐІЇЬЯЮЄЁ-ʼ'`ʹ", "John-Doe", "John Doe12", "John Doe 12", "Johnʼ'`ʹDoe",
             "ValidNameWithMaxLengthEquals30"})
     void testValidRecipientSurname(String name) throws NoSuchFieldException {
         checkRegexPattern("recipientSurname", name, true);
