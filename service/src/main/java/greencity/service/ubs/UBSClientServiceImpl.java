@@ -1030,7 +1030,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
-        bagsOrdered.forEach(orderBag -> orderBag.setOrder(order));
         order.setOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
@@ -1050,7 +1049,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setPayment(new ArrayList<>());
         }
         order.getPayment().add(payment);
-
+        bagsOrdered.forEach(orderBag -> orderBag.setOrder(order));
         orderRepository.save(order);
         return order;
     }
@@ -1200,6 +1199,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private long formBagsToBeSavedAndCalculateOrderSum(List<BagDto> bags, TariffsInfo tariffsInfo) {
         long sumToPayInCoins = 0L;
         List<OrderBag> orderBagList = new ArrayList(bags.size());
+        List<Integer> bagIds = bags.stream().map(BagDto::getId).collect(toList());
         for (BagDto temp : bags) {
             Bag bag = findActiveBagById(temp.getId());
             if (bag.getLimitIncluded().booleanValue()) {
@@ -1210,8 +1210,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             OrderBag orderBag = createOrderBag(bag);
             orderBag.setAmount(temp.getAmount());
             orderBagList.add(orderBag);
+            bagIds.add(temp.getId());
         }
-        List<Integer> bagIds = bags.stream().map(BagDto::getId).collect(toList());
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
             .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
             .map(this::createOrderBag).collect(toList());
