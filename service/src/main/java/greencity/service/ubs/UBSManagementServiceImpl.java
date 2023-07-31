@@ -73,7 +73,6 @@ import greencity.enums.PaymentType;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.OrderBagRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
@@ -110,6 +109,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
 import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -179,10 +179,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
-    @Autowired
-    private final OrderBagService orderBagService;
-    @Autowired
-    private final OrderBagRepository orderBagRepository;
 
     /**
      * Method gets all order payments, count paid amount, amount which user should
@@ -370,7 +366,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         checkAvailableOrderForEmployee(order, email);
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
 
-        var bagInfoDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(order.getTariffsInfo().getId()).stream()
+        var bagInfoDtoList = bagRepository.findBagsByTariffsInfoId(order.getTariffsInfo().getId()).stream()
             .map(bag -> modelMapper.map(bag, BagInfoDto.class))
             .collect(Collectors.toList());
 
@@ -713,7 +709,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            Optional<Bag> bagOptional = bagRepository.findActiveBagById(entry.getKey());
+            Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
             if (bagOptional.isPresent() && checkOrderStatusAboutConfirmWaste(order)) {
                 Optional<Long> confirmWasteWas = Optional.empty();
                 Optional<Long> initialAmount = Optional.empty();
@@ -740,7 +736,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            Optional<Bag> bagOptional = bagRepository.findActiveBagById(entry.getKey());
+            Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
             if (bagOptional.isPresent() && checkOrderStatusAboutExportedWaste(order)) {
                 Optional<Long> exporterWasteWas = Optional.empty();
                 Optional<Long> confirmWasteWas = Optional.empty();
@@ -825,7 +821,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        List<Bag> bag = orderBagService.findAllBagsInOrderBagsList(orderBagRepository.findOrderBagsByOrderId(id));
+        List<Bag> bag = bagRepository.findBagsByOrderId(id);
         final List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
 
         long sumAmountInCoins = 0;
@@ -1064,7 +1060,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
 
-        dto.setCapacityAndPrice(orderBagService.findAllBagsByOrderId(order.getId())
+        dto.setCapacityAndPrice(bagRepository.findBagsByOrderId(order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagInfoDto.class))
             .collect(Collectors.toList()));

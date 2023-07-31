@@ -2,7 +2,7 @@ package greencity.mapping.bag;
 
 import greencity.ModelUtils;
 import greencity.dto.bag.BagForUserDto;
-import greencity.entity.order.OrderBag;
+import greencity.entity.order.Bag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,8 +18,8 @@ class BagForUserDtoMapperTest {
     @Test
     void convert() {
         BagForUserDto expected = ModelUtils.TEST_BAG_FOR_USER_DTO;
-        OrderBag orderBag = ModelUtils.TEST_ORDER_BAG;
-        BagForUserDto actual = bagForUserDtoMapper.convert(orderBag);
+        Bag bag = ModelUtils.TEST_BAG;
+        BagForUserDto actual = bagForUserDtoMapper.convert(bag);
 
         assertEquals(expected.getService(), actual.getService());
         assertEquals(expected.getServiceEng(), actual.getServiceEng());
