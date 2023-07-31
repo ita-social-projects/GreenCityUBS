@@ -77,7 +77,8 @@ public class Bag {
     @JoinColumn
     private Employee editedBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.REMOVE,
+        fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
     private TariffsInfo tariffsInfo;
 
