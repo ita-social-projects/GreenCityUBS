@@ -1196,8 +1196,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             .reduce(0L, Long::sum);
     }
 
-    private long formBagsToBeSavedAndCalculateOrderSum(List<OrderBag> orderBagList, List<BagDto> bags, TariffsInfo tariffsInfo) {
-    long sumToPayInCoins = 0L;
+    private long formBagsToBeSavedAndCalculateOrderSum(List<OrderBag> orderBagList, List<BagDto> bags,
+        TariffsInfo tariffsInfo) {
+        long sumToPayInCoins = 0L;
         List<Integer> bagIds = bags.stream().map(BagDto::getId).collect(toList());
         for (BagDto temp : bags) {
             Bag bag = findActiveBagById(temp.getId());
