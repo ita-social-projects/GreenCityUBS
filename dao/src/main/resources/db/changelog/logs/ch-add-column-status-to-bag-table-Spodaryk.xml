@@ -2,17 +2,16 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-
     <changeSet id="Spodaryk-6" author="Oksana Spodaryk">
         <preConditions onFail="MARK_RAN">
-            <columnExists tableName="bag" columnName="status"/>
+            <not>
+                <columnExists tableName="bag" columnName="status"/>
+            </not>
         </preConditions>
-
         <addColumn tableName="bag">
             <column name="status" type="varchar(30)" defaultValue="ACTIVE">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>
-
 </databaseChangeLog>
