@@ -4,9 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <changeSet id="Spodaryk-4" author="Oksana Spodaryk">
         <preConditions onFail="MARK_RAN">
-            <not>
-                <primaryKeyExists tableName="order_bag_mapping"/>
-            </not>
+            <primaryKeyExists tableName="order_bag_mapping"/>
         </preConditions>
         <dropPrimaryKey tableName="order_bag_mapping" constraintName="order_bag_mapping_pkey"/>
 
