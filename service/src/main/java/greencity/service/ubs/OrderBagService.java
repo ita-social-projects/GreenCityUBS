@@ -16,8 +16,8 @@ import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 
 @Service
 @Data
-public final class OrderBagService {
-    private OrderBagRepository orderBagRepository;
+public class OrderBagService {
+    private final OrderBagRepository orderBagRepository;
 
     private Long getBagPrice(List<OrderBag> orderBags, Integer id) {
         return orderBags.stream()

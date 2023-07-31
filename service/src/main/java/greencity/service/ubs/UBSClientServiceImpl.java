@@ -379,10 +379,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<UBSuser> ubsUser = ubsUserRepository.findUBSuserByUser(currentUser);
 
         if (ubsUser.isEmpty()) {
-            UBSuser ubSuser = UBSuser.builder().id(null).build();
-            List<UBSuser> mutableUbsUserList = new ArrayList<>(ubsUser);
-            mutableUbsUserList.add(ubSuser);
-            ubsUser = mutableUbsUserList;
+            ubsUser = Collections.singletonList(UBSuser.builder().id(null).build());
         }
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
         dto.setUbsUserId(ubsUser.get(0).getId());
