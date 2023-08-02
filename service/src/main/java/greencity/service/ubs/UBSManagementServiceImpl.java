@@ -1665,7 +1665,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
     @Override
-    //@Transactional
+    @Transactional
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String lang,
         String email) {
         Order order = orderRepository.findById(orderId)
