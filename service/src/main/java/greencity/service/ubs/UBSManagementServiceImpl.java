@@ -1503,7 +1503,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public ReasonNotTakeBagDto saveReason(Long orderId, String description, MultipartFile[] images) {
+    public void saveReason(Long orderId, String description, MultipartFile[] images) {
         final Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         List<String> pictures = new ArrayList<>();
@@ -1522,7 +1522,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setImageReasonNotTakingBags(pictures);
         order.setReasonNotTakingBagDescription(description);
         orderRepository.save(order);
-        return dto;
     }
 
     /**
@@ -1638,6 +1637,27 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
+     * This is method which is updates admin page info for order and save reason.
+     *
+     * @param orderId                 {@link Long}.
+     * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
+     * @param language                {@link String}.
+     * @param email                   {@link String}.
+     * @param description             {@link String}.
+     * @param images                  {@link MultipartFile}.
+     *
+     * @author Anton Bondar.
+     */
+    @Override
+    @Transactional
+    public void updateOrderAdminPageInfoAndSaveReason(Long orderId, UpdateOrderPageAdminDto updateOrderPageAdminDto,
+        String language,
+        String email, String description, MultipartFile[] images) {
+        updateOrderAdminPageInfo(updateOrderPageAdminDto, orderId, language, email);
+        saveReason(orderId, description, images);
+    }
+
+    /**
      * This is method which is updates admin page info for order.
      *
      * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
@@ -1645,7 +1665,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
     @Override
-    @Transactional
+    //@Transactional
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String lang,
         String email) {
         Order order = orderRepository.findById(orderId)

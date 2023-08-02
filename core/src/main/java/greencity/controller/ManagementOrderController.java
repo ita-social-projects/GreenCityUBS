@@ -4,7 +4,6 @@ import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.bag.AdditionalBagInfoDto;
-import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
@@ -837,26 +836,6 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for save reason not taking the bag. *
-     *
-     * @return {ReasonNotTakeBagDto}. * @author Bohdan Fedorkiv
-     */
-
-    @ApiOperation(value = "Save reason for not taking the bag")
-    @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ReasonNotTakeBagDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)})
-    @PutMapping(value = "/save-reason/{id}",
-        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public ResponseEntity<ReasonNotTakeBagDto> saveReason(@PathVariable("id") Long id,
-        @RequestPart String description,
-        @RequestPart(required = false) @Nullable MultipartFile[] images) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ubsManagementService.saveReason(id, description, images));
-    }
-
-    /**
      * Controller for saving Admin comment.
      *
      * @param adminCommentDto {@link AdminCommentDto}.
@@ -903,14 +882,19 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for updating order admin page info.
+     * Controller for updating order admin page info and save reason if needed.
      *
-     * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
-     * @param orderId            {@link Long}.
+     * @param orderId                 {@link Long}.
+     * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
+     * @param language                {@link String}.
+     * @param principal               {@link Principal}.
+     * @param description             {@link String}.
+     * @param images                  {@link MultipartFile}.
      *
-     * @author Bahlay Yuriy.
+     * @author Anton Bondar
      */
-    @ApiOperation(value = "update order admin page info")
+
+    @ApiOperation(value = "update order admin page info and save reason if needed")
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -920,11 +904,20 @@ public class ManagementOrderController {
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
-    @PatchMapping("/update-order-page-admin-info/{id}")
-    public ResponseEntity<HttpStatus> updatePageAdminInfo(
-        @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
-        @RequestParam String lang, Principal principal) {
-        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, principal.getName());
+
+    @PatchMapping(value = "/update-order-page-admin-info/{id}",
+        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+
+    public ResponseEntity<HttpStatus> updatePageAdminInfo(@PathVariable(name = "id") Long orderId,
+        @Valid @RequestPart UpdateOrderPageAdminDto updateOrderPageAdminDto,
+        @RequestParam String language,
+        Principal principal,
+        @RequestParam String description,
+        @RequestPart(required = false) @Nullable MultipartFile[] images) {
+        ubsManagementService.updateOrderAdminPageInfoAndSaveReason(orderId, updateOrderPageAdminDto, language,
+            principal.getName(),
+            description, images);
+
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
