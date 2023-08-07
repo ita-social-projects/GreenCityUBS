@@ -65,7 +65,7 @@ public class CreateAddressRequestDto {
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
-    private String streetUa;
+    private String street;
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
