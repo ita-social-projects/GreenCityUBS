@@ -1656,6 +1656,25 @@ public class ModelUtils {
             .build();
     }
 
+    public static AddressDto addressWithEmptyPlaceIdDto() {
+        return AddressDto.builder()
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("25")
+            .street("Street")
+            .streetEn("StreetEn")
+            .coordinates(Coordinates.builder()
+                .latitude(0.0)
+                .longitude(0.0)
+                .build())
+            .district("Distinct")
+            .city("City")
+            .cityEn("CityEn")
+            .actual(false)
+            .build();
+    }
+
     public static AddressDto addressWithKyivRegionDto() {
         return AddressDto.builder()
             .id(1L)
@@ -4409,6 +4428,59 @@ public class ModelUtils {
             .build();
     }
 
+    public static CreateAddressRequestDto getAddressRequestToSaveDto() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("fdsfs2")
+            .searchAddress("fake street name2, 132, fake street2, 020002")
+            .district("fdsfds2")
+            .districtEn("dsadsad2")
+            .region("regdsad2")
+            .regionEn("regdsaden2")
+            .houseNumber("12")
+            .houseCorpus("22")
+            .entranceNumber("32")
+            .placeId("place_id")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestWithEmptyPlaceIdDto() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("fdsfs")
+            .searchAddress("fake street name, 13, fake street, 02000")
+            .district("fdsfds")
+            .districtEn("dsadsad")
+            .region("regdsad")
+            .regionEn("regdsaden")
+            .houseNumber("1")
+            .houseCorpus("2")
+            .entranceNumber("3")
+            .placeId("")
+            .street("street")
+            .streetEn("streetEn")
+            .city("city")
+            .cityEn("cityEn")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestWithEmptyPlaceIdToSaveDto() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("fdsfs1")
+            .searchAddress("fake street name, 13, fake street, 02000")
+            .district("fdsfds1")
+            .districtEn("dsadsad1")
+            .region("regdsad1")
+            .regionEn("regdsaden1")
+            .houseNumber("11")
+            .houseCorpus("21")
+            .entranceNumber("31")
+            .placeId("")
+            .street("street1")
+            .streetEn("streetEn1")
+            .city("city1")
+            .cityEn("cityEn1")
+            .build();
+    }
+
     public static CreateAddressRequestDto getAddressWithKyivRegionRequestDto() {
         return CreateAddressRequestDto.builder()
             .addressComment("fdsfs")
@@ -4420,6 +4492,21 @@ public class ModelUtils {
             .houseNumber("1")
             .houseCorpus("2")
             .entranceNumber("3")
+            .placeId("place_id")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressWithKyivRegionToSaveRequestDto() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("fdsfs1")
+            .searchAddress("fake street name, 13, fake street, 02000")
+            .district("fdsfds1")
+            .districtEn("dsadsad1")
+            .regionEn(KYIV_REGION_EN)
+            .region(KYIV_REGION_UA)
+            .houseNumber("11")
+            .houseCorpus("21")
+            .entranceNumber("31")
             .placeId("place_id")
             .build();
     }
@@ -4503,6 +4590,28 @@ public class ModelUtils {
                     .coordinates(Coordinates.builder()
                         .latitude(50.4459068)
                         .longitude(30.4477005)
+                        .build())
+                    .actual(false)
+                    .build()))
+            .build();
+    }
+
+    public static OrderWithAddressesResponseDto getOrderWithAddressesResponseDto() {
+        return OrderWithAddressesResponseDto.builder()
+            .addressList(List.of(
+                AddressDto.builder()
+                    .id(1L)
+                    .city("City")
+                    .cityEn("CityEn")
+                    .district("Distinct")
+                    .entranceNumber("7a")
+                    .houseCorpus("2")
+                    .houseNumber("25")
+                    .street("Street")
+                    .streetEn("StreetEn")
+                    .coordinates(Coordinates.builder()
+                        .latitude(0.0)
+                        .longitude(0.0)
                         .build())
                     .actual(false)
                     .build()))
