@@ -12,6 +12,10 @@ import greencity.dto.table.ColumnDTO;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.entity.table.TableColumnWidthForEmployee;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeOrderPosition;
+import greencity.entity.user.employee.Position;
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -22,11 +26,21 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Event;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.user.User;
-import greencity.entity.user.employee.*;
-import greencity.exceptions.*;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import greencity.repository.*;
+import greencity.repository.AddressRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeOrderPositionRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.PositionRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.TableColumnWidthForEmployeeRepository;
+import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.Data;
@@ -41,10 +55,27 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER;
+import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND;
+import static greencity.constant.ErrorMessage.EMPTY_ORDERS_ID_COLLECTION;
+import static greencity.constant.ErrorMessage.ORDER_IS_BLOCKED;
+import static greencity.constant.ErrorMessage.ORDER_PAYMENT_STATUS_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ORDER_STATUS_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -79,6 +110,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String CANCELLATION_REASON = "cancellationReason";
     private static final String CANCELLATION_COMMENT = "cancellationComment";
     private static final String ADMIN_COMMENT = "adminComment";
+    private static final String WITHOUT_ID = "-1";
+    private static final String WITHOUT_MANAGER_EN = "Without manager";
+    private static final String WITHOUT_MANAGER_UA = "Без менеджера";
+    private static final String WITHOUT_LOGISTICIAN_EN = "Without logistician";
+    private static final String WITHOUT_LOGISTICIAN_UA = "Без логіста";
+    private static final String WITHOUT_NAVIGATOR_EN = "Without navigator";
+    private static final String WITHOUT_NAVIGATOR_UA = "Без штурмана";
+    private static final String WITHOUT_DRIVER_EN = "Without driver";
+    private static final String WITHOUT_DRIVER_UA = "Без водія";
 
     @Override
     public TableParamsDto getParametersForOrdersTable(String uuid) {
@@ -340,7 +380,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<OptionForColumnDTO> callerList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(2L);
-        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
+        List<OptionForColumnDTO> optionForColumnDTOS =
+            includeItemsWithoutResponsiblePerson(WITHOUT_MANAGER_UA, WITHOUT_MANAGER_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -349,7 +390,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<OptionForColumnDTO> logicManList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(3L);
-        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
+        List<OptionForColumnDTO> optionForColumnDTOS =
+            includeItemsWithoutResponsiblePerson(WITHOUT_LOGISTICIAN_UA, WITHOUT_LOGISTICIAN_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -358,7 +400,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<OptionForColumnDTO> navigatorList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(4L);
-        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
+        List<OptionForColumnDTO> optionForColumnDTOS =
+            includeItemsWithoutResponsiblePerson(WITHOUT_NAVIGATOR_UA, WITHOUT_NAVIGATOR_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -367,7 +410,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<OptionForColumnDTO> driverList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(5L);
-        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
+        List<OptionForColumnDTO> optionForColumnDTOS =
+            includeItemsWithoutResponsiblePerson(WITHOUT_DRIVER_UA, WITHOUT_DRIVER_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -396,6 +440,16 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 .ua(address.getCity())
                 .build())
             .collect(Collectors.toList());
+    }
+
+    private List<OptionForColumnDTO> includeItemsWithoutResponsiblePerson(String nameUa, String nameEn) {
+        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
+        optionForColumnDTOS.add(OptionForColumnDTO.builder()
+            .key(WITHOUT_ID)
+            .ua(nameUa)
+            .en(nameEn)
+            .build());
+        return optionForColumnDTOS;
     }
 
     /* methods for changing order */
@@ -436,7 +490,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         if (isNull(pointsToReturn) || pointsToReturn == 0) {
             return;
         }
-        order.setPointsToUse(0);
         User user = order.getUser();
         if (isNull(user.getCurrentPoints())) {
             user.setCurrentPoints(0);

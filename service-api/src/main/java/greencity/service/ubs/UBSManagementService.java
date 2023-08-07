@@ -4,7 +4,24 @@ import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.order.*;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.CounterOrderDetailsDto;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.ExportDetailsDtoUpdate;
+import greencity.dto.order.NotTakenOrderReasonDto;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
+import greencity.dto.order.OrderInfoDto;
+import greencity.dto.order.OrderStatusPageDto;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
@@ -301,4 +318,13 @@ public interface UBSManagementService {
      * @author Kharchenko Volodymyr.
      */
     NotTakenOrderReasonDto getNotTakenOrderReason(Long orderId);
+
+    /**
+     * Method saves order ID of order for which we need to make a refund.
+     *
+     * @param orderId {@link Long}.
+     *
+     * @author Anton Bondar.
+     */
+    void saveOrderIdForRefund(Long orderId);
 }

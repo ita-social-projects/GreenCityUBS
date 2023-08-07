@@ -99,6 +99,12 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
+    void signUpEmployeeError() {
+        EmployeeSignUpDto dto = EmployeeSignUpDto.builder().build();
+        assertThrows(RemoteServerUnavailableException.class, () -> client.signUpEmployee(dto));
+    }
+
+    @Test
     void updateEmployeeEmailTest() {
         String newEmail = "new@mail.com";
         assertThrows(RemoteServerUnavailableException.class, () -> client.updateEmployeeEmail(newEmail, USER_UUID));

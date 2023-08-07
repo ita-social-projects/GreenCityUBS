@@ -11,7 +11,6 @@ import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.AddLocationTranslationDto;
-import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.service.TariffServiceDto;
@@ -68,6 +67,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -75,7 +75,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.Collections;
 
 @org.springframework.stereotype.Service
 @Data
@@ -289,6 +288,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             checkIfLocationAlreadyCreated(locationCreateDto.getAddLocationDtoList(), region.getId());
             locationRepository.save(location);
         });
+    }
+
+    @Override
+    public void deleteLocation(Long id) {
+        Location location = tryToFindLocationById(id);
+        if (location.getTariffLocations().stream().anyMatch(tl -> tl.getLocation().getId().equals(id))) {
+            throw new BadRequestException(ErrorMessage.LOCATION_CAN_NOT_BE_DELETED);
+        }
+        locationRepository.delete(location);
     }
 
     private Location createNewLocation(LocationCreateDto dto, Region region) {
@@ -782,24 +790,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             throw new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER
                 + tariffsInfo.getCourier().getId());
         }
-    }
-
-    @Override
-    public void editLocations(List<EditLocationDto> editLocationDtoList) {
-        editLocationDtoList.forEach(this::editLocation);
-    }
-
-    private void editLocation(EditLocationDto editLocationDto) {
-        Location location = tryToFindLocationById(editLocationDto.getLocationId());
-        if (!locationExists(editLocationDto.getNameUa(), editLocationDto.getNameEn(), location.getRegion())) {
-            location.setNameUk(editLocationDto.getNameUa());
-            location.setNameEn(editLocationDto.getNameEn());
-            locationRepository.save(location);
-        }
-    }
-
-    private boolean locationExists(String nameUk, String nameEn, Region region) {
-        return locationRepository.existsByNameUkAndNameEnAndRegion(nameUk, nameEn, region);
     }
 
     @Override

@@ -7,14 +7,18 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
-import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
-import greencity.dto.service.TariffServiceDto;
-import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.*;
 import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.service.ServiceDto;
+import greencity.dto.service.TariffServiceDto;
+import greencity.dto.tariff.AddNewTariffResponseDto;
+import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.EditTariffDto;
+import greencity.dto.tariff.GetTariffLimitsDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
 import greencity.enums.LocationStatus;
 import greencity.filters.TariffsInfoFilterCriteria;
@@ -130,6 +134,14 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     void addLocation(List<LocationCreateDto> dto);
+
+    /**
+     * Method for deleting location.
+     *
+     * @param id {@link Long} - location id.
+     * @author Anton Bondar
+     */
+    void deleteLocation(Long id);
 
     /**
      * Method for activate location.
@@ -259,14 +271,6 @@ public interface SuperAdminService {
      * @author Julia Seti
      */
     void switchTariffStatus(Long tariffId, String tariffStatus);
-
-    /**
-     * Method for editing Locations.
-     *
-     * @param editLocationDtoList - dto contains id of location wanted to be edited
-     *                            and changed naming
-     */
-    void editLocations(List<EditLocationDto> editLocationDtoList);
 
     /**
      * Method for changing status of {@link greencity.entity.order.TariffLocation}.
