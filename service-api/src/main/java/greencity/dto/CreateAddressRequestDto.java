@@ -24,7 +24,6 @@ public class CreateAddressRequestDto {
     private static final String houseNumberNotValid = "House number is invalid";
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ—/\"\\s]*", message = validationMessage)
-    @NotEmpty(message = notEmptyValidationMessage)
     private String searchAddress;
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ]*", message = validationMessage)
