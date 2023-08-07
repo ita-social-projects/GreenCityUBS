@@ -904,10 +904,8 @@ public class ManagementOrderController {
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
-
     @PatchMapping(value = "/update-order-page-admin-info/{id}",
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-
     public ResponseEntity<HttpStatus> updatePageAdminInfo(@PathVariable(name = "id") Long orderId,
         @Valid @RequestPart UpdateOrderPageAdminDto updateOrderPageAdminDto,
         @RequestParam String language,
@@ -915,9 +913,7 @@ public class ManagementOrderController {
         @RequestParam String description,
         @RequestPart(required = false) @Nullable MultipartFile[] images) {
         ubsManagementService.updateOrderAdminPageInfoAndSaveReason(orderId, updateOrderPageAdminDto, language,
-            principal.getName(),
-            description, images);
-
+            principal.getName(), description, images);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
