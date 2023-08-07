@@ -564,7 +564,7 @@ public class ModelUtils {
             .placeId("place_id")
             .city("city")
             .cityEn("cityEn")
-            .streetUa("street")
+            .street("street")
             .streetEn("streetEn")
             .build();
     }
