@@ -215,5 +215,4 @@
     <include file="/db/changelog/logs/ch-upd-notification-templates-titles-Lenets.xml"/>
     <include file="db/changelog/logs/ch-add-table-refunds-Bondar.xml"/>
     <include file="db/changelog/logs/2023-08-07-change-service-name-column-length.xml"/>
-    <include file="db/changelog/logs/2023-08-08-change-bag-name-column-length.xml"/>
 </databaseChangeLog>
