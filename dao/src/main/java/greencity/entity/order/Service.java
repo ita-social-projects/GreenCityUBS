@@ -29,7 +29,6 @@ import java.time.LocalDate;
 @EqualsAndHashCode(exclude = {"tariffsInfo", "editedBy", "editedAt"})
 @ToString(exclude = {"tariffsInfo"})
 @Table(name = "service")
-
 public class Service {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,10 +39,10 @@ public class Service {
     @Column(nullable = false)
     private Long price;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false)
     private String nameEng;
 
     @Column(nullable = false)
