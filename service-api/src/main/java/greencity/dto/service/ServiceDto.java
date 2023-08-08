@@ -22,11 +22,11 @@ import javax.validation.constraints.NotNull;
 @ToString
 public class ServiceDto {
     @NotBlank
-    @Length(max = 30)
+    @Length(max = 255)
     private String name;
 
     @NotBlank
-    @Length(max = 30)
+    @Length(max = 255)
     private String nameEng;
 
     @NotBlank
