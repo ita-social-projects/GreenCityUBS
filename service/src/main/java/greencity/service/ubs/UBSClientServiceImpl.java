@@ -192,7 +192,6 @@ import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -253,6 +252,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
+    private static final String KYIV_REGION_EN = "Kyiv Oblast";
+    private static final String KYIV_REGION_UA = "Київська область";
+    private static final String KYIV_EN = "Kyiv";
+    private static final String KYIV_UA = "місто Київ";
 
     @Override
     @Transactional
@@ -555,6 +558,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadRequestException(NUMBER_OF_ADDRESSES_EXCEEDED);
         }
 
+        if (addressRequestDto.getPlaceId().isEmpty()) {
+            checkIfAddressExistIgnorePlaceId(addresses, addressRequestDto);
+            saveAddressWithoutPlaceId(addresses, addressRequestDto, currentUser);
+            return findAllAddressesForCurrentOrder(uuid);
+        }
+
         OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
 
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
@@ -562,6 +571,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         addressRequestDtoForNullCheck.setId(0L);
         checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDtoForNullCheck);
 
+        checkIfAddressExistIgnorePlaceId(addresses, addressRequestDto);
         checkIfAddressExist(addresses, dtoRequest);
 
         Address address = modelMapper.map(dtoRequest, Address.class);
@@ -612,10 +622,34 @@ public class UBSClientServiceImpl implements UBSClientService {
         return findAllAddressesForCurrentOrder(uuid);
     }
 
+    private void saveAddressWithoutPlaceId(List<Address> addresses, CreateAddressRequestDto addressRequestDto,
+        User currentUser) {
+        Address address = modelMapper.map(addressRequestDto, Address.class);
+
+        address.setCoordinates(Coordinates.builder().latitude(0.0).build());
+        address.setCoordinates(Coordinates.builder().longitude(0.0).build());
+
+        address.setUser(currentUser);
+        address.setActual(addresses.isEmpty());
+        address.setAddressStatus(AddressStatus.NEW);
+        addressRepo.save(address);
+    }
+
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
         boolean exist = addresses.stream()
             .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
             .anyMatch(addressDto -> addressDto.equals(dtoRequest));
+
+        if (exist) {
+            throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
+        }
+    }
+
+    private void checkIfAddressExistIgnorePlaceId(List<Address> addresses,
+        CreateAddressRequestDto addressRequestDto) {
+        boolean exist = addresses.stream()
+            .map(address -> modelMapper.map(address, CreateAddressRequestDto.class))
+            .anyMatch(addressDto -> addressDto.equals(addressRequestDto));
 
         if (exist) {
             throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
@@ -662,7 +696,27 @@ public class UBSClientServiceImpl implements UBSClientService {
         double longitude = resultsEn.geometry.location.lng;
         orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
 
+        checkIfAddressBelongToKyiv(orderAddressDtoRequest);
+
         return orderAddressDtoRequest;
+    }
+
+    /**
+     * When Google API sets region name, there's a special case for Kyiv, the
+     * capital of Ukraine. Google API sets the 'Kyiv' as the name of region for
+     * addresses from Kyiv instead of Kyiv Region. Therefore, a separate logic is
+     * implemented to set 'Kyiv Region' name for such addresses instead of 'Kyiv'.
+     *
+     * @param request OrderAddressDtoRequest.
+     */
+    private void checkIfAddressBelongToKyiv(OrderAddressDtoRequest request) {
+        if (request.getRegion().equalsIgnoreCase(KYIV_UA)) {
+            request.setRegion(KYIV_REGION_UA);
+        }
+
+        if (request.getRegionEn().equalsIgnoreCase(KYIV_EN)) {
+            request.setRegionEn(KYIV_REGION_EN);
+        }
     }
 
     private void checkNullFieldsOnGoogleResponse(OrderAddressDtoRequest dtoRequest,

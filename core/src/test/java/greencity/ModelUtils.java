@@ -562,6 +562,10 @@ public class ModelUtils {
             .houseCorpus("2")
             .entranceNumber("3")
             .placeId("place_id")
+            .city("city")
+            .cityEn("cityEn")
+            .street("street")
+            .streetEn("streetEn")
             .build();
     }
 
