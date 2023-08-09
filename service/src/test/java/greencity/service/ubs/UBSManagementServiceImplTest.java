@@ -8,6 +8,7 @@ import greencity.constant.OrderHistory;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagMappingDto;
+import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.order.AdminCommentDto;
@@ -1872,7 +1873,11 @@ class UBSManagementServiceImplTest {
     @Test
     void saveReason() {
         Order order = ModelUtils.getOrdersDto();
+        ReasonNotTakeBagDto dto = new ReasonNotTakeBagDto();
+        dto.setDescription("uu");
         ubsManagementService.saveReason(order, "uu", new MultipartFile[2]);
+        assertEquals(order.getReasonNotTakingBagDescription(), dto.getDescription());
+        verify(orderRepository).save(order);
     }
 
     @Test
@@ -2468,8 +2473,12 @@ class UBSManagementServiceImplTest {
     @Test
     void saveReasonWhenListElementsAreNotNulls() {
         Order order = ModelUtils.getOrdersDto();
+        ReasonNotTakeBagDto dto = new ReasonNotTakeBagDto();
+        dto.setDescription("uu");
         ubsManagementService.saveReason(order, "uu", new MultipartFile[] {
             new MockMultipartFile("Name", new byte[2]), new MockMultipartFile("Name", new byte[2])});
+        assertEquals(order.getReasonNotTakingBagDescription(), dto.getDescription());
+        verify(orderRepository).save(order);
     }
 
     @Test

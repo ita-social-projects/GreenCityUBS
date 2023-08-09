@@ -636,6 +636,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         long totalPriceInCoins = convertBillsIntoCoins(setTotalPrice(getPriceDetails(orderId)));
         long needToPayInCoins = totalPriceInCoins - wasPaidInCoins - discountInCoins;
 
+        updatePaymentStatus(order, orderId, wasPaidInCoins, discountInCoins, totalPriceInCoins, needToPayInCoins);
+    }
+
+    private void updatePaymentStatus(Order order, Long orderId, long wasPaidInCoins, long discountInCoins,
+        long totalPriceInCoins, long needToPayInCoins) {
         if (needToPayInCoins == 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
             return;
