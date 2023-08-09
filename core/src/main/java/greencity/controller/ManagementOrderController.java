@@ -504,7 +504,7 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for update order and payment status.
+     * Controller for update order and payment status by id.
      *
      * @return {@link OrderDetailStatusDto}.
      * @author Orest Mahdziak
@@ -523,7 +523,7 @@ public class ManagementOrderController {
         @Valid @PathVariable("id") Long id, @RequestBody OrderDetailStatusRequestDto dto,
         Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateOrderDetailStatus(id, dto, principal.getName()));
+            .body(ubsManagementService.updateOrderDetailStatusById(id, dto, principal.getName()));
     }
 
     /**
@@ -628,7 +628,7 @@ public class ManagementOrderController {
         @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoUpdate dto,
         Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateOrderExportDetails(id, dto, principal.getName()));
+            .body(ubsManagementService.updateOrderExportDetailsById(id, dto, principal.getName()));
     }
 
     /**
@@ -877,7 +877,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> updateEcoStoreIdToOrder(
         @RequestBody @Valid EcoNumberDto ecoNumberDto, @PathVariable(name = "id") Long orderId,
         Principal principal) {
-        ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, orderId, principal.getName());
+        ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, orderId, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -891,7 +891,8 @@ public class ManagementOrderController {
      * @param description             {@link String}.
      * @param images                  {@link MultipartFile}.
      *
-     * @author Anton Bondar
+     * @author Bahlay Yuriy.
+     * @author Anton Bondar.
      */
 
     @ApiOperation(value = "update order admin page info and save reason if needed")
@@ -909,7 +910,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> updatePageAdminInfo(@PathVariable(name = "id") Long orderId,
         @Valid @RequestPart UpdateOrderPageAdminDto updateOrderPageAdminDto,
         @RequestParam String language,
-        Principal principal,
+        @ApiIgnore Principal principal,
         @RequestParam String description,
         @RequestPart(required = false) @Nullable MultipartFile[] images) {
         ubsManagementService.updateOrderAdminPageInfoAndSaveReason(orderId, updateOrderPageAdminDto, language,
