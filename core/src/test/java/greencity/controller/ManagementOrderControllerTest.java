@@ -8,7 +8,6 @@ import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
-import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
@@ -45,6 +44,7 @@ import java.util.Optional;
 import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getRequestDto;
+import static greencity.ModelUtils.getUpdateOrderPageAdminDto;
 import static greencity.ModelUtils.getUuid;
 import static greencity.ModelUtils.getViolationDetailInfoDto;
 import static org.mockito.Mockito.doNothing;
@@ -512,9 +512,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void updatePageAdminInfoTest() throws Exception {
-        UpdateOrderPageAdminDto dto = new UpdateOrderPageAdminDto();
-        dto.setGeneralOrderInfo(OrderDetailStatusRequestDto.builder().orderStatus("NOT_TAKEN_OUT").build());
-
+        UpdateOrderPageAdminDto dto = getUpdateOrderPageAdminDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
 
