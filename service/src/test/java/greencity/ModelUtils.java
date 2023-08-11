@@ -3235,10 +3235,10 @@ public class ModelUtils {
                 .build())
             .userInfoDto(UbsCustomersDtoUpdate
                 .builder()
-                .recipientId(2L)
-                .recipientName("aaaaa")
-                .recipientPhoneNumber("085555")
-                .recipientEmail("yura@333gmail.com")
+                .recipientId(1L)
+                .recipientName("Anatolii Petyrov")
+                .recipientPhoneNumber("095123456")
+                .recipientEmail("anatolii.andr@gmail.com")
                 .build())
             .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
                 .builder()
