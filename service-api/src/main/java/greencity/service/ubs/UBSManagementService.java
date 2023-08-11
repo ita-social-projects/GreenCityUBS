@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.dto.bag.AdditionalBagInfoDto;
-import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.order.AdminCommentDto;
@@ -29,6 +28,7 @@ import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
+import greencity.entity.order.Order;
 import greencity.enums.SortingOrder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -91,12 +91,13 @@ public interface UBSManagementService {
     /**
      * Method that update address.
      *
-     * @param dtoUpdate of {@link OrderAddressExportDetailsDtoUpdate} order id;
+     * @param dtoUpdate of {@link OrderAddressExportDetailsDtoUpdate} order id.
+     * @param order     {@link Order}.
      * @param email     {@link String}.
-     * @return {@link OrderAddressDtoResponse} that contains address;
+     * @return {@link OrderAddressDtoResponse} that contains address.
      * @author Mahdziak Orest
      */
-    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Long orderId,
+    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
         String email);
 
     /**
@@ -111,7 +112,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    void setOrderDetail(Long orderId,
+    void setOrderDetail(Order order,
         Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String email);
 
     /**
@@ -151,11 +152,18 @@ public interface UBSManagementService {
     OrderDetailStatusDto getOrderDetailStatus(Long id);
 
     /**
+     * Method that update order and payment status by id.
+     *
+     * @author Mahdziak Orest
+     */
+    OrderDetailStatusDto updateOrderDetailStatusById(Long id, OrderDetailStatusRequestDto dto, String email);
+
+    /**
      * Method that update order and payment status.
      *
      * @author Mahdziak Orest
      */
-    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto, String email);
+    OrderDetailStatusDto updateOrderDetailStatus(Order order, OrderDetailStatusRequestDto dto, String email);
 
     /**
      * Method that get export details by order id.
@@ -169,7 +177,14 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoUpdate dto, String uuid);
+    ExportDetailsDto updateOrderExportDetailsById(Long id, ExportDetailsDtoUpdate dto, String uuid);
+
+    /**
+     * Method that update export details by order.
+     *
+     * @author Mahdziak Orest
+     */
+    ExportDetailsDto updateOrderExportDetails(Order order, ExportDetailsDtoUpdate dto, String uuid);
 
     /**
      * Method that gets bags additional information.
@@ -225,10 +240,10 @@ public interface UBSManagementService {
     /**
      * Method that save ReasonNotTakeBagDto.
      */
-    ReasonNotTakeBagDto saveReason(Long orderId, String description, MultipartFile[] images);
+    void saveReason(Order order, String description, MultipartFile[] images);
 
     /**
-     * This is method which is save Admin comment.
+     * This is method which save Admin comment.
      *
      * @param adminCommentDto {@link AdminCommentDto}.
      * @param email           {@link String}.
@@ -238,7 +253,7 @@ public interface UBSManagementService {
     void saveAdminCommentToOrder(AdminCommentDto adminCommentDto, String email);
 
     /**
-     * This is method updates eco id from the shop for order.
+     * This is method updates eco id from the shop for order by id.
      *
      * @param ecoNumberDto {@link EcoNumberDto}.
      * @param orderId      {@link Long}.
@@ -246,18 +261,45 @@ public interface UBSManagementService {
      *
      * @author Yuriy Bahlay.
      */
-    void updateEcoNumberForOrder(EcoNumberDto ecoNumberDto, Long orderId, String email);
+    void updateEcoNumberForOrderById(EcoNumberDto ecoNumberDto, Long orderId, String email);
+
+    /**
+     * This is method updates eco id from the shop for order.
+     *
+     * @param ecoNumberDto {@link EcoNumberDto}.
+     * @param order        {@link Order}.
+     * @param email        {@link String}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    void updateEcoNumberForOrder(EcoNumberDto ecoNumberDto, Order order, String email);
+
+    /**
+     * This is method which is updates admin page info for order and save reason.
+     *
+     * @param orderId                 {@link Long}.
+     * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
+     * @param language                {@link String}.
+     * @param email                   {@link String}.
+     * @param description             {@link String}.
+     * @param images                  {@link MultipartFile}.
+     *
+     * @author Anton Bondar.
+     */
+    void updateOrderAdminPageInfoAndSaveReason(Long orderId, UpdateOrderPageAdminDto updateOrderPageAdminDto,
+        String language,
+        String email, String description, MultipartFile[] images);
 
     /**
      * This is method which is updates admin page info for order.
      * 
      * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
-     * @param orderId                 {@link Long}.
+     * @param order                   {@link Order}.
      * @param email                   {@link String}.
      *
      * @author Yuriy Bahlay.
      */
-    void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageAdminDto, Long orderId, String lang,
+    void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageAdminDto, Order order, String lang,
         String email);
 
     /**

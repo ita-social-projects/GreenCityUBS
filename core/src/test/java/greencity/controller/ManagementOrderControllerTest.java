@@ -9,6 +9,7 @@ import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
@@ -43,6 +44,7 @@ import java.util.Optional;
 import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getRequestDto;
+import static greencity.ModelUtils.getUpdateOrderPageAdminDto;
 import static greencity.ModelUtils.getUuid;
 import static greencity.ModelUtils.getViolationDetailInfoDto;
 import static org.mockito.Mockito.doNothing;
@@ -55,8 +57,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class ManagementOrderControllerTest {
@@ -506,5 +508,33 @@ class ManagementOrderControllerTest {
     void saveOrderIdForRefundTest() throws Exception {
         mockMvc.perform(post(ubsLink + "/save-order-for-refund/{orderId}", 1L)
             .principal(principal)).andExpect(status().isCreated());
+    }
+
+    @Test
+    void updatePageAdminInfoTest() throws Exception {
+        UpdateOrderPageAdminDto dto = getUpdateOrderPageAdminDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+
+        MockMultipartFile jsonFile = new MockMultipartFile(
+            "updateOrderPageAdminDto",
+            "updateOrderPageAdminDto.json",
+            "application/json",
+            responseJSON.getBytes());
+
+        MockMultipartHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart(ubsLink + "/update-order-page-admin-info/{id}", 1L);
+        builder.with(request -> {
+            request.setMethod("PATCH");
+            return request;
+        });
+
+        mockMvc.perform(
+            builder.file(jsonFile)
+                .param("language", "en")
+                .param("description", "false")
+                .principal(principal)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+            .andExpect(status().isCreated());
     }
 }
