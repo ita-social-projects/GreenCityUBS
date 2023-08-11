@@ -910,8 +910,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> updatePageAdminInfo(@PathVariable(name = "id") Long orderId,
         @Valid @RequestPart UpdateOrderPageAdminDto updateOrderPageAdminDto,
         @RequestParam String language,
-        @ApiIgnore Principal principal,
-        @RequestParam String description,
+        @ApiIgnore Principal principal, String description,
         @RequestPart(required = false) @Nullable MultipartFile[] images) {
         ubsManagementService.updateOrderAdminPageInfoAndSaveReason(orderId, updateOrderPageAdminDto, language,
             principal.getName(), description, images);
