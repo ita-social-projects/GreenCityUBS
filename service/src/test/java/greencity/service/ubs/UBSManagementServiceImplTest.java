@@ -2892,6 +2892,7 @@ class UBSManagementServiceImplTest {
     void updateOrderAdminPageInfoAndSaveReasonTest() {
         var dto = updateOrderPageAdminDto();
         Order order = getOrder();
+        //dto.getNotTakenOutReasonDto().setImages(new MultipartFile[2]);
 
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
@@ -2953,5 +2954,44 @@ class UBSManagementServiceImplTest {
         assertThrows(BadRequestException.class,
             () -> ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com"));
         verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void updateOrderAdminPageInfoAndSaveReasonWithImagesTest() {
+        var dto = updateOrderPageAdminDto();
+        Order order = getOrder();
+        dto.getNotTakenOutReasonDto().setImages(new MultipartFile[2]);
+
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+
+        Employee employee = getEmployee();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(1L, 1L))
+                .thenReturn(Optional.of(tariffsInfo));
+        when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
+
+        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
+        when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
+
+        var receivingStation = getReceivingStation();
+
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+
+        ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com");
+
+        verify(orderRepository).findById(1L);
+        verify(employeeRepository).findByEmail("test@gmail.com");
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
+        verify(paymentRepository).findAllByOrderId(1L);
+
+        verify(orderAddressRepository).findById(1L);
+        verify(receivingStationRepository).findAll();
+
+        verify(receivingStationRepository).findById(1L);
+        verify(orderRepository).getOrderDetails(1L);
     }
 }
