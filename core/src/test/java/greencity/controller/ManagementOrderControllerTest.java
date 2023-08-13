@@ -532,7 +532,6 @@ class ManagementOrderControllerTest {
         mockMvc.perform(
             builder.file(jsonFile)
                 .param("language", "en")
-                .param("description", "false")
                 .principal(principal)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isCreated());

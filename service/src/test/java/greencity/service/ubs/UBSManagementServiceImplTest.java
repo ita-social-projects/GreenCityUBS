@@ -2891,8 +2891,6 @@ class UBSManagementServiceImplTest {
     @Test
     void updateOrderAdminPageInfoAndSaveReasonTest() {
         var dto = updateOrderPageAdminDto();
-        MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
-
         Order order = getOrder();
 
         TariffsInfo tariffsInfo = getTariffsInfo();
@@ -2914,8 +2912,7 @@ class UBSManagementServiceImplTest {
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
 
-        ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com", "desc",
-            multipartFiles);
+        ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com");
 
         verify(orderRepository).findById(1L);
         verify(employeeRepository).findByEmail("test@gmail.com");
@@ -2927,5 +2924,34 @@ class UBSManagementServiceImplTest {
 
         verify(receivingStationRepository).findById(1L);
         verify(orderRepository).getOrderDetails(1L);
+    }
+
+    @Test
+    void updateOrderAdminPageInfoAndSaveReasonThrowsBadRequestExceptionWithEmptyDescFieldTest() {
+        var dto = updateOrderPageAdminDto();
+        Order order = getOrder();
+        dto.getGeneralOrderInfo().setOrderStatus(OrderStatus.NOT_TAKEN_OUT.name());
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        assertThrows(BadRequestException.class,
+            () -> ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com"));
+        verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void updateOrderAdminPageInfoAndSaveReasonThrowsBadRequestExceptionWithNullDescFieldTest() {
+        var dto = updateOrderPageAdminDto();
+        Order order = getOrder();
+        dto.getGeneralOrderInfo().setOrderStatus(OrderStatus.NOT_TAKEN_OUT.name());
+        dto.getNotTakenOutReasonDto().setDescription(null);
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        assertThrows(BadRequestException.class,
+            () -> ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com"));
+        verify(orderRepository).findById(1L);
     }
 }
