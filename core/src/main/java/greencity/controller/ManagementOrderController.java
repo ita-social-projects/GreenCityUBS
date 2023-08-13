@@ -890,7 +890,6 @@ public class ManagementOrderController {
      * @param principal               {@link Principal}.
      *
      * @author Bahlay Yuriy.
-     * @author Anton Bondar.
      */
 
     @ApiOperation(value = "update order admin page info and save reason if needed")
