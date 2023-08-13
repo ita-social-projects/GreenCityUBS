@@ -2892,7 +2892,7 @@ class UBSManagementServiceImplTest {
     void updateOrderAdminPageInfoAndSaveReasonTest() {
         var dto = updateOrderPageAdminDto();
         Order order = getOrder();
-        //dto.getNotTakenOutReasonDto().setImages(new MultipartFile[2]);
+        // dto.getNotTakenOutReasonDto().setImages(new MultipartFile[2]);
 
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
@@ -2970,7 +2970,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(1L, 1L))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
 
         when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
