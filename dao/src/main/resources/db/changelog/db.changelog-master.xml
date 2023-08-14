@@ -219,4 +219,5 @@
     <include file="db/changelog/logs/2023-08-08-change-bag-name-column-length.xml"/>
     <include file="db/changelog/logs/ch-add-column-status-to-bag-table-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-update-order-bag-mapping-table-Spodaryk.xml"/>
+    <include file="/db/changelog/logs/ch-add-column-order-bag-mapping-table-Spodaryk.xml"/>
 </databaseChangeLog>
