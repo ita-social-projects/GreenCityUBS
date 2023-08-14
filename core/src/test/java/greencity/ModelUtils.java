@@ -30,10 +30,12 @@ import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.position.PositionDto;
@@ -562,6 +564,10 @@ public class ModelUtils {
             .houseCorpus("2")
             .entranceNumber("3")
             .placeId("place_id")
+            .city("city")
+            .cityEn("cityEn")
+            .street("street")
+            .streetEn("streetEn")
             .build();
     }
 
@@ -591,6 +597,15 @@ public class ModelUtils {
             .name("UbsProfile")
             .email("ubsuser@mail.com")
             .uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
+            .build();
+    }
+
+    public static UpdateOrderPageAdminDto getUpdateOrderPageAdminDto() {
+        return UpdateOrderPageAdminDto.builder()
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus("NOT_TAKEN_OUT")
+                .build())
             .build();
     }
 }

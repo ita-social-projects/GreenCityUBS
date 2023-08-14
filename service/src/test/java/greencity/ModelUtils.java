@@ -60,7 +60,35 @@ import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.*;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.order.CounterOrderDetailsDto;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.ExportDetailsDtoUpdate;
+import greencity.dto.order.GroupedOrderDto;
+import greencity.dto.order.NotTakenOrderReasonDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderClientDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
+import greencity.dto.order.OrderDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.order.SenderLocation;
+import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderDetailDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -116,7 +144,11 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.entity.user.employee.*;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeFilterView;
+import greencity.entity.user.employee.EmployeeOrderPosition;
+import greencity.entity.user.employee.Position;
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -229,6 +261,9 @@ public class ModelUtils {
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
     public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(createBag(1), createBag(2), createBag(3));
+
+    public static final String KYIV_REGION_EN = "Kyiv Oblast";
+    public static final String KYIV_REGION_UA = "Київська область";
 
     public static EmployeeFilterView getEmployeeFilterView() {
         return getEmployeeFilterViewWithPassedIds(1L, 5L, 10L);
@@ -1618,6 +1653,44 @@ public class ModelUtils {
                 .longitude(30.4477005)
                 .build())
             .district("Distinct")
+            .city("City")
+            .actual(false)
+            .build();
+    }
+
+    public static AddressDto addressWithEmptyPlaceIdDto() {
+        return AddressDto.builder()
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("25")
+            .street("Street")
+            .streetEn("StreetEn")
+            .coordinates(Coordinates.builder()
+                .latitude(0.0)
+                .longitude(0.0)
+                .build())
+            .district("Distinct")
+            .city("City")
+            .cityEn("CityEn")
+            .actual(false)
+            .build();
+    }
+
+    public static AddressDto addressWithKyivRegionDto() {
+        return AddressDto.builder()
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("25")
+            .street("Street")
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .district("Distinct")
+            .regionEn(KYIV_REGION_EN)
+            .region(KYIV_REGION_UA)
             .city("City")
             .actual(false)
             .build();
@@ -3312,10 +3385,10 @@ public class ModelUtils {
                 .build())
             .userInfoDto(UbsCustomersDtoUpdate
                 .builder()
-                .recipientId(2L)
-                .recipientName("aaaaa")
-                .recipientPhoneNumber("085555")
-                .recipientEmail("yura@333gmail.com")
+                .recipientId(1L)
+                .recipientName("Anatolii Petyrov")
+                .recipientPhoneNumber("095123456")
+                .recipientEmail("anatolii.andr@gmail.com")
                 .build())
             .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
                 .builder()
@@ -4344,6 +4417,83 @@ public class ModelUtils {
             "}";
     }
 
+    public static List<GeocodingResult> getGeocodingResultWithKyivRegion() {
+        List<GeocodingResult> geocodingResults = new ArrayList<>();
+
+        GeocodingResult geocodingResult1 = new GeocodingResult();
+
+        Geometry geometry = new Geometry();
+        geometry.location = new LatLng(50.5555555d, 50.5555555d);
+
+        AddressComponent locality = new AddressComponent();
+        locality.longName = "fake street";
+        locality.types = new AddressComponentType[] {AddressComponentType.LOCALITY};
+
+        AddressComponent streetNumber = new AddressComponent();
+        streetNumber.longName = "13";
+        streetNumber.types = new AddressComponentType[] {AddressComponentType.STREET_NUMBER};
+
+        AddressComponent region = new AddressComponent();
+        region.longName = "Kyiv";
+        region.types = new AddressComponentType[] {AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
+
+        AddressComponent sublocality = new AddressComponent();
+        sublocality.longName = "fake district";
+        sublocality.types = new AddressComponentType[] {AddressComponentType.SUBLOCALITY};
+
+        AddressComponent route = new AddressComponent();
+        route.longName = "fake street name";
+        route.types = new AddressComponentType[] {AddressComponentType.ROUTE};
+
+        geocodingResult1.addressComponents = new AddressComponent[] {
+            locality,
+            streetNumber,
+            region,
+            sublocality,
+            route
+        };
+
+        geocodingResult1.formattedAddress = "fake address";
+        geocodingResult1.geometry = geometry;
+
+        GeocodingResult geocodingResult2 = new GeocodingResult();
+
+        AddressComponent locality2 = new AddressComponent();
+        locality2.longName = "fake street";
+        locality2.types = new AddressComponentType[] {AddressComponentType.LOCALITY};
+
+        AddressComponent streetNumber2 = new AddressComponent();
+        streetNumber2.longName = "13";
+        streetNumber2.types = new AddressComponentType[] {AddressComponentType.STREET_NUMBER};
+
+        AddressComponent region2 = new AddressComponent();
+        region2.longName = "місто Київ";
+        region2.types = new AddressComponentType[] {AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
+
+        AddressComponent sublocality2 = new AddressComponent();
+        sublocality2.longName = "fake district";
+        sublocality2.types = new AddressComponentType[] {AddressComponentType.SUBLOCALITY};
+
+        AddressComponent route2 = new AddressComponent();
+        route2.longName = "fake street name";
+        route2.types = new AddressComponentType[] {AddressComponentType.ROUTE};
+
+        geocodingResult2.addressComponents = new AddressComponent[] {
+            locality2,
+            streetNumber2,
+            region2,
+            sublocality2,
+            route2
+        };
+
+        geocodingResult2.formattedAddress = "fake address 2";
+        geocodingResult2.geometry = geometry;
+
+        geocodingResults.add(geocodingResult1);
+        geocodingResults.add(geocodingResult2);
+        return geocodingResults;
+    }
+
     public static List<GeocodingResult> getGeocodingResult() {
         List<GeocodingResult> geocodingResults = new ArrayList<>();
 
@@ -4437,6 +4587,89 @@ public class ModelUtils {
             .build();
     }
 
+    public static CreateAddressRequestDto getAddressRequestToSaveDto() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("fdsfs2")
+            .searchAddress("fake street name2, 132, fake street2, 020002")
+            .district("fdsfds2")
+            .districtEn("dsadsad2")
+            .region("regdsad2")
+            .regionEn("regdsaden2")
+            .houseNumber("12")
+            .houseCorpus("22")
+            .entranceNumber("32")
+            .placeId("place_id")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestWithEmptyPlaceIdDto() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("fdsfs")
+            .searchAddress("fake street name, 13, fake street, 02000")
+            .district("fdsfds")
+            .districtEn("dsadsad")
+            .region("regdsad")
+            .regionEn("regdsaden")
+            .houseNumber("1")
+            .houseCorpus("2")
+            .entranceNumber("3")
+            .placeId("")
+            .street("street")
+            .streetEn("streetEn")
+            .city("city")
+            .cityEn("cityEn")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestWithEmptyPlaceIdToSaveDto() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("fdsfs1")
+            .searchAddress("fake street name, 13, fake street, 02000")
+            .district("fdsfds1")
+            .districtEn("dsadsad1")
+            .region("regdsad1")
+            .regionEn("regdsaden1")
+            .houseNumber("11")
+            .houseCorpus("21")
+            .entranceNumber("31")
+            .placeId("")
+            .street("street1")
+            .streetEn("streetEn1")
+            .city("city1")
+            .cityEn("cityEn1")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressWithKyivRegionRequestDto() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("fdsfs")
+            .searchAddress("fake street name, 13, fake street, 02000")
+            .district("fdsfds")
+            .districtEn("dsadsad")
+            .regionEn(KYIV_REGION_EN)
+            .region(KYIV_REGION_UA)
+            .houseNumber("1")
+            .houseCorpus("2")
+            .entranceNumber("3")
+            .placeId("place_id")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressWithKyivRegionToSaveRequestDto() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("fdsfs1")
+            .searchAddress("fake street name, 13, fake street, 02000")
+            .district("fdsfds1")
+            .districtEn("dsadsad1")
+            .regionEn(KYIV_REGION_EN)
+            .region(KYIV_REGION_UA)
+            .houseNumber("11")
+            .houseCorpus("21")
+            .entranceNumber("31")
+            .placeId("place_id")
+            .build();
+    }
+
     public static OrderAddressDtoRequest getTestOrderAddressDtoRequest() {
         return OrderAddressDtoRequest.builder()
             .id(0L)
@@ -4516,6 +4749,28 @@ public class ModelUtils {
                     .coordinates(Coordinates.builder()
                         .latitude(50.4459068)
                         .longitude(30.4477005)
+                        .build())
+                    .actual(false)
+                    .build()))
+            .build();
+    }
+
+    public static OrderWithAddressesResponseDto getOrderWithAddressesResponseDto() {
+        return OrderWithAddressesResponseDto.builder()
+            .addressList(List.of(
+                AddressDto.builder()
+                    .id(1L)
+                    .city("City")
+                    .cityEn("CityEn")
+                    .district("Distinct")
+                    .entranceNumber("7a")
+                    .houseCorpus("2")
+                    .houseNumber("25")
+                    .street("Street")
+                    .streetEn("StreetEn")
+                    .coordinates(Coordinates.builder()
+                        .latitude(0.0)
+                        .longitude(0.0)
                         .build())
                     .actual(false)
                     .build()))

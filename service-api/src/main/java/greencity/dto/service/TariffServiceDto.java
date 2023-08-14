@@ -43,11 +43,11 @@ public class TariffServiceDto {
     private Double commission;
 
     @NotBlank
-    @Length(min = 1, max = 30)
+    @Length(min = 1, max = 255)
     private String name;
 
     @NotBlank
-    @Length(min = 1, max = 30)
+    @Length(min = 1, max = 255)
     private String nameEng;
 
     @NotBlank
