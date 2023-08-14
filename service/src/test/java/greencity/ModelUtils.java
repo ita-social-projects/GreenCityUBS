@@ -69,6 +69,7 @@ import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.GroupedOrderDto;
 import greencity.dto.order.NotTakenOrderReasonDto;
+import greencity.dto.order.NotTakenOutReasonDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
@@ -3274,6 +3275,10 @@ public class ModelUtils {
                 .positionId(2L)
                 .employeeId(2L)
                 .build()))
+            .notTakenOutReasonDto(
+                NotTakenOutReasonDto.builder()
+                    .description("")
+                    .build())
             .build();
     }
 
