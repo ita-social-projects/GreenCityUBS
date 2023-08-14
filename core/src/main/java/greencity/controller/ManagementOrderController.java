@@ -888,6 +888,8 @@ public class ManagementOrderController {
      * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
      * @param language                {@link String}.
      * @param principal               {@link Principal}.
+     * @param description             {@link String}.
+     * @param images                  {@link MultipartFile}.
      *
      * @author Bahlay Yuriy.
      * @author Anton Bondar.
@@ -907,9 +909,11 @@ public class ManagementOrderController {
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<HttpStatus> updatePageAdminInfo(@PathVariable(name = "id") Long orderId,
         @Valid @RequestPart UpdateOrderPageAdminDto updateOrderPageAdminDto,
-        @RequestParam String language, @ApiIgnore Principal principal) {
+        @RequestParam String language,
+        @ApiIgnore Principal principal, String description,
+        @RequestPart(required = false) @Nullable MultipartFile[] images) {
         ubsManagementService.updateOrderAdminPageInfoAndSaveReason(orderId, updateOrderPageAdminDto, language,
-            principal.getName());
+            principal.getName(), description, images);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
