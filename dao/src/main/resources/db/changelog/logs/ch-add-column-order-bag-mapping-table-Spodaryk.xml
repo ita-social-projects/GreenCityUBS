@@ -43,8 +43,6 @@
                 </not>
         </preConditions>
 
-        <sqlFile path="db/changelog/sql/ch-update-order-bag-mapping-table-Spodaryk.sql"/>
-
         <addPrimaryKey tableName="order_bag_mapping" columnNames="id"/>
 
         <addNotNullConstraint tableName="order_bag_mapping" columnName="capacity"/>
