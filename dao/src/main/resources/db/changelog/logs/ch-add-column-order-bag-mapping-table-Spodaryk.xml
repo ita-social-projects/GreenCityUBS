@@ -5,6 +5,7 @@
     <changeSet id="Spodaryk-4" author="Oksana Spodaryk">
         <preConditions onFail="MARK_RAN">
             <primaryKeyExists tableName="order_bag_mapping"/>
+
         </preConditions>
         <dropPrimaryKey tableName="order_bag_mapping" constraintName="order_bag_mapping_pkey"/>
 
@@ -23,10 +24,9 @@
         <addColumn tableName="order_bag_mapping">
             <column name="name_eng" type="varchar(30)"/>
         </addColumn>
-
         <addForeignKeyConstraint baseTableName="order_bag_mapping"
                                  baseColumnNames="bag_id"
-                                 constraintName="fk_bag_to_order"
+                                 constraintName="fk_bag_id_to_order"
                                  referencedTableName="bag"
                                  referencedColumnNames="id"/>
     </changeSet>
@@ -34,20 +34,16 @@
     <changeSet id="Spodaryk-5" author="Oksana Spodaryk">
 
         <preConditions onFail="MARK_RAN">
-            <not>
-                <columnExists tableName="order_bag_mapping" columnName="capacity"/>
-            </not>
-            <not>
-                <columnExists tableName="order_bag_mapping" columnName="price"/>
-            </not>
-            <not>
-                <columnExists tableName="order_bag_mapping" columnName="name"/>
-            </not>
-            <not>
-                <columnExists tableName="order_bag_mapping" columnName="name_eng"/>
-            </not>
+                <not>
+                    <columnExists tableName="order_bag_mapping" columnName="id"/>
+                    <columnExists tableName="order_bag_mapping" columnName="capacity"/>
+                    <columnExists tableName="order_bag_mapping" columnName="price"/>
+                    <columnExists tableName="order_bag_mapping" columnName="name"/>
+                    <columnExists tableName="order_bag_mapping" columnName="name_eng"/>
+                </not>
         </preConditions>
-        <sqlFile path="sql/ch-update-order-bag-mapping-table-Spodaryk.sql" relativeToChangelogFile="true"/>
+
+        <sqlFile path="db/changelog/sql/ch-update-order-bag-mapping-table-Spodaryk.sql"/>
 
         <addPrimaryKey tableName="order_bag_mapping" columnNames="id"/>
 
