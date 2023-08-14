@@ -2,12 +2,7 @@ package greencity.dto.order;
 
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
@@ -27,5 +22,4 @@ public class UpdateOrderPageAdminDto {
     private List<UpdateResponsibleEmployeeDto> updateResponsibleEmployeeDto;
     private Double writeOffStationSum;
     private Double ubsCourierSum;
-    private NotTakenOutReasonDto notTakenOutReasonDto;
 }

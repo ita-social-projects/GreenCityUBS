@@ -134,7 +134,6 @@ import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
 import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
-import static greencity.constant.ErrorMessage.REASON_NOT_TAKING_BAG;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
@@ -1676,18 +1675,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
      * @param language                {@link String}.
      * @param email                   {@link String}.
+     * @param description             {@link String}.
+     * @param images                  {@link MultipartFile}.
      *
      * @author Anton Bondar.
      */
     @Override
     @Transactional
     public void updateOrderAdminPageInfoAndSaveReason(Long orderId, UpdateOrderPageAdminDto updateOrderPageAdminDto,
-        String language, String email) {
+        String language,
+        String email, String description, MultipartFile[] images) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        checkOrderStatusAndSaveReason(order, updateOrderPageAdminDto);
         updateOrderAdminPageInfo(updateOrderPageAdminDto, order, language, email);
+        saveReason(order, description, images);
     }
 
     /**
@@ -1715,20 +1717,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 throw new BadRequestException(e.getMessage());
             }
         }
-    }
-
-    private void checkOrderStatusAndSaveReason(Order order, UpdateOrderPageAdminDto updateOrderPageAdminDto) {
-        var status = updateOrderPageAdminDto.getGeneralOrderInfo().getOrderStatus();
-        var desc = updateOrderPageAdminDto.getNotTakenOutReasonDto().getDescription();
-        var images = updateOrderPageAdminDto.getNotTakenOutReasonDto().getImages();
-
-        if (status.equalsIgnoreCase(OrderStatus.NOT_TAKEN_OUT.name()) && (desc == null || desc.isEmpty())) {
-            throw new BadRequestException(REASON_NOT_TAKING_BAG);
-        }
-        if (images == null) {
-            images = new MultipartFile[0];
-        }
-        saveReason(order, desc, images);
     }
 
     private void setUbsCourierSumAndWriteOffStationSum(Order order, Double writeOffStationSum, Double ubsCourierSum) {
