@@ -606,6 +606,7 @@ public class ModelUtils {
                 .builder()
                 .orderStatus("NOT_TAKEN_OUT")
                 .build())
+            .notTakenOutReason("not taken out")
             .build();
     }
 }

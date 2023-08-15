@@ -2914,8 +2914,7 @@ class UBSManagementServiceImplTest {
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
 
-        ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com", "desc",
-            multipartFiles);
+        ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com", multipartFiles);
 
         verify(orderRepository).findById(1L);
         verify(employeeRepository).findByEmail("test@gmail.com");
