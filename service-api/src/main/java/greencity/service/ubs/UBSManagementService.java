@@ -281,14 +281,12 @@ public interface UBSManagementService {
      * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
      * @param language                {@link String}.
      * @param email                   {@link String}.
-     * @param description             {@link String}.
      * @param images                  {@link MultipartFile}.
      *
      * @author Anton Bondar.
      */
     void updateOrderAdminPageInfoAndSaveReason(Long orderId, UpdateOrderPageAdminDto updateOrderPageAdminDto,
-        String language,
-        String email, String description, MultipartFile[] images);
+        String language, String email, MultipartFile[] images);
 
     /**
      * This is method which is updates admin page info for order.
