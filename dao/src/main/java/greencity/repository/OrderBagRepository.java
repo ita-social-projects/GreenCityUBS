@@ -67,7 +67,7 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      *
      * @param bagId {@link Integer} bag id
      * @return {@link List} of {@link OrderBag}
-     * @author Julia Seti
+     * @author Oksana Spodaryk
      */
     List<OrderBag> findAllByBagId(Integer bagId);
 }
