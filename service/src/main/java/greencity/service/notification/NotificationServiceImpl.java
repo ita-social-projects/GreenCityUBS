@@ -20,6 +20,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
 import greencity.service.ubs.NotificationService;
+import greencity.service.ubs.OrderBagService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
@@ -75,6 +76,8 @@ public class NotificationServiceImpl implements NotificationService {
     private static final String ORDER_NUMBER_KEY = "orderNumber";
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
     private static final String PAY_BUTTON = "payButton";
+    @Autowired
+    private final OrderBagService orderBagService;
 
     /**
      * {@inheritDoc}
@@ -239,7 +242,7 @@ public class NotificationServiceImpl implements NotificationService {
         long ubsCourierSumInCoins = order.getUbsCourierSum() == null ? 0L : order.getUbsCourierSum();
         long writeStationSumInCoins = order.getWriteOffStationSum() == null ? 0L : order.getWriteOffStationSum();
 
-        List<Bag> bagsType = bagRepository.findBagsByOrderId(order.getId());
+        List<Bag> bagsType = orderBagService.findAllBagsByOrderId(order.getId());
         Map<Integer, Integer> bagsAmount;
         if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
             bagsAmount = order.getExportedQuantity();
