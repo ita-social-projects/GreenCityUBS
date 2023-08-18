@@ -582,6 +582,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         address.setUser(currentUser);
         address.setActual(addresses.isEmpty());
         address.setAddressStatus(AddressStatus.NEW);
+
+        address.setDistrict(addressRequestDto.getDistrict());
+        address.setDistrictEn(addressRequestDto.getDistrictEn());
+
         addressRepo.save(address);
 
         return findAllAddressesForCurrentOrder(uuid);
@@ -620,6 +624,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         newAddress.setUser(address.getUser());
         newAddress.setAddressStatus(address.getAddressStatus());
         newAddress.setActual(address.getActual());
+
+        newAddress.setDistrict(addressRequestDto.getDistrict());
+        newAddress.setDistrictEn(addressRequestDto.getDistrictEn());
+
         addressRepo.save(newAddress);
 
         return findAllAddressesForCurrentOrder(uuid);
@@ -635,6 +643,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         address.setUser(currentUser);
         address.setActual(addresses.isEmpty());
         address.setAddressStatus(AddressStatus.NEW);
+
         addressRepo.save(address);
     }
 
