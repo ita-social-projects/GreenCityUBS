@@ -125,7 +125,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_PRICE_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_DEACTIVATE_PRICING_CARD', authentication)")
     @DeleteMapping("/deleteTariffService/{id}")
     public ResponseEntity<HttpStatus> deleteTariffService(
         @Valid @PathVariable Integer id) {
@@ -151,7 +151,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_PRICE_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_DEACTIVATE_PRICING_CARD', authentication)")
     @PutMapping("/editTariffService/{id}")
     public ResponseEntity<GetTariffServiceDto> editTariffService(
         @Valid @RequestBody TariffServiceDto dto,
@@ -357,7 +357,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_LOCATION_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('DELETE_LOCATION', authentication)")
     @DeleteMapping("/deleteLocation/{id}")
     public ResponseEntity<HttpStatus> deleteLocation(@PathVariable Long id) {
         superAdminService.deleteLocation(id);
@@ -377,7 +377,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_LOCATION_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('DELETE_LOCATION', authentication)")
     @PatchMapping("/activeLocations/{id}")
     public ResponseEntity<HttpStatus> activeLocation(
         @PathVariable Long id) {
@@ -496,7 +496,7 @@ class SuperAdminController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DESTINATION_NAME', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_STATION', authentication)")
     @PutMapping("/update-receiving-station")
     public ResponseEntity<ReceivingStationDto> updateReceivingStation(@RequestBody @Valid ReceivingStationDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.updateReceivingStation(dto));
@@ -530,7 +530,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DESTINATION_NAME', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_STATION', authentication)")
     @DeleteMapping("/delete-receiving-station/{id}")
     public ResponseEntity<HttpStatus> deleteReceivingStation(@PathVariable Long id) {
         superAdminService.deleteReceivingStation(id);
@@ -614,7 +614,7 @@ class SuperAdminController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 409, message = HttpStatuses.CONFLICT)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_PRICE_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_DEACTIVATE_PRICING_CARD', authentication)")
     @PutMapping("/editTariffInfo/{id}")
     public ResponseEntity<HttpStatus> editTariff(
         @Valid @PathVariable Long id, @Valid @RequestBody EditTariffDto dto) {
@@ -632,7 +632,7 @@ class SuperAdminController {
      * @author Julia Seti
      */
     @ApiOperation(value = "Set tariff limits")
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_PRICE_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_DEACTIVATE_PRICING_CARD', authentication)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -679,7 +679,7 @@ class SuperAdminController {
      * @author Julia Seti
      */
     @ApiOperation(value = "Switch tariff activation status by tariff id")
-    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_PRICING_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_DEACTIVATE_PRICING_CARD', authentication)")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -709,7 +709,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION', authentication)")
     @PutMapping("tariffs/{id}/locations/change-status")
     public ResponseEntity<HttpStatus> changeLocationsInTariffStatus(@PathVariable Long id,
         @Valid @RequestBody ChangeTariffLocationStatusDto dto, @RequestParam String status) {
@@ -735,7 +735,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_PRICING_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_DEACTIVATE_PRICING_CARD', authentication)")
     @PostMapping("/deactivate")
     public ResponseEntity<HttpStatus> switchActivationStatusByChosenParams(
         @RequestParam(name = "regionsIds", required = false) Optional<List<Long>> regionsIds,
