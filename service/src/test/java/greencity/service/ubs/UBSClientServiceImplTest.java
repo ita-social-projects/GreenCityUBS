@@ -149,6 +149,7 @@ import static greencity.ModelUtils.getBagTranslationDto;
 import static greencity.ModelUtils.getCancellationDto;
 import static greencity.ModelUtils.getCertificate;
 import static greencity.ModelUtils.getCourier;
+import static greencity.ModelUtils.getAddressRequestToSaveDto_WithoutDistricts;
 import static greencity.ModelUtils.getCourierDto;
 import static greencity.ModelUtils.getCourierDtoList;
 import static greencity.ModelUtils.getEmployee;
@@ -203,6 +204,7 @@ import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
 import static greencity.ModelUtils.getUserWithBotNotifyTrue;
 import static greencity.ModelUtils.getUserWithLastLocation;
 import static greencity.ModelUtils.getViberBotNotifyTrue;
+
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
@@ -1980,12 +1982,65 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
         when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
         when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
-        when(modelMapper.map(addresses.get(0), AddressDto.class)).thenReturn(addressDto());
+        var addressDto = addressDto();
+        addressDto.setDistrict("Район");
+        addressDto.setDistrictEn("District");
+        when(modelMapper.map(addresses.get(0), AddressDto.class)).thenReturn(addressDto);
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
 
         assertEquals(getAddressDtoResponse(), actualWithSearchAddress);
+        assertEquals(createAddressRequestToSaveDto.getDistrict(),
+            actualWithSearchAddress.getAddressList().get(0).getDistrict());
+        assertEquals(createAddressRequestToSaveDto.getDistrictEn(),
+            actualWithSearchAddress.getAddressList().get(0).getDistrictEn());
+
+        verify(addressRepository).save(addressToSave);
+
+        verify(userRepository, times(2)).findByUuid(user.getUuid());
+        verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
+        verify(googleApiService, times(2)).getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt());
+
+        verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
+        verify(modelMapper, times(2)).map(any(), eq(OrderAddressDtoRequest.class));
+        verify(modelMapper).map(any(), eq(Address.class));
+        verify(modelMapper).map(addresses.get(0), AddressDto.class);
+    }
+
+    @Test
+    void testSaveCurrentAddressForOrder_WithoutDistricts() {
+        User user = getUserForCreate();
+        List<Address> addresses = user.getAddresses();
+        addresses.get(0).setActual(false);
+        addresses.get(0).setAddressStatus(AddressStatus.NEW);
+
+        String uuid = user.getUuid();
+        OrderAddressDtoRequest dtoRequest = getTestOrderAddressLocationDto();
+        CreateAddressRequestDto createAddressRequestDto = getAddressRequestDto();
+        CreateAddressRequestDto createAddressRequestToSaveDto = getAddressRequestToSaveDto_WithoutDistricts();
+        Address addressToSave = new Address();
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
+        when(googleApiService.getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt()))
+            .thenReturn(getGeocodingResult().get(0));
+
+        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
+        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
+        var addressDto = addressDto();
+        addressDto.setDistrict(null);
+        addressDto.setDistrictEn(null);
+        when(modelMapper.map(addresses.get(0), AddressDto.class)).thenReturn(addressDto);
+
+        OrderWithAddressesResponseDto actualWithSearchAddress =
+            ubsService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
+
+        assertEquals(createAddressRequestToSaveDto.getDistrict(),
+            actualWithSearchAddress.getAddressList().get(0).getDistrict());
+        assertEquals(createAddressRequestToSaveDto.getDistrictEn(),
+            actualWithSearchAddress.getAddressList().get(0).getDistrictEn());
+
         verify(addressRepository).save(addressToSave);
 
         verify(userRepository, times(2)).findByUuid(user.getUuid());
@@ -2188,9 +2243,12 @@ class UBSClientServiceImplTest {
             eq(Address.class))).thenReturn(addresses.get(0));
 
         when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
+        var addressDto = addressDto();
+        addressDto.setDistrict("Район");
+        addressDto.setDistrictEn("District");
         when(modelMapper.map(addresses.get(0),
             AddressDto.class))
-                .thenReturn(addressDto());
+                .thenReturn(addressDto);
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
@@ -2198,6 +2256,10 @@ class UBSClientServiceImplTest {
         Assertions.assertNotNull(updateAddressRequestDto.getSearchAddress());
         Assertions.assertNull(dtoRequest.getSearchAddress());
         assertEquals(getAddressDtoResponse(), actualWithSearchAddress);
+        assertEquals(updateAddressRequestDto.getDistrict(),
+            actualWithSearchAddress.getAddressList().get(0).getDistrict());
+        assertEquals(updateAddressRequestDto.getDistrictEn(),
+            actualWithSearchAddress.getAddressList().get(0).getDistrictEn());
 
         verify(googleApiService, times(2)).getResultFromGeoCode(eq(updateAddressRequestDto.getPlaceId()),
             anyInt());
