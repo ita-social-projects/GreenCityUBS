@@ -582,6 +582,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         address.setUser(currentUser);
         address.setActual(addresses.isEmpty());
         address.setAddressStatus(AddressStatus.NEW);
+
+        address.setDistrict(addressRequestDto.getDistrict());
+        address.setDistrictEn(addressRequestDto.getDistrictEn());
+
         addressRepo.save(address);
 
         return findAllAddressesForCurrentOrder(uuid);
