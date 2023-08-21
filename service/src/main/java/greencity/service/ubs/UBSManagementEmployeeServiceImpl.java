@@ -89,7 +89,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private void signUpEmployee(Employee employee) {
         EmployeeSignUpDto signUpDto = EmployeeSignUpDto.builder()
             .email(employee.getEmail())
-            .name(employee.getFirstName() + " " + employee.getLastName())
+            .name(employee.getFirstName())
             .uuid(employee.getUuid())
             .positions(employee.getEmployeePosition().stream()
                 .map(position -> PositionDto.builder()
