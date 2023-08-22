@@ -311,7 +311,7 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void activateEmployeeTest() {
+    void activateEmployeeTestNotFound() {
         Employee employee = getEmployee();
         employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
         employee.setImagePath("Pass");
@@ -328,6 +328,19 @@ class UBSManagementEmployeeServiceImplTest {
     void activateEmployeeActiveTest() {
         Employee employee = getEmployee();
         employee.setImagePath("Pass");
+        employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+        employeeService.activateEmployee(employee.getId());
+        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
+    }
+
+    @Test
+    void activateEmployeeTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+        employeeService.activateEmployee(employee.getId());
         assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
     }
 
