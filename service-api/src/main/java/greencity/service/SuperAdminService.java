@@ -183,13 +183,6 @@ public interface SuperAdminService {
     CourierDto deactivateCourier(Long id);
 
     /**
-     * Method for change status courier and tariffs to activate.
-     *
-     * @param id - courier Id.
-     */
-    CourierDto activateCourier(Long id);
-
-    /**
      * Method for getting all info about tariffs.
      *
      * @return {@link GetTariffsInfoDto}

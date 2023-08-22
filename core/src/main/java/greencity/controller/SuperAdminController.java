@@ -463,24 +463,6 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for activate courier's.
-     *
-     * @param id - courier id that will need to be deleted;
-     */
-    @ApiOperation(value = "Activate courier's by Id")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PatchMapping("/activateCourier/{id}")
-    public ResponseEntity<CourierDto> activateCourier(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.activateCourier(id));
-    }
-
-    /**
      * Controller creates employee receiving station.
      *
      * @return {@link ReceivingStationDto}
