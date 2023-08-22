@@ -84,7 +84,7 @@ public final class ErrorMessage {
     public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
-    public static final String CANNOT_ACTIVATE_COURIER = "Courier is already activated with id: ";
+    public static final String CANNOT_ACTIVATE_COURIER_ALREADY_ACTIVATED = "Courier is already activated with id: ";
     public static final String TO_MUCH_BAG_EXCEPTION = "You choose to much bags, maximum amount is: ";
     public static final String PRICE_OF_ORDER_GREATER_THAN_LIMIT =
         "The price of you're order without discount is greater than allowable limit: ";
@@ -138,7 +138,7 @@ public final class ErrorMessage {
     public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max fields must have different values";
     public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED = "Employee with current uuid was not "
         + "deactivated.";
-    public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED = "Employee with current uuid was not "
+    public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED = "Employee with uuid: %s was not "
         + "activated.";
     public static final String BAG_FOR_TARIFF_NOT_EXIST = "Could not find bag with id %d for tariff with id %d";
     public static final String TARIFF_ALREADY_HAS_THIS_STATUS = "Tariff with id %d already has status: %s";

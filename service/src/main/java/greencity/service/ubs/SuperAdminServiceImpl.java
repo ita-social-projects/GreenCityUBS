@@ -481,7 +481,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Courier courier = courierRepository.findById(id).orElseThrow(
             () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
         if (CourierStatus.ACTIVE == courier.getCourierStatus()) {
-            throw new BadRequestException(ErrorMessage.CANNOT_ACTIVATE_COURIER + courier.getId());
+            throw new BadRequestException(ErrorMessage.CANNOT_ACTIVATE_COURIER_ALREADY_ACTIVATED + courier.getId());
         }
         deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(id);
         courier.setCourierStatus(CourierStatus.ACTIVE);

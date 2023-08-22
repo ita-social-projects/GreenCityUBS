@@ -114,9 +114,8 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
 
             @Override
             public void activateEmployee(String uuid) {
-                log.error(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED);
-                throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED,
-                    throwable);
+                log.error(                String.format(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED, uuid));
+                throw new RemoteServerUnavailableException(                String.format(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED, uuid));
             }
         };
     }
