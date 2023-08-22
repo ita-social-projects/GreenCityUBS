@@ -155,9 +155,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
                 SUPER_ADMIN_LINK + "/deactivateCourier/{id}",
-                SUPER_ADMIN_LINK + "/switchTariffStatus/{tariffId}")
-            .hasAnyRole(ADMIN, UBS_EMPLOYEE)
-            .antMatchers(HttpMethod.PATCH,
                 SUPER_ADMIN_LINK + "/activateCourier/{id}",
                 SUPER_ADMIN_LINK + "/switchTariffStatus/{tariffId}")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
