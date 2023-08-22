@@ -22,4 +22,5 @@ public class UpdateOrderPageAdminDto {
     private List<UpdateResponsibleEmployeeDto> updateResponsibleEmployeeDto;
     private Double writeOffStationSum;
     private Double ubsCourierSum;
+    private String notTakenOutReason;
 }

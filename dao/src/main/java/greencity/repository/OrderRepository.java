@@ -251,4 +251,22 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     void updateOrderStatusToExpected(@Param("actual_status") String actualStatus,
         @Param("expected_status") String expectedStatus,
         @Param("currentDate") LocalDate currentDate);
+
+    /**
+     * method returns all unpaid orders that contain a bag with id.
+     */
+    @Query(nativeQuery = true,
+        value = "select * from orders o "
+            + "left join order_bag_mapping obm on o.id = obm.order_id "
+            + "where obm.bag_id = :bagId and o.order_payment_status = 'UNPAID'")
+    List<Order> findAllUnpaidOrdersByBagId(Integer bagId);
+
+    /**
+     * method returns all orders that contain a bag with id.
+     */
+    @Query(nativeQuery = true,
+        value = "select * from orders o "
+            + "left join order_bag_mapping obm on o.id = obm.order_id "
+            + "where obm.bag_id = :bagId")
+    List<Order> findAllByBagId(Integer bagId);
 }

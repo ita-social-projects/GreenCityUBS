@@ -24,6 +24,8 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.api.DistrictDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
@@ -57,6 +59,7 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
+import greencity.entity.order.OrderBag;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
@@ -70,6 +73,7 @@ import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
+import greencity.enums.BagStatus;
 import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -92,6 +96,7 @@ import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
 import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
@@ -105,13 +110,13 @@ import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
+import greencity.service.locations.LocationApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,7 +125,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
@@ -133,7 +137,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -145,7 +148,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.BAD_ORDER_STATUS_REQUEST;
@@ -189,7 +191,6 @@ import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -227,6 +228,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final RegionRepository regionRepository;
     private final TelegramBotRepository telegramBotRepository;
     private final ViberBotRepository viberBotRepository;
+    private final LocationApiService locationApiService;
+    private final OrderBagRepository orderBagRepository;
+    private final OrderBagService orderBagService;
+
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -249,6 +254,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
+    private static final String KYIV_REGION_EN = "Kyiv Oblast";
+    private static final String KYIV_REGION_UA = "Київська область";
+    private static final String KYIV_EN = "Kyiv";
+    private static final String KYIV_UA = "місто Київ";
 
     @Override
     @Transactional
@@ -350,7 +359,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,
         Integer userPoints) {
-        var bagTranslationDtoList = bagRepository.findBagsByTariffsInfoId(tariffId).stream()
+        var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
             .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
             .collect(toList());
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
@@ -371,8 +380,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     public PersonalDataDto getSecondPageData(String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         List<UBSuser> ubsUser = ubsUserRepository.findUBSuserByUser(currentUser);
+
         if (ubsUser.isEmpty()) {
-            ubsUser.add(UBSuser.builder().id(null).build());
+            ubsUser = Collections.singletonList(UBSuser.builder().id(null).build());
         }
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
         dto.setUbsUserId(ubsUser.get(0).getId());
@@ -415,14 +425,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
         final User currentUser = userRepository.findByUuid(uuid);
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
-        Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
+        List<OrderBag> bagsOrdered = new ArrayList<>();
 
         if (!dto.isShouldBePaid()) {
             dto.setCertificates(Collections.emptySet());
             dto.setPointsToUse(0);
         }
 
-        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap,
+        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(bagsOrdered,
             dto.getBags(), tariffsInfo);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
@@ -435,7 +445,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         UBSuser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
-        getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPayInCoins, order, orderCertificates, userData);
+        getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
@@ -453,8 +463,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .collect(Collectors.toList());
     }
 
-    private Bag tryToGetBagById(Integer id) {
-        return bagRepository.findById(id)
+    private Bag findActiveBagById(Integer id) {
+        return bagRepository.findActiveBagById(id)
             .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
     }
 
@@ -551,6 +561,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadRequestException(NUMBER_OF_ADDRESSES_EXCEEDED);
         }
 
+        if (addressRequestDto.getPlaceId().isEmpty()) {
+            checkIfAddressExistIgnorePlaceId(addresses, addressRequestDto);
+            saveAddressWithoutPlaceId(addresses, addressRequestDto, currentUser);
+            return findAllAddressesForCurrentOrder(uuid);
+        }
+
         OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
 
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
@@ -558,6 +574,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         addressRequestDtoForNullCheck.setId(0L);
         checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDtoForNullCheck);
 
+        checkIfAddressExistIgnorePlaceId(addresses, addressRequestDto);
         checkIfAddressExist(addresses, dtoRequest);
 
         Address address = modelMapper.map(dtoRequest, Address.class);
@@ -565,6 +582,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         address.setUser(currentUser);
         address.setActual(addresses.isEmpty());
         address.setAddressStatus(AddressStatus.NEW);
+
+        address.setDistrict(addressRequestDto.getDistrict());
+        address.setDistrictEn(addressRequestDto.getDistrictEn());
+
         addressRepo.save(address);
 
         return findAllAddressesForCurrentOrder(uuid);
@@ -603,15 +624,44 @@ public class UBSClientServiceImpl implements UBSClientService {
         newAddress.setUser(address.getUser());
         newAddress.setAddressStatus(address.getAddressStatus());
         newAddress.setActual(address.getActual());
+
+        newAddress.setDistrict(addressRequestDto.getDistrict());
+        newAddress.setDistrictEn(addressRequestDto.getDistrictEn());
+
         addressRepo.save(newAddress);
 
         return findAllAddressesForCurrentOrder(uuid);
+    }
+
+    private void saveAddressWithoutPlaceId(List<Address> addresses, CreateAddressRequestDto addressRequestDto,
+        User currentUser) {
+        Address address = modelMapper.map(addressRequestDto, Address.class);
+
+        address.setCoordinates(Coordinates.builder().latitude(0.0).build());
+        address.setCoordinates(Coordinates.builder().longitude(0.0).build());
+
+        address.setUser(currentUser);
+        address.setActual(addresses.isEmpty());
+        address.setAddressStatus(AddressStatus.NEW);
+
+        addressRepo.save(address);
     }
 
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
         boolean exist = addresses.stream()
             .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
             .anyMatch(addressDto -> addressDto.equals(dtoRequest));
+
+        if (exist) {
+            throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
+        }
+    }
+
+    private void checkIfAddressExistIgnorePlaceId(List<Address> addresses,
+        CreateAddressRequestDto addressRequestDto) {
+        boolean exist = addresses.stream()
+            .map(address -> modelMapper.map(address, CreateAddressRequestDto.class))
+            .anyMatch(addressDto -> addressDto.equals(addressRequestDto));
 
         if (exist) {
             throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
@@ -658,7 +708,27 @@ public class UBSClientServiceImpl implements UBSClientService {
         double longitude = resultsEn.geometry.location.lng;
         orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
 
+        checkIfAddressBelongToKyiv(orderAddressDtoRequest);
+
         return orderAddressDtoRequest;
+    }
+
+    /**
+     * When Google API sets region name, there's a special case for Kyiv, the
+     * capital of Ukraine. Google API sets the 'Kyiv' as the name of region for
+     * addresses from Kyiv instead of Kyiv Region. Therefore, a separate logic is
+     * implemented to set 'Kyiv Region' name for such addresses instead of 'Kyiv'.
+     *
+     * @param request OrderAddressDtoRequest.
+     */
+    private void checkIfAddressBelongToKyiv(OrderAddressDtoRequest request) {
+        if (request.getRegion().equalsIgnoreCase(KYIV_UA)) {
+            request.setRegion(KYIV_REGION_UA);
+        }
+
+        if (request.getRegionEn().equalsIgnoreCase(KYIV_EN)) {
+            request.setRegionEn(KYIV_REGION_EN);
+        }
     }
 
     private void checkNullFieldsOnGoogleResponse(OrderAddressDtoRequest dtoRequest,
@@ -881,31 +951,17 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
-        Map<Integer, Integer> actualBagAmounts = getActualBagAmountsForOrder(order);
-        List<Bag> bagsForOrder = bagRepository.findBagsByOrderId(order.getId());
-        return bagsForOrder.stream()
-            .filter(bag -> actualBagAmounts.containsKey(bag.getId()))
-            .map(bag -> buildBagForUserDto(bag, actualBagAmounts.get(bag.getId())))
+        List<OrderBag> bagsAmountInOrder = order.getOrderBags();
+        Map<Integer, Integer> actualBagsAmount = orderBagService.getActualBagsAmountForOrder(bagsAmountInOrder);
+        return bagsAmountInOrder.stream()
+            .map(orderBag -> buildBagForUserDto(orderBag, actualBagsAmount.get(orderBag.getBag().getId())))
             .collect(toList());
     }
 
-    private Map<Integer, Integer> getActualBagAmountsForOrder(Order order) {
-        if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
-            return order.getExportedQuantity();
-        }
-        if (MapUtils.isNotEmpty(order.getConfirmedQuantity())) {
-            return order.getConfirmedQuantity();
-        }
-        if (MapUtils.isNotEmpty(order.getAmountOfBagsOrdered())) {
-            return order.getAmountOfBagsOrdered();
-        }
-        return new HashMap<>();
-    }
-
-    private BagForUserDto buildBagForUserDto(Bag bag, int count) {
-        BagForUserDto bagDto = modelMapper.map(bag, BagForUserDto.class);
+    private BagForUserDto buildBagForUserDto(OrderBag orderBag, int count) {
+        BagForUserDto bagDto = modelMapper.map(orderBag, BagForUserDto.class);
         bagDto.setCount(count);
-        bagDto.setTotalPrice(convertCoinsIntoBills(count * bag.getFullPrice()));
+        bagDto.setTotalPrice(convertCoinsIntoBills(count * orderBag.getPrice()));
         return bagDto;
     }
 
@@ -992,9 +1048,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
         eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().get(0));
         return UbsCustomersDto.builder()
-            .name(user.getFirstName() + " " + user.getLastName())
-            .email(user.getEmail())
-            .phoneNumber(user.getPhoneNumber())
+            .name(user.getSenderFirstName() + " " + user.getSenderLastName())
+            .email(user.getSenderEmail())
+            .phoneNumber(user.getSenderPhoneNumber())
             .build();
     }
 
@@ -1016,33 +1072,33 @@ public class UBSClientServiceImpl implements UBSClientService {
         return user.getId();
     }
 
-    private UBSuser updateRecipientDataInOrder(UBSuser ubSuser, UbsCustomersDtoUpdate dto) {
+    private UBSuser updateRecipientDataInOrder(UBSuser ubsUser, UbsCustomersDtoUpdate dto) {
         if (nonNull(dto.getRecipientEmail())) {
-            ubSuser.setEmail(dto.getRecipientEmail());
+            ubsUser.setSenderEmail(dto.getRecipientEmail());
         }
         if (nonNull(dto.getRecipientName())) {
-            ubSuser.setFirstName(dto.getRecipientName());
+            ubsUser.setSenderFirstName(dto.getRecipientName());
         }
         if (nonNull(dto.getRecipientSurName())) {
-            ubSuser.setLastName(dto.getRecipientSurName());
+            ubsUser.setSenderLastName(dto.getRecipientSurName());
         }
         if (nonNull(dto.getRecipientPhoneNumber())) {
-            ubSuser.setPhoneNumber(dto.getRecipientPhoneNumber());
+            ubsUser.setSenderPhoneNumber(dto.getRecipientPhoneNumber());
         }
 
-        return ubSuser;
+        return ubsUser;
     }
 
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
-        Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
+        List<OrderBag> bagsOrdered, UBSuser userData,
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
-        order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
+        order.setOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(
-            formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap));
+            calculateOrderSumWithoutDiscounts(bagsOrdered));
         setOrderPaymentStatus(order, sumToPayInCoins);
 
         Payment payment = Payment.builder()
@@ -1057,7 +1113,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setPayment(new ArrayList<>());
         }
         order.getPayment().add(payment);
-
+        bagsOrdered.forEach(orderBag -> orderBag.setOrder(order));
         orderRepository.save(order);
         return order;
     }
@@ -1198,33 +1254,42 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private long formBagsToBeSavedAndCalculateOrderSumClient(
-        Map<Integer, Integer> getOrderBagsAndQuantity) {
-        long sumToPayInCoins = 0L;
-
-        for (Map.Entry<Integer, Integer> temp : getOrderBagsAndQuantity.entrySet()) {
-            Integer amount = getOrderBagsAndQuantity.get(temp.getKey());
-            Bag bag = bagRepository.findById(temp.getKey())
-                .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + temp.getKey()));
-            sumToPayInCoins += bag.getFullPrice() * amount;
-        }
-        return sumToPayInCoins;
+    private long calculateOrderSumWithoutDiscounts(List<OrderBag> getOrderBagsAndQuantity) {
+        return getOrderBagsAndQuantity.stream()
+            .map(orderBag -> orderBag.getPrice() * orderBag.getAmount())
+            .reduce(0L, Long::sum);
     }
 
-    private long formBagsToBeSavedAndCalculateOrderSum(
-        Map<Integer, Integer> map, List<BagDto> bags, TariffsInfo tariffsInfo) {
+    private long formBagsToBeSavedAndCalculateOrderSum(List<OrderBag> orderBagList, List<BagDto> bags,
+        TariffsInfo tariffsInfo) {
         long sumToPayInCoins = 0L;
-
+        List<Integer> bagIds = bags.stream().map(BagDto::getId).collect(toList());
         for (BagDto temp : bags) {
-            Bag bag = tryToGetBagById(temp.getId());
+            Bag bag = findActiveBagById(temp.getId());
             if (bag.getLimitIncluded().booleanValue()) {
                 checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, temp.getAmount());
                 checkSumIfCourierLimitBySumOfOrder(tariffsInfo, bag.getFullPrice() * temp.getAmount());
             }
             sumToPayInCoins += bag.getFullPrice() * temp.getAmount();
-            map.put(temp.getId(), temp.getAmount());
+            OrderBag orderBag = createOrderBag(bag);
+            orderBag.setAmount(temp.getAmount());
+            orderBagList.add(orderBag);
         }
+        List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
+            .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
+            .map(this::createOrderBag).collect(toList());
+        orderBagList.addAll(notOrderedBags.stream().peek(orderBag -> orderBag.setAmount(0)).collect(toList()));
         return sumToPayInCoins;
+    }
+
+    private OrderBag createOrderBag(Bag bag) {
+        return OrderBag.builder()
+            .bag(bag)
+            .capacity(bag.getCapacity())
+            .price(bag.getFullPrice())
+            .name(bag.getName())
+            .nameEng(bag.getNameEng())
+            .build();
     }
 
     private void validateCertificate(Certificate certificate) {
@@ -1380,9 +1445,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         return sumToPayInCoins;
     }
 
-    private void getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
+    private void getOrder(OrderResponseDto dto, User currentUser, List<OrderBag> amountOfBagsOrdered,
         long sumToPayInCoins, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
-        formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPayInCoins);
+        formAndSaveOrder(order, orderCertificates, amountOfBagsOrdered, userData, currentUser, sumToPayInCoins);
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
     }
@@ -1427,6 +1492,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (order == null) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
+        order.setOrderBags(Collections.emptyList());
         orderRepository.delete(order);
     }
 
@@ -1887,5 +1953,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         return modelMapper.map(currentAddress, AddressDto.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<DistrictDto> getAllDistricts(String region, String city) {
+        List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
+        return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
+            .collect(Collectors.toList());
     }
 }

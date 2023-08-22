@@ -14,15 +14,14 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
-import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.notification.NotificationDto;
-import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
-import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
-import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.EcoNumberDto;
@@ -31,34 +30,41 @@ import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.*;
+import greencity.dto.user.AddBonusesToUserDto;
+import greencity.dto.user.AddingPointsToUserDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserProfileCreateDto;
+import greencity.dto.user.UserProfileDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
 import greencity.enums.AddressStatus;
-import greencity.enums.NotificationType;
+import greencity.enums.CancellationReason;
+import greencity.enums.CourierLimit;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationTime;
 import greencity.enums.NotificationTrigger;
-import greencity.enums.CancellationReason;
-import greencity.enums.CourierLimit;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
 import org.springframework.http.HttpStatus;
 
 import java.security.Principal;
@@ -140,6 +146,7 @@ public class ModelUtils {
             .region("Регіон")
             .cityEn("Lviv")
             .city("Львів")
+            .addressRegionDistrictList(new ArrayList<>())
             .actual(false)
             .build());
         list.add(AddressDto.builder().id(2L)
@@ -155,6 +162,8 @@ public class ModelUtils {
             .region("Регіон")
             .city("Львів")
             .cityEn("Lviv")
+            .addressRegionDistrictList(new ArrayList<>())
+
             .actual(false)
             .build());
         return list;
@@ -555,6 +564,10 @@ public class ModelUtils {
             .houseCorpus("2")
             .entranceNumber("3")
             .placeId("place_id")
+            .city("city")
+            .cityEn("cityEn")
+            .street("street")
+            .streetEn("streetEn")
             .build();
     }
 
@@ -587,7 +600,13 @@ public class ModelUtils {
             .build();
     }
 
-    public static EditLocationDto getEditLocationDto() {
-        return new EditLocationDto().setLocationId(1L).setNameEn("name").setNameUa("назва");
+    public static UpdateOrderPageAdminDto getUpdateOrderPageAdminDto() {
+        return UpdateOrderPageAdminDto.builder()
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus("NOT_TAKEN_OUT")
+                .build())
+            .notTakenOutReason("not taken out")
+            .build();
     }
 }
