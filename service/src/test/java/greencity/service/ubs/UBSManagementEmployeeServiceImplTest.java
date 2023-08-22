@@ -311,6 +311,40 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
+    void activateEmployeeTestNotFound() {
+        Employee employee = getEmployee();
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+        employee.setImagePath("Pass");
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+        employeeService.activateEmployee(1L);
+        verify(repository).findById(1L);
+        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
+        Exception thrown = assertThrows(NotFoundException.class,
+            () -> employeeService.deactivateEmployee(2L));
+        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
+    }
+
+    @Test
+    void activateEmployeeActiveTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+        employeeService.activateEmployee(employee.getId());
+        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
+    }
+
+    @Test
+    void activateEmployeeTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+        employeeService.activateEmployee(employee.getId());
+        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
+    }
+
+    @Test
     void deactivateEmployeeInactiveTest() {
         Employee employee = getEmployee();
         employee.setImagePath("Pass");
@@ -327,6 +361,20 @@ class UBSManagementEmployeeServiceImplTest {
 
         doThrow(HystrixRuntimeException.class).when(userRemoteClient).deactivateEmployee("Test");
         assertThrows(BadRequestException.class, () -> employeeService.deactivateEmployee(employeeId));
+
+        verify(repository).findById(1L);
+    }
+
+    @Test
+    void activateEmployeeHystrixRuntimeExceptionTest() {
+        Employee employee = getEmployee();
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+        long employeeId = employee.getId();
+        employee.setImagePath("Pass");
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+
+        doThrow(HystrixRuntimeException.class).when(userRemoteClient).activateEmployee("Test");
+        assertThrows(BadRequestException.class, () -> employeeService.activateEmployee(employeeId));
 
         verify(repository).findById(1L);
     }

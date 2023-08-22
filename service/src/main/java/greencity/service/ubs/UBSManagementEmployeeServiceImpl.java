@@ -283,7 +283,26 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             try {
                 userRemoteClient.deactivateEmployee(employee.getUuid());
             } catch (HystrixRuntimeException e) {
-                throw new BadRequestException("Employee with current uuid doesn't exist: " + employee.getUuid());
+                throw new BadRequestException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employee.getUuid());
+            }
+            employeeRepository.save(employee);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void activateEmployee(Long id) {
+        Employee employee = employeeRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
+        if (employee.getEmployeeStatus() == EmployeeStatus.INACTIVE) {
+            employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
+            try {
+                userRemoteClient.activateEmployee(employee.getUuid());
+            } catch (HystrixRuntimeException e) {
+                throw new BadRequestException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employee.getUuid());
             }
             employeeRepository.save(employee);
         }
