@@ -893,6 +893,45 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void activateCourierTest() {
+        Courier courier = getCourier();
+        courier.setCourierStatus(CourierStatus.DEACTIVATED);
+        CourierDto courierDto = getCourierDto();
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
+        when(modelMapper.map(courier, CourierDto.class)).thenReturn(courierDto);
+
+        superAdminService.activateCourier(anyLong());
+        courier.setCourierStatus(CourierStatus.ACTIVE);
+
+        assertEquals(CourierStatus.ACTIVE, courier.getCourierStatus());
+        verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourier(anyLong());
+        verify(courierRepository, times(1)).findById(anyLong());
+        verify(modelMapper, times(1)).map(courier, CourierDto.class);
+    }
+
+    @Test
+    void activateCourierThrowBadRequestException() {
+        Courier courier = getCourier();
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
+        courier.setCourierStatus(CourierStatus.ACTIVE);
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.activateCourier(1L));
+        verify(courierRepository).findById(1L);
+    }
+
+    @Test
+    void activateCourierThrowNotFoundException() {
+        when(courierRepository.findById(anyLong()))
+            .thenReturn(Optional.empty());
+
+        Exception thrownNotFoundEx = assertThrows(NotFoundException.class,
+            () -> superAdminService.activateCourier(1L));
+
+        assertEquals(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + 1L, thrownNotFoundEx.getMessage());
+        verify(courierRepository).findById(1L);
+    }
+
+    @Test
     void createCourier() {
         Courier courier = ModelUtils.getCourier();
         courier.setId(null);

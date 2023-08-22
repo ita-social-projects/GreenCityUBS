@@ -476,6 +476,19 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
+    @Transactional
+    public CourierDto activateCourier(Long id) {
+        Courier courier = courierRepository.findById(id).orElseThrow(
+            () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
+        if (CourierStatus.ACTIVE == courier.getCourierStatus()) {
+            throw new BadRequestException(ErrorMessage.CANNOT_ACTIVATE_COURIER + courier.getId());
+        }
+        deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(id);
+        courier.setCourierStatus(CourierStatus.ACTIVE);
+        return modelMapper.map(courier, CourierDto.class);
+    }
+
+    @Override
     public List<GetTariffsInfoDto> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
         List<TariffsInfo> tariffs = tariffsInfoRepository.findAll(new TariffsInfoSpecification(filterCriteria));
         return tariffs

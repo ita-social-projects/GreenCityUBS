@@ -1039,4 +1039,10 @@ class SuperAdminControllerTest {
         mockMvc.perform(patch(ubsLink + "/deactivateCourier/{id}", 1L)).andExpect(status().isOk());
         verify(superAdminService).deactivateCourier(1L);
     }
+
+    @Test
+    void activateCourier() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/activateCourier/{id}", 1L)).andExpect(status().isOk());
+        verify(superAdminService).activateCourier(1L);
+    }
 }
