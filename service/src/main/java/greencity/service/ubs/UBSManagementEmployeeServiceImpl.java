@@ -297,7 +297,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     public void activateEmployee(Long id) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
-        if (employee.getEmployeeStatus().equals(EmployeeStatus.INACTIVE)) {
+        if (employee.getEmployeeStatus()==EmployeeStatus.INACTIVE) {
             employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
             try {
                 userRemoteClient.activateEmployee(employee.getUuid());
