@@ -137,6 +137,8 @@ public final class ErrorMessage {
     public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max fields must have different values";
     public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED = "Employee with current uuid was not "
         + "deactivated.";
+    public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED = "Employee with uuid: %s was not "
+        + "activated.";
     public static final String BAG_FOR_TARIFF_NOT_EXIST = "Could not find bag with id %d for tariff with id %d";
     public static final String TARIFF_ALREADY_HAS_THIS_STATUS = "Tariff with id %d already has status: %s";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS =

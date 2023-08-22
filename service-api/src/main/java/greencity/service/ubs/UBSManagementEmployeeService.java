@@ -51,12 +51,20 @@ public interface UBSManagementEmployeeService {
     PositionDto update(PositionDto dto);
 
     /**
-     * Method deletes employee from database by id.
+     * Method deletes employee by id.
      *
      * @param id {@link Long}
      * @author Mykola Danylko
      */
     void deactivateEmployee(Long id);
+
+    /**
+     * Method activate employee by id.
+     *
+     * @param id {@link Long}
+     * @author Oksana Spodaryk
+     */
+    void activateEmployee(Long id);
 
     /**
      * Method creates new employee position.
