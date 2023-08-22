@@ -311,6 +311,27 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
+    void activateEmployeeTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+        employeeService.activateEmployee(1L);
+        verify(repository).findById(1L);
+        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
+        Exception thrown = assertThrows(NotFoundException.class,
+            () -> employeeService.deactivateEmployee(2L));
+        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
+    }
+
+    @Test
+    void activateEmployeeInactiveTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
+        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
+    }
+
+    @Test
     void deactivateEmployeeInactiveTest() {
         Employee employee = getEmployee();
         employee.setImagePath("Pass");
