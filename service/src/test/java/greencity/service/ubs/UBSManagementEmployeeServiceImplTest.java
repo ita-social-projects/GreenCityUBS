@@ -325,11 +325,9 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void activateEmployeeInactiveTest() {
+    void activateEmployeeActiveTest() {
         Employee employee = getEmployee();
-        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
         employee.setImagePath("Pass");
-        employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
         assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
     }
 
