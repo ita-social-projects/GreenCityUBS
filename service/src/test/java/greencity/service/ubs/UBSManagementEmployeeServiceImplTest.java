@@ -313,6 +313,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void activateEmployeeTest() {
         Employee employee = getEmployee();
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
         employee.setImagePath("Pass");
         when(repository.findById(1L)).thenReturn(Optional.of(employee));
         employeeService.activateEmployee(1L);
@@ -326,6 +327,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void activateEmployeeInactiveTest() {
         Employee employee = getEmployee();
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
         employee.setImagePath("Pass");
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
         assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
@@ -348,6 +350,20 @@ class UBSManagementEmployeeServiceImplTest {
 
         doThrow(HystrixRuntimeException.class).when(userRemoteClient).deactivateEmployee("Test");
         assertThrows(BadRequestException.class, () -> employeeService.deactivateEmployee(employeeId));
+
+        verify(repository).findById(1L);
+    }
+
+    @Test
+    void activateEmployeeHystrixRuntimeExceptionTest() {
+        Employee employee = getEmployee();
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+        long employeeId = employee.getId();
+        employee.setImagePath("Pass");
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+
+        doThrow(HystrixRuntimeException.class).when(userRemoteClient).activateEmployee("Test");
+        assertThrows(BadRequestException.class, () -> employeeService.activateEmployee(employeeId));
 
         verify(repository).findById(1L);
     }
