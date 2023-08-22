@@ -172,6 +172,6 @@ public interface UserRemoteClient {
      *
      * @param uuid - uuid of employee.
      */
-    @PutMapping("/user/activate-employee")
+    @PutMapping("/user/markUserAsActivated")
     void activateEmployee(@RequestParam String uuid);
 }
