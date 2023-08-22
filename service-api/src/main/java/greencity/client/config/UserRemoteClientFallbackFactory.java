@@ -111,6 +111,13 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED,
                     throwable);
             }
+
+            @Override
+            public void activateEmployee(String uuid) {
+                log.error(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED);
+                throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED,
+                    throwable);
+            }
         };
     }
 }

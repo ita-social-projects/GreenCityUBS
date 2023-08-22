@@ -166,4 +166,12 @@ public interface UserRemoteClient {
      */
     @PutMapping("/user/deactivate-employee")
     void deactivateEmployee(@RequestParam String uuid);
+
+    /**
+     * Activate employee by uuid.
+     *
+     * @param uuid - uuid of employee.
+     */
+    @PutMapping("/user/activate-employee")
+    void activateEmployee(@RequestParam String uuid);
 }

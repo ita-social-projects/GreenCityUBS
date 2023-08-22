@@ -59,6 +59,14 @@ public interface UBSManagementEmployeeService {
     void deactivateEmployee(Long id);
 
     /**
+     * Method activate employee from database by id.
+     *
+     * @param id {@link Long}
+     * @author Oksana Spodaryk
+     */
+    void activateEmployee(Long id);
+
+    /**
      * Method creates new employee position.
      *
      * @param dto {@link AddingPositionDto}

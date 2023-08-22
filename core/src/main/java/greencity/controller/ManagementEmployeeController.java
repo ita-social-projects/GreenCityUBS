@@ -139,6 +139,27 @@ public class ManagementEmployeeController {
     }
 
     /**
+     * Controller activate employee.
+     *
+     * @return {@link HttpStatus}
+     * @author Oksana Spodaryk.
+     */
+    @ApiOperation(value = "Activate employee")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
+    @PutMapping("/activate-employee/{id}")
+    public ResponseEntity<HttpStatus> activateEmployee(@PathVariable Long id) {
+        employeeService.activateEmployee(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
      * Controller gets all employee positions.
      *
      * @return {@link PositionDto}
