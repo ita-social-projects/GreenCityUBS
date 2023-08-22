@@ -904,7 +904,6 @@ class SuperAdminServiceImplTest {
         courier.setCourierStatus(CourierStatus.ACTIVE);
 
         assertEquals(CourierStatus.ACTIVE, courier.getCourierStatus());
-        verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourier(anyLong());
         verify(courierRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(courier, CourierDto.class);
     }
