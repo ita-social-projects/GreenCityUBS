@@ -8,10 +8,9 @@ import greencity.dto.LocationsDtos;
 import greencity.dto.courier.GetReceivingStationDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
-import greencity.dto.location.api.DistrictDto;
-import greencity.dto.location.api.LocationDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.position.PositionWithTranslateDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
@@ -24,39 +23,22 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.repository.*;
-import greencity.service.locations.LocationApiService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.ArrayList;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import static greencity.ModelUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementEmployeeServiceImplTest {
@@ -78,10 +60,6 @@ class UBSManagementEmployeeServiceImplTest {
     private UBSManagementEmployeeServiceImpl employeeService;
     @Mock
     private EmployeeCriteriaRepository employeeCriteriaRepository;
-    @Mock
-    private LocationApiService locationApiService;
-    @Mock
-    private UBSClientServiceImpl ubsClientService;
 
     @Test
     void saveEmployeeTest() {
@@ -321,12 +299,11 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void deactivateEmployeeHystrixRuntimeExceptionTest() {
         Employee employee = getEmployee();
-        long employeeId = employee.getId();
         employee.setImagePath("Pass");
         when(repository.findById(1L)).thenReturn(Optional.of(employee));
 
         doThrow(HystrixRuntimeException.class).when(userRemoteClient).deactivateEmployee("Test");
-        assertThrows(BadRequestException.class, () -> employeeService.deactivateEmployee(employeeId));
+        assertThrows(BadRequestException.class, () -> employeeService.deactivateEmployee(employee.getId()));
 
         verify(repository).findById(1L);
     }
@@ -376,9 +353,9 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void getAllPositionTest() {
         when(positionRepository.findAll()).thenReturn(List.of(getPosition()));
-        when(modelMapper.map(any(), any())).thenReturn(getPositionDto(1L));
+        when(modelMapper.map(any(), any())).thenReturn(getPositionWithTranslateDto(1L));
 
-        List<PositionDto> positionWithTranslateDtos = employeeService.getAllPositions();
+        List<PositionWithTranslateDto> positionWithTranslateDtos = employeeService.getAllPositions();
         assertEquals(1, positionWithTranslateDtos.size());
 
         verify(positionRepository, times(1)).findAll();
@@ -450,5 +427,4 @@ class UBSManagementEmployeeServiceImplTest {
         verify(modelMapper, times(1)).map(any(), any());
         verify(tariffsInfoRepository).findAll();
     }
-
 }

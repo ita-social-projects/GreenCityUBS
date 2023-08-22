@@ -10,6 +10,7 @@ import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.CreateCourierTranslationDto;
 import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.service.GetServiceDto;
@@ -344,27 +345,6 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for deleting location.
-     *
-     * @param id {@link Long} - location id.
-     * @author Anton Bondar
-     */
-    @ApiOperation(value = "Delete location")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_LOCATION_CARD', authentication)")
-    @DeleteMapping("/deleteLocation/{id}")
-    public ResponseEntity<HttpStatus> deleteLocation(@PathVariable Long id) {
-        superAdminService.deleteLocation(id);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    /**
      * Controller for activating location by Id.
      *
      * @param id - id location
@@ -693,6 +673,25 @@ class SuperAdminController {
         @Valid @RequestParam @ApiParam(name = "status", required = true, value = "status",
             allowableValues = "Active, Deactivated") String status) {
         superAdminService.switchTariffStatus(tariffId, status);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller for editing Locations.
+     *
+     * @author Yurii Fedorko
+     */
+    @ApiOperation(value = "Edit Locations")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION_NAME', authentication)")
+    @PostMapping("/locations/edit")
+    public ResponseEntity<HttpStatus> editLocations(@Valid @RequestBody List<EditLocationDto> editLocationDtoList) {
+        superAdminService.editLocations(editLocationDtoList);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

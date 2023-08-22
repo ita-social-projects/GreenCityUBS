@@ -501,10 +501,4 @@ class ManagementOrderControllerTest {
             .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk());
     }
-
-    @Test
-    void saveOrderIdForRefundTest() throws Exception {
-        mockMvc.perform(post(ubsLink + "/save-order-for-refund/{orderId}", 1L)
-            .principal(principal)).andExpect(status().isCreated());
-    }
 }

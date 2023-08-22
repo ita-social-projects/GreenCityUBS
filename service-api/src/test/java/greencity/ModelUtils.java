@@ -121,7 +121,7 @@ public class ModelUtils {
             .regionId(null)
             .courierId(1L)
             .locationIdList(List.of(1L))
-            .receivingStationsIdList(List.of(1L))
+            .receivingStationsIdList(null)
             .build();
     }
 
@@ -129,7 +129,6 @@ public class ModelUtils {
         return PositionDto.builder()
             .id(1L)
             .name("Менеджер послуги")
-            .name("Service Manager")
             .build();
     }
 }

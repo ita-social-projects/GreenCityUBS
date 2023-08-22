@@ -1,19 +1,19 @@
 package greencity.dto.address;
 
-import greencity.dto.location.api.DistrictDto;
 import greencity.entity.coords.Coordinates;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.util.List;
 
 import static greencity.constant.ValidationConstant.CH_EN;
 import static greencity.constant.ValidationConstant.CH_NUM;
@@ -21,10 +21,13 @@ import static greencity.constant.ValidationConstant.CH_UA;
 import static greencity.constant.ValidationConstant.CITY_EN_REGEXP;
 import static greencity.constant.ValidationConstant.CITY_UK_REGEXP;
 
-@Builder
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@Builder
+@EqualsAndHashCode
 public class AddressDto implements Serializable {
     @NotNull
     @Min(1)
@@ -70,5 +73,4 @@ public class AddressDto implements Serializable {
     private String districtEn;
 
     private String placeId;
-    private List<DistrictDto> addressRegionDistrictList;
 }

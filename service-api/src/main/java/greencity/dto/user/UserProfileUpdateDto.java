@@ -27,10 +27,10 @@ import java.util.List;
 @EqualsAndHashCode
 public class UserProfileUpdateDto implements Serializable {
     @NotBlank
-    @Pattern(regexp = "^(?!\\s*$)[ЁёІіЇїҐґЄєА-Яа-яA-Za-z0-9ʼ'`ʹ\\s-]{1,30}$")
+    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-ʼ'`ʹ\\s.]{1,30}")
     private String recipientName;
     @NotBlank
-    @Pattern(regexp = "^(?!\\s*$)[ЁёІіЇїҐґЄєА-Яа-яA-Za-z0-9ʼ'`ʹ\\s-]{1,30}$")
+    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z\\s-ʼ'`ʹ.]{1,30}")
     private String recipientSurname;
     @Email
     @Pattern(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")

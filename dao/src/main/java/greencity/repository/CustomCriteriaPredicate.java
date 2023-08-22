@@ -66,10 +66,6 @@ public class CustomCriteriaPredicate {
         return predicate;
     }
 
-    Predicate filter(Root<?> root, String nameColumn) {
-        return criteriaBuilder.isNull(root.<Long>get(nameColumn));
-    }
-
     Predicate filter(List<Long> ids, Root<?> root, String nameColumn) {
         List<Predicate> predicateList = new ArrayList<>();
         for (Long id : ids) {

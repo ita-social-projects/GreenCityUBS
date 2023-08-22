@@ -16,7 +16,6 @@ public class EmployeeFilterViewToGetEmployeeDtoMapper extends AbstractConverter<
             .phoneNumber(employeeFilterView.getPhoneNumber())
             .email(employeeFilterView.getEmail())
             .image(employeeFilterView.getImage())
-            .employeeStatus(employeeFilterView.getEmployeeStatus())
             .build();
     }
 }

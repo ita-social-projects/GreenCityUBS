@@ -210,8 +210,4 @@
     <include file="/db/changelog/logs/ch-add-column-position-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-add-column-employee_filter_view-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-modify-columns-house-number-in-tables-address-and-order-address.xml"/>
-    <include file="/db/changelog/logs/ch-upd-notification-platforms-body-body_eng-Lenets.xml"/>
-    <include file="/db/changelog/logs/ch-update_big_order_table_view-with-bags-sorting-Lenets.xml"/>
-    <include file="/db/changelog/logs/ch-upd-notification-templates-titles-Lenets.xml"/>
-    <include file="db/changelog/logs/ch-add-table-refunds-Bondar.xml"/>
 </databaseChangeLog>

@@ -133,11 +133,12 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyPaidOrder(Order order) {
-        NotificationParameter orderNumber = NotificationParameter.builder()
-            .key(ORDER_NUMBER_KEY)
-            .value(order.getId().toString())
-            .build();
-        fillAndSendNotification(Set.of(orderNumber), order, NotificationType.ORDER_IS_PAID);
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.ORDER_IS_PAID);
+        userNotification.setUser(order.getUser());
+        userNotification.setOrder(order);
+        UserNotification notification = userNotificationRepository.save(userNotification);
+        sendNotificationsForBotsAndEmail(notification, 0L);
     }
 
     @Override
@@ -155,29 +156,20 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyCourierItineraryFormed(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
-        parameters.add(NotificationParameter.builder()
-            .key("date")
+        parameters.add(NotificationParameter.builder().key("date")
             .value(order.getDeliverFrom() != null ? order.getDeliverFrom().format(DateTimeFormatter.ofPattern("dd-MM"))
                 : "")
             .build());
-        parameters.add(NotificationParameter.builder()
-            .key("startTime")
+        parameters.add(NotificationParameter.builder().key("startTime")
             .value(order.getDeliverFrom() != null ? order.getDeliverFrom().format(DateTimeFormatter.ofPattern("hh:mm"))
                 : "")
             .build());
-        parameters.add(NotificationParameter.builder()
-            .key("endTime")
+        parameters.add(NotificationParameter.builder().key("endTime")
             .value(
                 order.getDeliverTo() != null ? order.getDeliverTo().format(DateTimeFormatter.ofPattern("hh:mm")) : "")
             .build());
-        parameters.add(NotificationParameter.builder()
-            .key("phoneNumber")
-            .value("+380638175035, +380931038987")
-            .build());
-        parameters.add(NotificationParameter.builder()
-            .key(ORDER_NUMBER_KEY)
-            .value(order.getId().toString())
-            .build());
+        parameters.add(NotificationParameter.builder().key("phoneNumber")
+            .value("+380638175035, +380931038987").build());
         fillAndSendNotification(parameters, order, NotificationType.COURIER_ITINERARY_FORMED);
     }
 
@@ -308,22 +300,12 @@ public class NotificationServiceImpl implements NotificationService {
         Integer exportedBags = order.getExportedQuantity().values().stream()
             .reduce(0, Integer::sum);
 
-        parameters.add(NotificationParameter.builder()
-            .key("overpayment")
-            .value(String.valueOf(overpayment))
-            .build());
-        parameters.add(NotificationParameter.builder()
-            .key("realPackageNumber")
-            .value(exportedBags.toString())
-            .build());
-        parameters.add(NotificationParameter.builder()
-            .key("paidPackageNumber")
-            .value(paidBags.toString())
-            .build());
-        parameters.add(NotificationParameter.builder()
-            .key(ORDER_NUMBER_KEY)
-            .value(order.getId().toString())
-            .build());
+        parameters.add(NotificationParameter.builder().key("overpayment")
+            .value(String.valueOf(overpayment)).build());
+        parameters.add(NotificationParameter.builder().key("realPackageNumber")
+            .value(exportedBags.toString()).build());
+        parameters.add(NotificationParameter.builder().key("paidPackageNumber")
+            .value(paidBags.toString()).build());
         fillAndSendNotification(parameters, order, NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
     }
 
@@ -337,13 +319,9 @@ public class NotificationServiceImpl implements NotificationService {
         if (isNull(pointsToReturn) || pointsToReturn == 0) {
             return;
         }
-        parameters.add(NotificationParameter.builder()
-            .key("returnedPayment")
+        parameters.add(NotificationParameter.builder().key("returnedPayment")
             .value(String.valueOf(order.getPointsToUse())).build());
-        parameters.add(NotificationParameter.builder()
-            .key(ORDER_NUMBER_KEY)
-            .value(order.getId().toString())
-            .build());
+
         fillAndSendNotification(parameters, order, NotificationType.BONUSES_FROM_CANCELLED_ORDER);
     }
 
@@ -357,12 +335,7 @@ public class NotificationServiceImpl implements NotificationService {
             .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
         parameters.add(NotificationParameter.builder()
             .key("violationDescription")
-            .value(violation.getDescription())
-            .build());
-        parameters.add(NotificationParameter.builder()
-            .key(ORDER_NUMBER_KEY)
-            .value(orderId.toString())
-            .build());
+            .value(violation.getDescription()).build());
         fillAndSendNotification(parameters, violation.getOrder(), NotificationType.VIOLATION_THE_RULES);
     }
 

@@ -114,10 +114,7 @@ public class ViolationServiceImpl implements ViolationService {
         boolean status = false;
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
         for (Long id : tariffsInfoIds) {
-            if (id.equals(order.getTariffsInfo().getId())) {
-                status = true;
-                break;
-            }
+            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
         }
         if (!status) {
             throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + orderId);

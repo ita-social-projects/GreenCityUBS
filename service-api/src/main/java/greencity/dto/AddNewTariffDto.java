@@ -26,6 +26,5 @@ public class AddNewTariffDto {
     private Long courierId;
     @NotEmpty
     private List<@Min(1) Long> locationIdList;
-    @NotEmpty
     private List<@Min(1) Long> receivingStationsIdList;
 }
