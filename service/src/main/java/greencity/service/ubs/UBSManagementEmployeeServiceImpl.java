@@ -283,7 +283,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             try {
                 userRemoteClient.deactivateEmployee(employee.getUuid());
             } catch (HystrixRuntimeException e) {
-                throw new BadRequestException("Employee with current uuid doesn't exist: " + employee.getUuid());
+                throw new BadRequestException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employee.getUuid());
             }
             employeeRepository.save(employee);
         }
@@ -302,7 +302,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             try {
                 userRemoteClient.activateEmployee(employee.getUuid());
             } catch (HystrixRuntimeException e) {
-                throw new BadRequestException("Employee with current uuid doesn't exist: " + employee.getUuid());
+                throw new BadRequestException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employee.getUuid());
             }
             employeeRepository.save(employee);
         }

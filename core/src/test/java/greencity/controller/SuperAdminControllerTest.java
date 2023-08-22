@@ -1039,5 +1039,4 @@ class SuperAdminControllerTest {
         mockMvc.perform(patch(ubsLink + "/deactivateCourier/{id}", 1L)).andExpect(status().isOk());
         verify(superAdminService).deactivateCourier(1L);
     }
-
 }
