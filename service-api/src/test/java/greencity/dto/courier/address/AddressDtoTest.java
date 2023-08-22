@@ -20,11 +20,10 @@ class AddressDtoTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("provideFieldsAndValidValues")
-    void validFieldsInAddressDtoTest(String houseNumber, String cityEn) {
+    void validHouseNumbersInAddressDtoTest(String houseNumber) {
         var dto = AddressDto.builder()
             .id(1L)
             .houseNumber(houseNumber)
-            .cityEn(cityEn)
             .build();
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -39,11 +38,10 @@ class AddressDtoTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("provideFieldsAndInvalidValues")
-    void invalidFieldsInAddressDtoTest(String houseNumber, String cityEn) {
+    void invalidHouseNumbersInAddressDtoTest(String houseNumber) {
         var dto = AddressDto.builder()
             .id(1L)
             .houseNumber(houseNumber)
-            .cityEn(cityEn)
             .build();
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -52,33 +50,33 @@ class AddressDtoTest {
         Set<ConstraintViolation<AddressDto>> constraintViolations =
             validator.validate(dto);
 
-        assertThat(constraintViolations).hasSize(2);
+        assertThat(constraintViolations).hasSize(1);
     }
 
     private static Stream<Arguments> provideFieldsAndValidValues() {
         return Stream.of(
-            Arguments.of("1", "Kharkiv"),
-            Arguments.of("1F", "Kyiv"),
-            Arguments.of("1B", "Pryp'yat'"),
-            Arguments.of("1Ї", "Kam'yanets Podilskyi"),
-            Arguments.of("1-А", "Korsun Shevchenkivskiy"),
-            Arguments.of("1.Б", "Bila Krynytsya"),
-            Arguments.of("1 G", "Kam'yanets Podilskyi"),
-            Arguments.of("ЁёІіЇ", "Bilgorod-Dnistrovskyi"),
-            Arguments.of("їҐґЄє", "Blagovishchens'k"),
-            Arguments.of("1/3", "Ternopil'"),
-            Arguments.of("35/34", "Vinnitsa"),
-            Arguments.of("35-/34", "Vilnohirs'k"),
-            Arguments.of("35-/ 34", "Rivne"),
-            Arguments.of("35-/\"34", "Pereyaslav"),
-            Arguments.of("14\"o\"", "Zytomyr"));
+            Arguments.of("1"),
+            Arguments.of("1F"),
+            Arguments.of("1B"),
+            Arguments.of("1Ї"),
+            Arguments.of("1-А"),
+            Arguments.of("1.Б"),
+            Arguments.of("1 G"),
+            Arguments.of("ЁёІіЇ"),
+            Arguments.of("їҐґЄє"),
+            Arguments.of("1/3"),
+            Arguments.of("35/34"),
+            Arguments.of("35-/34"),
+            Arguments.of("35-/ 34"),
+            Arguments.of("35-/\"34"),
+            Arguments.of("14\"o\""));
     }
 
     private static Stream<Arguments> provideFieldsAndInvalidValues() {
         return Stream.of(
-            Arguments.of("", "0Kharkiv"),
-            Arguments.of("@#$", "kyiv"),
-            Arguments.of("Testtttttttt", " kharkiv"),
-            Arguments.of("Тесттттттттт", "-Rivne"));
+            Arguments.of(""),
+            Arguments.of("@#$"),
+            Arguments.of("Testtttttttt"),
+            Arguments.of("Тесттттттттт"));
     }
 }

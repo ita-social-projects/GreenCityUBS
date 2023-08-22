@@ -113,7 +113,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/add-manual-payment/{id}",
                 UBS_MANAG_LINK + "/add-bonuses-user/{id}",
                 UBS_MANAG_LINK + "/order/{id}/cancellation",
-                UBS_MANAG_LINK + "/save-order-for-refund/{orderId}",
                 ADMIN_EMPL_LINK + "/**",
                 SUPER_ADMIN_LINK + "/add-new-tariff",
                 SUPER_ADMIN_LINK + "/check-if-tariff-exists",
@@ -225,14 +224,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/notifications",
                 "/notifications/**",
                 "/notifications/quantityUnreadenNotifications")
-            .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
+            .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.PUT,
                 UBS_LINK + "/userProfile/**",
                 UBS_LINK + "/update-order-address")
-            .hasAnyRole(USER, ADMIN)
-            .antMatchers(HttpMethod.GET,
-                UBS_LINK + "/userProfile/**",
-                UBS_LINK + "/get-all-districts")
             .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.PATCH,
                 UBS_LINK + "/userProfile/**",

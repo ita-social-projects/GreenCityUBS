@@ -50,13 +50,12 @@ class AddNewTariffDtoTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("provideFieldsAndInvalidValues")
-    void addNewTariffDtoWithInvalidValuesTest(Long courierId, List<Long> locationIdList,
-        List<Long> receivingStationsIdList) {
+    void addNewTariffDtoWithInvalidValuesTest(Long courierId, List<Long> locationIdList) {
         AddNewTariffDto dto = new AddNewTariffDto(
             0L,
             courierId,
             locationIdList,
-            receivingStationsIdList);
+            List.of(0L));
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         final Validator validator = factory.getValidator();
@@ -69,8 +68,8 @@ class AddNewTariffDtoTest {
 
     private static Stream<Arguments> provideFieldsAndInvalidValues() {
         return Stream.of(
-            Arguments.of(null, List.of(), List.of()),
-            Arguments.of(-2L, List.of(), List.of()),
-            Arguments.of(0L, List.of(), List.of()));
+            Arguments.of(null, List.of()),
+            Arguments.of(-2L, List.of()),
+            Arguments.of(0L, List.of(0L)));
     }
 }

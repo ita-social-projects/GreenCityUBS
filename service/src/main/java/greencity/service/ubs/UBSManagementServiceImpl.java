@@ -16,7 +16,6 @@ import greencity.dto.courier.CourierInfoDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -56,7 +55,6 @@ import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
-import greencity.entity.order.Refund;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -85,11 +83,9 @@ import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RefundRepository;
 import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
-import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -131,13 +127,13 @@ import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
-import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -167,8 +163,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
     private final OrdersAdminsPageService ordersAdminsPageService;
-    private final LocationApiService locationApiService;
-    private final RefundRepository refundRepository;
+
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
 
     private final Set<OrderStatus> orderStatusesBeforeShipment =
@@ -429,7 +424,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * This is private method which formed {@link AddressExportDetailsDto} in order
      * to collect information about Address and order formed data and order id.
-     *
+     * 
      * @param address {@link Address}.
      * @return {@link AddressExportDetailsDto}.
      *
@@ -449,10 +444,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressHouseNumber(address.getHouseNumber())
             .addressRegion(address.getRegion())
             .addressRegionEng(address.getRegionEn())
-            .addressRegionDistrictList(
-                locationApiService.getAllDistrictsInCityByNames(address.getRegion(), address.getCity()).stream()
-                    .map(p -> modelMapper.map(p, DistrictDto.class))
-                    .collect(Collectors.toList()))
             .build();
     }
 
@@ -461,7 +452,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * about order data formed and about current order status and order payment
      * status with some translation with some language and arrays with orderStatuses
      * and OrderPaymentStatuses with translation.
-     *
+     * 
      * @param order {@link Order}.
      * @return {@link GeneralOrderInfo}.
      *
@@ -610,14 +601,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
                 if (Boolean.TRUE
-                    .equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
+                    .equals(orderDetailRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)
+                    && entry.getValue() != 0) {
                     orderDetailRepository.insertNewRecord(orderId, entry.getKey().longValue());
                     orderDetailRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
                 orderDetailRepository
                     .updateConfirm(entry.getValue(), orderId,
                         entry.getKey().longValue());
-                orderDetailRepository.deleteIfConfirmedQuantityIsZero(orderId, entry.getKey().longValue());
             }
         }
 
@@ -631,7 +622,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 orderDetailRepository
                     .updateExporter(entry.getValue(), orderId,
                         entry.getKey().longValue());
-                orderDetailRepository.deleteIfExportedQuantityIsZero(orderId, entry.getKey().longValue());
             }
         }
 
@@ -793,30 +783,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto;
     }
 
-    /**
-     * Helper method of {@link #getPriceDetails(Long)} which calculates the total
-     * price in coins based on the provided entries and bag items.
-     *
-     * @param entries the set of entries representing the quantity of bags of
-     *                {@link java.util.Map.Entry}
-     * @param bag     the list of bags to calculate the price from {@link Bag}
-     * @return the total price in coins {@link Long}
-     * @throws NotFoundException if a bag with a specific ID was not found
-     * @author Yurii Midianyi
-     */
-    private Long getSumInCoins(Set<Map.Entry<Integer, Integer>> entries, List<Bag> bag) {
-        long result = 0L;
-        for (Map.Entry<Integer, Integer> entry : entries) {
-            result += entry.getValue() * bag
-                .stream()
-                .filter(b -> b.getId().equals(entry.getKey()))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
-                .getFullPrice();
-        }
-        return result;
-    }
-
     private CounterOrderDetailsDto getPriceDetails(Long id) {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
@@ -831,9 +797,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         long totalSumConfirmedInCoins;
         long totalSumExportedInCoins;
         if (!bag.isEmpty()) {
-            sumAmountInCoins = getSumInCoins(order.getAmountOfBagsOrdered().entrySet(), bag);
-            sumConfirmedInCoins = getSumInCoins(order.getConfirmedQuantity().entrySet(), bag);
-            sumExportedInCoins = getSumInCoins(order.getExportedQuantity().entrySet(), bag);
+            for (Map.Entry<Integer, Integer> entry : order.getAmountOfBagsOrdered().entrySet()) {
+                sumAmountInCoins += entry.getValue() * bag
+                    .stream()
+                    .filter(b -> b.getId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                    .getFullPrice();
+            }
+            for (Map.Entry<Integer, Integer> entry : order.getConfirmedQuantity().entrySet()) {
+                sumConfirmedInCoins += entry.getValue() * bag
+                    .stream()
+                    .filter(b -> b.getId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                    .getFullPrice();
+            }
+            for (Map.Entry<Integer, Integer> entry : order.getExportedQuantity().entrySet()) {
+                sumExportedInCoins += entry.getValue() * bag
+                    .stream()
+                    .filter(b -> b.getId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                    .getFullPrice();
+            }
 
             if (order.getExportedQuantity().size() != 0) {
                 sumExportedInCoins += getUbsCourierOrWriteOffStationSum(order);
@@ -1094,6 +1081,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (isNull(pointsToReturn) || pointsToReturn == 0) {
             return;
         }
+        order.setPointsToUse(0);
         User user = order.getUser();
         if (isNull(user.getCurrentPoints())) {
             user.setCurrentPoints(0);
@@ -1550,6 +1538,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param ecoNumberDto {@link EcoNumberDto}.
      * @param orderId      {@link Long}.
      * @param email        {@link String}.
+     *
      * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
     @Override
@@ -1588,61 +1577,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return String.format("%s: %s; ", orderHistory, String.join("; ", newEcoNumbers));
     }
 
-    private void isOrderStatusCanceledOrDone(Order order) {
-        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DONE) {
-            throw new IllegalStateException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
-        }
-    }
-
-    private void updateOrderPageFields(UpdateOrderPageAdminDto updateOrderPageDto, Order order, String email) {
-        long orderId = order.getId();
-        if (nonNull(updateOrderPageDto.getUserInfoDto())) {
-            ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
-        }
-        if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
-            updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), orderId, email);
-        }
-        setUbsCourierSumAndWriteOffStationSum(orderId, updateOrderPageDto.getWriteOffStationSum(),
-            updateOrderPageDto.getUbsCourierSum());
-        if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
-            updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), email);
-        }
-        if (nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
-            updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), email);
-        }
-        if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
-            updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, email);
-        }
-        if (nonNull(updateOrderPageDto.getOrderDetailDto())) {
-            setOrderDetail(
-                orderId,
-                updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
-                updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
-                email);
-        }
-        if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
-            updateOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
-                .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),
-                    dto.getEmployeeId().toString(),
-                    dto.getPositionId(),
-                    email));
-        } else if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
-            List<EmployeeOrderPosition> employeeOrderPositions = employeeOrderPositionRepository
-                .findAllByOrderId(orderId);
-            if (!employeeOrderPositions.isEmpty()) {
-                employeeOrderPositionRepository.deleteAll(employeeOrderPositions);
-            }
-        }
-        if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-            notificationService.notifyUnpaidOrder(order);
-        }
-    }
-
     /**
      * This is method which is updates admin page info for order.
      *
      * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
      * @param orderId            {@link Long}.
+     *
      * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
     @Override
@@ -1652,7 +1592,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        isOrderStatusCanceledOrDone(order);
+        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DONE) {
+            throw new IllegalStateException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
+        }
 
         checkAvailableOrderForEmployee(order, email);
 
@@ -1661,7 +1603,48 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), email);
         } else {
             try {
-                updateOrderPageFields(updateOrderPageDto, order, email);
+                if (nonNull(updateOrderPageDto.getUserInfoDto())) {
+                    ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
+                }
+                if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
+                    updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), orderId, email);
+                }
+                setUbsCourierSumAndWriteOffStationSum(orderId, updateOrderPageDto.getWriteOffStationSum(),
+                    updateOrderPageDto.getUbsCourierSum());
+                if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
+                    updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), email);
+                }
+                if (nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
+                    updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), email);
+                }
+                if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
+                    updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, email);
+                }
+                if (nonNull(updateOrderPageDto.getOrderDetailDto())) {
+                    setOrderDetail(
+                        orderId,
+                        updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                        updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
+                        email);
+                }
+                if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
+                    updateOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+                        .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),
+                            dto.getEmployeeId().toString(),
+                            dto.getPositionId(),
+                            email));
+                } else {
+                    if (isOrderStatusFormedOrCanceledOrBroughtHimself(order)) {
+                        List<EmployeeOrderPosition> employeeOrderPositions = employeeOrderPositionRepository
+                            .findAllByOrderId(orderId);
+                        if (!employeeOrderPositions.isEmpty()) {
+                            employeeOrderPositionRepository.deleteAll(employeeOrderPositions);
+                        }
+                    }
+                }
+                if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
+                    notificationService.notifyUnpaidOrder(order);
+                }
             } catch (Exception e) {
                 throw new BadRequestException(e.getMessage());
             }
@@ -1708,9 +1691,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     /**
      * This method checks if Employee is assigned to the order.
-     *
+     * 
      * @param orderId - ID of chosen order {@link Long}.
      * @param email   - employee's email {@link String}.
+     *
      * @return {@link Boolean}
      */
     public Boolean checkEmployeeForOrder(Long orderId, String email) {
@@ -1838,12 +1822,5 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .description(order.getReasonNotTakingBagDescription())
             .images(order.getImageReasonNotTakingBags())
             .build();
-    }
-
-    @Override
-    public void saveOrderIdForRefund(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        refundRepository.save(Refund.builder().orderId(order.getId()).build());
     }
 }

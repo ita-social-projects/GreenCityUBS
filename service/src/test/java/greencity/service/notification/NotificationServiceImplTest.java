@@ -177,18 +177,10 @@ class NotificationServiceImplTest {
         @SneakyThrows
         void notifyPaidOrder() {
             Order order = Order.builder().id(1L).build();
-            NotificationParameter orderNumber = NotificationParameter.builder()
-                .key("orderNumber")
-                .value(order.getId().toString())
-                .build();
             when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-            when(notificationParameterRepository.saveAll(Set.of(orderNumber))).thenReturn(List.of(orderNumber));
-            when(userNotificationRepository.save(TEST_USER_NOTIFICATION)).thenReturn(TEST_USER_NOTIFICATION);
             PaymentResponseDto dto = PaymentResponseDto.builder().order_id("1_1").build();
             notificationService.notifyPaidOrder(dto);
             verify(notificationService).notifyPaidOrder(order);
-            verify(userNotificationRepository).save(any(UserNotification.class));
-            verify(notificationParameterRepository).saveAll(Set.of(orderNumber));
         }
 
         @Test
@@ -206,6 +198,7 @@ class NotificationServiceImplTest {
             userNotification.setNotificationType(NotificationType.COURIER_ITINERARY_FORMED);
             userNotification.setUser(order.getUser());
             userNotification.setOrder(order);
+            when(userNotificationRepository.save(any())).thenReturn(userNotification);
 
             List<NotificationParameter> parameters = new LinkedList<>();
             parameters.add(NotificationParameter.builder().key("date")
@@ -216,10 +209,6 @@ class NotificationServiceImplTest {
                 .value(order.getDeliverTo().format(DateTimeFormatter.ofPattern("hh:mm"))).build());
             parameters.add(NotificationParameter.builder().key("phoneNumber")
                 .value("+380638175035, +380931038987").build());
-            parameters.add(NotificationParameter.builder().key("orderNumber")
-                .value(order.getId().toString()).build());
-
-            when(userNotificationRepository.save(any())).thenReturn(userNotification);
 
             parameters.forEach(parameter -> parameter.setUserNotification(userNotification));
             when(notificationParameterRepository.saveAll(new HashSet<>(parameters))).thenReturn(parameters);
@@ -228,6 +217,7 @@ class NotificationServiceImplTest {
 
             verify(userNotificationRepository).save(any());
             verify(notificationParameterRepository).saveAll(new HashSet<>(parameters));
+
         }
 
         @Test
@@ -265,25 +255,18 @@ class NotificationServiceImplTest {
 
         @Test
         void testNotifyAddViolation() {
-            Set<NotificationParameter> parameters = new HashSet<>();
-            parameters.add(NotificationParameter.builder()
-                .key("violationDescription")
-                .value("violation description")
-                .build());
-            parameters.add(NotificationParameter.builder()
-                .key("orderNumber")
-                .value("46")
-                .build());
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
             when(violationRepository.findByOrderId(TEST_ORDER_4.getId())).thenReturn(Optional.of(violation));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_3)).thenReturn(TEST_USER_NOTIFICATION_3);
-            parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_3));
-            when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
+            TEST_NOTIFICATION_PARAMETER.setUserNotification(TEST_USER_NOTIFICATION_3);
+            when(notificationParameterRepository.saveAll(Collections.singleton(TEST_NOTIFICATION_PARAMETER)))
+                .thenReturn(Collections.singletonList(TEST_NOTIFICATION_PARAMETER));
+            TEST_NOTIFICATION_PARAMETER.setUserNotification(TEST_USER_NOTIFICATION_3);
 
             notificationService.notifyAddViolation(TEST_ORDER_4.getId());
 
             verify(userNotificationRepository).save(any());
-            verify(notificationParameterRepository).saveAll(parameters);
+            verify(notificationParameterRepository).saveAll(Collections.singleton(TEST_NOTIFICATION_PARAMETER));
         }
 
         @Test

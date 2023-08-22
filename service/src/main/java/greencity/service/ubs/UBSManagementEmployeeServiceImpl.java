@@ -13,6 +13,7 @@ import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.position.PositionWithTranslateDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
@@ -103,8 +104,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         try {
             userRemoteClient.signUpEmployee(signUpDto);
         } catch (HystrixRuntimeException e) {
-            throw new BadRequestException(
-                "Error to create user(): User with this email already exists or not valid data ");
+            throw new BadRequestException("User with this email already exists: " + signUpDto.getEmail());
         }
     }
 
@@ -329,9 +329,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
-    public List<PositionDto> getAllPositions() {
+    public List<PositionWithTranslateDto> getAllPositions() {
         return positionRepository.findAll().stream()
-            .map(p -> modelMapper.map(p, PositionDto.class))
+            .map(p -> modelMapper.map(p, PositionWithTranslateDto.class))
             .collect(Collectors.toList());
     }
 
