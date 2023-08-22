@@ -483,7 +483,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (CourierStatus.ACTIVE == courier.getCourierStatus()) {
             throw new BadRequestException(ErrorMessage.CANNOT_ACTIVATE_COURIER_ALREADY_ACTIVATED + courier.getId());
         }
-        deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(id);
         courier.setCourierStatus(CourierStatus.ACTIVE);
         return modelMapper.map(courier, CourierDto.class);
     }
