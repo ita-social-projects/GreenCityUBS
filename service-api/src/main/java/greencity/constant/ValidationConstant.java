@@ -20,6 +20,11 @@ public class ValidationConstant {
 
     public static final String NAME_REGEXP = "^(?!\\.)(?!.*\\.$)(?!.*?\\.\\.)(?!.*?\\-\\-)(?!.*?\\'\\')(?!\\s*$)"
         + "[-'ʼ ґҐіІєЄїЇА-Яа-я+\\w.]{1,30}$";
+    public static final String STREET_REGEXP = "^(?![0-9]+$)[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ0-9-]*$";
+    public static final String STREET_VALIDATION_MESSAGE =
+        "Use only English, or Ukrainian letters. Both English or Ukrainian letters valid, "
+            + "for cases, when user inputs street address by yourself instead of using Google Api, "
+            + "in that cases sets the same value for both localizations.";
 
     /**
      * Constructor.

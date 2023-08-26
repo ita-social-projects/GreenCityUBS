@@ -11,6 +11,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
+import static greencity.constant.ValidationConstant.STREET_REGEXP;
+import static greencity.constant.ValidationConstant.STREET_VALIDATION_MESSAGE;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,7 +22,7 @@ import javax.validation.constraints.Pattern;
 @Builder
 public class CreateAddressRequestDto {
     // CHECKSTYLE:OFF
-    private static final String validationMessage = "Use only English,or Ukrainian letter";
+    private static final String validationMessage = "Use only English, or Ukrainian letter";
     private static final String notEmptyValidationMessage = "Name must not be empty";
     private static final String houseNumberNotValid = "House number is invalid";
 
@@ -63,11 +66,11 @@ public class CreateAddressRequestDto {
     @NotEmpty(message = notEmptyValidationMessage)
     private String cityEn;
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ]*", message = validationMessage)
+    @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
     @NotEmpty(message = notEmptyValidationMessage)
     private String street;
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ]*", message = validationMessage)
+    @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
     @NotEmpty(message = notEmptyValidationMessage)
     private String streetEn;
 }

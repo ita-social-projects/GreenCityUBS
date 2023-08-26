@@ -609,8 +609,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
         if (addressRequestDto.getPlaceId() == null) {
-            address.setAddressComment(addressRequestDto.getAddressComment());
-            addressRepo.save(address);
+            Address addressWithNullPlaceId = modelMapper.map(addressRequestDto, Address.class);
+            addressWithNullPlaceId.setUser(currentUser);
+            addressWithNullPlaceId.setAddressStatus(AddressStatus.NEW);
+            addressRepo.save(addressWithNullPlaceId);
             return findAllAddressesForCurrentOrder(uuid);
         }
 
@@ -1357,7 +1359,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         setTelegramAndViberBots(user, userProfileUpdateDto.getTelegramIsNotify(),
             userProfileUpdateDto.getViberIsNotify());
         userProfileUpdateDto.getAddressDto().stream()
-            .filter(addressDto -> addressDto.getPlaceId() != null)
             .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
             .forEach(addressRequestDto -> updateCurrentAddressForOrder(addressRequestDto, uuid));
         User savedUser = userRepository.save(user);
