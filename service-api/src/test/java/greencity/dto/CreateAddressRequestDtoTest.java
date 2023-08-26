@@ -1,6 +1,5 @@
 package greencity.dto;
 
-import greencity.dto.CreateAddressRequestDto;
 import lombok.SneakyThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
