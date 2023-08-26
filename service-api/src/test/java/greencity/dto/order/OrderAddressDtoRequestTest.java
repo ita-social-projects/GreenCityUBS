@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class OrderAddressDtoRequestTest {
+class OrderAddressDtoRequestTest {
 
     @SneakyThrows
     @ParameterizedTest
