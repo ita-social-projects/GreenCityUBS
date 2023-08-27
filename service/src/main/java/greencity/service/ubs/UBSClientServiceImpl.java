@@ -611,7 +611,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (addressRequestDto.getPlaceId() == null) {
             Address addressWithNullPlaceId = modelMapper.map(addressRequestDto, Address.class);
             addressWithNullPlaceId.setUser(currentUser);
-            addressWithNullPlaceId.setAddressStatus(AddressStatus.NEW);
+            addressWithNullPlaceId.setAddressStatus(address.getAddressStatus());
             addressRepo.save(addressWithNullPlaceId);
             return findAllAddressesForCurrentOrder(uuid);
         }
