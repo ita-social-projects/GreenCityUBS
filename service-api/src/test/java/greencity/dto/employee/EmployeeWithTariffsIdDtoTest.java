@@ -1,8 +1,6 @@
-package greencity.dto.courier.employee;
+package greencity.dto.employee;
 
 import greencity.ModelUtils;
-import greencity.dto.employee.EmployeeDto;
-import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import lombok.SneakyThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

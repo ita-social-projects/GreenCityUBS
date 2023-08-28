@@ -1,4 +1,4 @@
-package greencity.dto.courier.tariff;
+package greencity.dto.tariff;
 
 import greencity.ModelUtils;
 import greencity.dto.AddNewTariffDto;
@@ -12,7 +12,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;

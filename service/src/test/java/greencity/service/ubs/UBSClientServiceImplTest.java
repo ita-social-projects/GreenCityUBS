@@ -8,7 +8,6 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
-
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagOrderDto;
@@ -43,7 +42,15 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderBag;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -121,12 +128,12 @@ import java.util.stream.Collectors;
 import static greencity.ModelUtils.KYIV_REGION_EN;
 import static greencity.ModelUtils.KYIV_REGION_UA;
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
-import static greencity.ModelUtils.TEST_BAG_LIST;
 import static greencity.ModelUtils.TEST_EMAIL;
 import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
 import static greencity.ModelUtils.addressDto;
 import static greencity.ModelUtils.addressDtoList;
+import static greencity.ModelUtils.addressDtoListWithNullPlaceId;
 import static greencity.ModelUtils.addressList;
 import static greencity.ModelUtils.addressWithEmptyPlaceIdDto;
 import static greencity.ModelUtils.addressWithKyivRegionDto;
@@ -137,6 +144,7 @@ import static greencity.ModelUtils.getAddress;
 import static greencity.ModelUtils.getAddressDtoResponse;
 import static greencity.ModelUtils.getAddressRequestDto;
 import static greencity.ModelUtils.getAddressRequestToSaveDto;
+import static greencity.ModelUtils.getAddressRequestToSaveDto_WithoutDistricts;
 import static greencity.ModelUtils.getAddressRequestWithEmptyPlaceIdDto;
 import static greencity.ModelUtils.getAddressRequestWithEmptyPlaceIdToSaveDto;
 import static greencity.ModelUtils.getAddressWithKyivRegionRequestDto;
@@ -149,7 +157,6 @@ import static greencity.ModelUtils.getBagTranslationDto;
 import static greencity.ModelUtils.getCancellationDto;
 import static greencity.ModelUtils.getCertificate;
 import static greencity.ModelUtils.getCourier;
-import static greencity.ModelUtils.getAddressRequestToSaveDto_WithoutDistricts;
 import static greencity.ModelUtils.getCourierDto;
 import static greencity.ModelUtils.getCourierDtoList;
 import static greencity.ModelUtils.getEmployee;
@@ -188,6 +195,7 @@ import static greencity.ModelUtils.getTariffsForLocationDto;
 import static greencity.ModelUtils.getTariffsInfo;
 import static greencity.ModelUtils.getTelegramBotNotifyTrue;
 import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
+import static greencity.ModelUtils.getTestOrderAddressDtoRequestWithNullPlaceId;
 import static greencity.ModelUtils.getTestOrderAddressLocationDto;
 import static greencity.ModelUtils.getTestUser;
 import static greencity.ModelUtils.getUBSuser;
@@ -204,7 +212,6 @@ import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
 import static greencity.ModelUtils.getUserWithBotNotifyTrue;
 import static greencity.ModelUtils.getUserWithLastLocation;
 import static greencity.ModelUtils.getViberBotNotifyTrue;
-
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
@@ -1822,14 +1829,22 @@ class UBSClientServiceImplTest {
         User user = getUserWithBotNotifyTrue();
         TelegramBot telegramBot = getTelegramBotNotifyTrue();
         ViberBot viberBot = getViberBotNotifyTrue();
+        List<AddressDto> addressDto = addressDtoListWithNullPlaceId();
+
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
         userProfileUpdateDto.getAddressDto().get(0).setPlaceId(null);
         userProfileUpdateDto.getAddressDto().get(1).setPlaceId(null);
+
         String uuid = UUID.randomUUID().toString();
+        OrderAddressDtoRequest updateAddressRequestDto = getTestOrderAddressDtoRequestWithNullPlaceId();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByUser(user)).thenReturn(Optional.of(telegramBot));
         when(viberBotRepository.findByUser(user)).thenReturn(Optional.of(viberBot));
+        when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
+        when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
+        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientService)
+            .updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         when(userRepository.save(user)).thenReturn(user);
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
 
@@ -1838,8 +1853,9 @@ class UBSClientServiceImplTest {
         verify(userRepository).findUserByUuid(uuid);
         verify(telegramBotRepository).findByUser(user);
         verify(viberBotRepository).findByUser(user);
-        verify(modelMapper, times(0)).map(any(), any(OrderAddressDtoRequest.class));
-        verify(ubsClientService, times(0)).updateCurrentAddressForOrder(any(), anyString());
+        verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
+        verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
+        verify(ubsClientService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         verify(userRepository).save(user);
         verify(modelMapper).map(user, UserProfileUpdateDto.class);
     }
@@ -2413,6 +2429,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
         doReturn(new OrderWithAddressesResponseDto()).when(ubsClientService).findAllAddressesForCurrentOrder(uuid);
+        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(address.setAddressComment(newComment));
 
         ubsClientService.updateCurrentAddressForOrder(dtoRequest, uuid);
 
@@ -2420,8 +2437,9 @@ class UBSClientServiceImplTest {
 
         verify(userRepository).findByUuid(uuid);
         verify(addressRepository).findById(addressId);
-        verify(addressRepository).save(address);
         verify(ubsClientService).findAllAddressesForCurrentOrder(uuid);
+        verify(modelMapper).map(dtoRequest, Address.class);
+        verify(addressRepository).save(address);
     }
 
     @Test
