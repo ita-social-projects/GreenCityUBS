@@ -1505,6 +1505,32 @@ public class ModelUtils {
         return list;
     }
 
+    public static List<AddressDto> addressDtoListWithNullPlaceId() {
+        List<AddressDto> list = new ArrayList<>();
+        list.add(AddressDto.builder()
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .build());
+        list.add(AddressDto.builder().id(2L)
+            .entranceNumber("9a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Shevchenka")
+            .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .build());
+        return list;
+    }
+
     public static UserProfileDto userProfileDto() {
         return UserProfileDto.builder()
             .recipientName("Dima")
@@ -4700,6 +4726,25 @@ public class ModelUtils {
             .cityEn("fake street")
             .regionEn("fake region")
             .placeId("place_id")
+            .build();
+    }
+
+    public static OrderAddressDtoRequest getTestOrderAddressDtoRequestWithNullPlaceId() {
+        return OrderAddressDtoRequest.builder()
+            .id(0L)
+            .region("fake region")
+            .searchAddress("fake street name, 13, fake street, 02000")
+            .city("fake street")
+            .district("Район")
+            .districtEn("District")
+            .entranceNumber("1")
+            .houseNumber("13")
+            .houseCorpus("1")
+            .street("fake street name")
+            .streetEn("fake street name")
+            .coordinates(new Coordinates(50.5555555d, 50.5555555d))
+            .cityEn("fake street")
+            .regionEn("fake region")
             .build();
     }
 
