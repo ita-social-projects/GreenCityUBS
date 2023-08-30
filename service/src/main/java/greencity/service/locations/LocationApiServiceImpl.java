@@ -250,22 +250,6 @@ public class LocationApiServiceImpl implements LocationApiService {
         return resultFromUrl.get(0);
     }
 
-    private boolean checkIfRegionIdEqualsUpperId(String regionId, String cityUpperId) {
-        return regionId.equals(cityUpperId);
-    }
-
-    private static String removeWordRegion(String sentence) {
-        String withoutSpaces = sentence.replace(" ", "");
-        String withoutRegion = withoutSpaces.replaceAll("(?iu)region", "");
-        return replaceAllQuotes(withoutRegion.replaceAll("(?iu)область", ""));
-    }
-
-    private static String removeWordCity(String sentence) {
-        String withoutSpaces = sentence.replace(" ", "");
-        String withoutRegion = withoutSpaces.replaceAll("(?iu)city", "");
-        return replaceAllQuotes(withoutRegion.replaceAll("(?iu)місто", ""));
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -301,7 +285,6 @@ public class LocationApiServiceImpl implements LocationApiService {
     @Override
     @Cacheable(value = "resultFromUrl", key = "#url")
     public List<LocationDto> getResultFromUrl(URI url) {
-        System.out.println("We come to getResultFromUrl " + url);
         ParameterizedTypeReference<Map<String, Object>> typeRef =
             new ParameterizedTypeReference<Map<String, Object>>() {
             };
@@ -319,7 +302,19 @@ public class LocationApiServiceImpl implements LocationApiService {
      * {@inheritDoc}
      */
     @Override
-    public LocationDto mapToLocationDto(Map<String, Object> result) {
+    @Cacheable(value = "locationDataByUpperId", key = "#level+'-'+#upperId")
+    public List<LocationDto> getLocationDataByUpperId(int level, String upperId) {
+        UriComponentsBuilder builder = buildUrl().queryParam(LEVEL, level)
+            .queryParam(PARENT, upperId);
+        return getResultFromUrl(builder.build().encode().toUri());
+    }
+
+    private UriComponentsBuilder buildUrl() {
+        return UriComponentsBuilder.fromHttpUrl(API_URL)
+            .queryParam(PAGE_SIZE, DEFAULT_PAGE_SIZE);
+    }
+
+    private LocationDto mapToLocationDto(Map<String, Object> result) {
         Map<String, String> nameMap = new HashMap<>();
         nameMap.put(NAME, getValueFromMap(result, NAME));
         nameMap.put(NAME_EN, getValueFromMap(result, NAME_EN));
@@ -330,37 +325,23 @@ public class LocationApiServiceImpl implements LocationApiService {
             .build();
     }
 
-    /**
-     * Retrieves a value from a map based on a specified key.
-     *
-     * @param <T> The type of the object being returned.
-     * @param map The map from which to retrieve the value.
-     * @param key The key associated with the value to retrieve.
-     * @return The value associated with the specified key.
-     */
     private <T> T getValueFromMap(Map<String, Object> map, String key) {
         return (T) map.get(key);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Cacheable(value = "locationDataByUpperId", key = "#level+'-'+#upperId")
-    public List<LocationDto> getLocationDataByUpperId(int level, String upperId) {
-        UriComponentsBuilder builder = buildUrl().queryParam(LEVEL, level)
-            .queryParam(PARENT, upperId);
-        return getResultFromUrl(builder.build().encode().toUri());
+    private boolean checkIfRegionIdEqualsUpperId(String regionId, String cityUpperId) {
+        return regionId.equals(cityUpperId);
     }
 
-    /**
-     * Constructs a URL using UriComponentsBuilder.
-     *
-     * @return A UriComponentsBuilder instance with the API URL, page, and page size
-     *         parameters set.
-     */
-    private UriComponentsBuilder buildUrl() {
-        return UriComponentsBuilder.fromHttpUrl(API_URL)
-            .queryParam(PAGE_SIZE, DEFAULT_PAGE_SIZE);
+    private static String removeWordRegion(String sentence) {
+        String withoutSpaces = sentence.replace(" ", "");
+        String withoutRegion = withoutSpaces.replaceAll("(?iu)region", "");
+        return replaceAllQuotes(withoutRegion.replaceAll("(?iu)область", ""));
+    }
+
+    private static String removeWordCity(String sentence) {
+        String withoutSpaces = sentence.replace(" ", "");
+        String withoutRegion = withoutSpaces.replaceAll("(?iu)city", "");
+        return replaceAllQuotes(withoutRegion.replaceAll("(?iu)місто", ""));
     }
 }

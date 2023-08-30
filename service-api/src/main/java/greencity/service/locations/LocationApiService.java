@@ -149,14 +149,6 @@ public interface LocationApiService {
     List<LocationDto> getResultFromUrl(URI url);
 
     /**
-     * Transforms a map into a LocationDto.
-     *
-     * @param result The map with location data.
-     * @return The transformed LocationDto.
-     */
-    LocationDto mapToLocationDto(Map<String, Object> result);
-
-    /**
      * Retrieves location data by its upper Id.
      *
      * @param level   The hierarchical level of the location.
