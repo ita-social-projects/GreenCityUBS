@@ -42,8 +42,9 @@ class LocationApiServiceTest {
     private static final String PARENT = "parent";
     private static final String PARENT_ID = "parent_id";
     private static final String RESULTS = "results";
+
     @InjectMocks
-    LocationApiService locationApiService;
+    LocationApiServiceImpl locationApiService;
     @Mock
     RestTemplate restTemplate;
 
