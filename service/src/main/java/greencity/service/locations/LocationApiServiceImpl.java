@@ -302,7 +302,7 @@ public class LocationApiServiceImpl implements LocationApiService {
      * {@inheritDoc}
      */
     @Override
-    @Cacheable(value = "locationDataByUpperId", key = "#level+'-'+#upperId")
+    @Cacheable(value = "locationDataByUpperId", key = "#level+'_'+#upperId")
     public List<LocationDto> getLocationDataByUpperId(int level, String upperId) {
         UriComponentsBuilder builder = buildUrl().queryParam(LEVEL, level)
             .queryParam(PARENT, upperId);
