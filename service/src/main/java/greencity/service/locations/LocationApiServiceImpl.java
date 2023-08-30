@@ -6,6 +6,7 @@ import greencity.enums.LocationDivision;
 import greencity.exceptions.NotFoundException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,11 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import org.springframework.cache.annotation.Cacheable;
+
 @Service
-public class LocationApiService {
+@EnableCaching
+public class LocationApiServiceImpl implements LocationApiService {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
     private static final int DEFAULT_PAGE_SIZE = 125;
     private static final String LEVEL = "level";
@@ -52,25 +56,15 @@ public class LocationApiService {
      * @param restTemplate An instance of RestTemplate for making HTTP requests.
      */
     @Autowired
-    public LocationApiService(RestTemplate restTemplate) {
+    public LocationApiServiceImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     /**
-     * Retrieves all districts in a city by the city's name. There's a special case
-     * for Kyiv, the capital of Ukraine. In the system, due to the API having
-     * references only to the previous element, the search for districts occurs
-     * sequentially: region -> district in region -> local community -> city ->
-     * district. Generally, the city corresponds to level 4 in the hierarchical
-     * structure. However, Kyiv is unique in that it is at level 1, and its
-     * districts are at level 5. Therefore, a separate logic is implemented because
-     * the system can't go through all the steps from level 1 to level 4, and has to
-     * directly access the districts from level 5 when dealing with Kyiv.
-     *
-     * @param regionName The name of the region.
-     * @param cityName   The name of the city.
-     * @return A list of LocationDto that represent districts in the city.
+     * {@inheritDoc}
      */
+    @Override
+    @Cacheable(value = "districtList", key = "#regionName + '_' + #cityName")
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
         checkIfNotNull(regionName, cityName);
         regionName = removeWordRegion(regionName);
@@ -102,13 +96,11 @@ public class LocationApiService {
     }
 
     /**
-     * Retrieves a list of cities by name.
-     *
-     * @param regionName The name of the region.
-     * @param cityName   The name of the city.
-     * @return A list of matching city locations.
+     * {@inheritDoc}
      */
-    private List<LocationDto> getCitiesByName(String regionName, String cityName) {
+    @Override
+    @Cacheable(value = "cityList", key = "#regionName + '_' + #cityName ")
+    public List<LocationDto> getCitiesByName(String regionName, String cityName) {
         List<LocationDto> allCities = getLocationDataByName(LocationDivision.CITY.getLevelId(), cityName);
         if (allCities.isEmpty()) {
             allCities.add(getCityByNameFromRegionSide(regionName, cityName));
@@ -120,13 +112,11 @@ public class LocationApiService {
     }
 
     /**
-     * Finds a location by its name.
-     *
-     * @param locations    The list of locations.
-     * @param locationName The location name.
-     * @return A LocationDto matching the provided name.
+     * {@inheritDoc}
      */
-    private LocationDto findLocationByName(List<LocationDto> locations, String locationName) {
+    @Override
+    @Cacheable(value = "locationByName", key = "#locations.size() + '_' + #locationName")
+    public LocationDto findLocationByName(List<LocationDto> locations, String locationName) {
         return locations.stream()
             .filter(location -> location.getLocationNameMap().containsValue(locationName))
             .findFirst()
@@ -134,14 +124,11 @@ public class LocationApiService {
     }
 
     /**
-     * Retrieves a city by name from a specified region.
-     *
-     * @param regionName The name of the region.
-     * @param cityName   The name of the city.
-     * @return The LocationDto that represents the city in the specified region.
-     * @throws NotFoundException if the city is not found.
+     * {@inheritDoc}
      */
-    private LocationDto getCityByNameFromRegionSide(String regionName, String cityName) {
+    @Override
+    @Cacheable(value = "cityByNameFromRegionSide", key = "#regionName + '_' + #cityName ")
+    public LocationDto getCityByNameFromRegionSide(String regionName, String cityName) {
         LocationDto region = getRegionByName(regionName);
         List<LocationDto> districts = getAllDistrictInTheRegionsById(region.getId());
         List<LocationDto> localCommunities = districts.stream()
@@ -157,12 +144,11 @@ public class LocationApiService {
     }
 
     /**
-     * Retrieves a region by name.
-     *
-     * @param regionName The name of the region.
-     * @return The region matching the provided name.
+     * {@inheritDoc}
      */
-    private LocationDto getRegionByName(String regionName) {
+    @Override
+    @Cacheable(value = "regionByName", key = "#regionName")
+    public LocationDto getRegionByName(String regionName) {
         List<LocationDto> allRegions;
         try {
             allRegions = getLocationDataByName(LocationDivision.REGION.getLevelId(), regionName);
@@ -180,17 +166,13 @@ public class LocationApiService {
     }
 
     /**
-     * Retrieves the city in a specified region.
-     *
-     * @param regionName The name of the region.
-     * @param cities     A list of LocationDto that represent cities.
-     * @return The LocationDto that represents the city in the specified region.
-     * @throws NotFoundException if the city is not found in the region.
+     * {@inheritDoc}
      */
-    private LocationDto getCityInRegion(String regionName, List<LocationDto> cities) {
+    @Override
+    @Cacheable(value = "cityInRegion", key = "#regionName +'_'+#cities.size()")
+    public LocationDto getCityInRegion(String regionName, List<LocationDto> cities) {
         LocationDto region = getRegionByName(regionName);
         String regionID = region.getId();
-
         return cities.stream()
             .filter(city -> {
                 if (checkIfRegionIdEqualsUpperId(region.getId(), city.getParentId())) {
@@ -207,65 +189,56 @@ public class LocationApiService {
     }
 
     /**
-     * Retrieves all regions.
-     *
-     * @return A list of LocationDto that represent all regions.
+     * {@inheritDoc}
      */
-
-    private List<LocationDto> getAllRegions() {
+    @Override
+    @Cacheable(value = "allRegions", key = "allRegions")
+    public List<LocationDto> getAllRegions() {
         return getLocationDataByLevel(LocationDivision.REGION.getLevelId());
     }
 
     /**
-     * Retrieves all cities by their ID.
-     *
-     * @param upperId The ID of the city.
-     * @return A list of LocationDto that represent the cities.
+     * {@inheritDoc}
      */
-
-    private List<LocationDto> getAllCitiesById(String upperId) {
+    @Override
+    @Cacheable(value = "allCitiesById", key = "#upperId")
+    public List<LocationDto> getAllCitiesById(String upperId) {
         return getLocationDataByUpperId(LocationDivision.CITY.getLevelId(), upperId);
     }
 
     /**
-     * Retrieves all districts in the region by the region's ID.
-     *
-     * @param upperId The ID of the region.
-     * @return A list of LocationDto that represent districts in the region.
+     * {@inheritDoc}
      */
-    private List<LocationDto> getAllDistrictInTheRegionsById(String upperId) {
+    @Override
+    @Cacheable(value = "allDistrictInTheRegionsById", key = "#upperId")
+    public List<LocationDto> getAllDistrictInTheRegionsById(String upperId) {
         return getLocationDataByUpperId(LocationDivision.DISTRICT_IN_REGION.getLevelId(), upperId);
     }
 
     /**
-     * Retrieves all local communities by their ID.
-     *
-     * @param upperId The ID of the local community.
-     * @return A list of LocationDto that represent local communities.
+     * {@inheritDoc}
      */
-    private List<LocationDto> getAllLocalCommunitiesById(String upperId) {
+    @Override
+    @Cacheable(value = "allLocalCommunitiesById", key = "#upperId")
+    public List<LocationDto> getAllLocalCommunitiesById(String upperId) {
         return getLocationDataByUpperId(LocationDivision.LOCAL_COMMUNITY.getLevelId(), upperId);
     }
 
     /**
-     * Retrieves all districts in a city by the city's ID.
-     *
-     * @param upperId The ID of the city.
-     * @return A list of LocationDto that represent districts in the city.
+     * {@inheritDoc}
      */
-    private List<LocationDto> getAllDistrictsInCityByCityID(String upperId) {
+    @Override
+    @Cacheable(value = "allDistrictsInCityByCityID", key = "#upperId")
+    public List<LocationDto> getAllDistrictsInCityByCityID(String upperId) {
         return getLocationDataByUpperId(LocationDivision.DISTRICT_IN_CITY.getLevelId(), upperId);
     }
 
     /**
-     * Retrieves location data by level and code.
-     *
-     * @param level The hierarchical level of the location.
-     * @param code  The code of the location.
-     * @return The LocationDto that matches the specified level and code.
-     * @throws NotFoundException if the location is not found.
+     * {@inheritDoc}
      */
-    private LocationDto getLocationDataByCode(int level, String code) {
+    @Override
+    @Cacheable(value = "locationDataByCode", key = "#level+'_'+#code")
+    public LocationDto getLocationDataByCode(int level, String code) {
         UriComponentsBuilder builder = buildUrl()
             .queryParam(CODE, code)
             .queryParam(LEVEL, level);
@@ -275,6 +248,85 @@ public class LocationApiService {
                 String.format(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE, level, code));
         }
         return resultFromUrl.get(0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Cacheable(value = "locationDataByLevel", key = "#level")
+    public List<LocationDto> getLocationDataByLevel(int level) {
+        UriComponentsBuilder builder = buildUrl().queryParam(LEVEL, level);
+        return getResultFromUrl(builder.build().encode().toUri());
+    }
+
+    private static boolean checkIfNotNull(String... names) {
+        if (Arrays.stream(names).anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException(ErrorMessage.VALUE_CAN_NOT_BE_NULL_OR_EMPTY);
+        }
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Cacheable(value = "locationDataByName", key = "#level+'_'+#name")
+    public List<LocationDto> getLocationDataByName(int level, String name) {
+        UriComponentsBuilder builder = buildUrl()
+            .queryParam(NAME, name)
+            .queryParam(LEVEL, level);
+        return getResultFromUrl(builder.build().encode().toUri());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Cacheable(value = "resultFromUrl", key = "#url")
+    public List<LocationDto> getResultFromUrl(URI url) {
+        ParameterizedTypeReference<Map<String, Object>> typeRef =
+            new ParameterizedTypeReference<Map<String, Object>>() {
+            };
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
+        return Optional.ofNullable(response)
+            .map(ResponseEntity::getBody)
+            .map(body -> (List<Map<String, Object>>) body.get(RESULTS))
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url))
+            .stream()
+            .map(this::mapToLocationDto)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Cacheable(value = "locationDataByUpperId", key = "#level+'_'+#upperId")
+    public List<LocationDto> getLocationDataByUpperId(int level, String upperId) {
+        UriComponentsBuilder builder = buildUrl().queryParam(LEVEL, level)
+            .queryParam(PARENT, upperId);
+        return getResultFromUrl(builder.build().encode().toUri());
+    }
+
+    private UriComponentsBuilder buildUrl() {
+        return UriComponentsBuilder.fromHttpUrl(API_URL)
+            .queryParam(PAGE_SIZE, DEFAULT_PAGE_SIZE);
+    }
+
+    private LocationDto mapToLocationDto(Map<String, Object> result) {
+        Map<String, String> nameMap = new HashMap<>();
+        nameMap.put(NAME, getValueFromMap(result, NAME));
+        nameMap.put(NAME_EN, getValueFromMap(result, NAME_EN));
+        return LocationDto.builder()
+            .id(getValueFromMap(result, CODE))
+            .parentId(getValueFromMap(result, PARENT_ID))
+            .locationNameMap(nameMap)
+            .build();
+    }
+
+    private <T> T getValueFromMap(Map<String, Object> map, String key) {
+        return (T) map.get(key);
     }
 
     private boolean checkIfRegionIdEqualsUpperId(String regionId, String cityUpperId) {
@@ -291,113 +343,5 @@ public class LocationApiService {
         String withoutSpaces = sentence.replace(" ", "");
         String withoutRegion = withoutSpaces.replaceAll("(?iu)city", "");
         return replaceAllQuotes(withoutRegion.replaceAll("(?iu)місто", ""));
-    }
-
-    /**
-     * Fetches a list of location data by level.
-     *
-     * @param level The level of the location.
-     * @return A list of LocationDto for the specified level.
-     */
-    private List<LocationDto> getLocationDataByLevel(int level) {
-        UriComponentsBuilder builder = buildUrl().queryParam(LEVEL, level);
-        return getResultFromUrl(builder.build().encode().toUri());
-    }
-
-    private static boolean checkIfNotNull(String... names) {
-        if (Arrays.stream(names).anyMatch(StringUtils::isBlank)) {
-            throw new IllegalArgumentException(ErrorMessage.VALUE_CAN_NOT_BE_NULL_OR_EMPTY);
-        }
-        return true;
-    }
-
-    /**
-     * Retrieves a list of location data by level and name.
-     *
-     * @param level The hierarchical level of the location.
-     * @param name  The name of the location.
-     * @return A list of LocationDto that matches the specified level and name.
-     * @throws IllegalArgumentException if the name is null.
-     */
-
-    private List<LocationDto> getLocationDataByName(int level, String name) {
-        UriComponentsBuilder builder = buildUrl()
-            .queryParam(NAME, name)
-            .queryParam(LEVEL, level);
-        return getResultFromUrl(builder.build().encode().toUri());
-    }
-
-    /**
-     * Extracts location data from a URL.
-     *
-     * @param url The URL to retrieve the data from.
-     * @return A list of LocationDto.
-     */
-    private List<LocationDto> getResultFromUrl(URI url) {
-        ParameterizedTypeReference<Map<String, Object>> typeRef =
-            new ParameterizedTypeReference<Map<String, Object>>() {
-            };
-        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
-        return Optional.ofNullable(response)
-            .map(ResponseEntity::getBody)
-            .map(body -> (List<Map<String, Object>>) body.get(RESULTS))
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url))
-            .stream()
-            .map(this::mapToLocationDto)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Transforms a map into a LocationDto.
-     *
-     * @param result The map with location data.
-     * @return The transformed LocationDto.
-     */
-    private LocationDto mapToLocationDto(Map<String, Object> result) {
-        Map<String, String> nameMap = new HashMap<>();
-        nameMap.put(NAME, getValueFromMap(result, NAME));
-        nameMap.put(NAME_EN, getValueFromMap(result, NAME_EN));
-        return LocationDto.builder()
-            .id(getValueFromMap(result, CODE))
-            .parentId(getValueFromMap(result, PARENT_ID))
-            .locationNameMap(nameMap)
-            .build();
-    }
-
-    /**
-     * Retrieves a value from a map based on a specified key.
-     *
-     * @param <T> The type of the object being returned.
-     * @param map The map from which to retrieve the value.
-     * @param key The key associated with the value to retrieve.
-     * @return The value associated with the specified key.
-     */
-    private <T> T getValueFromMap(Map<String, Object> map, String key) {
-        return (T) map.get(key);
-    }
-
-    /**
-     * Retrieves location data by its upper Id.
-     *
-     * @param level   The hierarchical level of the location.
-     * @param upperId The upperId associated with the location.
-     * @return A list of LocationDto associated with the specified upperId.
-     * @throws IllegalArgumentException if the upperId is null.
-     */
-    private List<LocationDto> getLocationDataByUpperId(int level, String upperId) {
-        UriComponentsBuilder builder = buildUrl().queryParam(LEVEL, level)
-            .queryParam(PARENT, upperId);
-        return getResultFromUrl(builder.build().encode().toUri());
-    }
-
-    /**
-     * Constructs a URL using UriComponentsBuilder.
-     *
-     * @return A UriComponentsBuilder instance with the API URL, page, and page size
-     *         parameters set.
-     */
-    private UriComponentsBuilder buildUrl() {
-        return UriComponentsBuilder.fromHttpUrl(API_URL)
-            .queryParam(PAGE_SIZE, DEFAULT_PAGE_SIZE);
     }
 }
