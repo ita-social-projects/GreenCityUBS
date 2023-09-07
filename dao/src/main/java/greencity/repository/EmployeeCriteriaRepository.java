@@ -3,23 +3,31 @@ package greencity.repository;
 import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Subquery;
+import javax.persistence.criteria.Expression;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static greencity.enums.EmployeeStatus.*;
-import static java.util.Arrays.*;
+import static greencity.enums.EmployeeStatus.employeeStatusExist;
+import static java.util.Arrays.stream;
 
 @Repository
 public class EmployeeCriteriaRepository {
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
+    private static final String POSITION_ID = "positionId";
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -87,9 +95,9 @@ public class EmployeeCriteriaRepository {
         List<Predicate> predicates) {
         Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
         Root<EmployeeFilterView> subQueryRoot = subQuery.from(EmployeeFilterView.class);
-        subQuery.select(criteriaBuilder.min(subQueryRoot.get("positionId")))
+        subQuery.select(criteriaBuilder.min(subQueryRoot.get(POSITION_ID)))
             .where(criteriaBuilder.equal(subQueryRoot.get("employeeId"), employeeFilterViewRoot.get("employeeId")));
-        predicates.add(criteriaBuilder.equal(employeeFilterViewRoot.get("positionId"), subQuery));
+        predicates.add(criteriaBuilder.equal(employeeFilterViewRoot.get(POSITION_ID), subQuery));
     }
 
     private void addCourierPredicate(EmployeeFilterCriteria employeeFilterCriteria,
@@ -123,7 +131,7 @@ public class EmployeeCriteriaRepository {
         Root<EmployeeFilterView> employeeFilterViewRoot,
         List<Predicate> predicates) {
         if (isListNotNullAndNotEmpty(employeeFilterCriteria.getPositions())) {
-            predicates.add(employeeFilterViewRoot.get("positionId")
+            predicates.add(employeeFilterViewRoot.get(POSITION_ID)
                 .in(employeeFilterCriteria.getPositions()));
         }
     }
