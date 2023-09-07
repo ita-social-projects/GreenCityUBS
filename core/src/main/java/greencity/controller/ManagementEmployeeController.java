@@ -1,6 +1,5 @@
 package greencity.controller;
 
-import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
@@ -8,6 +7,7 @@ import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.pageble.PageableAdvancedDto;
+import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -76,7 +75,7 @@ public class ManagementEmployeeController {
      * Controller gets all employees.
      *
      * @return {@link PageableAdvancedDto} pageable employees.
-     * @author Mykola Danylko.
+     * @author Mykola Danylko and Olena Sotnik.
      */
     @ApiOperation(value = "Get all employees")
     @ApiResponses(value = {
@@ -84,10 +83,9 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @ApiPageable
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/getAll-employees")
-    public ResponseEntity<Page<GetEmployeeDto>> getAllEmployees(
+    public ResponseEntity<PageableDto<GetEmployeeDto>> getAllEmployees(
         EmployeePage employeePage,
         EmployeeFilterCriteria employeeFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)

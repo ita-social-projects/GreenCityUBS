@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
+import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
@@ -28,7 +29,7 @@ public interface UBSManagementEmployeeService {
     /**
      * {@inheritDoc}
      */
-    Page<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
+    PageableDto<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
 
     /**
      * Method updates information about employee.

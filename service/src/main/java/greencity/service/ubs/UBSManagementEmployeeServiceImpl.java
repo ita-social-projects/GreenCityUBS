@@ -4,13 +4,12 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.dto.LocationsDtos;
-import greencity.dto.courier.GetReceivingStationDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.EmployeePositionsDto;
+import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
@@ -41,6 +40,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -112,101 +112,48 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
-    public Page<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria) {
-        List<EmployeeFilterView> employeeFilterViews =
-            employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria);
+    public PageableDto<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria filterCriteria) {
+        List<EmployeeFilterView> employeeFilterViews = employeeCriteriaRepository.findAll(employeePage, filterCriteria);
+        List<GetEmployeeDto> resultList = mapEmployeeFilterViewsToGetEmployeeDtos(employeeFilterViews);
+        Pageable pageable = getPageable(employeePage);
+        return getAllTranslationDto(new PageImpl<>(resultList, pageable, employeeFilterViews.size()));
+    }
 
-        Map<Long, GetEmployeeDto> getEmployeeDtoMap = new HashMap<>();
+    private List<GetEmployeeDto> mapEmployeeFilterViewsToGetEmployeeDtos(List<EmployeeFilterView> employeeFilterViews) {
+        Map<Long, GetEmployeeDto> getEmployeeDtoMap = new LinkedHashMap<>();
         for (var employeeFilterView : employeeFilterViews) {
-            var getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(
-                employeeFilterView.getEmployeeId(), id -> modelMapper.map(employeeFilterView, GetEmployeeDto.class));
-
+            var getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(employeeFilterView.getEmployeeId(),
+                id -> modelMapper.map(employeeFilterView, GetEmployeeDto.class));
             initializeGetEmployeeDtoCollectionsIfNeeded(getEmployeeDto);
-
             fillGetEmployeeDto(employeeFilterView, getEmployeeDto);
         }
+        return new ArrayList<>(getEmployeeDtoMap.values());
+    }
 
-        var resultList = new ArrayList<>(getEmployeeDtoMap.values());
+    private Pageable getPageable(EmployeePage employeePage) {
         Sort sort = Sort.by(employeePage.getSortDirection(), employeePage.getSortBy());
-        Pageable pageable = PageRequest.of(employeePage.getPageNumber(),
-            employeePage.getPageSize(), sort);
-        return new PageImpl<>(resultList, pageable, employeeFilterViews.size());
+        return PageRequest.of(employeePage.getPageNumber(), employeePage.getPageSize(), sort);
     }
 
     private void fillGetEmployeeDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto) {
-        fillGetTariffInfoForEmployeeDto(emplView, getEmployeeDto);
-        fillPositionDto(emplView, getEmployeeDto);
+        List<Employee> employees = employeeRepository.findAll();
+        fillGetTariffInfoForEmployeeDto(emplView, getEmployeeDto, employees);
+        fillPositionDto(emplView, getEmployeeDto, employees);
     }
 
-    private void fillPositionDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto) {
-        if (isPositionIdAbsent(emplView.getPositionId(), getEmployeeDto)) {
-            var positionDto = modelMapper.map(emplView, PositionDto.class);
-            getEmployeeDto.getEmployeePositions().add(positionDto);
-        }
+    private void fillPositionDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
+        employees.stream().filter(employee -> employee.getId() == emplView.getEmployeeId())
+            .forEach(employee -> employee.getEmployeePosition().stream()
+                .map(position -> modelMapper.map(position, PositionDto.class))
+                .forEach(positionDto -> getEmployeeDto.getEmployeePositions().add(positionDto)));
     }
 
-    private void fillGetTariffInfoForEmployeeDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto) {
-        GetTariffInfoForEmployeeDto tariffInfoDto;
-        if (isMainInfoAboutCurrentTariffAbsent(emplView.getTariffsInfoId(), getEmployeeDto)) {
-            tariffInfoDto = modelMapper.map(emplView, GetTariffInfoForEmployeeDto.class);
-            initializeTariffInfoDtoCollections(tariffInfoDto);
-            fillGetTariffInfoForEmployeeDtoCollections(emplView, tariffInfoDto);
-            getEmployeeDto.getTariffs().add(tariffInfoDto);
-        } else {
-            tariffInfoDto = extractTariffInfoForEmployeeDto(emplView, getEmployeeDto);
-            fillGetTariffInfoForEmployeeDtoCollections(emplView, tariffInfoDto);
-        }
-    }
-
-    private void fillGetTariffInfoForEmployeeDtoCollections(EmployeeFilterView emplView,
-        GetTariffInfoForEmployeeDto tariffInfoDto) {
-        if (isLocationIdAbsent(emplView.getLocationId(), tariffInfoDto)) {
-            tariffInfoDto.getLocationsDtos().add(modelMapper.map(emplView, LocationsDtos.class));
-        }
-        if (isReceivingStationIdAbsent(emplView.getReceivingStationId(), tariffInfoDto)) {
-            tariffInfoDto.getReceivingStationDtos().add(modelMapper.map(emplView, GetReceivingStationDto.class));
-        }
-    }
-
-    private boolean isMainInfoAboutCurrentTariffAbsent(Long tariffInfoId, GetEmployeeDto getEmployeeDto) {
-        return getEmployeeDto.getTariffs()
-            .stream()
-            .noneMatch(tariffInfoDto -> tariffInfoDto.getId().equals(tariffInfoId));
-    }
-
-    private static boolean isReceivingStationIdAbsent(Long receivingStationId,
-        GetTariffInfoForEmployeeDto tariffInfoDto) {
-        return tariffInfoDto.getReceivingStationDtos()
-            .stream()
-            .noneMatch(dto -> dto.getStationId().equals(receivingStationId));
-    }
-
-    private boolean isLocationIdAbsent(Long locationId, GetTariffInfoForEmployeeDto tariffInfoDto) {
-        return tariffInfoDto.getLocationsDtos()
-            .stream()
-            .noneMatch(locationDto -> locationDto.getLocationId().equals(locationId));
-    }
-
-    private GetTariffInfoForEmployeeDto extractTariffInfoForEmployeeDto(EmployeeFilterView emplView,
-        GetEmployeeDto getEmployeeDto) {
-        return getEmployeeDto.getTariffs()
-            .stream()
-            .filter(tariffInfoDto -> tariffInfoDto.getId().equals(emplView.getTariffsInfoId()))
-            .findAny()
-            .orElseThrow();
-    }
-
-    private void initializeTariffInfoDtoCollections(GetTariffInfoForEmployeeDto tariffInfoDto) {
-        if (tariffInfoDto.getLocationsDtos() == null || tariffInfoDto.getReceivingStationDtos() == null) {
-            tariffInfoDto.setLocationsDtos(new ArrayList<>());
-            tariffInfoDto.setReceivingStationDtos(new ArrayList<>());
-        }
-    }
-
-    private boolean isPositionIdAbsent(Long positionId, GetEmployeeDto getEmployeeDto) {
-        return getEmployeeDto.getEmployeePositions()
-            .stream()
-            .noneMatch(dto -> dto.getId().equals(positionId));
+    private void fillGetTariffInfoForEmployeeDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto,
+        List<Employee> employees) {
+        employees.stream().filter(employee -> employee.getId() == emplView.getEmployeeId())
+            .forEach(employee -> employee.getTariffInfos().stream()
+                .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class))
+                .forEach(tariffInfoDto -> getEmployeeDto.getTariffs().add(tariffInfoDto)));
     }
 
     private void initializeGetEmployeeDtoCollectionsIfNeeded(GetEmployeeDto getEmployeeDto) {
@@ -214,6 +161,15 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             getEmployeeDto.setEmployeePositions(new ArrayList<>());
             getEmployeeDto.setTariffs(new ArrayList<>());
         }
+    }
+
+    private PageableDto<GetEmployeeDto> getAllTranslationDto(Page<GetEmployeeDto> pages) {
+        List<GetEmployeeDto> getEmployeeDtos = pages.getContent();
+        return new PageableDto<>(
+            getEmployeeDtos,
+            pages.getTotalElements(),
+            pages.getPageable().getPageNumber(),
+            pages.getTotalPages());
     }
 
     /**
@@ -225,8 +181,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         final Employee upEmployee = employeeRepository.findById(dto.getEmployeeDto().getId()).orElseThrow(
             () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getEmployeeDto().getId()));
 
-        if (!employeeRepository
-            .findEmployeesByEmailAndIdNot(dto.getEmployeeDto().getEmail(), dto.getEmployeeDto().getId()).isEmpty()) {
+        if (!employeeRepository.findEmployeesByEmailAndIdNot(
+            dto.getEmployeeDto().getEmail(), dto.getEmployeeDto().getId()).isEmpty()) {
             throw new BadRequestException(
                 "Email already exist in another employee: " + dto.getEmployeeDto().getEmail());
         }
@@ -369,8 +325,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void updateEmployeeEmail(EmployeeWithTariffsIdDto dto, String uuid) {
-        Employee employee = employeeRepository.findById(dto.getEmployeeDto().getId())
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getEmployeeDto().getId()));
+        Employee employee = employeeRepository.findById(dto.getEmployeeDto().getId()).orElseThrow(
+            () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getEmployeeDto().getId()));
         String oldEmail = employee.getEmail();
         String newEmail = dto.getEmployeeDto().getEmail();
         if (!oldEmail.equals(newEmail)) {
