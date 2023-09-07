@@ -120,12 +120,13 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private List<GetEmployeeDto> mapEmployeeFilterViewsToGetEmployeeDtos(List<EmployeeFilterView> employeeFilterViews) {
+        List<Employee> employees = employeeRepository.findAll();
         Map<Long, GetEmployeeDto> getEmployeeDtoMap = new LinkedHashMap<>();
         for (var employeeFilterView : employeeFilterViews) {
             var getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(employeeFilterView.getEmployeeId(),
                 id -> modelMapper.map(employeeFilterView, GetEmployeeDto.class));
             initializeGetEmployeeDtoCollectionsIfNeeded(getEmployeeDto);
-            fillGetEmployeeDto(employeeFilterView, getEmployeeDto);
+            fillGetEmployeeDto(employeeFilterView, getEmployeeDto, employees);
         }
         return new ArrayList<>(getEmployeeDtoMap.values());
     }
@@ -135,8 +136,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         return PageRequest.of(employeePage.getPageNumber(), employeePage.getPageSize(), sort);
     }
 
-    private void fillGetEmployeeDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto) {
-        List<Employee> employees = employeeRepository.findAll();
+    private void fillGetEmployeeDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto,
+        List<Employee> employees) {
         fillGetTariffInfoForEmployeeDto(emplView, getEmployeeDto, employees);
         fillPositionDto(emplView, getEmployeeDto, employees);
     }
