@@ -220,4 +220,5 @@
     <include file="db/changelog/logs/ch-add-column-status-to-bag-table-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-update-order-bag-mapping-table-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-add-column-order-bag-mapping-table-Spodaryk.xml"/>
+    <include file="db/changelog/logs/ch-delete-from-languages-Spodaryk.xml"/>
 </databaseChangeLog>
