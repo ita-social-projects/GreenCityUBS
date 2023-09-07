@@ -143,7 +143,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void fillPositionDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
-        employees.stream().filter(employee -> employee.getId() == emplView.getEmployeeId())
+        employees.stream().filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
             .forEach(employee -> employee.getEmployeePosition().stream()
                 .map(position -> modelMapper.map(position, PositionDto.class))
                 .forEach(positionDto -> getEmployeeDto.getEmployeePositions().add(positionDto)));
@@ -151,7 +151,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
     private void fillGetTariffInfoForEmployeeDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto,
         List<Employee> employees) {
-        employees.stream().filter(employee -> employee.getId() == emplView.getEmployeeId())
+        employees.stream().filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
             .forEach(employee -> employee.getTariffInfos().stream()
                 .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class))
                 .forEach(tariffInfoDto -> getEmployeeDto.getTariffs().add(tariffInfoDto)));
