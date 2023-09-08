@@ -123,6 +123,7 @@ import static greencity.ModelUtils.TEST_ORDER_DETAILS_INFO_DTO_LIST;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
 import static greencity.ModelUtils.TEST_USER;
 import static greencity.ModelUtils.UPDATE_ORDER_PAGE_ADMIN_DTO;
+import static greencity.ModelUtils.getOrdersStatusFormedDto2;
 import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getAdminCommentDto;
 import static greencity.ModelUtils.getBagInfoDto;
@@ -171,11 +172,13 @@ import static greencity.ModelUtils.getTestOrderDetailStatusRequestDto;
 import static greencity.ModelUtils.getTestUser;
 import static greencity.ModelUtils.updateAllOrderPageDto;
 import static greencity.ModelUtils.updateOrderPageAdminDto;
+
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -1290,7 +1293,7 @@ class UBSManagementServiceImplTest {
         when(certificateRepository.findCertificate(order.getId())).thenReturn(List.of(ModelUtils.getCertificate2()));
         when(orderRepository.findSumOfCertificatesByOrderId(order.getId())).thenReturn(600L);
         when(orderRepository.getOrderDetails(1L))
-            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto2()));
+            .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto2()));
 
         ubsManagementService.setOrderDetail(order,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1307,7 +1310,7 @@ class UBSManagementServiceImplTest {
         when(certificateRepository.findCertificate(order.getId())).thenReturn(List.of(ModelUtils.getCertificate2()));
         when(orderRepository.findSumOfCertificatesByOrderId(order.getId())).thenReturn(600L);
         when(orderRepository.getOrderDetails(1L))
-            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto2()));
+            .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto2()));
 //        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.setOrderDetail(order,
@@ -2879,7 +2882,6 @@ class UBSManagementServiceImplTest {
 
         ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com", multipartFiles);
 
-        verify(orderRepository).findById(1L);
         verify(employeeRepository).findByEmail("test@gmail.com");
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
         verify(paymentRepository).findAllByOrderId(1L);
@@ -2888,6 +2890,119 @@ class UBSManagementServiceImplTest {
         verify(receivingStationRepository).findAll();
 
         verify(receivingStationRepository).findById(1L);
-        verify(orderRepository).getOrderDetails(1L);
     }
+
+    @Test
+    void updateOrderAdminPageInfoAndSaveReasonTest_OrderPaid() {
+        var dto = updateOrderPageAdminDto();
+        MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
+
+        Order order = getOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        Employee employee = getEmployee();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(1L, 1L))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
+
+        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
+        when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
+
+        var receivingStation = getReceivingStation();
+
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+
+        ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com", multipartFiles);
+
+        verify(employeeRepository).findByEmail("test@gmail.com");
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
+        verify(paymentRepository).findAllByOrderId(1L);
+
+        verify(orderAddressRepository).findById(1L);
+        verify(receivingStationRepository).findAll();
+
+        verify(receivingStationRepository).findById(1L);
+    }
+
+    @Test
+    void updateOrderAdminPageInfoAndSaveReasonTest_OrderPaidAndUpdate() {
+        var dto = updateOrderPageAdminDto();
+        MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
+
+        Order order = getOrder();
+        order.setPointsToUse(-10000);
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        Employee employee = getEmployee();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(1L, 1L))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
+
+        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
+        when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
+
+        var receivingStation = getReceivingStation();
+
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+
+        ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com", multipartFiles);
+
+        verify(employeeRepository).findByEmail("test@gmail.com");
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
+        verify(paymentRepository).findAllByOrderId(1L);
+
+        verify(orderAddressRepository).findById(1L);
+        verify(receivingStationRepository).findAll();
+
+        verify(receivingStationRepository).findById(1L);
+    }
+
+    @Test
+    void updateOrderAdminPageInfoAndSaveReasonTest_OrderUnPaidAndUpdate() {
+        var dto = updateOrderPageAdminDto();
+        MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
+
+        Order order = getOrder();
+        order.setPointsToUse(-10000);
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        Employee employee = getEmployee();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(1L, 1L))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
+
+        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
+        when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
+
+        var receivingStation = getReceivingStation();
+
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+
+        ubsManagementService.updateOrderAdminPageInfoAndSaveReason(1L, dto, "en", "test@gmail.com", multipartFiles);
+
+        verify(employeeRepository).findByEmail("test@gmail.com");
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
+        verify(paymentRepository).findAllByOrderId(1L);
+
+        verify(orderAddressRepository).findById(1L);
+        verify(receivingStationRepository).findAll();
+
+        verify(receivingStationRepository).findById(1L);
+    }
+
 }

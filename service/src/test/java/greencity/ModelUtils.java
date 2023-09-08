@@ -1975,6 +1975,21 @@ public class ModelUtils {
             .build();
     }
 
+    public static Payment getPayment2() {
+        return Payment.builder()
+            .id(1L)
+            .paymentStatus(PaymentStatus.PAID)
+            .amount(0L)
+            .currency("UAH")
+            .orderStatus("approved")
+            .responseStatus("approved")
+            .order(getOrder())
+            .paymentId("1")
+            .settlementDate(LocalDate.now().toString())
+            .fee(0L)
+            .build();
+    }
+
     public static User getUser() {
         return User.builder()
             .id(1L)
