@@ -40,7 +40,6 @@ import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
-import greencity.enums.OrderPaymentStatus;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
