@@ -2898,10 +2898,9 @@ class UBSManagementServiceImplTest {
         MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
 
         Order order = getOrder();
-
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
-        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         Employee employee = getEmployee();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
