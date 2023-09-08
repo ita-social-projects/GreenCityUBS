@@ -330,6 +330,16 @@ public class ModelUtils {
         return getEmployeeDto;
     }
 
+    public static GetEmployeeDto getEmployeeDtoWithPositionsForGetAllMethod() {
+        var getEmployeeDto = getEmployeeDto();
+        getEmployeeDto.setEmployeePositions(List.of(
+            getPositionDto(3L),
+            getPositionDto(5L),
+            getPositionDto(7L)));
+        getEmployeeDto.setTariffs(new ArrayList<>());
+        return getEmployeeDto;
+    }
+
     public static GetEmployeeDto getEmployeeDtoWithPositionsAndTariffs() {
         var getEmployeeDto = getEmployeeDto();
 
