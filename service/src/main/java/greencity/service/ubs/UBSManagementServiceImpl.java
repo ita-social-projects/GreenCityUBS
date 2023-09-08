@@ -1689,9 +1689,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String language, String email, MultipartFile[] images) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-
+        PaymentTableInfoDto paymentTableInfoDto = getPaymentTableInfo(orderId);
+        Double unPaidAmount = paymentTableInfoDto.getUnPaidAmount();
+        if (Double.compare(unPaidAmount, 0.0) != 0 && order.getOrderPaymentStatus().equals(OrderPaymentStatus.PAID)) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+        }
         updateOrderAdminPageInfo(updateOrderPageAdminDto, order, language, email);
         saveReason(order, updateOrderPageAdminDto.getNotTakenOutReason(), images);
+    }
+
+    private PaymentTableInfoDto getPaymentTableInfo(Long orderId) {
+        CounterOrderDetailsDto prices = getPriceDetails(orderId);
+        return getPaymentInfo(orderId, setTotalPrice(prices));
     }
 
     /**
