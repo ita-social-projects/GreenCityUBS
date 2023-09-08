@@ -1012,36 +1012,26 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (nonNull(dto.getOrderStatus())
             && (isNull(order.getOrderStatus()) || order.getOrderStatus().checkPossibleStatus(dto.getOrderStatus()))) {
             order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
-            switch (order.getOrderStatus()) {
-                case ADJUSTMENT:
-                    notificationService.notifyCourierItineraryFormed(order);
-                    eventService.saveEvent(OrderHistory.ORDER_ADJUSTMENT, email, order);
-                    break;
-                case CONFIRMED:
-                    eventService.saveEvent(OrderHistory.ORDER_CONFIRMED, email, order);
-                    break;
-                case FORMED:
-                    eventService.saveEvent(OrderHistory.ORDER_FORMED, email, order);
-                    break;
-                case NOT_TAKEN_OUT:
-                    eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT, email, order);
-                    break;
-                case CANCELED:
-                    verifyPaidWithBonuses(order, email);
-                    setOrderCancellation(order, dto.getCancellationReason(), dto.getCancellationComment());
-                    eventService.saveEvent(OrderHistory.ORDER_CANCELLED, email, order);
-                    break;
-                case DONE:
-                    eventService.saveEvent(OrderHistory.ORDER_DONE, email, order);
-                    break;
-                case BROUGHT_IT_HIMSELF:
-                    eventService.saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, order);
-                    break;
-                case ON_THE_ROUTE:
-                    eventService.saveEvent(OrderHistory.ORDER_ON_THE_ROUTE, email, order);
-                    break;
-                default:
-                    break;
+
+            if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
+                notificationService.notifyCourierItineraryFormed(order);
+                eventService.saveEvent(OrderHistory.ORDER_ADJUSTMENT, email, order);
+            } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
+                eventService.saveEvent(OrderHistory.ORDER_CONFIRMED, email, order);
+            } else if (order.getOrderStatus() == OrderStatus.FORMED) {
+                eventService.saveEvent(OrderHistory.ORDER_FORMED, email, order);
+            } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
+                eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT, email, order);
+            } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                verifyPaidWithBonuses(order, email);
+                setOrderCancellation(order, dto.getCancellationReason(), dto.getCancellationComment());
+                eventService.saveEvent(OrderHistory.ORDER_CANCELLED, email, order);
+            } else if (order.getOrderStatus() == OrderStatus.DONE) {
+                eventService.saveEvent(OrderHistory.ORDER_DONE, email, order);
+            } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
+                eventService.saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, order);
+            } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE) {
+                eventService.saveEvent(OrderHistory.ORDER_ON_THE_ROUTE, email, order);
             }
             orderRepository.save(order);
         }
