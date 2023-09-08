@@ -40,10 +40,12 @@ import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
+import greencity.enums.OrderPaymentStatus;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import greencity.repository.OrderRepository;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSClientService;
@@ -94,6 +96,7 @@ public class ManagementOrderController {
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
     private final BigOrderTableServiceView bigOrderTableService;
+    private final OrderRepository orderRepository;
 
     /**
      * Controller getting all certificates with sorting possibility.
