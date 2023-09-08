@@ -74,8 +74,9 @@ public class ManagementEmployeeController {
     /**
      * Controller gets all employees.
      *
-     * @return {@link PageableAdvancedDto} pageable employees.
-     * @author Mykola Danylko and Olena Sotnik.
+     * @return PageableDto of {@link GetEmployeeDto} employees.
+     * @author Mykola Danylko.
+     * @author Olena Sotnik.
      */
     @ApiOperation(value = "Get all employees")
     @ApiResponses(value = {

@@ -28,6 +28,7 @@ public class EmployeeCriteriaRepository {
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
     private static final String POSITION_ID = "positionId";
+    private static final String EMPLOYEE_ID = "employeeId";
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -96,7 +97,7 @@ public class EmployeeCriteriaRepository {
         Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
         Root<EmployeeFilterView> subQueryRoot = subQuery.from(EmployeeFilterView.class);
         subQuery.select(criteriaBuilder.min(subQueryRoot.get(POSITION_ID)))
-            .where(criteriaBuilder.equal(subQueryRoot.get("employeeId"), employeeFilterViewRoot.get("employeeId")));
+            .where(criteriaBuilder.equal(subQueryRoot.get(EMPLOYEE_ID), employeeFilterViewRoot.get(EMPLOYEE_ID)));
         predicates.add(criteriaBuilder.equal(employeeFilterViewRoot.get(POSITION_ID), subQuery));
     }
 

@@ -13,6 +13,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeFilterView;
@@ -142,18 +143,24 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void fillPositionDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
-        employees.stream().filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
-            .forEach(employee -> employee.getEmployeePosition().stream()
-                .map(position -> modelMapper.map(position, PositionDto.class))
-                .forEach(positionDto -> getEmployeeDto.getEmployeePositions().add(positionDto)));
+        List<PositionDto> positionsDtos = employees.stream()
+            .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
+            .flatMap(employee -> employee.getEmployeePosition().stream()
+                .map(position -> modelMapper.map(position, PositionDto.class)))
+            .collect(Collectors.toList());
+
+        getEmployeeDto.getEmployeePositions().addAll(positionsDtos);
     }
 
-    private void fillGetTariffInfoForEmployeeDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto,
-        List<Employee> employees) {
-        employees.stream().filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
-            .forEach(employee -> employee.getTariffInfos().stream()
-                .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class))
-                .forEach(tariffInfoDto -> getEmployeeDto.getTariffs().add(tariffInfoDto)));
+    private void fillGetTariffInfoForEmployeeDto(
+        EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
+        List<GetTariffInfoForEmployeeDto> tariffsInfoDtos = employees.stream()
+            .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
+            .flatMap(employee -> employee.getTariffInfos().stream()
+                .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class)))
+            .collect(Collectors.toList());
+
+        getEmployeeDto.getTariffs().addAll(tariffsInfoDtos);
     }
 
     private void initializeGetEmployeeDtoCollectionsIfNeeded(GetEmployeeDto getEmployeeDto) {
