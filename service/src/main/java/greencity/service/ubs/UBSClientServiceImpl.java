@@ -1423,22 +1423,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
-    @Override
-    public OrderCancellationReasonDto updateOrderCancellationReason(
-        long id, OrderCancellationReasonDto dto, String uuid) {
-        Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
-            throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
-        }
-        eventService.saveEvent(OrderHistory.ORDER_CANCELLED, uuid, order);
-        order.setCancellationReason(dto.getCancellationReason());
-        order.setCancellationComment(dto.getCancellationComment());
-        order.setId(id);
-        orderRepository.save(order);
-        return dto;
-    }
-
     private long reduceOrderSumDueToUsedPoints(long sumToPayInCoins, int pointsToUse) {
         if (sumToPayInCoins >= pointsToUse * 100L) {
             sumToPayInCoins -= pointsToUse * 100L;

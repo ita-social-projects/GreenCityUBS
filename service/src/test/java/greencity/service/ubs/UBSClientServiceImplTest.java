@@ -2811,39 +2811,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testUpdateOrderCancellationReason() {
-        OrderCancellationReasonDto dto = getCancellationDto();
-        Order orderDto = getOrderTest();
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
-        assert orderDto != null;
-        when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
-        when(orderRepository.save(any())).thenReturn(orderDto);
-        OrderCancellationReasonDto result = ubsService.updateOrderCancellationReason(1L, dto, anyString());
-
-        verify(eventService, times(1))
-            .saveEvent("Статус Замовлення - Скасовано", "", orderDto);
-        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
-        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
-        verify(orderRepository).save(orderDto);
-        verify(orderRepository).findById(1L);
-    }
-
-    @Test
-    void updateOrderCancellationReasonOrderNotFoundException() {
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class,
-            () -> ubsService.updateOrderCancellationReason(1L, null, "abc"));
-    }
-
-    @Test
-    void updateOrderCancellationReasonAccessDeniedException() {
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(getOrderTest()));
-        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
-        assertThrows(AccessDeniedException.class,
-            () -> ubsService.updateOrderCancellationReason(1L, null, "abc"));
-    }
-
-    @Test
     void testGelAllEventsFromOrderByOrderId() {
         List<Event> orderEvents = getListOfEvents();
         when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
