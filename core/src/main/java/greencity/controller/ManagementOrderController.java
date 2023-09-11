@@ -39,7 +39,6 @@ import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.parameters.CustomTableView;
-import greencity.entity.user.User;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
@@ -1006,30 +1005,6 @@ public class ManagementOrderController {
         @Valid @PathVariable("id") Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getNotTakenOrderReason(orderId));
-    }
-
-    /**
-     * Controller updates info about order cancellation reason.
-     *
-     * @param id   {@link Long}.
-     * @param dto  {@link OrderCancellationReasonDto}
-     * @param uuid current {@link User}'s uuid.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "updates info about order cancellation reason ")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/order/{id}/cancellation")
-    public ResponseEntity<OrderCancellationReasonDto> updateCancellationReason(
-        @RequestBody final OrderCancellationReasonDto dto,
-        @PathVariable("id") final Long id,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.updateOrderCancellationReason(id, dto, uuid));
     }
 
     /**
