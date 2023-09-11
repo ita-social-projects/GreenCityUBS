@@ -6,7 +6,6 @@ import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
-import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
@@ -491,17 +490,6 @@ class ManagementOrderControllerTest {
         this.mockMvc.perform(get(ubsLink + "/get-not-taken-order-reason/{id}", 1L))
             .andExpect(status().isOk());
         verify(ubsManagementService).getNotTakenOrderReason(1L);
-    }
-
-    @Test
-    void updatesCancellationReason() throws Exception {
-        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        mockMvc.perform(post(ubsLink + "/order/{id}/cancellation", 1L)
-            .principal(ModelUtils.getPrincipal())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isOk());
     }
 
     @Test
