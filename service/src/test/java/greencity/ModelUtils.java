@@ -173,6 +173,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -188,6 +189,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import static greencity.enums.NotificationReceiverType.EMAIL;
 import static greencity.enums.NotificationReceiverType.MOBILE;
 import static greencity.enums.NotificationReceiverType.SITE;
@@ -303,6 +305,39 @@ public class ModelUtils {
             getEmployeeFilterViewWithPassedIds(employeeId, 3L, tariffsInfoId),
             getEmployeeFilterViewWithPassedIds(employeeId, 5L, tariffsInfoId),
             getEmployeeFilterViewWithPassedIds(employeeId, 7L, tariffsInfoId));
+    }
+
+    public static List<Employee> getEmployeeListForGetAllMethod() {
+        return List.of(
+            Employee.builder()
+                .id(1L)
+                .firstName("First Name")
+                .lastName("Last Name")
+                .phoneNumber("Phone Number")
+                .email("employee@gmail.com")
+                .employeeStatus(EmployeeStatus.ACTIVE)
+                .employeePosition(new HashSet<>())
+                .tariffInfos(new HashSet<>())
+                .imagePath("path")
+                .tariffs(List.of(getTariffInfo()))
+                .build());
+    }
+
+    public static GetEmployeeDto getEmployeeDtoWithoutPositionsAndTariffsForGetAllMethod() {
+        var getEmployeeDto = getEmployeeDto();
+        getEmployeeDto.setEmployeePositions(new ArrayList<>());
+        getEmployeeDto.setTariffs(new ArrayList<>());
+        return getEmployeeDto;
+    }
+
+    public static GetEmployeeDto getEmployeeDtoWithPositionsForGetAllMethod() {
+        var getEmployeeDto = getEmployeeDto();
+        getEmployeeDto.setEmployeePositions(List.of(
+            getPositionDto(3L),
+            getPositionDto(5L),
+            getPositionDto(7L)));
+        getEmployeeDto.setTariffs(new ArrayList<>());
+        return getEmployeeDto;
     }
 
     public static GetEmployeeDto getEmployeeDtoWithPositionsAndTariffs() {
@@ -1872,6 +1907,14 @@ public class ModelUtils {
     public static Position getPosition() {
         return Position.builder()
             .id(1L)
+            .name("Водій")
+            .nameEn("Driver")
+            .build();
+    }
+
+    public static Position getPosition(Long id) {
+        return Position.builder()
+            .id(id)
             .name("Водій")
             .nameEn("Driver")
             .build();
