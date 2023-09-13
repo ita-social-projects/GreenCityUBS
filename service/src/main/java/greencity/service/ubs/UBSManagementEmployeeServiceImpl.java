@@ -124,7 +124,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         for (var employeeFilterView : employeeFilterViews) {
             var getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(employeeFilterView.getEmployeeId(),
                 id -> modelMapper.map(employeeFilterView, GetEmployeeDto.class));
-            initializeGetEmployeeDtoCollectionsIfNeeded(getEmployeeDto);
+            initializeGetEmployeeDtoCollections(getEmployeeDto);
             fillGetEmployeeDto(employeeFilterView, getEmployeeDto, employees);
         }
         return new ArrayList<>(getEmployeeDtoMap.values());
@@ -162,11 +162,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         getEmployeeDto.getTariffs().addAll(tariffsInfoDtos);
     }
 
-    private void initializeGetEmployeeDtoCollectionsIfNeeded(GetEmployeeDto getEmployeeDto) {
-        if (getEmployeeDto.getEmployeePositions() == null || getEmployeeDto.getTariffs() == null) {
-            getEmployeeDto.setEmployeePositions(new ArrayList<>());
-            getEmployeeDto.setTariffs(new ArrayList<>());
-        }
+    private void initializeGetEmployeeDtoCollections(GetEmployeeDto getEmployeeDto) {
+        getEmployeeDto.setEmployeePositions(new ArrayList<>());
+        getEmployeeDto.setTariffs(new ArrayList<>());
     }
 
     private PageableDto<GetEmployeeDto> getAllTranslationDto(Page<GetEmployeeDto> pages) {
