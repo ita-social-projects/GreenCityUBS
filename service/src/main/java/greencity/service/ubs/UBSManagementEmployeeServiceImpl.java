@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.Collections;
 
 @Service
 @Data
@@ -164,8 +163,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void initializeGetEmployeeDtoCollections(GetEmployeeDto getEmployeeDto) {
-        getEmployeeDto.setEmployeePositions(Collections.emptyList());
-        getEmployeeDto.setTariffs(Collections.emptyList());
+        getEmployeeDto.setEmployeePositions(new ArrayList<>());
+        getEmployeeDto.setTariffs(new ArrayList<>());
     }
 
     private PageableDto<GetEmployeeDto> getAllTranslationDto(Page<GetEmployeeDto> pages) {
