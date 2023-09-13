@@ -163,8 +163,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void initializeGetEmployeeDtoCollections(GetEmployeeDto getEmployeeDto) {
-        getEmployeeDto.setEmployeePositions(new ArrayList<>());
-        getEmployeeDto.setTariffs(new ArrayList<>());
+        getEmployeeDto.setEmployeePositions(Collections.emptyList());
+        getEmployeeDto.setTariffs(Collections.emptyList());
     }
 
     private PageableDto<GetEmployeeDto> getAllTranslationDto(Page<GetEmployeeDto> pages) {
