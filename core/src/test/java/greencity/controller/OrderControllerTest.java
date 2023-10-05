@@ -13,6 +13,7 @@ import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.user.UserInfoDto;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.repository.OrderRepository;
 import greencity.repository.UBSuserRepository;
@@ -23,6 +24,8 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -164,6 +167,28 @@ class OrderControllerTest {
     void processPaidOrderId() throws Exception {
         OrderResponseDto dto = ModelUtils.getOrderResponseDto();
         OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getOrderDetailStatusDto();
+
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/processOrder/{id}", 1L)
+            .content(orderResponseDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = OrderStatus.class,
+        names = "FORMED",
+        mode = EnumSource.Mode.EXCLUDE)
+    void processPaidOrderIdWithUnacceptableOrderStatusesTest(OrderStatus orderStatus) throws Exception {
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
+        OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getOrderDetailStatusDto();
+        orderDetailStatusDto.setOrderStatus(orderStatus.name());
 
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
         when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
