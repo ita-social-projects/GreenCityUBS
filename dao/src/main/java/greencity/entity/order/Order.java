@@ -193,10 +193,12 @@ public class Order {
     private List<OrderBag> orderBags = new ArrayList<>();
 
     /**
-     * Updates the list of order bags associated with this order. This method replaces all current items with
-     * new ones. It also sets the order reference for each order bag in the new list. This method should be
-     * used instead of the default setter to prevent exceptions related to collections with
-     * cascade="all-delete-orphan"  when the owning entity instance no longer references it.
+     * Updates the list of order bags associated with this order. This method
+     * replaces all current items with new ones. It also sets the order reference
+     * for each order bag in the new list. This method should be used instead of the
+     * default setter to prevent exceptions related to collections with
+     * cascade="all-delete-orphan" when the owning entity instance no longer
+     * references it.
      *
      * @param orderBags The new list of order bags to associate with this order.
      */
