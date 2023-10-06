@@ -196,13 +196,16 @@ public class Order {
      * Updates the list of order bags associated with this order. This method
      * replaces all current items with new ones. It also sets the order reference
      * for each order bag in the new list. This method should be used instead of the
-     * default setter to prevent exceptions related to collections with
-     * cascade="all-delete-orphan" when the owning entity instance no longer
-     * references it.
+     * default setter to prevent exception that occur when the owner entity instance
+     * no longer references collections with cascade="all-delete-orphan".
      *
      * @param orderBags The new list of order bags to associate with this order.
+     * @throws NullPointerException If the provided 'orderBags' argument is null.
      */
     public void updateWithNewOrderBags(List<OrderBag> orderBags) {
+        if (this.orderBags == null) {
+            this.orderBags = new ArrayList<>();
+        }
         if (!CollectionUtils.isEmpty(this.orderBags)) {
             this.orderBags.clear();
         }
