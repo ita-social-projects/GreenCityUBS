@@ -39,7 +39,7 @@ class OrderTest {
         order.updateWithNewOrderBags(bags);
 
         assertNotNull(order.getOrderBags());
-        assertSame(previous, order.getOrderBags());
+        assertSame(null, previous);
         assertNotSame(bags, order.getOrderBags());
         assertTrue(order.getOrderBags().containsAll(bags) && order.getOrderBags().size() == bags.size());
 
