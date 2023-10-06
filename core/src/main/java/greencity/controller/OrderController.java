@@ -24,6 +24,7 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
@@ -176,8 +177,8 @@ public class OrderController {
         @Valid @PathVariable("id") Optional<Long> id) {
         if (id.isPresent()) {
             OrderDetailStatusDto orderDetailStatusDto = ubsManagementService.getOrderDetailStatus(id.get());
-            if (orderDetailStatusDto.getPaymentStatus().equals("PAID")
-                || !orderDetailStatusDto.getOrderStatus().equals(OrderStatus.FORMED.name())) {
+            if (PaymentStatus.PAID.name().equals(orderDetailStatusDto.getPaymentStatus())
+                || !OrderStatus.FORMED.name().equals(orderDetailStatusDto.getOrderStatus())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
             return ResponseEntity.status(HttpStatus.OK)

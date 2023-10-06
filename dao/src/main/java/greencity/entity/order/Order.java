@@ -190,6 +190,7 @@ public class Order {
         cascade = CascadeType.ALL,
         orphanRemoval = true)
     @Setter(AccessLevel.PRIVATE)
+    @Builder.Default
     private List<OrderBag> orderBags = new ArrayList<>();
 
     /**
@@ -203,12 +204,10 @@ public class Order {
      * @throws NullPointerException If the provided 'orderBags' argument is null.
      */
     public void updateWithNewOrderBags(List<OrderBag> orderBags) {
-        if (this.orderBags == null) {
-            this.orderBags = new ArrayList<>();
-        }
         if (!CollectionUtils.isEmpty(this.orderBags)) {
             this.orderBags.clear();
         }
+        initOrderBagsIfNull();
         this.orderBags.addAll(orderBags);
         this.orderBags.forEach(ob -> ob.setOrder(this));
     }
@@ -221,6 +220,7 @@ public class Order {
      * @param orderBag The order bag to add to this order.
      */
     public void addOrderedBag(OrderBag orderBag) {
+        initOrderBagsIfNull();
         this.orderBags.add(orderBag);
         orderBag.setOrder(this);
     }
@@ -231,7 +231,15 @@ public class Order {
      *
      * @param orderBag The order bag to remove from this order.
      */
-    public void removeOrderedBag(OrderBag orderBag) {
-        orderBags.remove(orderBag);
+    public void removeOrderBag(OrderBag orderBag) {
+        if (!CollectionUtils.isEmpty(this.orderBags)) {
+            orderBags.remove(orderBag);
+        }
+    }
+
+    private void initOrderBagsIfNull() {
+        if (this.orderBags == null) {
+            this.orderBags = new ArrayList<>();
+        }
     }
 }
