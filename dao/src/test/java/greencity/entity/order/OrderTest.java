@@ -1,6 +1,5 @@
 package greencity.entity.order;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -49,7 +48,6 @@ class OrderTest {
     @Test
     void updateWithNewOrderBagsNullArgExceptionTest() {
         Order order = Order.builder().build();
-        List<OrderBag> previous = order.getOrderBags();
         List<OrderBag> bags = null;
         assertThrows(NullPointerException.class, () -> order.updateWithNewOrderBags(bags));
     }
