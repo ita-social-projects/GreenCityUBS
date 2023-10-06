@@ -184,7 +184,7 @@ class OrderControllerTest {
             .build();
         String resultJson = objectMapper.writeValueAsString(resultObject);
 
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(uuid);
+        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn(uuid);
         when(ubsManagementService.getOrderDetailStatus(orderId)).thenReturn(orderDetailStatusDto);
         when(ubsClientService.saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong()))
             .thenReturn(resultObject);
@@ -197,6 +197,7 @@ class OrderControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().json(resultJson));
 
+        verify(userRemoteClient).findUuidByEmail(anyString());
         verify(ubsManagementService).getOrderDetailStatus(orderId);
         verify(ubsClientService).saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong());
     }
@@ -229,7 +230,7 @@ class OrderControllerTest {
         OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getPaidOrderDetailStatusDto();
         orderDetailStatusDto.setOrderStatus(orderStatus.name());
 
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn("35467585763t4sfgchjfuyetf");
         when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -241,6 +242,7 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
 
+        verify(userRemoteClient).findUuidByEmail(anyString());
         verify(ubsManagementService).getOrderDetailStatus(orderId);
         verify(ubsClientService, never()).saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong());
     }
