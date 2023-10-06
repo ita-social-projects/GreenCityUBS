@@ -767,7 +767,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfo.setMax(dto.getMax());
         tariffsInfo.setCourierLimit(dto.getCourierLimit());
         tariffsInfo.setLimitDescription(dto.getLimitDescription());
-        tariffsInfo.setTariffStatus(getChangedTariffStatus(dto.getMin(), dto.getMax()));
         tariffsInfoRepository.save(tariffsInfo);
     }
 
@@ -808,12 +807,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setLimitIncluded(dto.getLimitIncluded());
         return bag;
-    }
-
-    private TariffStatus getChangedTariffStatus(Long min, Long max) {
-        return min != null || max != null
-            ? TariffStatus.ACTIVE
-            : TariffStatus.DEACTIVATED;
     }
 
     @Override
