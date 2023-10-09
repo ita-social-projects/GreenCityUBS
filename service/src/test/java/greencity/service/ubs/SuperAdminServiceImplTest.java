@@ -254,7 +254,7 @@ class SuperAdminServiceImplTest {
         Bag bagDeleted = ModelUtils.getBagDeleted();
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
         Order order = ModelUtils.getOrder();
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag2()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag2()));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bagDeleted);
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag, getBag2()));
@@ -288,7 +288,7 @@ class SuperAdminServiceImplTest {
         Bag bagDeleted = ModelUtils.getBagDeleted();
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
         Order order = ModelUtils.getOrder();
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         Map<Integer, Integer> hashMap = new HashMap<>();
         hashMap.put(1, 1);
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
@@ -361,7 +361,7 @@ class SuperAdminServiceImplTest {
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
         Order order = ModelUtils.getOrder();
         String uuid = UUID.randomUUID().toString();
-        order.setOrderBags(List.of(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(List.of(ModelUtils.getOrderBag()));
 
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
@@ -397,7 +397,7 @@ class SuperAdminServiceImplTest {
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
         Order order = ModelUtils.getOrder();
         String uuid = UUID.randomUUID().toString();
-        order.setOrderBags(List.of(ModelUtils.getOrderBagWithConfirmedAmount()));
+        order.updateWithNewOrderBags(List.of(ModelUtils.getOrderBagWithConfirmedAmount()));
 
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
@@ -433,7 +433,7 @@ class SuperAdminServiceImplTest {
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
         Order order = ModelUtils.getOrder();
         String uuid = UUID.randomUUID().toString();
-        order.setOrderBags(List.of(ModelUtils.getOrderBagWithExportedAmount()));
+        order.updateWithNewOrderBags(List.of(ModelUtils.getOrderBagWithExportedAmount()));
 
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));

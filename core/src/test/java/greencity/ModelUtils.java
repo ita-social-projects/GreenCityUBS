@@ -226,11 +226,15 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderDetailStatusDto getOrderDetailStatusDto() {
-        return getOrderDetailStatusDto(PaymentStatus.PAID);
+    public static OrderDetailStatusDto getPaidOrderDetailStatusDto() {
+        return getPaidOrderDetailStatusDto(PaymentStatus.PAID);
     }
 
-    public static OrderDetailStatusDto getOrderDetailStatusDto(PaymentStatus paymentStatus) {
+    public static OrderDetailStatusDto getUnpaidOrderDetailStatusDto() {
+        return getPaidOrderDetailStatusDto(PaymentStatus.UNPAID);
+    }
+
+    public static OrderDetailStatusDto getPaidOrderDetailStatusDto(PaymentStatus paymentStatus) {
         return OrderDetailStatusDto.builder()
             .paymentStatus(paymentStatus.name())
             .orderStatus(OrderStatus.CONFIRMED.name())

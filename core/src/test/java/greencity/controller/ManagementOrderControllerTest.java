@@ -207,7 +207,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void updateOrderStatusesDetail() throws Exception {
-        OrderDetailStatusDto dto = ModelUtils.getOrderDetailStatusDto();
+        OrderDetailStatusDto dto = ModelUtils.getPaidOrderDetailStatusDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
         this.mockMvc.perform(put(ubsLink + "/update-order-detail-status" + "/{id}", 1L)
