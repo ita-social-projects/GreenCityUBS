@@ -1096,7 +1096,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
-        order.setOrderBags(bagsOrdered);
+        order.updateWithNewOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(
@@ -1115,7 +1115,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setPayment(new ArrayList<>());
         }
         order.getPayment().add(payment);
-        bagsOrdered.forEach(orderBag -> orderBag.setOrder(order));
         orderRepository.save(order);
         return order;
     }
@@ -1477,7 +1476,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (order == null) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
-        order.setOrderBags(Collections.emptyList());
+        order.updateWithNewOrderBags(Collections.emptyList());
         orderRepository.delete(order);
     }
 

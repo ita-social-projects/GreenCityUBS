@@ -788,7 +788,7 @@ class UBSClientServiceImplTest {
             }
         }
         tariffsInfo.setBags(Arrays.asList(bag));
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
@@ -841,7 +841,7 @@ class UBSClientServiceImplTest {
             }
         }
         tariffsInfo.setBags(Arrays.asList(bag));
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user.setId(null), user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
@@ -894,7 +894,7 @@ class UBSClientServiceImplTest {
             }
         }
         tariffsInfo.setBags(Arrays.asList(bag));
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user.setId(null), user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
@@ -943,9 +943,11 @@ class UBSClientServiceImplTest {
         Payment payment1 = getPayment();
         payment1.setId(1L);
         order1.getPayment().add(payment1);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(
+            Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
         order1
-            .setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
+            .updateWithNewOrderBags(
+                Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
             if (f.getName().equals("merchantId")) {
@@ -1141,7 +1143,7 @@ class UBSClientServiceImplTest {
         dto.getBags().get(0).setAmount(1);
         Bag bag = getBagForOrder();
         Order order = getOrder();
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         TariffsInfo tariffsInfo = getTariffInfo();
         tariffsInfo.setBags(Arrays.asList(bag));
         user.setOrders(new ArrayList<>());
@@ -1378,7 +1380,7 @@ class UBSClientServiceImplTest {
         dto.getBags().get(0).setAmount(5);
         Order order = getOrder();
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
 
         Bag bag = getBagForOrder();
         TariffsInfo tariffsInfo = getTariffInfo();
@@ -2880,7 +2882,7 @@ class UBSClientServiceImplTest {
 
         order.setCertificates(Set.of(getCertificate()));
         order.setPayment(TEST_PAYMENT_LIST);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
             if (f.getName().equals("merchantId")) {
@@ -2891,7 +2893,7 @@ class UBSClientServiceImplTest {
 
         order.setPointsToUse(-10000);
         CertificateDto certificateDto = createCertificateDto();
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
@@ -2940,7 +2942,7 @@ class UBSClientServiceImplTest {
 
         CertificateDto certificateDto = createCertificateDto();
         certificateDto.setPoints(1500);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(ModelUtils.getAmount());
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
@@ -2989,7 +2991,7 @@ class UBSClientServiceImplTest {
         CertificateDto certificateDto = createCertificateDto();
         certificateDto.setPoints(1500);
         order.setPointsToUse(-1000);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
         when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
@@ -3025,7 +3027,7 @@ class UBSClientServiceImplTest {
         user.setChangeOfPointsList(new ArrayList<>());
         order.setUser(user);
         order.setPointsToUse(-10000);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         OrderFondyClientDto dto = getOrderFondyClientDto();
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -3089,8 +3091,8 @@ class UBSClientServiceImplTest {
         Payment payment1 = getPayment();
         payment1.setId(1L);
         order1.getPayment().add(payment1);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
-        order1.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order1.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -3134,7 +3136,7 @@ class UBSClientServiceImplTest {
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
         Bag bag = getBagForOrder();
 
         UBSuser ubSuser = getUBSuser().setId(null);
@@ -3423,7 +3425,7 @@ class UBSClientServiceImplTest {
         order.setAmountOfBagsOrdered(Map.of(1, 10));
         bags.add(bag);
         order.setUser(user);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
@@ -3483,7 +3485,7 @@ class UBSClientServiceImplTest {
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
 
         when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
@@ -3516,7 +3518,7 @@ class UBSClientServiceImplTest {
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
         OrdersDataForUserDto ordersDataForUserDto = getOrderStatusDto();
         Order order = getOrderTest();
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         User user = getTestUser();
         Bag bag = bagDto();
 
@@ -3577,7 +3579,7 @@ class UBSClientServiceImplTest {
         order.setConfirmedQuantity(Map.of(1, 10));
         bags.add(bag);
         order.setUser(user);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
@@ -3619,7 +3621,7 @@ class UBSClientServiceImplTest {
         order.setAmountOfBagsOrdered(Map.of(1, 10));
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
@@ -3750,7 +3752,7 @@ class UBSClientServiceImplTest {
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         Bag bag = getBagForOrder();
 
         UBSuser ubSuser = getUBSuser();
@@ -3929,7 +3931,7 @@ class UBSClientServiceImplTest {
         bag.setFullPrice(1200_00L);
         bags.add(bag);
         order.setUser(user);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());

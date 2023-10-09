@@ -8,11 +8,13 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
+import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.user.UserInfoDto;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.repository.OrderRepository;
 import greencity.repository.UBSuserRepository;
@@ -23,6 +25,8 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -41,6 +45,7 @@ import static greencity.ModelUtils.getRedirectionConfig;
 import static greencity.ModelUtils.getUbsCustomersDto;
 import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
 import static greencity.ModelUtils.getUserInfoDto;
+import static greencity.ModelUtils.getUnpaidOrderDetailStatusDto;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,9 +55,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -161,9 +168,44 @@ class OrderControllerTest {
     }
 
     @Test
+    void processOrderId() throws Exception {
+        Long orderId = 1L;
+        String uuid = "35467585763t4sfgchjfuyetf";
+        ObjectMapper objectMapper = new ObjectMapper();
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
+        String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
+
+        OrderDetailStatusDto orderDetailStatusDto = getUnpaidOrderDetailStatusDto();
+        orderDetailStatusDto.setOrderStatus(OrderStatus.FORMED.name());
+
+        FondyOrderResponse resultObject = FondyOrderResponse.builder()
+            .orderId(orderId)
+            .link("Link")
+            .build();
+        String resultJson = objectMapper.writeValueAsString(resultObject);
+
+        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn(uuid);
+        when(ubsManagementService.getOrderDetailStatus(orderId)).thenReturn(orderDetailStatusDto);
+        when(ubsClientService.saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong()))
+            .thenReturn(resultObject);
+
+        mockMvc.perform(post(ubsLink + "/processOrder/{id}", orderId)
+            .content(orderResponseDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(resultJson));
+
+        verify(userRemoteClient).findUuidByEmail(anyString());
+        verify(ubsManagementService).getOrderDetailStatus(orderId);
+        verify(ubsClientService).saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong());
+    }
+
+    @Test
     void processPaidOrderId() throws Exception {
         OrderResponseDto dto = ModelUtils.getOrderResponseDto();
-        OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getOrderDetailStatusDto();
+        OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getPaidOrderDetailStatusDto();
 
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
         when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
@@ -176,6 +218,33 @@ class OrderControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = OrderStatus.class,
+        names = "FORMED",
+        mode = EnumSource.Mode.EXCLUDE)
+    void processPaidOrderIdWithUnacceptableOrderStatusesTest(OrderStatus orderStatus) throws Exception {
+        Long orderId = 1L;
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
+        OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getPaidOrderDetailStatusDto();
+        orderDetailStatusDto.setOrderStatus(orderStatus.name());
+
+        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn("35467585763t4sfgchjfuyetf");
+        when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/processOrder/{id}", orderId)
+            .content(orderResponseDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+
+        verify(userRemoteClient).findUuidByEmail(anyString());
+        verify(ubsManagementService).getOrderDetailStatus(orderId);
+        verify(ubsClientService, never()).saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong());
     }
 
     @Test
