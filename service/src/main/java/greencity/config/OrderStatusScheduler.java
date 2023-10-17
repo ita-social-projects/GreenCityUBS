@@ -20,7 +20,7 @@ public class OrderStatusScheduler {
      * Method auto update the orders status from "CONFIRMED" to "ON_THE_ROUTE" on
      * the day of export.
      */
-    @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Kyiv")
+    @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Kiev")
     public void autoUpdateOrderStatus() {
         log.info("Update order status from actual status to expected status by the day of export");
         ubsManagementService.updateOrderStatusToExpected();
