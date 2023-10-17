@@ -115,6 +115,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1877,7 +1878,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void updateOrderStatusToExpected() {
         orderRepository.updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
             OrderStatus.ON_THE_ROUTE.name(),
-            LocalDate.now());
+            LocalDate.now(ZoneId.of("Europe/Kyiv")));
     }
 
     @Override
