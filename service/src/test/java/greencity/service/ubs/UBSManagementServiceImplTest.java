@@ -80,6 +80,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
@@ -97,6 +98,7 @@ import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -176,6 +178,7 @@ import static greencity.ModelUtils.updateOrderPageAdminDto;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -2697,10 +2700,19 @@ class UBSManagementServiceImplTest {
 
     @Test
     void updateOrderStatusToExpected() {
-        ubsManagementService.updateOrderStatusToExpected();
-        verify(orderRepository).updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
-            OrderStatus.ON_THE_ROUTE.name(),
-            LocalDate.now());
+        ZoneId expectedZoneId = ZoneId.of("Europe/Kyiv");
+        LocalDate expectedLocalDate = LocalDate.of(2019, 1, 2);
+
+        try (MockedStatic<LocalDate> localDate = Mockito.mockStatic(LocalDate.class)) {
+            localDate.when(() -> LocalDate.now(expectedZoneId))
+                .thenReturn(expectedLocalDate);
+
+            ubsManagementService.updateOrderStatusToExpected();
+
+            verify(orderRepository).updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
+                OrderStatus.ON_THE_ROUTE.name(),
+                expectedLocalDate);
+        }
     }
 
     @ParameterizedTest
