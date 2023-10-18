@@ -1608,7 +1608,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             && !added.contains("")) {
             historyChanges.append(collectInfoAboutChangesOfEcoNumber(added, OrderHistory.ADD_NEW_ECO_NUMBER));
             added.forEach(newNumber -> {
-                if (!newNumber.matches("[0-9]+") || newNumber.length() != 10) {
+                if (!newNumber.matches("\\d{4,10}")) {
                     throw new BadRequestException(INCORRECT_ECO_NUMBER);
                 }
                 order.getAdditionalOrders().add(newNumber);
