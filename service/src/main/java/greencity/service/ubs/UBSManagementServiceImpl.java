@@ -1878,7 +1878,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void updateOrderStatusToExpected() {
         orderRepository.updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
             OrderStatus.ON_THE_ROUTE.name(),
-            LocalDate.now(ZoneId.of("Europe/Kyiv")));
+            LocalDate.now(ZoneId.of("Europe/Kiev")));
     }
 
     @Override
