@@ -2698,7 +2698,7 @@ class UBSManagementServiceImplTest {
 
     @Test
     void updateOrderStatusToExpected() {
-        ZoneId expectedZoneId = ZoneId.of("Europe/Kyiv");
+        ZoneId expectedZoneId = ZoneId.of("Europe/Kiev");
         LocalDate expectedLocalDate = LocalDate.of(2019, 1, 2);
 
         try (MockedStatic<LocalDate> localDate = Mockito.mockStatic(LocalDate.class)) {
