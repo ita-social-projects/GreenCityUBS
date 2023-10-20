@@ -18,6 +18,7 @@ public class NotificationParameter {
 
     @ManyToOne
     @JoinColumn(name = "notification_id", nullable = false)
+    @ToString.Exclude
     private UserNotification userNotification;
 
     @Column(nullable = false, name = "key", length = 50)
