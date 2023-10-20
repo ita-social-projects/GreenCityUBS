@@ -927,6 +927,29 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void updateOrderDetailStatusToBroughtItHimselfTest() {
+        String email = "some@email.com";
+        Order saved = getOrder();
+        saved.setOrderStatus(OrderStatus.FORMED);
+        Order updated = getOrder();
+        updated.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+
+        when(paymentRepository.findAllByOrderId(saved.getId())).thenReturn(saved.getPayment());
+
+        OrderDetailStatusRequestDto detailStatusDto = OrderDetailStatusRequestDto.builder()
+            .orderStatus("BROUGHT_IT_HIMSELF")
+            .build();
+
+        OrderDetailStatusDto result = ubsManagementService.updateOrderDetailStatus(saved, detailStatusDto, email);
+
+        verify(eventService).saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, updated);
+        verify(notificationService).notifySelfPickupOrder(updated);
+        verify(orderRepository).save(updated);
+
+        assertEquals(OrderStatus.BROUGHT_IT_HIMSELF.name(), result.getOrderStatus());
+    }
+
+    @Test
     void getAllEmployeesByPosition() {
         Order order = getOrder();
         TariffsInfo tariffsInfo = getTariffsInfo();
