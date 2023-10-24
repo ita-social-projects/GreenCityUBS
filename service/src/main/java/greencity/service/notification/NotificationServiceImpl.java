@@ -226,6 +226,18 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void notifySelfPickupOrder(Order order) {
+        Set<NotificationParameter> parameters = Set.of(NotificationParameter.builder()
+            .key(ORDER_NUMBER_KEY)
+            .value(order.getId().toString())
+            .build());
+        fillAndSendNotification(parameters, order, NotificationType.ORDER_STATUS_CHANGED);
+    }
+
     private Double getAmountToPay(Order order) {
         long bonusesInCoins = order.getPointsToUse() == null ? 0L : order.getPointsToUse() * 100L;
         long certificatesInCoins = order.getCertificates() == null ? 0L
