@@ -569,6 +569,7 @@ public class ModelUtils {
     public static Order getOrder() {
         return Order.builder()
             .id(1L)
+            .orderDate(LocalDateTime.of(2023, 10, 20, 14, 58))
             .payment(Lists.newArrayList(Payment.builder()
                 .id(1L)
                 .paymentId("1")

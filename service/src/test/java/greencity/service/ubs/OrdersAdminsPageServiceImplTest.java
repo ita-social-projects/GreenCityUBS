@@ -524,7 +524,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
-        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, 1L);
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
 
         assertNotNull(order.getDateOfExport());
         assertNotNull(order.getDeliverFrom());
@@ -533,6 +533,28 @@ class OrdersAdminsPageServiceImplTest {
         assertNotNull(order.getEmployeeOrderPositions());
 
         verify(orderRepository).save(order);
+    }
+
+    @Test
+    void orderStatusForDevelopStageChangeStatusToBroughtItHimselfTest() {
+        String newStatus = "BROUGHT_IT_HIMSELF";
+        Order saved = ModelUtils.getOrder();
+        saved.setOrderStatus(OrderStatus.FORMED);
+
+        Order expected = ModelUtils.getOrder();
+        expected.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        expected.setDateOfExport(null);
+        expected.setDeliverFrom(null);
+        expected.setDeliverTo(null);
+        expected.setReceivingStation(null);
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(saved));
+
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
+
+        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF), anyString(), any(Order.class));
+        verify(notificationService).notifySelfPickupOrder(expected);
+        verify(orderRepository).save(expected);
     }
 
     @ParameterizedTest
@@ -556,7 +578,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
-        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, 1L);
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
 
         verify(orderRepository).save(order);
     }
@@ -565,7 +587,7 @@ class OrdersAdminsPageServiceImplTest {
     void orderStatusForDevelopStageEntityNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertEquals(List.of(1L),
-            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "", 1L));
+            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "", ModelUtils.getEmployee()));
     }
 
     @Test
@@ -573,7 +595,7 @@ class OrdersAdminsPageServiceImplTest {
         when(orderRepository.findById(1L))
             .thenReturn(Optional.of(ModelUtils.getOrder().setOrderStatus(OrderStatus.FORMED)));
         assertEquals(List.of(1L),
-            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "DONE", 1L));
+            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "DONE", ModelUtils.getEmployee()));
     }
 
     @Test
@@ -581,7 +603,6 @@ class OrdersAdminsPageServiceImplTest {
         var orderId = 1L;
         var ordersId = List.of(orderId);
         var newValue = "CONFIRMED";
-        var employeeId = 3L;
         var anotherEmployeeId = 4L;
 
         var order = Order.builder()
@@ -593,7 +614,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
-        var result = ordersAdminsPageService.orderStatusForDevelopStage(ordersId, newValue, employeeId);
+        var result = ordersAdminsPageService.orderStatusForDevelopStage(ordersId, newValue, ModelUtils.getEmployee());
 
         verify(orderRepository).findById(orderId);
         verify(orderRepository, never()).save(any(Order.class));

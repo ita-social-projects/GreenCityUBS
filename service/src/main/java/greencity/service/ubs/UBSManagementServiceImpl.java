@@ -1030,6 +1030,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 eventService.saveEvent(OrderHistory.ORDER_DONE, email, order);
             } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
                 eventService.saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, order);
+                notificationService.notifySelfPickupOrder(order);
             } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE) {
                 eventService.saveEvent(OrderHistory.ORDER_ON_THE_ROUTE, email, order);
             }
