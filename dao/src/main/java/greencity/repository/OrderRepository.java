@@ -168,14 +168,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Method sets order status by order's id.
      *
-     * @param orderId     - order's ID
-     * @param orderStatus - order status to set
+     * @param orderId            - order's ID
+     * @param orderPaymentStatus - order status to set
      */
     @Modifying
     @Transactional
     @Query(nativeQuery = true,
-        value = "UPDATE orders SET order_payment_status = :orderStatus WHERE id = :orderId")
-    void updateOrderPaymentStatus(@Param(value = "orderId") Long orderId, @Param("orderStatus") String orderStatus);
+        value = "UPDATE orders SET order_payment_status = :orderPaymentStatus WHERE id = :orderId")
+    void updateOrderPaymentStatus(Long orderId, String orderPaymentStatus);
 
     /**
      * Return sum of discounts by order id.

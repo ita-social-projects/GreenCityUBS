@@ -110,6 +110,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
 import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -435,7 +436,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @param address {@link Address}.
      * @return {@link AddressExportDetailsDto}.
-     *
      * @author Yuriy Bahlay.
      */
     private AddressExportDetailsDto getAddressDtoForAdminPage(OrderAddress address) {
@@ -467,7 +467,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @param order {@link Order}.
      * @return {@link GeneralOrderInfo}.
-     *
      * @author Yuriy Bahlay.
      */
     private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Optional<Order> order) {
@@ -507,7 +506,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * ua and en.
      *
      * @return {@link List}.
-     *
      * @author Yuriy Bahlay.
      */
     private List<OrderStatusesTranslationDto> getOrderStatusesTranslation() {
@@ -539,7 +537,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @param orderStatusTranslation      {@link OrderStatusTranslation}.
      * @param orderStatusesTranslationDto {@link OrderStatusesTranslationDto}.
-     *
      * @author Yuriy Bahlay.
      */
     private void setValueForOrderStatusIsNotTakenOutOrDoneOrCancelledAsTrue(
@@ -555,7 +552,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * This is method which is get order payment statuses translation.
      *
      * @return {@link List}.
-     *
      * @author Yuriy Bahlay.
      */
     private List<OrderPaymentStatusesTranslationDto> getOrderPaymentStatusesTranslation() {
@@ -619,7 +615,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 orderDetailRepository
                     .updateConfirm(entry.getValue(), orderId,
                         entry.getKey().longValue());
-                orderDetailRepository.deleteIfConfirmedQuantityIsZero(orderId, entry.getKey().longValue());
             }
         }
 
@@ -633,7 +628,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 orderDetailRepository
                     .updateExporter(entry.getValue(), orderId,
                         entry.getKey().longValue());
-                orderDetailRepository.deleteIfExportedQuantityIsZero(orderId, entry.getKey().longValue());
             }
         }
 
@@ -649,25 +643,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId = order.getId();
 
         if (needToPayInCoins == 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
             return;
         }
         if (totalPriceInCoins - wasPaidInCoins >= 0 && needToPayInCoins < 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
             recalculateCertificates(totalPriceInCoins - wasPaidInCoins, order);
             return;
         }
         if (totalPriceInCoins < wasPaidInCoins) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
             recalculateCertificates(0L, order);
             return;
         }
         if (needToPayInCoins > 0 && wasPaidInCoins + discountInCoins != 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.HALF_PAID.name());
             notificationService.notifyHalfPaidPackage(order);
             return;
         }
         if (wasPaidInCoins + discountInCoins == 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.UNPAID.name());
         }
     }
@@ -827,7 +826,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        List<Bag> bag = orderBagService.findAllBagsInOrderBagsList(orderBagRepository.findOrderBagsByOrderId(id));
+        List<Bag> bag = orderBagService.findAllBagsInOrderBagsList(order.getOrderBags());
         final List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
 
         long sumAmountInCoins = 0;
@@ -1681,7 +1680,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param language                {@link String}.
      * @param email                   {@link String}.
      * @param images                  {@link MultipartFile}.
-     *
      * @author Anton Bondar.
      */
     @Override
@@ -1690,18 +1688,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String language, String email, MultipartFile[] images) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        PaymentTableInfoDto paymentTableInfoDto = getPaymentTableInfo(orderId);
-        Double unPaidAmount = paymentTableInfoDto.getUnPaidAmount();
-        if (Double.compare(unPaidAmount, 0.0) != 0 && order.getOrderPaymentStatus().equals(OrderPaymentStatus.PAID)) {
-            order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
-        }
         updateOrderAdminPageInfo(updateOrderPageAdminDto, order, language, email);
         saveReason(order, updateOrderPageAdminDto.getNotTakenOutReason(), images);
-    }
-
-    private PaymentTableInfoDto getPaymentTableInfo(Long orderId) {
-        CounterOrderDetailsDto prices = getPriceDetails(orderId);
-        return getPaymentInfo(orderId, setTotalPrice(prices));
     }
 
     /**
