@@ -1331,7 +1331,8 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public List<EventDto> getAllEventsForOrder(Long orderId, String email) {
+    public List<EventDto> getAllEventsForOrder(Long orderId, String email, String language) {
+        System.out.println("-----------------------------------------------------------------" + language + "----------------------------------------------------");
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
@@ -1339,6 +1340,14 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
         if (orderEvents.isEmpty()) {
             throw new NotFoundException(EVENTS_NOT_FOUND_EXCEPTION + orderId);
+        }
+        if(language.equals("en")) {
+            return orderEvents
+                    .stream()
+                    .map(event -> event.setEventName(event.getEventNameEng()))
+                    .map(event -> event.setAuthorName(event.getAuthorNameEng()))
+                    .map(event -> modelMapper.map(event, EventDto.class))
+                    .collect(toList());
         }
         return orderEvents
             .stream()

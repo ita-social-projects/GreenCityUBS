@@ -52,6 +52,7 @@ import javax.validation.constraints.Pattern;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @RestController
@@ -250,9 +251,10 @@ public class OrderController {
     @ApiLocale
     @GetMapping("/order_history/{orderId}")
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
-        @Valid @PathVariable("orderId") Long id,
-        Principal principal) {
-        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id, principal.getName()));
+            @Valid @PathVariable("orderId") Long id,
+            Principal principal,
+            @ApiIgnore Locale locale) {
+        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id, principal.getName(), locale.getLanguage()));
     }
 
     /**

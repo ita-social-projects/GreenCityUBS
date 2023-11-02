@@ -287,7 +287,7 @@ public interface UBSClientService {
      * @return {@link List} that contains list of EventsDTOS.
      * @author Yuriy Bahlay.
      */
-    List<EventDto> getAllEventsForOrder(Long orderId, String email);
+    List<EventDto> getAllEventsForOrder(Long orderId, String email, String language);
 
     /**
      * Method that returns order info for surcharge.
