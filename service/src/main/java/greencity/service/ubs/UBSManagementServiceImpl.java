@@ -1006,7 +1006,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         if (nonNull(dto.getAdminComment())) {
             order.setAdminComment(dto.getAdminComment());
-//            eventService.saveEvent(OrderHistory.ADD_ADMIN_COMMENT, email, order, OrderHistory.ADD_ADMIN_COMMENT_ENG);
+            eventService.saveEvent(OrderHistory.ADD_ADMIN_COMMENT, email, order, OrderHistory.ADD_ADMIN_COMMENT_ENG);
             orderRepository.save(order);
         }
         if (nonNull(dto.getOrderStatus())

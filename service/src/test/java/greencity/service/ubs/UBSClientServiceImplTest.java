@@ -227,6 +227,7 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -2820,9 +2821,22 @@ class UBSClientServiceImplTest {
         List<EventDto> eventDTOS = orderEvents.stream()
             .map(event -> modelMapper.map(event, EventDto.class))
             .collect(Collectors.toList());
-        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), anyString()));
+        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), "ua"));
     }
-    // TODO
+
+    @Test
+    void testGelAllEventsFromOrderByOrderIdWithEng() {
+        List<Event> orderEvents = getListOfEvents();
+        when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
+        when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(orderEvents);
+        List<EventDto> eventDTOS = orderEvents.stream()
+                .map(event -> event.setEventName(event.getEventNameEng()))
+                .map(event -> event.setAuthorName(event.getAuthorNameEng()))
+                .map(event -> modelMapper.map(event, EventDto.class))
+                .collect(toList());
+        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), "en"));
+    }
+
     @Test
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());

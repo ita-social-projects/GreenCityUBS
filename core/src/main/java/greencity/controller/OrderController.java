@@ -238,6 +238,7 @@ public class OrderController {
      * Controller gets info about events history from,order by order id.
      *
      * @param id {@link Long}.
+     * @param locale Language
      * @return {@link HttpStatus} - http status.
      * @author Yuriy Bahlay.
      */

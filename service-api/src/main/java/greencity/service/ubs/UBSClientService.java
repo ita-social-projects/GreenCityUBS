@@ -284,6 +284,7 @@ public interface UBSClientService {
      *
      * @param orderId {@link Long} id.
      * @param email   {@link String};
+     * @param language {@link String};
      * @return {@link List} that contains list of EventsDTOS.
      * @author Yuriy Bahlay.
      */
