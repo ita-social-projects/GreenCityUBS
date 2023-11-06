@@ -373,7 +373,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         ubsService.validatePayment(dto);
         verify(eventService, times(1))
-            .save("Замовлення Оплачено", "Система", order, "Order paid", "System");
+            .save("Додано оплату  №1", "Система", order, "Added payment  №1", "System");
         verify(paymentRepository, times(1)).save(payment);
     }
 
