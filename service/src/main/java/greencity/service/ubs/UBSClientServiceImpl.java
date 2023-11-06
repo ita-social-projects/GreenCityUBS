@@ -446,7 +446,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
-        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order, OrderHistory.ORDER_FORMED_ENG, OrderHistory.CLIENT_ENG);
 
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, null);
@@ -1048,7 +1048,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         UBSuser user = optionalUbsUser.get();
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
-        eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().get(0));
+        eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().get(0), OrderHistory.CHANGED_SENDER_ENG);
         return UbsCustomersDto.builder()
             .name(user.getSenderFirstName() + " " + user.getSenderLastName())
             .email(user.getSenderEmail())
@@ -1592,7 +1592,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             order.setOrderStatus(OrderStatus.CONFIRMED);
             orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_CONFIRMED, OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ORDER_CONFIRMED, OrderHistory.SYSTEM, order, OrderHistory.ORDER_CONFIRMED_ENG, OrderHistory.SYSTEM_ENG);
         }
     }
 
@@ -1769,9 +1769,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPayment.setOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order, OrderHistory.ORDER_PAID_ENG, OrderHistory.SYSTEM_ENG);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM, order);
+                OrderHistory.SYSTEM, order, OrderHistory.ADD_PAYMENT_SYSTEM_ENG + orderPayment.getPaymentId(), OrderHistory.SYSTEM_ENG);
         }
     }
 

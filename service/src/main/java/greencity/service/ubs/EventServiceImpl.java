@@ -37,7 +37,7 @@ public class EventServiceImpl implements EventService {
      * @param order       Order.
      * @author Yuriy Bahlay.
      */
-    public void save(String eventName, String eventAuthor, Order order) {
+    public void save(String eventName, String eventAuthor, Order order, String eventNameEng, String eventAuthorNameEng) {
         if (eventName.isEmpty()) {
             return;
         }
@@ -45,6 +45,8 @@ public class EventServiceImpl implements EventService {
         event.setEventDate(LocalDateTime.now());
         event.setEventName(eventName);
         event.setAuthorName(eventAuthor);
+        event.setEventNameEng(eventNameEng);
+        event.setAuthorNameEng(eventAuthorNameEng);
         if (order.getEvents() != null) {
             List<Event> events = new ArrayList<>(order.getEvents());
             events.add(event);
@@ -76,11 +78,11 @@ public class EventServiceImpl implements EventService {
      * @author Hlazova Nataliia.
      */
     @Override
-    public void saveEvent(String name, String email, Order order) {
+    public void saveEvent(String name, String email, Order order, String nameEng) {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         save(name, employee.getFirstName()
-            + "  " + employee.getLastName(), order);
+            + "  " + employee.getLastName(), order, nameEng, employee.getLastName());
     }
 
     @Data

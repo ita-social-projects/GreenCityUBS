@@ -483,7 +483,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
                 if (OrderStatus.BROUGHT_IT_HIMSELF == OrderStatus.valueOf(updatedStatusValue)) {
                     eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF,
-                        employee.getFirstName() + "  " + employee.getLastName(), existedOrder);
+                        employee.getFirstName() + "  " + employee.getLastName(), existedOrder, OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG,
+                            employee.getFirstName() + "  " + employee.getLastName());
                     notificationService.notifySelfPickupOrder(existedOrder);
                 }
             } catch (Exception e) {
@@ -735,7 +736,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
-                eventService.saveEvent(historyChanges, email, existedOrder);
+                eventService.saveEvent(historyChanges, email, existedOrder, historyChanges);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }

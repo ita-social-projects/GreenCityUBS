@@ -42,7 +42,7 @@ class EventServiceImplTest {
     @Test
     void saveEmptyEventTest() {
         Order order = ModelUtils.getOrder();
-        eventService.save("", "admin", order);
+        eventService.save("", "admin", order, "", "admin");
         verify(eventRepository, times(0)).save(any());
     }
 
@@ -62,7 +62,7 @@ class EventServiceImplTest {
             ModelUtils.getListOfEvents().get(1)));
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(ModelUtils.TEST_EMPLOYEE));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
-        eventService.saveEvent("Замовлення оплаченно", "email", order);
+        eventService.saveEvent("Замовлення оплаченно", "email", order, "The order is paid");
         verify(eventRepository, times(1)).save(any());
     }
 }

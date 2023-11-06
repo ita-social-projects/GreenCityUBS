@@ -11,7 +11,7 @@ public interface EventService {
      * @param order       Order.
      * @author Yuriy Bahlay.
      */
-    void save(String eventName, String eventAuthor, Order order);
+    void save(String eventName, String eventAuthor, Order order, String eventNameEng, String eventAuthorNameEng);
 
     /**
      * This method return correct status for changes with Responsible employee.
@@ -30,5 +30,5 @@ public interface EventService {
      * @param email {@link String}.
      * @author Hlazova Nataliia.
      */
-    void saveEvent(String name, String email, Order order);
+    void saveEvent(String name, String email, Order order, String nameEng);
 }
