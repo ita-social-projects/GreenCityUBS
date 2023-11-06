@@ -36,7 +36,7 @@ class EventServiceImplTest {
             ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
         eventService.save("Замовлення оплаченно", "Анжрій Іванюк", order,
-                "Order paid", "Анжрій Іванюк" );
+            "Order paid", "Анжрій Іванюк");
         verify(eventRepository, times(1)).save(any());
     }
 

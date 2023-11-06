@@ -340,7 +340,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Optional<OrderAddress> addressForAdminPage = orderAddressRepository.findById(dtoUpdate.getAddressId());
         if (addressForAdminPage.isPresent()) {
             orderAddressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
-            eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order, OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_ENG);
+            eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order,
+                OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_ENG);
             return addressForAdminPage.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
         } else {
             throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getAddressId());
@@ -1021,7 +1022,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.FORMED) {
                 eventService.saveEvent(OrderHistory.ORDER_FORMED, email, order, OrderHistory.ORDER_FORMED_ENG);
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT, email, order, OrderHistory.ORDER_NOT_TAKEN_OUT_ENG);
+                eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT, email, order,
+                    OrderHistory.ORDER_NOT_TAKEN_OUT_ENG);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
                 verifyPaidWithBonuses(order, email);
                 setOrderCancellation(order, dto.getCancellationReason(), dto.getCancellationComment());
@@ -1029,10 +1031,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
                 eventService.saveEvent(OrderHistory.ORDER_DONE, email, order, OrderHistory.ORDER_DONE_ENG);
             } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
-                eventService.saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, order, OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
+                eventService.saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, order,
+                    OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
                 notificationService.notifySelfPickupOrder(order);
             } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE) {
-                eventService.saveEvent(OrderHistory.ORDER_ON_THE_ROUTE, email, order, OrderHistory.ORDER_ON_THE_ROUTE_ENG);
+                eventService.saveEvent(OrderHistory.ORDER_ON_THE_ROUTE, email, order,
+                    OrderHistory.ORDER_ON_THE_ROUTE_ENG);
             }
             orderRepository.save(order);
         }
@@ -1206,7 +1210,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setDeliverFrom(getUpdatedDeliveryFrom(dto.getTimeDeliveryFrom(), order));
         order.setDeliverTo(getUpdatedDeliveryTo(dto.getTimeDeliveryTo(), order));
         orderRepository.save(order);
-        eventService.saveEvent(action + getEventOnUpdateExportDetails(order), email, order, actionEng + getEventOnUpdateExportDetails(order));
+        eventService.saveEvent(action + getEventOnUpdateExportDetails(order), email, order,
+            actionEng + getEventOnUpdateExportDetails(order));
         return buildExportDto(order, receivingStation);
     }
 
@@ -1395,8 +1400,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         paymentRepository.deletePaymentById(paymentId);
         eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder(),
-                OrderHistory.DELETE_PAYMENT_MANUALLY_ENG + payment.getPaymentId(),
-                employee.getFirstName() + "  " + employee.getLastName());
+            OrderHistory.DELETE_PAYMENT_MANUALLY_ENG + payment.getPaymentId(),
+            employee.getFirstName() + "  " + employee.getLastName());
         updateOrderPaymentStatusForManualPayment(payment.getOrder());
     }
 
@@ -1414,8 +1419,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Payment paymentUpdated = paymentRepository.save(changePaymentEntity(payment, paymentRequestDto, image));
         eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder(),
-                OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG + paymentRequestDto.getPaymentId(),
-                employee.getFirstName() + "  " + employee.getLastName());
+            OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG + paymentRequestDto.getPaymentId(),
+            employee.getFirstName() + "  " + employee.getLastName());
 
         ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(paymentUpdated);
         updateOrderPaymentStatusForManualPayment(payment.getOrder());
@@ -1432,11 +1437,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if (paymentsForCurrentOrder > 0 && totalAmount > totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
-            eventService.save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order, OrderHistory.ORDER_HALF_PAID_ENG, OrderHistory.SYSTEM_ENG);
+            eventService.save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order,
+                OrderHistory.ORDER_HALF_PAID_ENG, OrderHistory.SYSTEM_ENG);
             notificationService.notifyHalfPaidPackage(order);
         } else if (paymentsForCurrentOrder > 0 && totalAmount <= totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order, OrderHistory.ORDER_PAID_ENG, OrderHistory.SYSTEM_ENG);
+            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order, OrderHistory.ORDER_PAID_ENG,
+                OrderHistory.SYSTEM_ENG);
             notificationService.notifyPaidOrder(order);
         } else if (paymentsForCurrentOrder == 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
@@ -1496,8 +1503,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), order,
-                OrderHistory.ADD_PAYMENT_MANUALLY_ENG + paymentRequestDto.getPaymentId(),
-                employee.getFirstName() + "  " + employee.getLastName());
+            OrderHistory.ADD_PAYMENT_MANUALLY_ENG + paymentRequestDto.getPaymentId(),
+            employee.getFirstName() + "  " + employee.getLastName());
         return payment;
     }
 

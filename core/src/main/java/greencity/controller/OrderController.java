@@ -237,7 +237,7 @@ public class OrderController {
     /**
      * Controller gets info about events history from,order by order id.
      *
-     * @param id {@link Long}.
+     * @param id     {@link Long}.
      * @param locale Language
      * @return {@link HttpStatus} - http status.
      * @author Yuriy Bahlay.
@@ -252,10 +252,11 @@ public class OrderController {
     @ApiLocale
     @GetMapping("/order_history/{orderId}")
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
-            @Valid @PathVariable("orderId") Long id,
-            Principal principal,
-            @ApiIgnore Locale locale) {
-        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id, principal.getName(), locale.getLanguage()));
+        @Valid @PathVariable("orderId") Long id,
+        Principal principal,
+        @ApiIgnore Locale locale) {
+        return ResponseEntity.ok()
+            .body(ubsClientService.getAllEventsForOrder(id, principal.getName(), locale.getLanguage()));
     }
 
     /**

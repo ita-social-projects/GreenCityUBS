@@ -37,7 +37,8 @@ public class EventServiceImpl implements EventService {
      * @param order       Order.
      * @author Yuriy Bahlay.
      */
-    public void save(String eventName, String eventAuthor, Order order, String eventNameEng, String eventAuthorNameEng) {
+    public void save(String eventName, String eventAuthor, Order order, String eventNameEng,
+        String eventAuthorNameEng) {
         if (eventName.isEmpty()) {
             return;
         }

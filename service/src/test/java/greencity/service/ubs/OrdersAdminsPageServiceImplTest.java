@@ -553,7 +553,7 @@ class OrdersAdminsPageServiceImplTest {
         ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
 
         verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF), anyString(), any(Order.class),
-                eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG), anyString());
+            eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG), anyString());
         verify(notificationService).notifySelfPickupOrder(expected);
         verify(orderRepository).save(expected);
     }

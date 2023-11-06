@@ -58,7 +58,8 @@ public final class OrderHistory {
     public static final String RETURN_OVERPAYMENT_TO_CLIENT = "Повернено кошти клієнту";
     public static final String RETURN_OVERPAYMENT_AS_BONUS_TO_CLIENT = "Зараховано кошти на бонусний рахунок клієнта";
     public static final String RETURN_BONUSES_TO_CLIENT = "Невикористані бонуси повернено на бонусний рахунок клієнта";
-    public static final String RETURN_BONUSES_TO_CLIENT_ENG = "Unused bonuses are returned to the client's bonus account";
+    public static final String RETURN_BONUSES_TO_CLIENT_ENG =
+        "Unused bonuses are returned to the client's bonus account";
     public static final String WASTE_REMOVAL_ADDRESS_CHANGE = "Змінено адресу вивезення відходів";
     public static final String WASTE_REMOVAL_ADDRESS_CHANGE_ENG = "The address of waste removal has been changed";
     public static final String ADD_ADMIN_COMMENT = "Додано коментар";

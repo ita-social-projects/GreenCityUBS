@@ -196,7 +196,8 @@ public class ViolationServiceImpl implements ViolationService {
             .orElseThrow(() -> new NotFoundException(ORDER_HAS_NOT_VIOLATION));
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
-        eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getEmail(), violation.getOrder(), OrderHistory.CHANGES_VIOLATION_ENG);
+        eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getEmail(), violation.getOrder(),
+            OrderHistory.CHANGES_VIOLATION_ENG);
     }
 
     private void updateViolation(Violation violation, UpdateViolationToUserDto add, MultipartFile[] multipartFiles) {

@@ -483,8 +483,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
                 if (OrderStatus.BROUGHT_IT_HIMSELF == OrderStatus.valueOf(updatedStatusValue)) {
                     eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF,
-                        employee.getFirstName() + "  " + employee.getLastName(), existedOrder, OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG,
-                            employee.getFirstName() + "  " + employee.getLastName());
+                        employee.getFirstName() + "  " + employee.getLastName(), existedOrder,
+                        OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG,
+                        employee.getFirstName() + "  " + employee.getLastName());
                     notificationService.notifySelfPickupOrder(existedOrder);
                 }
             } catch (Exception e) {
