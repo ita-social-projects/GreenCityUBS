@@ -391,11 +391,13 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order,
+                OrderHistory.ADD_PAYMENT_MANUALLY_ENG + 1, "Петро" + "  " + "Петренко");
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, image, "test@gmail.com");
 
         verify(eventService, times(1))
-            .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order, "Added payment №1",
+                    "Петро  Петренко");
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -420,7 +422,8 @@ class UBSManagementServiceImplTest {
         doNothing().when(fileService).delete("");
         doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + getManualPayment().getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(),
-            getOrder());
+            getOrder(), OrderHistory.DELETE_PAYMENT_MANUALLY_ENG + getManualPayment().getPaymentId(),
+                employee.getFirstName() + "  " + employee.getLastName());
         ubsManagementService.deleteManualPayment(1L, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).deletePaymentById(1L);
@@ -436,11 +439,11 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
             employee.getFirstName() + "  " + employee.getLastName(),
-            getOrder());
+            getOrder(), OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG + 1, employee.getFirstName() + "  " + employee.getLastName());
         ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
-        verify(eventService, times(2)).save(any(), any(), any());
+        verify(eventService, times(2)).save(any(), any(), any(), any(), any());
         verify(fileService, times(0)).delete(null);
     }
 
@@ -467,11 +470,11 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(any(), any(), any());
+        doNothing().when(eventService).save(any(), any(), any(), any() , any());
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
-            "Петро  Петренко", order);
+            "Петро  Петренко", order, OrderHistory.ADD_PAYMENT_MANUALLY_ENG + 1, "Петро  Петренко");
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -500,16 +503,16 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(any(), any(), any());
+        doNothing().when(eventService).save(any(), any(), any(), any(), any());
         when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
 
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
 
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
-            "Петро  Петренко", order);
+            "Петро  Петренко", order, OrderHistory.ADD_PAYMENT_MANUALLY_ENG + 1, "Петро  Петренко");
         verify(eventService, times(1))
-            .save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
+            .save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order, OrderHistory.ORDER_HALF_PAID_ENG, OrderHistory.SYSTEM_ENG);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -537,13 +540,13 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(any(), any(), any());
+        doNothing().when(eventService).save(any(), any(), any(), any(), any());
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
-            "Петро  Петренко", order);
+            "Петро  Петренко", order, OrderHistory.ADD_PAYMENT_MANUALLY_ENG + 1, "Петро  Петренко");
         verify(eventService, times(1))
-            .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order, OrderHistory.ORDER_PAID_ENG, OrderHistory.SYSTEM_ENG);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -569,10 +572,11 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order,
+                OrderHistory.ADD_PAYMENT_MANUALLY_ENG + 1, "Петро" + "  " + "Петренко");
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(eventService, times(1))
-            .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order, "Added payment №1", "Петро  Петренко");
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -598,10 +602,11 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order,
+                OrderHistory.ADD_PAYMENT_MANUALLY_ENG + 1, "Петро" + "  " + "Петренко");
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(eventService, times(1))
-            .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order, "Added payment №1", "Петро  Петренко");
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -627,10 +632,11 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order,
+                OrderHistory.ADD_PAYMENT_MANUALLY_ENG + 1, "Петро" + "  " + "Петренко");
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(eventService, times(1))
-            .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order, "Added payment №1", "Петро  Петренко");
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -656,10 +662,11 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order,
+                OrderHistory.ADD_PAYMENT_MANUALLY_ENG + 1, "Петро" + "  " + "Петренко");
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(eventService, times(1))
-            .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order, "Added payment №1", "Петро  Петренко");
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -679,11 +686,11 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         when(fileService.upload(file)).thenReturn("path");
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum",
-            getOrder());
+            getOrder(), OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG + 1, "Yuriy" + "  " + "Gerasum");
         ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), file, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
-        verify(eventService, times(2)).save(any(), any(), any());
+        verify(eventService, times(2)).save(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -878,17 +885,16 @@ class UBSManagementServiceImplTest {
         assertEquals(0, order.getPointsToUse());
 
         verify(eventService, times(1))
-            .saveEvent("Статус Замовлення - Узгодження",
-                "test@gmail.com", order);
+            .saveEvent("Статус Замовлення - Узгодження","test@gmail.com", order, "Order Status - Approval");
         verify(eventService, times(1))
-            .saveEvent("Статус Замовлення - Підтверджено",
-                "test@gmail.com", order);
-        verify(eventService, times(3))
-            .saveEvent("Статус Замовлення - Скасовано",
-                "test@gmail.com", order);
+                .saveEvent("Статус Замовлення - Підтверджено","test@gmail.com", order, "Order Status - Confirmed");
+        verify(eventService, times(1))
+            .saveEvent("Статус Замовлення - Сформовано",
+                "test@gmail.com", order, "Order Status - Formed");
         verify(eventService, times(1))
             .saveEvent("Невикористані бонуси повернено на бонусний рахунок клієнта" + ". Всього " + 700,
-                "test@gmail.com", order);
+                "test@gmail.com", order,
+                    "Unused bonuses are returned to the client's bonus account" + ". General " + 700);
     }
 
     @Test
@@ -942,7 +948,7 @@ class UBSManagementServiceImplTest {
 
         OrderDetailStatusDto result = ubsManagementService.updateOrderDetailStatus(saved, detailStatusDto, email);
 
-        verify(eventService).saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, updated);
+        verify(eventService).saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, updated, OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
         verify(notificationService).notifySelfPickupOrder(updated);
         verify(orderRepository).save(updated);
 
@@ -2079,12 +2085,13 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order,
+                OrderHistory.ADD_PAYMENT_MANUALLY_ENG + 1, "Петро" + "  " + "Петренко");
         ubsManagementService.saveNewManualPayment(1L, paymentDetails, Mockito.mock(MultipartFile.class),
             "test@gmail.com");
 
         verify(eventService, times(1))
-            .save("Замовлення Оплачено", "Система", order);
+            .save("Замовлення Оплачено", "Система", order, "Order Paid", "System");
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -2344,7 +2351,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.updateManualPayment(payment.getId(), requestDto, file, employee.getUuid());
 
         verify(paymentRepository).save(any(Payment.class));
-        verify(eventService, times(2)).save(any(), any(), any());
+        verify(eventService, times(2)).save(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -2594,7 +2601,9 @@ class UBSManagementServiceImplTest {
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService).delete(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
-            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder(),
+                OrderHistory.DELETE_PAYMENT_MANUALLY_ENG + payment.getPaymentId(),
+                employee.getFirstName() + "  " + employee.getLastName());
 
     }
 
@@ -2616,7 +2625,9 @@ class UBSManagementServiceImplTest {
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService, times(0)).delete(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
-            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder(),
+                OrderHistory.DELETE_PAYMENT_MANUALLY_ENG + payment.getPaymentId(),
+                employee.getFirstName() + "  " + employee.getLastName());
     }
 
     @Test
@@ -2650,7 +2661,7 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).save(order);
         verify(userRepository).save(user);
         verify(notificationService).notifyBonuses(order, 900L);
-        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order, OrderHistory.ADDED_BONUSES_ENG);
     }
 
     @Test
@@ -2670,7 +2681,7 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).save(order);
         verify(userRepository).save(user);
         verify(notificationService).notifyBonuses(order, 200L);
-        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order, OrderHistory.ADDED_BONUSES_ENG);
     }
 
     @Test
@@ -2688,7 +2699,7 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).save(order);
         verify(userRepository).save(user);
         verify(notificationService).notifyBonuses(order, 300L);
-        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order, OrderHistory.ADDED_BONUSES_ENG);
     }
 
     @Test

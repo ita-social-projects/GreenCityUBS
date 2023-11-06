@@ -2176,7 +2176,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
+                "Назвав івенту", "Автор", "Event name", "Author", new Order())))
             .orderStatus(OrderStatus.FORMED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
@@ -2197,8 +2197,8 @@ public class ModelUtils {
     public static Order getCanceledPaidOrder() {
         return Order.builder()
             .id(1L)
-            .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
+                .events(List.of(new Event(1L, LocalDateTime.now(),
+                        "Назвав івенту", "Автор", "Event name", "Author", new Order())))
             .orderStatus(OrderStatus.CANCELED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
@@ -2219,8 +2219,8 @@ public class ModelUtils {
     public static Order getAdjustmentPaidOrder() {
         return Order.builder()
             .id(1L)
-            .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
+                .events(List.of(new Event(1L, LocalDateTime.now(),
+                        "Назвав івенту", "Автор", "Event name", "Author", new Order())))
             .orderStatus(OrderStatus.ADJUSTMENT)
             .payment(singletonList(Payment.builder()
                 .id(1L)
@@ -2241,8 +2241,8 @@ public class ModelUtils {
     public static Order getFormedHalfPaidOrder() {
         return Order.builder()
             .id(1L)
-            .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
+                .events(List.of(new Event(1L, LocalDateTime.now(),
+                        "Назвав івенту", "Автор", "Event name", "Author", new Order())))
             .orderStatus(OrderStatus.FORMED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
@@ -2263,8 +2263,8 @@ public class ModelUtils {
     public static Order getCanceledHalfPaidOrder() {
         return Order.builder()
             .id(1L)
-            .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
+                .events(List.of(new Event(1L, LocalDateTime.now(),
+                        "Назвав івенту", "Автор", "Event name", "Author", new Order())))
             .orderStatus(OrderStatus.CANCELED)
             .payment(singletonList(Payment.builder()
                 .id(1L)

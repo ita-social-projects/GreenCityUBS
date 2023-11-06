@@ -552,7 +552,8 @@ class OrdersAdminsPageServiceImplTest {
 
         ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
 
-        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF), anyString(), any(Order.class));
+        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF), anyString(), any(Order.class),
+                eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG), anyString());
         verify(notificationService).notifySelfPickupOrder(expected);
         verify(orderRepository).save(expected);
     }
@@ -754,7 +755,7 @@ class OrdersAdminsPageServiceImplTest {
         verify(employeeRepository).findById(1L);
         verify(orderRepository).findById(1L);
         verify(orderRepository, never()).save(any(Order.class));
-        verify(eventService, never()).save(anyString(), anyString(), any(Order.class));
+        verify(eventService, never()).save(anyString(), anyString(), any(Order.class), anyString(), anyString());
 
         assertTrue(order.isBlocked());
         assertEquals(blockedByEmployee.get(), order.getBlockedByEmployee());

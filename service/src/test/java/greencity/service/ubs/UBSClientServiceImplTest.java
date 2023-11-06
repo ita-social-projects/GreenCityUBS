@@ -372,7 +372,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         ubsService.validatePayment(dto);
         verify(eventService, times(1))
-            .save("Замовлення Оплачено", "Система", order);
+            .save("Замовлення Оплачено", "Система", order, "Order paid", "System");
         verify(paymentRepository, times(1)).save(payment);
     }
 
@@ -2820,14 +2820,14 @@ class UBSClientServiceImplTest {
         List<EventDto> eventDTOS = orderEvents.stream()
             .map(event -> modelMapper.map(event, EventDto.class))
             .collect(Collectors.toList());
-        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString()));
+        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), anyString()));
     }
-
+    // TODO
     @Test
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc"));
+            () -> ubsService.getAllEventsForOrder(1L, "abc", "test"));
     }
 
     @Test
@@ -2835,7 +2835,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(Collections.emptyList());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc"));
+            () -> ubsService.getAllEventsForOrder(1L, "abc", "test"));
     }
 
     @Test
