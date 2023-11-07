@@ -45,6 +45,7 @@ public class EventServiceImpl implements EventService {
         event.setEventDate(LocalDateTime.now());
         event.setEventName(eventName);
         event.setAuthorName(eventAuthor);
+        saveEventEng(eventName, eventAuthor, event);
         if (order.getEvents() != null) {
             List<Event> events = new ArrayList<>(order.getEvents());
             events.add(event);
@@ -52,6 +53,62 @@ public class EventServiceImpl implements EventService {
         }
         event.setOrder(order);
         eventRepository.save(event);
+    }
+
+    private static void saveEventEng(String eventName, String eventAuthor, Event event) {
+        switch (eventName) {
+            case OrderHistory.ORDER_FORMED:
+                event.setEventNameEng(OrderHistory.ORDER_FORMED_ENG);
+                event.setAuthorNameEng(OrderHistory.CLIENT_ENG);
+                break;
+            case OrderHistory.ORDER_PAID:
+                event.setEventNameEng(OrderHistory.ORDER_PAID_ENG);
+                event.setAuthorNameEng(OrderHistory.SYSTEM_ENG);
+                break;
+            case OrderHistory.ADD_PAYMENT_SYSTEM:
+                event.setEventNameEng(OrderHistory.ADD_PAYMENT_SYSTEM_ENG);
+                event.setAuthorNameEng(OrderHistory.SYSTEM_ENG);
+                break;
+            case OrderHistory.ORDER_ADJUSTMENT:
+                event.setEventNameEng(OrderHistory.ORDER_ADJUSTMENT_ENG);
+                event.setAuthorNameEng(eventAuthor);
+                break;
+            case OrderHistory.ORDER_BROUGHT_IT_HIMSELF:
+                event.setEventNameEng(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
+                event.setAuthorNameEng(eventAuthor);
+                break;
+            case OrderHistory.ORDER_CONFIRMED:
+                event.setEventNameEng(OrderHistory.ORDER_CONFIRMED_ENG);
+                event.setAuthorNameEng(OrderHistory.SYSTEM_ENG);
+                break;
+            case OrderHistory.DELETE_PAYMENT_MANUALLY:
+                event.setEventNameEng(OrderHistory.DELETE_PAYMENT_MANUALLY_ENG);
+                event.setAuthorNameEng(eventAuthor);
+                break;
+            case OrderHistory.UPDATE_PAYMENT_MANUALLY:
+                event.setEventNameEng(OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG);
+                event.setAuthorNameEng(eventAuthor);
+                break;
+            case OrderHistory.ORDER_HALF_PAID:
+                event.setEventNameEng(OrderHistory.ORDER_HALF_PAID_ENG);
+                event.setAuthorNameEng(OrderHistory.SYSTEM_ENG);
+                break;
+            case OrderHistory.ADD_PAYMENT_MANUALLY:
+                event.setEventNameEng(OrderHistory.ADD_PAYMENT_MANUALLY_ENG);
+                event.setAuthorNameEng(eventAuthor);
+                break;
+            case OrderHistory.ADD_ADMIN_COMMENT:
+                event.setEventNameEng(OrderHistory.ADD_ADMIN_COMMENT_ENG);
+                event.setAuthorNameEng(eventAuthor);
+                break;
+            case OrderHistory.DELETE_VIOLATION:
+                event.setEventNameEng(OrderHistory.DELETE_VIOLATION_ENG);
+                event.setAuthorNameEng(eventAuthor);
+                break;
+            default:
+                event.setEventNameEng(eventName);
+                event.setAuthorNameEng(eventAuthor);
+        }
     }
 
     /**

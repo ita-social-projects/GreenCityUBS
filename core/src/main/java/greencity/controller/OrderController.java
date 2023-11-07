@@ -25,6 +25,7 @@ import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.service.ubs.EventService;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
@@ -52,6 +53,7 @@ import javax.validation.constraints.Pattern;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @RestController
@@ -189,6 +191,23 @@ public class OrderController {
     }
 
     /**
+     * Controller saves all entered by user data to database.
+     *
+     * @author Oleh Bilonizhka
+     */
+    @ApiOperation(value = "Process user order.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping(value = {"/TestSave"})
+    public ResponseEntity saveTest(Long id, String eventName, String eventAuthor) {
+        ubsClientService.testSave(id, eventName, eventAuthor);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
      * Controller checks if received data is valid and stores payment info if is.
      *
      * @param dto {@link PaymentResponseDto} - response order data.
@@ -251,8 +270,10 @@ public class OrderController {
     @GetMapping("/order_history/{orderId}")
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
         @Valid @PathVariable("orderId") Long id,
-        Principal principal) {
-        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id, principal.getName()));
+        Principal principal,
+        @ApiIgnore Locale locale) {
+        return ResponseEntity.ok()
+            .body(ubsClientService.getAllEventsForOrder(id, principal.getName(), locale.getLanguage()));
     }
 
     /**

@@ -287,7 +287,7 @@ public interface UBSClientService {
      * @return {@link List} that contains list of EventsDTOS.
      * @author Yuriy Bahlay.
      */
-    List<EventDto> getAllEventsForOrder(Long orderId, String email);
+    List<EventDto> getAllEventsForOrder(Long orderId, String email, String language);
 
     /**
      * Method that returns order info for surcharge.
@@ -423,4 +423,11 @@ public interface UBSClientService {
      */
 
     List<DistrictDto> getAllDistricts(String region, String city);
+
+    /**
+     * Method gets all districts in city.
+     *
+     */
+
+    void testSave(Long id, String eventName, String eventAuthor);
 }
