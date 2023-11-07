@@ -2176,7 +2176,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
+                "Roman", "Roman", "Roman", "Roman", new Order())))
             .orderStatus(OrderStatus.FORMED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
@@ -2198,7 +2198,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
+                "Roman", "Roman", "Roman", "Roman", new Order())))
             .orderStatus(OrderStatus.CANCELED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
@@ -2220,7 +2220,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
+                "Roman", "Roman", "Roman", "Roman", new Order())))
             .orderStatus(OrderStatus.ADJUSTMENT)
             .payment(singletonList(Payment.builder()
                 .id(1L)
@@ -2242,7 +2242,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
+                "Roman", "Roman", "Roman", "Roman", new Order())))
             .orderStatus(OrderStatus.FORMED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
@@ -2264,7 +2264,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
+                "Roman", "Roman", "Roman", "Roman", new Order())))
             .orderStatus(OrderStatus.CANCELED)
             .payment(singletonList(Payment.builder()
                 .id(1L)

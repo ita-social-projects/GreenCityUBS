@@ -423,11 +423,4 @@ public interface UBSClientService {
      */
 
     List<DistrictDto> getAllDistricts(String region, String city);
-
-    /**
-     * Method gets all districts in city.
-     *
-     */
-
-    void testSave(Long id, String eventName, String eventAuthor);
 }

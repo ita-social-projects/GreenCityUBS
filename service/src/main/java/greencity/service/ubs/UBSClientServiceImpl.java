@@ -1957,11 +1957,4 @@ public class UBSClientServiceImpl implements UBSClientService {
         return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
             .collect(Collectors.toList());
     }
-
-    @Override
-    public void testSave(Long id, String eventName, String eventAuthor) {
-        Order order = orderRepository.findById(id).orElseThrow(
-            () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
-        eventService.save(eventName, eventAuthor, order);
-    }
 }

@@ -191,23 +191,6 @@ public class OrderController {
     }
 
     /**
-     * Controller saves all entered by user data to database.
-     *
-     * @author Oleh Bilonizhka
-     */
-    @ApiOperation(value = "Process user order.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping(value = {"/TestSave"})
-    public ResponseEntity saveTest(Long id, String eventName, String eventAuthor) {
-        ubsClientService.testSave(id, eventName, eventAuthor);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    /**
      * Controller checks if received data is valid and stores payment info if is.
      *
      * @param dto {@link PaymentResponseDto} - response order data.
