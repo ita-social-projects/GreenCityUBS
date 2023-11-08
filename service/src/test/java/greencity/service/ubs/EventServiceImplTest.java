@@ -57,7 +57,7 @@ class EventServiceImplTest {
         String orderPaid = OrderHistory.ORDER_PAID;
         String addPaymentSystem = OrderHistory.ADD_PAYMENT_SYSTEM;
         String orderAdjustment = OrderHistory.ORDER_ADJUSTMENT;
-        String orderBroughtItHimself = OrderHistory.ORDER_BROUGHT_IT_HIMSELF;
+        String orderConfirmed = OrderHistory.ORDER_CONFIRMED;
         String eventAuthor = "Test";
         Order order = ModelUtils.getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
@@ -68,7 +68,7 @@ class EventServiceImplTest {
         eventService.save(orderPaid, eventAuthor, order);
         eventService.save(addPaymentSystem, eventAuthor, order);
         eventService.save(orderAdjustment, eventAuthor, order);
-        eventService.save(orderBroughtItHimself, eventAuthor, order);
+        eventService.save(orderConfirmed, eventAuthor, order);
 
         assertEquals(OrderHistory.ORDER_FORMED_ENG, "Order Status - Formed");
         assertEquals(OrderHistory.CLIENT_ENG, "Client");
@@ -76,8 +76,42 @@ class EventServiceImplTest {
         assertEquals(OrderHistory.SYSTEM_ENG, "System");
         assertEquals(OrderHistory.ADD_PAYMENT_SYSTEM_ENG, "Added payment");
         assertEquals(OrderHistory.ORDER_ADJUSTMENT_ENG, "Order Status - Approval");
-        assertEquals(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG, "Order status - Will bring it myself");
+        assertEquals(OrderHistory.ORDER_CONFIRMED_ENG, "Order Status - Confirmed");
         verify(eventRepository, times(5)).save(any());
+    }
+
+    @Test
+    void testSaveEventEngWithUserName() {
+        String deletePaymentManuallyEng = OrderHistory.DELETE_PAYMENT_MANUALLY;
+        String orderBroughtItHimself = OrderHistory.ORDER_BROUGHT_IT_HIMSELF;
+        String updatePaymentManually = OrderHistory.UPDATE_PAYMENT_MANUALLY;
+        String orderHalfPaid = OrderHistory.ORDER_HALF_PAID;
+        String addPaymentManually = OrderHistory.ADD_PAYMENT_MANUALLY;
+        String addAdminComment = OrderHistory.ADD_ADMIN_COMMENT;
+        String deleteViolation = OrderHistory.DELETE_VIOLATION;
+        String userName = "Test";
+        Order order = ModelUtils.getOrder();
+        order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
+            ModelUtils.getListOfEvents().get(1)));
+        when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
+
+        eventService.save(deletePaymentManuallyEng, userName, order);
+        eventService.save(orderBroughtItHimself, userName, order);
+        eventService.save(updatePaymentManually, userName, order);
+        eventService.save(orderHalfPaid, userName, order);
+        eventService.save(addPaymentManually, userName, order);
+        eventService.save(addAdminComment, userName, order);
+        eventService.save(deleteViolation, userName, order);
+
+        assertEquals(OrderHistory.DELETE_PAYMENT_MANUALLY_ENG, "Payments have been removed");
+        assertEquals(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG, "Order status - Will bring it myself");
+        assertEquals(OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG, "Payment details have been changed");
+        assertEquals(OrderHistory.ORDER_HALF_PAID_ENG, "Order partially paid");
+        assertEquals(OrderHistory.ADD_PAYMENT_MANUALLY_ENG, "Added payment");
+        assertEquals(OrderHistory.ADD_ADMIN_COMMENT_ENG, "Comment added");
+        assertEquals(OrderHistory.DELETE_VIOLATION_ENG, "Violation removed");
+
+        verify(eventRepository, times(7)).save(any());
     }
 
     @Test
