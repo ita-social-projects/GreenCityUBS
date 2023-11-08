@@ -25,7 +25,6 @@ import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.service.ubs.EventService;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
