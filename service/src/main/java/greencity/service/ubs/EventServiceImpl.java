@@ -55,6 +55,13 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(event);
     }
 
+    /**
+     * This is method which save event in eng language.
+     *
+     * @param eventName   String.
+     * @param eventAuthor String.
+     * @param event       Event.
+     */
     private static void saveEventEng(String eventName, String eventAuthor, Event event) {
         switch (eventName) {
             case OrderHistory.ORDER_FORMED:
