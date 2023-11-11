@@ -258,6 +258,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String KYIV_REGION_UA = "Київська область";
     private static final String KYIV_EN = "Kyiv";
     private static final String KYIV_UA = "місто Київ";
+    private static final String LANGUAGE_EN = "en";
 
     @Override
     @Transactional
@@ -1340,11 +1341,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (orderEvents.isEmpty()) {
             throw new NotFoundException(EVENTS_NOT_FOUND_EXCEPTION + orderId);
         }
-        if (language.equals("en")) {
+        if (LANGUAGE_EN.equals(language)) {
             return orderEvents
                 .stream()
-                .map(event -> event.setEventName(event.getEventNameEng()))
-                .map(event -> event.setAuthorName(event.getAuthorNameEng()))
+                .peek(event -> {
+                    event.setEventName(event.getEventNameEng());
+                    event.setAuthorName(event.getAuthorNameEng());
+                })
                 .map(event -> modelMapper.map(event, EventDto.class))
                 .collect(toList());
         }

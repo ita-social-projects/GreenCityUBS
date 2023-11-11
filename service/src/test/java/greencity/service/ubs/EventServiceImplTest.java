@@ -53,22 +53,23 @@ class EventServiceImplTest {
 
     @Test
     void testSaveEventEng() {
-        String eventAuthor = "Test";
+        String eventAuthorSystem = "Система";
+        String eventAuthorClient = "Клієнт";
         Order order = ModelUtils.getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
 
-        eventService.save(OrderHistory.ORDER_FORMED, eventAuthor, order);
-        eventService.save(OrderHistory.ORDER_PAID, eventAuthor, order);
-        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM, eventAuthor, order);
-        eventService.save(OrderHistory.ORDER_ADJUSTMENT, eventAuthor, order);
-        eventService.save(OrderHistory.ORDER_CONFIRMED, eventAuthor, order);
+        eventService.save(OrderHistory.ORDER_FORMED, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_PAID, eventAuthorClient, order);
+        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_ADJUSTMENT, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_CONFIRMED, eventAuthorSystem, order);
 
         assertEquals("Order Status - Formed", OrderHistory.ORDER_FORMED_ENG);
+        assertEquals("System", OrderHistory.SYSTEM_ENG);
         assertEquals("Client", OrderHistory.CLIENT_ENG);
         assertEquals("Order Paid", OrderHistory.ORDER_PAID_ENG);
-        assertEquals("System", OrderHistory.SYSTEM_ENG);
         assertEquals("Added payment", OrderHistory.ADD_PAYMENT_SYSTEM_ENG);
         assertEquals("Order Status - Approval", OrderHistory.ORDER_ADJUSTMENT_ENG);
         assertEquals("Order Status - Confirmed", OrderHistory.ORDER_CONFIRMED_ENG);

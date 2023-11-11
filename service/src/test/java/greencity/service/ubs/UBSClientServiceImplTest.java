@@ -2830,8 +2830,10 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(orderEvents);
         List<EventDto> eventDTOS = orderEvents.stream()
-            .map(event -> event.setEventName(event.getEventNameEng()))
-            .map(event -> event.setAuthorName(event.getAuthorNameEng()))
+            .peek(event -> {
+                event.setEventName(event.getEventNameEng());
+                event.setAuthorName(event.getAuthorNameEng());
+            })
             .map(event -> modelMapper.map(event, EventDto.class))
             .collect(toList());
         assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), "en"));
