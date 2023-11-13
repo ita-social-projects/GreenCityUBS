@@ -1344,11 +1344,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (LANGUAGE_EN.equals(language)) {
             return orderEvents
                 .stream()
-                .map(event -> {
+                .peek(event -> {
                     event.setEventName(event.getEventNameEng());
                     event.setAuthorName(event.getAuthorNameEng());
-                    return modelMapper.map(event, EventDto.class);
                 })
+                .map(event -> modelMapper.map(event, EventDto.class))
                 .collect(toList());
         }
         return orderEvents
