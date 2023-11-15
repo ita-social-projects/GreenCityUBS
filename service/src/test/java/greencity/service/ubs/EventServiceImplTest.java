@@ -8,12 +8,17 @@ import greencity.repository.EventRepository;
 import greencity.service.ubs.EventServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,6 +49,58 @@ class EventServiceImplTest {
         Order order = ModelUtils.getOrder();
         eventService.save("", "admin", order);
         verify(eventRepository, times(0)).save(any());
+    }
+
+    @Test
+    void testSaveEventEng() {
+        String eventAuthorSystem = "Система";
+        String eventAuthorClient = "Клієнт";
+        Order order = ModelUtils.getOrder();
+        order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
+            ModelUtils.getListOfEvents().get(1)));
+        when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
+
+        eventService.save(OrderHistory.ORDER_FORMED, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_PAID, eventAuthorClient, order);
+        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_ADJUSTMENT, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_CONFIRMED, eventAuthorSystem, order);
+
+        assertEquals("Order Status - Formed", OrderHistory.ORDER_FORMED_ENG);
+        assertEquals("System", OrderHistory.SYSTEM_ENG);
+        assertEquals("Client", OrderHistory.CLIENT_ENG);
+        assertEquals("Order Paid", OrderHistory.ORDER_PAID_ENG);
+        assertEquals("Added payment", OrderHistory.ADD_PAYMENT_SYSTEM_ENG);
+        assertEquals("Order Status - Approval", OrderHistory.ORDER_ADJUSTMENT_ENG);
+        assertEquals("Order Status - Confirmed", OrderHistory.ORDER_CONFIRMED_ENG);
+        verify(eventRepository, times(5)).save(any());
+    }
+
+    @Test
+    void testSaveEventEngWithUserName() {
+        String userName = "Test";
+        Order order = ModelUtils.getOrder();
+        order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
+            ModelUtils.getListOfEvents().get(1)));
+        when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
+
+        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY, userName, order);
+        eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, userName, order);
+        eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY, userName, order);
+        eventService.save(OrderHistory.ORDER_HALF_PAID, userName, order);
+        eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY, userName, order);
+        eventService.save(OrderHistory.ADD_ADMIN_COMMENT, userName, order);
+        eventService.save(OrderHistory.DELETE_VIOLATION, userName, order);
+
+        assertEquals("Payments have been removed", OrderHistory.DELETE_PAYMENT_MANUALLY_ENG);
+        assertEquals("Order status - Will bring it myself", OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
+        assertEquals("Payment details have been changed", OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG);
+        assertEquals("Order partially paid", OrderHistory.ORDER_HALF_PAID_ENG);
+        assertEquals("Added payment", OrderHistory.ADD_PAYMENT_MANUALLY_ENG);
+        assertEquals("Comment added", OrderHistory.ADD_ADMIN_COMMENT_ENG);
+        assertEquals("Violation removed", OrderHistory.DELETE_VIOLATION_ENG);
+
+        verify(eventRepository, times(7)).save(any());
     }
 
     @Test

@@ -314,7 +314,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(ubsClientService, times(1))
-            .getAllEventsForOrder(1L, "test@gmail.com");
+            .getAllEventsForOrder(1L, "test@gmail.com", "en");
     }
 
     @Test
