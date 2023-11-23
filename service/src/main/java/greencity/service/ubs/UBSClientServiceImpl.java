@@ -1504,7 +1504,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         checkForNullCounter(order);
 
         long sumToPayInCoins = calculateSumToPay(dto, order, currentUser);
-
         transferUserPointsToOrder(order, dto.getPointsToUse());
         paymentVerification(sumToPayInCoins, order);
 
