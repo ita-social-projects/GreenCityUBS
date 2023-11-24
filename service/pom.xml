@@ -129,7 +129,7 @@
         <dependency>
             <groupId>com.liqpay</groupId>
             <artifactId>liqpay-sdk</artifactId>
-            <version>0.7-SNAPSHOT</version>
+            <version>0.8-SNAPSHOT</version>
         </dependency>
 
         <!-- libphonenumber -->
