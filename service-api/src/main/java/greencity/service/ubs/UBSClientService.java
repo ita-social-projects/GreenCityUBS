@@ -282,12 +282,13 @@ public interface UBSClientService {
     /**
      * Methods for finding all events for Order.
      *
-     * @param orderId {@link Long} id.
-     * @param email   {@link String};
+     * @param orderId  {@link Long} id.
+     * @param email    {@link String};
+     * @param language {@link String};
      * @return {@link List} that contains list of EventsDTOS.
      * @author Yuriy Bahlay.
      */
-    List<EventDto> getAllEventsForOrder(Long orderId, String email);
+    List<EventDto> getAllEventsForOrder(Long orderId, String email, String language);
 
     /**
      * Method that returns order info for surcharge.

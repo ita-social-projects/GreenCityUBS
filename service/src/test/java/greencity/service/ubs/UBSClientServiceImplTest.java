@@ -227,6 +227,7 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -2820,14 +2821,29 @@ class UBSClientServiceImplTest {
         List<EventDto> eventDTOS = orderEvents.stream()
             .map(event -> modelMapper.map(event, EventDto.class))
             .collect(Collectors.toList());
-        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString()));
+        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), "ua"));
+    }
+
+    @Test
+    void testGelAllEventsFromOrderByOrderIdWithEng() {
+        List<Event> orderEvents = getListOfEvents();
+        when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
+        when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(orderEvents);
+        List<EventDto> eventDTOS = orderEvents.stream()
+            .peek(event -> {
+                event.setEventName(event.getEventNameEng());
+                event.setAuthorName(event.getAuthorNameEng());
+            })
+            .map(event -> modelMapper.map(event, EventDto.class))
+            .collect(toList());
+        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), "en"));
     }
 
     @Test
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc"));
+            () -> ubsService.getAllEventsForOrder(1L, "abc", "en"));
     }
 
     @Test
@@ -2835,7 +2851,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(Collections.emptyList());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc"));
+            () -> ubsService.getAllEventsForOrder(1L, "abc", "en"));
     }
 
     @Test
