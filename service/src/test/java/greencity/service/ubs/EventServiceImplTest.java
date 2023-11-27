@@ -70,7 +70,7 @@ class EventServiceImplTest {
         assertEquals("System", OrderHistory.SYSTEM_ENG);
         assertEquals("Client", OrderHistory.CLIENT_ENG);
         assertEquals("Order Paid", OrderHistory.ORDER_PAID_ENG);
-        assertEquals("Added payment", OrderHistory.ADD_PAYMENT_SYSTEM_ENG);
+        assertEquals("Added payment  №", OrderHistory.ADD_PAYMENT_SYSTEM_ENG);
         assertEquals("Order Status - Approval", OrderHistory.ORDER_ADJUSTMENT_ENG);
         assertEquals("Order Status - Confirmed", OrderHistory.ORDER_CONFIRMED_ENG);
         verify(eventRepository, times(5)).save(any());
@@ -92,11 +92,11 @@ class EventServiceImplTest {
         eventService.save(OrderHistory.ADD_ADMIN_COMMENT, userName, order);
         eventService.save(OrderHistory.DELETE_VIOLATION, userName, order);
 
-        assertEquals("Payments have been removed", OrderHistory.DELETE_PAYMENT_MANUALLY_ENG);
+        assertEquals("Payment removed №", OrderHistory.DELETE_PAYMENT_MANUALLY_ENG);
         assertEquals("Order status - Will bring it myself", OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
-        assertEquals("Payment details have been changed", OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG);
+        assertEquals("Payment details changed № ", OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG);
         assertEquals("Order partially paid", OrderHistory.ORDER_HALF_PAID_ENG);
-        assertEquals("Added payment", OrderHistory.ADD_PAYMENT_MANUALLY_ENG);
+        assertEquals("Added payment №", OrderHistory.ADD_PAYMENT_MANUALLY_ENG);
         assertEquals("Comment added", OrderHistory.ADD_ADMIN_COMMENT_ENG);
         assertEquals("Violation removed", OrderHistory.DELETE_VIOLATION_ENG);
 
