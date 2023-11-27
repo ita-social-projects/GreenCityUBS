@@ -73,6 +73,8 @@ public class EventServiceImpl implements EventService {
         eventNameToEngMap.put(OrderHistory.ADD_PAYMENT_MANUALLY, OrderHistory.ADD_PAYMENT_MANUALLY_ENG);
         eventNameToEngMap.put(OrderHistory.ADD_ADMIN_COMMENT, OrderHistory.ADD_ADMIN_COMMENT_ENG);
         eventNameToEngMap.put(OrderHistory.DELETE_VIOLATION, OrderHistory.DELETE_VIOLATION_ENG);
+
+        eventNameToEngMap.put(OrderHistory.DELETE_VIOLATION, OrderHistory.DELETE_VIOLATION_ENG);
     }
 
     private static String getEventNameEng(String eventName) {
