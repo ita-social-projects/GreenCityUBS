@@ -48,6 +48,7 @@ public class EventServiceImpl implements EventService {
         event.setAuthorName(eventAuthor);
         event.setEventNameEng(getEventNameEng(eventName));
         event.setAuthorNameEng(getAuthorNameEng(eventAuthor));
+        getEventNameEngWithNumbers(eventName, event);
 
         if (order.getEvents() != null) {
             List<Event> events = new ArrayList<>(order.getEvents());
@@ -58,19 +59,31 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(event);
     }
 
+    private void getEventNameEngWithNumbers(String eventName, Event event) {
+        if (eventName.startsWith(OrderHistory.ADD_PAYMENT_SYSTEM)) {
+            event.setEventNameEng(
+                OrderHistory.ADD_PAYMENT_SYSTEM_ENG + eventName.substring(OrderHistory.ADD_PAYMENT_SYSTEM.length()));
+        } else if (eventName.startsWith(OrderHistory.DELETE_PAYMENT_MANUALLY)) {
+            event.setEventNameEng(OrderHistory.DELETE_PAYMENT_MANUALLY_ENG
+                + eventName.substring(OrderHistory.DELETE_PAYMENT_MANUALLY.length()));
+        } else if (eventName.startsWith(OrderHistory.UPDATE_PAYMENT_MANUALLY)) {
+            event.setEventNameEng(OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG
+                + eventName.substring(OrderHistory.UPDATE_PAYMENT_MANUALLY.length()));
+        } else if (eventName.startsWith(OrderHistory.ADD_PAYMENT_MANUALLY)) {
+            event.setEventNameEng(OrderHistory.ADD_PAYMENT_MANUALLY_ENG
+                + eventName.substring(OrderHistory.ADD_PAYMENT_MANUALLY.length()));
+        }
+    }
+
     private static final Map<String, String> eventNameToEngMap = new HashMap<>();
 
     static {
         eventNameToEngMap.put(OrderHistory.ORDER_FORMED, OrderHistory.ORDER_FORMED_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_PAID, OrderHistory.ORDER_PAID_ENG);
-        eventNameToEngMap.put(OrderHistory.ADD_PAYMENT_SYSTEM, OrderHistory.ADD_PAYMENT_SYSTEM_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_ADJUSTMENT, OrderHistory.ORDER_ADJUSTMENT_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_CONFIRMED, OrderHistory.ORDER_CONFIRMED_ENG);
-        eventNameToEngMap.put(OrderHistory.DELETE_PAYMENT_MANUALLY, OrderHistory.DELETE_PAYMENT_MANUALLY_ENG);
-        eventNameToEngMap.put(OrderHistory.UPDATE_PAYMENT_MANUALLY, OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_HALF_PAID, OrderHistory.ORDER_HALF_PAID_ENG);
-        eventNameToEngMap.put(OrderHistory.ADD_PAYMENT_MANUALLY, OrderHistory.ADD_PAYMENT_MANUALLY_ENG);
         eventNameToEngMap.put(OrderHistory.ADD_ADMIN_COMMENT, OrderHistory.ADD_ADMIN_COMMENT_ENG);
         eventNameToEngMap.put(OrderHistory.DELETE_VIOLATION, OrderHistory.DELETE_VIOLATION_ENG);
     }

@@ -35,13 +35,13 @@ public final class OrderHistory {
     public static final String DELETE_VIOLATION = "Видалено порушення";
     public static final String DELETE_VIOLATION_ENG = "Violation removed";
     public static final String ADD_PAYMENT_MANUALLY = "Додано оплату №";
-    public static final String ADD_PAYMENT_MANUALLY_ENG = "Added payment";
+    public static final String ADD_PAYMENT_MANUALLY_ENG = "Added payment №";
     public static final String UPDATE_PAYMENT_MANUALLY = "Змінено деталі оплати № ";
-    public static final String UPDATE_PAYMENT_MANUALLY_ENG = "Payment details have been changed";
+    public static final String UPDATE_PAYMENT_MANUALLY_ENG = "Payment details changed № ";
     public static final String DELETE_PAYMENT_MANUALLY = "Видалено оплату №";
-    public static final String DELETE_PAYMENT_MANUALLY_ENG = "Payments have been removed";
+    public static final String DELETE_PAYMENT_MANUALLY_ENG = "Payment removed №";
     public static final String ADD_PAYMENT_SYSTEM = "Додано оплату  №";
-    public static final String ADD_PAYMENT_SYSTEM_ENG = "Added payment";
+    public static final String ADD_PAYMENT_SYSTEM_ENG = "Added payment  №";
     public static final String UPDATE_EXPORT_DETAILS = "Змінено деталі вивезення.";
     public static final String UPDATE_EXPORT_DATA = " Дата вивезення: %s.";
     public static final String UPDATE_DELIVERY_TIME = " Час вивезення: %s - %s.";
