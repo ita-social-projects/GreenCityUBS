@@ -144,6 +144,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/editService/{id}",
                 SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}",
                 SUPER_ADMIN_LINK + "/editTariffInfo/{id}",
+                SUPER_ADMIN_LINK + "/activate-employee/{id}",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,

@@ -23,6 +23,8 @@ import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
@@ -50,6 +52,7 @@ import javax.validation.constraints.Pattern;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @RestController
@@ -175,7 +178,8 @@ public class OrderController {
         @Valid @PathVariable("id") Optional<Long> id) {
         if (id.isPresent()) {
             OrderDetailStatusDto orderDetailStatusDto = ubsManagementService.getOrderDetailStatus(id.get());
-            if (orderDetailStatusDto.getPaymentStatus().equals("PAID")) {
+            if (PaymentStatus.PAID.name().equals(orderDetailStatusDto.getPaymentStatus())
+                || !OrderStatus.FORMED.name().equals(orderDetailStatusDto.getOrderStatus())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
             return ResponseEntity.status(HttpStatus.OK)
@@ -233,7 +237,8 @@ public class OrderController {
     /**
      * Controller gets info about events history from,order by order id.
      *
-     * @param id {@link Long}.
+     * @param id     {@link Long}.
+     * @param locale {@link Locale}.
      * @return {@link HttpStatus} - http status.
      * @author Yuriy Bahlay.
      */
@@ -248,8 +253,10 @@ public class OrderController {
     @GetMapping("/order_history/{orderId}")
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
         @Valid @PathVariable("orderId") Long id,
-        Principal principal) {
-        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id, principal.getName()));
+        Principal principal,
+        @ApiIgnore Locale locale) {
+        return ResponseEntity.ok()
+            .body(ubsClientService.getAllEventsForOrder(id, principal.getName(), locale.getLanguage()));
     }
 
     /**

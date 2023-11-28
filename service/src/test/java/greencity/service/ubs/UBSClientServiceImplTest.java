@@ -8,7 +8,6 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
-
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagOrderDto;
@@ -43,7 +42,15 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderBag;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -121,12 +128,12 @@ import java.util.stream.Collectors;
 import static greencity.ModelUtils.KYIV_REGION_EN;
 import static greencity.ModelUtils.KYIV_REGION_UA;
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
-import static greencity.ModelUtils.TEST_BAG_LIST;
 import static greencity.ModelUtils.TEST_EMAIL;
 import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
 import static greencity.ModelUtils.addressDto;
 import static greencity.ModelUtils.addressDtoList;
+import static greencity.ModelUtils.addressDtoListWithNullPlaceId;
 import static greencity.ModelUtils.addressList;
 import static greencity.ModelUtils.addressWithEmptyPlaceIdDto;
 import static greencity.ModelUtils.addressWithKyivRegionDto;
@@ -137,6 +144,7 @@ import static greencity.ModelUtils.getAddress;
 import static greencity.ModelUtils.getAddressDtoResponse;
 import static greencity.ModelUtils.getAddressRequestDto;
 import static greencity.ModelUtils.getAddressRequestToSaveDto;
+import static greencity.ModelUtils.getAddressRequestToSaveDto_WithoutDistricts;
 import static greencity.ModelUtils.getAddressRequestWithEmptyPlaceIdDto;
 import static greencity.ModelUtils.getAddressRequestWithEmptyPlaceIdToSaveDto;
 import static greencity.ModelUtils.getAddressWithKyivRegionRequestDto;
@@ -149,7 +157,6 @@ import static greencity.ModelUtils.getBagTranslationDto;
 import static greencity.ModelUtils.getCancellationDto;
 import static greencity.ModelUtils.getCertificate;
 import static greencity.ModelUtils.getCourier;
-import static greencity.ModelUtils.getAddressRequestToSaveDto_WithoutDistricts;
 import static greencity.ModelUtils.getCourierDto;
 import static greencity.ModelUtils.getCourierDtoList;
 import static greencity.ModelUtils.getEmployee;
@@ -188,6 +195,7 @@ import static greencity.ModelUtils.getTariffsForLocationDto;
 import static greencity.ModelUtils.getTariffsInfo;
 import static greencity.ModelUtils.getTelegramBotNotifyTrue;
 import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
+import static greencity.ModelUtils.getTestOrderAddressDtoRequestWithNullPlaceId;
 import static greencity.ModelUtils.getTestOrderAddressLocationDto;
 import static greencity.ModelUtils.getTestUser;
 import static greencity.ModelUtils.getUBSuser;
@@ -204,7 +212,6 @@ import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
 import static greencity.ModelUtils.getUserWithBotNotifyTrue;
 import static greencity.ModelUtils.getUserWithLastLocation;
 import static greencity.ModelUtils.getViberBotNotifyTrue;
-
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
@@ -220,6 +227,7 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -781,7 +789,7 @@ class UBSClientServiceImplTest {
             }
         }
         tariffsInfo.setBags(Arrays.asList(bag));
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
@@ -834,7 +842,7 @@ class UBSClientServiceImplTest {
             }
         }
         tariffsInfo.setBags(Arrays.asList(bag));
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user.setId(null), user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
@@ -887,7 +895,7 @@ class UBSClientServiceImplTest {
             }
         }
         tariffsInfo.setBags(Arrays.asList(bag));
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user.setId(null), user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
@@ -936,9 +944,11 @@ class UBSClientServiceImplTest {
         Payment payment1 = getPayment();
         payment1.setId(1L);
         order1.getPayment().add(payment1);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(
+            Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
         order1
-            .setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
+            .updateWithNewOrderBags(
+                Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
             if (f.getName().equals("merchantId")) {
@@ -1134,7 +1144,7 @@ class UBSClientServiceImplTest {
         dto.getBags().get(0).setAmount(1);
         Bag bag = getBagForOrder();
         Order order = getOrder();
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         TariffsInfo tariffsInfo = getTariffInfo();
         tariffsInfo.setBags(Arrays.asList(bag));
         user.setOrders(new ArrayList<>());
@@ -1371,7 +1381,7 @@ class UBSClientServiceImplTest {
         dto.getBags().get(0).setAmount(5);
         Order order = getOrder();
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
 
         Bag bag = getBagForOrder();
         TariffsInfo tariffsInfo = getTariffInfo();
@@ -1822,14 +1832,22 @@ class UBSClientServiceImplTest {
         User user = getUserWithBotNotifyTrue();
         TelegramBot telegramBot = getTelegramBotNotifyTrue();
         ViberBot viberBot = getViberBotNotifyTrue();
+        List<AddressDto> addressDto = addressDtoListWithNullPlaceId();
+
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
         userProfileUpdateDto.getAddressDto().get(0).setPlaceId(null);
         userProfileUpdateDto.getAddressDto().get(1).setPlaceId(null);
+
         String uuid = UUID.randomUUID().toString();
+        OrderAddressDtoRequest updateAddressRequestDto = getTestOrderAddressDtoRequestWithNullPlaceId();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByUser(user)).thenReturn(Optional.of(telegramBot));
         when(viberBotRepository.findByUser(user)).thenReturn(Optional.of(viberBot));
+        when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
+        when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
+        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientService)
+            .updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         when(userRepository.save(user)).thenReturn(user);
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
 
@@ -1838,8 +1856,9 @@ class UBSClientServiceImplTest {
         verify(userRepository).findUserByUuid(uuid);
         verify(telegramBotRepository).findByUser(user);
         verify(viberBotRepository).findByUser(user);
-        verify(modelMapper, times(0)).map(any(), any(OrderAddressDtoRequest.class));
-        verify(ubsClientService, times(0)).updateCurrentAddressForOrder(any(), anyString());
+        verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
+        verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
+        verify(ubsClientService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         verify(userRepository).save(user);
         verify(modelMapper).map(user, UserProfileUpdateDto.class);
     }
@@ -2413,6 +2432,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
         doReturn(new OrderWithAddressesResponseDto()).when(ubsClientService).findAllAddressesForCurrentOrder(uuid);
+        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(address.setAddressComment(newComment));
 
         ubsClientService.updateCurrentAddressForOrder(dtoRequest, uuid);
 
@@ -2420,8 +2440,9 @@ class UBSClientServiceImplTest {
 
         verify(userRepository).findByUuid(uuid);
         verify(addressRepository).findById(addressId);
-        verify(addressRepository).save(address);
         verify(ubsClientService).findAllAddressesForCurrentOrder(uuid);
+        verify(modelMapper).map(dtoRequest, Address.class);
+        verify(addressRepository).save(address);
     }
 
     @Test
@@ -2793,39 +2814,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testUpdateOrderCancellationReason() {
-        OrderCancellationReasonDto dto = getCancellationDto();
-        Order orderDto = getOrderTest();
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
-        assert orderDto != null;
-        when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
-        when(orderRepository.save(any())).thenReturn(orderDto);
-        OrderCancellationReasonDto result = ubsService.updateOrderCancellationReason(1L, dto, anyString());
-
-        verify(eventService, times(1))
-            .saveEvent("Статус Замовлення - Скасовано", "", orderDto);
-        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
-        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
-        verify(orderRepository).save(orderDto);
-        verify(orderRepository).findById(1L);
-    }
-
-    @Test
-    void updateOrderCancellationReasonOrderNotFoundException() {
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class,
-            () -> ubsService.updateOrderCancellationReason(1L, null, "abc"));
-    }
-
-    @Test
-    void updateOrderCancellationReasonAccessDeniedException() {
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(getOrderTest()));
-        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
-        assertThrows(AccessDeniedException.class,
-            () -> ubsService.updateOrderCancellationReason(1L, null, "abc"));
-    }
-
-    @Test
     void testGelAllEventsFromOrderByOrderId() {
         List<Event> orderEvents = getListOfEvents();
         when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
@@ -2833,14 +2821,29 @@ class UBSClientServiceImplTest {
         List<EventDto> eventDTOS = orderEvents.stream()
             .map(event -> modelMapper.map(event, EventDto.class))
             .collect(Collectors.toList());
-        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString()));
+        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), "ua"));
+    }
+
+    @Test
+    void testGelAllEventsFromOrderByOrderIdWithEng() {
+        List<Event> orderEvents = getListOfEvents();
+        when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
+        when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(orderEvents);
+        List<EventDto> eventDTOS = orderEvents.stream()
+            .peek(event -> {
+                event.setEventName(event.getEventNameEng());
+                event.setAuthorName(event.getAuthorNameEng());
+            })
+            .map(event -> modelMapper.map(event, EventDto.class))
+            .collect(toList());
+        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), "en"));
     }
 
     @Test
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc"));
+            () -> ubsService.getAllEventsForOrder(1L, "abc", "en"));
     }
 
     @Test
@@ -2848,7 +2851,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(Collections.emptyList());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc"));
+            () -> ubsService.getAllEventsForOrder(1L, "abc", "en"));
     }
 
     @Test
@@ -2859,7 +2862,8 @@ class UBSClientServiceImplTest {
 
         ubsService.deleteOrder(order.getUser().getUuid(), 1L);
 
-        verify(orderRepository).delete(order);
+        verify(orderRepository).save(order);
+        verify(ordersForUserRepository).getAllByUserUuidAndId(order.getUser().getUuid(), order.getId());
     }
 
     @Test
@@ -2895,7 +2899,7 @@ class UBSClientServiceImplTest {
 
         order.setCertificates(Set.of(getCertificate()));
         order.setPayment(TEST_PAYMENT_LIST);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
             if (f.getName().equals("merchantId")) {
@@ -2906,7 +2910,7 @@ class UBSClientServiceImplTest {
 
         order.setPointsToUse(-10000);
         CertificateDto certificateDto = createCertificateDto();
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
@@ -2955,7 +2959,7 @@ class UBSClientServiceImplTest {
 
         CertificateDto certificateDto = createCertificateDto();
         certificateDto.setPoints(1500);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(ModelUtils.getAmount());
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
@@ -3004,7 +3008,7 @@ class UBSClientServiceImplTest {
         CertificateDto certificateDto = createCertificateDto();
         certificateDto.setPoints(1500);
         order.setPointsToUse(-1000);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
         when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
@@ -3040,7 +3044,7 @@ class UBSClientServiceImplTest {
         user.setChangeOfPointsList(new ArrayList<>());
         order.setUser(user);
         order.setPointsToUse(-10000);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         OrderFondyClientDto dto = getOrderFondyClientDto();
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -3104,8 +3108,8 @@ class UBSClientServiceImplTest {
         Payment payment1 = getPayment();
         payment1.setId(1L);
         order1.getPayment().add(payment1);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
-        order1.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order1.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -3149,7 +3153,7 @@ class UBSClientServiceImplTest {
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
         Bag bag = getBagForOrder();
 
         UBSuser ubSuser = getUBSuser().setId(null);
@@ -3438,7 +3442,7 @@ class UBSClientServiceImplTest {
         order.setAmountOfBagsOrdered(Map.of(1, 10));
         bags.add(bag);
         order.setUser(user);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
@@ -3498,7 +3502,7 @@ class UBSClientServiceImplTest {
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
 
         when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
@@ -3531,7 +3535,7 @@ class UBSClientServiceImplTest {
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
         OrdersDataForUserDto ordersDataForUserDto = getOrderStatusDto();
         Order order = getOrderTest();
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         User user = getTestUser();
         Bag bag = bagDto();
 
@@ -3592,7 +3596,7 @@ class UBSClientServiceImplTest {
         order.setConfirmedQuantity(Map.of(1, 10));
         bags.add(bag);
         order.setUser(user);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
@@ -3634,7 +3638,7 @@ class UBSClientServiceImplTest {
         order.setAmountOfBagsOrdered(Map.of(1, 10));
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
@@ -3765,7 +3769,7 @@ class UBSClientServiceImplTest {
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         Bag bag = getBagForOrder();
 
         UBSuser ubSuser = getUBSuser();
@@ -3944,7 +3948,7 @@ class UBSClientServiceImplTest {
         bag.setFullPrice(1200_00L);
         bags.add(bag);
         order.setUser(user);
-        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());

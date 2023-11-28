@@ -26,6 +26,12 @@ public class Event {
     @Column(name = "author", nullable = false)
     private String authorName;
 
+    @Column(name = "event_name_eng", nullable = false)
+    private String eventNameEng;
+
+    @Column(name = "author_eng", nullable = false)
+    private String authorNameEng;
+
     @ManyToOne
     private Order order;
 }

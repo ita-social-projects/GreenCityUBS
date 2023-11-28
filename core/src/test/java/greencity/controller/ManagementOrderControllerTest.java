@@ -6,7 +6,6 @@ import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
-import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
@@ -208,7 +207,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void updateOrderStatusesDetail() throws Exception {
-        OrderDetailStatusDto dto = ModelUtils.getOrderDetailStatusDto();
+        OrderDetailStatusDto dto = ModelUtils.getPaidOrderDetailStatusDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
         this.mockMvc.perform(put(ubsLink + "/update-order-detail-status" + "/{id}", 1L)
@@ -494,14 +493,36 @@ class ManagementOrderControllerTest {
     }
 
     @Test
-    void updatesCancellationReason() throws Exception {
-        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+    void saveOrderIdForRefundTest() throws Exception {
+        mockMvc.perform(post(ubsLink + "/save-order-for-refund/{orderId}", 1L)
+            .principal(principal)).andExpect(status().isCreated());
+    }
+
+    @Test
+    void updatePageAdminInfoTest() throws Exception {
+        UpdateOrderPageAdminDto dto = getUpdateOrderPageAdminDto();
         ObjectMapper objectMapper = new ObjectMapper();
-        mockMvc.perform(post(ubsLink + "/order/{id}/cancellation", 1L)
-            .principal(ModelUtils.getPrincipal())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isOk());
+        String responseJSON = objectMapper.writeValueAsString(dto);
+
+        MockMultipartFile jsonFile = new MockMultipartFile(
+            "updateOrderPageAdminDto",
+            "updateOrderPageAdminDto.json",
+            "application/json",
+            responseJSON.getBytes());
+
+        MockMultipartHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart(ubsLink + "/update-order-page-admin-info/{id}", 1L);
+        builder.with(request -> {
+            request.setMethod("PATCH");
+            return request;
+        });
+
+        mockMvc.perform(
+            builder.file(jsonFile)
+                .param("language", "en")
+                .principal(principal)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+            .andExpect(status().isCreated());
     }
 
     @Test
