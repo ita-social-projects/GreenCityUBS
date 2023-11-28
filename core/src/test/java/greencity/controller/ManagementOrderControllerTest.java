@@ -493,6 +493,42 @@ class ManagementOrderControllerTest {
     }
 
     @Test
+<<<<<<< HEAD
+=======
+    void saveOrderIdForRefundTest() throws Exception {
+        mockMvc.perform(post(ubsLink + "/save-order-for-refund/{orderId}", 1L)
+            .principal(principal)).andExpect(status().isCreated());
+    }
+
+    @Test
+    void updatePageAdminInfoTest() throws Exception {
+        UpdateOrderPageAdminDto dto = getUpdateOrderPageAdminDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+
+        MockMultipartFile jsonFile = new MockMultipartFile(
+            "updateOrderPageAdminDto",
+            "updateOrderPageAdminDto.json",
+            "application/json",
+            responseJSON.getBytes());
+
+        MockMultipartHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart(ubsLink + "/update-order-page-admin-info/{id}", 1L);
+        builder.with(request -> {
+            request.setMethod("PATCH");
+            return request;
+        });
+
+        mockMvc.perform(
+            builder.file(jsonFile)
+                .param("language", "en")
+                .principal(principal)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+>>>>>>> f97c5a3cd4f47d86b233ef0cdfffe89f2bfbe4c9
     void saveOrderIdForRefundTest() throws Exception {
         mockMvc.perform(post(ubsLink + "/save-order-for-refund/{orderId}", 1L)
             .principal(principal)).andExpect(status().isCreated());
