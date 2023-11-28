@@ -172,7 +172,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Integer totalBagsAmount = amount.values().stream().reduce(0, Integer::sum);
         if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
             if (totalBagsAmount.equals(amount.get(bagId))) {
-                order.setOrderBags(new ArrayList<>());
+                order.updateWithNewOrderBags(new ArrayList<>());
                 orderRepository.delete(order);
                 return;
             }
@@ -767,7 +767,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfo.setMax(dto.getMax());
         tariffsInfo.setCourierLimit(dto.getCourierLimit());
         tariffsInfo.setLimitDescription(dto.getLimitDescription());
-        tariffsInfo.setTariffStatus(getChangedTariffStatus(dto.getMin(), dto.getMax()));
         tariffsInfoRepository.save(tariffsInfo);
     }
 
@@ -808,12 +807,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setLimitIncluded(dto.getLimitIncluded());
         return bag;
-    }
-
-    private TariffStatus getChangedTariffStatus(Long min, Long max) {
-        return min != null || max != null
-            ? TariffStatus.ACTIVE
-            : TariffStatus.DEACTIVATED;
     }
 
     @Override

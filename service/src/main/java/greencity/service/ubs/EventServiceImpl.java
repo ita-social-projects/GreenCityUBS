@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -45,6 +46,10 @@ public class EventServiceImpl implements EventService {
         event.setEventDate(LocalDateTime.now());
         event.setEventName(eventName);
         event.setAuthorName(eventAuthor);
+        event.setEventNameEng(getEventNameEng(eventName));
+        event.setAuthorNameEng(getAuthorNameEng(eventAuthor));
+        getEventNameEngWithNumbers(eventName, event);
+
         if (order.getEvents() != null) {
             List<Event> events = new ArrayList<>(order.getEvents());
             events.add(event);
@@ -52,6 +57,49 @@ public class EventServiceImpl implements EventService {
         }
         event.setOrder(order);
         eventRepository.save(event);
+    }
+
+    private void getEventNameEngWithNumbers(String eventName, Event event) {
+        if (eventName.startsWith(OrderHistory.ADD_PAYMENT_SYSTEM)) {
+            event.setEventNameEng(
+                OrderHistory.ADD_PAYMENT_SYSTEM_ENG + eventName.substring(OrderHistory.ADD_PAYMENT_SYSTEM.length()));
+        } else if (eventName.startsWith(OrderHistory.DELETE_PAYMENT_MANUALLY)) {
+            event.setEventNameEng(OrderHistory.DELETE_PAYMENT_MANUALLY_ENG
+                + eventName.substring(OrderHistory.DELETE_PAYMENT_MANUALLY.length()));
+        } else if (eventName.startsWith(OrderHistory.UPDATE_PAYMENT_MANUALLY)) {
+            event.setEventNameEng(OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG
+                + eventName.substring(OrderHistory.UPDATE_PAYMENT_MANUALLY.length()));
+        } else if (eventName.startsWith(OrderHistory.ADD_PAYMENT_MANUALLY)) {
+            event.setEventNameEng(OrderHistory.ADD_PAYMENT_MANUALLY_ENG
+                + eventName.substring(OrderHistory.ADD_PAYMENT_MANUALLY.length()));
+        }
+    }
+
+    private static final Map<String, String> eventNameToEngMap = new HashMap<>();
+
+    static {
+        eventNameToEngMap.put(OrderHistory.ORDER_FORMED, OrderHistory.ORDER_FORMED_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_PAID, OrderHistory.ORDER_PAID_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_ADJUSTMENT, OrderHistory.ORDER_ADJUSTMENT_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_CONFIRMED, OrderHistory.ORDER_CONFIRMED_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_HALF_PAID, OrderHistory.ORDER_HALF_PAID_ENG);
+        eventNameToEngMap.put(OrderHistory.ADD_ADMIN_COMMENT, OrderHistory.ADD_ADMIN_COMMENT_ENG);
+        eventNameToEngMap.put(OrderHistory.DELETE_VIOLATION, OrderHistory.DELETE_VIOLATION_ENG);
+    }
+
+    private static String getEventNameEng(String eventName) {
+        return eventNameToEngMap.getOrDefault(eventName, eventName);
+    }
+
+    private static String getAuthorNameEng(String eventAuthor) {
+        if (OrderHistory.SYSTEM.equals(eventAuthor)) {
+            return OrderHistory.SYSTEM_ENG;
+        } else if (OrderHistory.CLIENT.equals(eventAuthor)) {
+            return OrderHistory.CLIENT_ENG;
+        } else {
+            return eventAuthor;
+        }
     }
 
     /**

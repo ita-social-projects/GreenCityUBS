@@ -3,12 +3,12 @@ package greencity.service.ubs;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
+import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public interface UBSManagementEmployeeService {
     /**
      * {@inheritDoc}
      */
-    Page<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
+    PageableDto<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
 
     /**
      * Method updates information about employee.
@@ -51,12 +51,20 @@ public interface UBSManagementEmployeeService {
     PositionDto update(PositionDto dto);
 
     /**
-     * Method deletes employee from database by id.
+     * Method deletes employee by id.
      *
      * @param id {@link Long}
      * @author Mykola Danylko
      */
     void deactivateEmployee(Long id);
+
+    /**
+     * Method activate employee by id.
+     *
+     * @param id {@link Long}
+     * @author Oksana Spodaryk
+     */
+    void activateEmployee(Long id);
 
     /**
      * Method creates new employee position.

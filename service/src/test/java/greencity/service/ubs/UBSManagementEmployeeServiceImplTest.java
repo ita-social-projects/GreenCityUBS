@@ -4,18 +4,13 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.dto.LocationsDtos;
-import greencity.dto.courier.GetReceivingStationDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
-import greencity.dto.location.api.DistrictDto;
-import greencity.dto.location.api.LocationDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
-import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.entity.user.employee.Position;
 import greencity.enums.EmployeeStatus;
 import greencity.exceptions.BadRequestException;
@@ -23,27 +18,24 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import greencity.repository.*;
-import greencity.service.locations.LocationApiService;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.PositionRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.EmployeeCriteriaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.ArrayList;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,7 +44,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
@@ -65,8 +56,6 @@ class UBSManagementEmployeeServiceImplTest {
     @Mock
     private PositionRepository positionRepository;
     @Mock
-    private ReceivingStationRepository stationRepository;
-    @Mock
     private TariffsInfoRepository tariffsInfoRepository;
     @Mock
     private FileService fileService;
@@ -78,10 +67,6 @@ class UBSManagementEmployeeServiceImplTest {
     private UBSManagementEmployeeServiceImpl employeeService;
     @Mock
     private EmployeeCriteriaRepository employeeCriteriaRepository;
-    @Mock
-    private LocationApiService locationApiService;
-    @Mock
-    private UBSClientServiceImpl ubsClientService;
 
     @Test
     void saveEmployeeTest() {
@@ -153,58 +138,28 @@ class UBSManagementEmployeeServiceImplTest {
         var employeeFilterCriteria = new EmployeeFilterCriteria();
         var employeeId = 1L;
         var tariffsInfoId = 10L;
-        var employeeFilterViews = getEmployeeFilterViewListForOneEmployeeWithDifferentPositions(
-            employeeId, tariffsInfoId);
-        var expectedGetEmployeeDto = getEmployeeDtoWithPositionsAndTariffs();
+        var employeeFilterViews =
+            getEmployeeFilterViewListForOneEmployeeWithDifferentPositions(employeeId, tariffsInfoId);
+        var expectedGetEmployeeDto = getEmployeeDtoWithoutPositionsAndTariffsForGetAllMethod();
+        var expectedEmployeesList = getEmployeeListForGetAllMethod();
+        var firstElement = employeeFilterViews.get(0);
 
         when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
             .thenReturn(employeeFilterViews);
-        mockModelMapperBehaviourForEmployeeFilterViewCollection(employeeFilterViews);
-
-        var getEmployeeDtoPage = employeeService.findAll(employeePage, employeeFilterCriteria);
-        var actualGetEmployeeDto = getEmployeeDtoPage.get()
-            .findAny()
-            .orElseThrow();
-
-        assertEquals(expectedGetEmployeeDto, actualGetEmployeeDto);
-        verify(employeeCriteriaRepository).findAll(employeePage, employeeFilterCriteria);
-        verifyAllModelMappersWasInvokedForFirstRecordOfEmployeeFilterViewCollection(employeeFilterViews);
-        verifyOnlyModelMapperToPositionDtoWasInvoked(employeeFilterViews);
-    }
-
-    private void verifyOnlyModelMapperToPositionDtoWasInvoked(List<EmployeeFilterView> employeeFilterViews) {
-        for (int i = 1; i < employeeFilterViews.size(); i++) {
-            verify(modelMapper, never()).map(employeeFilterViews.get(i), GetEmployeeDto.class);
-            verify(modelMapper, never()).map(employeeFilterViews.get(i), GetTariffInfoForEmployeeDto.class);
-            verify(modelMapper, never()).map(employeeFilterViews.get(i), LocationsDtos.class);
-            verify(modelMapper, never()).map(employeeFilterViews.get(i), GetReceivingStationDto.class);
-            verify(modelMapper, times(1)).map(employeeFilterViews.get(i), PositionDto.class);
-        }
-    }
-
-    private void verifyAllModelMappersWasInvokedForFirstRecordOfEmployeeFilterViewCollection(
-        List<EmployeeFilterView> employeeFilterViews) {
-        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), GetEmployeeDto.class);
-        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), GetTariffInfoForEmployeeDto.class);
-        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), LocationsDtos.class);
-        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), GetReceivingStationDto.class);
-        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), PositionDto.class);
-    }
-
-    private void mockModelMapperBehaviourForEmployeeFilterViewCollection(List<EmployeeFilterView> employeeFilterViews) {
-        var firstElement = employeeFilterViews.get(0);
+        when(repository.findAll()).thenReturn(expectedEmployeesList);
         when(modelMapper.map(firstElement, GetEmployeeDto.class))
             .thenReturn(getEmployeeDto());
-        when(modelMapper.map(firstElement, GetTariffInfoForEmployeeDto.class))
-            .thenReturn(getTariffInfoForEmployeeDto2());
-        when(modelMapper.map(firstElement, LocationsDtos.class))
-            .thenReturn(getLocationsDtos(firstElement.getLocationId()));
-        when(modelMapper.map(firstElement, GetReceivingStationDto.class))
-            .thenReturn(getReceivingStationDto2());
-        for (var employeeFilterView : employeeFilterViews) {
-            when(modelMapper.map(employeeFilterView, PositionDto.class))
-                .thenReturn(getPositionDto(employeeFilterView.getPositionId()));
-        }
+
+        var getPageableDtoGetEmployeeDto =
+            employeeService.findAll(employeePage, employeeFilterCriteria);
+        var actualGetEmployeeDto = getPageableDtoGetEmployeeDto.getPage().get(0);
+
+        assertEquals(expectedGetEmployeeDto, actualGetEmployeeDto);
+        assertEquals(expectedGetEmployeeDto.getId(), actualGetEmployeeDto.getId());
+        assertEquals(expectedGetEmployeeDto.getEmail(), actualGetEmployeeDto.getEmail());
+        verify(employeeCriteriaRepository).findAll(employeePage, employeeFilterCriteria);
+        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), GetEmployeeDto.class);
+        verify(repository).findAll();
     }
 
     @Test
@@ -311,6 +266,40 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
+    void activateEmployeeTestNotFound() {
+        Employee employee = getEmployee();
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+        employee.setImagePath("Pass");
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+        employeeService.activateEmployee(1L);
+        verify(repository).findById(1L);
+        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
+        Exception thrown = assertThrows(NotFoundException.class,
+            () -> employeeService.deactivateEmployee(2L));
+        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
+    }
+
+    @Test
+    void activateEmployeeActiveTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+        employeeService.activateEmployee(employee.getId());
+        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
+    }
+
+    @Test
+    void activateEmployeeTest() {
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+        employeeService.activateEmployee(employee.getId());
+        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
+    }
+
+    @Test
     void deactivateEmployeeInactiveTest() {
         Employee employee = getEmployee();
         employee.setImagePath("Pass");
@@ -327,6 +316,20 @@ class UBSManagementEmployeeServiceImplTest {
 
         doThrow(HystrixRuntimeException.class).when(userRemoteClient).deactivateEmployee("Test");
         assertThrows(BadRequestException.class, () -> employeeService.deactivateEmployee(employeeId));
+
+        verify(repository).findById(1L);
+    }
+
+    @Test
+    void activateEmployeeHystrixRuntimeExceptionTest() {
+        Employee employee = getEmployee();
+        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+        long employeeId = employee.getId();
+        employee.setImagePath("Pass");
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+
+        doThrow(HystrixRuntimeException.class).when(userRemoteClient).activateEmployee("Test");
+        assertThrows(BadRequestException.class, () -> employeeService.activateEmployee(employeeId));
 
         verify(repository).findById(1L);
     }
@@ -450,5 +453,4 @@ class UBSManagementEmployeeServiceImplTest {
         verify(modelMapper, times(1)).map(any(), any());
         verify(tariffsInfoRepository).findAll();
     }
-
 }

@@ -667,4 +667,30 @@ class NotificationServiceImplTest {
         assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitleEng(), result.getTitle());
     }
 
+    @Test
+    void notifySelfPickupOrderTest() {
+        User user = getUser();
+        Long orderId = 2L;
+        Order order = Order.builder()
+            .id(orderId)
+            .user(user)
+            .build();
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.ORDER_STATUS_CHANGED);
+        notification.setUser(user);
+        notification.setOrder(order);
+        Set<NotificationParameter> parameters = Set.of(NotificationParameter.builder()
+            .key("orderNumber")
+            .value(orderId.toString())
+            .userNotification(notification)
+            .build());
+
+        when(userNotificationRepository.save(any())).thenReturn(notification);
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+
+        notificationService.notifySelfPickupOrder(order);
+
+        verify(userNotificationRepository).save(notification);
+        verify(notificationParameterRepository).saveAll(parameters);
+    }
 }

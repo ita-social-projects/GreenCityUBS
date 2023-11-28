@@ -87,6 +87,15 @@ public interface NotificationService {
     void notifyUnpaidOrder(Order order);
 
     /**
+     * Notifies the customer that the order status has been changed to "Brought by
+     * himself".
+     *
+     * @param order The order {@link Order} which status was changed.
+     * @author Maksym Lenets
+     */
+    public void notifySelfPickupOrder(Order order);
+
+    /**
      * Method that returns page with notifications for user by UUID.
      *
      * @author Ann Sakhno

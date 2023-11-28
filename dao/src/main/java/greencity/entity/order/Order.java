@@ -10,14 +10,16 @@ import greencity.enums.CancellationReason;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.filters.StringListConverter;
+import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
+import lombok.AccessLevel;
 import org.hibernate.annotations.Cascade;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -187,5 +189,57 @@ public class Order {
         mappedBy = "order",
         cascade = CascadeType.ALL,
         orphanRemoval = true)
+    @Setter(AccessLevel.PRIVATE)
+    @Builder.Default
     private List<OrderBag> orderBags = new ArrayList<>();
+
+    /**
+     * Updates the list of order bags associated with this order. This method
+     * replaces all current items with new ones. It also sets the order reference
+     * for each order bag in the new list. This method should be used instead of the
+     * default setter to prevent exception that occur when the owner entity instance
+     * no longer references collections with cascade="all-delete-orphan".
+     *
+     * @param orderBags The new list of order bags to associate with this order.
+     * @throws NullPointerException If the provided 'orderBags' argument is null.
+     */
+    public void updateWithNewOrderBags(List<OrderBag> orderBags) {
+        if (!CollectionUtils.isEmpty(this.orderBags)) {
+            this.orderBags.clear();
+        }
+        initOrderBagsIfNull();
+        this.orderBags.addAll(orderBags);
+        this.orderBags.forEach(ob -> ob.setOrder(this));
+    }
+
+    /**
+     * Adds an ordered bag to the list of order bags associated with this order.
+     * This method adds the specified order bag to the list and sets the order
+     * reference for the order bag.
+     *
+     * @param orderBag The order bag to add to this order.
+     */
+    public void addOrderedBag(OrderBag orderBag) {
+        initOrderBagsIfNull();
+        this.orderBags.add(orderBag);
+        orderBag.setOrder(this);
+    }
+
+    /**
+     * Removes an ordered bag from the list of order bags associated with this
+     * order. This method removes the specified order bag from the list.
+     *
+     * @param orderBag The order bag to remove from this order.
+     */
+    public void removeOrderBag(OrderBag orderBag) {
+        if (!CollectionUtils.isEmpty(this.orderBags)) {
+            orderBags.remove(orderBag);
+        }
+    }
+
+    private void initOrderBagsIfNull() {
+        if (this.orderBags == null) {
+            this.orderBags = new ArrayList<>();
+        }
+    }
 }

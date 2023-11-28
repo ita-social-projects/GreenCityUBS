@@ -258,6 +258,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String KYIV_REGION_UA = "Київська область";
     private static final String KYIV_EN = "Kyiv";
     private static final String KYIV_UA = "місто Київ";
+    private static final String LANGUAGE_EN = "en";
 
     @Override
     @Transactional
@@ -609,8 +610,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
         if (addressRequestDto.getPlaceId() == null) {
-            address.setAddressComment(addressRequestDto.getAddressComment());
-            addressRepo.save(address);
+            Address addressWithNullPlaceId = modelMapper.map(addressRequestDto, Address.class);
+            addressWithNullPlaceId.setUser(currentUser);
+            addressWithNullPlaceId.setAddressStatus(address.getAddressStatus());
+            addressRepo.save(addressWithNullPlaceId);
             return findAllAddressesForCurrentOrder(uuid);
         }
 
@@ -1094,7 +1097,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
-        order.setOrderBags(bagsOrdered);
+        order.updateWithNewOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(
@@ -1113,7 +1116,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setPayment(new ArrayList<>());
         }
         order.getPayment().add(payment);
-        bagsOrdered.forEach(orderBag -> orderBag.setOrder(order));
         orderRepository.save(order);
         return order;
     }
@@ -1330,7 +1332,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public List<EventDto> getAllEventsForOrder(Long orderId, String email) {
+    public List<EventDto> getAllEventsForOrder(Long orderId, String email, String language) {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
@@ -1338,6 +1340,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
         if (orderEvents.isEmpty()) {
             throw new NotFoundException(EVENTS_NOT_FOUND_EXCEPTION + orderId);
+        }
+        if (LANGUAGE_EN.equals(language)) {
+            return orderEvents
+                .stream()
+                .peek(event -> {
+                    event.setEventName(event.getEventNameEng());
+                    event.setAuthorName(event.getAuthorNameEng());
+                })
+                .map(event -> modelMapper.map(event, EventDto.class))
+                .collect(toList());
         }
         return orderEvents
             .stream()
@@ -1357,7 +1369,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         setTelegramAndViberBots(user, userProfileUpdateDto.getTelegramIsNotify(),
             userProfileUpdateDto.getViberIsNotify());
         userProfileUpdateDto.getAddressDto().stream()
-            .filter(addressDto -> addressDto.getPlaceId() != null)
             .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
             .forEach(addressRequestDto -> updateCurrentAddressForOrder(addressRequestDto, uuid));
         User savedUser = userRepository.save(user);
@@ -1422,22 +1433,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
-    @Override
-    public OrderCancellationReasonDto updateOrderCancellationReason(
-        long id, OrderCancellationReasonDto dto, String uuid) {
-        Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
-            throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
-        }
-        eventService.saveEvent(OrderHistory.ORDER_CANCELLED, uuid, order);
-        order.setCancellationReason(dto.getCancellationReason());
-        order.setCancellationComment(dto.getCancellationComment());
-        order.setId(id);
-        orderRepository.save(order);
-        return dto;
-    }
-
     private long reduceOrderSumDueToUsedPoints(long sumToPayInCoins, int pointsToUse) {
         if (sumToPayInCoins >= pointsToUse * 100L) {
             sumToPayInCoins -= pointsToUse * 100L;
@@ -1492,8 +1487,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (order == null) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
-        order.setOrderBags(Collections.emptyList());
-        orderRepository.delete(order);
+        order.updateWithNewOrderBags(Collections.emptyList());
+        order.setOrderStatus(OrderStatus.CANCELED);
+        orderRepository.save(order);
     }
 
     @Override
@@ -1504,6 +1500,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         checkForNullCounter(order);
 
         long sumToPayInCoins = calculateSumToPay(dto, order, currentUser);
+
         transferUserPointsToOrder(order, dto.getPointsToUse());
         paymentVerification(sumToPayInCoins, order);
 

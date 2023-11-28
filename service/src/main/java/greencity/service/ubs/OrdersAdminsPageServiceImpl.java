@@ -241,7 +241,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         switch (columnName) {
             case ORDER_STATUS:
-                return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employee.getId()));
+                return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employee));
             case DATE_OF_EXPORT:
                 return createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value, employee.getId()));
             case TIME_OF_EXPORT:
@@ -454,22 +454,24 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     /* methods for changing order */
     @Override
-    public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
+    public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String updatedStatusValue,
+        Employee employee) {
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
+                if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
                     throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
-                if (existedOrder.getOrderStatus().checkPossibleStatus(value)) {
-                    existedOrder.setOrderStatus(OrderStatus.valueOf(value));
+                if (existedOrder.getOrderStatus().checkPossibleStatus(updatedStatusValue)) {
+                    existedOrder.setOrderStatus(OrderStatus.valueOf(updatedStatusValue));
                     removePickUpDetailsAndResponsibleEmployees(existedOrder);
                 } else {
                     throw new BadRequestException(
                         "Such desired status isn't applicable with current status!");
                 }
+
                 if (existedOrder.getOrderStatus() == OrderStatus.CANCELED
                     && (existedOrder.getPointsToUse() != 0 || !existedOrder.getCertificates().isEmpty())) {
                     notificationService.notifyBonusesFromCanceledOrder(existedOrder);
@@ -478,6 +480,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
+
+                if (OrderStatus.BROUGHT_IT_HIMSELF == OrderStatus.valueOf(updatedStatusValue)) {
+                    eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF,
+                        employee.getFirstName() + "  " + employee.getLastName(), existedOrder);
+                    notificationService.notifySelfPickupOrder(existedOrder);
+                }
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
