@@ -79,6 +79,20 @@ public class EventServiceImpl implements EventService {
 
     static {
         eventNameToEngMap.put(OrderHistory.ORDER_FORMED, OrderHistory.ORDER_FORMED_ENG);
+        eventNameToEngMap.put(OrderHistory.ASSIGN_DRIVER, OrderHistory.ASSIGN_DRIVER_ENG);
+        eventNameToEngMap.put(OrderHistory.ASSIGN_LOGIEST, OrderHistory.ASSIGN_LOGIEST_ENG);
+        eventNameToEngMap.put(OrderHistory.ASSIGN_CALL_MANAGER, OrderHistory.ASSIGN_CALL_MANAGER_ENG);
+        eventNameToEngMap.put(OrderHistory.ASSIGN_CALL_PILOT, OrderHistory.ASSIGN_CALL_PILOT_ENG);
+        eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_CALL, OrderHistory.UPDATE_MANAGER_CALL_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_ON_THE_ROUTE, OrderHistory.ORDER_ON_THE_ROUTE_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_DONE, OrderHistory.ORDER_DONE_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_CANCELLED, OrderHistory.ORDER_CANCELLED_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_NOT_TAKEN_OUT, OrderHistory.ORDER_NOT_TAKEN_OUT_ENG);
+        eventNameToEngMap.put(OrderHistory.ADD_VIOLATION, OrderHistory.ADD_VIOLATION_ENG);
+        eventNameToEngMap.put(OrderHistory.CHANGES_VIOLATION, OrderHistory.CHANGES_VIOLATION_ENG);
+        eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_LOGIEST, OrderHistory.UPDATE_MANAGER_LOGIEST_ENG);
+        eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_CALL_PILOT, OrderHistory.UPDATE_MANAGER_CALL_PILOT_ENG);
+        eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_DRIVER, OrderHistory.UPDATE_MANAGER_DRIVER_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_PAID, OrderHistory.ORDER_PAID_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_ADJUSTMENT, OrderHistory.ORDER_ADJUSTMENT_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
