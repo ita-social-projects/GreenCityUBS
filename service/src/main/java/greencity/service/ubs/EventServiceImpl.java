@@ -29,7 +29,7 @@ import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EmployeeRepository employeeRepository;
-    private final String DATE_EXPORT = " Дата вивезення:";
+    private final String DATE_EXPORT = "Змінено деталі вивезення. Дата вивезення:";
 
     /**
      * This is method which collect's information about order history lifecycle.
@@ -62,13 +62,10 @@ public class EventServiceImpl implements EventService {
     }
 
     private void getEventNameEngWithDate(String eventName, Event event) {
-         if (eventName.startsWith(OrderHistory.UPDATE_EXPORT_DETAILS)) {
-            event.setEventNameEng(OrderHistory.UPDATE_EXPORT_DETAILS_ENG
-                    + eventName.substring(OrderHistory.UPDATE_EXPORT_DETAILS.length()));
-        }else if (eventName.startsWith(DATE_EXPORT)) {
-            event.setEventNameEng(String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG
-                    ,eventName.substring(DATE_EXPORT.length())));
-        }
+         if (eventName.startsWith(DATE_EXPORT)) {
+            event.setEventNameEng(OrderHistory.UPDATE_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
+                    eventName.substring(DATE_EXPORT.length())));
+         }
     }
 
     private void getEventNameEngWithNumbers(String eventName, Event event) {
