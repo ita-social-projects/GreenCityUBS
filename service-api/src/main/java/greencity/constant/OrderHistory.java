@@ -63,6 +63,7 @@ public final class OrderHistory {
     public static final String UPDATE_DELIVERY_TIME = " Час вивезення: %s - %s.";
     public static final String UPDATE_RECEIVING_STATION = " Станція приймання: %s.";
     public static final String SET_EXPORT_DETAILS = "Встановлено деталі вивезення.";
+    public static final String SET_EXPORT_DETAILS_ENG = "Installed export details.";
     public static final String RETURN_OVERPAYMENT_TO_CLIENT = "Повернено кошти клієнту";
     public static final String RETURN_OVERPAYMENT_AS_BONUS_TO_CLIENT = "Зараховано кошти на бонусний рахунок клієнта";
     public static final String RETURN_BONUSES_TO_CLIENT = "Невикористані бонуси повернено на бонусний рахунок клієнта";
