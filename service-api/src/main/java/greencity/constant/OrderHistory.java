@@ -57,7 +57,9 @@ public final class OrderHistory {
     public static final String ADD_PAYMENT_SYSTEM = "Додано оплату  №";
     public static final String ADD_PAYMENT_SYSTEM_ENG = "Added payment  №";
     public static final String UPDATE_EXPORT_DETAILS = "Змінено деталі вивезення.";
+    public static final String UPDATE_EXPORT_DETAILS_ENG = "Changed export details.";
     public static final String UPDATE_EXPORT_DATA = " Дата вивезення: %s.";
+    public static final String UPDATE_EXPORT_DATA_ENG = " Date of removal:%s.";
     public static final String UPDATE_DELIVERY_TIME = " Час вивезення: %s - %s.";
     public static final String UPDATE_RECEIVING_STATION = " Станція приймання: %s.";
     public static final String SET_EXPORT_DETAILS = "Встановлено деталі вивезення.";
@@ -68,9 +70,13 @@ public final class OrderHistory {
     public static final String ADD_ADMIN_COMMENT = "Додано коментар";
     public static final String ADD_ADMIN_COMMENT_ENG = "Comment added";
     public static final String ADD_NEW_ECO_NUMBER = "Додано номер замовлення з магазину";
+    public static final String ADD_NEW_ECO_NUMBER_ENG = "Add number order from the store";
     public static final String DELETED_ECO_NUMBER = "Видалено номер замовлення з магазину";
+    public static final String DELETED_ECO_NUMBER_ENG = "Removed number order from the store";
     public static final String CHANGED_SENDER = "Змінено дані Відправника";
+    public static final String CHANGED_SENDER_ENG = "Data of the sender changed";
     public static final String ADDED_BONUSES = "Зараховано кошти на бонусний рахунок клієнта";
+    public static final String ADDED_BONUSES_ENG = "Funds have been credited to the client's bonus account";
 
     /**
      * Constructor.

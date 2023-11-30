@@ -29,6 +29,7 @@ import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EmployeeRepository employeeRepository;
+    private final String DATE_EXPORT = " Дата вивезення:";
 
     /**
      * This is method which collect's information about order history lifecycle.
@@ -49,6 +50,7 @@ public class EventServiceImpl implements EventService {
         event.setEventNameEng(getEventNameEng(eventName));
         event.setAuthorNameEng(getAuthorNameEng(eventAuthor));
         getEventNameEngWithNumbers(eventName, event);
+        getEventNameEngWithDate(eventName, event);
 
         if (order.getEvents() != null) {
             List<Event> events = new ArrayList<>(order.getEvents());
@@ -57,6 +59,16 @@ public class EventServiceImpl implements EventService {
         }
         event.setOrder(order);
         eventRepository.save(event);
+    }
+
+    private void getEventNameEngWithDate(String eventName, Event event) {
+         if (eventName.startsWith(OrderHistory.UPDATE_EXPORT_DETAILS)) {
+            event.setEventNameEng(OrderHistory.UPDATE_EXPORT_DETAILS_ENG
+                    + eventName.substring(OrderHistory.UPDATE_EXPORT_DETAILS.length()));
+        }else if (eventName.startsWith(DATE_EXPORT)) {
+            event.setEventNameEng(String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG
+                    ,eventName.substring(DATE_EXPORT.length())));
+        }
     }
 
     private void getEventNameEngWithNumbers(String eventName, Event event) {
@@ -72,6 +84,12 @@ public class EventServiceImpl implements EventService {
         } else if (eventName.startsWith(OrderHistory.ADD_PAYMENT_MANUALLY)) {
             event.setEventNameEng(OrderHistory.ADD_PAYMENT_MANUALLY_ENG
                 + eventName.substring(OrderHistory.ADD_PAYMENT_MANUALLY.length()));
+        } else if (eventName.startsWith(OrderHistory.ADD_NEW_ECO_NUMBER)) {
+            event.setEventNameEng(OrderHistory.ADD_NEW_ECO_NUMBER_ENG
+                    + eventName.substring(OrderHistory.ADD_NEW_ECO_NUMBER.length()));
+        }else if (eventName.startsWith(OrderHistory.DELETED_ECO_NUMBER)) {
+            event.setEventNameEng(OrderHistory.DELETED_ECO_NUMBER_ENG
+                    + eventName.substring(OrderHistory.DELETED_ECO_NUMBER.length()));
         }
     }
 
@@ -90,6 +108,8 @@ public class EventServiceImpl implements EventService {
         eventNameToEngMap.put(OrderHistory.ORDER_NOT_TAKEN_OUT, OrderHistory.ORDER_NOT_TAKEN_OUT_ENG);
         eventNameToEngMap.put(OrderHistory.ADD_VIOLATION, OrderHistory.ADD_VIOLATION_ENG);
         eventNameToEngMap.put(OrderHistory.CHANGES_VIOLATION, OrderHistory.CHANGES_VIOLATION_ENG);
+        eventNameToEngMap.put(OrderHistory.ADDED_BONUSES, OrderHistory.ADDED_BONUSES_ENG);
+        eventNameToEngMap.put(OrderHistory.CHANGED_SENDER, OrderHistory.CHANGED_SENDER_ENG);
         eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_LOGIEST, OrderHistory.UPDATE_MANAGER_LOGIEST_ENG);
         eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_CALL_PILOT, OrderHistory.UPDATE_MANAGER_CALL_PILOT_ENG);
         eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_DRIVER, OrderHistory.UPDATE_MANAGER_DRIVER_ENG);
