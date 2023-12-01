@@ -259,19 +259,6 @@ public class OrderController {
             .body(ubsClientService.getAllEventsForOrder(id, principal.getName(), locale.getLanguage()));
     }
 
-    @ApiOperation(value = "Process user order.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping(value = {"/TestSave"})
-    public ResponseEntity saveTest(Long id, String eventName, String eventAuthor) {
-        ubsClientService.testSave(id, eventName, eventAuthor);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-
     /**
      * Controller updates info about ubs_user in order .
      *

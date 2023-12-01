@@ -290,8 +290,6 @@ public interface UBSClientService {
      */
     List<EventDto> getAllEventsForOrder(Long orderId, String email, String language);
 
-    void testSave(Long id, String eventName, String eventAuthor);
-
     /**
      * Method that returns order info for surcharge.
      *

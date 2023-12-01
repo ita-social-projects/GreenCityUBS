@@ -30,7 +30,6 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EmployeeRepository employeeRepository;
 
-
     /**
      * This is method which collect's information about order history lifecycle.
      *
@@ -62,16 +61,19 @@ public class EventServiceImpl implements EventService {
     }
 
     private void getEventNameEngWithDate(String eventName, Event event) {
-         if (eventName.startsWith(OrderHistory.UPDATE_DATE_EXPORT)) {
-            event.setEventNameEng(OrderHistory.UPDATE_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
+        if (eventName.startsWith(OrderHistory.UPDATE_DATE_EXPORT)) {
+            event.setEventNameEng(
+                OrderHistory.UPDATE_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
                     eventName.substring(OrderHistory.UPDATE_DATE_EXPORT.length())));
-         } else if (eventName.startsWith(OrderHistory.SET_DATE_EXPORT)) {
-             event.setEventNameEng(OrderHistory.SET_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
-                     eventName.substring(OrderHistory.SET_DATE_EXPORT.length())));
-         } else if (eventName.startsWith(OrderHistory.UPDATE_MIX_WASTE)) {
-        event.setEventNameEng(OrderHistory.SET_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_ORDER_EXPORT_ENG,
-                eventName.substring(OrderHistory.UPDATE_MIX_WASTE.length())));
-         }
+        } else if (eventName.startsWith(OrderHistory.SET_DATE_EXPORT)) {
+            event.setEventNameEng(
+                OrderHistory.SET_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
+                    eventName.substring(OrderHistory.SET_DATE_EXPORT.length())));
+        } else if (eventName.startsWith(OrderHistory.UPDATE_MIX_WASTE)) {
+            event.setEventNameEng(
+                OrderHistory.SET_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_ORDER_EXPORT_ENG,
+                    eventName.substring(OrderHistory.UPDATE_MIX_WASTE.length())));
+        }
     }
 
     private void getEventNameEngWithNumbers(String eventName, Event event) {
@@ -89,10 +91,10 @@ public class EventServiceImpl implements EventService {
                 + eventName.substring(OrderHistory.ADD_PAYMENT_MANUALLY.length()));
         } else if (eventName.startsWith(OrderHistory.ADD_NEW_ECO_NUMBER)) {
             event.setEventNameEng(OrderHistory.ADD_NEW_ECO_NUMBER_ENG
-                    + eventName.substring(OrderHistory.ADD_NEW_ECO_NUMBER.length()));
-        }else if (eventName.startsWith(OrderHistory.DELETED_ECO_NUMBER)) {
+                + eventName.substring(OrderHistory.ADD_NEW_ECO_NUMBER.length()));
+        } else if (eventName.startsWith(OrderHistory.DELETED_ECO_NUMBER)) {
             event.setEventNameEng(OrderHistory.DELETED_ECO_NUMBER_ENG
-                    + eventName.substring(OrderHistory.DELETED_ECO_NUMBER.length()));
+                + eventName.substring(OrderHistory.DELETED_ECO_NUMBER.length()));
         }
     }
 

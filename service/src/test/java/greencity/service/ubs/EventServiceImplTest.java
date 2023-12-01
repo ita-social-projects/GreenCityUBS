@@ -82,7 +82,7 @@ class EventServiceImplTest {
         String eventAuthorSystem = "Система";
         Order order = ModelUtils.getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
-                ModelUtils.getListOfEvents().get(1)));
+            ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
 
         eventService.save(OrderHistory.UPDATE_DATE_EXPORT, eventAuthorSystem, order);
