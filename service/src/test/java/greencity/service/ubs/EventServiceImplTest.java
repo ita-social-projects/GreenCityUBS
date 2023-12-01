@@ -78,6 +78,29 @@ class EventServiceImplTest {
     }
 
     @Test
+    void testGetEventNameEngWithDate() {
+        String eventAuthorSystem = "Система";
+        Order order = ModelUtils.getOrder();
+        order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
+                ModelUtils.getListOfEvents().get(1)));
+        when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
+
+        eventService.save(OrderHistory.UPDATE_DATE_EXPORT, eventAuthorSystem, order);
+        eventService.save(OrderHistory.SET_DATE_EXPORT, eventAuthorSystem, order);
+        eventService.save(OrderHistory.UPDATE_MIX_WASTE, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ADD_NEW_ECO_NUMBER, eventAuthorSystem, order);
+        eventService.save(OrderHistory.DELETED_ECO_NUMBER, eventAuthorSystem, order);
+
+        assertEquals("Змінено деталі вивезення. Дата вивезення:", OrderHistory.UPDATE_DATE_EXPORT);
+        assertEquals("Встановлено деталі вивезення. Дата вивезення:", OrderHistory.SET_DATE_EXPORT);
+        assertEquals("Змінено деталі замовлення. Мікс відходів ", OrderHistory.UPDATE_MIX_WASTE);
+        assertEquals("Додано номер замовлення з магазину", OrderHistory.ADD_NEW_ECO_NUMBER);
+        assertEquals("Видалено номер замовлення з магазину", OrderHistory.DELETED_ECO_NUMBER);
+
+        verify(eventRepository, times(5)).save(any());
+    }
+
+    @Test
     void testSaveEventEngWithUserName() {
         String userName = "Test";
         Order order = ModelUtils.getOrder();

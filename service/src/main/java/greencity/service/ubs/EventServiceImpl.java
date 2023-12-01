@@ -29,8 +29,7 @@ import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EmployeeRepository employeeRepository;
-    private final String UPDATE_DATE_EXPORT = "Змінено деталі вивезення. Дата вивезення:";
-    private final String SET_DATE_EXPORT = "Встановлено деталі вивезення. Дата вивезення:";
+
 
     /**
      * This is method which collect's information about order history lifecycle.
@@ -63,12 +62,15 @@ public class EventServiceImpl implements EventService {
     }
 
     private void getEventNameEngWithDate(String eventName, Event event) {
-         if (eventName.startsWith(UPDATE_DATE_EXPORT)) {
+         if (eventName.startsWith(OrderHistory.UPDATE_DATE_EXPORT)) {
             event.setEventNameEng(OrderHistory.UPDATE_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
-                    eventName.substring(UPDATE_DATE_EXPORT.length())));
-         } else if (eventName.startsWith(SET_DATE_EXPORT)) {
+                    eventName.substring(OrderHistory.UPDATE_DATE_EXPORT.length())));
+         } else if (eventName.startsWith(OrderHistory.SET_DATE_EXPORT)) {
              event.setEventNameEng(OrderHistory.SET_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
-                     eventName.substring(SET_DATE_EXPORT.length())));
+                     eventName.substring(OrderHistory.SET_DATE_EXPORT.length())));
+         } else if (eventName.startsWith(OrderHistory.UPDATE_MIX_WASTE)) {
+        event.setEventNameEng(OrderHistory.SET_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_ORDER_EXPORT_ENG,
+                eventName.substring(OrderHistory.UPDATE_MIX_WASTE.length())));
          }
     }
 
