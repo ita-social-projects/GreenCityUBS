@@ -5,6 +5,7 @@ import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.order.Order;
+import greencity.entity.user.Violation;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
@@ -63,6 +64,8 @@ public interface NotificationService {
      * @author Ann Sakhno
      */
     void notifyAddViolation(Long orderId);
+
+    void notifyChangedViolation(Violation violation, Long orderId);
 
     /**
      * Method that creates notification for inactive users.

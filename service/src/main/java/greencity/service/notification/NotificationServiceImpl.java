@@ -381,6 +381,16 @@ public class NotificationServiceImpl implements NotificationService {
         fillAndSendNotification(parameters, violation.getOrder(), NotificationType.VIOLATION_THE_RULES);
     }
 
+    @Override
+    public void notifyChangedViolation(Violation violation, Long orderId) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+        parameters.add(NotificationParameter.builder()
+                .key(ORDER_NUMBER_KEY)
+                .value(orderId.toString())
+                .build());
+        fillAndSendNotification(parameters, violation.getOrder(), NotificationType.CHANGED_IN_RULE_VIOLATION_STATUS);
+    }
+
     /**
      * {@inheritDoc}
      */

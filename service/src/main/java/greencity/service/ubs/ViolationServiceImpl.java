@@ -195,6 +195,7 @@ public class ViolationServiceImpl implements ViolationService {
         Violation violation = violationRepository.findByOrderId(add.getOrderID())
             .orElseThrow(() -> new NotFoundException(ORDER_HAS_NOT_VIOLATION));
         updateViolation(violation, add, multipartFiles);
+        notificationService.notifyChangedViolation(violation, add.getOrderID());
         violationRepository.save(violation);
         eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getEmail(), violation.getOrder());
     }
