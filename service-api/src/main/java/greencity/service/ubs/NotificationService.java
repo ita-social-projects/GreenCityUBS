@@ -65,6 +65,11 @@ public interface NotificationService {
      */
     void notifyAddViolation(Long orderId);
 
+    /**
+     * Method that creates notification when edit violations.
+     *
+     * @author Nazar Bokalo
+     */
     void notifyChangedViolation(Violation violation, Long orderId);
 
     /**
