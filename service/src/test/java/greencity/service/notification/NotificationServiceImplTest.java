@@ -290,6 +290,24 @@ class NotificationServiceImplTest {
         }
 
         @Test
+        void TestNotifyChangedViolation() {
+            Set<NotificationParameter> parameters = new HashSet<>();
+            parameters.add(NotificationParameter.builder()
+                .key("orderNumber")
+                .value("46")
+                .build());
+            Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
+            when(userNotificationRepository.save(TEST_USER_NOTIFICATION_6)).thenReturn(TEST_USER_NOTIFICATION_6);
+            parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_6));
+            when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
+
+            notificationService.notifyChangedViolation(violation, TEST_ORDER_4.getId());
+
+            verify(userNotificationRepository).save(any());
+            verify(notificationParameterRepository).saveAll(parameters);
+        }
+
+        @Test
         void testNotifyInactiveAccounts() {
             AbstractNotificationProvider abstractNotificationProvider =
                 Mockito.mock(AbstractNotificationProvider.class);

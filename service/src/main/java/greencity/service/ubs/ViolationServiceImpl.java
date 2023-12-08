@@ -197,6 +197,7 @@ public class ViolationServiceImpl implements ViolationService {
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
         eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getEmail(), violation.getOrder());
+        notificationService.notifyChangedViolation(violation, add.getOrderID());
     }
 
     private void updateViolation(Violation violation, UpdateViolationToUserDto add, MultipartFile[] multipartFiles) {
