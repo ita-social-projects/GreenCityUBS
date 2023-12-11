@@ -8,8 +8,6 @@ import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Optional;
-
 public interface NotificationService {
     /**
      * Method that creates notification for unpaid order.
