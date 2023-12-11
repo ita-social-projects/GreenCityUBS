@@ -8,6 +8,8 @@ import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 public interface NotificationService {
     /**
      * Method that creates notification for unpaid order.
@@ -71,6 +73,13 @@ public interface NotificationService {
      * @author Nazar Bokalo
      */
     void notifyChangedViolation(Violation violation, Long orderId);
+
+    /**
+     * Method that creates notification when admin delete user violations.
+     *
+     * @author Nazar Bokalo
+     */
+    void notifyDeleteViolation(Long orderId);
 
     /**
      * Method that creates notification for inactive users.

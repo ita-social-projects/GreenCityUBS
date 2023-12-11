@@ -398,6 +398,22 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
+    public void notifyDeleteViolation(Long orderId) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+        Violation violation = violationRepository.findByOrderId(orderId)
+            .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
+        parameters.add(NotificationParameter.builder()
+            .key(ORDER_NUMBER_KEY)
+            .value(orderId.toString())
+            .build());
+        fillAndSendNotification(parameters, violation.getOrder(),
+            NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void notifyInactiveAccounts() {
         Long[] monthsList = {2L, 4L, 6L, 8L, 10L, 12L};
         List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks = new ArrayList<>();
