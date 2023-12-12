@@ -73,6 +73,13 @@ public interface NotificationService {
     void notifyChangedViolation(Violation violation, Long orderId);
 
     /**
+     * Method that creates notification when admin delete user violations.
+     *
+     * @author Nazar Bokalo
+     */
+    void notifyDeleteViolation(Long orderId);
+
+    /**
      * Method that creates notification for inactive users.
      *
      * @author Ann Sakhno
