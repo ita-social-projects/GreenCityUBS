@@ -177,6 +177,7 @@ public class ViolationServiceImpl implements ViolationService {
                     fileService.delete(images.get(i));
                 }
             }
+            notificationService.notifyDeleteViolation(id);
             violationRepository.deleteById(violationOptional.get().getId());
             User user = violationOptional.get().getOrder().getUser();
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
