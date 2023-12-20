@@ -72,7 +72,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Qualifier("singleThreadedExecutor")
     private ExecutorService executor;
     private final InternalUrlConfigProp internalUrlConfigProp;
-
     private static final String ORDER_NUMBER_KEY = "orderNumber";
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
     private static final String PAY_BUTTON = "payButton";
