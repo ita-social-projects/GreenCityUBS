@@ -49,6 +49,7 @@ public class EventServiceImpl implements EventService {
         event.setEventNameEng(getEventNameEng(eventName));
         event.setAuthorNameEng(getAuthorNameEng(eventAuthor));
         getEventNameEngWithNumbers(eventName, event);
+        getEventNameEngWithDate(eventName, event);
 
         if (order.getEvents() != null) {
             List<Event> events = new ArrayList<>(order.getEvents());
@@ -57,6 +58,22 @@ public class EventServiceImpl implements EventService {
         }
         event.setOrder(order);
         eventRepository.save(event);
+    }
+
+    private void getEventNameEngWithDate(String eventName, Event event) {
+        if (eventName.startsWith(OrderHistory.UPDATE_DATE_EXPORT)) {
+            event.setEventNameEng(
+                OrderHistory.UPDATE_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
+                    eventName.substring(OrderHistory.UPDATE_DATE_EXPORT.length())));
+        } else if (eventName.startsWith(OrderHistory.SET_DATE_EXPORT)) {
+            event.setEventNameEng(
+                OrderHistory.SET_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
+                    eventName.substring(OrderHistory.SET_DATE_EXPORT.length())));
+        } else if (eventName.startsWith(OrderHistory.UPDATE_MIX_WASTE)) {
+            event.setEventNameEng(
+                OrderHistory.SET_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_ORDER_EXPORT_ENG,
+                    eventName.substring(OrderHistory.UPDATE_MIX_WASTE.length())));
+        }
     }
 
     private void getEventNameEngWithNumbers(String eventName, Event event) {
@@ -72,6 +89,12 @@ public class EventServiceImpl implements EventService {
         } else if (eventName.startsWith(OrderHistory.ADD_PAYMENT_MANUALLY)) {
             event.setEventNameEng(OrderHistory.ADD_PAYMENT_MANUALLY_ENG
                 + eventName.substring(OrderHistory.ADD_PAYMENT_MANUALLY.length()));
+        } else if (eventName.startsWith(OrderHistory.ADD_NEW_ECO_NUMBER)) {
+            event.setEventNameEng(OrderHistory.ADD_NEW_ECO_NUMBER_ENG
+                + eventName.substring(OrderHistory.ADD_NEW_ECO_NUMBER.length()));
+        } else if (eventName.startsWith(OrderHistory.DELETED_ECO_NUMBER)) {
+            event.setEventNameEng(OrderHistory.DELETED_ECO_NUMBER_ENG
+                + eventName.substring(OrderHistory.DELETED_ECO_NUMBER.length()));
         }
     }
 
@@ -79,6 +102,22 @@ public class EventServiceImpl implements EventService {
 
     static {
         eventNameToEngMap.put(OrderHistory.ORDER_FORMED, OrderHistory.ORDER_FORMED_ENG);
+        eventNameToEngMap.put(OrderHistory.ASSIGN_DRIVER, OrderHistory.ASSIGN_DRIVER_ENG);
+        eventNameToEngMap.put(OrderHistory.ASSIGN_LOGIEST, OrderHistory.ASSIGN_LOGIEST_ENG);
+        eventNameToEngMap.put(OrderHistory.ASSIGN_CALL_MANAGER, OrderHistory.ASSIGN_CALL_MANAGER_ENG);
+        eventNameToEngMap.put(OrderHistory.ASSIGN_CALL_PILOT, OrderHistory.ASSIGN_CALL_PILOT_ENG);
+        eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_CALL, OrderHistory.UPDATE_MANAGER_CALL_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_ON_THE_ROUTE, OrderHistory.ORDER_ON_THE_ROUTE_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_DONE, OrderHistory.ORDER_DONE_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_CANCELLED, OrderHistory.ORDER_CANCELLED_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_NOT_TAKEN_OUT, OrderHistory.ORDER_NOT_TAKEN_OUT_ENG);
+        eventNameToEngMap.put(OrderHistory.ADD_VIOLATION, OrderHistory.ADD_VIOLATION_ENG);
+        eventNameToEngMap.put(OrderHistory.CHANGES_VIOLATION, OrderHistory.CHANGES_VIOLATION_ENG);
+        eventNameToEngMap.put(OrderHistory.ADDED_BONUSES, OrderHistory.ADDED_BONUSES_ENG);
+        eventNameToEngMap.put(OrderHistory.CHANGED_SENDER, OrderHistory.CHANGED_SENDER_ENG);
+        eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_LOGIEST, OrderHistory.UPDATE_MANAGER_LOGIEST_ENG);
+        eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_CALL_PILOT, OrderHistory.UPDATE_MANAGER_CALL_PILOT_ENG);
+        eventNameToEngMap.put(OrderHistory.UPDATE_MANAGER_DRIVER, OrderHistory.UPDATE_MANAGER_DRIVER_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_PAID, OrderHistory.ORDER_PAID_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_ADJUSTMENT, OrderHistory.ORDER_ADJUSTMENT_ENG);
         eventNameToEngMap.put(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
