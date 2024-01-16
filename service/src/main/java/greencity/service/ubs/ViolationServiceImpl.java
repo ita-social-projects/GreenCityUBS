@@ -177,6 +177,7 @@ public class ViolationServiceImpl implements ViolationService {
                     fileService.delete(images.get(i));
                 }
             }
+            notificationService.notifyDeleteViolation(id);
             violationRepository.deleteById(violationOptional.get().getId());
             User user = violationOptional.get().getOrder().getUser();
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
@@ -197,6 +198,7 @@ public class ViolationServiceImpl implements ViolationService {
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
         eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getEmail(), violation.getOrder());
+        notificationService.notifyChangedViolation(violation, add.getOrderID());
     }
 
     private void updateViolation(Violation violation, UpdateViolationToUserDto add, MultipartFile[] multipartFiles) {

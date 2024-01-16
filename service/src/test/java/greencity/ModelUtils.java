@@ -230,6 +230,8 @@ public class ModelUtils {
     public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotificationForViolation();
     public static final UserNotification TEST_USER_NOTIFICATION_4 = createUserNotification4();
     public static final UserNotification TEST_USER_NOTIFICATION_5 = createUserNotification5();
+    public static final UserNotification TEST_USER_NOTIFICATION_6 = createUserNotificationForViolation6();
+    public static final UserNotification TEST_USER_NOTIFICATION_7 = createUserNotificationForViolation7();
     public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
@@ -2701,6 +2703,24 @@ public class ModelUtils {
     public static UserNotification createUserNotificationForViolation() {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
+        userNotification.setUser(TEST_ORDER_4.getUser());
+        userNotification.setOrder(TEST_ORDER_4);
+
+        return userNotification;
+    }
+
+    public static UserNotification createUserNotificationForViolation6() {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.CHANGED_IN_RULE_VIOLATION_STATUS);
+        userNotification.setUser(TEST_ORDER_4.getUser());
+        userNotification.setOrder(TEST_ORDER_4);
+
+        return userNotification;
+    }
+
+    public static UserNotification createUserNotificationForViolation7() {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
         userNotification.setUser(TEST_ORDER_4.getUser());
         userNotification.setOrder(TEST_ORDER_4);
 
