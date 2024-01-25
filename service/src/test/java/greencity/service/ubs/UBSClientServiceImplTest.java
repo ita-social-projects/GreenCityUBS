@@ -107,8 +107,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
@@ -124,7 +123,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import static greencity.ModelUtils.KYIV_REGION_EN;
 import static greencity.ModelUtils.KYIV_REGION_UA;
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
@@ -2255,7 +2253,7 @@ class UBSClientServiceImplTest {
             .thenReturn(getGeocodingResult().get(0));
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
-                .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
+            .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
         when(addressRepository.findById(updateAddressRequestDto.getId()))
             .thenReturn(Optional.ofNullable(addresses.get(0)));
         when(modelMapper.map(any(),
@@ -2267,7 +2265,7 @@ class UBSClientServiceImplTest {
         addressDto.setDistrictEn("District");
         when(modelMapper.map(addresses.get(0),
             AddressDto.class))
-                .thenReturn(addressDto);
+            .thenReturn(addressDto);
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
@@ -2352,7 +2350,7 @@ class UBSClientServiceImplTest {
             .thenReturn(getGeocodingResult().get(0));
         when(modelMapper.map(any(),
             eq(OrderAddressDtoRequest.class)))
-                .thenReturn(dtoRequest);
+            .thenReturn(dtoRequest);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
             () -> ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
@@ -3452,10 +3450,10 @@ class UBSClientServiceImplTest {
             .thenReturn(ModelUtils.getAmount());
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+            .thenReturn(Optional.of(orderStatusTranslation));
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
-                .thenReturn(orderPaymentStatusTranslation);
+            .thenReturn(orderPaymentStatusTranslation);
 
         ubsService.getOrderForUser(user.getUuid(), 1L);
 
@@ -3509,10 +3507,10 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+            .thenReturn(Optional.of(orderStatusTranslation));
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
-                .thenReturn(orderPaymentStatusTranslation);
+            .thenReturn(orderPaymentStatusTranslation);
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(ModelUtils.getAmount());
 
@@ -3557,10 +3555,10 @@ class UBSClientServiceImplTest {
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+            .thenReturn(Optional.of(orderStatusTranslation));
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
-                .thenReturn(orderPaymentStatusTranslation);
+            .thenReturn(orderPaymentStatusTranslation);
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(ModelUtils.getAmount());
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
@@ -3607,10 +3605,10 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+            .thenReturn(Optional.of(orderStatusTranslation));
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
-                .thenReturn(orderPaymentStatusTranslation);
+            .thenReturn(orderPaymentStatusTranslation);
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(ModelUtils.getAmount());
         PageableDto<OrdersDataForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), pageable, null);
@@ -3650,10 +3648,10 @@ class UBSClientServiceImplTest {
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+            .thenReturn(Optional.of(orderStatusTranslation));
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
-                .thenReturn(orderPaymentStatusTranslation);
+            .thenReturn(orderPaymentStatusTranslation);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(ModelUtils.getAmount());
@@ -3961,10 +3959,10 @@ class UBSClientServiceImplTest {
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(Optional.of(orderStatusTranslation));
+            .thenReturn(Optional.of(orderStatusTranslation));
         when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
-                .thenReturn(orderPaymentStatusTranslation);
+            .thenReturn(orderPaymentStatusTranslation);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(ModelUtils.getAmount());

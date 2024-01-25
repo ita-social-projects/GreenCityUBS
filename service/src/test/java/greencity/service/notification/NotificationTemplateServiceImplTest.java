@@ -15,10 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 import java.util.Optional;
-
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PAGEABLE;
 import static greencity.ModelUtils.TEMPLATE_PAGE;

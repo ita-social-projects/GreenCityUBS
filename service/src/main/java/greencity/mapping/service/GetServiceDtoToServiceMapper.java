@@ -5,7 +5,6 @@ import greencity.dto.service.GetServiceDto;
 import greencity.entity.order.Service;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 

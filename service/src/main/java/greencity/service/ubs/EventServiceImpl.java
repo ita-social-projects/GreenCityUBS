@@ -9,8 +9,7 @@ import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import lombok.Data;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 

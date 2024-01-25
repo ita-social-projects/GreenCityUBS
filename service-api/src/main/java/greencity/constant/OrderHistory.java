@@ -65,8 +65,6 @@ public final class OrderHistory {
     public static final String SET_EXPORT_DETAILS = "Встановлено деталі вивезення.";
     public static final String SET_EXPORT_DETAILS_ENG = "Installed export details.";
     public static final String UPDATE_ORDER_EXPORT_ENG = " Waste mix: %s.";
-    public static final String RETURN_OVERPAYMENT_TO_CLIENT = "Повернено кошти клієнту";
-    public static final String RETURN_OVERPAYMENT_AS_BONUS_TO_CLIENT = "Зараховано кошти на бонусний рахунок клієнта";
     public static final String RETURN_BONUSES_TO_CLIENT = "Невикористані бонуси повернено на бонусний рахунок клієнта";
     public static final String WASTE_REMOVAL_ADDRESS_CHANGE = "Змінено адресу вивезення відходів";
     public static final String ADD_ADMIN_COMMENT = "Додано коментар";

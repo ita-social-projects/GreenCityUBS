@@ -3,14 +3,11 @@ package greencity.mapping.location;
 import greencity.ModelUtils;
 import greencity.dto.location.LocationCreateDto;
 import greencity.entity.user.Location;
-import greencity.mapping.location.LocationCreateDtoMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)

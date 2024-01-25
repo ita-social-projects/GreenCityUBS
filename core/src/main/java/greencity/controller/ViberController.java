@@ -39,7 +39,7 @@ public class ViberController {
 
     /**
      * The method receives all requestss from Viberr.
-     * 
+     *
      * @param callbackDto - contains all the necessary data.
      */
     @PostMapping(value = "/bot", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,

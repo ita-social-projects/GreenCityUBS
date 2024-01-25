@@ -5,8 +5,7 @@ import greencity.entity.order.TariffsInfo;
 import greencity.enums.LocationStatus;
 import greencity.enums.TariffStatus;
 import org.springframework.stereotype.Repository;
-
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 
 @Repository

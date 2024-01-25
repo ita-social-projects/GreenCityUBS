@@ -1,15 +1,21 @@
 package greencity.security;
 
-import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import jakarta.servlet.http.HttpServletRequest;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Optional;
+import java.util.Date;
 
 /**
  * Class that provides methods for working with JWT.
@@ -19,6 +25,7 @@ import java.util.*;
  */
 @Slf4j
 @Component
+@Getter
 public class JwtTool {
     private final String accessTokenKey;
 
@@ -28,15 +35,6 @@ public class JwtTool {
     @Autowired
     public JwtTool(@Value("${greencity.authorization.token-key}") String accessTokenKey) {
         this.accessTokenKey = accessTokenKey;
-    }
-
-    /**
-     * Returns access token key.
-     *
-     * @return accessTokenKey
-     */
-    public String getAccessTokenKey() {
-        return accessTokenKey;
     }
 
     /**
@@ -60,17 +58,18 @@ public class JwtTool {
      * @param ttl   is token time to live.
      */
     public String createAccessToken(String email, int ttl) {
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("role", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+        ClaimsBuilder claims = Jwts.claims().subject(email);
+        claims.add("role", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+
         Date now = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
         calendar.add(Calendar.MINUTE, ttl);
         return Jwts.builder()
-            .setClaims(claims)
-            .setIssuedAt(now)
-            .setExpiration(calendar.getTime())
-            .signWith(SignatureAlgorithm.HS256, accessTokenKey)
+            .claims(claims.build())
+            .issuedAt(now)
+            .expiration(calendar.getTime())
+            .signWith(Keys.hmacShaKeyFor(accessTokenKey.getBytes(StandardCharsets.UTF_8)), Jwts.SIG.HS256)
             .compact();
     }
 
@@ -78,11 +77,13 @@ public class JwtTool {
      * Method for getting employee authorities from access token.
      *
      */
+    @SuppressWarnings({"unchecked, rawtype"})
     public List<String> getAuthoritiesFromToken(String accessToken) {
+        SecretKey key = Keys.hmacShaKeyFor(accessToken.getBytes());
         return (List<String>) Jwts.parser()
-            .setSigningKey(getAccessTokenKey())
-            .parseClaimsJws(accessToken)
-            .getBody()
+            .verifyWith(key).build()
+            .parseSignedClaims(accessToken)
+            .getPayload()
             .get("employee_authorities");
     }
 }

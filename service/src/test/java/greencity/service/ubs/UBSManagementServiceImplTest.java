@@ -93,8 +93,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -109,7 +108,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-
 import static greencity.ModelUtils.ORDER_DETAIL_STATUS_DTO;
 import static greencity.ModelUtils.TEST_ADDITIONAL_BAG_INFO_DTO;
 import static greencity.ModelUtils.TEST_ADDITIONAL_BAG_INFO_DTO_LIST;
@@ -125,6 +123,7 @@ import static greencity.ModelUtils.TEST_ORDER_DETAILS_INFO_DTO_LIST;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
 import static greencity.ModelUtils.TEST_USER;
 import static greencity.ModelUtils.UPDATE_ORDER_PAGE_ADMIN_DTO;
+import static greencity.ModelUtils.getOrdersStatusCanceledDto;
 import static greencity.ModelUtils.getOrdersStatusFormedDto2;
 import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getAdminCommentDto;
@@ -156,7 +155,6 @@ import static greencity.ModelUtils.getOrderStatusTranslations;
 import static greencity.ModelUtils.getOrderUserFirst;
 import static greencity.ModelUtils.getOrderWithoutPayment;
 import static greencity.ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto;
-import static greencity.ModelUtils.getOrdersStatusCanseledDto;
 import static greencity.ModelUtils.getOrdersStatusConfirmedDto;
 import static greencity.ModelUtils.getOrdersStatusDoneDto;
 import static greencity.ModelUtils.getOrdersStatusFormedDto;
@@ -174,7 +172,6 @@ import static greencity.ModelUtils.getTestOrderDetailStatusRequestDto;
 import static greencity.ModelUtils.getTestUser;
 import static greencity.ModelUtils.updateAllOrderPageDto;
 import static greencity.ModelUtils.updateOrderPageAdminDto;
-
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static java.util.Collections.singletonList;
@@ -1506,14 +1503,13 @@ class UBSManagementServiceImplTest {
 
     @Test
     void testSetOrderDetailsCanceled() {
-        Order order = getOrdersStatusCanseledDto();
+        Order order = getOrdersStatusCanceledDto();
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         doNothing().when(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-//        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.setOrderDetail(order,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -2039,7 +2035,7 @@ class UBSManagementServiceImplTest {
         when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-                .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
         when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
@@ -2110,7 +2106,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-                .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
         when(modelMapper.map(getOrderForGetOrderStatusData2Test().getPayment().get(0), PaymentInfoDto.class))
@@ -2151,7 +2147,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-                .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
 
@@ -2186,7 +2182,7 @@ class UBSManagementServiceImplTest {
         when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-                .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
 
@@ -2223,7 +2219,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-                .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
         assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderStatusData(1L, "test@gmail.com"));
     }
 
@@ -2506,10 +2502,10 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-                .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
         when(
             orderPaymentStatusTranslationRepository.getAllBy())
-                .thenReturn(List.of(orderPaymentStatusTranslation));
+            .thenReturn(List.of(orderPaymentStatusTranslation));
 
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
@@ -2550,14 +2546,14 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-                .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
 
         when(orderStatusTranslationRepository.findAllBy())
             .thenReturn(list);
 
         when(
             orderPaymentStatusTranslationRepository.getAllBy())
-                .thenReturn(List.of(orderPaymentStatusTranslation));
+            .thenReturn(List.of(orderPaymentStatusTranslation));
 
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());

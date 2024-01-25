@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import java.net.URI;
 import java.util.Map;
 import java.util.HashMap;
@@ -23,9 +22,7 @@ import java.util.stream.Collectors;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.collections4.CollectionUtils;
-
 import org.springframework.cache.annotation.Cacheable;
 
 @Service

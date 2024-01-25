@@ -7,7 +7,6 @@ import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.enums.SortingOrder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.Optional;
 
 public interface ViolationService {

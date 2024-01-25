@@ -38,7 +38,6 @@ import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.position.PositionDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
@@ -66,7 +65,6 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import org.springframework.http.HttpStatus;
-
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -77,7 +75,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import static greencity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
@@ -249,14 +246,6 @@ public class ModelUtils {
             .timeDeliveryTo("20:20:20")
             .receivingStationId(1L)
             .allReceivingStations(List.of(getReceivingStationDto()))
-            .build();
-    }
-
-    public static PositionDto getPositionDto() {
-        return PositionDto.builder()
-            .id(1L)
-            .name("Водій")
-            .nameEn("Driver")
             .build();
     }
 

@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,7 +13,7 @@ import java.util.Optional;
 public interface BagRepository extends JpaRepository<Bag, Integer> {
     /**
      * This is method which find capacity by id.
-     * 
+     *
      * @param bagId {@link Integer}.
      * @return {@link Integer}.
      * @author Yuriy Bahlay.
@@ -43,7 +42,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
 
     /**
      * method, that returns {@link Bag}'s info.
-     * 
+     *
      * @param orderId order id {@link Long}
      * @author Nazar Struk
      * @author José Castellanos

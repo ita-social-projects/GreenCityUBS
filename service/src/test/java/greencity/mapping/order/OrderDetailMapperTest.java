@@ -10,14 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-class OrderDelailMapperTest {
+class OrderDetailMapperTest {
 
     @InjectMocks
-    OrderDelailMapper orderDelailMapper;
+    OrderDetailMapper orderDetailMapper;
 
     @Test
     void convert() {
@@ -41,7 +40,7 @@ class OrderDelailMapperTest {
                 .price(500.0)
                 .build());
 
-        List<OrderDetailInfoDto> actual = orderDelailMapper.convert(orderDetailDto);
+        List<OrderDetailInfoDto> actual = orderDetailMapper.convert(orderDetailDto);
 
         Assertions.assertEquals(expected, actual);
 

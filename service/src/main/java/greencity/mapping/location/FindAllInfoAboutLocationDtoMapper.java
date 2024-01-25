@@ -7,7 +7,6 @@ import greencity.dto.location.RegionTranslationDto;
 import greencity.entity.user.Region;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
 

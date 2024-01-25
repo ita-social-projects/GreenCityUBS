@@ -19,13 +19,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import java.util.Optional;
-
-import static greencity.enums.NotificationReceiverType.EMAIL;
 import static greencity.enums.NotificationReceiverType.MOBILE;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramServiceTest {
@@ -58,7 +59,8 @@ class TelegramServiceTest {
             template.getTitle() + "\n\n" + template.getNotificationPlatforms().get(0).getBody());
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
-                notification.getNotificationType(), MOBILE)).thenReturn(Optional.of(template));
+                notification.getNotificationType(), MOBILE))
+            .thenReturn(Optional.of(template));
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
         when(ubsTelegramBot.execute(sendMessage)).thenReturn(null);

@@ -1,12 +1,16 @@
 package greencity.service.ubs.manager;
 
 import greencity.ModelUtils;
-import greencity.dto.order.BigOrderTableDTO;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
-import greencity.filters.*;
-import greencity.repository.*;
+import greencity.filters.DateFilter;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
+import greencity.repository.BigOrderTableRepository;
+import greencity.repository.CustomTableViewRepo;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,11 +19,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 

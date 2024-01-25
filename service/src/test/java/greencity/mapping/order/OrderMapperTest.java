@@ -3,16 +3,13 @@ package greencity.mapping.order;
 import greencity.ModelUtils;
 import greencity.dto.order.OrderResponseDto;
 import greencity.entity.order.Order;
-import greencity.mapping.order.OrderMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)

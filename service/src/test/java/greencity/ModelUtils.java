@@ -173,7 +173,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -189,7 +188,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import static greencity.enums.NotificationReceiverType.EMAIL;
 import static greencity.enums.NotificationReceiverType.MOBILE;
 import static greencity.enums.NotificationReceiverType.SITE;
@@ -232,7 +230,6 @@ public class ModelUtils {
     public static final UserNotification TEST_USER_NOTIFICATION_5 = createUserNotification5();
     public static final UserNotification TEST_USER_NOTIFICATION_6 = createUserNotificationForViolation6();
     public static final UserNotification TEST_USER_NOTIFICATION_7 = createUserNotificationForViolation7();
-    public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
     public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = createNotificationTemplateDto();
@@ -329,32 +326,6 @@ public class ModelUtils {
         var getEmployeeDto = getEmployeeDto();
         getEmployeeDto.setEmployeePositions(new ArrayList<>());
         getEmployeeDto.setTariffs(new ArrayList<>());
-        return getEmployeeDto;
-    }
-
-    public static GetEmployeeDto getEmployeeDtoWithPositionsForGetAllMethod() {
-        var getEmployeeDto = getEmployeeDto();
-        getEmployeeDto.setEmployeePositions(List.of(
-            getPositionDto(3L),
-            getPositionDto(5L),
-            getPositionDto(7L)));
-        getEmployeeDto.setTariffs(new ArrayList<>());
-        return getEmployeeDto;
-    }
-
-    public static GetEmployeeDto getEmployeeDtoWithPositionsAndTariffs() {
-        var getEmployeeDto = getEmployeeDto();
-
-        getEmployeeDto.setEmployeePositions(List.of(
-            getPositionDto(3L),
-            getPositionDto(5L),
-            getPositionDto(7L)));
-
-        var getTariffInfoForEmployeeDto = getTariffInfoForEmployeeDto2();
-        getTariffInfoForEmployeeDto.setLocationsDtos(List.of(getLocationsDtos(30L)));
-        getTariffInfoForEmployeeDto.setReceivingStationDtos(List.of(getReceivingStationDto2()));
-        getEmployeeDto.setTariffs(List.of(getTariffInfoForEmployeeDto));
-
         return getEmployeeDto;
     }
 
@@ -506,7 +477,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static UBSuser getUBSuserWtihoutOrderAddress() {
+    public static UBSuser getUBSuserWithoutOrderAddress() {
         return UBSuser.builder()
             .firstName("oleh")
             .lastName("ivanov")
@@ -675,21 +646,6 @@ public class ModelUtils {
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
-            .build();
-    }
-
-    public static Order getOrderWithoutAddress() {
-        return Order.builder()
-            .id(1L)
-            .counterOrderPaymentId(0L)
-            .ubsUser(UBSuser.builder()
-                .firstName("oleh")
-                .lastName("ivanov")
-                .email("mail@mail.ua")
-                .id(1L)
-                .phoneNumber("067894522")
-                .build())
-            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .build();
     }
 
@@ -1403,43 +1359,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static GetEmployeeDto getGetEmployeeDto() {
-        return GetEmployeeDto
-            .builder()
-            .id(1L)
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .image("path")
-            .employeePositions(List.of(PositionDto.builder()
-                .id(1L)
-                .name("Водій")
-                .nameEn("Driver")
-                .build()))
-            .tariffs(List.of(GetTariffInfoForEmployeeDto.builder()
-                .id(1L)
-                .region(getRegionDto(1L))
-                .locationsDtos(List.of(LocationsDtos
-                    .builder()
-                    .locationId(1L)
-                    .nameEn("Kyiv")
-                    .nameUk("Київ")
-                    .build()))
-                .receivingStationDtos(List.of(GetReceivingStationDto
-                    .builder()
-                    .stationId(1L)
-                    .name("Петрівка")
-                    .build()))
-                .courier(CourierTranslationDto.builder()
-                    .id(1L)
-                    .nameUk("Тест")
-                    .nameEn("Test")
-                    .build())
-                .build()))
-            .build();
-    }
-
     private static RegionDto getRegionDto(Long id) {
         return RegionDto.builder()
             .regionId(id)
@@ -1915,14 +1834,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static Position getPosition(Long id) {
-        return Position.builder()
-            .id(id)
-            .name("Водій")
-            .nameEn("Driver")
-            .build();
-    }
-
     public static PositionDto getPositionDto(Long id) {
         return PositionDto.builder()
             .id(id)
@@ -2011,21 +1922,6 @@ public class ModelUtils {
             .id(1L)
             .paymentStatus(PaymentStatus.PAID)
             .amount(95000L)
-            .currency("UAH")
-            .orderStatus("approved")
-            .responseStatus("approved")
-            .order(getOrder())
-            .paymentId("1")
-            .settlementDate(LocalDate.now().toString())
-            .fee(0L)
-            .build();
-    }
-
-    public static Payment getPayment2() {
-        return Payment.builder()
-            .id(1L)
-            .paymentStatus(PaymentStatus.PAID)
-            .amount(0L)
             .currency("UAH")
             .orderStatus("approved")
             .responseStatus("approved")
@@ -2681,13 +2577,6 @@ public class ModelUtils {
         return Violation.builder().description("violation description").build();
     }
 
-    private static NotificationParameter createNotificationParameter() {
-        return NotificationParameter.builder()
-            .key("violationDescription")
-            .value("violation description")
-            .build();
-    }
-
     private static Order createTestOrder4() {
         return Order.builder().id(46L).user(User.builder().id(42L).build())
             .orderDate(LocalDateTime.now())
@@ -3018,18 +2907,6 @@ public class ModelUtils {
 
     }
 
-    public static OrderBag getEditedOrderBag() {
-        return OrderBag.builder()
-            .id(1L)
-            .amount(1)
-            .price(150_00L)
-            .capacity(20)
-            .name("Бавовняна сумка")
-            .bag(getBag())
-            .order(getOrder())
-            .build();
-    }
-
     public static Location getLocation() {
         return Location.builder()
             .id(1L)
@@ -3287,36 +3164,6 @@ public class ModelUtils {
                 .capacity(10)
                 .commission(21_00L)
                 .fullPrice(21_00L)
-                .build());
-    }
-
-    public static List<Bag> getBag2list() {
-        return List.of(Bag.builder()
-            .status(BagStatus.ACTIVE)
-            .id(1)
-            .price(100_00L)
-            .capacity(10)
-            .commission(20_00L)
-            .fullPrice(120_00L)
-            .build());
-    }
-
-    public static List<Bag> getBag3list() {
-        return List.of(Bag.builder()
-            .status(BagStatus.ACTIVE)
-            .id(1)
-            .price(100_00L)
-            .capacity(10)
-            .commission(21_00L)
-            .fullPrice(2000_00L)
-            .build(),
-            Bag.builder()
-                .status(BagStatus.ACTIVE)
-                .id(2)
-                .price(100_00L)
-                .capacity(10)
-                .commission(20_00L)
-                .fullPrice(120_00L)
                 .build());
     }
 
@@ -4104,7 +3951,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static Order getOrdersStatusCanseledDto() {
+    public static Order getOrdersStatusCanceledDto() {
         return Order.builder()
             .id(1L)
             .payment(List.of(Payment.builder().id(1L).build()))
@@ -4514,12 +4361,13 @@ public class ModelUtils {
     }
 
     public static String getSuccessfulFondyResponse() {
-        return "{\n" +
-            "  \"response\":{\n" +
-            "    \"response_status\":\"success\",\n" +
-            "    \"checkout_url\":\"https://pay.fondy.eu/checkout?token=afcb21aef707b1fea2565b66bac7dc41d7833390\"\n" +
-            "  }\n" +
-            "}";
+        return """
+            {
+              "response":{
+                "response_status":"success",
+                "checkout_url":"https://pay.fondy.eu/checkout?token=afcb21aef707b1fea2565b66bac7dc41d7833390"
+              }
+            }""";
     }
 
     public static List<GeocodingResult> getGeocodingResultWithKyivRegion() {

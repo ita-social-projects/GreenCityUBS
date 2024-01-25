@@ -25,9 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
-
 import java.util.Optional;
-
 import static greencity.enums.NotificationReceiverType.MOBILE;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -124,7 +122,7 @@ class ViberServiceImplTest {
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
-                    .thenReturn(Optional.of(template));
+            .thenReturn(Optional.of(template));
         when(viberClient.sendMessage(sendMessageToUserDto)).thenReturn(null);
 
         viberService.sendNotification(notification, MOBILE, 0L);
@@ -141,7 +139,7 @@ class ViberServiceImplTest {
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
-                    .thenReturn(Optional.of(template));
+            .thenReturn(Optional.of(template));
 
         viberService.sendNotification(notification, MOBILE, 0L);
 

@@ -36,10 +36,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-
 import java.security.Principal;
 import java.util.Optional;
-
 import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getRequestDto;

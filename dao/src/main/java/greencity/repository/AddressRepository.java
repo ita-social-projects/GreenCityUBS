@@ -5,7 +5,6 @@ import greencity.entity.user.ubs.Address;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -95,7 +94,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
 
     /**
      * Finds first non-deleted {@link Address} associated with the given user ID.
-     * 
+     *
      * @param userId the ID of the user whose address is being searched for
      * @return an {@link Optional} containing the first {@link Address} record that
      *         matches the provided userId and has an address status other than

@@ -6,7 +6,6 @@ import greencity.dto.order.SenderLocation;
 import greencity.entity.order.BigOrderTableViews;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 

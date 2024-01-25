@@ -13,11 +13,17 @@ import lombok.Data;
 import lombok.NonNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.INVALID_DISTANCE_AMOUNT;
+import static greencity.constant.ErrorMessage.INVALID_LITRES_AMOUNT;
+import static greencity.constant.ErrorMessage.NO_SUCH_COORDINATES;
+import static greencity.constant.ErrorMessage.UNDELIVERED_ORDERS_NOT_FOUND;
 
 @Service
 @Data
@@ -88,10 +94,10 @@ public class CoordinateServiceImpl implements CoordinateService {
      */
     private void checkIfSpecifiedLitresAndDistancesAreValid(double distance, int litres) {
         if (distance < 0 || distance > 20) {
-            throw new BadRequestException(INAVALID_DISTANCE_AMOUNT);
+            throw new BadRequestException(INVALID_DISTANCE_AMOUNT);
         }
         if (litres < 0 || litres > 10000) {
-            throw new BadRequestException(INAVALID_LITRES_AMOUNT);
+            throw new BadRequestException(INVALID_LITRES_AMOUNT);
         }
     }
 

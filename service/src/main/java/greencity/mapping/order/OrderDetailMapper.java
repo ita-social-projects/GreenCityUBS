@@ -4,12 +4,11 @@ import greencity.dto.order.OrderDetailDto;
 import greencity.dto.order.OrderDetailInfoDto;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class OrderDelailMapper extends AbstractConverter<OrderDetailDto, List<OrderDetailInfoDto>> {
+public class OrderDetailMapper extends AbstractConverter<OrderDetailDto, List<OrderDetailInfoDto>> {
     @Override
     protected List<OrderDetailInfoDto> convert(OrderDetailDto orderDetailDto) {
         List<OrderDetailInfoDto> dto = new ArrayList<>();

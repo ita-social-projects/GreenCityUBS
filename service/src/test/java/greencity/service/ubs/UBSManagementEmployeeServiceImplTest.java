@@ -29,15 +29,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
+import static greencity.ModelUtils.getAddEmployeeDto;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getEmployeeDto;
+import static greencity.ModelUtils.getEmployeeDtoWithoutPositionsAndTariffsForGetAllMethod;
+import static greencity.ModelUtils.getEmployeeFilterViewListForOneEmployeeWithDifferentPositions;
+import static greencity.ModelUtils.getEmployeeForUpdateEmailCheck;
+import static greencity.ModelUtils.getEmployeeListForGetAllMethod;
+import static greencity.ModelUtils.getEmployeeWithTariffsIdDto;
+import static greencity.ModelUtils.getPosition;
+import static greencity.ModelUtils.getPositionDto;
+import static greencity.ModelUtils.getTariffsInfo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

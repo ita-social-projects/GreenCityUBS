@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.order.Certificate;
 import greencity.enums.CertificateStatus;
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +10,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +31,7 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @return list of {@link Certificate}.
      * @author Nazar Struk
      */
+    @NonNull
     Page<Certificate> findAll(Pageable page);
 
     /**
@@ -50,6 +51,7 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @param code is list Certificate
      * @return set of {@link Certificate}
      */
+
     Set<Certificate> findAllByCodeAndCertificateStatus(List<String> code, CertificateStatus status);
 
     /**
