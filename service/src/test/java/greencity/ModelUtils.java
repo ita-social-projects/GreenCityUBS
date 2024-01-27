@@ -1359,9 +1359,9 @@ public class ModelUtils {
             .build();
     }
 
-    private static RegionDto getRegionDto(Long id) {
+    private static RegionDto getRegionDto() {
         return RegionDto.builder()
-            .regionId(id)
+            .regionId(15L)
             .nameEn("Kyiv region")
             .nameUk("Київська область")
             .build();
@@ -1761,7 +1761,7 @@ public class ModelUtils {
         LocationDto locationDto1 = LocationDto.builder()
             .locationNameMap(Map.of("name", "Вінниця", "name_en", "Vinnytsa"))
             .build();
-        return Arrays.asList(locationDto1);
+        return singletonList(locationDto1);
     }
 
     public static DistrictDto getDistrictDto() {
@@ -1791,7 +1791,7 @@ public class ModelUtils {
             .cityEn("CityEng")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
-            .addressRegionDistrictList(Arrays.asList(getDistrictDto()))
+            .addressRegionDistrictList(singletonList(getDistrictDto()))
             .build();
     }
 
@@ -1865,7 +1865,7 @@ public class ModelUtils {
     public static Violation getViolation() {
         LocalDateTime localdatetime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 0, 0);
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
@@ -1881,7 +1881,7 @@ public class ModelUtils {
     public static Violation getViolation2() {
         LocalDateTime localdatetime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 0, 0);
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
@@ -1896,7 +1896,7 @@ public class ModelUtils {
     public static ViolationDetailInfoDto getViolationDetailInfoDto() {
         LocalDateTime localdatetime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 0, 0);
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
             .addedByUser("Alan Po")
@@ -2293,7 +2293,7 @@ public class ModelUtils {
 
         return OrderDetailStatusDto.builder()
             .orderStatus(TEST_ORDER.getOrderStatus().name())
-            .paymentStatus(TEST_PAYMENT_LIST.get(0).getPaymentStatus().name())
+            .paymentStatus(TEST_PAYMENT_LIST.getFirst().getPaymentStatus().name())
             .date(orderDate)
             .build();
     }
@@ -2486,21 +2486,21 @@ public class ModelUtils {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
             .notificationTemplateMainInfoDto(createNotificationTemplateMainInfoDto())
             .platforms(List.of(
-                createNotificationPlatformDto(SITE)))
+                createNotificationPlatformDto()))
             .build();
     }
 
     private static NotificationTemplateWithPlatformsDto createNotificationTemplateWithPlatformsDto() {
         return NotificationTemplateWithPlatformsDto.builder()
             .notificationTemplateMainInfoDto(createNotificationTemplateMainInfoDto())
-            .platforms(List.of(createNotificationPlatformDto(SITE)))
+            .platforms(List.of(createNotificationPlatformDto()))
             .build();
     }
 
-    private static NotificationPlatformDto createNotificationPlatformDto(NotificationReceiverType receiverType) {
+    private static NotificationPlatformDto createNotificationPlatformDto() {
         return NotificationPlatformDto.builder()
             .id(1L)
-            .receiverType(receiverType)
+            .receiverType(SITE)
             .nameEng("NameEng")
             .body("Body")
             .bodyEng("BodyEng")

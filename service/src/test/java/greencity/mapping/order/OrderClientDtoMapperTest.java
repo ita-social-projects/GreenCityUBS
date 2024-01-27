@@ -26,7 +26,7 @@ class OrderClientDtoMapperTest {
             .orderStatus(OrderStatus.DONE)
             .payment(Collections.singletonList(new Payment()))
             .build();
-        order.getPayment().get(0).setAmount(350L);
+        order.getPayment().getFirst().setAmount(350L);
 
         assertEquals(expected, mapper.convert(order));
 

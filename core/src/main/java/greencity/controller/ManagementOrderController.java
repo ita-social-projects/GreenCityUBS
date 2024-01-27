@@ -179,7 +179,7 @@ public class ManagementOrderController {
     })
 
     @GetMapping("/all-undelivered")
-    public ResponseEntity<List<GroupedOrderDto>> allUndeliveredCoords(Authentication authentication) {
+    public ResponseEntity<List<GroupedOrderDto>> allUndeliveredCoords() {
         return ResponseEntity.status(HttpStatus.OK).body(coordinateService.getAllUndeliveredOrdersWithLiters());
     }
 

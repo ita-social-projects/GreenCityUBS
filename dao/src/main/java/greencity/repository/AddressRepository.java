@@ -14,7 +14,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     /**
      * Method returns {@link Coordinates} of undelivered orders.
      *
-     * @return list of {@link Coordinates}.
+     * @return set of {@link Coordinates}.
      */
     @Query("select a.coordinates from Address a inner join UBSuser u on a.id = u.orderAddress.id "
         + "inner join Order o on u = o.ubsUser "
@@ -25,7 +25,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      * Method returns {@link Coordinates} of undelivered orders which not exceed
      * given capacity limit.
      *
-     * @return list of {@link Coordinates}.
+     * @return set of {@link Coordinates}.
      */
     @Query("select a.coordinates "
         + "from UBSuser u "

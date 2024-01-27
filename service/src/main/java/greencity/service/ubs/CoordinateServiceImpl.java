@@ -150,7 +150,7 @@ public class CoordinateServiceImpl implements CoordinateService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's
+     * @return set of {@link Coordinates} - start coordinates with it is
      *         distant @relatives.
      * @author Oleh Bilonizhka
      */

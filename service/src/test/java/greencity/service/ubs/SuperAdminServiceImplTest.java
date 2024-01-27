@@ -224,13 +224,13 @@ class SuperAdminServiceImplTest {
 
         when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(bags);
-        when(modelMapper.map(bags.get(0), GetTariffServiceDto.class)).thenReturn(dto);
+        when(modelMapper.map(bags.getFirst(), GetTariffServiceDto.class)).thenReturn(dto);
 
         superAdminService.getTariffService(1);
 
         verify(tariffsInfoRepository).existsById(1L);
         verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
-        verify(modelMapper).map(bags.get(0), GetTariffServiceDto.class);
+        verify(modelMapper).map(bags.getFirst(), GetTariffServiceDto.class);
     }
 
     @Test
@@ -268,7 +268,7 @@ class SuperAdminServiceImplTest {
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bagDeleted);
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag, getBag2()));
-        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(List.of(order));
         when(orderBagService
             .getActualBagsAmountForOrder(Arrays.asList(getOrderBag(), ModelUtils.getOrderBag2())))
             .thenReturn(ModelUtils.getAmount());
@@ -298,14 +298,14 @@ class SuperAdminServiceImplTest {
         Bag bagDeleted = ModelUtils.getBagDeleted();
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
         Order order = ModelUtils.getOrder();
-        order.updateWithNewOrderBags(Arrays.asList(getOrderBag()));
+        order.updateWithNewOrderBags(Collections.singletonList(getOrderBag()));
         Map<Integer, Integer> hashMap = new HashMap<>();
         hashMap.put(1, 1);
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bagDeleted);
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
-        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
-        when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(getOrderBag())))
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(List.of(order));
+        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(getOrderBag())))
             .thenReturn(hashMap);
         when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
         assertEquals(BagStatus.ACTIVE, bag.getStatus());
@@ -382,7 +382,7 @@ class SuperAdminServiceImplTest {
             .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(List.of(order));
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
-        when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(getOrderBag())))
+        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(getOrderBag())))
             .thenReturn(ModelUtils.getAmount());
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
@@ -418,7 +418,7 @@ class SuperAdminServiceImplTest {
         when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(List.of(order));
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
         when(orderBagService
-            .getActualBagsAmountForOrder(Arrays.asList(getOrderBag().setConfirmedQuantity(2))))
+            .getActualBagsAmountForOrder(Collections.singletonList(getOrderBag().setConfirmedQuantity(2))))
             .thenReturn(ModelUtils.getAmount());
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
@@ -454,7 +454,7 @@ class SuperAdminServiceImplTest {
         when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(List.of(order));
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
         when(orderBagService.getActualBagsAmountForOrder(
-            Arrays.asList(getOrderBag().setExportedQuantity(2).setConfirmedQuantity(2))))
+            Collections.singletonList(getOrderBag().setExportedQuantity(2).setConfirmedQuantity(2))))
             .thenReturn(ModelUtils.getAmount());
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);

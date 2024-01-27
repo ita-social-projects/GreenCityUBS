@@ -203,7 +203,7 @@ class NotificationServiceImplTest {
             List<NotificationParameter> notificationParameters = List.of(
                 NotificationParameter.builder().id(1L)
                     .userNotification(created).key("orderNumber")
-                    .value(orders.get(0).getId().toString()).build(),
+                    .value(orders.getFirst().getId().toString()).build(),
                 NotificationParameter.builder().id(2L)
                     .userNotification(created).key("amountToPay")
                     .value("10000").build());
@@ -470,7 +470,7 @@ class NotificationServiceImplTest {
             UserNotification notification = new UserNotification();
             notification.setNotificationType(NotificationType.UNPAID_PACKAGE);
             notification.setUser(user);
-            notification.setOrder(orders.get(0));
+            notification.setOrder(orders.getFirst());
             notification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(2));
 
             when(userNotificationRepository.findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(

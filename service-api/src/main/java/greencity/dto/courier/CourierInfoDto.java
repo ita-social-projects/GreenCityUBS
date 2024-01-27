@@ -12,9 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-/**
- * {@inheritDoc}
- */
 public class CourierInfoDto {
     Long min;
     Long max;

@@ -16,11 +16,11 @@ class NotificationTemplateWithPlatformsDtoMapperTest {
     @Test
     void convert() {
         var notification = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
-        var platform = notification.getNotificationPlatforms().get(0);
+        var platform = notification.getNotificationPlatforms().getFirst();
 
         var dto = notificationTemplateWithPlatformsDtoMapper.convert(notification);
         var mainInfoDto = dto.getNotificationTemplateMainInfoDto();
-        var platformDto = dto.getPlatforms().get(0);
+        var platformDto = dto.getPlatforms().getFirst();
 
         assertEquals(notification.getNotificationType(), mainInfoDto.getType());
         assertEquals(notification.getTrigger(), mainInfoDto.getTrigger());

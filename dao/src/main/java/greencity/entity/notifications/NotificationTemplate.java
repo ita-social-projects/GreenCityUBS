@@ -74,30 +74,4 @@ public class NotificationTemplate {
 
     @Column(name = "title_eng")
     private String titleEng;
-
-    /**
-     * helper method, that allows to save NotificationPlatform entity in database
-     * correctly.
-     *
-     * @param platform notification platform for NotificationTemplate
-     *                 {@link NotificationPlatform}
-     * @author Safarov Renat
-     */
-    public void addNotificationPlatform(NotificationPlatform platform) {
-        platform.setNotificationTemplate(this);
-        notificationPlatforms.add(platform);
-    }
-
-    /**
-     * helper method, that allows to remove NotificationPlatform entity from
-     * database correctly.
-     *
-     * @param platform notification platform for NotificationTemplate
-     *                 {@link NotificationPlatform}
-     * @author Safarov Renat
-     */
-    public void removeNotificationPlatform(NotificationPlatform platform) {
-        platform.setNotificationTemplate(null);
-        notificationPlatforms.remove(platform);
-    }
 }

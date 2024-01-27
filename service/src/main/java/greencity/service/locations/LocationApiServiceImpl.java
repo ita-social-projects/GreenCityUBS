@@ -76,7 +76,7 @@ public class LocationApiServiceImpl implements LocationApiService {
         String cityId = city.getId();
         List<LocationDto> allDistricts = getAllDistrictsInCityByCityID(cityId);
         if (allDistricts.isEmpty()) {
-            return Arrays.asList(city);
+            return List.of(city);
         }
         return allDistricts;
     }
@@ -84,7 +84,7 @@ public class LocationApiServiceImpl implements LocationApiService {
     static String replaceAllQuotes(String input) {
         Pattern pattern = Pattern.compile("[`'‘’“”‛‟ʼ«»\"]");
         Matcher matcher = pattern.matcher(input);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             matcher.appendReplacement(sb, "’");
         }
@@ -130,7 +130,7 @@ public class LocationApiServiceImpl implements LocationApiService {
         List<LocationDto> districts = getAllDistrictInTheRegionsById(region.getId());
         List<LocationDto> localCommunities = districts.stream()
             .flatMap(district -> getAllLocalCommunitiesById(district.getId()).stream())
-            .collect(Collectors.toList());
+            .toList();
         List<LocationDto> cities = localCommunities.stream()
             .flatMap(community -> getAllCitiesById(community.getId()).stream())
             .collect(Collectors.toList());
@@ -244,7 +244,7 @@ public class LocationApiServiceImpl implements LocationApiService {
             throw new NotFoundException(
                 String.format(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE, level, code));
         }
-        return resultFromUrl.get(0);
+        return resultFromUrl.getFirst();
     }
 
     /**
@@ -286,7 +286,7 @@ public class LocationApiServiceImpl implements LocationApiService {
             new ParameterizedTypeReference<Map<String, Object>>() {
             };
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
-        return Optional.ofNullable(response)
+        return Optional.of(response)
             .map(ResponseEntity::getBody)
             .map(body -> (List<Map<String, Object>>) body.get(RESULTS))
             .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url))

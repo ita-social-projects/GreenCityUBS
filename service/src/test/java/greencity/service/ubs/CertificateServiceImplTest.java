@@ -76,9 +76,7 @@ class CertificateServiceImplTest {
 
     @Test
     void deleteCertificateNotFound() {
-        Assertions.assertThrows(NotFoundException.class, () -> {
-            certificateService.deleteCertificate("1111-1234");
-        });
+        Assertions.assertThrows(NotFoundException.class, () -> certificateService.deleteCertificate("1111-1234"));
     }
 
     @Test
@@ -87,9 +85,7 @@ class CertificateServiceImplTest {
         certificate.setCode("1111-1234")
             .setCertificateStatus(CertificateStatus.EXPIRED);
         when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(certificate));
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            certificateService.deleteCertificate("1111-1234");
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> certificateService.deleteCertificate("1111-1234"));
     }
 
     @Test

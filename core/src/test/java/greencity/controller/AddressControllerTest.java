@@ -60,7 +60,7 @@ class AddressControllerTest {
     private final Principal principal = getPrincipal();
 
     @BeforeEach
-    private void setup() {
+    public void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(addressController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRemoteClient))
@@ -139,10 +139,6 @@ class AddressControllerTest {
         String region = "Львівська";
         String city = "Львів";
         List<DistrictDto> mockLocationDtoList = new ArrayList<>();
-        DistrictDto mockLocationDto = DistrictDto.builder()
-            .nameUa("Львів")
-            .nameEn("Lviv")
-            .build();
         when(ubsClientService.getAllDistricts(region, city)).thenReturn(mockLocationDtoList);
         mockMvc.perform(get(ubsLink + "/get-all-districts")
             .param("region", region)
@@ -153,5 +149,4 @@ class AddressControllerTest {
 
         verify(ubsClientService).getAllDistricts(region, city);
     }
-
 }

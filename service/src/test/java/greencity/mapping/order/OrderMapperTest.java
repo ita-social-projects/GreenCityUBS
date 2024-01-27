@@ -10,6 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,7 +24,7 @@ class OrderMapperTest {
         OrderResponseDto orderResponseDto = ModelUtils.getOrderResponseDto();
 
         Order expected = Order.builder()
-            .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
+            .additionalOrders(new HashSet<>(List.of("232-534-634")))
             .comment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)

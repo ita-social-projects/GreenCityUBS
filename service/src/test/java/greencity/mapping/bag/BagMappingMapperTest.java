@@ -45,9 +45,9 @@ class BagMappingMapperTest {
 
         List<BagMappingDto> list = bagMappingMapper.convert(order);
         assertEquals(1, list.size());
-        assertEquals(1, list.get(0).getAmount());
-        assertEquals(1, list.get(0).getConfirmed());
-        assertEquals(1, list.get(0).getExported());
+        assertEquals(1, list.getFirst().getAmount());
+        assertEquals(1, list.getFirst().getConfirmed());
+        assertEquals(1, list.getFirst().getExported());
     }
 
 }

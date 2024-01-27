@@ -54,6 +54,7 @@ import java.util.UUID;
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -145,7 +146,7 @@ class SuperAdminControllerTest {
             .content(requestDtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -175,7 +176,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .param("tariffId", "1L"))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -198,9 +199,9 @@ class SuperAdminControllerTest {
 
         mockMvc.perform(delete(ubsLink + "/deleteTariffService/" + 1L))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
-                result.getResolvedException().getMessage()));
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
         verify(superAdminService).deleteTariffService(1);
         verifyNoMoreInteractions(superAdminService);
@@ -245,7 +246,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .param("uuid", uuid))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -291,7 +292,7 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof ServiceAlreadyExistsException))
+            .andExpect(result -> assertInstanceOf(ServiceAlreadyExistsException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.SERVICE_ALREADY_EXISTS,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -317,7 +318,7 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -343,7 +344,7 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -392,7 +393,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .param("tariffId", "1L"))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -439,7 +440,7 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -465,7 +466,7 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -495,7 +496,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .param("id", "1L"))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -530,7 +531,7 @@ class SuperAdminControllerTest {
         mockMvc.perform(get(ubsLink + "/getActiveLocations")
             .principal(principal))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(
                 result -> assertEquals(message, Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -557,7 +558,7 @@ class SuperAdminControllerTest {
         mockMvc.perform(get(ubsLink + "/getDeactivatedLocations")
             .principal(principal))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(
                 result -> assertEquals(message, Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -635,7 +636,7 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof CourierAlreadyExists))
+            .andExpect(result -> assertInstanceOf(CourierAlreadyExists.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.COURIER_ALREADY_EXISTS,
                 result.getResolvedException().getMessage()));
 
@@ -660,7 +661,7 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isConflict())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof TariffAlreadyExistsException))
+            .andExpect(result -> assertInstanceOf(TariffAlreadyExistsException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_IS_ALREADY_EXISTS,
                 result.getResolvedException().getMessage()));
 
@@ -699,10 +700,6 @@ class SuperAdminControllerTest {
     @Test
     @SneakyThrows
     void updateCourierTest() {
-        List<CourierTranslationDto> dtoList = List.of(CourierTranslationDto.builder()
-            .nameUk("УБС")
-            .nameEn("UBS")
-            .build());
         CourierUpdateDto dto = CourierUpdateDto.builder()
             .courierId(1L)
             .nameEn("Test")
@@ -793,7 +790,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .param("id", "1L"))
             .andExpect(status().isBadRequest())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+            .andExpect(result -> assertInstanceOf(BadRequestException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.LOCATIONS_BELONG_TO_DIFFERENT_REGIONS,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
         verify(superAdminService).editTariff(1L, dto);
@@ -813,7 +810,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .param("id", "1L"))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
         verify(superAdminService).editTariff(1L, dto);
@@ -833,7 +830,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .param("id", "1L"))
             .andExpect(status().isConflict())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof TariffAlreadyExistsException))
+            .andExpect(result -> assertInstanceOf(TariffAlreadyExistsException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_IS_ALREADY_EXISTS,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
         verify(superAdminService).editTariff(1L, dto);
@@ -880,7 +877,7 @@ class SuperAdminControllerTest {
             .param("tariffId", "1")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+            .andExpect(result -> assertInstanceOf(BadRequestException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -902,7 +899,7 @@ class SuperAdminControllerTest {
             .param("tariffId", "1")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -930,7 +927,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .param("tariffId", "1"))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -961,7 +958,7 @@ class SuperAdminControllerTest {
             .param("status", "Active")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + 1L,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
@@ -979,7 +976,7 @@ class SuperAdminControllerTest {
             .param("tariffId", "1L")
             .param("status", "Active"))
             .andExpect(status().isBadRequest())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+            .andExpect(result -> assertInstanceOf(BadRequestException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 

@@ -386,7 +386,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             ubsUser = Collections.singletonList(UBSuser.builder().id(null).build());
         }
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
-        dto.setUbsUserId(ubsUser.get(0).getId());
+        dto.setUbsUserId(ubsUser.getFirst().getId());
         if (currentUser.getAlternateEmail() != null
             && !currentUser.getAlternateEmail().isEmpty()) {
             dto.setEmail(currentUser.getAlternateEmail());
@@ -509,7 +509,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private FondyPaymentResponse getFondyPaymentResponse(Order order) {
-        Payment payment = order.getPayment().get(order.getPayment().size() - 1);
+        Payment payment = order.getPayment().getLast();
         return FondyPaymentResponse.builder()
             .paymentStatus(payment.getResponseStatus())
             .build();
@@ -1049,7 +1049,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         UBSuser user = optionalUbsUser.get();
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
-        eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().get(0));
+        eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().getFirst());
         return UbsCustomersDto.builder()
             .name(user.getSenderFirstName() + " " + user.getSenderLastName())
             .email(user.getSenderEmail())
@@ -1092,7 +1092,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return ubsUser;
     }
 
-    private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
+    private void formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
         List<OrderBag> bagsOrdered, UBSuser userData,
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
@@ -1117,7 +1117,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         order.getPayment().add(payment);
         orderRepository.save(order);
-        return order;
     }
 
     private void setOrderPaymentStatus(Order order, long sumToPay) {
@@ -1137,7 +1136,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
             .orderId(orderId + "_"
-                + order.getPayment().get(order.getPayment().size() - 1).getId().toString())
+                + order.getPayment().getLast().getId().toString())
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPayInCoins)
@@ -1200,7 +1199,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         long amountInCoins = order.getPayment().stream()
             .flatMapToLong(p -> LongStream.of(p.getAmount()))
             .reduce(Long::sum).orElse(0);
-        String currency = order.getPayment().isEmpty() ? "UAH" : order.getPayment().get(0).getCurrency();
+        String currency = order.getPayment().isEmpty() ? "UAH" : order.getPayment().getFirst().getCurrency();
         return OrderPaymentDetailDto.builder()
             .amount(amountInCoins != 0L ? amountInCoins + certificatePointsInCoins + pointsToUseInCoins : 0L)
             .certificates(-certificatePointsInCoins)
@@ -1265,10 +1264,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private long formBagsToBeSavedAndCalculateOrderSum(List<OrderBag> orderBagList, List<BagDto> bags,
         TariffsInfo tariffsInfo) {
         long sumToPayInCoins = 0L;
-        List<Integer> bagIds = bags.stream().map(BagDto::getId).collect(toList());
+        List<Integer> bagIds = bags.stream().map(BagDto::getId).toList();
         for (BagDto temp : bags) {
             Bag bag = findActiveBagById(temp.getId());
-            if (bag.getLimitIncluded().booleanValue()) {
+            if (bag.getLimitIncluded()) {
                 checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, temp.getAmount());
                 checkSumIfCourierLimitBySumOfOrder(tariffsInfo, bag.getFullPrice() * temp.getAmount());
             }
@@ -1279,8 +1278,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
             .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
-            .map(this::createOrderBag).collect(toList());
-        orderBagList.addAll(notOrderedBags.stream().peek(orderBag -> orderBag.setAmount(0)).collect(toList()));
+            .map(this::createOrderBag).toList();
+        orderBagList.addAll(notOrderedBags.stream().peek(orderBag -> orderBag.setAmount(0)).toList());
         return sumToPayInCoins;
     }
 
@@ -1472,7 +1471,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId, uuid);
         Map<Integer, Integer> amountBagsOrder = orderStatusPageDto.getAmountOfBagsOrdered();
         Map<Integer, Integer> amountBagsOrderExported = orderStatusPageDto.getAmountOfBagsExported();
-        amountBagsOrderExported.replaceAll((id, quantity) -> quantity = quantity - amountBagsOrder.get(id));
+        amountBagsOrderExported.replaceAll((id, quantity) -> quantity - amountBagsOrder.get(id));
         orderStatusPageDto.setAmountOfBagsExported(amountBagsOrderExported);
         Double exportedPrice = orderStatusPageDto.getOrderExportedDiscountedPrice();
         Double initialPrice = orderStatusPageDto.getOrderDiscountedPrice();

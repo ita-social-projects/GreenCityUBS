@@ -149,7 +149,7 @@ class UBSManagementEmployeeServiceImplTest {
             getEmployeeFilterViewListForOneEmployeeWithDifferentPositions(employeeId, tariffsInfoId);
         var expectedGetEmployeeDto = getEmployeeDtoWithoutPositionsAndTariffsForGetAllMethod();
         var expectedEmployeesList = getEmployeeListForGetAllMethod();
-        var firstElement = employeeFilterViews.get(0);
+        var firstElement = employeeFilterViews.getFirst();
 
         when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
             .thenReturn(employeeFilterViews);
@@ -159,13 +159,13 @@ class UBSManagementEmployeeServiceImplTest {
 
         var getPageableDtoGetEmployeeDto =
             employeeService.findAll(employeePage, employeeFilterCriteria);
-        var actualGetEmployeeDto = getPageableDtoGetEmployeeDto.getPage().get(0);
+        var actualGetEmployeeDto = getPageableDtoGetEmployeeDto.getPage().getFirst();
 
         assertEquals(expectedGetEmployeeDto, actualGetEmployeeDto);
         assertEquals(expectedGetEmployeeDto.getId(), actualGetEmployeeDto.getId());
         assertEquals(expectedGetEmployeeDto.getEmail(), actualGetEmployeeDto.getEmail());
         verify(employeeCriteriaRepository).findAll(employeePage, employeeFilterCriteria);
-        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), GetEmployeeDto.class);
+        verify(modelMapper, times(1)).map(employeeFilterViews.getFirst(), GetEmployeeDto.class);
         verify(repository).findAll();
     }
 

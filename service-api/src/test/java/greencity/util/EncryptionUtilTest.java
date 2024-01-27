@@ -20,7 +20,6 @@ public class EncryptionUtilTest {
     private static final String INVALID_PASSWORD = "password";
     private static final String SIGNATURE = "c972ca8f1eb227d85631728d690037cfa41375af";
     private static final String MERCHANT_ID = "3";
-    private static final String PRIVATE_KEY = "privateKey";
 
     @Test
     public void checkIfResponseSignatureIsValid() {

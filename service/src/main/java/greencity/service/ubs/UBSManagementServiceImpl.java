@@ -838,9 +838,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             sumConfirmedInCoins = getSumInCoins(order.getConfirmedQuantity().entrySet(), bag);
             sumExportedInCoins = getSumInCoins(order.getExportedQuantity().entrySet(), bag);
 
-            if (order.getExportedQuantity().size() != 0) {
+            if (!order.getExportedQuantity().isEmpty()) {
                 sumExportedInCoins += getUbsCourierOrWriteOffStationSum(order);
-            } else if (order.getConfirmedQuantity().size() != 0) {
+            } else if (!order.getConfirmedQuantity().isEmpty()) {
                 sumConfirmedInCoins += getUbsCourierOrWriteOffStationSum(order);
             } else {
                 sumAmountInCoins += getUbsCourierOrWriteOffStationSum(order);
@@ -978,7 +978,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (payment.isEmpty()) {
             throw new NotFoundException(PAYMENT_NOT_FOUND + id);
         }
-        return buildStatuses(order, payment.get(0));
+        return buildStatuses(order, payment.getFirst());
     }
 
     /**
@@ -1039,7 +1039,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             paymentRepository.saveAll(payment);
         }
 
-        return buildStatuses(order, payment.get(0));
+        return buildStatuses(order, payment.getFirst());
     }
 
     private void verifyPaidWithBonuses(Order order, String email) {
@@ -1791,7 +1791,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void checkUpdateResponsibleEmployeeDto(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
         String email) {
         if (nonNull(updateAllOrderPageDto.getUpdateResponsibleEmployeeDto())) {
-            updateAllOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+            updateAllOrderPageDto.getUpdateResponsibleEmployeeDto()
                 .forEach(dto -> {
                     if (nonNull(dto.getEmployeeId()) && nonNull(dto.getPositionId())) {
                         ordersAdminsPageService.responsibleEmployee(List.of(order.getId()),

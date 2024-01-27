@@ -27,7 +27,6 @@ class UserToUserProfileUpdateDtoMapperTest {
     @Test
     void convert() {
         MockitoAnnotations.initMocks(this);
-        AddressDto expected = ModelUtils.getAddressDto(1L);
         when(locationApiService.getAllDistrictsInCityByNames(anyString(), anyString()))
             .thenReturn(ModelUtils.getLocationApiDtoList());
         UserProfileUpdateDto userProfileUpdateDto = ModelUtils.updateUserProfileDto();

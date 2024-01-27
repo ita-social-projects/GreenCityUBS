@@ -68,9 +68,9 @@ class UserRepositoryTest extends IntegrationTestBase {
         List<User> users = ModelUtils.getUsers();
         List<User> actual = userRepository.getAllInactiveUsers(LocalDate.of(2022, 1, 15), LocalDate.now());
 
-        Assertions.assertEquals(users.get(0).getRecipientName(), actual.get(0).getRecipientName());
-        Assertions.assertEquals(users.get(0).getRecipientSurname(), actual.get(0).getRecipientSurname());
-        Assertions.assertEquals(users.get(0).getRecipientEmail(), actual.get(0).getRecipientEmail());
-        Assertions.assertEquals(users.get(0).getRecipientPhone(), actual.get(0).getRecipientPhone());
+        Assertions.assertEquals(users.getFirst().getRecipientName(), actual.getFirst().getRecipientName());
+        Assertions.assertEquals(users.getFirst().getRecipientSurname(), actual.getFirst().getRecipientSurname());
+        Assertions.assertEquals(users.getFirst().getRecipientEmail(), actual.getFirst().getRecipientEmail());
+        Assertions.assertEquals(users.getFirst().getRecipientPhone(), actual.getFirst().getRecipientPhone());
     }
 }

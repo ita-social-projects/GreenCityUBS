@@ -185,8 +185,8 @@ public class ViolationServiceImpl implements ViolationService {
         if (violationOptional.isPresent()) {
             List<String> images = violationOptional.get().getImages();
             if (!images.isEmpty()) {
-                for (int i = 0; i < images.size(); i++) {
-                    fileService.delete(images.get(i));
+                for (String image : images) {
+                    fileService.delete(image);
                 }
             }
             notificationService.notifyDeleteViolation(id);

@@ -19,7 +19,6 @@ class CustomErrorControllerTest {
     HttpServletRequest request;
     @InjectMocks
     CustomErrorController customErrorController;
-    private static final String response = "NOT_FOUND";
 
     @Test
     void testHandleError() {

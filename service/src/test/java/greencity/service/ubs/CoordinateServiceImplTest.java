@@ -90,7 +90,7 @@ class CoordinateServiceImplTest {
 
         for (Coordinates cord : ModelUtils.getCoordinatesSet()) {
             List<Order> currentOrders = allUndeliveredOrders.stream().filter(
-                o -> o.getUbsUser().getOrderAddress().getCoordinates().equals(cord)).collect(Collectors.toList());
+                o -> o.getUbsUser().getOrderAddress().getCoordinates().equals(cord)).toList();
             for (Order order : currentOrders) {
                 when(modelMapper.map(order, OrderDto.class)).thenReturn(
                     OrderDto.builder().latitude(order.getUbsUser().getOrderAddress().getCoordinates().getLatitude())
@@ -116,16 +116,12 @@ class CoordinateServiceImplTest {
 
     @Test
     void getClusterCoordsThrowExceptionToDistanceTest() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            coordinateService.getClusteredCoords(-1, 20);
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> coordinateService.getClusteredCoords(-1, 20));
     }
 
     @Test
     void getClusterCoordsThrowExceptionToLitresTest() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            coordinateService.getClusteredCoords(2, -1);
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> coordinateService.getClusteredCoords(2, -1));
     }
 
     @Test
@@ -164,23 +160,19 @@ class CoordinateServiceImplTest {
             }
         });
         GroupedOrderDto groupedOrderDto = coordinateService
-            .getClusteredCoordsAlongWithSpecified(ModelUtils.getCoordinatesDtoSet(), 3000, 15).get(0);
+            .getClusteredCoordsAlongWithSpecified(ModelUtils.getCoordinatesDtoSet(), 3000, 15).getFirst();
         assertEquals(3000, groupedOrderDto.getAmountOfLitres());
-        assertEquals(groupedOrderDto.getGroupOfOrders().get(0), getOrderDto());
+        assertEquals(groupedOrderDto.getGroupOfOrders().getFirst(), getOrderDto());
     }
 
     @Test
     void getClusteredCoordsAlongWithSpecifiedThrowExceptionToDistanceTest() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            coordinateService.getClusteredCoords(-1, 20);
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> coordinateService.getClusteredCoords(-1, 20));
     }
 
     @Test
     void getClusteredCoordsAlongWithSpecifiedThrowExceptionToLitresTest() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            coordinateService.getClusteredCoords(2, -1);
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> coordinateService.getClusteredCoords(2, -1));
     }
 
     @Test

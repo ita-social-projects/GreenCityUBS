@@ -494,11 +494,11 @@ class OrdersAdminsPageServiceImplTest {
         String email = "test@gmail.com";
 
         Employee employee = Employee.builder()
-            .id(1l)
+            .id(1L)
             .email(email)
             .build();
         Employee anotherEmployee = Employee.builder()
-            .id(2l)
+            .id(2L)
             .build();
 
         RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToAddAdminCommentForOrder();
@@ -895,7 +895,7 @@ class OrdersAdminsPageServiceImplTest {
         Long orderId = 1L;
         String email = "test@gmail.com";
         Employee employee = Employee.builder()
-            .id(1l)
+            .id(1L)
             .email(email)
             .build();
         RequestToChangeOrdersDataDto dto = RequestToChangeOrdersDataDto.builder()
@@ -935,11 +935,11 @@ class OrdersAdminsPageServiceImplTest {
         Long orderId = 1L;
         String email = "test@gmail.com";
         Employee employee = Employee.builder()
-            .id(1l)
+            .id(1L)
             .email(email)
             .build();
         Employee anotherEmployee = Employee.builder()
-            .id(2l)
+            .id(2L)
             .build();
 
         RequestToChangeOrdersDataDto dto = RequestToChangeOrdersDataDto.builder()
@@ -982,7 +982,7 @@ class OrdersAdminsPageServiceImplTest {
         LocalDateTime dateTime = LocalDateTime.now(clock);
 
         Employee employee = Employee.builder()
-            .id(1l)
+            .id(1L)
             .email(email)
             .build();
 
@@ -1046,11 +1046,11 @@ class OrdersAdminsPageServiceImplTest {
         var newComment = "some comment";
 
         Employee employee = Employee.builder()
-            .id(1l)
+            .id(1L)
             .email(email)
             .build();
         Employee anotherEmployee = Employee.builder()
-            .id(2l)
+            .id(2L)
             .build();
 
         RequestToChangeOrdersDataDto dto = RequestToChangeOrdersDataDto.builder()

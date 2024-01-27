@@ -385,7 +385,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         if (location.isPresent()) {
             throw new NotFoundException("The location with name: "
-                + dto.get(0).getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
+                + dto.getFirst().getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
         }
     }
 
@@ -599,7 +599,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 .collect(Collectors.toSet());
         List<Long> existingLocationsIds =
             tariffLocationSet.stream().map(tariffLocation -> tariffLocation.getLocation().getId())
-                .collect(Collectors.toList());
+                .toList();
         idListToCheck.removeAll(existingLocationsIds);
         tariffsInfo.setTariffLocations(tariffLocationSet);
         tariffsLocationRepository.saveAll(tariffLocationSet);
@@ -901,7 +901,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (regionsIds != null && citiesIds != null) {
             checkIfRegionIsUnique(regionsIds);
             List<Location> locations = citiesIds.stream()
-                .map(locationId -> tryToFindLocationByIdForRegion(locationId, regionsIds.get(0)))
+                .map(locationId -> tryToFindLocationByIdForRegion(locationId, regionsIds.getFirst()))
                 .collect(Collectors.toList());
             saveLocationsWithActiveStatus(locations);
         } else if (regionsIds == null && citiesIds != null) {
@@ -933,7 +933,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         } else if (shouldDeactivateTariffsByRegionsAndCities(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByRegionsAndCities(
                 details.getCitiesIds().get(),
-                details.getRegionsIds().get().get(0));
+                details.getRegionsIds().get().getFirst());
         } else if (shouldDeactivateTariffsByCourier(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(details.getCourierId().get());
         } else if (shouldDeactivateTariffsByReceivingStations(details)) {
@@ -944,25 +944,25 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 details.getCourierId().get(), details.getStationsIds().get());
         } else if (shouldDeactivateTariffsByCourierAndRegion(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByCourierAndRegion(
-                details.getRegionsIds().get().get(0), details.getCourierId().get());
+                details.getRegionsIds().get().getFirst(), details.getCourierId().get());
         } else if (shouldDeactivateTariffsByRegionAndCityAndStation(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByRegionAndCitiesAndStations(
-                details.getRegionsIds().get().get(0), details.getCitiesIds().get(),
+                details.getRegionsIds().get().getFirst(), details.getCitiesIds().get(),
                 details.getStationsIds().get());
         } else if (shouldDeactivateTariffsByAll(details)) {
             deactivateTariffsForChosenParamRepository.deactivateTariffsByAllParam(
-                details.getRegionsIds().get().get(0), details.getCitiesIds().get(),
+                details.getRegionsIds().get().getFirst(), details.getCitiesIds().get(),
                 details.getStationsIds().get(), details.getCourierId().get());
         } else if (shouldDeactivateTariffsByRegionAndReceivingStations(details)) {
             tariffsInfoRepository.deactivateTariffsByRegionAndReceivingStations(
-                details.getRegionsIds().get().get(0), details.getStationsIds().get());
+                details.getRegionsIds().get().getFirst(), details.getStationsIds().get());
         } else if (shouldDeactivateTariffsByCourierAndRegionAndCities(details)) {
             tariffsInfoRepository.deactivateTariffsByCourierAndRegionAndCities(
-                details.getRegionsIds().get().get(0), details.getCitiesIds().get(),
+                details.getRegionsIds().get().getFirst(), details.getCitiesIds().get(),
                 details.getCourierId().get());
         } else if (shouldDeactivateTariffsByCourierAndRegionAndReceivingStations(details)) {
             tariffsInfoRepository.deactivateTariffsByCourierAndRegionAndReceivingStations(
-                details.getRegionsIds().get().get(0), details.getStationsIds().get(),
+                details.getRegionsIds().get().getFirst(), details.getStationsIds().get(),
                 details.getCourierId().get());
         } else {
             throw new BadRequestException("Bad request. Please choose another combination of parameters");
@@ -982,10 +982,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (details.getRegionsIds().isPresent() && details.getCitiesIds().isPresent()
             && details.getStationsIds().isPresent() && details.getCourierId().isPresent()) {
             if (details.getRegionsIds().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsIds().get().get(0))
+                if (regionRepository.existsRegionById(details.getRegionsIds().get().getFirst())
                     && deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(
                         details.getCitiesIds().get(),
-                        details.getRegionsIds().get().get(0))
+                        details.getRegionsIds().get().getFirst())
                     && deactivateTariffsForChosenParamRepository
                         .isReceivingStationsExists(details.getStationsIds().get())
                     && courierRepository.existsCourierById(details.getCourierId().get())) {
@@ -1018,10 +1018,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (details.getRegionsIds().isPresent() && details.getCitiesIds().isPresent()
             && details.getStationsIds().isPresent() && details.getCourierId().isEmpty()) {
             if (details.getRegionsIds().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsIds().get().get(0))
+                if (regionRepository.existsRegionById(details.getRegionsIds().get().getFirst())
                     && deactivateTariffsForChosenParamRepository
                         .isCitiesExistForRegion(details.getCitiesIds().get(),
-                            details.getRegionsIds().get().get(0))
+                            details.getRegionsIds().get().getFirst())
                     && deactivateTariffsForChosenParamRepository
                         .isReceivingStationsExists(details.getStationsIds().get())) {
                     return true;
@@ -1052,7 +1052,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (details.getRegionsIds().isPresent() && details.getCourierId().isPresent()
             && details.getCitiesIds().isEmpty() && details.getStationsIds().isEmpty()) {
             if (details.getRegionsIds().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsIds().get().get(0))
+                if (regionRepository.existsRegionById(details.getRegionsIds().get().getFirst())
                     && courierRepository.existsCourierById(details.getCourierId().get())) {
                     return true;
                 } else {
@@ -1106,7 +1106,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (details.getRegionsIds().isPresent() && details.getCourierId().isEmpty()
             && details.getCitiesIds().isEmpty() && details.getStationsIds().isPresent()) {
             if (details.getRegionsIds().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsIds().get().get(0))
+                if (regionRepository.existsRegionById(details.getRegionsIds().get().getFirst())
                     && deactivateTariffsForChosenParamRepository
                         .isReceivingStationsExists(details.getStationsIds().get())) {
                     return true;
@@ -1136,10 +1136,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (details.getRegionsIds().isPresent() && details.getCitiesIds().isPresent()
             && details.getStationsIds().isEmpty() && details.getCourierId().isPresent()) {
             if (details.getRegionsIds().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsIds().get().get(0))
+                if (regionRepository.existsRegionById(details.getRegionsIds().get().getFirst())
                     && deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(
                         details.getCitiesIds().get(),
-                        details.getRegionsIds().get().get(0))
+                        details.getRegionsIds().get().getFirst())
                     && courierRepository.existsCourierById(details.getCourierId().get())) {
                     return true;
                 } else {
@@ -1171,7 +1171,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (details.getRegionsIds().isPresent() && details.getCitiesIds().isEmpty()
             && details.getStationsIds().isPresent() && details.getCourierId().isPresent()) {
             if (details.getRegionsIds().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsIds().get().get(0))
+                if (regionRepository.existsRegionById(details.getRegionsIds().get().getFirst())
                     && deactivateTariffsForChosenParamRepository
                         .isReceivingStationsExists(details.getStationsIds().get())
                     && courierRepository.existsCourierById(details.getCourierId().get())) {
@@ -1249,10 +1249,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (details.getRegionsIds().isPresent() && details.getCitiesIds().isPresent()
             && details.getStationsIds().isEmpty() && details.getCourierId().isEmpty()) {
             if (details.getRegionsIds().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsIds().get().get(0))
+                if (regionRepository.existsRegionById(details.getRegionsIds().get().getFirst())
                     && deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(
                         details.getCitiesIds().get(),
-                        details.getRegionsIds().get().get(0))) {
+                        details.getRegionsIds().get().getFirst())) {
                     return true;
                 } else {
                     throw new NotFoundException(String.format(REGIONS_OR_CITIES_NOT_EXIST_MESSAGE,
