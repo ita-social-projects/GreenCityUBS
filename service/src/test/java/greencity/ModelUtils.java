@@ -351,7 +351,7 @@ public class ModelUtils {
     public static GetTariffInfoForEmployeeDto getTariffInfoForEmployeeDto2() {
         return GetTariffInfoForEmployeeDto.builder()
             .id(10L)
-            .region(getRegionDto(15L))
+            .region(getRegionDto())
             .courier(getCourierTranslationDto(20L))
             .build();
     }

@@ -43,7 +43,7 @@ class AddressRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(Optional.of(address.getRegion()), Optional.of(actual.getFirst().getRegion()));
         Assertions.assertEquals(Optional.of(address.getDistrict()), Optional.of(actual.getFirst().getDistrict()));
         Assertions.assertEquals(Optional.of(address.getEntranceNumber()),
-            Optional.of(actual.get(0).getEntranceNumber()));
+            Optional.of(actual.getFirst().getEntranceNumber()));
         Assertions.assertEquals(Optional.of(address.getHouseCorpus()), Optional.of(actual.getFirst().getHouseCorpus()));
         Assertions.assertEquals(Optional.of(address.getHouseNumber()), Optional.of(actual.getFirst().getHouseNumber()));
         Assertions.assertEquals(Optional.of(address.getStreet()), Optional.of(actual.getFirst().getStreet()));

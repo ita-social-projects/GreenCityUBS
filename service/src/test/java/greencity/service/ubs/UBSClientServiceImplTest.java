@@ -3516,7 +3516,6 @@ class UBSClientServiceImplTest {
         List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
 
-        BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().getFirst();
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
         order.setExportedQuantity(Map.of(1, 10));
@@ -3564,7 +3563,6 @@ class UBSClientServiceImplTest {
         List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
 
-        BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().getFirst();
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
         order.setConfirmedQuantity(Map.of(1, 10));
@@ -3771,19 +3769,15 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
 
-        assertThrows(NotFoundException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
-        });
+        assertThrows(NotFoundException.class, () ->
+                ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
 
     }
 
     @Test
     void checkAddressUserTest() throws IllegalAccessException {
-
         User user = getUserWithLastLocation();
         user.setCurrentPoints(900);
-
-        User user1 = getUser();
 
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().getFirst().setAmount(15);
@@ -3867,7 +3861,6 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findByOrdersId(anyLong())).thenReturn(Optional.of(tariffsInfo));
         when(modelMapper.map(tariffsInfo, TariffsForLocationDto.class))
             .thenReturn(getTariffsForLocationDto());
-        var dto = ubsService.getTariffForOrder(1L);
         verify(tariffsInfoRepository, times(1)).findByOrdersId(anyLong());
         verify(modelMapper).map(tariffsInfo, TariffsForLocationDto.class);
     }

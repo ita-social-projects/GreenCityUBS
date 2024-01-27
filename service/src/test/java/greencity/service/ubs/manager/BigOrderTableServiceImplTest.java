@@ -2,7 +2,6 @@ package greencity.service.ubs.manager;
 
 import greencity.ModelUtils;
 import greencity.entity.parameters.CustomTableView;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;
@@ -46,7 +45,6 @@ class BigOrderTableServiceImplTest {
         var orderPage = getOrderPage();
         var orderSearchCriteria = getOrderSearchCriteria();
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
-        Optional<User> user = Optional.of(ModelUtils.getUser());
         List<Long> tariffsInfoIds = new ArrayList<>();
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(employee);
         when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria, tariffsInfoIds)).thenReturn(Page.empty());
