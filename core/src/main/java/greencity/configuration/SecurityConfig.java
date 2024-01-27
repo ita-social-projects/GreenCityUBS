@@ -272,10 +272,12 @@ public class SecurityConfig {
             web.ignoring().requestMatchers(UBS_LINK + "/receiveLiqPayPayment");
             web.ignoring().requestMatchers("/bot");
             web.ignoring().requestMatchers("/v2/api-docs/**");
+            web.ignoring().requestMatchers("/v3/api-docs/**");
             web.ignoring().requestMatchers("/swagger.json");
             web.ignoring().requestMatchers("/swagger-ui.html");
             web.ignoring().requestMatchers("/swagger-resources/**");
             web.ignoring().requestMatchers("/webjars/**");
+            web.ignoring().requestMatchers("/swagger-ui/**");
         };
     }
 

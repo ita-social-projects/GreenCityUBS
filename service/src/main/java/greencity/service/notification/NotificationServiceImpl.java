@@ -41,6 +41,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -89,6 +90,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationParameterRepository notificationParameterRepository;
     @Autowired
     @Qualifier("kyivZonedClock")
+    @Lazy
     private Clock clock;
     private final List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
