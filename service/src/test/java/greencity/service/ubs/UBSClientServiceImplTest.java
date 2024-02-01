@@ -109,7 +109,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3769,8 +3768,8 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
 
-        assertThrows(NotFoundException.class, () ->
-                ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+        assertThrows(NotFoundException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
 
     }
 
@@ -3858,10 +3857,11 @@ class UBSClientServiceImplTest {
     @Test
     void getTariffForOrderTest() {
         TariffsInfo tariffsInfo = getTariffInfo();
-        when(tariffsInfoRepository.findByOrdersId(anyLong())).thenReturn(Optional.of(tariffsInfo));
+        when(tariffsInfoRepository.findByOrdersId(1L)).thenReturn(Optional.of(tariffsInfo));
         when(modelMapper.map(tariffsInfo, TariffsForLocationDto.class))
             .thenReturn(getTariffsForLocationDto());
-        verify(tariffsInfoRepository, times(1)).findByOrdersId(anyLong());
+        ubsService.getTariffForOrder(1L);
+        verify(tariffsInfoRepository).findByOrdersId(1L);
         verify(modelMapper).map(tariffsInfo, TariffsForLocationDto.class);
     }
 

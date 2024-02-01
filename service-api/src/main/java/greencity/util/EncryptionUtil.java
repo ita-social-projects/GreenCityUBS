@@ -19,12 +19,12 @@ public class EncryptionUtil {
      * @return {@link String} - encrypted signature.
      */
     public String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
-        String stringBuilder = password + "|" + dto.getAmount() +
-            "|" + dto.getCurrency() +
-            "|" + merchantId +
-            "|" + dto.getOrderDescription() +
-            "|" + dto.getOrderId() +
-            "|" + dto.getResponseUrl();
+        String stringBuilder = password + "|" + dto.getAmount()
+            + "|" + dto.getCurrency()
+            + "|" + merchantId
+            + "|" + dto.getOrderDescription()
+            + "|" + dto.getOrderId()
+            + "|" + dto.getResponseUrl();
         return sha1Hex(stringBuilder);
     }
 

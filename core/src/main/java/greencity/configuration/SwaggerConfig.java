@@ -18,7 +18,6 @@ import io.swagger.v3.oas.models.info.License;
 @Configuration
 @Slf4j
 public class SwaggerConfig {
-
     /**
      * Customizing the OpenAPI bean.
      *

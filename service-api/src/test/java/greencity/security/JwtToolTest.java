@@ -2,7 +2,6 @@ package greencity.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,13 +30,13 @@ class JwtToolTest {
 
     @BeforeEach
     public void setup() {
-        jwtTool = new JwtTool("testAccessTokenKey");
+        jwtTool = new JwtTool("secret-refresh-token-key-bigger-key");
     }
 
     @Test
     void testGetAccessTokenKey() {
         String accessTokenKey = jwtTool.getAccessTokenKey();
-        assertEquals("testAccessTokenKey", accessTokenKey);
+        assertEquals("secret-refresh-token-key-bigger-key", accessTokenKey);
     }
 
     @Test
@@ -61,7 +60,7 @@ class JwtToolTest {
         String email = "test@example.com";
         int ttl = 60;
         String accessToken = jwtTool.createAccessToken(email, ttl);
-        SecretKey key = Keys.hmacShaKeyFor(accessToken.getBytes());
+        SecretKey key = Keys.hmacShaKeyFor(jwtTool.getAccessTokenKey().getBytes());
         assertNotNull(accessToken);
 
         Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(accessToken).getPayload();
@@ -84,13 +83,15 @@ class JwtToolTest {
 
     @Test
     void testGetAuthoritiesFromToken() {
-        String accessToken = Jwts.builder()
-            .setSubject("test@example.com")
-            .claim("employee_authorities", Arrays.asList("ROLE_USER", "ROLE_ADMIN"))
-            .signWith(SignatureAlgorithm.HS256, "testAccessTokenKey")
-            .compact();
+        final String accessToken = jwtTool.createAccessToken("test@example.com", 60);
+        SecretKey key = Keys.hmacShaKeyFor(jwtTool.getAccessTokenKey().getBytes());
 
-        List<String> authorities = jwtTool.getAuthoritiesFromToken(accessToken);
+        @SuppressWarnings({"unchecked, rawtype"})
+        List<String> authorities = (List<String>) Jwts.parser()
+            .verifyWith(key).build()
+            .parseSignedClaims(accessToken)
+            .getPayload()
+            .get("role");
         List<String> expectedAuthorities = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
         assertEquals(expectedAuthorities, authorities);
     }

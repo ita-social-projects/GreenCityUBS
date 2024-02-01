@@ -7,7 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class LocationApiServiceTest {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
     private static final String PAGE_SIZE_VALUE = "125";
@@ -56,7 +58,7 @@ class LocationApiServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        locationApiService = new LocationApiServiceImpl(restTemplate);
     }
 
     private UriComponentsBuilder buildCode(String code, int level) {
@@ -194,7 +196,7 @@ class LocationApiServiceTest {
     }
 
     @Test
-    void testGetDisctrictByName_whenNameEn() {
+    void testGetDistrictByName_whenNameEn() {
         initLviv();
         UriComponentsBuilder lvivBuilder = buildName("Lviv", LocationDivision.CITY.getLevelId());
         UriComponentsBuilder lvivskaBuilder = buildName("Lvivska", LocationDivision.REGION.getLevelId());

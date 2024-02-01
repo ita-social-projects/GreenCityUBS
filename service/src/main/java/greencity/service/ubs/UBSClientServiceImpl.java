@@ -418,8 +418,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     @Transactional

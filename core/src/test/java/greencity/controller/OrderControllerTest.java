@@ -21,6 +21,7 @@ import greencity.repository.UBSuserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
+import jakarta.servlet.ServletException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,8 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.NestedServletException;
 import java.security.Principal;
 import java.util.Arrays;
@@ -280,8 +283,8 @@ class OrderControllerTest {
         when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null))
             .thenThrow(UBSuserNotFoundException.class);
 
-        NestedServletException exception =
-            assertThrows(NestedServletException.class, () -> mockMvc.perform(put(ubsLink + "/update-recipients-data")
+        ServletException exception =
+            assertThrows(ServletException.class, () -> mockMvc.perform(put(ubsLink + "/update-recipients-data")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
                 .principal(principal))

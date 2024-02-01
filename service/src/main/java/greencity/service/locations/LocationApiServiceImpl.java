@@ -286,6 +286,11 @@ public class LocationApiServiceImpl implements LocationApiService {
             new ParameterizedTypeReference<Map<String, Object>>() {
             };
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
+
+        if (response == null || response.getBody() == null) {
+            throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url);
+        }
+
         return Optional.of(response)
             .map(ResponseEntity::getBody)
             .map(body -> (List<Map<String, Object>>) body.get(RESULTS))

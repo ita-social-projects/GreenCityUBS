@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
@@ -737,6 +738,7 @@ class SuperAdminControllerTest {
         GetTariffsInfoDto getTariffsInfoDto = ModelUtils.getAllTariffsInfoDto();
 
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         String result = objectMapper.writeValueAsString(getTariffsInfoDto);
 
         Mockito.when(superAdminService.getAllTariffsInfo(TariffsInfoFilterCriteria.builder().build()))
