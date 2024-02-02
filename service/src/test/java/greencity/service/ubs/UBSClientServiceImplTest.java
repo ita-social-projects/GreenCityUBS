@@ -225,7 +225,6 @@ import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -758,7 +757,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(15);
+        dto.getBags().getFirst().setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);

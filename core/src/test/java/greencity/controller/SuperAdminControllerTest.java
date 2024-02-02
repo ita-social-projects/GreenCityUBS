@@ -10,7 +10,6 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.courier.AddingReceivingStationDto;
-import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
@@ -56,7 +55,6 @@ import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
@@ -92,9 +90,9 @@ class SuperAdminControllerTest {
 
     private static final String ubsLink = "/ubs/superAdmin";
 
-    private Principal principal = getUuid();
+    private final Principal principal = getUuid();
 
-    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+    private final ErrorAttributes errorAttributes = new DefaultErrorAttributes();
 
     @BeforeEach
     void setup() {

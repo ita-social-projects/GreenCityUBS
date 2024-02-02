@@ -45,7 +45,7 @@ public class LocationApiServiceImpl implements LocationApiService {
         .id(KYIV_ID)
         .locationNameMap(Map.of(NAME, NAME_KYIV_UA, NAME_EN, NAME_KYIV_EN))
         .build();
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     /**
      * Constructor for the LocationApiService class.
@@ -283,7 +283,7 @@ public class LocationApiServiceImpl implements LocationApiService {
     @Cacheable(value = "resultFromUrl", key = "#url")
     public List<LocationDto> getResultFromUrl(URI url) {
         ParameterizedTypeReference<Map<String, Object>> typeRef =
-            new ParameterizedTypeReference<Map<String, Object>>() {
+            new ParameterizedTypeReference<>() {
             };
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
 

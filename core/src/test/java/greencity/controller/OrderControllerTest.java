@@ -36,9 +36,6 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.NestedServletException;
 import java.security.Principal;
 import java.util.Arrays;
 import static greencity.ModelUtils.getPrincipal;
@@ -91,7 +88,7 @@ class OrderControllerTest {
     @Mock
     private UBSuserRepository ubSuserRepository;
 
-    private Principal principal = getPrincipal();
+    private final Principal principal = getPrincipal();
 
     @BeforeEach
     void setup() {

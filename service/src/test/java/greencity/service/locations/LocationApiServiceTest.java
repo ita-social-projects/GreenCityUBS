@@ -489,8 +489,7 @@ class LocationApiServiceTest {
         respond(builder3_2, List.of(mykolaivskaDistrictResult));
         respond(builder4_2, List.of(mykolaiv2Result));
 
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв");
-        });
+        assertThrows(NotFoundException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв"));
     }
 }
