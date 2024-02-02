@@ -84,9 +84,12 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
         }
         allFieldsFromTableDto.setUserBonuses(u.getCurrentPoints().toString());
         Optional<Order> optional =
-            u.getOrders().stream().max(Comparator.comparing(Order::getOrderDate));
-        optional.ifPresent(order -> allFieldsFromTableDto
-            .setLastOrderDate(order.getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT))));
+            u.getOrders().stream().max((o1, o2) -> o1.getOrderDate().compareTo(o2.getOrderDate()));
+        if (optional.isPresent()) {
+            allFieldsFromTableDto
+                .setLastOrderDate(optional
+                    .get().getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
+        }
         return allFieldsFromTableDto;
     }
 }
