@@ -186,6 +186,6 @@ public class EmployeeCriteriaRepository {
     }
 
     private boolean isStringNotNullAndNotEmpty(String str) {
-        return str != null && !str.isEmpty();
+        return str != null && str.length() > 0;
     }
 }

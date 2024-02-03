@@ -57,7 +57,7 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
         if (u.getRecipientName() != null) {
             name.append(u.getRecipientName());
         }
-        if (!name.isEmpty()) {
+        if (name.length() != 0) {
             name.append(" ");
         }
         if (u.getRecipientSurname() != null) {

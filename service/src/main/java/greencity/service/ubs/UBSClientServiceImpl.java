@@ -386,7 +386,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             ubsUser = Collections.singletonList(UBSuser.builder().id(null).build());
         }
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
-        dto.setUbsUserId(ubsUser.getFirst().getId());
+        dto.setUbsUserId(ubsUser.get(0).getId());
         if (currentUser.getAlternateEmail() != null
             && !currentUser.getAlternateEmail().isEmpty()) {
             dto.setEmail(currentUser.getAlternateEmail());

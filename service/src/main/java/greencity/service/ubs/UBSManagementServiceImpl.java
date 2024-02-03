@@ -838,9 +838,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             sumConfirmedInCoins = getSumInCoins(order.getConfirmedQuantity().entrySet(), bag);
             sumExportedInCoins = getSumInCoins(order.getExportedQuantity().entrySet(), bag);
 
-            if (!order.getExportedQuantity().isEmpty()) {
+            if (order.getExportedQuantity().size() != 0) {
                 sumExportedInCoins += getUbsCourierOrWriteOffStationSum(order);
-            } else if (!order.getConfirmedQuantity().isEmpty()) {
+            } else if (order.getConfirmedQuantity().size() != 0) {
                 sumConfirmedInCoins += getUbsCourierOrWriteOffStationSum(order);
             } else {
                 sumAmountInCoins += getUbsCourierOrWriteOffStationSum(order);
