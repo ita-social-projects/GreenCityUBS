@@ -929,41 +929,51 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private void deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto details) {
         if (shouldDeactivateTariffsByRegions(details)) {
-            deactivateTariffsForChosenParamRepository.deactivateTariffsByRegions(details.getRegionsIds().get());
+            details.getRegionsIds().ifPresent(deactivateTariffsForChosenParamRepository::deactivateTariffsByRegions);
         } else if (shouldDeactivateTariffsByRegionsAndCities(details)) {
-            deactivateTariffsForChosenParamRepository.deactivateTariffsByRegionsAndCities(
-                details.getCitiesIds().get(),
-                details.getRegionsIds().get().getFirst());
+            details.getCitiesIds().ifPresent(citiesIds -> details.getRegionsIds().ifPresent(
+                regionsIds -> deactivateTariffsForChosenParamRepository.deactivateTariffsByRegionsAndCities(citiesIds,
+                    regionsIds.getFirst())));
         } else if (shouldDeactivateTariffsByCourier(details)) {
-            deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(details.getCourierId().get());
+            details.getCourierId().ifPresent(deactivateTariffsForChosenParamRepository::deactivateTariffsByCourier);
         } else if (shouldDeactivateTariffsByReceivingStations(details)) {
-            deactivateTariffsForChosenParamRepository.deactivateTariffsByReceivingStations(
-                details.getStationsIds().get());
+            details.getStationsIds()
+                .ifPresent(deactivateTariffsForChosenParamRepository::deactivateTariffsByReceivingStations);
         } else if (shouldDeactivateTariffsByCourierAndReceivingStations(details)) {
-            deactivateTariffsForChosenParamRepository.deactivateTariffsByCourierAndReceivingStations(
-                details.getCourierId().get(), details.getStationsIds().get());
+            details.getCourierId().ifPresent(
+                courierId -> details.getStationsIds().ifPresent(stationsIds -> deactivateTariffsForChosenParamRepository
+                    .deactivateTariffsByCourierAndReceivingStations(courierId, stationsIds)));
         } else if (shouldDeactivateTariffsByCourierAndRegion(details)) {
-            deactivateTariffsForChosenParamRepository.deactivateTariffsByCourierAndRegion(
-                details.getRegionsIds().get().getFirst(), details.getCourierId().get());
+            details.getRegionsIds().ifPresent(
+                regionsIds -> details.getCourierId().ifPresent(courierId -> deactivateTariffsForChosenParamRepository
+                    .deactivateTariffsByCourierAndRegion(regionsIds.getFirst(), courierId)));
         } else if (shouldDeactivateTariffsByRegionAndCityAndStation(details)) {
-            deactivateTariffsForChosenParamRepository.deactivateTariffsByRegionAndCitiesAndStations(
-                details.getRegionsIds().get().getFirst(), details.getCitiesIds().get(),
-                details.getStationsIds().get());
+            details.getRegionsIds()
+                .ifPresent(regionsIds -> details.getCitiesIds().ifPresent(citiesIds -> details.getStationsIds()
+                    .ifPresent(stationsIds -> deactivateTariffsForChosenParamRepository
+                        .deactivateTariffsByRegionAndCitiesAndStations(regionsIds.getFirst(), citiesIds,
+                            stationsIds))));
         } else if (shouldDeactivateTariffsByAll(details)) {
-            deactivateTariffsForChosenParamRepository.deactivateTariffsByAllParam(
-                details.getRegionsIds().get().getFirst(), details.getCitiesIds().get(),
-                details.getStationsIds().get(), details.getCourierId().get());
+            details.getRegionsIds()
+                .ifPresent(regionsIds -> details.getCitiesIds()
+                    .ifPresent(citiesIds -> details.getStationsIds().ifPresent(stationsIds -> details.getCourierId()
+                        .ifPresent(courierId -> deactivateTariffsForChosenParamRepository
+                            .deactivateTariffsByAllParam(regionsIds.getFirst(), citiesIds, stationsIds, courierId)))));
         } else if (shouldDeactivateTariffsByRegionAndReceivingStations(details)) {
-            tariffsInfoRepository.deactivateTariffsByRegionAndReceivingStations(
-                details.getRegionsIds().get().getFirst(), details.getStationsIds().get());
+            details.getRegionsIds()
+                .ifPresent(regionsIds -> details.getStationsIds().ifPresent(stationsIds -> tariffsInfoRepository
+                    .deactivateTariffsByRegionAndReceivingStations(regionsIds.getFirst(), stationsIds)));
         } else if (shouldDeactivateTariffsByCourierAndRegionAndCities(details)) {
-            tariffsInfoRepository.deactivateTariffsByCourierAndRegionAndCities(
-                details.getRegionsIds().get().getFirst(), details.getCitiesIds().get(),
-                details.getCourierId().get());
+            details.getRegionsIds()
+                .ifPresent(regionsIds -> details.getCitiesIds()
+                    .ifPresent(citiesIds -> details.getCourierId().ifPresent(courierId -> tariffsInfoRepository
+                        .deactivateTariffsByCourierAndRegionAndCities(regionsIds.getFirst(), citiesIds, courierId))));
         } else if (shouldDeactivateTariffsByCourierAndRegionAndReceivingStations(details)) {
-            tariffsInfoRepository.deactivateTariffsByCourierAndRegionAndReceivingStations(
-                details.getRegionsIds().get().getFirst(), details.getStationsIds().get(),
-                details.getCourierId().get());
+            details.getRegionsIds()
+                .ifPresent(regionsIds -> details.getStationsIds()
+                    .ifPresent(stationsIds -> details.getCourierId().ifPresent(
+                        courierId -> tariffsInfoRepository.deactivateTariffsByCourierAndRegionAndReceivingStations(
+                            regionsIds.getFirst(), stationsIds, courierId))));
         } else {
             throw new BadRequestException("Bad request. Please choose another combination of parameters");
         }
