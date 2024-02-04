@@ -33,11 +33,6 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     }
 
     @Override
-    public String getBotToken() {
-        return botToken;
-    }
-
-    @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
         String uuId = message.getText().replace("/start", "").trim();

@@ -73,7 +73,7 @@ public class ClientController {
      * @author Oleksandr Khomiakov
      */
     @Operation(summary = "returns all user orders for logged user")
-    @ApiResponses({
+    @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = PageableDto.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
@@ -95,7 +95,7 @@ public class ClientController {
      * @author Oleg Postolovskyi
      */
     @Operation(summary = "returns user order for logged user")
-    @ApiResponses({
+    @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = OrdersDataForUserDto.class))),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
@@ -114,7 +114,7 @@ public class ClientController {
      * @author Max Boiarchuk
      */
     @Operation(summary = "delete user order")
-    @ApiResponses({
+    @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
@@ -218,7 +218,7 @@ public class ClientController {
      * @author Igor Boykov
      */
     @Operation(summary = "Controller for getting order info data about surcharge")
-    @ApiResponses({
+    @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = OrderStatusPageDto.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),

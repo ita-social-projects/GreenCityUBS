@@ -112,7 +112,7 @@ public class ManagementEmployeeController {
         @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PutMapping(value = "/update-employee",
-        consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+        consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> update(
         @Parameter(description = SwaggerExampleModel.EMPLOYEE_DTO,
             required = true) @RequestPart @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
