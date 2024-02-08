@@ -79,7 +79,7 @@ public class JwtTool {
      */
     @SuppressWarnings({"unchecked, rawtype"})
     public List<String> getAuthoritiesFromToken(String accessToken) {
-        SecretKey key = Keys.hmacShaKeyFor(accessToken.getBytes());
+        SecretKey key = Keys.hmacShaKeyFor(accessTokenKey.getBytes());
         return (List<String>) Jwts.parser()
             .verifyWith(key).build()
             .parseSignedClaims(accessToken)
