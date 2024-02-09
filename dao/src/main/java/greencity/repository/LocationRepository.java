@@ -81,4 +81,14 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
         value = "SELECT * from locations "
             + "WHERE region_id = :regionId")
     List<Location> findLocationsByRegionId(@Param("regionId") Long regionId);
+
+    @Query(nativeQuery = true,
+        value = "SELECT a.city_en from locations AS l "
+            + "INNER JOIN address AS a "
+            + "ON a.city_en = l.name_en "
+            + "WHERE a.id = :addressId "
+            + "AND l.id = :locationId "
+            + "GROUP BY a.city_en")
+    Optional<String> findAddressAndLocationNamesMatch(@Param("locationId") Long locationId,
+        @Param("addressId") Long addressId);
 }

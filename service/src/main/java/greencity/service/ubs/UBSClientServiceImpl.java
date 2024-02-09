@@ -3,9 +3,11 @@ package greencity.service.ubs;
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import greencity.client.FondyClient;
+import greencity.service.google.GoogleApiService;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.constant.KyivTariffLocation;
 import greencity.constant.OrderHistory;
 import greencity.dto.AllActiveLocationsDto;
 import greencity.dto.CreateAddressRequestDto;
@@ -86,6 +88,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
+import greencity.exceptions.location.AddressNotWithinLocationAreaException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.AddressRepository;
@@ -109,7 +112,6 @@ import greencity.repository.TelegramBotRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
-import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
@@ -118,6 +120,12 @@ import greencity.util.OrderUtils;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
+import org.locationtech.jts.algorithm.distance.PointPairDistance;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.algorithm.distance.DistanceToPoint;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -125,6 +133,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
@@ -148,6 +157,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.BAD_ORDER_STATUS_REQUEST;
@@ -259,6 +269,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String KYIV_EN = "Kyiv";
     private static final String KYIV_UA = "місто Київ";
     private static final String LANGUAGE_EN = "en";
+    private static final Double KYIV_LATITUDE = 50.4546600;
+    private static final Double KYIV_LONGITUDE = 30.5238000;
+    private static final Integer SPATIAL_REFERENCE_SYSTEM_IDENTIFIER = 4326; // corresponds to WGS 84 coordinate system
+    private static final Double LOCATION_20_KM_ZONE_VALUE = 20.00;
+    private static final String UKRAINE_EN = "Ukraine";
+    private static final String LANG_EN = "en";
+    private static final String ADDRESS_NOT_FOUND_BY_ID_MESSAGE = "Address not found with id: ";
+    private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_EXCEPTION = "Location and Address selected " +
+        "does not match, reselect correct data.";
 
     @Override
     @Transactional
@@ -425,6 +444,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
         final User currentUser = userRepository.findByUuid(uuid);
+        if (!checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
+            throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_EXCEPTION);
+        }
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
         List<OrderBag> bagsOrdered = new ArrayList<>();
 
@@ -456,6 +478,45 @@ public class UBSClientServiceImpl implements UBSClientService {
             String link = getLinkFromFondyCheckoutResponse(fondyClient.getCheckoutResponse(paymentRequestDto));
             return getPaymentRequestDto(order, link);
         }
+    }
+
+    private boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
+        Address address = addressRepo.findById(addressId)
+            .orElseThrow(() -> new EntityNotFoundException(ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
+
+        boolean isKyivTariff = Arrays.stream(KyivTariffLocation.values())
+            .anyMatch(kyivTariffLocation -> kyivTariffLocation.getLocationName().equals(address.getCityEn()));
+
+        if (locationId == 1L) {
+            return isKyivTariff;
+        } else if (locationId == 2L) {
+            if (address.getCoordinates() == null || address.getCoordinates().getLatitude() == 0.0
+                || address.getCoordinates().getLongitude() == 0.0) {
+                Coordinates addressCoordinates = googleApiService.getCoordinatesByGoogleMapsGeocoding(
+                    UKRAINE_EN, address.getCityEn(), LANG_EN);
+                address.setCoordinates(addressCoordinates);
+            }
+            double addressLatitude = address.getCoordinates().getLatitude();
+            double addressLongitude = address.getCoordinates().getLongitude();
+
+            return calculateDistanceInKmBetweenTwoPoints(
+                KYIV_LATITUDE, KYIV_LONGITUDE, addressLatitude, addressLongitude) <= LOCATION_20_KM_ZONE_VALUE
+                && !isKyivTariff;
+        } else {
+            return locationRepository.findAddressAndLocationNamesMatch(locationId, addressId).isPresent();
+        }
+    }
+
+    private double calculateDistanceInKmBetweenTwoPoints(double point1Latitude, double point1Longitude,
+        double point2Latitude, double point2Longitude) {
+        GeometryFactory geometryFactory =
+            new GeometryFactory(new PrecisionModel(), SPATIAL_REFERENCE_SYSTEM_IDENTIFIER);
+        Coordinate coordinatePoint1 = new Coordinate(point1Longitude, point1Latitude);
+        Point geoPoint2 = geometryFactory.createPoint(new Coordinate(point2Longitude, point2Latitude));
+        PointPairDistance pointPairDistance = new PointPairDistance();
+
+        DistanceToPoint.computeDistance(geoPoint2, coordinatePoint1, pointPairDistance);
+        return pointPairDistance.getDistance();
     }
 
     private List<Integer> getBagIds(List<BagDto> dto) {
