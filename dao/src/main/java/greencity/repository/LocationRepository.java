@@ -14,7 +14,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      * {@inheritDoc}
      */
     @Query(nativeQuery = true,
-        value = "select * FROM locations as l "
+        value = "select l.* FROM locations as l "
             + "WHERE l.region_id = :regionId AND (l.name_en = :locationNameEn "
             + "OR l.name_uk = :locationNameUk)")
     Optional<Location> findLocationByNameAndRegionId(@Param("locationNameUk") String locationNameUk,
@@ -29,7 +29,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      * @author Anton Bondar
      */
     @Query(nativeQuery = true,
-        value = "SELECT * FROM locations AS l "
+        value = "SELECT l.* FROM locations AS l "
             + "INNER JOIN tariffs_locations AS m ON l.id = m.location_id "
             + "JOIN tariffs_info AS t ON t.id = m.tariffs_info_id "
             + "JOIN courier AS c ON c.id = t.courier_id "

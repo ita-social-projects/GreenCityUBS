@@ -61,7 +61,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      *
      * @return list of {@link Address}.
      */
-    @Query(value = "SELECT * FROM address a"
+    @Query(value = "SELECT a.* FROM address a"
         + " WHERE user_id =:userId AND a.status != 'DELETED'", nativeQuery = true)
     List<Address> findAllNonDeletedAddressesByUserId(Long userId);
 

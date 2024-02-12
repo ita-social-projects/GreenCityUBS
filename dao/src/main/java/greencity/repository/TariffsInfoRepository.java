@@ -22,7 +22,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      * @author Yurii Fedorko
      */
     @Query(nativeQuery = true,
-        value = "SELECT * FROM tariffs_info as t "
+        value = "SELECT t.* FROM tariffs_info as t "
             + "INNER JOIN tariffs_locations as m "
             + "on t.id = m.tariffs_info_id "
             + "WHERE t.courier_id = :courierId AND m.location_id = :locationId")
@@ -123,7 +123,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      * @author Julia Seti
      */
     @Query(nativeQuery = true,
-        value = "SELECT * FROM tariffs_info ti "
+        value = "SELECT ti.* FROM tariffs_info ti "
             + "JOIN tariffs_locations tl "
             + "ON ti.id = tl.tariffs_info_id "
             + "WHERE tl.location_id = :locationId "
@@ -143,7 +143,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      */
 
     @Query(nativeQuery = true,
-        value = "SELECT * FROM tariff_infos_receiving_employee_mapping te "
+        value = "SELECT te.* FROM tariff_infos_receiving_employee_mapping te "
             + "LEFT JOIN tariffs_info ti on ti.id = te.tariffs_info_id "
             + "LEFT JOIN employees e on te.employee_id = e.id "
             + "WHERE ti.id = :tariffId AND e.id = :employeeId")

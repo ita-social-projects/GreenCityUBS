@@ -49,7 +49,7 @@ public interface TariffLocationRepository extends JpaRepository<TariffLocation, 
      * @return list of {@link TariffLocation} where courier already works
      */
     @Query(nativeQuery = true,
-        value = "SELECT * FROM tariffs_locations as l JOIN tariffs_info as t "
+        value = "SELECT l.* FROM tariffs_locations as l JOIN tariffs_info as t "
             + "ON l.tariffs_info_id = t.id "
             + "WHERE l.location_id IN :locationIds AND t.courier_id = :courierId")
     List<TariffLocation> findAllByCourierIdAndLocationIds(@Param("courierId") Long courierId,

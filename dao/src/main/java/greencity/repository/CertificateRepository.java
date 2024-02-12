@@ -39,7 +39,7 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @author Orest Mahdziak
      */
 
-    @Query(value = "SELECT * FROM ORDERS AS O JOIN CERTIFICATE AS C "
+    @Query(value = "SELECT O.* FROM ORDERS AS O JOIN CERTIFICATE AS C "
         + "ON O.ID = C.ORDER_ID WHERE O.ID = :idOrder", nativeQuery = true)
     List<Certificate> findCertificate(@Param("idOrder") Long idOrder);
 
@@ -49,7 +49,7 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @param code is list Certificate
      * @return set of {@link Certificate}
      */
-    @Query(nativeQuery = true, value = "SELECT * FROM certificate c WHERE c.code IN :codes AND c.status = :status")
+    @Query(nativeQuery = true, value = "SELECT c.* FROM certificate c WHERE c.code IN :codes AND c.status = :status")
     Set<Certificate> findAllByCodeAndCertificateStatus(List<String> code, CertificateStatus status);
 
     /**
