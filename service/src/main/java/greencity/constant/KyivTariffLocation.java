@@ -10,6 +10,7 @@ public enum KyivTariffLocation {
     ZAZYMIE("Zazymie"),
     IRPIN("Irpin"),
     KNIAZHYCHI("Kniazhychi"),
+    KNYAZHYCHI("Knyazhychi"),
     KOTSIUBYNSKE("Kotsiubyns'ke"),
     NOVOSILKY("Novosilky"),
     PETROPAVLIVSKA_BORSHCHAHIVKA("Petropavlivska Borshchahivka"),

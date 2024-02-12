@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -82,6 +81,15 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             + "WHERE region_id = :regionId")
     List<Location> findLocationsByRegionId(@Param("regionId") Long regionId);
 
+    /**
+     * Method for getting list of locations by region.
+     *
+     * @param addressId  {@link Long} - id of address
+     * @param locationId {@link Long} - id of location
+     * @return {@link Optional<String>} - returns name of city in English if
+     *         location city and address city names match
+     * @author Olena Sotnik
+     */
     @Query(nativeQuery = true,
         value = "SELECT a.city_en from locations AS l "
             + "INNER JOIN address AS a "

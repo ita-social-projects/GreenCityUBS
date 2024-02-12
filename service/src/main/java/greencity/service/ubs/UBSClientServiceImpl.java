@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import greencity.client.FondyClient;
+import greencity.exceptions.user.UserIsNotOrderOwnerException;
 import greencity.service.google.GoogleApiService;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
@@ -133,7 +134,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
@@ -157,7 +157,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.BAD_ORDER_STATUS_REQUEST;
@@ -276,8 +275,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String UKRAINE_EN = "Ukraine";
     private static final String LANG_EN = "en";
     private static final String ADDRESS_NOT_FOUND_BY_ID_MESSAGE = "Address not found with id: ";
-    private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_EXCEPTION = "Location and Address selected " +
+    private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected " +
         "does not match, reselect correct data.";
+    private static final String USER_IS_NOT_ORDER_OWNER_MESSAGE = "Current user has no owner rights to process " +
+        "the order with id: ";
 
     @Override
     @Transactional
@@ -445,8 +446,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
         final User currentUser = userRepository.findByUuid(uuid);
         if (!checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
-            throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_EXCEPTION);
+            throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
         }
+
+        if (orderId != null) {
+            checkIfCurrentUserIsOrderOwner(orderId, uuid);
+        }
+
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
         List<OrderBag> bagsOrdered = new ArrayList<>();
 
@@ -480,31 +486,49 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
+    private void checkIfCurrentUserIsOrderOwner(Long orderId, String uuid) {
+        boolean isUserOwnerOfOrder =
+            orderRepository.getAllOrdersOfUser(uuid).stream().anyMatch(order -> order.getId() == orderId);
+        if (!isUserOwnerOfOrder) {
+            throw new UserIsNotOrderOwnerException(USER_IS_NOT_ORDER_OWNER_MESSAGE + orderId);
+        }
+    }
+
     private boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
         Address address = addressRepo.findById(addressId)
             .orElseThrow(() -> new EntityNotFoundException(ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
 
-        boolean isKyivTariff = Arrays.stream(KyivTariffLocation.values())
-            .anyMatch(kyivTariffLocation -> kyivTariffLocation.getLocationName().equals(address.getCityEn()));
+        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getCityEn());
 
         if (locationId == 1L) {
             return isKyivTariff;
         } else if (locationId == 2L) {
-            if (address.getCoordinates() == null || address.getCoordinates().getLatitude() == 0.0
-                || address.getCoordinates().getLongitude() == 0.0) {
-                Coordinates addressCoordinates = googleApiService.getCoordinatesByGoogleMapsGeocoding(
-                    UKRAINE_EN, address.getCityEn(), LANG_EN);
-                address.setCoordinates(addressCoordinates);
-            }
+            checkAndCalculateAddressCoordinatesIfEmpty(address);
+
             double addressLatitude = address.getCoordinates().getLatitude();
             double addressLongitude = address.getCoordinates().getLongitude();
 
-            return calculateDistanceInKmBetweenTwoPoints(
-                KYIV_LATITUDE, KYIV_LONGITUDE, addressLatitude, addressLongitude) <= LOCATION_20_KM_ZONE_VALUE
-                && !isKyivTariff;
+            return calculateDistanceInKmBetweenTwoPoints(KYIV_LATITUDE, KYIV_LONGITUDE,
+                addressLatitude, addressLongitude) <= LOCATION_20_KM_ZONE_VALUE && !isKyivTariff;
         } else {
             return locationRepository.findAddressAndLocationNamesMatch(locationId, addressId).isPresent();
         }
+    }
+
+    private boolean checkIfCityBelongsToKyivTariff(String cityName) {
+        return Arrays.stream(KyivTariffLocation.values())
+            .anyMatch(kyivTariffLocation -> kyivTariffLocation.getLocationName().equals(cityName));
+    }
+
+    private Address checkAndCalculateAddressCoordinatesIfEmpty(Address address) {
+        if (address.getCoordinates() == null || address.getCoordinates().getLatitude() == 0.0
+            || address.getCoordinates().getLongitude() == 0.0) {
+            Coordinates addressCoordinates = googleApiService.getCoordinatesByGoogleMapsGeocoding(
+                UKRAINE_EN, address.getCityEn(), LANG_EN);
+            address.setCoordinates(addressCoordinates);
+            addressRepo.save(address);
+        }
+        return address;
     }
 
     private double calculateDistanceInKmBetweenTwoPoints(double point1Latitude, double point1Longitude,

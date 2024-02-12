@@ -7,8 +7,10 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
+import greencity.exceptions.location.AddressNotWithinLocationAreaException;
 import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
+import greencity.exceptions.user.UserIsNotOrderOwnerException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
@@ -22,7 +24,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
 import javax.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
@@ -176,5 +177,29 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleTariffAlreadyExistsException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
+    }
+
+    /**
+     * Exception handler for {@link UserIsNotOrderOwnerException}.
+     *
+     * @param request {@link WebRequest} with error details.
+     * @return {@link ResponseEntity} with http status and exception message.
+     */
+    @ExceptionHandler(UserIsNotOrderOwnerException.class)
+    public final ResponseEntity<Object> handleUserIsNotOrderOwnerException(WebRequest request) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
+    }
+
+    /**
+     * Exception handler for {@link AddressNotWithinLocationAreaException}.
+     *
+     * @param request {@link WebRequest} with error details.
+     * @return {@link ResponseEntity} with http status and exception message.
+     */
+    @ExceptionHandler(AddressNotWithinLocationAreaException.class)
+    public final ResponseEntity<Object> handleAddressNotWithinLocationAreaException(WebRequest request) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
     }
 }
