@@ -2,7 +2,6 @@ package greencity.dto.user;
 
 import greencity.dto.bag.BagTranslationDto;
 import lombok.*;
-
 import java.io.Serializable;
 import java.util.List;
 

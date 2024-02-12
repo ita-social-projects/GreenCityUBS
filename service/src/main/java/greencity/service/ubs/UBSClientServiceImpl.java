@@ -88,6 +88,7 @@ import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
+import greencity.mapping.bag.BagTranslationDtoMapper;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -231,6 +232,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final LocationApiService locationApiService;
     private final OrderBagRepository orderBagRepository;
     private final OrderBagService orderBagService;
+    private final BagTranslationDtoMapper bagTranslationDtoMapper;
 
     @Lazy
     @Autowired
@@ -258,6 +260,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String KYIV_REGION_UA = "Київська область";
     private static final String KYIV_EN = "Kyiv";
     private static final String KYIV_UA = "місто Київ";
+    private static final String BAGS_QUANTITY_NOT_FOUND_MESSAGE = "Bags quantity not found by current orderId " +
+            "and bagId.";
 
     @Override
     @Transactional
@@ -335,7 +339,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         checkIfTariffIsAvailableForCurrentLocation(tariffsInfo, location);
 
-        return getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints());
+        return getUserPointsAndAllBagsDtoByTariffIdAndOrderIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints(),
+                orderId);
     }
 
     private void checkIfTariffIsAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {
@@ -357,12 +362,37 @@ public class UBSClientServiceImpl implements UBSClientService {
             .getLocationStatus() != LocationStatus.DEACTIVATED;
     }
 
-    private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,
-        Integer userPoints) {
+    private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndOrderIdAndUserPoints(Long tariffId,
+        Integer userPoints, Long orderId) {
         var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
-            .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
-            .collect(toList());
+                    .map(bag -> buildBagTranslationDto(orderId, bag))
+                    .collect(toList());
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
+    }
+    private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId, Integer userPoints) {
+       var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
+                .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
+                .collect(toList());
+        return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
+    }
+
+
+    private BagTranslationDto buildBagTranslationDto(Long orderId, Bag source) {
+        return BagTranslationDto.builder()
+                .id(source.getId())
+                .capacity(source.getCapacity())
+                .price(BigDecimal.valueOf(source.getFullPrice())
+                        .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
+                .name(source.getName())
+                .nameEng(source.getNameEng())
+                .limitedIncluded(source.getLimitIncluded())
+                .quantity(getQuantityOfBagsByBagIdAndOrderId(orderId, source.getId()))
+                .build();
+    }
+
+    private Integer getQuantityOfBagsByBagIdAndOrderId(Long orderId, Integer bagId){
+        return orderBagRepository.getAmountOfOrderBagsByOrderIdAndBagId(orderId, bagId)
+                .orElseThrow(() -> new NotFoundException(BAGS_QUANTITY_NOT_FOUND_MESSAGE));
     }
 
     private Location getLocationByOrderIdThroughLazyInitialization(Order order) {

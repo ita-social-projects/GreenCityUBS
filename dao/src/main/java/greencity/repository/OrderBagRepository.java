@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
@@ -70,4 +71,10 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      * @author Oksana Spodaryk
      */
     List<OrderBag> findAllByBagId(Integer bagId);
+
+    @Query(value = "SELECT amount FROM order_bag_mapping "
+            + "WHERE order_id = :orderId "
+            + "AND bag_id = :bagId", nativeQuery = true)
+    Optional<Integer> getAmountOfOrderBagsByOrderIdAndBagId(@Param("orderId") Long orderId, @Param("bagId") Integer bagId);
+
 }

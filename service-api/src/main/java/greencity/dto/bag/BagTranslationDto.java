@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-
+import org.springframework.lang.Nullable;
 import javax.validation.constraints.Min;
 import java.io.Serializable;
 
@@ -28,4 +28,5 @@ public class BagTranslationDto implements Serializable {
     private String nameEng;
     @NonNull
     private Boolean limitedIncluded;
+    private Integer quantity;
 }
