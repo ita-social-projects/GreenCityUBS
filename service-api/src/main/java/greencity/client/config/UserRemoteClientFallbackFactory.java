@@ -14,7 +14,6 @@ import greencity.dto.user.UserVO;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

@@ -49,13 +49,11 @@ import org.apache.commons.lang3.EnumUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,7 +62,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import static greencity.constant.ErrorMessage.DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER;
 import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
@@ -214,13 +211,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto(RECEIVING, "Станція приймання", "Receiving station"),
                 RECEIVING, 20, false, true, true, 27, EditType.SELECT, receivingStationList(),
                 exportDetails),
-            new ColumnDTO(new TitleDto(CALLER, "Менеджер обдзвону", "Responsible caller"), CALLER, 20,
+            new ColumnDTO(new TitleDto(CALLER, "Менеджер обдзвону", "Call manager"), CALLER, 20,
                 false, true, true, 29, EditType.SELECT, callerList(), responsible),
             new ColumnDTO(new TitleDto(LOGIC_MAN, "Логіст", "Logistician"), LOGIC_MAN, 20, false,
                 true, true, 30, EditType.SELECT, logicManList(), responsible),
-            new ColumnDTO(new TitleDto(DRIVER, "Водій", "Responsible driver"), DRIVER, 20, false, true,
+            new ColumnDTO(new TitleDto(DRIVER, "Водій", "Driver"), DRIVER, 20, false, true,
                 true, 31, EditType.SELECT, driverList(), responsible),
-            new ColumnDTO(new TitleDto(NAVIGATOR, "Штурман", "Responsible navigator"), NAVIGATOR, 20, false,
+            new ColumnDTO(new TitleDto(NAVIGATOR, "Штурман", "Navigator"), NAVIGATOR, 20, false,
                 true, true, 32, EditType.SELECT, navigatorList(), responsible),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "blockedBy",
                 20, false, true, false, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
@@ -239,29 +236,26 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         }
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
-        switch (columnName) {
-            case ORDER_STATUS:
-                return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employee.getId()));
-            case DATE_OF_EXPORT:
-                return createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value, employee.getId()));
-            case TIME_OF_EXPORT:
-                return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employee.getId()));
-            case RECEIVING:
-                return createReturnForSwitchChangeOrder(
-                    receivingStationForDevelopStage(ordersId, value, employee.getId()));
-            case CANCELLATION_REASON:
-                return createReturnForSwitchChangeOrder(
-                    cancellationReasonForDevelopStage(ordersId, value, employee.getId()));
-            case CANCELLATION_COMMENT:
-                return createReturnForSwitchChangeOrder(
-                    cancellationCommentForDevelopStage(ordersId, value, employee));
-            case ADMIN_COMMENT:
-                return createReturnForSwitchChangeOrder(
-                    adminCommentForDevelopStage(ordersId, value, employee));
-            default:
+        return switch (columnName) {
+            case ORDER_STATUS ->
+                createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employee));
+            case DATE_OF_EXPORT ->
+                createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value, employee.getId()));
+            case TIME_OF_EXPORT ->
+                createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employee.getId()));
+            case RECEIVING -> createReturnForSwitchChangeOrder(
+                receivingStationForDevelopStage(ordersId, value, employee.getId()));
+            case CANCELLATION_REASON -> createReturnForSwitchChangeOrder(
+                cancellationReasonForDevelopStage(ordersId, value, employee.getId()));
+            case CANCELLATION_COMMENT -> createReturnForSwitchChangeOrder(
+                cancellationCommentForDevelopStage(ordersId, value, employee));
+            case ADMIN_COMMENT -> createReturnForSwitchChangeOrder(
+                adminCommentForDevelopStage(ordersId, value, employee));
+            default -> {
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
-        }
+                yield createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
+            }
+        };
     }
 
     @Override
@@ -454,22 +448,24 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     /* methods for changing order */
     @Override
-    public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
+    public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String updatedStatusValue,
+        Employee employee) {
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
+                if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
                     throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
-                if (existedOrder.getOrderStatus().checkPossibleStatus(value)) {
-                    existedOrder.setOrderStatus(OrderStatus.valueOf(value));
+                if (existedOrder.getOrderStatus().checkPossibleStatus(updatedStatusValue)) {
+                    existedOrder.setOrderStatus(OrderStatus.valueOf(updatedStatusValue));
                     removePickUpDetailsAndResponsibleEmployees(existedOrder);
                 } else {
                     throw new BadRequestException(
                         "Such desired status isn't applicable with current status!");
                 }
+
                 if (existedOrder.getOrderStatus() == OrderStatus.CANCELED
                     && (existedOrder.getPointsToUse() != 0 || !existedOrder.getCertificates().isEmpty())) {
                     notificationService.notifyBonusesFromCanceledOrder(existedOrder);
@@ -478,6 +474,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
+
+                if (OrderStatus.BROUGHT_IT_HIMSELF == OrderStatus.valueOf(updatedStatusValue)) {
+                    eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF,
+                        employee.getFirstName() + "  " + employee.getLastName(), existedOrder);
+                    notificationService.notifySelfPickupOrder(existedOrder);
+                }
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }

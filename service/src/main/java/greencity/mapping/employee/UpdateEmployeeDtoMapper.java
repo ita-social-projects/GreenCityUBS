@@ -5,7 +5,6 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.stream.Collectors;
 
 @Component

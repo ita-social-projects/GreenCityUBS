@@ -39,7 +39,6 @@ import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -282,12 +281,13 @@ public interface UBSClientService {
     /**
      * Methods for finding all events for Order.
      *
-     * @param orderId {@link Long} id.
-     * @param email   {@link String};
+     * @param orderId  {@link Long} id.
+     * @param email    {@link String};
+     * @param language {@link String};
      * @return {@link List} that contains list of EventsDTOS.
      * @author Yuriy Bahlay.
      */
-    List<EventDto> getAllEventsForOrder(Long orderId, String email);
+    List<EventDto> getAllEventsForOrder(Long orderId, String email, String language);
 
     /**
      * Method that returns order info for surcharge.
@@ -307,7 +307,7 @@ public interface UBSClientService {
 
     /**
      * Method return link with Fondy payment .
-     * 
+     *
      * @param dto - current OrderFondyClientDto dto.
      * @author Max Boiarchuk
      */
@@ -415,7 +415,7 @@ public interface UBSClientService {
 
     /**
      * Method gets all districts in city.
-     * 
+     *
      * @param region - name of region
      * @param city   - name of city
      *

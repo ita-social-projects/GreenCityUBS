@@ -35,8 +35,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -146,7 +145,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
             .flatMap(employee -> employee.getEmployeePosition().stream()
                 .map(position -> modelMapper.map(position, PositionDto.class)))
-            .collect(Collectors.toList());
+            .toList();
 
         getEmployeeDto.getEmployeePositions().addAll(positionsDtos);
     }
@@ -157,7 +156,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
             .flatMap(employee -> employee.getTariffInfos().stream()
                 .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class)))
-            .collect(Collectors.toList());
+            .toList();
 
         getEmployeeDto.getTariffs().addAll(tariffsInfoDtos);
     }

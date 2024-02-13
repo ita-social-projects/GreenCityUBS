@@ -5,10 +5,10 @@ import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
 @Repository
@@ -27,6 +27,9 @@ public interface OrdersForUserRepository extends PagingAndSortingRepository<Orde
      * @param uuid     {@link User}'s uuid.
      * @return {@link Page} of {@link Order}.
      */
+    @Query(value = "SELECT o FROM Order AS o WHERE o.user = "
+        + "(SELECT u FROM User AS u WHERE u.uuid = :uuid) "
+        + "ORDER BY o.orderDate DESC")
     Page<Order> getAllByUserUuid(Pageable pageable, String uuid);
 
     /**
@@ -38,6 +41,11 @@ public interface OrdersForUserRepository extends PagingAndSortingRepository<Orde
      * @param statuses list of {@link OrderStatus} to match.
      * @return {@link Page} of {@link Order}.
      */
+
+    @Query(value = "SELECT o FROM Order AS o WHERE o.user = "
+        + "(SELECT u FROM User AS u WHERE u.uuid = :uuid) "
+        + "AND o.orderStatus IN (:statuses) "
+        + "ORDER BY o.orderDate DESC")
     Page<Order> getAllByUserUuidAndOrderStatusIn(Pageable pageable, String uuid, List<OrderStatus> statuses);
 
     /**

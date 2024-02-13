@@ -56,30 +56,6 @@ public interface OrderDetailRepository extends JpaRepository<Order, Integer> {
     void updateConfirm(Integer valueConfirmed, Long orderId, Long bagId);
 
     /**
-     * Method for delete Confirm value when it equals zero.
-     *
-     * @param orderId order id {@link Long}
-     * @param bagId   bag id {@link Long}
-     * @author Anatolii Shapiro
-     */
-    @Modifying
-    @Query(value = "DELETE FROM ORDER_BAG_MAPPING WHERE CONFIRMED_QUANTITY = 0 "
-        + "AND ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
-    void deleteIfConfirmedQuantityIsZero(Long orderId, Long bagId);
-
-    /**
-     * Method for delete Exported value when it equals zero.
-     *
-     * @param orderId order id {@link Long}
-     * @param bagId   bag id {@link Long}
-     * @author Anatolii Shapiro
-     */
-    @Modifying
-    @Query(value = "DELETE FROM ORDER_BAG_MAPPING WHERE EXPORTED_QUANTITY = 0 "
-        + "AND ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
-    void deleteIfExportedQuantityIsZero(Long orderId, Long bagId);
-
-    /**
      * Method for INSERT new record for ability to update value in next steps.
      *
      * @param orderId order id {@link Long}

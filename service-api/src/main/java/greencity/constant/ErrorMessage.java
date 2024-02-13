@@ -13,9 +13,9 @@ public final class ErrorMessage {
     public static final String TOO_MANY_CERTIFICATES = "Too many certificates was entered.";
     public static final String THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST =
         "The set of user data does not exist with id: ";
-    public static final String INAVALID_DISTANCE_AMOUNT = "The distance should be between 0 and 20 km.";
+    public static final String INVALID_DISTANCE_AMOUNT = "The distance should be between 0 and 20 km.";
     public static final String NO_SUCH_COORDINATES = "There are no any order with coordinates: ";
-    public static final String INAVALID_LITRES_AMOUNT = "The amount of litres should be between 0 and 10.000 litres.";
+    public static final String INVALID_LITRES_AMOUNT = "The amount of litres should be between 0 and 10.000 litres.";
     public static final String NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER = "Not found address with such id: ";
     public static final String NOT_FOUND_ADDRESS_BY_PLACE_ID = "Not found address with such place id: ";
     public static final String UNDELIVERED_ORDERS_NOT_FOUND = "There are no any undelivered orders found.";
@@ -44,7 +44,6 @@ public final class ErrorMessage {
     public static final String POSITION_NOT_FOUND = "Position doesn't exist";
     public static final String RECEIVING_STATION_ALREADY_EXISTS = "Receiving station already exists: ";
     public static final String RECEIVING_STATION_NOT_FOUND_BY_ID = "Receiving station with current id doesn't exist: ";
-    public static final String REGION_NOT_FOUND_BY_ID = "Region with current id doesn't exist: ";
     public static final String RECEIVING_STATION_NOT_FOUND = "Receiving station doesn't exist.";
     public static final String EMPLOYEES_ASSIGNED_POSITION = "There are employees assigned to this position.";
     public static final String EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED = "Employee was not successfully saved";
@@ -52,7 +51,6 @@ public final class ErrorMessage {
     public static final String CANNOT_DELETE_DEFAULT_IMAGE = "You can't delete default image.";
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
-    public static final String ADDRESS_NOT_FOUND = "Address not found";
     public static final String NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE =
         "Not found locations on level: %s, and by code: %s";
     public static final String VALUE_CAN_NOT_BE_NULL_OR_EMPTY = "The value parameter cannot be null or empty";
@@ -153,8 +151,6 @@ public final class ErrorMessage {
         + "or Deactivated.";
     public static final String UNRESOLVABLE_ACTIVATION_STATUS = "Unresolvable activation status. Please choose Active "
         + "or Deactivated.";
-    public static final String COLUMN_WIDTH_INFO_NOT_FOUND =
-        "There is no saved column width configuration for current employee";
     public static final String DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER =
         "Date of export not specified for the order with ID: ";
     public static final String EMPTY_ORDERS_ID_COLLECTION = "Request should contain at least one order ID";
@@ -162,7 +158,6 @@ public final class ErrorMessage {
     public static final String REGIONS_NOT_FOUND_BY_LOCATION_STATUS =
         "Regions containing locations with a status: %s, not found";
     public static final String ORDER_CAN_NOT_BE_UPDATED = "An order with the status: %s, can not be updated";
-    public static final String INVALID_URL = "Invalid URL: ";
     public static final String LOCATION_CAN_NOT_BE_DELETED =
         "Such location cannot be deleted as it is linked to the tariff";
 

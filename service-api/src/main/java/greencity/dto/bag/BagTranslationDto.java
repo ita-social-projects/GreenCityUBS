@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.AllArgsConstructor;
 import lombok.ToString;
 import lombok.NonNull;
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 import java.io.Serializable;
 
 @AllArgsConstructor

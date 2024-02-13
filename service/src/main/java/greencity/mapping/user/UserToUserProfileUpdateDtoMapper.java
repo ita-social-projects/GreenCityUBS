@@ -11,7 +11,6 @@ import greencity.service.locations.LocationApiService;
 import org.modelmapper.AbstractConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +30,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     @Override
     protected UserProfileUpdateDto convert(User user) {
         List<AddressDto> addressDtoList = user.getAddresses().stream()
-            .filter(obj -> obj.getActual())
+            .filter(Address::getActual)
             .map(this::createAddressDto)
             .collect(Collectors.toList());
 

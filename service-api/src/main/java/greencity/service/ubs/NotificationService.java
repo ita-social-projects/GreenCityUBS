@@ -5,6 +5,7 @@ import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.order.Order;
+import greencity.entity.user.Violation;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
@@ -65,6 +66,20 @@ public interface NotificationService {
     void notifyAddViolation(Long orderId);
 
     /**
+     * Method that creates notification when edit violations.
+     *
+     * @author Nazar Bokalo
+     */
+    void notifyChangedViolation(Violation violation, Long orderId);
+
+    /**
+     * Method that creates notification when admin delete user violations.
+     *
+     * @author Nazar Bokalo
+     */
+    void notifyDeleteViolation(Long orderId);
+
+    /**
      * Method that creates notification for inactive users.
      *
      * @author Ann Sakhno
@@ -85,6 +100,15 @@ public interface NotificationService {
      * @author Oleh Kulbaba
      */
     void notifyUnpaidOrder(Order order);
+
+    /**
+     * Notifies the customer that the order status has been changed to "Brought by
+     * himself".
+     *
+     * @param order The order {@link Order} which status was changed.
+     * @author Maksym Lenets
+     */
+    public void notifySelfPickupOrder(Order order);
 
     /**
      * Method that returns page with notifications for user by UUID.

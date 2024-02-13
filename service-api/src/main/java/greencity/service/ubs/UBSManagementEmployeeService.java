@@ -10,7 +10,6 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 public interface UBSManagementEmployeeService {

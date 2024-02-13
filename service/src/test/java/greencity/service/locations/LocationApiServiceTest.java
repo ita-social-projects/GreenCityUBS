@@ -7,30 +7,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
-
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class LocationApiServiceTest {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
     private static final String PAGE_SIZE_VALUE = "125";
@@ -59,7 +58,7 @@ class LocationApiServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        locationApiService = new LocationApiServiceImpl(restTemplate);
     }
 
     private UriComponentsBuilder buildCode(String code, int level) {
@@ -148,15 +147,15 @@ class LocationApiServiceTest {
         UriComponentsBuilder level5BuilderCity =
             buildParent(LocationDivision.DISTRICT_IN_CITY.getLevelId(), "UA46060250010015970");
 
-        respond(level1Builder, Arrays.asList(lvivskaResult));
-        respond(level2BuilderLviv, Arrays.asList(lvivDistrictResult));
-        respond(level2BuilderLvivParent, Arrays.asList(lvivDistrictResult));
-        respond(level3BuilderParentLviv, Arrays.asList(lvivska2Result));
-        respond(level3BuilderParentLviv, Arrays.asList(lvivska2Result));
-        respond(level3CityBuilder, Arrays.asList(lvivska2Result));
+        respond(level1Builder, List.of(lvivskaResult));
+        respond(level2BuilderLviv, List.of(lvivDistrictResult));
+        respond(level2BuilderLvivParent, List.of(lvivDistrictResult));
+        respond(level3BuilderParentLviv, List.of(lvivska2Result));
+        respond(level3BuilderParentLviv, List.of(lvivska2Result));
+        respond(level3CityBuilder, List.of(lvivska2Result));
         respond(level4BuilderParentLvivCity, Arrays.asList(lvivResult, lviv2Result));
-        respond(level4BuilderLvivCity, Arrays.asList(lvivResult));
-        respond(level4BuilderLviv2City, Arrays.asList(lviv2Result));
+        respond(level4BuilderLvivCity, List.of(lvivResult));
+        respond(level4BuilderLviv2City, List.of(lviv2Result));
         respond(level5BuilderVillage, new ArrayList<>());
         respond(level5BuilderCity, Arrays.asList(halytskyiResult, zaliznychnyiResult));
 
@@ -172,7 +171,7 @@ class LocationApiServiceTest {
         UriComponentsBuilder kyivBuilder = build(LocationDivision.REGION.getLevelId());
         UriComponentsBuilder kyivDistrictsBuilder =
             buildParent(LocationDivision.DISTRICT_IN_CITY.getLevelId(), "UA80000000000093317");
-        respond(kyivBuilder, Arrays.asList(kyivResult));
+        respond(kyivBuilder, List.of(kyivResult));
         respond(kyivDistrictsBuilder, Arrays.asList(holosiivskyiResult, darnytskyiResult));
 
     }
@@ -188,8 +187,8 @@ class LocationApiServiceTest {
             buildName("Прип’ять", LocationDivision.CITY.getLevelId());
         UriComponentsBuilder levelBuilderPrypiat5 =
             buildParent(LocationDivision.DISTRICT_IN_CITY.getLevelId(), "UA32000000010085013");
-        respond(level1Builder, Arrays.asList(lvivskaResult));
-        respond(levelBuilderPrypiat, Arrays.asList(prypiatResult));
+        respond(level1Builder, List.of(lvivskaResult));
+        respond(levelBuilderPrypiat, List.of(prypiatResult));
         respond(levelBuilderPrypiat5, new ArrayList<>());
         List<LocationDto> districts =
             locationApiService.getAllDistrictsInCityByNames("Львівська область", "Прип'ять");
@@ -197,7 +196,7 @@ class LocationApiServiceTest {
     }
 
     @Test
-    void testGetDisctrictByName_whenNameEn() {
+    void testGetDistrictByName_whenNameEn() {
         initLviv();
         UriComponentsBuilder lvivBuilder = buildName("Lviv", LocationDivision.CITY.getLevelId());
         UriComponentsBuilder lvivskaBuilder = buildName("Lvivska", LocationDivision.REGION.getLevelId());
@@ -235,9 +234,8 @@ class LocationApiServiceTest {
     @Test
     void testGetAllDistrictsInCityByNames_whenCityNotExist() {
         initLviv();
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Вінницька область", "Львів");
-        });
+        assertThrows(NotFoundException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("Вінницька область", "Львів"));
     }
 
     @Test
@@ -254,9 +252,8 @@ class LocationApiServiceTest {
 
     @Test
     void testGetAllDistrictsInCityByNames_whenCityNotFound() {
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Львівська область", "UNREAL");
-        });
+        assertThrows(NotFoundException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("Львівська область", "UNREAL"));
     }
 
     @Test
@@ -265,9 +262,8 @@ class LocationApiServiceTest {
         List<Map<String, Object>> results = Collections.singletonList(apiResult1);
         ResponseEntity<Map> responseEntity = prepareResponseEntity(results);
         when(restTemplate.getForEntity((API_URL), Map.class)).thenReturn(responseEntity);
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("RegionName", "CityName");
-        });
+        assertThrows(NotFoundException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("RegionName", "CityName"));
 
     }
 
@@ -298,10 +294,10 @@ class LocationApiServiceTest {
         UriComponentsBuilder level5BuilderVillage =
             buildParent(LocationDivision.DISTRICT_IN_CITY.getLevelId(), "UA46060230040034427");
 
-        respond(level1Builder, Arrays.asList(lvivskaResult));
-        respond(level2BuilderLviv, Arrays.asList(lvivDistrictResult));
-        respond(level2BuilderLvivParent, Arrays.asList(lvivDistrictResult));
-        respond(level3VillageBuilder, Arrays.asList(kulykivskaResult));
+        respond(level1Builder, List.of(lvivskaResult));
+        respond(level2BuilderLviv, List.of(lvivDistrictResult));
+        respond(level2BuilderLvivParent, List.of(lvivDistrictResult));
+        respond(level3VillageBuilder, List.of(kulykivskaResult));
         respond(level4BuilderVillage, Arrays.asList(kulykivResult, vidnivResult));
         respond(level4BuilderParentLvivCity, Arrays.asList(kulykivResult, vidnivResult));
         respond(level5BuilderVillage, new ArrayList<>());
@@ -309,7 +305,7 @@ class LocationApiServiceTest {
         assertNotNull(allDistricts);
         assertFalse(allDistricts.isEmpty());
         assertEquals(1, allDistricts.size());
-        assertLocationDto(allDistricts.get(0), "UA46060230040034427", "UA46060230000093092", "Віднів", "Vidniv");
+        assertLocationDto(allDistricts.getFirst(), "UA46060230040034427", "UA46060230000093092", "Віднів", "Vidniv");
     }
 
     @Test
@@ -321,47 +317,36 @@ class LocationApiServiceTest {
 
     @Test
     void testGetGetAllDistrictsInCityByNames_whenCityValueNulOrEmpty() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Lvivska область", null);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Lvivska область", "");
-        });
+        assertThrows(IllegalArgumentException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("Lvivska область", null));
+        assertThrows(IllegalArgumentException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("Lvivska область", ""));
     }
 
     @Test
     void testGetGetAllDistrictsInCityByNames_whenRegionValueNullOrEmpty() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames(null, "Lviv");
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("", "city Lviv");
-        });
+        assertThrows(IllegalArgumentException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames(null, "Lviv"));
+        assertThrows(IllegalArgumentException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("", "city Lviv"));
     }
 
     @Test
     void testGetGetAllDistrictsInCityByNames_whenValuesNullOrEmpty() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames(null, null);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("", "");
-        });
+        assertThrows(IllegalArgumentException.class, () -> locationApiService.getAllDistrictsInCityByNames(null, null));
+        assertThrows(IllegalArgumentException.class, () -> locationApiService.getAllDistrictsInCityByNames("", ""));
     }
 
     @Test
     void testGetGetAllDistrictsInCityByNames_whenResultEmpty() {
         initLviv();
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Львівська область", "Тест");
-        });
+        assertThrows(NotFoundException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("Львівська область", "Тест"));
     }
 
     @Test
     void testGetGetAllDistrictsInCityByNames_whenUrlEmpty() {
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Тест", "Тест");
-        });
+        assertThrows(NotFoundException.class, () -> locationApiService.getAllDistrictsInCityByNames("Тест", "Тест"));
     }
 
     @Test
@@ -384,13 +369,12 @@ class LocationApiServiceTest {
             buildCode("UA74040000000028062", LocationDivision.DISTRICT_IN_REGION.getLevelId());
 
         respond(builder, Arrays.asList(mykolaivskaResult, chernihivskaResult));
-        respond(builder4, Arrays.asList(mykolaiv2Result));
-        respond(builder3, Arrays.asList(bobrovytskaDistrictResult));
-        respond(builder2, Arrays.asList(nizhynskyiResult));
+        respond(builder4, List.of(mykolaiv2Result));
+        respond(builder3, List.of(bobrovytskaDistrictResult));
+        respond(builder2, List.of(nizhynskyiResult));
 
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв");
-        });
+        assertThrows(NotFoundException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв"));
     }
 
     @Test
@@ -420,15 +404,14 @@ class LocationApiServiceTest {
 
         respond(builder, Arrays.asList(mykolaivskaResult, chernihivskaResult));
         respond(builder4, new ArrayList<>());
-        respond(builder3, Arrays.asList(bobrovytskaDistrictResult));
-        respond(builder2, Arrays.asList(nizhynskyiResult));
-        respond(builder2_2, Arrays.asList(mykolaivskyiResult));
-        respond(builder3_2, Arrays.asList(mykolaivskaDistrictResult));
+        respond(builder3, List.of(bobrovytskaDistrictResult));
+        respond(builder2, List.of(nizhynskyiResult));
+        respond(builder2_2, List.of(mykolaivskyiResult));
+        respond(builder3_2, List.of(mykolaivskaDistrictResult));
         respond(builder4_2, new ArrayList<>());
 
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв");
-        });
+        assertThrows(NotFoundException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв"));
     }
 
     @Test
@@ -441,8 +424,6 @@ class LocationApiServiceTest {
             getApiResult("UA48060150000071713", "UA48060000000094390", "Миколаївська", "Mykolaivska");
         Map<String, Object> chernihivskaResult =
             getApiResult("UA74000000000025378", null, "Чернігівська", "Chernihivska");
-        Map<String, Object> nizhynskyiResult =
-            getApiResult("UA74040000000028062", "UA74000000000025378", "Ніжинський", "Nizhynskyi");
         Map<String, Object> bobrovytskaDistrictResult =
             getApiResult("UA74040050000013413", "UA74040000000028062", "Бобровицька", "Bobrovytska");
         Map<String, Object> mykolaiv2Result =
@@ -461,15 +442,14 @@ class LocationApiServiceTest {
 
         respond(builder, Arrays.asList(mykolaivskaResult, chernihivskaResult));
         respond(builder4, new ArrayList<>());
-        respond(builder3, Arrays.asList(bobrovytskaDistrictResult));
+        respond(builder3, List.of(bobrovytskaDistrictResult));
         respond(builder2, new ArrayList<>());
-        respond(builder2_2, Arrays.asList(mykolaivskyiResult));
-        respond(builder3_2, Arrays.asList(mykolaivskaDistrictResult));
-        respond(builder4_2, Arrays.asList(mykolaiv2Result));
+        respond(builder2_2, List.of(mykolaivskyiResult));
+        respond(builder3_2, List.of(mykolaivskaDistrictResult));
+        respond(builder4_2, List.of(mykolaiv2Result));
 
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв");
-        });
+        assertThrows(NotFoundException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв"));
     }
 
     @Test
@@ -482,8 +462,6 @@ class LocationApiServiceTest {
             getApiResult("UA48060150000071713", "UA48060000000094390", "Миколаївська", "Mykolaivska");
         Map<String, Object> chernihivskaResult =
             getApiResult("UA74000000000025378", null, "Чернігівська", "Chernihivska");
-        Map<String, Object> nizhynskyiResult =
-            getApiResult("UA74040000000028062", "UA74000000000025378", "Ніжинський", "Nizhynskyi");
         Map<String, Object> bobrovytskaDistrictResult =
             getApiResult("UA74040050000013413", "UA74040000000028062", "Бобровицька", "Bobrovytska");
         Map<String, Object> mykolaiv2Result =
@@ -503,17 +481,15 @@ class LocationApiServiceTest {
         UriComponentsBuilder builder4_2 = buildParent(LocationDivision.CITY.getLevelId(), "UA48060150000071713");
 
         respond(builder, Arrays.asList(mykolaivskaResult, chernihivskaResult));
-        respond(builder_2, Arrays.asList(chernihivskaResult));
+        respond(builder_2, List.of(chernihivskaResult));
         respond(builder4, new ArrayList<>());
-        respond(builder3, Arrays.asList(bobrovytskaDistrictResult));
+        respond(builder3, List.of(bobrovytskaDistrictResult));
         respond(builder2, new ArrayList<>());
-        respond(builder2_2, Arrays.asList(mykolaivskyiResult));
-        respond(builder3_2, Arrays.asList(mykolaivskaDistrictResult));
-        respond(builder4_2, Arrays.asList(mykolaiv2Result));
+        respond(builder2_2, List.of(mykolaivskyiResult));
+        respond(builder3_2, List.of(mykolaivskaDistrictResult));
+        respond(builder4_2, List.of(mykolaiv2Result));
 
-        assertThrows(NotFoundException.class, () -> {
-            locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв");
-        });
+        assertThrows(NotFoundException.class,
+            () -> locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв"));
     }
-
 }

@@ -3,13 +3,12 @@ package greencity.mapping.certificate;
 import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.entity.order.Certificate;
-import greencity.mapping.certificate.CertificateDtoForSearchingMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
 class CertificateDtoForSearchingMapperTest {
@@ -27,7 +26,7 @@ class CertificateDtoForSearchingMapperTest {
         assertEquals(expected.getExpirationDate(), certificateDtoForSearching.getExpirationDate());
         assertEquals(expected.getPoints(), certificateDtoForSearching.getPoints());
         assertEquals(expected.getDateOfUse(), certificateDtoForSearching.getDateOfUse());
-        assertEquals(null, certificateDtoForSearching.getOrderId());
+        assertNull(certificateDtoForSearching.getOrderId());
     }
 
     @Test

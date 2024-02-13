@@ -3,7 +3,11 @@ package greencity.service.ubs;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.violation.*;
+import greencity.dto.violation.AddingViolationsToUserDto;
+import greencity.dto.violation.UpdateViolationToUserDto;
+import greencity.dto.violation.UserViolationsDto;
+import greencity.dto.violation.UserViolationsWithUserName;
+import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.user.employee.Employee;
 import greencity.enums.OrderStatus;
 import greencity.enums.SortingOrder;
@@ -14,7 +18,11 @@ import greencity.entity.user.Violation;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.*;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.UserViolationsTableRepo;
+import greencity.repository.ViolationRepository;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,15 +30,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION;
+import static greencity.constant.ErrorMessage.ORDER_ALREADY_HAS_VIOLATION;
+import static greencity.constant.ErrorMessage.ORDER_HAS_NOT_VIOLATION;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.VIOLATION_DOES_NOT_EXIST;
 
 @Service
 @AllArgsConstructor
@@ -173,10 +185,11 @@ public class ViolationServiceImpl implements ViolationService {
         if (violationOptional.isPresent()) {
             List<String> images = violationOptional.get().getImages();
             if (!images.isEmpty()) {
-                for (int i = 0; i < images.size(); i++) {
-                    fileService.delete(images.get(i));
+                for (String image : images) {
+                    fileService.delete(image);
                 }
             }
+            notificationService.notifyDeleteViolation(id);
             violationRepository.deleteById(violationOptional.get().getId());
             User user = violationOptional.get().getOrder().getUser();
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
@@ -197,6 +210,7 @@ public class ViolationServiceImpl implements ViolationService {
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
         eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getEmail(), violation.getOrder());
+        notificationService.notifyChangedViolation(violation, add.getOrderID());
     }
 
     private void updateViolation(Violation violation, UpdateViolationToUserDto add, MultipartFile[] multipartFiles) {

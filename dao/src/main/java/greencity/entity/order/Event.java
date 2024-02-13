@@ -1,8 +1,17 @@
 package greencity.entity.order;
 
-import lombok.*;
-
-import javax.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,6 +34,12 @@ public class Event {
 
     @Column(name = "author", nullable = false)
     private String authorName;
+
+    @Column(name = "event_name_eng", nullable = false)
+    private String eventNameEng;
+
+    @Column(name = "author_eng", nullable = false)
+    private String authorNameEng;
 
     @ManyToOne
     private Order order;

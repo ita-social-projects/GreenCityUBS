@@ -126,8 +126,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import javax.persistence.EntityNotFoundException;
-import javax.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -262,6 +262,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String KYIV_UA = "місто Київ";
     private static final String BAGS_QUANTITY_NOT_FOUND_MESSAGE = "Bags quantity not found by current orderId "
         + "and bagId.";
+    private static final String LANGUAGE_EN = "en";
+
 
     @Override
     @Transactional
@@ -448,8 +450,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     @Transactional
@@ -539,7 +539,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private FondyPaymentResponse getFondyPaymentResponse(Order order) {
-        Payment payment = order.getPayment().get(order.getPayment().size() - 1);
+        Payment payment = order.getPayment().getLast();
         return FondyPaymentResponse.builder()
             .paymentStatus(payment.getResponseStatus())
             .build();
@@ -1079,7 +1079,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         UBSuser user = optionalUbsUser.get();
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
-        eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().get(0));
+        eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().getFirst());
         return UbsCustomersDto.builder()
             .name(user.getSenderFirstName() + " " + user.getSenderLastName())
             .email(user.getSenderEmail())
@@ -1122,7 +1122,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return ubsUser;
     }
 
-    private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
+    private void formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
         List<OrderBag> bagsOrdered, UBSuser userData,
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
@@ -1147,7 +1147,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         order.getPayment().add(payment);
         orderRepository.save(order);
-        return order;
     }
 
     private void setOrderPaymentStatus(Order order, long sumToPay) {
@@ -1167,7 +1166,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
             .orderId(orderId + "_"
-                + order.getPayment().get(order.getPayment().size() - 1).getId().toString())
+                + order.getPayment().getLast().getId().toString())
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPayInCoins)
@@ -1230,7 +1229,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         long amountInCoins = order.getPayment().stream()
             .flatMapToLong(p -> LongStream.of(p.getAmount()))
             .reduce(Long::sum).orElse(0);
-        String currency = order.getPayment().isEmpty() ? "UAH" : order.getPayment().get(0).getCurrency();
+        String currency = order.getPayment().isEmpty() ? "UAH" : order.getPayment().getFirst().getCurrency();
         return OrderPaymentDetailDto.builder()
             .amount(amountInCoins != 0L ? amountInCoins + certificatePointsInCoins + pointsToUseInCoins : 0L)
             .certificates(-certificatePointsInCoins)
@@ -1295,10 +1294,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private long formBagsToBeSavedAndCalculateOrderSum(List<OrderBag> orderBagList, List<BagDto> bags,
         TariffsInfo tariffsInfo) {
         long sumToPayInCoins = 0L;
-        List<Integer> bagIds = bags.stream().map(BagDto::getId).collect(toList());
+        List<Integer> bagIds = bags.stream().map(BagDto::getId).toList();
         for (BagDto temp : bags) {
             Bag bag = findActiveBagById(temp.getId());
-            if (bag.getLimitIncluded().booleanValue()) {
+            if (bag.getLimitIncluded()) {
                 checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, temp.getAmount());
                 checkSumIfCourierLimitBySumOfOrder(tariffsInfo, bag.getFullPrice() * temp.getAmount());
             }
@@ -1309,8 +1308,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
             .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
-            .map(this::createOrderBag).collect(toList());
-        orderBagList.addAll(notOrderedBags.stream().peek(orderBag -> orderBag.setAmount(0)).collect(toList()));
+            .map(this::createOrderBag).toList();
+        orderBagList.addAll(notOrderedBags.stream().peek(orderBag -> orderBag.setAmount(0)).toList());
         return sumToPayInCoins;
     }
 
@@ -1362,7 +1361,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public List<EventDto> getAllEventsForOrder(Long orderId, String email) {
+    public List<EventDto> getAllEventsForOrder(Long orderId, String email, String language) {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
@@ -1370,6 +1369,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
         if (orderEvents.isEmpty()) {
             throw new NotFoundException(EVENTS_NOT_FOUND_EXCEPTION + orderId);
+        }
+        if (LANGUAGE_EN.equals(language)) {
+            return orderEvents
+                .stream()
+                .peek(event -> {
+                    event.setEventName(event.getEventNameEng());
+                    event.setAuthorName(event.getAuthorNameEng());
+                })
+                .map(event -> modelMapper.map(event, EventDto.class))
+                .collect(toList());
         }
         return orderEvents
             .stream()
@@ -1492,7 +1501,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId, uuid);
         Map<Integer, Integer> amountBagsOrder = orderStatusPageDto.getAmountOfBagsOrdered();
         Map<Integer, Integer> amountBagsOrderExported = orderStatusPageDto.getAmountOfBagsExported();
-        amountBagsOrderExported.replaceAll((id, quantity) -> quantity = quantity - amountBagsOrder.get(id));
+        amountBagsOrderExported.replaceAll((id, quantity) -> quantity - amountBagsOrder.get(id));
         orderStatusPageDto.setAmountOfBagsExported(amountBagsOrderExported);
         Double exportedPrice = orderStatusPageDto.getOrderExportedDiscountedPrice();
         Double initialPrice = orderStatusPageDto.getOrderDiscountedPrice();
@@ -1508,7 +1517,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
         order.updateWithNewOrderBags(Collections.emptyList());
-        orderRepository.delete(order);
+        order.setOrderStatus(OrderStatus.CANCELED);
+        orderRepository.save(order);
     }
 
     @Override

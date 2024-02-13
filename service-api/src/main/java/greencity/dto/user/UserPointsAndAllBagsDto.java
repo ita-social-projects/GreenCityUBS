@@ -1,6 +1,7 @@
 package greencity.dto.user;
 
 import greencity.dto.bag.BagTranslationDto;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

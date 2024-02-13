@@ -6,13 +6,13 @@ import greencity.dto.order.UserWithOrdersDto;
 import greencity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.repository.*;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;

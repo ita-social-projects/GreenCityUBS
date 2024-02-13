@@ -22,7 +22,16 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.*;
+import greencity.repository.AddressRepository;
+import greencity.repository.EmployeeOrderPositionRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.PositionRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.TableColumnWidthForEmployeeRepository;
+import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -36,8 +45,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
@@ -45,10 +53,26 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.Clock;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.eq;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersAdminsPageServiceImplTest {
@@ -470,11 +494,11 @@ class OrdersAdminsPageServiceImplTest {
         String email = "test@gmail.com";
 
         Employee employee = Employee.builder()
-            .id(1l)
+            .id(1L)
             .email(email)
             .build();
         Employee anotherEmployee = Employee.builder()
-            .id(2l)
+            .id(2L)
             .build();
 
         RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToAddAdminCommentForOrder();
@@ -524,7 +548,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
-        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, 1L);
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
 
         assertNotNull(order.getDateOfExport());
         assertNotNull(order.getDeliverFrom());
@@ -533,6 +557,28 @@ class OrdersAdminsPageServiceImplTest {
         assertNotNull(order.getEmployeeOrderPositions());
 
         verify(orderRepository).save(order);
+    }
+
+    @Test
+    void orderStatusForDevelopStageChangeStatusToBroughtItHimselfTest() {
+        String newStatus = "BROUGHT_IT_HIMSELF";
+        Order saved = ModelUtils.getOrder();
+        saved.setOrderStatus(OrderStatus.FORMED);
+
+        Order expected = ModelUtils.getOrder();
+        expected.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        expected.setDateOfExport(null);
+        expected.setDeliverFrom(null);
+        expected.setDeliverTo(null);
+        expected.setReceivingStation(null);
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(saved));
+
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
+
+        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF), anyString(), any(Order.class));
+        verify(notificationService).notifySelfPickupOrder(expected);
+        verify(orderRepository).save(expected);
     }
 
     @ParameterizedTest
@@ -556,7 +602,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
-        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, 1L);
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
 
         verify(orderRepository).save(order);
     }
@@ -565,7 +611,7 @@ class OrdersAdminsPageServiceImplTest {
     void orderStatusForDevelopStageEntityNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertEquals(List.of(1L),
-            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "", 1L));
+            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "", ModelUtils.getEmployee()));
     }
 
     @Test
@@ -573,7 +619,7 @@ class OrdersAdminsPageServiceImplTest {
         when(orderRepository.findById(1L))
             .thenReturn(Optional.of(ModelUtils.getOrder().setOrderStatus(OrderStatus.FORMED)));
         assertEquals(List.of(1L),
-            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "DONE", 1L));
+            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "DONE", ModelUtils.getEmployee()));
     }
 
     @Test
@@ -581,7 +627,6 @@ class OrdersAdminsPageServiceImplTest {
         var orderId = 1L;
         var ordersId = List.of(orderId);
         var newValue = "CONFIRMED";
-        var employeeId = 3L;
         var anotherEmployeeId = 4L;
 
         var order = Order.builder()
@@ -593,7 +638,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
-        var result = ordersAdminsPageService.orderStatusForDevelopStage(ordersId, newValue, employeeId);
+        var result = ordersAdminsPageService.orderStatusForDevelopStage(ordersId, newValue, ModelUtils.getEmployee());
 
         verify(orderRepository).findById(orderId);
         verify(orderRepository, never()).save(any(Order.class));
@@ -850,7 +895,7 @@ class OrdersAdminsPageServiceImplTest {
         Long orderId = 1L;
         String email = "test@gmail.com";
         Employee employee = Employee.builder()
-            .id(1l)
+            .id(1L)
             .email(email)
             .build();
         RequestToChangeOrdersDataDto dto = RequestToChangeOrdersDataDto.builder()
@@ -890,11 +935,11 @@ class OrdersAdminsPageServiceImplTest {
         Long orderId = 1L;
         String email = "test@gmail.com";
         Employee employee = Employee.builder()
-            .id(1l)
+            .id(1L)
             .email(email)
             .build();
         Employee anotherEmployee = Employee.builder()
-            .id(2l)
+            .id(2L)
             .build();
 
         RequestToChangeOrdersDataDto dto = RequestToChangeOrdersDataDto.builder()
@@ -937,7 +982,7 @@ class OrdersAdminsPageServiceImplTest {
         LocalDateTime dateTime = LocalDateTime.now(clock);
 
         Employee employee = Employee.builder()
-            .id(1l)
+            .id(1L)
             .email(email)
             .build();
 
@@ -1001,11 +1046,11 @@ class OrdersAdminsPageServiceImplTest {
         var newComment = "some comment";
 
         Employee employee = Employee.builder()
-            .id(1l)
+            .id(1L)
             .email(email)
             .build();
         Employee anotherEmployee = Employee.builder()
-            .id(2l)
+            .id(2L)
             .build();
 
         RequestToChangeOrdersDataDto dto = RequestToChangeOrdersDataDto.builder()

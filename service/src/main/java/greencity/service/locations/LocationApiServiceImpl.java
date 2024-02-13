@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import java.net.URI;
 import java.util.Map;
 import java.util.HashMap;
@@ -23,9 +22,7 @@ import java.util.stream.Collectors;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.collections4.CollectionUtils;
-
 import org.springframework.cache.annotation.Cacheable;
 
 @Service
@@ -48,7 +45,7 @@ public class LocationApiServiceImpl implements LocationApiService {
         .id(KYIV_ID)
         .locationNameMap(Map.of(NAME, NAME_KYIV_UA, NAME_EN, NAME_KYIV_EN))
         .build();
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     /**
      * Constructor for the LocationApiService class.
@@ -79,7 +76,7 @@ public class LocationApiServiceImpl implements LocationApiService {
         String cityId = city.getId();
         List<LocationDto> allDistricts = getAllDistrictsInCityByCityID(cityId);
         if (allDistricts.isEmpty()) {
-            return Arrays.asList(city);
+            return List.of(city);
         }
         return allDistricts;
     }
@@ -87,7 +84,7 @@ public class LocationApiServiceImpl implements LocationApiService {
     static String replaceAllQuotes(String input) {
         Pattern pattern = Pattern.compile("[`'‘’“”‛‟ʼ«»\"]");
         Matcher matcher = pattern.matcher(input);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             matcher.appendReplacement(sb, "’");
         }
@@ -133,7 +130,7 @@ public class LocationApiServiceImpl implements LocationApiService {
         List<LocationDto> districts = getAllDistrictInTheRegionsById(region.getId());
         List<LocationDto> localCommunities = districts.stream()
             .flatMap(district -> getAllLocalCommunitiesById(district.getId()).stream())
-            .collect(Collectors.toList());
+            .toList();
         List<LocationDto> cities = localCommunities.stream()
             .flatMap(community -> getAllCitiesById(community.getId()).stream())
             .collect(Collectors.toList());
@@ -247,7 +244,7 @@ public class LocationApiServiceImpl implements LocationApiService {
             throw new NotFoundException(
                 String.format(ErrorMessage.NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE, level, code));
         }
-        return resultFromUrl.get(0);
+        return resultFromUrl.getFirst();
     }
 
     /**
@@ -286,10 +283,15 @@ public class LocationApiServiceImpl implements LocationApiService {
     @Cacheable(value = "resultFromUrl", key = "#url")
     public List<LocationDto> getResultFromUrl(URI url) {
         ParameterizedTypeReference<Map<String, Object>> typeRef =
-            new ParameterizedTypeReference<Map<String, Object>>() {
+            new ParameterizedTypeReference<>() {
             };
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
-        return Optional.ofNullable(response)
+
+        if (response == null || response.getBody() == null) {
+            throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url);
+        }
+
+        return Optional.of(response)
             .map(ResponseEntity::getBody)
             .map(body -> (List<Map<String, Object>>) body.get(RESULTS))
             .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url))

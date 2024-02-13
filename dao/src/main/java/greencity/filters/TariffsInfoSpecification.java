@@ -8,11 +8,9 @@ import greencity.entity.user.Region;
 import greencity.entity.user.employee.ReceivingStation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-
-import javax.persistence.criteria.*;
+import jakarta.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import static java.util.Objects.nonNull;
 
 @RequiredArgsConstructor

@@ -21,6 +21,7 @@ import greencity.repository.UBSuserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
+import jakarta.servlet.ServletException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,19 +36,16 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.util.NestedServletException;
-
 import java.security.Principal;
 import java.util.Arrays;
-
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getRedirectionConfig;
 import static greencity.ModelUtils.getUbsCustomersDto;
 import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
 import static greencity.ModelUtils.getUserInfoDto;
 import static greencity.ModelUtils.getUnpaidOrderDetailStatusDto;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -90,7 +88,7 @@ class OrderControllerTest {
     @Mock
     private UBSuserRepository ubSuserRepository;
 
-    private Principal principal = getPrincipal();
+    private final Principal principal = getPrincipal();
 
     @BeforeEach
     void setup() {
@@ -275,23 +273,21 @@ class OrderControllerTest {
     }
 
     @Test
-    void updatesRecipientsInfoWithOutUser() throws Exception {
+    void updatesRecipientsInfoWithOutUser() {
         ObjectMapper objectMapper = new ObjectMapper();
         UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
 
         when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null))
             .thenThrow(UBSuserNotFoundException.class);
 
-        NestedServletException exception =
-            assertThrows(NestedServletException.class, () -> {
-                mockMvc.perform(put(ubsLink + "/update-recipients-data")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
-                    .principal(principal))
-                    .andExpect(status().isBadRequest());
-            });
+        ServletException exception =
+            assertThrows(ServletException.class, () -> mockMvc.perform(put(ubsLink + "/update-recipients-data")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
+                .principal(principal))
+                .andExpect(status().isBadRequest()));
 
-        assertTrue(exception.getCause() instanceof UBSuserNotFoundException);
+        assertInstanceOf(UBSuserNotFoundException.class, exception.getCause());
         verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null);
     }
 
@@ -314,7 +310,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(ubsClientService, times(1))
-            .getAllEventsForOrder(1L, "test@gmail.com");
+            .getAllEventsForOrder(1L, "test@gmail.com", "en");
     }
 
     @Test
