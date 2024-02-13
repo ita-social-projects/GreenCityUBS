@@ -5070,6 +5070,21 @@ public class ModelUtils {
             100);
     }
 
+    public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoWithQuantity() {
+        return new UserPointsAndAllBagsDto(
+            List.of(
+                BagTranslationDto.builder()
+                    .id(1)
+                    .name("name")
+                    .capacity(20)
+                    .price(170.)
+                    .nameEng("nameEng")
+                    .limitedIncluded(false)
+                    .quantity(2)
+                    .build()),
+            100);
+    }
+
     public static Order getOrderExportDetailsWithExportDate() {
         return Order.builder()
             .id(1L)

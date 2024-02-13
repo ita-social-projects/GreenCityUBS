@@ -41,6 +41,7 @@ import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
@@ -671,22 +672,25 @@ class UBSClientServiceImplTest {
         var tariffLocation = getTariffLocation();
 
         var bags = getBag1list();
-        var bagTranslationDto = getBagTranslationDto();
-        var userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDtoWithQuantity();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(orderBagRepository.getAmountOfOrderBagsByOrderIdAndBagId(anyLong(), anyInt()))
+            .thenReturn(Optional.of(2));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
             .thenReturn(Optional.of(tariffLocation));
         when(bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
-        when(modelMapper.map(bags.getFirst(), BagTranslationDto.class)).thenReturn(bagTranslationDto);
 
         var userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageDataByOrderId(uuid, orderId);
 
         assertEquals(
-            userPointsAndAllBagsDtoExpected.getBags(),
-            userPointsAndAllBagsDtoActual.getBags());
+            userPointsAndAllBagsDtoExpected.getBags().get(0).toString(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).toString());
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags().get(0).getQuantity(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).getQuantity());
         assertEquals(
             userPointsAndAllBagsDtoExpected.getBags().getFirst().getId(),
             userPointsAndAllBagsDtoActual.getBags().getFirst().getId());
@@ -695,10 +699,10 @@ class UBSClientServiceImplTest {
             userPointsAndAllBagsDtoActual.getPoints());
 
         verify(userRepository).findUserByUuid(uuid);
+        verify(orderBagRepository).getAmountOfOrderBagsByOrderIdAndBagId(anyLong(), anyInt());
         verify(orderRepository).findById(orderId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
         verify(bagRepository).findAllActiveBagsByTariffsInfoId(tariffsInfoId);
-        verify(modelMapper).map(bags.getFirst(), BagTranslationDto.class);
     }
 
     @Test

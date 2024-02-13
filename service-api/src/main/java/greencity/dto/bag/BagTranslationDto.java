@@ -1,11 +1,12 @@
 package greencity.dto.bag;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NonNull;
+import lombok.EqualsAndHashCode;
+import lombok.Builder;
 import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.ToString;
+import lombok.NonNull;
 import jakarta.validation.constraints.Min;
 import java.io.Serializable;
 
@@ -14,6 +15,7 @@ import java.io.Serializable;
 @Setter
 @EqualsAndHashCode
 @Builder
+@ToString
 public class BagTranslationDto implements Serializable {
     @Min(1)
     private Integer id;
@@ -27,4 +29,5 @@ public class BagTranslationDto implements Serializable {
     private String nameEng;
     @NonNull
     private Boolean limitedIncluded;
+    private Integer quantity;
 }
