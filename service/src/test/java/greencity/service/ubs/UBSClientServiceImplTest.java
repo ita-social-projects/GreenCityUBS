@@ -34,13 +34,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.position.PositionAuthoritiesDto;
-import greencity.dto.user.AllPointsUserDto;
-import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserProfileCreateDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
@@ -107,7 +101,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -124,94 +117,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static greencity.ModelUtils.KYIV_REGION_EN;
-import static greencity.ModelUtils.KYIV_REGION_UA;
-import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
-import static greencity.ModelUtils.TEST_EMAIL;
-import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
-import static greencity.ModelUtils.TEST_PAYMENT_LIST;
-import static greencity.ModelUtils.addressDto;
-import static greencity.ModelUtils.addressDtoList;
-import static greencity.ModelUtils.addressDtoListWithNullPlaceId;
-import static greencity.ModelUtils.addressList;
-import static greencity.ModelUtils.addressWithEmptyPlaceIdDto;
-import static greencity.ModelUtils.addressWithKyivRegionDto;
-import static greencity.ModelUtils.bagDto;
-import static greencity.ModelUtils.botList;
-import static greencity.ModelUtils.createCertificateDto;
-import static greencity.ModelUtils.getAddress;
-import static greencity.ModelUtils.getAddressDtoResponse;
-import static greencity.ModelUtils.getAddressRequestDto;
-import static greencity.ModelUtils.getAddressRequestToSaveDto;
-import static greencity.ModelUtils.getAddressRequestToSaveDto_WithoutDistricts;
-import static greencity.ModelUtils.getAddressRequestWithEmptyPlaceIdDto;
-import static greencity.ModelUtils.getAddressRequestWithEmptyPlaceIdToSaveDto;
-import static greencity.ModelUtils.getAddressWithKyivRegionRequestDto;
-import static greencity.ModelUtils.getAddressWithKyivRegionToSaveRequestDto;
-import static greencity.ModelUtils.getBag;
-import static greencity.ModelUtils.getBag1list;
-import static greencity.ModelUtils.getBag4list;
-import static greencity.ModelUtils.getBagForOrder;
-import static greencity.ModelUtils.getBagTranslationDto;
-import static greencity.ModelUtils.getCancellationDto;
-import static greencity.ModelUtils.getCertificate;
-import static greencity.ModelUtils.getCourier;
-import static greencity.ModelUtils.getCourierDto;
-import static greencity.ModelUtils.getCourierDtoList;
-import static greencity.ModelUtils.getEmployee;
-import static greencity.ModelUtils.getGeocodingResult;
-import static greencity.ModelUtils.getGeocodingResultWithKyivRegion;
-import static greencity.ModelUtils.getListOfEvents;
-import static greencity.ModelUtils.getLocation;
-import static greencity.ModelUtils.getMaximumAmountOfAddresses;
-import static greencity.ModelUtils.getOrder;
-import static greencity.ModelUtils.getOrderClientDto;
-import static greencity.ModelUtils.getOrderCount;
-import static greencity.ModelUtils.getOrderCountWithPaymentStatusPaid;
-import static greencity.ModelUtils.getOrderDetails;
-import static greencity.ModelUtils.getOrderDetailsWithoutSender;
-import static greencity.ModelUtils.getOrderDoneByUser;
-import static greencity.ModelUtils.getOrderFondyClientDto;
-import static greencity.ModelUtils.getOrderPaymentDetailDto;
-import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
-import static greencity.ModelUtils.getOrderResponseDto;
-import static greencity.ModelUtils.getOrderStatusDto;
-import static greencity.ModelUtils.getOrderStatusTranslation;
-import static greencity.ModelUtils.getOrderTest;
-import static greencity.ModelUtils.getOrderWithAddressesResponseDto;
-import static greencity.ModelUtils.getOrderWithEvents;
-import static greencity.ModelUtils.getOrderWithTariffAndLocation;
-import static greencity.ModelUtils.getOrderWithoutPayment;
-import static greencity.ModelUtils.getOrdersDto;
-import static greencity.ModelUtils.getPayment;
-import static greencity.ModelUtils.getPaymentResponseDto;
-import static greencity.ModelUtils.getSuccessfulFondyResponse;
-import static greencity.ModelUtils.getTariffInfo;
-import static greencity.ModelUtils.getTariffInfoWithLimitOfBags;
-import static greencity.ModelUtils.getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag;
-import static greencity.ModelUtils.getTariffLocation;
-import static greencity.ModelUtils.getTariffsForLocationDto;
-import static greencity.ModelUtils.getTariffsInfo;
-import static greencity.ModelUtils.getTelegramBotNotifyTrue;
-import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
-import static greencity.ModelUtils.getTestOrderAddressDtoRequestWithNullPlaceId;
-import static greencity.ModelUtils.getTestOrderAddressLocationDto;
-import static greencity.ModelUtils.getTestUser;
-import static greencity.ModelUtils.getUBSuser;
-import static greencity.ModelUtils.getUBSuserWithoutSender;
-import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
-import static greencity.ModelUtils.getUbsUsers;
-import static greencity.ModelUtils.getUser;
-import static greencity.ModelUtils.getUserForCreate;
-import static greencity.ModelUtils.getUserInfoDto;
-import static greencity.ModelUtils.getUserPointsAndAllBagsDto;
-import static greencity.ModelUtils.getUserProfileCreateDto;
-import static greencity.ModelUtils.getUserProfileUpdateDto;
-import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
-import static greencity.ModelUtils.getUserWithBotNotifyTrue;
-import static greencity.ModelUtils.getUserWithLastLocation;
-import static greencity.ModelUtils.getViberBotNotifyTrue;
+import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
@@ -674,22 +580,25 @@ class UBSClientServiceImplTest {
         var tariffLocation = getTariffLocation();
 
         var bags = getBag1list();
-        var bagTranslationDto = getBagTranslationDto();
-        var userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDtoWithQuantity();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+        when(orderBagRepository.getAmountOfOrderBagsByOrderIdAndBagId(anyLong(), anyInt()))
+            .thenReturn(Optional.of(2));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
             .thenReturn(Optional.of(tariffLocation));
         when(bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
-        when(modelMapper.map(bags.get(0), BagTranslationDto.class)).thenReturn(bagTranslationDto);
 
         var userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageDataByOrderId(uuid, orderId);
 
         assertEquals(
-            userPointsAndAllBagsDtoExpected.getBags(),
-            userPointsAndAllBagsDtoActual.getBags());
+            userPointsAndAllBagsDtoExpected.getBags().get(0).toString(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).toString());
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags().get(0).getQuantity(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).getQuantity());
         assertEquals(
             userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
             userPointsAndAllBagsDtoActual.getBags().get(0).getId());
@@ -698,10 +607,10 @@ class UBSClientServiceImplTest {
             userPointsAndAllBagsDtoActual.getPoints());
 
         verify(userRepository).findUserByUuid(uuid);
+        verify(orderBagRepository).getAmountOfOrderBagsByOrderIdAndBagId(anyLong(), anyInt());
         verify(orderRepository).findById(orderId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
         verify(bagRepository).findAllActiveBagsByTariffsInfoId(tariffsInfoId);
-        verify(modelMapper).map(bags.get(0), BagTranslationDto.class);
     }
 
     @Test

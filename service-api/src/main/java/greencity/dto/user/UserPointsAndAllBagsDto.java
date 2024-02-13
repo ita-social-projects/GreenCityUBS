@@ -1,7 +1,11 @@
 package greencity.dto.user;
 
 import greencity.dto.bag.BagTranslationDto;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.ToString;
 import java.io.Serializable;
 import java.util.List;
 

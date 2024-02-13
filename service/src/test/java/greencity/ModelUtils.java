@@ -173,7 +173,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -189,7 +188,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import static greencity.enums.NotificationReceiverType.EMAIL;
 import static greencity.enums.NotificationReceiverType.MOBILE;
 import static greencity.enums.NotificationReceiverType.SITE;
@@ -5197,6 +5195,21 @@ public class ModelUtils {
                     .price(150.)
                     .nameEng("nameEng")
                     .limitedIncluded(false)
+                    .build()),
+            100);
+    }
+
+    public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoWithQuantity() {
+        return new UserPointsAndAllBagsDto(
+            List.of(
+                BagTranslationDto.builder()
+                    .id(1)
+                    .name("name")
+                    .capacity(20)
+                    .price(170.)
+                    .nameEng("nameEng")
+                    .limitedIncluded(false)
+                    .quantity(2)
                     .build()),
             100);
     }
