@@ -2,7 +2,6 @@ package greencity.dto.pageble;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
 import java.util.List;
 
 @Data

@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -33,23 +32,25 @@ class AddressRepositoryTest extends IntegrationTestBase {
         Address address = ModelUtils.getAddress();
         List<Address> actual = addressRepository.findAllNonDeletedAddressesByUserId(1L);
 
-        Assertions.assertEquals(Optional.of(address.getUser().getId()), Optional.of(actual.get(0).getUser().getId()));
-        Assertions.assertEquals(Optional.of(address.getCoordinates()), Optional.of(actual.get(0).getCoordinates()));
-        Assertions.assertEquals(Optional.of(address.getId()), Optional.of(actual.get(0).getId()));
-        Assertions.assertEquals(Optional.of(address.getAddressStatus()), Optional.of(actual.get(0).getAddressStatus()));
+        Assertions.assertEquals(Optional.of(address.getUser().getId()),
+            Optional.of(actual.getFirst().getUser().getId()));
+        Assertions.assertEquals(Optional.of(address.getCoordinates()), Optional.of(actual.getFirst().getCoordinates()));
+        Assertions.assertEquals(Optional.of(address.getId()), Optional.of(actual.getFirst().getId()));
+        Assertions.assertEquals(Optional.of(address.getAddressStatus()),
+            Optional.of(actual.getFirst().getAddressStatus()));
         Assertions.assertEquals(Optional.of(address.getAddressComment()), Optional.of(address.getAddressComment()));
-        Assertions.assertEquals(Optional.of(address.getActual()), Optional.of(actual.get(0).getActual()));
-        Assertions.assertEquals(Optional.of(address.getRegion()), Optional.of(actual.get(0).getRegion()));
-        Assertions.assertEquals(Optional.of(address.getDistrict()), Optional.of(actual.get(0).getDistrict()));
+        Assertions.assertEquals(Optional.of(address.getActual()), Optional.of(actual.getFirst().getActual()));
+        Assertions.assertEquals(Optional.of(address.getRegion()), Optional.of(actual.getFirst().getRegion()));
+        Assertions.assertEquals(Optional.of(address.getDistrict()), Optional.of(actual.getFirst().getDistrict()));
         Assertions.assertEquals(Optional.of(address.getEntranceNumber()),
-            Optional.of(actual.get(0).getEntranceNumber()));
-        Assertions.assertEquals(Optional.of(address.getHouseCorpus()), Optional.of(actual.get(0).getHouseCorpus()));
-        Assertions.assertEquals(Optional.of(address.getHouseNumber()), Optional.of(actual.get(0).getHouseNumber()));
-        Assertions.assertEquals(Optional.of(address.getStreet()), Optional.of(actual.get(0).getStreet()));
-        Assertions.assertEquals(Optional.of(address.getCityEn()), Optional.of(actual.get(0).getCityEn()));
-        Assertions.assertEquals(Optional.of(address.getRegionEn()), Optional.of(actual.get(0).getRegionEn()));
-        Assertions.assertEquals(Optional.of(address.getDistrictEn()), Optional.of(actual.get(0).getDistrictEn()));
-        Assertions.assertEquals(Optional.of(address.getStreetEn()), Optional.of(actual.get(0).getStreetEn()));
+            Optional.of(actual.getFirst().getEntranceNumber()));
+        Assertions.assertEquals(Optional.of(address.getHouseCorpus()), Optional.of(actual.getFirst().getHouseCorpus()));
+        Assertions.assertEquals(Optional.of(address.getHouseNumber()), Optional.of(actual.getFirst().getHouseNumber()));
+        Assertions.assertEquals(Optional.of(address.getStreet()), Optional.of(actual.getFirst().getStreet()));
+        Assertions.assertEquals(Optional.of(address.getCityEn()), Optional.of(actual.getFirst().getCityEn()));
+        Assertions.assertEquals(Optional.of(address.getRegionEn()), Optional.of(actual.getFirst().getRegionEn()));
+        Assertions.assertEquals(Optional.of(address.getDistrictEn()), Optional.of(actual.getFirst().getDistrictEn()));
+        Assertions.assertEquals(Optional.of(address.getStreetEn()), Optional.of(actual.getFirst().getStreetEn()));
     }
 
     // @Test

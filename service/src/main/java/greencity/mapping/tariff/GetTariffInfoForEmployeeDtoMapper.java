@@ -8,7 +8,6 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .nameUk(tariffLocation.getLocation().getRegion().getUkrName())
                 .nameEn(tariffLocation.getLocation().getRegion().getEnName())
                 .build())
-            .collect(Collectors.toList()).get(0);
+            .toList().getFirst();
 
         List<LocationsDtos> locationsDtos = source.getTariffLocations().stream()
             .map(tariffLocation -> LocationsDtos.builder()

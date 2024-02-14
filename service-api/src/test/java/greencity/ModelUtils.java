@@ -5,35 +5,11 @@ import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.table.UbsTableCreationDto;
-import greencity.dto.user.UserVO;
-import greencity.dto.violation.UserViolationMailDto;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
-
 import java.util.List;
 
 public class ModelUtils {
-
-    public static UserVO getUserVO() {
-        return UserVO.builder()
-            .id(13L)
-            .email("email").build();
-    }
-
-    public static UbsTableCreationDto getUbsTableCreationDto() {
-        return UbsTableCreationDto.builder()
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
-            .build();
-    }
-
-    public static UserViolationMailDto getUserViolationMailDto() {
-        return UserViolationMailDto.builder()
-            .name("String")
-            .email("string@gmail.com")
-            .violationDescription("Description")
-            .build();
-    }
 
     public static Location getLocation() {
         return Location.builder()

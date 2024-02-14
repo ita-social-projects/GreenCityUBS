@@ -3,15 +3,14 @@ package greencity.mapping.order;
 import greencity.ModelUtils;
 import greencity.dto.order.OrderResponseDto;
 import greencity.entity.order.Order;
-import greencity.mapping.order.OrderMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -25,7 +24,7 @@ class OrderMapperTest {
         OrderResponseDto orderResponseDto = ModelUtils.getOrderResponseDto();
 
         Order expected = Order.builder()
-            .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
+            .additionalOrders(new HashSet<>(List.of("232-534-634")))
             .comment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)

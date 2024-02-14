@@ -5,8 +5,7 @@ import greencity.dto.payment.PaymentResponseDto;
 import lombok.ToString;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Component;
-
-import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
+import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
 
 @Component
 @ToString
@@ -17,17 +16,16 @@ public class EncryptionUtil {
      * @param dto        {@link PaymentRequestDto} - request order data.
      * @param password   - fondy password.
      * @param merchantId - fondy merchant id.
-     * @return {@String} - encrypted signature.
+     * @return {@link String} - encrypted signature.
      */
     public String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
-        StringBuilder stringBuilder = new StringBuilder(password);
-        stringBuilder.append("|" + dto.getAmount());
-        stringBuilder.append("|" + dto.getCurrency());
-        stringBuilder.append("|" + merchantId);
-        stringBuilder.append("|" + dto.getOrderDescription());
-        stringBuilder.append("|" + dto.getOrderId());
-        stringBuilder.append("|" + dto.getResponseUrl());
-        return sha1Hex(stringBuilder.toString());
+        String stringBuilder = password + "|" + dto.getAmount()
+            + "|" + dto.getCurrency()
+            + "|" + merchantId
+            + "|" + dto.getOrderDescription()
+            + "|" + dto.getOrderId()
+            + "|" + dto.getResponseUrl();
+        return sha256Hex(stringBuilder);
     }
 
     /**
@@ -73,24 +71,24 @@ public class EncryptionUtil {
         checkString(dto.getTran_type(), stringBuilder);
         checkString(dto.getVerification_status(), stringBuilder);
         checkInteger(dto.getParent_order_id(), stringBuilder);
-        return DigestUtils.sha1Hex(stringBuilder.toString()).equals(dto.getSignature());
+        return DigestUtils.sha256Hex(stringBuilder.toString()).equals(dto.getSignature());
     }
 
     private static void checkString(String string, StringBuilder stringBuilder) {
-        if (string != null && !string.equals("")) {
-            stringBuilder.append("|" + string);
+        if (string != null && !string.isEmpty()) {
+            stringBuilder.append("|").append(string);
         }
     }
 
     private static void checkInteger(Integer number, StringBuilder stringBuilder) {
         if (number != null && number != 0) {
-            stringBuilder.append("|" + number);
+            stringBuilder.append("|").append(number);
         }
     }
 
     private static void checkIntegerInclude0(Integer number, StringBuilder stringBuilder) {
         if (number != null) {
-            stringBuilder.append("|" + number);
+            stringBuilder.append("|").append(number);
         }
     }
 }

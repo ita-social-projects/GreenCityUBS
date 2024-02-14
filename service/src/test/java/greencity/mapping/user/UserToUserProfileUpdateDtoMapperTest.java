@@ -14,8 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +27,6 @@ class UserToUserProfileUpdateDtoMapperTest {
     @Test
     void convert() {
         MockitoAnnotations.initMocks(this);
-        AddressDto expected = ModelUtils.getAddressDto(1L);
         when(locationApiService.getAllDistrictsInCityByNames(anyString(), anyString()))
             .thenReturn(ModelUtils.getLocationApiDtoList());
         UserProfileUpdateDto userProfileUpdateDto = ModelUtils.updateUserProfileDto();

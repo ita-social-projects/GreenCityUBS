@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Repository
@@ -30,7 +29,7 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      * @param id the ID of the order
      * @return a list of order bags matching the bag ID
      */
-    @Query(value = "SELECT   * FROM ORDER_BAG_MAPPING as OBM "
+    @Query(value = "SELECT OBM.* FROM ORDER_BAG_MAPPING as OBM "
         + "where OBM.BAG_ID = :bagId", nativeQuery = true)
     List<OrderBag> findOrderBagsByBagId(@Param("bagId") Integer id);
 
@@ -40,7 +39,7 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      * @param id the ID of the order
      * @return a list of order bags matching the order ID
      */
-    @Query(value = "SELECT   * FROM ORDER_BAG_MAPPING as OBM "
+    @Query(value = "SELECT OBM.* FROM ORDER_BAG_MAPPING as OBM "
         + "where OBM.ORDER_ID = :orderId", nativeQuery = true)
     List<OrderBag> findOrderBagsByOrderId(@Param("orderId") Long id);
 
@@ -61,13 +60,4 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
         + "from orders o "
         + "where o.id = obm.order_id and obm.bag_id = :bagId and o.order_payment_status = 'UNPAID'", nativeQuery = true)
     void updateAllByBagIdForUnpaidOrders(Integer bagId, Integer capacity, Long price, String name, String nameEng);
-
-    /**
-     * method returns all OrderBags by bag id.
-     *
-     * @param bagId {@link Integer} bag id
-     * @return {@link List} of {@link OrderBag}
-     * @author Oksana Spodaryk
-     */
-    List<OrderBag> findAllByBagId(Integer bagId);
 }

@@ -6,7 +6,6 @@ import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.entity.user.employee.Employee;
-
 import java.util.List;
 
 public interface OrdersAdminsPageService {

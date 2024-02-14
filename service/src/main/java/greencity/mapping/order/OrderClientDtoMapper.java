@@ -4,7 +4,6 @@ import greencity.dto.order.OrderClientDto;
 import greencity.entity.order.Order;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.LongStream;

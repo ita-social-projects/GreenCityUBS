@@ -7,7 +7,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 @UtilityClass
-public class PostgersInitializer {
+public class PostgresInitializer {
     public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:13.3");
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {

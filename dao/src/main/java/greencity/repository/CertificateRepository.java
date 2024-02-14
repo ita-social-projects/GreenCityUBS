@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Set;
 
@@ -40,7 +39,7 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @author Orest Mahdziak
      */
 
-    @Query(value = "SELECT * FROM ORDERS AS O JOIN CERTIFICATE AS C "
+    @Query(value = "SELECT O.* FROM ORDERS AS O JOIN CERTIFICATE AS C "
         + "ON O.ID = C.ORDER_ID WHERE O.ID = :idOrder", nativeQuery = true)
     List<Certificate> findCertificate(@Param("idOrder") Long idOrder);
 
@@ -50,6 +49,7 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @param code is list Certificate
      * @return set of {@link Certificate}
      */
+    @Query(nativeQuery = true, value = "SELECT c.* FROM certificate c WHERE c.code IN :codes AND c.status = :status")
     Set<Certificate> findAllByCodeAndCertificateStatus(List<String> code, CertificateStatus status);
 
     /**

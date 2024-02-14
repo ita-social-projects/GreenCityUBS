@@ -6,8 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import greencity.dto.order.UserWithSomeOrderDetailDto;
 import greencity.dto.pageble.PageableDto;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import java.util.List;
 
 @Getter

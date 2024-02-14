@@ -7,7 +7,6 @@ import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.stream.Collectors;
 
 @Component

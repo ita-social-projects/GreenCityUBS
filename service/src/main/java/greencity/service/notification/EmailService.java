@@ -8,9 +8,7 @@ import greencity.enums.NotificationReceiverType;
 import greencity.repository.NotificationTemplateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.Objects;
-
 import static greencity.enums.NotificationReceiverType.EMAIL;
 
 @Service

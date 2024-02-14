@@ -9,9 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,7 +26,7 @@ class OrderClientDtoMapperTest {
             .orderStatus(OrderStatus.DONE)
             .payment(Collections.singletonList(new Payment()))
             .build();
-        order.getPayment().get(0).setAmount(350L);
+        order.getPayment().getFirst().setAmount(350L);
 
         assertEquals(expected, mapper.convert(order));
 

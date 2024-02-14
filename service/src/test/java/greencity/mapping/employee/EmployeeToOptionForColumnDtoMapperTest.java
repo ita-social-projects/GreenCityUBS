@@ -3,7 +3,6 @@ package greencity.mapping.employee;
 import greencity.ModelUtils;
 import greencity.dto.OptionForColumnDTO;
 import greencity.entity.user.employee.Employee;
-import greencity.mapping.employee.EmployeeToOptionForColumnDtoMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

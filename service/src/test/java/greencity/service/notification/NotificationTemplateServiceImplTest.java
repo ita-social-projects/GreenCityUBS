@@ -15,10 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 import java.util.Optional;
-
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PAGEABLE;
 import static greencity.ModelUtils.TEMPLATE_PAGE;
@@ -70,10 +68,10 @@ class NotificationTemplateServiceImplTest {
 
         var updateDto = TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
         var mainInfoDto = updateDto.getNotificationTemplateMainInfoDto();
-        var platformDto = updateDto.getPlatforms().get(0);
+        var platformDto = updateDto.getPlatforms().getFirst();
 
         var notification = TEST_NOTIFICATION_TEMPLATE;
-        var platform = notification.getNotificationPlatforms().get(0);
+        var platform = notification.getNotificationPlatforms().getFirst();
 
         when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
 
@@ -111,7 +109,7 @@ class NotificationTemplateServiceImplTest {
         Long id = 1L;
 
         var dto = TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
-        dto.getPlatforms().get(0).setId(100L);
+        dto.getPlatforms().getFirst().setId(100L);
 
         when(templateRepository.findById(id)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 

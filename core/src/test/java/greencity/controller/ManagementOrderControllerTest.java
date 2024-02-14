@@ -36,10 +36,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-
 import java.security.Principal;
 import java.util.Optional;
-
 import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getRequestDto;
@@ -92,39 +90,12 @@ class ManagementOrderControllerTest {
 
     private final Principal principal = getUuid();
 
-    public static final String contentForaddingcontroller = "{\n"
-        + " \"code\": \"1111-2222\",\n" +
-        " \"monthCount\": 8,\n" +
-        " \"points\": 100\n"
-        + "}";
-
-    public static final String contentForUpdatingController = "{\n"
-        + " \"district\": \"test\",\n"
-        + " \"street\": \"test\",\n"
-        + " \"houseCorpus\": \"4\",\n"
-        + " \"entranceNumber\": \"2\",\n"
-        + " \"houseNumber\": \"1\"\n"
-        + "}";
-
-    public static final String contentForUpdatingOrderDetailController = "[\n"
-        + "{\n"
-        + "\"amount\": 0,\n"
-        + "\"bagId\": 0,\n"
-        + "\"confirmedQuantity\": 0,\n"
-        + "\"exportedQuantity\": 0,\n"
-        + "\"orderId\": 0\n"
-        + "}\n"
-        + "]";
-
-    public static final String contentForUpdatingEmployeeByOrderController = "{\n"
-        + "\"employeeOrderPositionDTOS\": [\n"
-        + "{\n"
-        + "\"name\": \"Alisson Becker\",\n"
-        + "\"positionId\": 1\n"
-        + "}\n"
-        + "],\n"
-        + "\"orderId\": 8\n"
-        + "}";
+    public static final String contentForaddingcontroller = """
+        {
+         "code": "1111-2222",
+         "monthCount": 8,
+         "points": 100
+        }""";
 
     @BeforeEach
     void setup() {
@@ -288,7 +259,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void deleteManualPayment() throws Exception {
-        mockMvc.perform(delete(ubsLink + "/delete-manual-payment/{id}", 1l))
+        mockMvc.perform(delete(ubsLink + "/delete-manual-payment/{id}", 1L))
             .andExpect(status().isOk()).andDo(print());
     }
 
@@ -301,7 +272,7 @@ class ManagementOrderControllerTest {
             "", "application/json", responseJSON.getBytes());
 
         MockMultipartHttpServletRequestBuilder builder =
-            multipart(ubsLink + "/update-manual-payment/{id}", 1l);
+            multipart(ubsLink + "/update-manual-payment/{id}", 1L);
         builder.with(request -> {
             request.setMethod("PUT");
             return request;

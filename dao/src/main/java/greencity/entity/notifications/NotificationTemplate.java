@@ -1,9 +1,29 @@
 package greencity.entity.notifications;
 
-import greencity.enums.*;
-import lombok.*;
+import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationTime;
+import greencity.enums.NotificationTrigger;
+import greencity.enums.NotificationType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.OneToMany;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,30 +74,4 @@ public class NotificationTemplate {
 
     @Column(name = "title_eng")
     private String titleEng;
-
-    /**
-     * helper method, that allows to save NotificationPlatform entity in database
-     * correctly.
-     *
-     * @param platform notification platform for NotificationTemplate
-     *                 {@link NotificationPlatform}
-     * @author Safarov Renat
-     */
-    public void addNotificationPlatform(NotificationPlatform platform) {
-        platform.setNotificationTemplate(this);
-        notificationPlatforms.add(platform);
-    }
-
-    /**
-     * helper method, that allows to remove NotificationPlatform entity from
-     * database correctly.
-     *
-     * @param platform notification platform for NotificationTemplate
-     *                 {@link NotificationPlatform}
-     * @author Safarov Renat
-     */
-    public void removeNotificationPlatform(NotificationPlatform platform) {
-        platform.setNotificationTemplate(null);
-        notificationPlatforms.remove(platform);
-    }
 }

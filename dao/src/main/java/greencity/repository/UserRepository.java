@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -77,7 +76,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      *         {@param localDate}.
      */
     @Query(nativeQuery = true,
-        value = " SELECT * FROM users as u INNER JOIN orders as o ON u.id = o.users_id "
+        value = " SELECT u.* FROM users as u INNER JOIN orders as o ON u.id = o.users_id "
             + "WHERE (SELECT COUNT(id) FROM orders WHERE CAST(o.order_date AS DATE) < :toDate "
             + "AND CAST(o.order_date AS DATE) > :fromDate)!=0")
     List<User> getAllInactiveUsers(LocalDate fromDate, LocalDate toDate);

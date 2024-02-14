@@ -22,27 +22,77 @@ import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
-import greencity.repository.*;
+import greencity.repository.BagRepository;
+import greencity.repository.NotificationParameterRepository;
+import greencity.repository.NotificationTemplateRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.UserNotificationRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.ViolationRepository;
 import greencity.service.ubs.OrderBagService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.*;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
-
-import static greencity.ModelUtils.*;
+import static greencity.ModelUtils.TEST_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET;
+import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET2;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
+import static greencity.ModelUtils.TEST_ORDER_2;
+import static greencity.ModelUtils.TEST_ORDER_3;
+import static greencity.ModelUtils.TEST_ORDER_4;
+import static greencity.ModelUtils.TEST_ORDER_5;
+import static greencity.ModelUtils.TEST_PAGE;
+import static greencity.ModelUtils.TEST_PAGEABLE;
+import static greencity.ModelUtils.TEST_PAYMENT_LIST;
+import static greencity.ModelUtils.TEST_USER;
+import static greencity.ModelUtils.TEST_USER_NOTIFICATION;
+import static greencity.ModelUtils.TEST_USER_NOTIFICATION_2;
+import static greencity.ModelUtils.TEST_USER_NOTIFICATION_3;
+import static greencity.ModelUtils.TEST_USER_NOTIFICATION_4;
+import static greencity.ModelUtils.TEST_USER_NOTIFICATION_5;
+import static greencity.ModelUtils.TEST_USER_NOTIFICATION_6;
+import static greencity.ModelUtils.TEST_USER_NOTIFICATION_7;
+import static greencity.ModelUtils.TEST_VIOLATION;
+import static greencity.ModelUtils.createUserNotificationForViolation;
+import static greencity.ModelUtils.createViolationNotificationDto;
+import static greencity.ModelUtils.getBag1list;
+import static greencity.ModelUtils.getBag4list;
+import static greencity.ModelUtils.getCertificate;
+import static greencity.ModelUtils.getUser;
+import static greencity.ModelUtils.getViolation;
 import static greencity.enums.NotificationReceiverType.SITE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
@@ -153,7 +203,7 @@ class NotificationServiceImplTest {
             List<NotificationParameter> notificationParameters = List.of(
                 NotificationParameter.builder().id(1L)
                     .userNotification(created).key("orderNumber")
-                    .value(orders.get(0).getId().toString()).build(),
+                    .value(orders.getFirst().getId().toString()).build(),
                 NotificationParameter.builder().id(2L)
                     .userNotification(created).key("amountToPay")
                     .value("10000").build());
@@ -351,7 +401,7 @@ class NotificationServiceImplTest {
 
             when(userNotificationRepository.getUserIdByDateOfLastNotificationAndNotificationType(
                 LocalDate.now(clock).minusMonths(2L), NotificationType.LETS_STAY_CONNECTED.toString()))
-                    .thenReturn(List.of(11L, 22L));
+                .thenReturn(List.of(11L, 22L));
             when(userRepository.getInactiveUsersByDateOfLastOrder(LocalDate.now(clock).minusMonths(2L)))
                 .thenReturn(List.of(user, user1));
             when(userNotificationRepository.save(any())).thenReturn(notification);
@@ -420,7 +470,7 @@ class NotificationServiceImplTest {
             UserNotification notification = new UserNotification();
             notification.setNotificationType(NotificationType.UNPAID_PACKAGE);
             notification.setUser(user);
-            notification.setOrder(orders.get(0));
+            notification.setOrder(orders.getFirst());
             notification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(2));
 
             when(userNotificationRepository.findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(
