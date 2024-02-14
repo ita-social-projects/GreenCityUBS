@@ -3,7 +3,10 @@ package greencity.filters;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentSystem;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor

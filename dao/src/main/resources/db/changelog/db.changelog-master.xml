@@ -34,7 +34,6 @@
     <include file="db/changelog/logs/ch-add-column-station-status-Korzh.xml"/>
     <include file="db/changelog/logs/ch-add-table-employee-receiving-station-mapping-Danylko.xml"/>
     <include file="db/changelog/logs/ch-create-index-employee-email-Danylko.xml"/>
-    <include file="db/changelog/logs/ch-add-new-order_bag_mapping-columns-Mahdziak.xml"/>
     <include file="db/changelog/logs/ch-add-unique-constraint-position-receiving-st-Danylko.xml"/>
     <include file="db/changelog/logs/ch-change-column-name-position-rec-station-Danylko.xml"/>
     <include file="db/changelog/logs/ch-add-columns-violation-level-violation-date-in-violations-description-mapping-Rusanovscaia.xml"/>
@@ -207,7 +206,6 @@
     <include file="db/changelog/logs/ch-update-service-price-Seti.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Seti.xml"/>
     <include file="/db/changelog/logs/ch-modify-columns-name-name-eng-in-bag-and-service-tables.xml"/>
-    <include file="/db/changelog/logs/ch-add-column-order-bag-mapping-table-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-add-column-position-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-add-column-employee_filter_view-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-modify-columns-house-number-in-tables-address-and-order-address.xml"/>
@@ -218,8 +216,8 @@
     <include file="db/changelog/logs/2023-08-07-change-service-name-column-length.xml"/>
     <include file="db/changelog/logs/2023-08-08-change-bag-name-column-length.xml"/>
     <include file="db/changelog/logs/ch-add-column-status-to-bag-table-Spodaryk.xml"/>
-    <include file="/db/changelog/logs/ch-update-order-bag-mapping-table-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-add-column-order-bag-mapping-table-Spodaryk.xml"/>
+    <include file="/db/changelog/logs/ch-update-order-bag-mapping-table-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-insert-into-users-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-add-columns-nameEventEng-and-authorEng-to-Events-Bokalo.xml"/>
     <include file="/db/changelog/logs/ch-update-employees-set-new-main-email-Midianyi.xml"/>

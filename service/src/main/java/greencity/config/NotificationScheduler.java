@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-
 import java.time.Clock;
 import java.time.ZoneId;
 
@@ -23,6 +23,7 @@ public class NotificationScheduler {
     }
 
     @Autowired
+    @Lazy
     private NotificationServiceImpl notificationService;
 
     /**

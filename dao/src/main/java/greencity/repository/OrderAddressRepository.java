@@ -12,7 +12,7 @@ public interface OrderAddressRepository extends JpaRepository<OrderAddress, Long
      *
      * @return {@link OrderAddress}.
      */
-    @Query(value = "SELECT * FROM orders as o "
+    @Query(value = "SELECT o.* FROM orders as o "
         + " JOIN ubs_user as ubs ON o.ubs_user_id = ubs.id "
         + " JOIN address as addr ON addr.id = ubs.address_id "
         + " WHERE o.id = :orderId", nativeQuery = true)

@@ -21,11 +21,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -78,9 +76,7 @@ class CertificateServiceImplTest {
 
     @Test
     void deleteCertificateNotFound() {
-        Assertions.assertThrows(NotFoundException.class, () -> {
-            certificateService.deleteCertificate("1111-1234");
-        });
+        Assertions.assertThrows(NotFoundException.class, () -> certificateService.deleteCertificate("1111-1234"));
     }
 
     @Test
@@ -89,9 +85,7 @@ class CertificateServiceImplTest {
         certificate.setCode("1111-1234")
             .setCertificateStatus(CertificateStatus.EXPIRED);
         when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(certificate));
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            certificateService.deleteCertificate("1111-1234");
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> certificateService.deleteCertificate("1111-1234"));
     }
 
     @Test

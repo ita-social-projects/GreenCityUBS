@@ -110,8 +110,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -128,7 +127,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
@@ -980,7 +978,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (payment.isEmpty()) {
             throw new NotFoundException(PAYMENT_NOT_FOUND + id);
         }
-        return buildStatuses(order, payment.get(0));
+        return buildStatuses(order, payment.getFirst());
     }
 
     /**
@@ -1041,7 +1039,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             paymentRepository.saveAll(payment);
         }
 
-        return buildStatuses(order, payment.get(0));
+        return buildStatuses(order, payment.getFirst());
     }
 
     private void verifyPaidWithBonuses(Order order, String email) {
@@ -1793,7 +1791,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void checkUpdateResponsibleEmployeeDto(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
         String email) {
         if (nonNull(updateAllOrderPageDto.getUpdateResponsibleEmployeeDto())) {
-            updateAllOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+            updateAllOrderPageDto.getUpdateResponsibleEmployeeDto()
                 .forEach(dto -> {
                     if (nonNull(dto.getEmployeeId()) && nonNull(dto.getPositionId())) {
                         ordersAdminsPageService.responsibleEmployee(List.of(order.getId()),

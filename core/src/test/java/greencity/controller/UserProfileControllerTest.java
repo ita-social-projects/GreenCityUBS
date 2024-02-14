@@ -24,10 +24,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-
 import java.security.Principal;
 import java.util.List;
-
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getUserProfileCreateDto;
 import static org.mockito.Mockito.verify;

@@ -2,14 +2,22 @@ package greencity.repository;
 
 import greencity.enums.SortingOrder;
 import greencity.entity.user.Violation;
-import org.springframework.data.domain.*;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
-
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Expression;
 import java.util.List;
-
 import static java.util.Objects.nonNull;
 
 @Repository

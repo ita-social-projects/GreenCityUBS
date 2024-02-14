@@ -2,7 +2,6 @@ package greencity.repository;
 
 import greencity.filters.DateFilter;
 import greencity.filters.OrderSearchCriteria;
-
 import java.util.Map;
 import java.util.function.Function;
 

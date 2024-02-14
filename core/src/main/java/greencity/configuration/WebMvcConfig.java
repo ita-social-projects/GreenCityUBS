@@ -7,12 +7,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-
 import java.time.Clock;
 import java.util.List;
 import java.util.Locale;
@@ -58,6 +59,18 @@ public class WebMvcConfig implements WebMvcConfigurer {
         LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
         lci.setParamName("lang");
         return lci;
+    }
+
+    /**
+     * Method that returns MultipartResolver as CommonsMultipartyResolver has been
+     * superseded by StandardServletMultipartResolver after migration to SpringBoot
+     * 3.1.5.
+     *
+     * @return {@link MultipartResolver}
+     */
+    @Bean
+    public MultipartResolver multipartResolver() {
+        return new StandardServletMultipartResolver();
     }
 
     @Override

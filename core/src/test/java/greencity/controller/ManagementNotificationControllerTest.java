@@ -25,10 +25,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import java.security.Principal;
 import java.util.List;
-
 import static greencity.ModelUtils.getUuid;
 import static greencity.enums.NotificationStatus.INACTIVE;
 import static org.mockito.Mockito.doThrow;

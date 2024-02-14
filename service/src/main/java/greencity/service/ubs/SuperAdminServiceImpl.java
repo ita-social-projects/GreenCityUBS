@@ -68,7 +68,6 @@ import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -386,7 +385,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         if (location.isPresent()) {
             throw new NotFoundException("The location with name: "
-                + dto.get(0).getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
+                + dto.getFirst().getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
         }
     }
 
@@ -600,7 +599,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 .collect(Collectors.toSet());
         List<Long> existingLocationsIds =
             tariffLocationSet.stream().map(tariffLocation -> tariffLocation.getLocation().getId())
-                .collect(Collectors.toList());
+                .toList();
         idListToCheck.removeAll(existingLocationsIds);
         tariffsInfo.setTariffLocations(tariffLocationSet);
         tariffsLocationRepository.saveAll(tariffLocationSet);

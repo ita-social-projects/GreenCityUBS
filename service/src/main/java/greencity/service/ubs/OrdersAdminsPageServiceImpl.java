@@ -49,13 +49,11 @@ import org.apache.commons.lang3.EnumUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,7 +62,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import static greencity.constant.ErrorMessage.DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER;
 import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
@@ -239,29 +236,26 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         }
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
-        switch (columnName) {
-            case ORDER_STATUS:
-                return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employee));
-            case DATE_OF_EXPORT:
-                return createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value, employee.getId()));
-            case TIME_OF_EXPORT:
-                return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employee.getId()));
-            case RECEIVING:
-                return createReturnForSwitchChangeOrder(
-                    receivingStationForDevelopStage(ordersId, value, employee.getId()));
-            case CANCELLATION_REASON:
-                return createReturnForSwitchChangeOrder(
-                    cancellationReasonForDevelopStage(ordersId, value, employee.getId()));
-            case CANCELLATION_COMMENT:
-                return createReturnForSwitchChangeOrder(
-                    cancellationCommentForDevelopStage(ordersId, value, employee));
-            case ADMIN_COMMENT:
-                return createReturnForSwitchChangeOrder(
-                    adminCommentForDevelopStage(ordersId, value, employee));
-            default:
+        return switch (columnName) {
+            case ORDER_STATUS ->
+                createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employee));
+            case DATE_OF_EXPORT ->
+                createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value, employee.getId()));
+            case TIME_OF_EXPORT ->
+                createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employee.getId()));
+            case RECEIVING -> createReturnForSwitchChangeOrder(
+                receivingStationForDevelopStage(ordersId, value, employee.getId()));
+            case CANCELLATION_REASON -> createReturnForSwitchChangeOrder(
+                cancellationReasonForDevelopStage(ordersId, value, employee.getId()));
+            case CANCELLATION_COMMENT -> createReturnForSwitchChangeOrder(
+                cancellationCommentForDevelopStage(ordersId, value, employee));
+            case ADMIN_COMMENT -> createReturnForSwitchChangeOrder(
+                adminCommentForDevelopStage(ordersId, value, employee));
+            default -> {
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
-        }
+                yield createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
+            }
+        };
     }
 
     @Override

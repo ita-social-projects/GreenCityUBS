@@ -3,7 +3,6 @@ package greencity.dto.address;
 import greencity.dto.location.api.DistrictDto;
 import lombok.Builder;
 import lombok.Data;
-
 import java.util.List;
 
 @Builder

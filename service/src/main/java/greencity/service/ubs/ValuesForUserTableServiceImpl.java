@@ -7,18 +7,17 @@ import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
-import greencity.repository.*;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 
 @Service

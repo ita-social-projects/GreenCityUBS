@@ -3,10 +3,15 @@ package greencity.entity.user.ubs;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.User;
 import greencity.enums.AddressStatus;
-import lombok.*;
-
-import javax.persistence.*;
-import javax.validation.constraints.Size;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @NoArgsConstructor

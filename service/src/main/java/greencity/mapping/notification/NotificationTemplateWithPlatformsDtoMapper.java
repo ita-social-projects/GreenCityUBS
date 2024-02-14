@@ -6,7 +6,6 @@ import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.entity.notifications.NotificationTemplate;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.stream.Collectors;
 
 @Component

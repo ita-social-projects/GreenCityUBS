@@ -6,7 +6,6 @@ import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
@@ -15,10 +14,13 @@ import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,8 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
 
@@ -54,20 +55,21 @@ public class ManagementEmployeeController {
      * @return {@link EmployeeWithTariffsDto} saved employee.
      * @author Mykola Danylko.
      */
-    @ApiOperation(value = "Save employee")
+    @Operation(summary = "Save employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = EmployeeWithTariffsIdDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
+            content = @Content(schema = @Schema(implementation = EmployeeWithTariffsDto.class))),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
     @PostMapping(value = "/save-employee")
     public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
-        @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
+        @Parameter(description = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
             required = true) @Valid @RequestPart EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
+        @Parameter(description = "Employee image") @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 
@@ -78,11 +80,12 @@ public class ManagementEmployeeController {
      * @author Mykola Danylko.
      * @author Olena Sotnik.
      */
-    @ApiOperation(value = "Get all employees")
+    @Operation(summary = "Get all employees")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableAdvancedDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = PageableDto.class))),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/getAll-employees")
@@ -99,20 +102,21 @@ public class ManagementEmployeeController {
      * @return {@link EmployeeWithTariffsDto} update employee.
      * @author Mykola Danylko.
      */
-    @ApiOperation(value = "Update information about employee")
+    @Operation(summary = "Update information about employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeWithTariffsIdDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = EmployeeWithTariffsDto.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+        @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PutMapping(value = "/update-employee",
-        consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+        consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> update(
-        @ApiParam(value = SwaggerExampleModel.EMPLOYEE_DTO,
+        @Parameter(description = SwaggerExampleModel.EMPLOYEE_DTO,
             required = true) @RequestPart @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
+        @Parameter(description = "Employee image") @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeWithTariffsIdDto, image));
     }
 
@@ -122,13 +126,13 @@ public class ManagementEmployeeController {
      * @return {@link HttpStatus}
      * @author Mykola Danylko.
      */
-    @ApiOperation(value = "Delete employee")
+    @Operation(summary = "Delete employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @PutMapping("/deactivate-employee/{id}")
@@ -143,13 +147,13 @@ public class ManagementEmployeeController {
      * @return {@link HttpStatus}
      * @author Oksana Spodaryk.
      */
-    @ApiOperation(value = "Activate employee")
+    @Operation(summary = "Activate employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @PutMapping("/activate-employee/{id}")
@@ -164,11 +168,12 @@ public class ManagementEmployeeController {
      * @return {@link PositionDto}
      * @author Mykola Danylko.
      */
-    @ApiOperation(value = "Get all employee positions")
+    @Operation(summary = "Get all employee positions")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PositionDto[].class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PositionDto.class)))),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/get-all-positions")
@@ -181,14 +186,14 @@ public class ManagementEmployeeController {
      *
      * @author Mykola Danylko.
      */
-    @ApiOperation(value = "Deletes employee image")
+    @Operation(summary = "Deletes employee image")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+        @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEE', authentication)")
     @DeleteMapping("/delete-employee-image/{id}")
@@ -204,13 +209,13 @@ public class ManagementEmployeeController {
      *
      * @author Inna Yashna.
      */
-    @ApiOperation(value = "Get information about all employee's authorities")
+    @Operation(summary = "Get information about all employee's authorities")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-authorities")
     public ResponseEntity<Object> getAllAuthorities(@RequestParam String email) {
@@ -227,14 +232,14 @@ public class ManagementEmployeeController {
      *
      * @author Anton Bondar.
      */
-    @ApiOperation(value = "Get information about an employee`s positions and all possible "
+    @Operation(summary = "Get information about an employee`s positions and all possible "
         + "related authorities to these positions.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-positions-authorities")
     public ResponseEntity<PositionAuthoritiesDto> getPositionsAndRelatedAuthorities(@RequestParam String email) {
@@ -249,13 +254,13 @@ public class ManagementEmployeeController {
      *
      * @author Anton Bondar.
      */
-    @ApiOperation(value = "Get information about login employee`s positions.")
+    @Operation(summary = "Get information about login employee`s positions.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-employee-login-positions")
     public ResponseEntity<List<String>> getEmployeeLoginPositionNames(@RequestParam String email) {
@@ -269,13 +274,13 @@ public class ManagementEmployeeController {
      *
      * @author Inna Yashna.
      */
-    @ApiOperation(value = "Edit an employee`s authorities")
+    @Operation(summary = "Edit an employee`s authorities")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEES_AUTHORITIES', authentication)")
     @PutMapping("/edit-authorities")
@@ -289,11 +294,11 @@ public class ManagementEmployeeController {
      *
      * @return list of all tariffs.
      */
-    @ApiOperation(value = "Get all tariffs for working with employee page")
+    @Operation(summary = "Get all tariffs for working with employee page")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/getTariffs")

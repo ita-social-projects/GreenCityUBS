@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import greencity.dto.viber.enums.EventTypes;
 import lombok.Builder;
 import lombok.ToString;
-
 import java.util.Set;
 
 @Builder

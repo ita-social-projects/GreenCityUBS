@@ -7,7 +7,6 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.service.locations.LocationApiService;
 import greencity.service.ubs.UBSClientService;
@@ -22,13 +21,9 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import static greencity.ModelUtils.getPrincipal;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -65,7 +60,7 @@ class AddressControllerTest {
     private final Principal principal = getPrincipal();
 
     @BeforeEach
-    private void setup() {
+    public void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(addressController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRemoteClient))
@@ -144,10 +139,6 @@ class AddressControllerTest {
         String region = "Львівська";
         String city = "Львів";
         List<DistrictDto> mockLocationDtoList = new ArrayList<>();
-        DistrictDto mockLocationDto = DistrictDto.builder()
-            .nameUa("Львів")
-            .nameEn("Lviv")
-            .build();
         when(ubsClientService.getAllDistricts(region, city)).thenReturn(mockLocationDtoList);
         mockMvc.perform(get(ubsLink + "/get-all-districts")
             .param("region", region)
@@ -158,5 +149,4 @@ class AddressControllerTest {
 
         verify(ubsClientService).getAllDistricts(region, city);
     }
-
 }

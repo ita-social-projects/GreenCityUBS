@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.order.GroupedOrderDto;
 import lombok.NonNull;
-
 import java.util.List;
 import java.util.Set;
 

@@ -1,8 +1,8 @@
 package greencity.constant;
 
 public class ValidationConstant {
-    public static final String SERTIFICATE_CODE_REGEXP = "\\d{4}-\\d{4}";
-    public static final String SERTIFICATE_CODE_REGEXP_MESSAGE = "This sertifacate code is not valid";
+    public static final String CERTIFICATE_CODE_REGEXP = "\\d{4}-\\d{4}";
+    public static final String CERTIFICATE_CODE_REGEXP_MESSAGE = "This certificate code is not valid";
     public static final String SELECT_CORRECT_LANGUAGE = "Select correct language: 'en' or 'ua'";
     public static final String COURIER_NAME_EN_MESSAGE = "use English letters, no longer than 30 symbols, "
         + "name cannot starts with a number or not a capital letter and could contain numbers and whitespaces";

@@ -8,7 +8,6 @@ import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Region;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.stream.Collectors;
 
 @Component
