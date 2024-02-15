@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="Shumeyko-1" author="Mykola Shumeyko" runOnChange="true">
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ви нещодавно залишили заявку для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі? Сума до сплати ${amountToPay}. грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою  https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=1</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ви нещодавно залишили заявку для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі? Сума до сплати ${amountToPay}. грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою  https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=2</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ви нещодавно залишили заявку для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі? Сума до сплати ${amountToPay}. грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою  https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=3</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітаємо! Ви успішно замовили й оплатили послугу «УБС Кур'єр», замовлення №${orderNumber}. УБС Кур'єр приїде по ваші пакети впродовж 2–9 днів від дати оплати послуги. Коли маршрут буде сформовано, ми обов’язково зв'яжемося з вами для узгодження деталей. Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=4</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітаємо! Ви успішно замовили й оплатили послугу «УБС Кур'єр», замовлення №${orderNumber}. УБС Кур'єр приїде по ваші пакети впродовж 2–9 днів від дати оплати послуги. Коли маршрут буде сформовано, ми обов’язково зв'яжемося з вами для узгодження деталей. Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=5</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітаємо! Ви успішно замовили й оплатили послугу «УБС Кур'єр», замовлення №${orderNumber}. УБС Кур'єр приїде по ваші пакети впродовж 2–9 днів від дати оплати послуги. Коли маршрут буде сформовано, ми обов’язково зв'яжемося з вами для узгодження деталей. Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=6</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ми сформували маршрут УБС Кур’єра, замовлення №${orderNumber}. Наш Кур’єр буде у вас ${date}.  Робочий час Кур'єра: з ${startTime} до ${endTime}. Будь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур'єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов'язково попередьте про це Кур'єра або менеджерів! Номер Кур'єра — +380638175035 або +380931038987. Якщо у вас залишилися будь-які питання - з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=7</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ми сформували маршрут УБС Кур’єра, замовлення №${orderNumber}. Наш Кур’єр буде у вас ${date}.  Робочий час Кур'єра: з ${startTime} до ${endTime}. Будь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур'єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов'язково попередьте про це Кур'єра або менеджерів! Номер Кур'єра — +380638175035 або +380931038987. Якщо у вас залишилися будь-які питання - з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=8</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ми сформували маршрут УБС Кур’єра, замовлення №${orderNumber}. Наш Кур’єр буде у вас ${date}.  Робочий час Кур'єра: з ${startTime} до ${endTime}. Будь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур'єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов'язково попередьте про це Кур'єра або менеджерів! Номер Кур'єра — +380638175035 або +380931038987. Якщо у вас залишилися будь-які питання - з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=9</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=10</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=11</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body" value="Вітання! Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <where>id=12</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! Recently you have requested our “UBS Courier” service, however, we have not received the payment confirmation. Did you happen to encounter any issues? The sum is ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager  https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=1</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! Recently you have requested our “UBS Courier” service, however, we have not received the payment confirmation. Did you happen to encounter any issues? The sum is ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager  https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=2</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! Recently you have requested our “UBS Courier” service, however, we have not received the payment confirmation. Did you happen to encounter any issues? The sum is ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager  https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=3</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! You have successfully purchased a “UBS Courier” service, order №${orderNumber}. UBS Courier will collect your bags within 2-9 days from the payment date. Once the route is created, we will contact you to confirm the details. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=4</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! You have successfully purchased a “UBS Courier” service, order №${orderNumber}. UBS Courier will collect your bags within 2-9 days from the payment date. Once the route is created, we will contact you to confirm the details. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=5</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! You have successfully purchased a “UBS Courier” service, order №${orderNumber}. UBS Courier will collect your bags within 2-9 days from the payment date. Once the route is created, we will contact you to confirm the details. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=6</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! We have created the route for your UBS Courier, order №${orderNumber}.Your Courier will arrive ${date}. Courier’s hours of operation: from ${startTime} to ${endTime}. Please be available during this time frame and make sure your phone is not on “silent”. The Courier will call you in advance, and upon arrival. If you are unable to be present during the agreed time, you may leave your bags with the concierge, but please, do notify your Courier or one of the managers! Courier’s number — +380638175035 or +380931038987. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=7</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! We have created the route for your UBS Courier, order №${orderNumber}.Your Courier will arrive ${date}. Courier’s hours of operation: from ${startTime} to ${endTime}. Please be available during this time frame and make sure your phone is not on “silent”. The Courier will call you in advance, and upon arrival. If you are unable to be present during the agreed time, you may leave your bags with the concierge, but please, do notify your Courier or one of the managers! Courier’s number — +380638175035 or +380931038987. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=8</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! We have created the route for your UBS Courier, order №${orderNumber}.Your Courier will arrive ${date}. Courier’s hours of operation: from ${startTime} to ${endTime}. Please be available during this time frame and make sure your phone is not on “silent”. The Courier will call you in advance, and upon arrival. If you are unable to be present during the agreed time, you may leave your bags with the concierge, but please, do notify your Courier or one of the managers! Courier’s number — +380638175035 or +380931038987. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=9</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! You have made some changes to the following order №${orderNumber}. Please pay the remaining fee of ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=10</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! You have made some changes to the following order №${orderNumber}. Please pay the remaining fee of ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=11</where>
+        </update>
+        <update tableName="notification_platforms" >
+            <column name="body_eng" value="Hello! You have made some changes to the following order №${orderNumber}. Please pay the remaining fee of ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <where>id=12</where>
+        </update>
+
+    </changeSet>
+</databaseChangeLog>
