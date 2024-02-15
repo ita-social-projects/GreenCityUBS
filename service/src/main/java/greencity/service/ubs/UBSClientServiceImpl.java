@@ -271,14 +271,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final Double KYIV_LATITUDE = 50.4546600;
     private static final Double KYIV_LONGITUDE = 30.5238000;
     private static final Integer SPATIAL_REFERENCE_SYSTEM_IDENTIFIER = 4326; // corresponds to WGS 84 coordinate system
-    private static final Double LOCATION_20_KM_ZONE_VALUE = 20.00;
+    private static final Double LOCATION_40_KM_ZONE_VALUE = 40.00;
     private static final String UKRAINE_EN = "Ukraine";
     private static final String LANG_EN = "en";
     private static final String ADDRESS_NOT_FOUND_BY_ID_MESSAGE = "Address not found with id: ";
-    private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected " +
-        "does not match, reselect correct data.";
-    private static final String USER_IS_NOT_ORDER_OWNER_MESSAGE = "Current user has no owner rights to process " +
-        "the order with id: ";
+    private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected "
+        + "does not match, reselect correct data.";
+    private static final String USER_IS_NOT_ORDER_OWNER_MESSAGE = "Current user has no owner rights to process "
+        + "the order with id: ";
 
     @Override
     @Transactional
@@ -509,7 +509,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             double addressLongitude = address.getCoordinates().getLongitude();
 
             return calculateDistanceInKmBetweenTwoPoints(KYIV_LATITUDE, KYIV_LONGITUDE,
-                addressLatitude, addressLongitude) <= LOCATION_20_KM_ZONE_VALUE && !isKyivTariff;
+                addressLatitude, addressLongitude) <= LOCATION_40_KM_ZONE_VALUE && !isKyivTariff;
         } else {
             return locationRepository.findAddressAndLocationNamesMatch(locationId, addressId).isPresent();
         }

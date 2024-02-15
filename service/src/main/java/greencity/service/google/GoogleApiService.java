@@ -65,7 +65,6 @@ public class GoogleApiService {
                 .latitude(latitude)
                 .longitude(longitude)
                 .build();
-
         } catch (IOException | InterruptedException | ApiException e) {
             Thread.currentThread().interrupt();
             log.error("Occurred error during the call on google API, reason: {}", e.getMessage());

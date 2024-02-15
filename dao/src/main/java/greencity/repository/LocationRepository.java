@@ -86,8 +86,9 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      *
      * @param addressId  {@link Long} - id of address
      * @param locationId {@link Long} - id of location
-     * @return {@link Optional<String>} - returns name of city in English if
-     *         location city and address city names match
+     *
+     * @return {@link Optional} of {@link String} - returns name of city in English
+     *         if location city and address city names match
      * @author Olena Sotnik
      */
     @Query(nativeQuery = true,
