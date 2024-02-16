@@ -90,7 +90,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationParameterRepository notificationParameterRepository;
     @Autowired
     @Qualifier("kyivZonedClock")
-    @Lazy
     private Clock clock;
     private final List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
