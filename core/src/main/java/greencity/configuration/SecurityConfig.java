@@ -14,15 +14,12 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.Collections;
 import static greencity.constant.AppConstant.ADMIN;
@@ -72,7 +69,18 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(AbstractHttpConfigurer::disable)
+        http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedOrigins(Collections.singletonList("*"));
+            config.setAllowedMethods(
+                Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
+            config.setAllowedHeaders(
+                Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Headers",
+                    "X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
+            config.setAllowCredentials(false);
+            config.setMaxAge(3600L);
+            return config;
+        }))
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
             .addFilterBefore(
@@ -82,7 +90,16 @@ public class SecurityConfig {
                 .sendError(SC_UNAUTHORIZED, "Authorize first."))
                 .accessDeniedHandler((req, resp, exc) -> resp.sendError(SC_FORBIDDEN, "You don't have authorities.")))
             .authorizeHttpRequests(req -> req
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, UBS_LINK + "/userProfile/user/create").permitAll()
+                .requestMatchers("/v2/api-docs/**",
+                    "/v3/api-docs/**",
+                    "/swagger.json",
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/swagger-resources/**",
+                    "/webjars/**")
+                .permitAll()
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/getAllCertificates",
                     UBS_MANAG_LINK + "/bigOrderTable",
@@ -261,27 +278,6 @@ public class SecurityConfig {
     }
 
     /**
-     * Method for configure matchers that will be ignored in security.
-     *
-     * @return {@link WebSecurityCustomizer}
-     */
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> {
-            web.ignoring().requestMatchers(UBS_LINK + "/receivePayment");
-            web.ignoring().requestMatchers(UBS_LINK + "/receiveLiqPayPayment");
-            web.ignoring().requestMatchers("/bot");
-            web.ignoring().requestMatchers("/v2/api-docs/**");
-            web.ignoring().requestMatchers("/v3/api-docs/**");
-            web.ignoring().requestMatchers("/swagger.json");
-            web.ignoring().requestMatchers("/swagger-ui.html");
-            web.ignoring().requestMatchers("/swagger-resources/**");
-            web.ignoring().requestMatchers("/webjars/**");
-            web.ignoring().requestMatchers("/swagger-ui/**");
-        };
-    }
-
-    /**
      * Method for configure type of authentication provider.
      *
      * @param auth {@link AuthenticationManagerBuilder}
@@ -299,23 +295,5 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    /**
-     * Bean {@link CorsConfigurationSource} that uses for CORS setup.
-     */
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("*"));
-        configuration.setAllowedMethods(
-            Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
-        configuration.setAllowedHeaders(
-            Arrays.asList(
-                "X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
-        configuration.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 }
