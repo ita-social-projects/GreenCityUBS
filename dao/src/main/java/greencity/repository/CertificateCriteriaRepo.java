@@ -61,15 +61,16 @@ public class CertificateCriteriaRepo {
         typedQuery.setMaxResults(certificatePage.getPageSize());
 
         Pageable pageable = getPageable(certificatePage);
-        long certificatesCount = getCertificatesCount(predicate);
+        long certificatesCount = getCertificatesCount(certificateFilterCriteria);
 
         return new PageImpl<>(typedQuery.getResultList(), pageable, certificatesCount);
     }
 
-    private long getCertificatesCount(Predicate predicate) {
-        CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-        Root<Certificate> countRoot = countQuery.from(Certificate.class);
-        countQuery.select(criteriaBuilder.count(countRoot)).where(predicate);
+    private long getCertificatesCount(CertificateFilterCriteria certificateFilterCriteria) {
+        var countQuery = criteriaBuilder.createQuery(Long.class);
+        var countRoot = countQuery.from(Certificate.class);
+        var countPredicate = getPredicate(certificateFilterCriteria, countRoot);
+        countQuery.select(criteriaBuilder.count(countRoot)).where(countPredicate);
         return entityManager.createQuery(countQuery).getSingleResult();
     }
 
