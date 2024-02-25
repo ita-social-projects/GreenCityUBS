@@ -39,8 +39,17 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @author Orest Mahdziak
      */
 
-    @Query(value = "SELECT O.* FROM ORDERS AS O JOIN CERTIFICATE AS C "
-        + "ON O.ID = C.ORDER_ID WHERE O.ID = :idOrder", nativeQuery = true)
+    @Query(
+        value = "SELECT c.code, "
+            + "c.status, "
+            + "c.expiration_date, "
+            + "c.points, "
+            + "c.order_id, "
+            + "c.creation_date, "
+            + "c.date_of_use, "
+            + "c.initial_points_value FROM ORDERS AS O JOIN CERTIFICATE AS C "
+            + "ON O.ID = C.ORDER_ID WHERE O.ID = :idOrder",
+        nativeQuery = true)
     List<Certificate> findCertificate(@Param("idOrder") Long idOrder);
 
     /**
