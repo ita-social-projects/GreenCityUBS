@@ -62,7 +62,7 @@ public class BigOrderTableRepository {
 
         var sort = Sort.by(orderPage.getSortDirection(), orderPage.getSortBy());
         var pageable = PageRequest.of(orderPage.getPageNumber(), orderPage.getPageSize(), sort);
-        var ordersCount = getOrdersCount(predicate);
+        var ordersCount = getOrdersCount(searchCriteria, tariffsInfoIds);
 
         return new PageImpl<>(resultList, pageable, ordersCount);
     }
@@ -138,10 +138,11 @@ public class BigOrderTableRepository {
         }
     }
 
-    private long getOrdersCount(Predicate predicate) {
+    private long getOrdersCount(OrderSearchCriteria searchCriteria, List<Long> tariffsInfoIds) {
         var countQuery = criteriaBuilder.createQuery(Long.class);
         var countOrderRoot = countQuery.from(BigOrderTableViews.class);
-        countQuery.select(criteriaBuilder.count(countOrderRoot)).where(predicate);
+        var countPredicate = getPredicate(searchCriteria, countOrderRoot, tariffsInfoIds);
+        countQuery.select(criteriaBuilder.count(countOrderRoot)).where(countPredicate);
         return entityManager.createQuery(countQuery).getSingleResult();
     }
 }
