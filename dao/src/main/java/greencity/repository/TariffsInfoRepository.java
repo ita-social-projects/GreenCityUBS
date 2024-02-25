@@ -116,14 +116,14 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
     Set<TariffsInfo> findTariffsInfosByIdIsIn(List<Long> id);
 
     /**
-     * method, that returns {@link Set} of {@link TariffsInfo} by bag ids.
+     * Method, that returns {@link Set} of {@link TariffsInfo} by bag ids.
      *
      * @param bagIds {@link List} of {@link Integer} list of bag ids.
      * @return {@link Optional} of {@link TariffsInfo}.
      * @author Julia Seti
      */
     @Query(nativeQuery = true,
-        value = "SELECT ti.* FROM tariffs_info ti "
+        value = "SELECT * FROM tariffs_info ti "
             + "JOIN tariffs_locations tl "
             + "ON ti.id = tl.tariffs_info_id "
             + "WHERE tl.location_id = :locationId "
@@ -143,9 +143,17 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      */
 
     @Query(nativeQuery = true,
-        value = "SELECT te.* FROM tariff_infos_receiving_employee_mapping te "
-            + "LEFT JOIN tariffs_info ti on ti.id = te.tariffs_info_id "
-            + "LEFT JOIN employees e on te.employee_id = e.id "
+        value = "SELECT ti.id, ti.tariff_status, "
+            + "ti.creator_id, "
+            + "ti.created_at, "
+            + "ti.courier_limits, "
+            + "ti.courier_id, "
+            + "ti.limit_description, "
+            + "ti.min, "
+            + "ti.max "
+            + "FROM tariff_infos_receiving_employee_mapping te "
+            + "LEFT JOIN tariffs_info ti ON ti.id = te.tariffs_info_id "
+            + "LEFT JOIN employees e ON te.employee_id = e.id "
             + "WHERE ti.id = :tariffId AND e.id = :employeeId")
     Optional<TariffsInfo> findTariffsInfoByIdForEmployee(Long tariffId, Long employeeId);
 }
