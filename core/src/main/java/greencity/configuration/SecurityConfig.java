@@ -98,7 +98,10 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/swagger-resources/**",
-                    "/webjars/**")
+                    "/webjars/**",
+                    UBS_LINK + "/receivePayment",
+                    UBS_LINK + "/receiveLiqPayPayment",
+                    "/bot")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/getAllCertificates",
