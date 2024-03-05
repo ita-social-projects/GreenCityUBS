@@ -237,6 +237,7 @@ public class SecurityConfig {
                     UBS_LINK + "/userProfile/**",
                     UBS_LINK + "/order/**",
                     UBS_LINK + "/processOrder",
+                    UBS_LINK + "/processOrder/{id}",
                     UBS_LINK + "/processLiqPayOrder",
                     UBS_LINK + "/processLiqPayOrder/{id}",
                     UBS_LINK + "/save-order-address",
