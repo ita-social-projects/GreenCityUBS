@@ -3,9 +3,8 @@ package greencity.util;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import lombok.ToString;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Component;
-import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
+import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
 
 @Component
 @ToString
@@ -25,7 +24,7 @@ public class EncryptionUtil {
             + "|" + dto.getOrderDescription()
             + "|" + dto.getOrderId()
             + "|" + dto.getResponseUrl();
-        return sha256Hex(stringBuilder);
+        return sha1Hex(stringBuilder);
     }
 
     /**
@@ -71,7 +70,7 @@ public class EncryptionUtil {
         checkString(dto.getTran_type(), stringBuilder);
         checkString(dto.getVerification_status(), stringBuilder);
         checkInteger(dto.getParent_order_id(), stringBuilder);
-        return DigestUtils.sha256Hex(stringBuilder.toString()).equals(dto.getSignature());
+        return sha1Hex(stringBuilder.toString()).equals(dto.getSignature());
     }
 
     private static void checkString(String string, StringBuilder stringBuilder) {
