@@ -101,6 +101,7 @@ public class SecurityConfig {
                     "/webjars/**",
                     UBS_LINK + "/receivePayment",
                     UBS_LINK + "/receiveLiqPayPayment",
+                    UBS_LINK + "/receivePaymentClient",
                     "/bot")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
