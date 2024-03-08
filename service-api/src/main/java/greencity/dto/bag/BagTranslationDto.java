@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.ToString;
 import jakarta.validation.constraints.Min;
 import java.io.Serializable;
 
@@ -13,6 +14,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @EqualsAndHashCode
+@ToString
 @Builder
 public class BagTranslationDto implements Serializable {
     @Min(1)
@@ -27,4 +29,5 @@ public class BagTranslationDto implements Serializable {
     private String nameEng;
     @NonNull
     private Boolean limitedIncluded;
+    private Integer quantity;
 }
