@@ -9,6 +9,8 @@ public final class ErrorMessage {
         + " Certificate code: ";
     public static final String CERTIFICATE_IS_NOT_ACTIVATED = "The certificate is not activated yet:";
     public static final String BAG_NOT_FOUND = "Bag does not exist by id: ";
+    public static final String BAGS_QUANTITY_NOT_FOUND_MESSAGE = "Bags quantity not found by current orderId "
+        + "and bagId.";
     public static final String USER_DONT_HAVE_ENOUGH_POINTS = "User doesn't have enough bonus points.";
     public static final String TOO_MANY_CERTIFICATES = "Too many certificates was entered.";
     public static final String THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST =

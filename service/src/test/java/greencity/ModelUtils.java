@@ -5170,4 +5170,19 @@ public class ModelUtils {
     public static Refund getRefund(Long id) {
         return Refund.builder().orderId(id).build();
     }
+
+    public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoWithQuantity() {
+        return new UserPointsAndAllBagsDto(
+            List.of(
+                BagTranslationDto.builder()
+                    .id(1)
+                    .name("name")
+                    .capacity(20)
+                    .price(170.)
+                    .nameEng("nameEng")
+                    .limitedIncluded(false)
+                    .quantity(2)
+                    .build()),
+            100);
+    }
 }

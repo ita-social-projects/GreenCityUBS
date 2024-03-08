@@ -671,22 +671,25 @@ class UBSClientServiceImplTest {
         var tariffLocation = getTariffLocation();
 
         var bags = getBag1list();
-        var bagTranslationDto = getBagTranslationDto();
-        var userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
+        var userPointsAndAllBagsDtoExpected = ModelUtils.getUserPointsAndAllBagsDtoWithQuantity();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
             .thenReturn(Optional.of(tariffLocation));
         when(bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
-        when(modelMapper.map(bags.getFirst(), BagTranslationDto.class)).thenReturn(bagTranslationDto);
+        when(orderBagRepository.getAmountOfOrderBagsByOrderIdAndBagId(anyLong(), anyInt()))
+            .thenReturn(Optional.of(2));
 
         var userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageDataByOrderId(uuid, orderId);
 
         assertEquals(
-            userPointsAndAllBagsDtoExpected.getBags(),
-            userPointsAndAllBagsDtoActual.getBags());
+            userPointsAndAllBagsDtoExpected.getBags().get(0).toString(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).toString());
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags().get(0).getQuantity(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).getQuantity());
         assertEquals(
             userPointsAndAllBagsDtoExpected.getBags().getFirst().getId(),
             userPointsAndAllBagsDtoActual.getBags().getFirst().getId());
@@ -698,7 +701,7 @@ class UBSClientServiceImplTest {
         verify(orderRepository).findById(orderId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
         verify(bagRepository).findAllActiveBagsByTariffsInfoId(tariffsInfoId);
-        verify(modelMapper).map(bags.getFirst(), BagTranslationDto.class);
+        verify(orderBagRepository).getAmountOfOrderBagsByOrderIdAndBagId(anyLong(), anyInt());
     }
 
     @Test

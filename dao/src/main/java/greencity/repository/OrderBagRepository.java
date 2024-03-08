@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
@@ -60,4 +61,26 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
         + "from orders o "
         + "where o.id = obm.order_id and obm.bag_id = :bagId and o.order_payment_status = 'UNPAID'", nativeQuery = true)
     void updateAllByBagIdForUnpaidOrders(Integer bagId, Integer capacity, Long price, String name, String nameEng);
+
+    /**
+     * Method returns OrderBags quantity by bag id and order id. It prioritizes the
+     * following quantities in descending order: 1. Exported Quantity: If all
+     * OrderBags have the 'exportedQuantity' attribute set, the method will return
+     * it. 2. Confirmed Quantity: If 'exportedQuantity' is not available for all
+     * OrderBags but 'confirmedQuantity' is, the method will return it. 3. Regular
+     * Amount: If neither 'exportedQuantity' nor 'confirmedQuantity' are available
+     * for all OrderBags, the method will return the 'amount' attribute.
+     *
+     * @param bagId   {@link Integer} bag id
+     * @param orderId {@link Long} order id
+     *
+     * @return {@link Optional} of {@link Integer} returns actual bags' amount
+     * @author Olena Sotnik
+     */
+    @Query(value = "SELECT COALESCE(obm.exported_quantity, obm.confirmed_quantity, obm.amount) "
+        + "FROM order_bag_mapping AS obm "
+        + "WHERE obm.order_id = :orderId "
+        + "AND obm.bag_id = :bagId", nativeQuery = true)
+    Optional<Integer> getAmountOfOrderBagsByOrderIdAndBagId(@Param("orderId") Long orderId,
+        @Param("bagId") Integer bagId);
 }

@@ -191,6 +191,7 @@ import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.BAGS_QUANTITY_NOT_FOUND_MESSAGE;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -336,7 +337,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         checkIfTariffIsAvailableForCurrentLocation(tariffsInfo, location);
 
-        return getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints());
+        return getUserPointsAndAllBagsDtoByTariffIdAndOrderIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints(),
+            orderId);
     }
 
     private void checkIfTariffIsAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {
@@ -358,12 +360,38 @@ public class UBSClientServiceImpl implements UBSClientService {
             .getLocationStatus() != LocationStatus.DEACTIVATED;
     }
 
+    private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndOrderIdAndUserPoints(Long tariffId,
+        Integer userPoints, Long orderId) {
+        var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
+            .map(bag -> buildBagTranslationDto(orderId, bag))
+            .collect(toList());
+        return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
+    }
+
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,
         Integer userPoints) {
         var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
             .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
             .collect(toList());
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
+    }
+
+    private BagTranslationDto buildBagTranslationDto(Long orderId, Bag source) {
+        return BagTranslationDto.builder()
+            .id(source.getId())
+            .capacity(source.getCapacity())
+            .price(BigDecimal.valueOf(source.getFullPrice())
+                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
+            .name(source.getName())
+            .nameEng(source.getNameEng())
+            .limitedIncluded(source.getLimitIncluded())
+            .quantity(getQuantityOfBagsByBagIdAndOrderId(orderId, source.getId()))
+            .build();
+    }
+
+    private Integer getQuantityOfBagsByBagIdAndOrderId(Long orderId, Integer bagId) {
+        return orderBagRepository.getAmountOfOrderBagsByOrderIdAndBagId(orderId, bagId)
+            .orElseThrow(() -> new NotFoundException(BAGS_QUANTITY_NOT_FOUND_MESSAGE));
     }
 
     private Location getLocationByOrderIdThroughLazyInitialization(Order order) {
