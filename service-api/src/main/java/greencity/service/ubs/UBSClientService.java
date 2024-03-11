@@ -56,13 +56,12 @@ public interface UBSClientService {
     /**
      * Methods returns all available for order bags and current user's bonus points.
      *
-     * @param uuid       current {@link User}'s uuid.
      * @param tariffId   {@link Long} tariff id.
      * @param locationId {@link Long} location id.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Safarov Renat
      */
-    UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(String uuid, Long tariffId, Long locationId);
+    UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(Long tariffId, Long locationId);
 
     /**
      * Methods returns all available for order bags and current user's bonus points.
