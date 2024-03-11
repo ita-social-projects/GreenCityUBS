@@ -395,8 +395,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldReturnExpectedData() {
-        var user = getUser();
-        var uuid = user.getUuid();
 
         var tariffLocation = getTariffLocation();
 
@@ -411,7 +409,6 @@ class UBSClientServiceImplTest {
         var bagTranslationDto = getBagTranslationDto();
         var userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
@@ -420,19 +417,12 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(bags.get(0), BagTranslationDto.class)).thenReturn(bagTranslationDto);
 
         var userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageDataByTariffAndLocationId(uuid, tariffsInfoId, locationId);
+            ubsService.getFirstPageDataByTariffAndLocationId(tariffsInfoId, locationId);
 
         assertEquals(
             userPointsAndAllBagsDtoExpected.getBags(),
             userPointsAndAllBagsDtoActual.getBags());
-        assertEquals(
-            userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
-            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
-        assertEquals(
-            userPointsAndAllBagsDtoExpected.getPoints(),
-            userPointsAndAllBagsDtoActual.getPoints());
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(tariffsInfoRepository).findById(tariffsInfoId);
         verify(locationRepository).findById(locationId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
@@ -442,8 +432,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenTariffLocationDoesNotExist() {
-        var user = getUser();
-        var uuid = user.getUuid();
 
         var tariffsInfo = getTariffInfo();
         var tariffsInfoId = tariffsInfo.getId();
@@ -453,18 +441,16 @@ class UBSClientServiceImplTest {
 
         var expectedErrorMessage = TARIFF_FOR_LOCATION_NOT_EXIST + locationId;
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
             .thenReturn(Optional.empty());
 
-        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
+        var exception = assertThrows(NotFoundException.class, () -> ubsService
+            .getFirstPageDataByTariffAndLocationId(tariffsInfoId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(tariffsInfoRepository).findById(tariffsInfoId);
         verify(locationRepository).findById(locationId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
@@ -475,9 +461,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenLocationDoesNotExist() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
         var tariffsInfo = getTariffInfo();
         var tariffsInfoId = tariffsInfo.getId();
 
@@ -486,19 +469,16 @@ class UBSClientServiceImplTest {
 
         var expectedErrorMessage = LOCATION_DOESNT_FOUND_BY_ID + locationId;
 
-        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.empty());
 
-        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
+        var exception = assertThrows(NotFoundException.class, () -> ubsService
+            .getFirstPageDataByTariffAndLocationId(tariffsInfoId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(anyString());
         verify(tariffsInfoRepository).findById(anyLong());
         verify(locationRepository).findById(locationId);
-
         verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
         verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
@@ -506,8 +486,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenTariffDoesNotExist() {
-        var user = getUser();
-        var uuid = user.getUuid();
 
         var tariffsInfo = getTariffInfo();
         var tariffId = tariffsInfo.getId();
@@ -517,48 +495,19 @@ class UBSClientServiceImplTest {
 
         var expectedErrorMessage = TARIFF_NOT_FOUND + tariffId;
 
-        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffId)).thenReturn(Optional.empty());
 
-        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffId, locationId));
+        var exception = assertThrows(NotFoundException.class, () -> ubsService
+            .getFirstPageDataByTariffAndLocationId(tariffId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(anyString());
         verify(tariffsInfoRepository).findById(tariffId);
 
         verify(locationRepository, never()).findById(anyLong());
         verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
         verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), anyLong());
-    }
-
-    @Test
-    void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenUserDoesNotExist() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
-        var tariffsInfo = getTariffInfo();
-        var tariffsInfoId = tariffsInfo.getId();
-
-        var location = getLocation();
-        var locationId = location.getId();
-
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
-
-        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
-
-        assertEquals(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, exception.getMessage());
-
-        verify(userRepository).findUserByUuid(uuid);
-
-        verify(tariffsInfoRepository, never()).findById(anyLong());
-        verify(locationRepository, never()).findById(anyLong());
-        verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
-        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
-        verify(modelMapper, never()).map(any(), any());
     }
 
     @Test
@@ -573,16 +522,14 @@ class UBSClientServiceImplTest {
         var location = getLocation();
         var locationId = location.getId();
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
 
-        var exception = assertThrows(BadRequestException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
+        var exception = assertThrows(BadRequestException.class, () -> ubsService
+            .getFirstPageDataByTariffAndLocationId(tariffsInfoId, locationId));
 
         assertEquals(TARIFF_OR_LOCATION_IS_DEACTIVATED, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(tariffsInfoRepository).findById(tariffsInfoId);
         verify(locationRepository).findById(locationId);
 
@@ -593,9 +540,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkIfTariffIsAvailableForCurrentLocationThrowExceptionWhenLocationIsDeactivated() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
         var tariffsInfo = getTariffInfo();
         var tariffsInfoId = tariffsInfo.getId();
 
@@ -603,16 +547,14 @@ class UBSClientServiceImplTest {
         var locationId = location.getId();
         location.setLocationStatus(LocationStatus.DEACTIVATED);
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
 
-        var exception = assertThrows(BadRequestException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
+        var exception = assertThrows(BadRequestException.class, () -> ubsService
+            .getFirstPageDataByTariffAndLocationId(tariffsInfoId, locationId));
 
         assertEquals(TARIFF_OR_LOCATION_IS_DEACTIVATED, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(tariffsInfoRepository).findById(tariffsInfoId);
         verify(locationRepository).findById(locationId);
 
@@ -623,9 +565,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkIfTariffIsAvailableForCurrentLocationWhenLocationForTariffIsDeactivated() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
         var tariffLocation = getTariffLocation();
         tariffLocation.setLocationStatus(LocationStatus.DEACTIVATED);
 
@@ -638,18 +577,15 @@ class UBSClientServiceImplTest {
 
         var expectedErrorMessage = LOCATION_IS_DEACTIVATED_FOR_TARIFF + tariffsInfoId;
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
             .thenReturn(Optional.of(tariffLocation));
 
-        var exception = assertThrows(BadRequestException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
+        var exception = assertThrows(BadRequestException.class, () -> ubsService
+            .getFirstPageDataByTariffAndLocationId(tariffsInfoId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
-
-        verify(userRepository).findUserByUuid(uuid);
         verify(tariffsInfoRepository).findById(tariffsInfoId);
         verify(locationRepository).findById(locationId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
