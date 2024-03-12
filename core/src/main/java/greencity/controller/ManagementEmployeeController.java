@@ -65,7 +65,8 @@ public class ManagementEmployeeController {
         @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
-    @PostMapping(value = "/save-employee")
+    @PostMapping(value = "/save-employee",
+        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
         @Parameter(description = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
             required = true) @Valid @RequestPart EmployeeWithTariffsIdDto employeeWithTariffsIdDto,

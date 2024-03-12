@@ -162,6 +162,7 @@ public final class ErrorMessage {
     public static final String ORDER_CAN_NOT_BE_UPDATED = "An order with the status: %s, can not be updated";
     public static final String LOCATION_CAN_NOT_BE_DELETED =
         "Such location cannot be deleted as it is linked to the tariff";
+    public static final String EMPLOYEE_NOT_FOUND_BY_EMAIL = "Employee with current id doesn't exist: ";
 
     /**
      * Constructor.
