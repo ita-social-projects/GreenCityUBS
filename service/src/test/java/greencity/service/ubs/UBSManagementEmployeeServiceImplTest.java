@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -75,28 +76,75 @@ class UBSManagementEmployeeServiceImplTest {
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
 
-        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(repository.save(any())).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         employeeService.save(dto, file);
 
-        verify(repository, times(1)).existsByEmail(getAddEmployeeDto().getEmail());
+        verify(repository, times(1)).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(modelMapper, times(2)).map(any(), any());
         verify(repository, times(1)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
     }
 
     @Test
+    void saveEmployeeTestThrowsNotFoundException() {
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+
+        when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(repository.existsByEmailAndInactiveStatus(getAddEmployeeDto().getEmail())).thenReturn(true);
+
+        Exception thrown = assertThrows(NotFoundException.class,
+            () -> employeeService.save(dto, null));
+        assertEquals(thrown.getMessage(),
+            ErrorMessage.EMPLOYEE_NOT_FOUND_BY_EMAIL + dto.getEmployeeDto().getEmail());
+
+        verify(repository, times(1))
+            .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
+        verify(repository, times(1))
+            .existsByEmailAndInactiveStatus(getAddEmployeeDto().getEmail());
+    }
+
+    @Test
+    void saveEmployeeTestWithInactiveStatus() {
+        Employee employee = getEmployee();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        MockMultipartFile file = new MockMultipartFile("employeeDto",
+            "", "application/json", "random Bytes".getBytes());
+
+        when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(repository.existsByEmailAndInactiveStatus(getAddEmployeeDto().getEmail())).thenReturn(true);
+        when(repository.findByEmail(dto.getEmployeeDto().getEmail())).thenReturn(Optional.of(employee));
+        when(repository.findById(dto.getEmployeeDto().getId())).thenReturn(Optional.of(employee));
+        when(repository.findEmployeesByEmailAndIdNot(dto.getEmployeeDto().getEmail(), dto.getEmployeeDto().getId()))
+            .thenReturn(new ArrayList<>());
+
+        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
+        when(repository.save(any())).thenReturn(employee);
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
+        employeeService.save(dto, file);
+        employeeService.update(dto, file);
+
+        verify(repository, times(1))
+            .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
+        verify(repository, times(1))
+            .existsByEmailAndInactiveStatus(getAddEmployeeDto().getEmail());
+        verify(modelMapper, times(4)).map(any(), any());
+        verify(repository, times(3)).save(any());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
+    }
+
+    @Test
     void saveEmployeeWithExistingEmailShouldThrowExceptionTest() {
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
-        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(true);
+        when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(true);
         Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.save(dto, null));
         assertEquals(thrown.getMessage(),
             ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmployeeDto().getEmail());
 
-        verify(repository).existsByEmail(getAddEmployeeDto().getEmail());
+        verify(repository).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
     }
 
     @Test
@@ -104,13 +152,14 @@ class UBSManagementEmployeeServiceImplTest {
         Employee employee = getEmployee();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
 
-        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(repository.save(any())).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         employeeService.save(dto, null);
 
-        verify(repository, times(1)).existsByEmail(getAddEmployeeDto().getEmail());
+        verify(repository, times(1))
+            .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(modelMapper, times(2)).map(any(), any());
         verify(repository, times(1)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
@@ -123,13 +172,13 @@ class UBSManagementEmployeeServiceImplTest {
         EmployeeWithTariffsIdDto employeeWithTariffsIdDto = getEmployeeWithTariffsIdDto();
         employeeWithTariffsIdDto.getEmployeeDto().setEmail("test@gmail.com");
 
-        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(true, false, false);
+        when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(true);
         Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.save(employeeWithTariffsIdDto, null));
         assertEquals(thrown.getMessage(),
             ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeWithTariffsIdDto.getEmployeeDto().getEmail());
 
-        verify(repository).existsByEmail(getAddEmployeeDto().getEmail());
+        verify(repository).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
     }
 
     @Test

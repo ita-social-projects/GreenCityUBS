@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.user.employee.Employee;
+import greencity.enums.EmployeeStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -132,4 +133,34 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             + "WHERE EMPLOYEE_ID = :employeeId",
         nativeQuery = true)
     List<Long> findTariffsInfoForEmployee(Long employeeId);
+
+    /**
+     * Method returns true or false if Employee exists by email with
+     * EmployeeStatus.INACTIVE.
+     *
+     * @param email {@link String}.
+     * @return boolean.
+     * @author Olena Sotnik.
+     */
+    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true "
+        + "ELSE false END "
+        + "FROM Employee e "
+        + "WHERE e.email = ?1 "
+        + "AND e.employeeStatus = 'INACTIVE'")
+    boolean existsByEmailAndInactiveStatus(String email);
+
+    /**
+     * Method returns true or false if Employee exists by email with
+     * EmployeeStatus.ACTIVE.
+     *
+     * @param email {@link String}.
+     * @return boolean.
+     * @author Olena Sotnik.
+     */
+    @Query(value = "SELECT CASE WHEN COUNT(e) > 0 THEN true "
+        + "ELSE false END "
+        + "FROM Employee e "
+        + "WHERE e.email = ?1 "
+        + "AND e.employeeStatus = 'ACTIVE'")
+    boolean existsByEmailAndActiveStatus(String email);
 }
