@@ -96,6 +96,24 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
+    void saveEmployeeTestThrowsNotFoundException() {
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+
+        when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(repository.existsByEmailAndInactiveStatus(getAddEmployeeDto().getEmail())).thenReturn(true);
+
+        Exception thrown = assertThrows(NotFoundException.class,
+            () -> employeeService.save(dto, null));
+        assertEquals(thrown.getMessage(),
+            ErrorMessage.EMPLOYEE_NOT_FOUND_BY_EMAIL + dto.getEmployeeDto().getEmail());
+
+        verify(repository, times(1))
+            .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
+        verify(repository, times(1))
+            .existsByEmailAndInactiveStatus(getAddEmployeeDto().getEmail());
+    }
+
+    @Test
     void saveEmployeeTestWithInactiveStatus() {
         Employee employee = getEmployee();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
