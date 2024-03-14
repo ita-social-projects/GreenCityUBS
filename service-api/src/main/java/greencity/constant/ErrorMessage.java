@@ -39,7 +39,8 @@ public final class ErrorMessage {
     public static final String FILE_NOT_SAVED = "File hasn't been saved";
     public static final String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
     public static final String EMPLOYEE_WITH_UUID_NOT_FOUND = "Employee with current uuid doesn't exist: ";
-    public static final String CURRENT_EMAIL_ALREADY_EXISTS = "Employee with this email already exists: ";
+    public static final String ACTIVE_EMPLOYEE_WITH_CURRENT_EMAIL_ALREADY_EXISTS =
+        "Active employee with this email already exists: ";
     public static final String PHONE_NUMBER_PARSING_FAIL = "Phone number parsing fail: ";
     public static final String CURRENT_POSITION_ALREADY_EXISTS = "Position with this name already exists: ";
     public static final String POSITION_NOT_FOUND_BY_ID = "Position with current id doesn't exist: ";
