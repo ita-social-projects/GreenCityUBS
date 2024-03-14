@@ -68,7 +68,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         if (employeeEmail != null
             && employeeRepository.existsByEmailAndActiveStatus(employeeEmail)) {
             throw new UnprocessableEntityException(
-                ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeEmail);
+                ErrorMessage.ACTIVE_EMPLOYEE_WITH_CURRENT_EMAIL_ALREADY_EXISTS + employeeEmail);
         }
 
         if (employeeRepository.existsByEmailAndInactiveStatus(employeeEmail)) {
