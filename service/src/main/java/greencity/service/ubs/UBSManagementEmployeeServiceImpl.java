@@ -69,7 +69,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         if (employeeEmail != null
             && employeeRepository.existsByEmailAndActiveStatus(employeeEmail)) {
             throw new UnprocessableEntityException(
-                ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeEmail);
+                ErrorMessage.ACTIVE_EMPLOYEE_WITH_CURRENT_EMAIL_ALREADY_EXISTS + employeeEmail);
         }
 
         if (employeeRepository.existsByEmailAndInactiveStatus(employeeEmail)) {
@@ -210,7 +210,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         updateEmployeeAuthoritiesToRelatedPositions(dto);
 
         Employee updatedEmployee = modelMapper.map(dto, Employee.class);
-        updatedEmployee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(List.of(31L)));
+        updatedEmployee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
         updatedEmployee.setUuid(upEmployee.getUuid());
         updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
 

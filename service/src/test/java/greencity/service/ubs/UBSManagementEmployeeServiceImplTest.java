@@ -142,7 +142,7 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.save(dto, null));
         assertEquals(thrown.getMessage(),
-            ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmployeeDto().getEmail());
+            ErrorMessage.ACTIVE_EMPLOYEE_WITH_CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmployeeDto().getEmail());
 
         verify(repository).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
     }
@@ -176,7 +176,8 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.save(employeeWithTariffsIdDto, null));
         assertEquals(thrown.getMessage(),
-            ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeWithTariffsIdDto.getEmployeeDto().getEmail());
+            ErrorMessage.ACTIVE_EMPLOYEE_WITH_CURRENT_EMAIL_ALREADY_EXISTS
+                + employeeWithTariffsIdDto.getEmployeeDto().getEmail());
 
         verify(repository).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
     }
