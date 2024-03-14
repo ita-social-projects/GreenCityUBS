@@ -63,12 +63,25 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     public EmployeeWithTariffsDto save(EmployeeWithTariffsIdDto dto, MultipartFile image) {
+        String employeeEmail = dto.getEmployeeDto().getEmail();
         dto.getEmployeeDto()
             .setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getEmployeeDto().getPhoneNumber()));
-        if (dto.getEmployeeDto().getEmail() != null
-            && employeeRepository.existsByEmail(dto.getEmployeeDto().getEmail())) {
+        if (employeeEmail != null
+            && employeeRepository.existsByEmailAndActiveStatus(employeeEmail)) {
             throw new UnprocessableEntityException(
-                ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmployeeDto().getEmail());
+                ErrorMessage.ACTIVE_EMPLOYEE_WITH_CURRENT_EMAIL_ALREADY_EXISTS + employeeEmail);
+        }
+
+        if (employeeRepository.existsByEmailAndInactiveStatus(employeeEmail)) {
+            Employee employee = employeeRepository.findByEmail(employeeEmail).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND_BY_EMAIL
+                    + dto.getEmployeeDto().getEmail()));
+            dto.getEmployeeDto().setId(employee.getId());
+
+            EmployeeWithTariffsDto employeeWithTariffsDto = update(dto, image);
+            employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
+            employeeRepository.save(employee);
+            return employeeWithTariffsDto;
         }
         checkValidPosition(dto.getEmployeeDto().getEmployeePositions());
 
