@@ -220,6 +220,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_LINK + "/processLiqPayOrder/{id}",
                 UBS_LINK + "/save-order-address",
                 UBS_LINK + "/client/**",
+                UBS_LINK + "/details-for-existing-order/{orderId}",
                 "/notifications/**")
             .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.GET,
