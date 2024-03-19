@@ -5,6 +5,7 @@ import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
 import greencity.service.FeignClientCallAsync;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,7 +22,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import static greencity.constant.AppConstant.ADMIN;
 import static greencity.constant.AppConstant.ADMIN_EMPL_LINK;
 import static greencity.constant.AppConstant.ADMIN_LINK;
@@ -41,6 +42,9 @@ public class SecurityConfig {
     private final JwtTool jwtTool;
     private final FeignClientCallAsync userRemoteClient;
     private final AuthenticationConfiguration authenticationConfiguration;
+
+    @Value("${spring.messaging.stomp.websocket.allowed-origins}")
+    private String[] allowedOrigins;
 
     /**
      * Constructor.
@@ -71,13 +75,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(Collections.singletonList("*"));
+            config.setAllowedOriginPatterns(List.of(allowedOrigins));
             config.setAllowedMethods(
                 Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
             config.setAllowedHeaders(
                 Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Headers",
                     "X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
-            config.setAllowCredentials(false);
+            config.setAllowCredentials(true);
             config.setMaxAge(3600L);
             return config;
         }))
