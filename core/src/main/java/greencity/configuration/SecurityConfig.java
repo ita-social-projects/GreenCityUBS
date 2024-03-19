@@ -21,7 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import static greencity.constant.AppConstant.ADMIN;
 import static greencity.constant.AppConstant.ADMIN_EMPL_LINK;
 import static greencity.constant.AppConstant.ADMIN_LINK;
@@ -71,13 +71,18 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOriginPatterns(Collections.singletonList("*"));
+            config.setAllowedOriginPatterns(List.of(
+                "https://www.greencity.social/",
+                "http://localhost:4200",
+                "http://localhost:4200/*",
+                "http://localhost:4205",
+                "http://localhost:4205/*"));
             config.setAllowedMethods(
                 Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
             config.setAllowedHeaders(
                 Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Headers",
                     "X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
-            config.setAllowCredentials(false);
+            config.setAllowCredentials(true);
             config.setMaxAge(3600L);
             return config;
         }))
