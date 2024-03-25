@@ -377,4 +377,12 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class))
             .collect(Collectors.toList());
     }
+
+    @Override
+    public List<GetEmployeeDto> getEmployeesByOrderId(Long tariffId) {
+        return employeeRepository.getEmployeesByOrderId(tariffId)
+            .stream()
+            .map(employee -> modelMapper.map(employee, GetEmployeeDto.class))
+            .collect(Collectors.toList());
+    }
 }

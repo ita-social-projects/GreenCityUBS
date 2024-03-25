@@ -300,4 +300,11 @@ public class ManagementEmployeeController {
     public ResponseEntity<List<GetTariffInfoForEmployeeDto>> getTariffInfoForEmployee() {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.getTariffsForEmployee());
     }
+
+
+    @ApiOperation(value = "Get all employees by order id")
+    @GetMapping("/get-employees/{tariffId}")
+    public ResponseEntity<List<GetEmployeeDto>> getEmployeesByOrderId(@PathVariable Long tariffId) {
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.getEmployeesByOrderId(tariffId));
+    }
 }
