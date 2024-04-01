@@ -44,6 +44,9 @@ public class Employee {
     @Column(name = "image_path")
     private String imagePath;
 
+    @Column(name = "has_chat")
+    private Boolean hasChat;
+
     @Column(nullable = false, name = "status", length = 20)
     @Enumerated(EnumType.STRING)
     private EmployeeStatus employeeStatus;

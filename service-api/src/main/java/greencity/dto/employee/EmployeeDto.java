@@ -36,6 +36,7 @@ public class EmployeeDto {
     @NotBlank
     private String email;
     private String image;
+    private Boolean hasChat;
     @NotEmpty
     private List<PositionDto> employeePositions;
 }
