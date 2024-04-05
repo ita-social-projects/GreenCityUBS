@@ -25,6 +25,7 @@ import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
 import greencity.enums.LocationStatus;
 import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
@@ -756,5 +757,28 @@ class SuperAdminController {
         } else {
             throw new BadRequestException("You should enter at least one parameter");
         }
+    }
+
+    /**
+     * Check if a tariff exists by its ID.
+     *
+     * @param id The ID of the tariff to check.
+     * @return ResponseEntity with a boolean indicating whether the tariff exists.
+     * @throws NotFoundException if the tariff with the specified ID is not found.
+     * @author Yurii Ososvskyi
+     */
+    @ApiOperation(value = "Check if tariff exists by Id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
+    @GetMapping("/check-if-tariff-exists/{id}")
+    public ResponseEntity<Boolean> checkIfTariffExistsById(@PathVariable Long id) {
+        boolean exists = superAdminService.checkIfTariffExistsById(id);
+        return ResponseEntity.ok(exists);
     }
 }
