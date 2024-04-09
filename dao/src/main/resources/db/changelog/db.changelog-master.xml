@@ -222,7 +222,6 @@
     <include file="/db/changelog/logs/ch-insert-into-users-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-add-columns-nameEventEng-and-authorEng-to-Events-Bokalo.xml"/>
     <include file="/db/changelog/logs/ch-update-employees-set-new-main-email-Midianyi.xml"/>
-    <include file="/db/changelog/logs/ch-delete-from-locations-Liubchenko.xml"/>
 
 </databaseChangeLog>
 
