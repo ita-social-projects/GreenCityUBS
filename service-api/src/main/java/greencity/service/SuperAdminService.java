@@ -290,11 +290,4 @@ public interface SuperAdminService {
      *                                      and activation status.
      */
     void switchActivationStatusByChosenParams(DetailsOfDeactivateTariffsDto detailsOfDeactivateTariffsDto);
-
-    /**
-     * Method checks if passed tariff id exists in database.
-     *
-     * param tariffId {@link Long} tariff id
-     */
-    boolean checkIfTariffExistsById(Long tariffInfoId);
 }

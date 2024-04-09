@@ -1300,11 +1300,4 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             throw new BadRequestException(BAD_SIZE_OF_REGIONS_MESSAGE);
         }
     }
-
-    @Override
-    public boolean checkIfTariffExistsById(Long tariffInfoId) {
-        return tariffsInfoRepository.findById(tariffInfoId)
-                .map(tariff -> true)
-                .orElseThrow(() -> new NotFoundException("Tariff not found with id: " + tariffInfoId));
-    }
 }

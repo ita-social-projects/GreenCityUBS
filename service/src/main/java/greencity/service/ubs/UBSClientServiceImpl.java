@@ -1985,4 +1985,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
             .collect(Collectors.toList());
     }
+
+    /**
+     * Checks if a tariff exists by its ID.
+     *
+     * @param tariffInfoId The ID of the tariff to check.
+     * @return {@code true} if the tariff exists, {@code false} otherwise.
+     */
+    @Override
+    public boolean checkIfTariffExistsById(Long tariffInfoId) {
+        return tariffsInfoRepository.existsById(tariffInfoId);
+    }
 }

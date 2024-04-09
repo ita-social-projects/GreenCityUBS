@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -301,6 +300,13 @@ public class ManagementEmployeeController {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.getTariffsForEmployee());
     }
 
+    /**
+     * Retrieves all employees associated with a specific tariff ID.
+     *
+     * @param tariffId The ID of the tariff.
+     * @return ResponseEntity containing a list of GetEmployeeDto objects
+     *         representing the employees, with HttpStatus.OK if successful.
+     */
     @ApiOperation(value = "Get all employees by tariff id")
     @GetMapping("/get-employees/{tariffId}")
     public ResponseEntity<List<GetEmployeeDto>> getEmployeesByTariffId(@PathVariable Long tariffId) {

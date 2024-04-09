@@ -421,6 +421,13 @@ public interface UBSClientService {
      *
      * @return {@link DistrictDto}
      */
-
     List<DistrictDto> getAllDistricts(String region, String city);
+
+    /**
+     * Checks if a tariff exists by its ID.
+     *
+     * @param tariffInfoId The ID of the tariff to check.
+     * @return {@code true} if the tariff exists, {@code false} otherwise.
+     */
+    boolean checkIfTariffExistsById(Long tariffInfoId);
 }
