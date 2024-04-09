@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="ch-delete-from-locations-Liubchenko" author="Denys Liubchenko">
+        <delete tableName="tariffs_locations">
+            <where>location_id=2</where>
+        </delete>
+
+        <delete tableName="locations">
+            <where>id=2</where>
+        </delete>
+    </changeSet>
+</databaseChangeLog>
