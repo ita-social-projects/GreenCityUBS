@@ -149,7 +149,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         parameters.add(NotificationParameter.builder()
             .key(PAY_BUTTON)
-            .value(internalUrlConfigProp.getUnpaidOrderUrl() + order.getId())
+            .value(internalUrlConfigProp.getUserOrdersUrl())
             .build());
 
         return parameters;
