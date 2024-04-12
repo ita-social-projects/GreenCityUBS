@@ -10,5 +10,5 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 @ConfigurationProperties(prefix = "greencity.internal", ignoreUnknownFields = false)
 public class InternalUrlConfigProp {
-    private String userOrdersUrl;
+    private String orderUrl;
 }
