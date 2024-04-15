@@ -30,10 +30,10 @@ public class EmployeeUpdateDtoMapper extends AbstractConverter<Employee, Employe
                         .build())
                     .collect(Collectors.toList()))
                 .build())
-            .tariffId(employee.getTariffInfos()
-                .stream()
-                .map(TariffsInfo::getId)
-                .collect(Collectors.toList()))
+//            .tariffId(employee.getTariffs()
+//                .stream()
+//                .map(TariffsInfo::getId)
+//                .collect(Collectors.toList()))
             .build();
     }
 }

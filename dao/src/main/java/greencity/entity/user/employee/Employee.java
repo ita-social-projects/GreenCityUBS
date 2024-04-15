@@ -1,5 +1,6 @@
 package greencity.entity.user.employee;
 
+import greencity.entity.TarriffsInfoRecievingEmployee;
 import greencity.entity.order.Service;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.enums.EmployeeStatus;
@@ -44,9 +45,6 @@ public class Employee {
     @Column(name = "image_path")
     private String imagePath;
 
-    @Column(name = "has_chat")
-    private Boolean hasChat;
-
     @Column(nullable = false, name = "status", length = 20)
     @Enumerated(EnumType.STRING)
     private EmployeeStatus employeeStatus;
@@ -58,12 +56,8 @@ public class Employee {
         inverseJoinColumns = {@JoinColumn(name = "position_id")})
     private Set<Position> employeePosition;
 
-    @ManyToMany
-    @JoinTable(
-        name = "tariff_infos_receiving_employee_mapping",
-        joinColumns = {@JoinColumn(name = "employee_id")},
-        inverseJoinColumns = {@JoinColumn(name = "tariffs_info_id")})
-    private Set<TariffsInfo> tariffInfos;
+    @OneToMany(mappedBy = "employee")
+    private List<TarriffsInfoRecievingEmployee> tarriffsInfoRecievingEmployees;
 
     @OneToMany(mappedBy = "creator")
     private List<TariffsInfo> tariffs;

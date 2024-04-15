@@ -106,6 +106,4 @@ public interface UBSManagementEmployeeService {
      * @author Nikita Korzh.
      */
     List<GetTariffInfoForEmployeeDto> getTariffsForEmployee();
-
-    List<GetEmployeeDto> getEmployeesByOrderId(Long tariffId);
 }

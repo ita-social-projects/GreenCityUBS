@@ -87,7 +87,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
         Employee employee = modelMapper.map(dto, Employee.class);
         employee.setUuid(UUID.randomUUID().toString());
-        employee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
+        //employee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
         if (image != null) {
             employee.setImagePath(fileService.upload(image));
@@ -166,13 +166,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
     private void fillGetTariffInfoForEmployeeDto(
         EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
-        List<GetTariffInfoForEmployeeDto> tariffsInfoDtos = employees.stream()
-            .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
-            .flatMap(employee -> employee.getTariffInfos().stream()
-                .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class)))
-            .collect(Collectors.toList());
 
-        getEmployeeDto.getTariffs().addAll(tariffsInfoDtos);
     }
 
     private void initializeGetEmployeeDtoCollections(GetEmployeeDto getEmployeeDto) {
@@ -210,7 +204,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         updateEmployeeAuthoritiesToRelatedPositions(dto);
 
         Employee updatedEmployee = modelMapper.map(dto, Employee.class);
-        updatedEmployee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
         updatedEmployee.setUuid(upEmployee.getUuid());
         updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
 
@@ -375,14 +368,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         return tariffs
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class))
-            .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<GetEmployeeDto> getEmployeesByOrderId(Long tariffId) {
-        return employeeRepository.getEmployeesByOrderId(tariffId)
-            .stream()
-            .map(employee -> modelMapper.map(employee, GetEmployeeDto.class))
             .collect(Collectors.toList());
     }
 }

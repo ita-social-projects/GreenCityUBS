@@ -34,7 +34,7 @@ public class EmployeeWithTariffsDtoMapper extends AbstractConverter<Employee, Em
                         .build())
                     .collect(Collectors.toList()))
                 .build())
-            .tariffs(employee.getTariffInfos().stream()
+            .tariffs(employee.getTariffs().stream()
                 .map(getTariffs -> GetTariffInfoForEmployeeDto.builder()
                     .id(getTariffs.getId())
                     .region(getTariffs.getTariffLocations().stream().map(

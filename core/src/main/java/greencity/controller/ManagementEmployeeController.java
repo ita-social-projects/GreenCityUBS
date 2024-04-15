@@ -304,6 +304,6 @@ public class ManagementEmployeeController {
     @ApiOperation(value = "Get all employees by tariff id")
     @GetMapping("/get-employees/{tariffId}")
     public ResponseEntity<List<GetEmployeeDto>> getEmployeesByTariffId(@PathVariable Long tariffId) {
-        return ResponseEntity.status(HttpStatus.OK).body(employeeService.getEmployeesByOrderId(tariffId));
+        return ResponseEntity.ok().body(null);
     }
 }

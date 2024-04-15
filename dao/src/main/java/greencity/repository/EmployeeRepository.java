@@ -164,7 +164,4 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
         + "WHERE e.email = ?1 "
         + "AND e.employeeStatus = 'ACTIVE'")
     boolean existsByEmailAndActiveStatus(String email);
-
-    @Query("SELECT e FROM Employee e JOIN e.tariffInfos t WHERE t.id = :tariffId")
-    List<Employee> getEmployeesByOrderId(Long tariffId);
 }
