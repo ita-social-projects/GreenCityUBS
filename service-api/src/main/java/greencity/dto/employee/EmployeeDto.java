@@ -1,5 +1,6 @@
 package greencity.dto.employee;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import greencity.annotations.ValidPhoneNumber;
 import greencity.constant.ValidationConstant;
 import greencity.dto.position.PositionDto;
@@ -21,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmployeeDto {
-    @Min(1)
+    @JsonIgnore
     private Long id;
     @NotNull
     @Pattern(regexp = ValidationConstant.NAME_REGEXP)

@@ -13,6 +13,8 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.dto.tariff.TariffWithChatAccess;
+import greencity.entity.TarriffsInfoRecievingEmployee;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeFilterView;
@@ -23,12 +25,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import greencity.repository.EmployeeCriteriaRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.phone.UAPhoneNumberUtil;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
@@ -55,6 +52,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final UserRemoteClient userRemoteClient;
     private final FileService fileService;
     private final ModelMapper modelMapper;
+    private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EmployeeCriteriaRepository employeeCriteriaRepository;
 
@@ -87,8 +85,15 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
         Employee employee = modelMapper.map(dto, Employee.class);
         employee.setUuid(UUID.randomUUID().toString());
-        //employee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
+        dto.getTariffId().stream().forEach(tariff -> {
+            TarriffsInfoRecievingEmployee tarriffsInfoRecievingEmployee = new TarriffsInfoRecievingEmployee();
+            tarriffsInfoRecievingEmployee.setEmployee(employee);
+            tarriffsInfoRecievingEmployee.setHasChat(tariff.getHasChat());
+            tarriffsInfoRecievingEmployee.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
+                    .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
+            employee.getTarriffsInfoRecievingEmployees().add(tarriffsInfoRecievingEmployee);
+        });
         if (image != null) {
             employee.setImagePath(fileService.upload(image));
         } else {

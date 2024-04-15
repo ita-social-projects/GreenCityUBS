@@ -55,18 +55,16 @@ public class ManagementEmployeeController {
      */
     @ApiOperation(value = "Save employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = EmployeeWithTariffsIdDto.class),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
-    @PostMapping(value = "/save-employee")
+    @PostMapping(value = "/save-employee", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
-        @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
-            required = true) @Valid @RequestPart EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
+        @RequestBody EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
+        @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 

@@ -10,6 +10,7 @@ import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -57,8 +58,7 @@ public class Employee {
     private Set<Position> employeePosition;
 
     @OneToMany(mappedBy = "employee")
-    private List<TarriffsInfoRecievingEmployee> tarriffsInfoRecievingEmployees;
-
+    private List<TarriffsInfoRecievingEmployee> tarriffsInfoRecievingEmployees = new ArrayList<>();
     @OneToMany(mappedBy = "creator")
     private List<TariffsInfo> tariffs;
 
