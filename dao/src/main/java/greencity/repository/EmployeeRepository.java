@@ -164,12 +164,4 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
         + "WHERE e.email = ?1 "
         + "AND e.employeeStatus = 'ACTIVE'")
     boolean existsByEmailAndActiveStatus(String email);
-
-    /**
-     * Retrieves a list of employees associated with the specified tariff ID.
-     *
-     * @param tariffId The ID of the tariff.
-     * @return A list of employees associated with the specified tariff ID.
-     */
-    List<Employee> getEmployeesByOrderId(Long tariffId);
 }
