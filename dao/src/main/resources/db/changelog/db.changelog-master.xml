@@ -225,7 +225,6 @@
     <include file="/db/changelog/logs/ch-update-employees-set-new-main-email-Midianyi.xml"/>
     <include file="/db/changelog/logs/ch-add-column-hasChat-employees-Klopov.xml"/>
     <include file="/db/changelog/logs/ch-add-column-tarriff-infos-mapping-Klopov.xml"/>
-
-
+    <include file="/db/changelog/logs/ch-remove-column-hasChat-employees-Klopov.xml"/>
 </databaseChangeLog>
 
