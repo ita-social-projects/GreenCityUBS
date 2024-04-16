@@ -13,8 +13,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
-import greencity.dto.tariff.TariffWithChatAccess;
-import greencity.entity.TarriffsInfoRecievingEmployee;
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeFilterView;
@@ -87,12 +86,12 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         employee.setUuid(UUID.randomUUID().toString());
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
         dto.getTariffId().stream().forEach(tariff -> {
-            TarriffsInfoRecievingEmployee tarriffsInfoRecievingEmployee = new TarriffsInfoRecievingEmployee();
-            tarriffsInfoRecievingEmployee.setEmployee(employee);
-            tarriffsInfoRecievingEmployee.setHasChat(tariff.getHasChat());
-            tarriffsInfoRecievingEmployee.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
+            TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
+            tariffsInfoReceivingEmployees.setEmployee(employee);
+            tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
+            tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
                     .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
-            employee.getTarriffsInfoRecievingEmployees().add(tarriffsInfoRecievingEmployee);
+            employee.getTariffsInfoReceivingEmployees().add(tariffsInfoReceivingEmployees);
         });
         if (image != null) {
             employee.setImagePath(fileService.upload(image));
@@ -211,6 +210,14 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee updatedEmployee = modelMapper.map(dto, Employee.class);
         updatedEmployee.setUuid(upEmployee.getUuid());
         updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
+        dto.getTariffId().stream().forEach(tariff -> {
+            TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
+            tariffsInfoReceivingEmployees.setEmployee(updatedEmployee);
+            tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
+            tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
+                    .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
+            updatedEmployee.getTariffsInfoReceivingEmployees().add(tariffsInfoReceivingEmployees);
+        });
 
         if (image != null) {
             updatedEmployee.setImagePath(fileService.upload(image));

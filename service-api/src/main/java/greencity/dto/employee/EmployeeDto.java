@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import greencity.annotations.ValidPhoneNumber;
 import greencity.constant.ValidationConstant;
 import greencity.dto.position.PositionDto;
+import greencity.enums.EmployeeStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmployeeDto {
-    @JsonIgnore
     private Long id;
     @NotNull
     @Pattern(regexp = ValidationConstant.NAME_REGEXP)
@@ -36,8 +36,8 @@ public class EmployeeDto {
     @Email
     @NotBlank
     private String email;
+    private EmployeeStatus employeeStatus;
     private String image;
-    private Boolean hasChat;
     @NotEmpty
     private List<PositionDto> employeePositions;
 }
