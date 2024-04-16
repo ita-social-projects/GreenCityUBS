@@ -1,5 +1,6 @@
 package greencity.entity.user.employee;
 
+import greencity.entity.order.TariffsInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -82,4 +83,5 @@ public class EmployeeFilterView {
 
     @Column(name = "courier_name_uk")
     private String courierNameUk;
+
 }

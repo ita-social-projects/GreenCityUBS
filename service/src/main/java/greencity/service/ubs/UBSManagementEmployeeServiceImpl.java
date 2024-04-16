@@ -141,6 +141,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         for (var employeeFilterView : employeeFilterViews) {
             var getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(employeeFilterView.getEmployeeId(),
                 id -> modelMapper.map(employeeFilterView, GetEmployeeDto.class));
+            getEmployeeDto.setTariffs(employees.stream().filter(employee -> employee.getId().equals(employeeFilterView.getEmployeeId()))
+                .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()
+                    .map(tariffsInfoRecievingEmployee -> modelMapper.map(tariffsInfoRecievingEmployee.getTariffsInfo(),
+                        GetTariffInfoForEmployeeDto.class)))
+                .collect(Collectors.toList()));
             initializeGetEmployeeDtoCollections(getEmployeeDto);
             fillGetEmployeeDto(employeeFilterView, getEmployeeDto, employees);
         }
@@ -169,8 +174,20 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void fillGetTariffInfoForEmployeeDto(
-        EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
+            EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
 
+        List<GetTariffInfoForEmployeeDto> tariffs = employees.stream()
+                .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
+                .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()
+                        .map(tariffsInfoRecievingEmployee -> {
+                            GetTariffInfoForEmployeeDto tariffDto = modelMapper.map(tariffsInfoRecievingEmployee.getTariffsInfo(),
+                                    GetTariffInfoForEmployeeDto.class);
+                            tariffDto.setHasChat(tariffsInfoRecievingEmployee.getHasChat());
+                            return tariffDto;
+                        }))
+                .collect(Collectors.toList());
+
+        getEmployeeDto.setTariffs(tariffs);
     }
 
     private void initializeGetEmployeeDtoCollections(GetEmployeeDto getEmployeeDto) {
