@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
@@ -430,4 +431,19 @@ public interface UBSClientService {
      * @return {@code true} if the tariff exists, {@code false} otherwise.
      */
     boolean checkIfTariffExistsById(Long tariffInfoId);
+
+    /**
+     * Retrieves all locations.
+     *
+     * @return List of all locations.
+     */
+    List<LocationsDto> getAllLocations();
+
+    /**
+     * Retrieves the tariff ID associated with the specified location ID.
+     *
+     * @param locationId The ID of the location for which to retrieve the tariff ID.
+     * @return The tariff ID associated with the specified location ID.
+     */
+    Long getTariffIdByLocationId(Long locationId);
 }

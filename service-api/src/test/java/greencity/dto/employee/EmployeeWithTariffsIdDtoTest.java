@@ -32,7 +32,7 @@ class EmployeeWithTariffsIdDtoTest {
                 .email("mail@gmail.com")
                 .employeePositions(List.of(ModelUtils.getEmployeePosition()))
                 .build())
-            .tariffId(List.of(1L))
+            .tariffId(List.of())
             .build();
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -58,7 +58,7 @@ class EmployeeWithTariffsIdDtoTest {
                 .email(email)
                 .employeePositions(null)
                 .build())
-            .tariffId(List.of(1L))
+            .tariffId(List.of())
             .build();
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();

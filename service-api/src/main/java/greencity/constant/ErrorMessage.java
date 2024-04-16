@@ -170,6 +170,7 @@ public final class ErrorMessage {
         "Such location cannot be deleted as it is linked to the tariff";
     public static final String BAGS_QUANTITY_NOT_FOUND_MESSAGE = "Bags quantity not found by current orderId "
         + "and bagId.";
+    public static final String TARIFF_NOT_FOUND_BY_LOCATION_ID = "Tariff with location id: %d not found";
 
     /**
      * Constructor.

@@ -634,7 +634,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void setEmployeeTariffInfos(Employee employee, TariffsInfo tariffsInfo) {
-        //TODO: fix that
+        // TODO: fix that
     }
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {

@@ -91,7 +91,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             tarriffsInfoRecievingEmployee.setEmployee(employee);
             tarriffsInfoRecievingEmployee.setHasChat(tariff.getHasChat());
             tarriffsInfoRecievingEmployee.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
-                    .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
             employee.getTarriffsInfoRecievingEmployees().add(tarriffsInfoRecievingEmployee);
         });
         if (image != null) {

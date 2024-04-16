@@ -5,6 +5,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
 import greencity.constants.HttpStatuses;
 import greencity.constant.ValidationConstant;
+import greencity.dto.LocationsDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
@@ -22,6 +23,7 @@ import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserVO;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -457,5 +459,44 @@ public class OrderController {
     public ResponseEntity<Boolean> checkIfTariffExistsById(@PathVariable Long id) {
         Boolean exists = ubsClientService.checkIfTariffExistsById(id);
         return ResponseEntity.status(HttpStatus.OK).body(exists);
+    }
+
+    /**
+     * Retrieves all active locations and returns them as DTOs.
+     *
+     * @return ResponseEntity with a list of DTOs representing all active locations.
+     */
+    @ApiOperation(value = "Get All Active Locations")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping(value = "/locations", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<LocationsDto>> getAllLocations() {
+        List<LocationsDto> locations = ubsClientService.getAllLocations();
+        return ResponseEntity.status(HttpStatus.OK).body(locations);
+    }
+
+    /**
+     * Retrieves the tariff ID by location ID.
+     *
+     * @param locationId The ID of the location.
+     * @return ResponseEntity with the tariff ID.
+     */
+    @ApiOperation(value = "Get Tariff ID by Location ID")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping(value = "/tariffs/{locationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Long> getTariffIdByLocationId(@PathVariable("locationId") Long locationId) {
+        Long tariffId = ubsClientService.getTariffIdByLocationId(locationId);
+        return ResponseEntity.status(HttpStatus.OK).body(tariffId);
     }
 }

@@ -81,4 +81,12 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
         value = "SELECT * from locations "
             + "WHERE region_id = :regionId")
     List<Location> findLocationsByRegionId(@Param("regionId") Long regionId);
+
+    /**
+     * Method for getting all active locations.
+     *
+     * @return list of {@link Location} - list of active locations
+     */
+    @Query("SELECT l FROM Location l WHERE l.locationStatus = 'ACTIVE'")
+    List<Location> findAllActiveLocations();
 }
