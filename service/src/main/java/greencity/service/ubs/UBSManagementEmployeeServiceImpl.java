@@ -90,7 +90,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             tariffsInfoReceivingEmployees.setEmployee(employee);
             tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
             tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
-                    .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
             employee.getTariffsInfoReceivingEmployees().add(tariffsInfoReceivingEmployees);
         });
         if (image != null) {
@@ -141,7 +141,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         for (var employeeFilterView : employeeFilterViews) {
             var getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(employeeFilterView.getEmployeeId(),
                 id -> modelMapper.map(employeeFilterView, GetEmployeeDto.class));
-            getEmployeeDto.setTariffs(employees.stream().filter(employee -> employee.getId().equals(employeeFilterView.getEmployeeId()))
+            getEmployeeDto.setTariffs(employees.stream()
+                .filter(employee -> employee.getId().equals(employeeFilterView.getEmployeeId()))
                 .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()
                     .map(tariffsInfoRecievingEmployee -> modelMapper.map(tariffsInfoRecievingEmployee.getTariffsInfo(),
                         GetTariffInfoForEmployeeDto.class)))
@@ -174,18 +175,19 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void fillGetTariffInfoForEmployeeDto(
-            EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
+        EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
 
         List<GetTariffInfoForEmployeeDto> tariffs = employees.stream()
-                .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
-                .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()
-                        .map(tariffsInfoRecievingEmployee -> {
-                            GetTariffInfoForEmployeeDto tariffDto = modelMapper.map(tariffsInfoRecievingEmployee.getTariffsInfo(),
-                                    GetTariffInfoForEmployeeDto.class);
-                            tariffDto.setHasChat(tariffsInfoRecievingEmployee.getHasChat());
-                            return tariffDto;
-                        }))
-                .collect(Collectors.toList());
+            .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
+            .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()
+                .map(tariffsInfoRecievingEmployee -> {
+                    GetTariffInfoForEmployeeDto tariffDto =
+                        modelMapper.map(tariffsInfoRecievingEmployee.getTariffsInfo(),
+                            GetTariffInfoForEmployeeDto.class);
+                    tariffDto.setHasChat(tariffsInfoRecievingEmployee.getHasChat());
+                    return tariffDto;
+                }))
+            .collect(Collectors.toList());
 
         getEmployeeDto.setTariffs(tariffs);
     }
@@ -232,7 +234,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             tariffsInfoReceivingEmployees.setEmployee(updatedEmployee);
             tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
             tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
-                    .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
             updatedEmployee.getTariffsInfoReceivingEmployees().add(tariffsInfoReceivingEmployees);
         });
 
@@ -403,9 +405,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public List<EmployeeWithTariffsDto> getEmployeesByTariffId(Long tariffId) {
         List<Employee> employeeWithEnabledChat =
-                employeeRepository.selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId);
+            employeeRepository.selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId);
 
-        return  employeeWithEnabledChat
+        return employeeWithEnabledChat
             .stream()
             .map(employee -> modelMapper.map(employee, EmployeeWithTariffsDto.class))
             .collect(Collectors.toList());

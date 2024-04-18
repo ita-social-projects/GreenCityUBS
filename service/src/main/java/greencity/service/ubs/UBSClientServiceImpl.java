@@ -1967,11 +1967,12 @@ public class UBSClientServiceImpl implements UBSClientService {
      *
      * @param locationId The ID of the location to retrieve the tariff ID for.
      * @return The tariff ID if found.
-     * @throws NotFoundException if the tariff ID is not found for the given location ID.
+     * @throws NotFoundException if the tariff ID is not found for the given
+     *                           location ID.
      */
     @Override
     public Long getTariffIdByLocationId(Long locationId) {
         return tariffsInfoRepository.findTariffIdByLocationId(locationId)
-        .orElseThrow(() -> new NotFoundException(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationId)));
+            .orElseThrow(() -> new NotFoundException(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationId)));
     }
 }

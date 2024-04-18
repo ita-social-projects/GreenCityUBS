@@ -1,6 +1,5 @@
 package greencity.entity.order;
 
-
 import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
