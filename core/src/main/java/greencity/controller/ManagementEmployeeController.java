@@ -304,9 +304,9 @@ public class ManagementEmployeeController {
      * @return ResponseEntity containing a list of GetEmployeeDto objects
      *         representing the employees, with HttpStatus.OK if successful.
      */
-    @ApiOperation(value = "Get all employees by tariff id")
+    @ApiOperation(value = "Get all employees with enabled chat by tariff id")
     @GetMapping("/get-employees/{tariffId}")
-    public ResponseEntity<List<GetEmployeeDto>> getEmployeesByTariffId(@PathVariable Long tariffId) {
-        return ResponseEntity.ok().body(null);
+    public ResponseEntity<List<EmployeeWithTariffsDto>> getEmployeesByTariffId(@PathVariable Long tariffId) {
+        return ResponseEntity.ok().body(employeeService.getEmployeesByTariffId(tariffId));
     }
 }

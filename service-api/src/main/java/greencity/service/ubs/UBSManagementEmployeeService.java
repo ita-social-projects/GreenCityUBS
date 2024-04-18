@@ -106,4 +106,12 @@ public interface UBSManagementEmployeeService {
      * @author Nikita Korzh.
      */
     List<GetTariffInfoForEmployeeDto> getTariffsForEmployee();
+
+    /**
+     * Method to get a list of employees associated with a specific tariff.
+     *
+     * @param tariffId The ID of the tariff for which to retrieve associated employees.
+     * @return A list of GetEmployeeDto objects representing the employees associated with the given tariff.
+     */
+    List<EmployeeWithTariffsDto> getEmployeesByTariffId(Long tariffId);
 }
