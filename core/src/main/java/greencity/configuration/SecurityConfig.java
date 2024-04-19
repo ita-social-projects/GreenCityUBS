@@ -200,7 +200,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/**",
                     SUPER_ADMIN_LINK + "/**",
-                    UBS_LINK + "/order/{id}/cancellation",
                     ADMIN_LINK + "/notification/get-all",
                     ADMIN_LINK + "/notification/{id}",
                     ADMIN_LINK + "/**",
@@ -254,6 +253,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK + "/**",
                     UBS_LINK + "/client/**",
+                    UBS_LINK + "/order/{id}/cancellation",
                     "/notifications",
                     "/notifications/**",
                     "/notifications/quantityUnreadenNotifications")
