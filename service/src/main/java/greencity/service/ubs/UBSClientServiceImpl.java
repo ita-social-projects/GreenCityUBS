@@ -1449,7 +1449,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     public OrderCancellationReasonDto getOrderCancellationReason(final Long orderId, String uuid) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
+        User user = userRepository.findByUuid(uuid);
+        boolean isAdminOrUbsEmployee = employeeRepository.findByUuid(uuid).isPresent();
+        if (!isAdminOrUbsEmployee && !(order.getUser().equals(user))) {
             throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
         }
         return OrderCancellationReasonDto.builder()
