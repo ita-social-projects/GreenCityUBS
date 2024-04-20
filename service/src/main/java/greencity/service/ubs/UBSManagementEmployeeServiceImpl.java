@@ -176,7 +176,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
     private void fillGetTariffInfoForEmployeeDto(
         EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
-
         List<GetTariffInfoForEmployeeDto> tariffs = employees.stream()
             .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
             .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()

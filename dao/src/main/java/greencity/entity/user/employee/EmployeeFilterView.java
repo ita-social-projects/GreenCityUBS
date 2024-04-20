@@ -83,5 +83,4 @@ public class EmployeeFilterView {
 
     @Column(name = "courier_name_uk")
     private String courierNameUk;
-
 }

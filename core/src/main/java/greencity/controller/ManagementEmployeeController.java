@@ -1,7 +1,6 @@
 package greencity.controller;
 
 import greencity.constants.HttpStatuses;
-import greencity.constants.SwaggerExampleModel;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.GetEmployeeDto;
@@ -47,24 +46,25 @@ public class ManagementEmployeeController {
     private final UBSClientService ubsClientService;
 
     /**
-     * Controller saves employee.
+     * Controller method to save an employee.
      *
-     * @param employeeWithTariffsIdDto {@link EmployeeWithTariffsIdDto}
-     * @return {@link EmployeeWithTariffsDto} saved employee.
-     * @author Mykola Danylko.
+     * @param employeeWithTariffsIdDto DTO for {@link EmployeeWithTariffsIdDto}.
+     * @param image                    Image of the employee (optional).
+     * @return ResponseEntity with {@link EmployeeWithTariffsDto} instance.
+     * @author [Author Name]
      */
     @ApiOperation(value = "Save employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
-    @PostMapping(value = "/save-employee", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/save-employee", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
-        @RequestBody EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @RequestPart(required = false) MultipartFile image) {
+            @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 
