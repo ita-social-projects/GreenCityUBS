@@ -86,11 +86,10 @@ public class OrderController {
     })
     @GetMapping("/order-details-for-tariff")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPointsByTariffAndLocationId(
-        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @RequestParam Long tariffId,
         @RequestParam Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageDataByTariffAndLocationId(userUuid, tariffId, locationId));
+            .body(ubsClientService.getFirstPageDataByTariffAndLocationId(tariffId, locationId));
     }
 
     /**
