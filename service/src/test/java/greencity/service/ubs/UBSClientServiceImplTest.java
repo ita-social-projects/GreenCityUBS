@@ -2525,7 +2525,6 @@ class UBSClientServiceImplTest {
         Order orderDto = getOrderTest();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
         assert orderDto != null;
-        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.of(new Employee()));
         when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
         OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L, anyString());
 
@@ -2539,8 +2538,7 @@ class UBSClientServiceImplTest {
         Order orderDto = getOrderTest();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
         assert orderDto != null;
-        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.of(new Employee()));
-        when(userRepository.findByUuid(anyString())).thenReturn(null);
+        when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
         OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L, anyString());
 
         assertEquals(dto.getCancellationReason(), result.getCancellationReason());
@@ -2553,7 +2551,6 @@ class UBSClientServiceImplTest {
         Order orderDto = getOrderTest();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
         assert orderDto != null;
-        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.empty());
         when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
         OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L, anyString());
 
@@ -2571,7 +2568,6 @@ class UBSClientServiceImplTest {
     @Test
     void getOrderCancellationReasonAccessDeniedException() {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(getOrderTest()));
-        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.empty());
         when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         assertThrows(AccessDeniedException.class,
             () -> ubsService.getOrderCancellationReason(1L, "abc"));

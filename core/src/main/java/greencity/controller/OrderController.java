@@ -71,7 +71,6 @@ public class OrderController {
      * Controller returns all available bags and bonus points of current user by
      * tariff and location ids. {@link UserVO}.
      *
-     * @param userUuid   {@link UserVO} id.
      * @param tariffId   {@link UserVO} id of tariff.
      * @param locationId {@link UserVO} id of location.
      * @return {@link UserPointsAndAllBagsDto}.
