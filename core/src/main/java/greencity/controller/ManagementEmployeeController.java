@@ -107,7 +107,7 @@ public class ManagementEmployeeController {
     @PutMapping(value = "/update-employee",
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> update(
-        @RequestBody EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
+            @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
         @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeWithTariffsIdDto, image));
     }
