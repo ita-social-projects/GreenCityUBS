@@ -108,6 +108,7 @@ public class SecurityConfig {
                     UBS_LINK + "/receivePaymentClient",
                     UBS_LINK + "/getAllActiveCouriers",
                     UBS_LINK + "/locations/{courierId}",
+                    UBS_LINK + "/order-details-for-tariff",
                     "/bot")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,

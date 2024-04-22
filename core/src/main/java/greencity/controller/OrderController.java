@@ -71,7 +71,6 @@ public class OrderController {
      * Controller returns all available bags and bonus points of current user by
      * tariff and location ids. {@link UserVO}.
      *
-     * @param userUuid   {@link UserVO} id.
      * @param tariffId   {@link UserVO} id of tariff.
      * @param locationId {@link UserVO} id of location.
      * @return {@link UserPointsAndAllBagsDto}.
@@ -86,11 +85,10 @@ public class OrderController {
     })
     @GetMapping("/order-details-for-tariff")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPointsByTariffAndLocationId(
-        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @RequestParam Long tariffId,
         @RequestParam Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageDataByTariffAndLocationId(userUuid, tariffId, locationId));
+            .body(ubsClientService.getFirstPageDataByTariffAndLocationId(tariffId, locationId));
     }
 
     /**
