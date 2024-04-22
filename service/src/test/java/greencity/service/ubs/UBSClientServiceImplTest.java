@@ -19,38 +19,14 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.MakeOrderAgainDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderFondyClientDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.position.PositionAuthoritiesDto;
-import greencity.dto.user.AllPointsUserDto;
-import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserProfileCreateDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderBag;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.*;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -58,42 +34,18 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
-import greencity.enums.AddressStatus;
-import greencity.enums.CertificateStatus;
-import greencity.enums.CourierLimit;
-import greencity.enums.LocationStatus;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.TariffStatus;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.CourierRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderBagRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.TariffLocationRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.TelegramBotRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
-import greencity.repository.ViberBotRepository;
+import greencity.repository.*;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -101,146 +53,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityNotFoundException;
+
 import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-import static greencity.ModelUtils.KYIV_REGION_EN;
-import static greencity.ModelUtils.KYIV_REGION_UA;
-import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
-import static greencity.ModelUtils.TEST_EMAIL;
-import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
-import static greencity.ModelUtils.TEST_PAYMENT_LIST;
-import static greencity.ModelUtils.addressDto;
-import static greencity.ModelUtils.addressDtoList;
-import static greencity.ModelUtils.addressDtoListWithNullPlaceId;
-import static greencity.ModelUtils.addressList;
-import static greencity.ModelUtils.addressWithEmptyPlaceIdDto;
-import static greencity.ModelUtils.addressWithKyivRegionDto;
-import static greencity.ModelUtils.bagDto;
-import static greencity.ModelUtils.botList;
-import static greencity.ModelUtils.createCertificateDto;
-import static greencity.ModelUtils.getAddress;
-import static greencity.ModelUtils.getAddressDtoResponse;
-import static greencity.ModelUtils.getAddressRequestDto;
-import static greencity.ModelUtils.getAddressRequestToSaveDto;
-import static greencity.ModelUtils.getAddressRequestToSaveDto_WithoutDistricts;
-import static greencity.ModelUtils.getAddressRequestWithEmptyPlaceIdDto;
-import static greencity.ModelUtils.getAddressRequestWithEmptyPlaceIdToSaveDto;
-import static greencity.ModelUtils.getAddressWithKyivRegionRequestDto;
-import static greencity.ModelUtils.getAddressWithKyivRegionToSaveRequestDto;
-import static greencity.ModelUtils.getBag;
-import static greencity.ModelUtils.getBag1list;
-import static greencity.ModelUtils.getBag4list;
-import static greencity.ModelUtils.getBagForOrder;
-import static greencity.ModelUtils.getBagTranslationDto;
-import static greencity.ModelUtils.getCancellationDto;
-import static greencity.ModelUtils.getCertificate;
-import static greencity.ModelUtils.getCourier;
-import static greencity.ModelUtils.getCourierDto;
-import static greencity.ModelUtils.getCourierDtoList;
-import static greencity.ModelUtils.getEmployee;
-import static greencity.ModelUtils.getGeocodingResult;
-import static greencity.ModelUtils.getGeocodingResultWithKyivRegion;
-import static greencity.ModelUtils.getListOfEvents;
-import static greencity.ModelUtils.getLocation;
-import static greencity.ModelUtils.getMaximumAmountOfAddresses;
-import static greencity.ModelUtils.getOrder;
-import static greencity.ModelUtils.getOrderClientDto;
-import static greencity.ModelUtils.getOrderCount;
-import static greencity.ModelUtils.getOrderCountWithPaymentStatusPaid;
-import static greencity.ModelUtils.getOrderDetails;
-import static greencity.ModelUtils.getOrderDetailsWithoutSender;
-import static greencity.ModelUtils.getOrderDoneByUser;
-import static greencity.ModelUtils.getOrderFondyClientDto;
-import static greencity.ModelUtils.getOrderPaymentDetailDto;
-import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
-import static greencity.ModelUtils.getOrderResponseDto;
-import static greencity.ModelUtils.getOrderStatusDto;
-import static greencity.ModelUtils.getOrderStatusTranslation;
-import static greencity.ModelUtils.getOrderTest;
-import static greencity.ModelUtils.getOrderWithAddressesResponseDto;
-import static greencity.ModelUtils.getOrderWithEvents;
-import static greencity.ModelUtils.getOrderWithTariffAndLocation;
-import static greencity.ModelUtils.getOrderWithoutPayment;
-import static greencity.ModelUtils.getOrdersDto;
-import static greencity.ModelUtils.getPayment;
-import static greencity.ModelUtils.getPaymentResponseDto;
-import static greencity.ModelUtils.getSuccessfulFondyResponse;
-import static greencity.ModelUtils.getTariffInfo;
-import static greencity.ModelUtils.getTariffInfoWithLimitOfBags;
-import static greencity.ModelUtils.getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag;
-import static greencity.ModelUtils.getTariffLocation;
-import static greencity.ModelUtils.getTariffsForLocationDto;
-import static greencity.ModelUtils.getTariffsInfo;
-import static greencity.ModelUtils.getTelegramBotNotifyTrue;
-import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
-import static greencity.ModelUtils.getTestOrderAddressDtoRequestWithNullPlaceId;
-import static greencity.ModelUtils.getTestOrderAddressLocationDto;
-import static greencity.ModelUtils.getTestUser;
-import static greencity.ModelUtils.getUBSuser;
-import static greencity.ModelUtils.getUBSuserWithoutSender;
-import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
-import static greencity.ModelUtils.getUbsUsers;
-import static greencity.ModelUtils.getUser;
-import static greencity.ModelUtils.getUserForCreate;
-import static greencity.ModelUtils.getUserInfoDto;
-import static greencity.ModelUtils.getUserPointsAndAllBagsDto;
-import static greencity.ModelUtils.getUserProfileCreateDto;
-import static greencity.ModelUtils.getUserProfileUpdateDto;
-import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
-import static greencity.ModelUtils.getUserWithBotNotifyTrue;
-import static greencity.ModelUtils.getUserWithLastLocation;
-import static greencity.ModelUtils.getViberBotNotifyTrue;
-import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
-import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
-import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
-import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
-import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
-import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
-import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+
+import static greencity.ModelUtils.*;
+import static greencity.constant.ErrorMessage.*;
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -390,53 +217,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getFirstPageDataByTariffAndLocationIdShouldReturnExpectedData() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
-        var tariffLocation = getTariffLocation();
-
-        var tariffsInfo = tariffLocation.getTariffsInfo();
-        var tariffsInfoId = tariffsInfo.getId();
-        tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
-
-        var location = tariffLocation.getLocation();
-        var locationId = location.getId();
-
-        var bags = getBag1list();
-        var bagTranslationDto = getBagTranslationDto();
-        var userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
-
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
-        when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
-        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
-            .thenReturn(Optional.of(tariffLocation));
-        when(bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
-        when(modelMapper.map(bags.getFirst(), BagTranslationDto.class)).thenReturn(bagTranslationDto);
-
-        var userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageDataByTariffAndLocationId(uuid, tariffsInfoId, locationId);
-
-        assertEquals(
-            userPointsAndAllBagsDtoExpected.getBags(),
-            userPointsAndAllBagsDtoActual.getBags());
-        assertEquals(
-            userPointsAndAllBagsDtoExpected.getBags().getFirst().getId(),
-            userPointsAndAllBagsDtoActual.getBags().getFirst().getId());
-        assertEquals(
-            userPointsAndAllBagsDtoExpected.getPoints(),
-            userPointsAndAllBagsDtoActual.getPoints());
-
-        verify(userRepository).findUserByUuid(uuid);
-        verify(tariffsInfoRepository).findById(tariffsInfoId);
-        verify(locationRepository).findById(locationId);
-        verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
-        verify(bagRepository).findAllActiveBagsByTariffsInfoId(tariffsInfoId);
-        verify(modelMapper).map(bags.getFirst(), BagTranslationDto.class);
-    }
-
-    @Test
     void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenTariffLocationDoesNotExist() {
         var user = getUser();
         var uuid = user.getUuid();
@@ -449,18 +229,16 @@ class UBSClientServiceImplTest {
 
         var expectedErrorMessage = TARIFF_FOR_LOCATION_NOT_EXIST + locationId;
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
             .thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
+            tariffsInfoId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(tariffsInfoRepository).findById(tariffsInfoId);
         verify(locationRepository).findById(locationId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
@@ -482,16 +260,14 @@ class UBSClientServiceImplTest {
 
         var expectedErrorMessage = LOCATION_DOESNT_FOUND_BY_ID + locationId;
 
-        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
+            tariffsInfoId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(anyString());
         verify(tariffsInfoRepository).findById(anyLong());
         verify(locationRepository).findById(locationId);
 
@@ -513,48 +289,19 @@ class UBSClientServiceImplTest {
 
         var expectedErrorMessage = TARIFF_NOT_FOUND + tariffId;
 
-        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffId)).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffId, locationId));
+            tariffId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(anyString());
         verify(tariffsInfoRepository).findById(tariffId);
 
         verify(locationRepository, never()).findById(anyLong());
         verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
         verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), anyLong());
-    }
-
-    @Test
-    void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenUserDoesNotExist() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
-        var tariffsInfo = getTariffInfo();
-        var tariffsInfoId = tariffsInfo.getId();
-
-        var location = getLocation();
-        var locationId = location.getId();
-
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
-
-        var exception = assertThrows(NotFoundException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
-
-        assertEquals(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, exception.getMessage());
-
-        verify(userRepository).findUserByUuid(uuid);
-
-        verify(tariffsInfoRepository, never()).findById(anyLong());
-        verify(locationRepository, never()).findById(anyLong());
-        verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
-        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
-        verify(modelMapper, never()).map(any(), any());
     }
 
     @Test
@@ -569,16 +316,14 @@ class UBSClientServiceImplTest {
         var location = getLocation();
         var locationId = location.getId();
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
 
         var exception = assertThrows(BadRequestException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
+            tariffsInfoId, locationId));
 
         assertEquals(TARIFF_OR_LOCATION_IS_DEACTIVATED, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(tariffsInfoRepository).findById(tariffsInfoId);
         verify(locationRepository).findById(locationId);
 
@@ -599,16 +344,14 @@ class UBSClientServiceImplTest {
         var locationId = location.getId();
         location.setLocationStatus(LocationStatus.DEACTIVATED);
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
 
         var exception = assertThrows(BadRequestException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
+            tariffsInfoId, locationId));
 
         assertEquals(TARIFF_OR_LOCATION_IS_DEACTIVATED, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(tariffsInfoRepository).findById(tariffsInfoId);
         verify(locationRepository).findById(locationId);
 
@@ -634,24 +377,67 @@ class UBSClientServiceImplTest {
 
         var expectedErrorMessage = LOCATION_IS_DEACTIVATED_FOR_TARIFF + tariffsInfoId;
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
             .thenReturn(Optional.of(tariffLocation));
 
         var exception = assertThrows(BadRequestException.class, () -> ubsService.getFirstPageDataByTariffAndLocationId(
-            uuid, tariffsInfoId, locationId));
+            tariffsInfoId, locationId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(tariffsInfoRepository).findById(tariffsInfoId);
         verify(locationRepository).findById(locationId);
         verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
 
         verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
+    }
+
+    @Test
+    void getFirstPageDataByTariffAndLocationIdShouldReturnExpectedData() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var tariffLocation = getTariffLocation();
+
+        var tariffsInfo = tariffLocation.getTariffsInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+        tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
+
+        var location = tariffLocation.getLocation();
+        var locationId = location.getId();
+
+        var bags = getBag1list();
+        var bagTranslationDto = getBagTranslationDto();
+        var userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
+
+        when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
+            .thenReturn(Optional.of(tariffLocation));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
+        when(modelMapper.map(bags.getFirst(), BagTranslationDto.class)).thenReturn(bagTranslationDto);
+
+        var userPointsAndAllBagsDtoActual =
+            ubsService.getFirstPageDataByTariffAndLocationId(tariffsInfoId, locationId);
+
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags(),
+            userPointsAndAllBagsDtoActual.getBags());
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags().getFirst().getId(),
+            userPointsAndAllBagsDtoActual.getBags().getFirst().getId());
+        assertEquals(
+            0,
+            userPointsAndAllBagsDtoActual.getPoints());
+
+        verify(tariffsInfoRepository).findById(tariffsInfoId);
+        verify(locationRepository).findById(locationId);
+        verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(tariffsInfoId);
+        verify(modelMapper).map(bags.getFirst(), BagTranslationDto.class);
     }
 
     @Test
@@ -2785,7 +2571,6 @@ class UBSClientServiceImplTest {
         Order orderDto = getOrderTest();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
         assert orderDto != null;
-        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.of(new Employee()));
         when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
         OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L, anyString());
 
@@ -2799,8 +2584,7 @@ class UBSClientServiceImplTest {
         Order orderDto = getOrderTest();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
         assert orderDto != null;
-        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.of(new Employee()));
-        when(userRepository.findByUuid(anyString())).thenReturn(null);
+        when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
         OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L, anyString());
 
         assertEquals(dto.getCancellationReason(), result.getCancellationReason());
@@ -2813,7 +2597,6 @@ class UBSClientServiceImplTest {
         Order orderDto = getOrderTest();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
         assert orderDto != null;
-        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.empty());
         when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
         OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L, anyString());
 
@@ -2831,7 +2614,6 @@ class UBSClientServiceImplTest {
     @Test
     void getOrderCancellationReasonAccessDeniedException() {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(getOrderTest()));
-        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.empty());
         when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         assertThrows(AccessDeniedException.class,
             () -> ubsService.getOrderCancellationReason(1L, "abc"));
