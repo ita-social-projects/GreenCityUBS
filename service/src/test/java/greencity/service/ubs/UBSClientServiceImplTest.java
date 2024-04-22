@@ -11,6 +11,7 @@ import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagOrderDto;
+import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
@@ -392,6 +393,51 @@ class UBSClientServiceImplTest {
 
         verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
         verify(modelMapper, never()).map(any(), any());
+    }
+
+    @Test
+    void getFirstPageDataByTariffAndLocationIdShouldReturnExpectedData() {
+        var user = getUser();
+        var uuid = user.getUuid();
+
+        var tariffLocation = getTariffLocation();
+
+        var tariffsInfo = tariffLocation.getTariffsInfo();
+        var tariffsInfoId = tariffsInfo.getId();
+        tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
+
+        var location = tariffLocation.getLocation();
+        var locationId = location.getId();
+
+        var bags = getBag1list();
+        var bagTranslationDto = getBagTranslationDto();
+        var userPointsAndAllBagsDtoExpected = getUserPointsAndAllBagsDto();
+
+        when(tariffsInfoRepository.findById(tariffsInfoId)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
+        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
+            .thenReturn(Optional.of(tariffLocation));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
+        when(modelMapper.map(bags.getFirst(), BagTranslationDto.class)).thenReturn(bagTranslationDto);
+
+        var userPointsAndAllBagsDtoActual =
+            ubsService.getFirstPageDataByTariffAndLocationId(tariffsInfoId, locationId);
+
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags(),
+            userPointsAndAllBagsDtoActual.getBags());
+        assertEquals(
+            userPointsAndAllBagsDtoExpected.getBags().getFirst().getId(),
+            userPointsAndAllBagsDtoActual.getBags().getFirst().getId());
+        assertEquals(
+            0,
+            userPointsAndAllBagsDtoActual.getPoints());
+
+        verify(tariffsInfoRepository).findById(tariffsInfoId);
+        verify(locationRepository).findById(locationId);
+        verify(tariffLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(tariffsInfoId);
+        verify(modelMapper).map(bags.getFirst(), BagTranslationDto.class);
     }
 
     @Test
