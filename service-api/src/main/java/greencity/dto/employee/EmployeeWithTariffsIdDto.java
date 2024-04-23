@@ -18,5 +18,5 @@ public class EmployeeWithTariffsIdDto {
     @Valid
     private EmployeeDto employeeDto;
     @NotEmpty
-    private List<TariffWithChatAccess> tariffId;
+    private List<TariffWithChatAccess> tariffs;
 }

@@ -85,7 +85,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee employee = modelMapper.map(dto, Employee.class);
         employee.setUuid(UUID.randomUUID().toString());
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
-        dto.getTariffId().stream().forEach(tariff -> {
+        dto.getTariffs().stream().forEach(tariff -> {
             TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
             tariffsInfoReceivingEmployees.setEmployee(employee);
             tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
@@ -228,7 +228,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee updatedEmployee = modelMapper.map(dto, Employee.class);
         updatedEmployee.setUuid(upEmployee.getUuid());
         updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
-        dto.getTariffId().stream().forEach(tariff -> {
+        dto.getTariffs().stream().forEach(tariff -> {
             TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
             tariffsInfoReceivingEmployees.setEmployee(updatedEmployee);
             tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
