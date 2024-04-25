@@ -100,9 +100,6 @@ class OrderControllerTest {
 
     @Test
     void getCurrentUserPointsByTariffAndLocationId() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString())))
-            .thenReturn("35467585763t4sfgchjfuyetf");
-
         mockMvc.perform(get(ubsLink + "/order-details-for-tariff")
             .principal(principal)
             .param("tariffId", "1")
@@ -110,8 +107,7 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageDataByTariffAndLocationId("35467585763t4sfgchjfuyetf", 1L, 1L);
+        verify(ubsClientService).getFirstPageDataByTariffAndLocationId(1L, 1L);
     }
 
     @Test

@@ -309,10 +309,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(String uuid, Long tariffId, Long locationId) {
-        var user = userRepository.findUserByUuid(uuid).orElseThrow(
-            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-
+    public UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(Long tariffId, Long locationId) {
         var tariffsInfo = tariffsInfoRepository.findById(tariffId)
             .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND + tariffId));
 
@@ -321,7 +318,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         checkIfTariffIsAvailableForCurrentLocation(tariffsInfo, location);
 
-        return getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints());
+        return getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(tariffsInfo.getId(), 0);
     }
 
     @Override

@@ -77,7 +77,7 @@ public class SecurityConfig {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedOriginPatterns(List.of(allowedOrigins));
             config.setAllowedMethods(
-                Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
+                Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH", "HEAD"));
             config.setAllowedHeaders(
                 Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Headers",
                     "X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
@@ -106,6 +106,9 @@ public class SecurityConfig {
                     UBS_LINK + "/receivePayment",
                     UBS_LINK + "/receiveLiqPayPayment",
                     UBS_LINK + "/receivePaymentClient",
+                    UBS_LINK + "/getAllActiveCouriers",
+                    UBS_LINK + "/locations/{courierId}",
+                    UBS_LINK + "/order-details-for-tariff",
                     "/bot")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
@@ -198,7 +201,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/**",
                     SUPER_ADMIN_LINK + "/**",
-                    UBS_LINK + "/order/{id}/cancellation",
                     ADMIN_LINK + "/notification/get-all",
                     ADMIN_LINK + "/notification/{id}",
                     ADMIN_LINK + "/**",
@@ -252,6 +254,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK + "/**",
                     UBS_LINK + "/client/**",
+                    UBS_LINK + "/order/{id}/cancellation",
                     "/notifications",
                     "/notifications/**",
                     "/notifications/quantityUnreadenNotifications")
