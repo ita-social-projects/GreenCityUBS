@@ -263,8 +263,7 @@ public class OrderController {
     @Operation(summary = "Update recipient information in order")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = { @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = UbsCustomersDto.class)) }),
+            content = @Content(schema = @Schema(implementation = UbsCustomersDto.class))),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
