@@ -58,6 +58,7 @@ import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -89,11 +90,6 @@ import static greencity.ModelUtils.getEmployee;
 import static greencity.ModelUtils.getOrderBag;
 import static greencity.ModelUtils.getReceivingStation;
 import static greencity.ModelUtils.getReceivingStationDto;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -740,11 +736,11 @@ class SuperAdminServiceImplTest {
     void getAllLocationTest() {
         List<Region> regionList = ModelUtils.getAllRegion();
 
-        when(regionRepository.findAll()).thenReturn(regionList);
+        when(regionRepository.findAllWithNotDeletedLocations()).thenReturn(regionList);
 
         superAdminService.getAllLocation();
 
-        verify(regionRepository).findAll();
+        verify(regionRepository).findAllWithNotDeletedLocations();
         regionList.forEach(region -> verify(modelMapper).map(region, LocationInfoDto.class));
     }
 
@@ -752,12 +748,12 @@ class SuperAdminServiceImplTest {
     void getLocationsByStatusTest() {
         List<Region> regionList = ModelUtils.getAllRegion();
 
-        when(regionRepository.findAllByLocationsLocationStatus(LocationStatus.ACTIVE))
+        when(regionRepository.findAllWithLocationsByLocationStatus(LocationStatus.ACTIVE))
             .thenReturn(Optional.of(regionList));
 
         var result = superAdminService.getLocationsByStatus(LocationStatus.ACTIVE);
 
-        verify(regionRepository).findAllByLocationsLocationStatus(LocationStatus.ACTIVE);
+        verify(regionRepository).findAllWithLocationsByLocationStatus(LocationStatus.ACTIVE);
         regionList.forEach(region -> verify(modelMapper).map(region, LocationInfoDto.class));
         verify(modelMapper, times(regionList.size())).map(any(Region.class), eq(LocationInfoDto.class));
         assertEquals(regionList.size(), result.size());
@@ -765,7 +761,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void getLocationsByStatusNotFoundExceptionTest() {
-        when(regionRepository.findAllByLocationsLocationStatus(LocationStatus.ACTIVE))
+        when(regionRepository.findAllWithLocationsByLocationStatus(LocationStatus.ACTIVE))
             .thenReturn(Optional.empty());
 
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
@@ -774,7 +770,7 @@ class SuperAdminServiceImplTest {
         assertEquals(String.format(ErrorMessage.REGIONS_NOT_FOUND_BY_LOCATION_STATUS, LocationStatus.ACTIVE.name()),
             notFoundException.getMessage());
 
-        verify(regionRepository).findAllByLocationsLocationStatus(LocationStatus.ACTIVE);
+        verify(regionRepository).findAllWithLocationsByLocationStatus(LocationStatus.ACTIVE);
     }
 
     @Test
@@ -810,31 +806,37 @@ class SuperAdminServiceImplTest {
         Location location = ModelUtils.getLocationDto();
         location
             .setTariffLocations(Set.of(TariffLocation.builder().location(Location.builder().id(2L).build()).build()));
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         superAdminService.deleteLocation(1L);
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
         verify(locationRepository).delete(any(Location.class));
     }
 
     @Test
-    void deleteLocationThrowsBadRequestExceptionTest() {
+    void deleteLocationAssignedToTarificTest() {
         Location location = ModelUtils.getLocationDto();
+        location.setIsDeleted(false);
         location
             .setTariffLocations(Set.of(TariffLocation.builder().location(Location.builder().id(1L).build()).build()));
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-        assertThrows(BadRequestException.class, () -> superAdminService.deleteLocation(1L));
-        verify(locationRepository).findById(1L);
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.save(location)).thenReturn(location);
+
+        assertDoesNotThrow(() -> superAdminService.deleteLocation(1L));
+        assertTrue(location.getIsDeleted());
+
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).save(location);
     }
 
     @Test
     void activateLocation() {
         Location location = ModelUtils.getLocationDto();
 
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
 
         superAdminService.activateLocation(1L);
 
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
         verify(locationRepository).save(location);
     }
 
@@ -853,15 +855,16 @@ class SuperAdminServiceImplTest {
     @Test
     void activateLocationExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.activateLocation(1L));
-        verify(locationRepository).findById(anyLong());
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(anyLong());
     }
 
     @Test
     void activateLocationException2Test() {
         Location location = ModelUtils.getLocationDto();
         location.setLocationStatus(LocationStatus.ACTIVE);
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         assertThrows(BadRequestException.class, () -> superAdminService.activateLocation(1L));
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
     }
 
     @Test
@@ -1255,7 +1258,7 @@ class SuperAdminServiceImplTest {
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
@@ -1267,7 +1270,7 @@ class SuperAdminServiceImplTest {
         superAdminService.editTariff(1L, dto);
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
         verify(tariffsLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
@@ -1288,7 +1291,7 @@ class SuperAdminServiceImplTest {
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
@@ -1301,7 +1304,7 @@ class SuperAdminServiceImplTest {
         superAdminService.editTariff(1L, dto);
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
         verify(tariffsLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
@@ -1327,13 +1330,13 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(1L)).thenReturn(Optional.empty());
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.editTariff(1L, dto));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
     }
 
     @Test
@@ -1343,15 +1346,15 @@ class SuperAdminServiceImplTest {
         List<Location> locations = ModelUtils.getLocationList2();
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(locations.get(0)));
-        when(locationRepository.findById(2L)).thenReturn(Optional.of(locations.get(1)));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(locations.get(0)));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(2L)).thenReturn(Optional.of(locations.get(1)));
 
         assertThrows(BadRequestException.class,
             () -> superAdminService.editTariff(1L, dto));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findById(1L);
-        verify(locationRepository).findById(2L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(2L);
     }
 
     @Test
@@ -1364,7 +1367,7 @@ class SuperAdminServiceImplTest {
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
 
@@ -1372,7 +1375,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.editTariff(1L, dto));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(courierRepository).findById(1L);
     }
@@ -1387,7 +1390,7 @@ class SuperAdminServiceImplTest {
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.empty());
@@ -1396,7 +1399,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.editTariff(1L, dto));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
         verify(courierRepository).findById(1L);
@@ -1408,7 +1411,7 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         Location location = ModelUtils.getLocation();
 
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(courierRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -1417,7 +1420,7 @@ class SuperAdminServiceImplTest {
 
         verify(tariffsInfoRepository).findById(1L);
         verify(courierRepository).findById(1L);
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
     }
 
     @Test
@@ -1427,9 +1430,8 @@ class SuperAdminServiceImplTest {
         Location location = ModelUtils.getLocation();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
 
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.empty());
@@ -1438,7 +1440,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.editTariff(1L, dto));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
     }
@@ -1450,7 +1452,7 @@ class SuperAdminServiceImplTest {
         Location location = ModelUtils.getLocation();
         Courier courier = getDeactivatedCourier();
 
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
 
@@ -1459,7 +1461,7 @@ class SuperAdminServiceImplTest {
 
         verify(tariffsInfoRepository).findById(1L);
         verify(courierRepository).findById(1L);
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
     }
 
     @Test
@@ -1473,7 +1475,7 @@ class SuperAdminServiceImplTest {
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
@@ -1485,7 +1487,7 @@ class SuperAdminServiceImplTest {
         superAdminService.editTariff(1L, dto);
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findById(1L);
+        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
         verify(tariffsLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
