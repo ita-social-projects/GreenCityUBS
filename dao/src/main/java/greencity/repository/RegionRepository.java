@@ -2,8 +2,8 @@ package greencity.repository;
 
 import greencity.entity.user.Region;
 import greencity.enums.LocationStatus;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
@@ -29,8 +29,12 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
      * @return List of {@link Region} if at least one region exists.
      * @author Maksym Lenets
      */
-    @EntityGraph(attributePaths = "locations")
-    Optional<List<Region>> findAllByLocationsLocationStatus(LocationStatus locationStatus);
+
+    @Query("SELECT r FROM Region r "
+        + "LEFT JOIN FETCH r.locations l "
+        + "WHERE l.isDeleted = false "
+        + "AND l.locationStatus = :locationStatus")
+    Optional<List<Region>> findAllWithLocationsByLocationStatus(@Param("locationStatus") LocationStatus locationStatus);
 
     /**
      * Method to check if the region exists by regionId.
@@ -40,4 +44,15 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
      * @author Nikita Korzh.
      */
     boolean existsRegionById(Long id);
+
+    /**
+     * Method to find all regions with not deleted locations.
+     *
+     * @return return list of regions.
+     * @author Denys Ryhal.
+     */
+    @Query("SELECT r FROM Region r "
+        + "LEFT JOIN FETCH r.locations l "
+        + "WHERE l.isDeleted = false")
+    List<Region> findAllWithNotDeletedLocations();
 }
