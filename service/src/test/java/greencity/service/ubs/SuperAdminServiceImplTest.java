@@ -44,19 +44,7 @@ import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
-import greencity.repository.BagRepository;
-import greencity.repository.CourierRepository;
-import greencity.repository.DeactivateChosenEntityRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderBagRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RegionRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.TariffLocationRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
@@ -140,6 +128,8 @@ class SuperAdminServiceImplTest {
     private OrderRepository orderRepository;
     @Mock
     private OrderBagService orderBagService;
+    @Mock
+    private OrderAddressRepository orderAddressRepository;
 
     @AfterEach
     void afterEach() {
@@ -804,20 +794,21 @@ class SuperAdminServiceImplTest {
     @Test
     void deleteLocationTest() {
         Location location = ModelUtils.getLocationDto();
-        location
-            .setTariffLocations(Set.of(TariffLocation.builder().location(Location.builder().id(2L).build()).build()));
+
+        when(orderAddressRepository.existsByLocation(location)).thenReturn(false);
         when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         superAdminService.deleteLocation(1L);
         verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
         verify(locationRepository).delete(any(Location.class));
+        verify(orderAddressRepository).existsByLocation(any(Location.class));
     }
 
     @Test
     void deleteLocationAssignedToTarificTest() {
         Location location = ModelUtils.getLocationDto();
         location.setIsDeleted(false);
-        location
-            .setTariffLocations(Set.of(TariffLocation.builder().location(Location.builder().id(1L).build()).build()));
+
+        when(orderAddressRepository.existsByLocation(location)).thenReturn(true);
         when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         when(locationRepository.save(location)).thenReturn(location);
 
@@ -826,6 +817,7 @@ class SuperAdminServiceImplTest {
 
         verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
         verify(locationRepository).save(location);
+        verify(orderAddressRepository).existsByLocation(any(Location.class));
     }
 
     @Test
