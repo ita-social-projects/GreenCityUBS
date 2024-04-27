@@ -324,7 +324,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public List<LocationInfoDto> getAllLocation() {
-        return regionRepository.findAll().stream()
+        return regionRepository.findAllWithNotDeletedLocations().stream()
             .map(i -> modelMapper.map(i, LocationInfoDto.class))
             .collect(Collectors.toList());
     }
@@ -332,7 +332,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<LocationInfoDto> getLocationsByStatus(LocationStatus locationStatus) {
         List<Region> regionWithDeactivatedLocations = regionRepository
-            .findAllByLocationsLocationStatus(locationStatus)
+            .findAllWithLocationsByLocationStatus(locationStatus)
             .orElseThrow(() -> new NotFoundException(
                 String.format(ErrorMessage.REGIONS_NOT_FOUND_BY_LOCATION_STATUS, locationStatus.name())));
         return regionWithDeactivatedLocations.stream()
@@ -354,9 +354,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void deleteLocation(Long id) {
         Location location = tryToFindLocationById(id);
         if (location.getTariffLocations().stream().anyMatch(tl -> tl.getLocation().getId().equals(id))) {
-            throw new BadRequestException(ErrorMessage.LOCATION_CAN_NOT_BE_DELETED);
+            location.setIsDeleted(true);
+            locationRepository.save(location);
+        } else {
+            locationRepository.delete(location);
         }
-        locationRepository.delete(location);
     }
 
     private Location createNewLocation(LocationCreateDto dto, Region region) {
@@ -502,7 +504,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Location tryToFindLocationById(Long id) {
-        return locationRepository.findById(id).orElseThrow(
+        return locationRepository.findByIdAndIsDeletedIsFalse(id).orElseThrow(
             () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID + id));
     }
 

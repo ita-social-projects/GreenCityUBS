@@ -16,7 +16,8 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     @Query(nativeQuery = true,
         value = "select l.* FROM locations as l "
             + "WHERE l.region_id = :regionId AND (l.name_en = :locationNameEn "
-            + "OR l.name_uk = :locationNameUk)")
+            + "OR l.name_uk = :locationNameUk) "
+            + "AND l.is_deleted = false")
     Optional<Location> findLocationByNameAndRegionId(@Param("locationNameUk") String locationNameUk,
         @Param("locationNameEn") String locationNameEn,
         @Param("regionId") Long regionId);
@@ -37,7 +38,8 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             + "AND t.tariff_status = 'ACTIVE' "
             + "AND m.location_status = 'ACTIVE' "
             + "AND c.courier_status = 'ACTIVE' "
-            + "AND c.id = :courierId")
+            + "AND c.id = :courierId "
+            + "AND l.is_deleted = false")
     List<Location> findAllActiveLocationsByCourierId(@Param("courierId") Long courierId);
 
     /**
@@ -51,7 +53,8 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     @Query(nativeQuery = true,
         value = "SELECT * from locations "
             + "WHERE region_id = :regionId "
-            + "AND id IN :locIds")
+            + "AND id IN :locIds "
+            + "AND is_deleted = false")
     List<Location> findAllByIdAndRegionId(@Param("locIds") List<Long> locIds, @Param("regionId") Long regionId);
 
     /**
@@ -65,7 +68,8 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     @Query(nativeQuery = true,
         value = "SELECT * from locations "
             + "WHERE region_id = :regionId "
-            + "AND id = :locationId")
+            + "AND id = :locationId "
+            + "AND is_deleted = false")
     Optional<Location> findLocationByIdAndRegionId(@Param("locationId") Long locationId,
         @Param("regionId") Long regionId);
 
@@ -78,6 +82,16 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      */
     @Query(nativeQuery = true,
         value = "SELECT * from locations "
-            + "WHERE region_id = :regionId")
+            + "WHERE region_id = :regionId "
+            + "AND is_deleted = false")
     List<Location> findLocationsByRegionId(@Param("regionId") Long regionId);
+
+    /**
+     * Method for not deleted location by id.
+     *
+     * @param locationId {@link Long} - id of location
+     * @return optional of {@link Location}
+     * @author Denys Ryhal
+     */
+    Optional<Location> findByIdAndIsDeletedIsFalse(Long locationId);
 }

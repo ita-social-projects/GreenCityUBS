@@ -25,7 +25,9 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
         value = "SELECT t.* FROM tariffs_info as t "
             + "INNER JOIN tariffs_locations as m "
             + "on t.id = m.tariffs_info_id "
-            + "WHERE t.courier_id = :courierId AND m.location_id = :locationId")
+            + "INNER JOIN locations l on m.location_id = l.id "
+            + "WHERE t.courier_id = :courierId AND m.location_id = :locationId "
+            + "AND l.is_deleted = false")
     Optional<TariffsInfo> findTariffsInfoLimitsByCourierIdAndLocationId(@Param("courierId") Long courierId,
         @Param("locationId") Long locationId);
 
@@ -61,7 +63,8 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
         + " inner join tariffs_locations tl on ti.id = tl.tariffs_info_id"
         + " inner join locations l on tl.id = tl.location_id"
         + " where l.region_id = :regionId and"
-        + " rs.id in(:stationsIds)")
+        + " rs.id in(:stationsIds)"
+        + " and l.is_deleted = false")
     void deactivateTariffsByRegionAndReceivingStations(Long regionId, List<Long> stationsIds);
 
     /**
@@ -81,6 +84,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
         + " inner join tariffs_locations tl on ti.id = tl.tariffs_info_id"
         + " inner join locations l on tl.id = tl.location_id"
         + " where l.region_id = :regionId and"
+        + " l.is_deleted = false and"
         + " tl.location_id in (:citiesIds) and"
         + " ti.courier_id = :courierId")
     void deactivateTariffsByCourierAndRegionAndCities(Long regionId, List<Long> citiesIds, Long courierId);
@@ -102,6 +106,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
         + " inner join tariffs_locations tl on ti.id = tl.tariffs_info_id"
         + " inner join locations l on tl.id = tl.location_id"
         + " where l.region_id = :regionId and"
+        + " l.is_deleted = false and"
         + " rs.id in(:stationsIds) and"
         + " ti.courier_id = :courierId")
     void deactivateTariffsByCourierAndRegionAndReceivingStations(Long regionId, List<Long> stationsIds, Long courierId);
@@ -126,7 +131,9 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
         + "FROM TariffsInfo ti "
         + "JOIN ti.tariffLocations tl "
         + "JOIN Bag b ON ti.id = b.tariffsInfo.id "
-        + "WHERE tl.location.id = :locationId AND b.id IN :bagIds")
+        + "WHERE tl.location.id = :locationId "
+        + "AND b.id IN :bagIds "
+        + "AND tl.location.isDeleted = false")
     Optional<TariffsInfo> findTariffsInfoByBagIdAndLocationId(
         @Param("bagIds") List<Integer> bagIds, @Param("locationId") Long locationId);
 

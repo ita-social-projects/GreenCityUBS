@@ -51,6 +51,10 @@ public class Location {
     @Column(name = "name_en")
     private String nameEn;
 
+    @Builder.Default
+    @Column(name = "is_deleted", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isDeleted = false;
+
     @Embedded
     private Coordinates coordinates;
 
