@@ -1,5 +1,9 @@
 package greencity.filters;
 
+import greencity.entity.order.Courier_;
+import greencity.entity.user.Location_;
+import greencity.entity.user.Region_;
+import greencity.entity.user.employee.ReceivingStation_;
 import greencity.enums.TariffStatus;
 import greencity.entity.order.Courier;
 import greencity.entity.order.TariffsInfo;
@@ -28,16 +32,16 @@ public class TariffsInfoSpecification implements Specification<TariffsInfo> {
         List<Predicate> predicates = new ArrayList<>();
 
         if (nonNull(criteria.getRegion())) {
-            predicates.add(criteriaBuilder.equal(region, criteria.getRegion()));
+            predicates.add(criteriaBuilder.equal(region.get(Region_.ID), criteria.getRegion()));
         }
         if (nonNull(criteria.getLocation())) {
-            predicates.add(location.in((Object[]) criteria.getLocation()));
+            predicates.add(location.get(Location_.ID).in((Object[]) criteria.getLocation()));
         }
         if (nonNull(criteria.getCourier())) {
-            predicates.add(criteriaBuilder.equal(courier, criteria.getCourier()));
+            predicates.add(criteriaBuilder.equal(courier.get(Courier_.ID), criteria.getCourier()));
         }
         if (nonNull(criteria.getReceivingStation())) {
-            predicates.add(receivingStation.in((Object[]) criteria.getReceivingStation()));
+            predicates.add(receivingStation.get(ReceivingStation_.ID).in((Object[]) criteria.getReceivingStation()));
         }
         if (nonNull(criteria.getStatus())) {
             predicates.add(criteriaBuilder.equal(status, criteria.getStatus()));
