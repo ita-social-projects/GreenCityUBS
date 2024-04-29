@@ -1,12 +1,14 @@
 package greencity.filters;
 
 import greencity.entity.order.Courier_;
+import greencity.entity.order.TariffLocation_;
+import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.TariffsInfo_;
+import greencity.entity.order.Courier;
 import greencity.entity.user.Location_;
 import greencity.entity.user.Region_;
 import greencity.entity.user.employee.ReceivingStation_;
 import greencity.enums.TariffStatus;
-import greencity.entity.order.Courier;
-import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.ReceivingStation;
@@ -23,11 +25,11 @@ public class TariffsInfoSpecification implements Specification<TariffsInfo> {
 
     @Override
     public Predicate toPredicate(Root<TariffsInfo> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        Path<Location> location = root.join("tariffLocations").get("location");
-        Path<Region> region = location.get("region");
-        Path<Courier> courier = root.get("courier");
-        Path<ReceivingStation> receivingStation = root.join("receivingStationList");
-        Path<TariffStatus> status = root.get("tariffStatus");
+        Path<Location> location = root.join(TariffsInfo_.TARIFF_LOCATIONS).get(TariffLocation_.LOCATION);
+        Path<Region> region = location.get(Location_.REGION);
+        Path<Courier> courier = root.get(TariffsInfo_.COURIER);
+        Path<ReceivingStation> receivingStation = root.join(TariffsInfo_.RECEIVING_STATION_LIST);
+        Path<TariffStatus> status = root.get(TariffsInfo_.TARIFF_STATUS);
 
         List<Predicate> predicates = new ArrayList<>();
 
