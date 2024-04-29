@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.user.Location;
 import greencity.entity.user.ubs.OrderAddress;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,11 @@ public interface OrderAddressRepository extends JpaRepository<OrderAddress, Long
         + " JOIN address as addr ON addr.id = ubs.address_id "
         + " WHERE o.id = :orderId", nativeQuery = true)
     OrderAddress getOrderAddressByOrderId(Long orderId);
+
+    /**
+     * Method checks if {@link OrderAddress} exists by {@link Location}.
+     *
+     * @return boolean.
+     */
+    boolean existsByLocation(Location location);
 }
