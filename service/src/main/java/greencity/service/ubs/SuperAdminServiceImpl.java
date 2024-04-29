@@ -63,6 +63,7 @@ import greencity.repository.ServiceRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
+import greencity.repository.OrderAddressRepository;
 import greencity.service.SuperAdminService;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -122,6 +123,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final OrderBagRepository orderBagRepository;
     private final OrderRepository orderRepository;
     private final OrderBagService orderBagService;
+    private final OrderAddressRepository orderAddressRepository;
 
     @Override
     public GetTariffServiceDto addTariffService(long tariffId, TariffServiceDto dto, String employeeUuid) {
@@ -353,7 +355,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public void deleteLocation(Long id) {
         Location location = tryToFindLocationById(id);
-        if (location.getTariffLocations().stream().anyMatch(tl -> tl.getLocation().getId().equals(id))) {
+        if (orderAddressRepository.existsByLocation(location)) {
             location.setIsDeleted(true);
             locationRepository.save(location);
         } else {
