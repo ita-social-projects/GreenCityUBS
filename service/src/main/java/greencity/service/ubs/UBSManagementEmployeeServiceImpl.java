@@ -13,6 +13,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.dto.tariff.TariffWithChatAccess;
 import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
@@ -86,19 +87,18 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         employee.setUuid(UUID.randomUUID().toString());
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
         employee.setImagePath(image != null ? fileService.upload(image) : defaultImagePath);
-        dto.getTariffs().stream().forEach(tariff -> {
-            TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
-            tariffsInfoReceivingEmployees.setEmployee(employee);
-            tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
-            tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
-            employee.getTariffsInfoReceivingEmployees().add(tariffsInfoReceivingEmployees);
-        });
-        // if (image != null) {
-        // employee.setImagePath(fileService.upload(image));
-        // } else {
-        // employee.setImagePath(defaultImagePath);
-        // }
+
+        List<TariffWithChatAccess> tariffs = dto.getTariffs();
+        if (tariffs != null) {
+            tariffs.forEach(tariff -> {
+                TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
+                tariffsInfoReceivingEmployees.setEmployee(employee);
+                tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
+                tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
+                    .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
+                employee.getTariffsInfoReceivingEmployees().add(tariffsInfoReceivingEmployees);
+            });
+        }
         signUpEmployee(employee);
         return modelMapper.map(employeeRepository.save(employee), EmployeeWithTariffsDto.class);
     }
@@ -229,15 +229,16 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee updatedEmployee = modelMapper.map(dto, Employee.class);
         updatedEmployee.setUuid(upEmployee.getUuid());
         updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
-        dto.getTariffs().stream().forEach(tariff -> {
-            TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
-            tariffsInfoReceivingEmployees.setEmployee(updatedEmployee);
-            tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
-            tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
-            updatedEmployee.getTariffsInfoReceivingEmployees().add(tariffsInfoReceivingEmployees);
-        });
-
+        if (dto.getTariffs() != null) {
+            dto.getTariffs().stream().forEach(tariff -> {
+                TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
+                tariffsInfoReceivingEmployees.setEmployee(updatedEmployee);
+                tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
+                tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
+                    .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
+                updatedEmployee.getTariffsInfoReceivingEmployees().add(tariffsInfoReceivingEmployees);
+            });
+        }
         if (image != null) {
             updatedEmployee.setImagePath(fileService.upload(image));
         } else {
