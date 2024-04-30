@@ -55,16 +55,17 @@ public class ManagementEmployeeController {
      */
     @ApiOperation(value = "Save employee")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = HttpStatuses.CREATED),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
-    @PostMapping(value = "/save-employee", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/save-employee",
+        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
-            @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+        @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
+        @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 
@@ -107,7 +108,7 @@ public class ManagementEmployeeController {
     @PutMapping(value = "/update-employee",
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> update(
-            @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
+        @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
         @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeWithTariffsIdDto, image));
     }
@@ -305,7 +306,7 @@ public class ManagementEmployeeController {
      *         representing the employees, with HttpStatus.OK if successful.
      */
     @ApiOperation(value = "Get all employees with enabled chat by tariff id")
-    @GetMapping("/get-employees/{tariffId}")
+    @GetMapping(value = "/get-employees/{tariffId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<EmployeeWithTariffsDto>> getEmployeesByTariffId(@PathVariable Long tariffId) {
         return ResponseEntity.ok().body(employeeService.getEmployeesByTariffId(tariffId));
     }

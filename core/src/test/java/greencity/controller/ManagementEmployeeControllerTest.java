@@ -5,8 +5,11 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.tariff.TariffWithChatAccess;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.service.ubs.UBSClientService;
@@ -23,11 +26,15 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static greencity.ModelUtils.getUuid;
@@ -86,16 +93,23 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void saveEmployeeTest() throws Exception {
+        EmployeeDto employeeDto = new EmployeeDto();
+        List<TariffWithChatAccess> tariffs = new ArrayList<>();
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
+        dto.setEmployeeDto(employeeDto);
+        dto.setTariffs(tariffs);
         ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(dto);
-        MockMultipartFile jsonFile = new MockMultipartFile("employeeWithTariffsIdDto",
-            "", "application/json", responseJSON.getBytes());
-
-        mockMvc.perform(multipart(UBS_LINK + SAVE_LINK)
-            .file(jsonFile)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
+        String dtoJson = objectMapper.writeValueAsString(dto);
+        MockMultipartFile jsonFile = new MockMultipartFile(
+            "employee",
+            "employee.json",
+            MediaType.APPLICATION_JSON_VALUE,
+            dtoJson.getBytes());
+        mockMvc.perform(
+            multipart(UBS_LINK + SAVE_LINK)
+                .file(jsonFile)
+                .principal(principal)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isCreated());
         verify(service).save(dto, null);
     }
@@ -134,13 +148,21 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void updateEmployeeTest() throws Exception {
+        EmployeeDto employeeDto = new EmployeeDto();
+        List<TariffWithChatAccess> tariffs = new ArrayList<>();
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
+        dto.setEmployeeDto(employeeDto);
+        dto.setTariffs(tariffs);
         ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(dto);
-        MockMultipartFile jsonFile = new MockMultipartFile("employeeWithTariffsIdDto",
-            "", "application/json", responseJSON.getBytes());
+        String dtoJson = objectMapper.writeValueAsString(dto);
+
+        MockMultipartFile jsonFile = new MockMultipartFile(
+            "employee",
+            "employee.json",
+            MediaType.APPLICATION_JSON_VALUE,
+            dtoJson.getBytes());
         MockMultipartHttpServletRequestBuilder builder =
-            multipart(UBS_LINK + UPDATE_LINK);
+            MockMvcRequestBuilders.multipart(UBS_LINK + UPDATE_LINK);
         builder.with(request -> {
             request.setMethod("PUT");
             return request;
@@ -148,7 +170,7 @@ class ManagementEmployeeControllerTest {
 
         mockMvc.perform(builder.file(jsonFile)
             .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isOk());
         verify(service, times(1)).update(dto, null);
     }
@@ -241,5 +263,28 @@ class ManagementEmployeeControllerTest {
         mockMvc.perform(get(UBS_LINK + GET_ALL_TARIFFS)
             .principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).getTariffsForEmployee();
+    }
+
+    @Test
+    void getEmployeesByTariffIdTest() throws Exception {
+        Long tariffId = 1L;
+        List<EmployeeWithTariffsDto> employees = new ArrayList<>();
+        EmployeeDto employeeDto = new EmployeeDto();
+        employeeDto.setFirstName("John");
+
+        EmployeeWithTariffsDto employee1 = new EmployeeWithTariffsDto();
+        employee1.setEmployeeDto(employeeDto);
+
+        employees.add(employee1);
+        when(service.getEmployeesByTariffId(tariffId)).thenReturn(employees);
+
+        mockMvc.perform(get(UBS_LINK + "/get-employees/{tariffId}", tariffId))
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].employeeDto.firstName")
+                .value(employee1.getEmployeeDto().getFirstName()))
+            .andReturn();
+
+        verify(service, times(1)).getEmployeesByTariffId(tariffId);
     }
 }

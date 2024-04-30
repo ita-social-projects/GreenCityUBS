@@ -3,7 +3,6 @@ package greencity.mapping.employee;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.position.PositionDto;
-import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -30,10 +29,10 @@ public class EmployeeUpdateDtoMapper extends AbstractConverter<Employee, Employe
                         .build())
                     .collect(Collectors.toList()))
                 .build())
-//            .tariffId(employee.getTariffs()
-//                .stream()
-//                .map(TariffsInfo::getId)
-//                .collect(Collectors.toList()))
+            // .tariffId(employee.getTariffs()
+            // .stream()
+            // .map(TariffsInfo::getId)
+            // .collect(Collectors.toList()))
             .build();
     }
 }

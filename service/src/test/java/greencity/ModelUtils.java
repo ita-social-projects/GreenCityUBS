@@ -102,11 +102,7 @@ import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.table.ColumnWidthDto;
-import greencity.dto.tariff.EditTariffDto;
-import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
-import greencity.dto.tariff.GetTariffLimitsDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.dto.tariff.*;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -1257,7 +1253,7 @@ public class ModelUtils {
 //                .id(1L)
 //                .service(new Service())
 //                .build()))
-//            .imagePath("path")
+            .imagePath("path")
             .build();
     }
 
@@ -1383,9 +1379,28 @@ public class ModelUtils {
                 .build());
     }
 
+//    public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
+//        return EmployeeWithTariffsIdDto
+//            .builder()
+//            .employeeDto(EmployeeDto.builder()
+//                .id(1L)
+//                .firstName("Петро")
+//                .lastName("Петренко")
+//                .phoneNumber("+380935577455")
+//                .email("test@gmail.com")
+//                .image("path")
+//                .employeePositions(List.of(PositionDto.builder()
+//                    .id(1L)
+//                    .name("Водій")
+//                    .nameEn("Driver")
+//                    .build()))
+//                .build())
+////            .tariffId(List.of(1L))
+//            .build();
+//    }
+
     public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
-        return EmployeeWithTariffsIdDto
-            .builder()
+        return EmployeeWithTariffsIdDto.builder()
             .employeeDto(EmployeeDto.builder()
                 .id(1L)
                 .firstName("Петро")
@@ -1399,7 +1414,7 @@ public class ModelUtils {
                     .nameEn("Driver")
                     .build()))
                 .build())
-//            .tariffId(List.of(1L))
+            .tariffs(null)
             .build();
     }
 
