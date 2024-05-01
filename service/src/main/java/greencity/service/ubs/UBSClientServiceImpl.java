@@ -328,8 +328,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         var order = orderRepository.findById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        checkIsOrderOfCurrentUser(user, order);
-
         var tariffsInfo = order.getTariffsInfo();
 
         var location = getLocationByOrderIdThroughLazyInitialization(order);
@@ -338,12 +336,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         return getUserPointsAndAllBagsDtoByTariffIdAndOrderIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints(),
             orderId);
-    }
-
-    private void checkIsOrderOfCurrentUser(User user, Order order) {
-        if (!order.getUser().equals(user)) {
-            throw new AccessDeniedException(ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER);
-        }
     }
 
     private void checkIfTariffIsAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {

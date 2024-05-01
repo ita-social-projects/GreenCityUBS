@@ -446,7 +446,6 @@ class UBSClientServiceImplTest {
         var uuid = user.getUuid();
 
         var order = getOrderWithTariffAndLocation();
-        order.setUser(user);
         var orderId = order.getId();
 
         var tariffsInfo = order.getTariffsInfo();
@@ -531,31 +530,6 @@ class UBSClientServiceImplTest {
             uuid, orderId));
 
         assertEquals(expectedErrorMessage, exception.getMessage());
-
-        verify(userRepository).findUserByUuid(anyString());
-        verify(orderRepository).findById(orderId);
-
-        verify(tariffLocationRepository, never()).findTariffLocationByTariffsInfoAndLocation(any(), any());
-        verify(bagRepository, never()).findAllActiveBagsByTariffsInfoId(anyLong());
-        verify(modelMapper, never()).map(any(), any());
-    }
-
-    @Test
-    void getFirstPageDataByOrderIdShouldThrowExceptionWhenOrderIsNotOfCurrentUser() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
-        var order = getOrderWithoutPayment();
-        order.setUser(User.builder().build());
-        var orderId = order.getId();
-
-        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-
-        var exception = assertThrows(AccessDeniedException.class, () -> ubsService.getFirstPageDataByOrderId(
-            uuid, orderId));
-
-        assertEquals(ORDER_DOES_NOT_BELONG_TO_USER, exception.getMessage());
 
         verify(userRepository).findUserByUuid(anyString());
         verify(orderRepository).findById(orderId);
