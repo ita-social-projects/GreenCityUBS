@@ -214,7 +214,7 @@ public interface UBSClientService {
      * @return {@link UbsCustomersDto};
      * @author Rusanovscaia Nadejda
      */
-    UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String email);
+    UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String userUuid);
 
     /**
      * Method creates ubs user profile if it does not exist.
