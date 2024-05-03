@@ -1675,6 +1675,7 @@ public class ModelUtils {
             .regionEn(KYIV_REGION_EN)
             .region(KYIV_REGION_UA)
             .city("City")
+                .cityEn("Kyiv")
             .actual(false)
             .build();
     }

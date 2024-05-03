@@ -55,6 +55,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -159,7 +160,6 @@ class UBSClientServiceImplTest {
     private OrderBagService orderBagService;
     @Mock
     private OrderBagRepository orderBagRepository;
-
     @Test
     void testGetAllDistricts() {
 
@@ -601,6 +601,7 @@ class UBSClientServiceImplTest {
         }
         tariffsInfo.setBags(Collections.singletonList(bag));
         order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
