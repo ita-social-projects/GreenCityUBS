@@ -76,7 +76,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .accessDeniedHandler((req, resp, exc) -> resp.sendError(SC_FORBIDDEN, "You don't have authorities."))
             .and()
             .authorizeRequests()
-            .antMatchers(HttpMethod.GET, UBS_LINK + "/order-details-for-tariff")
+            .antMatchers(HttpMethod.GET,
+                    UBS_LINK + "/order-details-for-tariff",
+                    ADMIN_EMPL_LINK + "/get-employees/{tariffId}",
+                    UBS_LINK + "/tariffs/{locationId}")
             .permitAll()
             .antMatchers(HttpMethod.POST, UBS_LINK + "/userProfile/user/create")
             .permitAll()
@@ -230,8 +233,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/notifications/**",
                 UBS_LINK + "/check-if-tariff-exists/{id}",
                 UBS_LINK + "/locations",
-                UBS_LINK + "/tariffs/{locationId}",
-                ADMIN_LINK + "/ubs-employee/get-employees/{tariffId}",
                 "/notifications/quantityUnreadenNotifications")
             .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PUT,
