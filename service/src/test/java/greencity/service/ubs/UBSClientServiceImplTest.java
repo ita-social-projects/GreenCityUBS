@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.ModelUtils;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
+import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
@@ -51,9 +52,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
@@ -159,6 +166,12 @@ class UBSClientServiceImplTest {
     private OrderBagService orderBagService;
     @Mock
     private OrderBagRepository orderBagRepository;
+
+    @Mock
+    private SecurityContext securityContext;
+
+    @Mock
+    private Authentication authentication;
 
     @Test
     void testGetAllDistricts() {
@@ -1551,16 +1564,21 @@ class UBSClientServiceImplTest {
 
     @Test
     void updateUbsUserInfoInOrderTest() {
-        UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
-            .recipientId(1L)
-            .recipientName("Anatolii")
-            .recipientSurName("Anatolii")
-            .recipientEmail("anatolii.andr@gmail.com")
-            .recipientPhoneNumber("095123456").build();
+        UbsCustomersDtoUpdate request = getUbsCustomer();
 
-        Optional<UBSuser> user = Optional.of(getUBSuser());
-        when(ubsUserRepository.findById(1L)).thenReturn(user);
-        when(ubsUserRepository.save(user.get())).thenReturn(user.get());
+        Optional<UBSuser> ubsUserOptional = Optional.of(getUBSuser());
+        UBSuser ubsUser = ubsUserOptional.get();
+        User user = getUser();
+        ubsUser.setUser(user);
+
+        MockedStatic<SecurityContextHolder> mockedContextHolder = mockStatic(SecurityContextHolder.class);
+        mockedContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getAuthorities()).thenReturn(Collections.emptyList());
+        doNothing().when(eventService).save(anyString(), anyString(), any());
+
+        when(ubsUserRepository.findById(1L)).thenReturn(ubsUserOptional);
+        when(ubsUserRepository.save(ubsUser)).thenReturn(ubsUser);
 
         UbsCustomersDto expected = UbsCustomersDto.builder()
             .name("Anatolii Anatolii")
@@ -1572,7 +1590,52 @@ class UBSClientServiceImplTest {
         assertEquals(expected, actual);
 
         verify(ubsUserRepository).findById(1L);
-        verify(ubsUserRepository).save(user.get());
+        verify(ubsUserRepository).save(ubsUserOptional.get());
+        verify(eventService).save(anyString(), anyString(), any());
+
+        mockedContextHolder.verify(SecurityContextHolder::getContext);
+        verify(securityContext).getAuthentication();
+        verify(authentication).getAuthorities();
+
+        mockedContextHolder.close();
+    }
+
+    @Test
+    void updateUbsUserInfoInOrderWithWrongAccessThrowsExceptionTest() {
+        UbsCustomersDtoUpdate request = getUbsCustomer();
+
+        Optional<UBSuser> ubsUserOptional = Optional.of(getUBSuser());
+        UBSuser ubsUser = ubsUserOptional.get();
+        User user = getUser();
+        ubsUser.setUser(user);
+
+        MockedStatic<SecurityContextHolder> mockedContextHolder = mockStatic(SecurityContextHolder.class);
+        mockedContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getAuthorities())
+            .thenReturn((Collection) Collections.singletonList(new SimpleGrantedAuthority(USER_WITH_PREFIX)));
+
+        when(ubsUserRepository.findById(1L)).thenReturn(ubsUserOptional);
+
+        assertThrows(AccessDeniedException.class,
+            () -> ubsService.updateUbsUserInfoInOrder(request, user.getUuid() + "test"));
+
+        verify(ubsUserRepository).findById(1L);
+
+        mockedContextHolder.verify(SecurityContextHolder::getContext);
+        verify(securityContext).getAuthentication();
+        verify(authentication).getAuthorities();
+
+        mockedContextHolder.close();
+    }
+
+    private static UbsCustomersDtoUpdate getUbsCustomer() {
+        return UbsCustomersDtoUpdate.builder()
+            .recipientId(1L)
+            .recipientName("Anatolii")
+            .recipientSurName("Anatolii")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .recipientPhoneNumber("095123456").build();
     }
 
     @Test

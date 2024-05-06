@@ -124,6 +124,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -196,6 +197,7 @@ import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -1073,19 +1075,37 @@ public class UBSClientServiceImpl implements UBSClientService {
      * @author Rusanovscaia Nadejda
      */
     @Override
-    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String email) {
-        Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getRecipientId());
-        if (optionalUbsUser.isEmpty()) {
-            throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getRecipientId());
-        }
-        UBSuser user = optionalUbsUser.get();
-        ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
-        eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().getFirst());
+    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String userUuid) {
+        var ubsUser = getUbsUserById(dtoUpdate.getRecipientId());
+        checkUserHasAccessToUpdateData(ubsUser, userUuid);
+
+        ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
+        eventService.save(OrderHistory.CHANGED_SENDER, ubsUser.getUser().getRecipientEmail(),
+            ubsUser.getOrders().getFirst());
+
         return UbsCustomersDto.builder()
-            .name(user.getSenderFirstName() + " " + user.getSenderLastName())
-            .email(user.getSenderEmail())
-            .phoneNumber(user.getSenderPhoneNumber())
+            .name(ubsUser.getSenderFirstName() + " " + ubsUser.getSenderLastName())
+            .email(ubsUser.getSenderEmail())
+            .phoneNumber(ubsUser.getSenderPhoneNumber())
             .build();
+    }
+
+    private UBSuser getUbsUserById(Long recipientId) {
+        return ubsUserRepository.findById(recipientId)
+            .orElseThrow(() -> new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + recipientId));
+    }
+
+    private void checkUserHasAccessToUpdateData(UBSuser ubsUser, String userUuid) {
+        var uuid = ubsUser.getUser().getUuid();
+        if (checkUserRoleIsUser() && !(uuid.equals(userUuid))) {
+            throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
+        }
+    }
+
+    private boolean checkUserRoleIsUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals(USER_WITH_PREFIX));
     }
 
     @Override
