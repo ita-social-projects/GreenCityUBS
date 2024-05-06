@@ -268,7 +268,7 @@ public class OrderController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication) || hasAnyRole('USER','ADMIN')")
     @PutMapping("/update-recipients-data")
     public ResponseEntity<UbsCustomersDto> updateRecipientsInfo(
         @Valid @RequestBody UbsCustomersDtoUpdate dto, @Parameter(hidden = true) @CurrentUserUuid String uuid) {
