@@ -23,6 +23,7 @@ import greencity.enums.EmployeeStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.repository.*;
@@ -412,5 +413,14 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .stream()
             .map(employee -> modelMapper.map(employee, EmployeeWithTariffsDto.class))
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public EmployeeWithTariffsDto getEmployeeByEmail(String email) {
+        Employee employee = employeeRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException(String.format("Employee not found with email %s", email))
+        );
+
+        return modelMapper.map(employee, EmployeeWithTariffsDto.class);
     }
 }

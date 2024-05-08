@@ -116,4 +116,6 @@ public interface UBSManagementEmployeeService {
      *         associated with the given tariff.
      */
     List<EmployeeWithTariffsDto> getEmployeesByTariffId(Long tariffId);
+
+    EmployeeWithTariffsDto getEmployeeByEmail(String email);
 }

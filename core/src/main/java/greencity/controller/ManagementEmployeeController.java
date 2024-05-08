@@ -303,11 +303,17 @@ public class ManagementEmployeeController {
      *
      * @param tariffId The ID of the tariff.
      * @return ResponseEntity containing a list of GetEmployeeDto objects
-     *         representing the employees, with HttpStatus.OK if successful.
+     *         representing the employees, with HttpStatus OK if successful.
      */
     @ApiOperation(value = "Get all employees with enabled chat by tariff id")
     @GetMapping(value = "/get-employees/{tariffId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<EmployeeWithTariffsDto>> getEmployeesByTariffId(@PathVariable Long tariffId) {
         return ResponseEntity.ok().body(employeeService.getEmployeesByTariffId(tariffId));
+    }
+
+    @ApiOperation(value = "Get employee with tariffs by email")
+    @GetMapping(value = "/{email}")
+    public ResponseEntity<EmployeeWithTariffsDto> getEmployeesByUserId(@PathVariable String email) {
+        return ResponseEntity.ok().body(employeeService.getEmployeeByEmail(email));
     }
 }
