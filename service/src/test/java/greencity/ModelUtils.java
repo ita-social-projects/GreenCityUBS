@@ -168,15 +168,18 @@ import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.TariffStatus;
 import greencity.util.Bot;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -200,6 +203,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class ModelUtils {
+    private static final LocalDateTime LOCAL_DATE_TIME = LocalDateTime.of(1994, 3, 28, 15, 10);
+    private static final Clock fixedClock =
+        Clock.fixed(LOCAL_DATE_TIME.toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
 
     public static final String TEST_EMAIL = "test@gmail.com";
     public static final Order TEST_ORDER = createOrder();
@@ -5185,4 +5191,17 @@ public class ModelUtils {
                     .build()),
             100);
     }
+
+    public static Order getNotifyInternallyFormedOrder() {
+        return Order.builder()
+            .id(1L)
+            .user(User.builder().id(1L).build())
+            .deliverFrom(LocalDateTime.now(fixedClock).minusHours(3))
+            .deliverTo(LocalDateTime.now(fixedClock).minusHours(2))
+            .orderStatus(OrderStatus.ADJUSTMENT)
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
+            .orderDate(LocalDateTime.now(fixedClock))
+            .build();
+    }
+
 }
