@@ -117,5 +117,13 @@ public interface UBSManagementEmployeeService {
      */
     List<EmployeeWithTariffsDto> getEmployeesByTariffId(Long tariffId);
 
+    /**
+     * Fetches an employee by their email.
+     *
+     * @param email The email of the employee to be fetched.
+     * @return An EmployeeWithTariffsDto object representing the employee with the
+     *         given email. This object includes details of the employee and the
+     *         tariffs associated with them.
+     */
     EmployeeWithTariffsDto getEmployeeByEmail(String email);
 }

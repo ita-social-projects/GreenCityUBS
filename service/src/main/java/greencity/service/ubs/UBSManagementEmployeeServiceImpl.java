@@ -404,6 +404,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .collect(Collectors.toList());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<EmployeeWithTariffsDto> getEmployeesByTariffId(Long tariffId) {
         List<Employee> employeeWithEnabledChat =
@@ -415,11 +418,13 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .collect(Collectors.toList());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public EmployeeWithTariffsDto getEmployeeByEmail(String email) {
         Employee employee = employeeRepository.findByEmail(email).orElseThrow(
-                () -> new UserNotFoundException(String.format("Employee not found with email %s", email))
-        );
+            () -> new UserNotFoundException(String.format("Employee not found with email %s", email)));
 
         return modelMapper.map(employee, EmployeeWithTariffsDto.class);
     }

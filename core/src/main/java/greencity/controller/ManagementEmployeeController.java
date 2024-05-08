@@ -311,6 +311,14 @@ public class ManagementEmployeeController {
         return ResponseEntity.ok().body(employeeService.getEmployeesByTariffId(tariffId));
     }
 
+    /**
+     * Endpoint to fetch an employee along with their tariffs by their email.
+     *
+     * @param email The email of the employee to be fetched.
+     * @return Containing an EmployeeWithTariffsDto object representing the employee
+     *         with the given email. This object includes details of the employee
+     *         and the tariffs associated with them.
+     */
     @ApiOperation(value = "Get employee with tariffs by email")
     @GetMapping(value = "/{email}")
     public ResponseEntity<EmployeeWithTariffsDto> getEmployeesByUserId(@PathVariable String email) {
