@@ -19,4 +19,10 @@ public final class AppConstant {
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";
     public static final Integer TWO_DECIMALS_AFTER_POINT_IN_CURRENCY = 2;
     public static final Integer NO_DECIMALS_AFTER_POINT_IN_CURRENCY = 0;
+
+    public static final String NOTIFICATOR_START_IS_FAILED_LOG_MESSAGE =
+        "Failed to start scheduled notificator with type {} because cron is incorrect or template is inactive.";
+    public static final String NOTIFICATOR_SUCCESSFULLY_START_LOG_MESSAGE =
+        "Scheduled notificator for {} notification template by {} cron";
+    public static final String NOTIFICATOR_RESTART_LOG_MESSAGE = "Restarting scheduled notificator {}";
 }

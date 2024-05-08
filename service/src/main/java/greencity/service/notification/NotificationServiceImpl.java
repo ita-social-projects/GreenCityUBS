@@ -75,6 +75,9 @@ import static greencity.constant.ErrorMessage.VIOLATION_DOES_NOT_EXIST;
 import static greencity.enums.NotificationReceiverType.SITE;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
+import static greencity.constant.OrderHistory.ADD_VIOLATION;
+import static greencity.constant.OrderHistory.CHANGES_VIOLATION;
+import static greencity.constant.OrderHistory.DELETE_VIOLATION;
 
 @Service
 @Transactional
@@ -100,6 +103,12 @@ public class NotificationServiceImpl implements NotificationService {
     private static final String ORDER_NUMBER_KEY = "orderNumber";
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
     private static final String PAY_BUTTON = "payButton";
+    private static final String VIOLATION_DESCRIPTION = "violationDescription";
+
+    private static final int MAX_NOTIFICATION_ORDER_AGE_MONTHS = 1;
+    private static final int MIN_NOTIFICATION_ORDER_AGE_DAYS = 3;
+    private static final int MAX_NOTIFICATIONS_PER_WEEK = 1;
+
     @Autowired
     private final OrderBagService orderBagService;
 
@@ -109,10 +118,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyUnpaidOrders() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
-            Optional<UserNotification> lastNotification = userNotificationRepository
-                .findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(order.getId(),
-                    NotificationType.UNPAID_ORDER);
-            if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
+            if (checkIfOrderNeedsNewNotification(order, NotificationType.UNPAID_ORDER)) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
                 Double amountToPay = getAmountToPay(order);
@@ -121,16 +127,6 @@ public class NotificationServiceImpl implements NotificationService {
                 fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
             }
         }
-    }
-
-    private boolean checkIfUnpaidOrderNeedsNewNotification(Order order, Optional<UserNotification> lastNotification) {
-        return (lastNotification.isEmpty()
-            || (lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusDays(7))
-                || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusDays(7))))
-            && (order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))
-                || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusMonths(1)))
-            && (order.getOrderDate().isBefore(LocalDateTime.now(clock).minusDays(3))
-                || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)));
     }
 
     private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order,
@@ -179,6 +175,16 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public void notifyAllCourierItineraryFormed() {
+        var orders =
+            orderRepository.findAllByOrderStatusAndOrderPaymentStatus(OrderStatus.ADJUSTMENT, OrderPaymentStatus.PAID);
+        orders.forEach(order -> {
+            checkIfOrderNeedsNewNotification(order, NotificationType.COURIER_ITINERARY_FORMED);
+            notifyCourierItineraryFormed(order);
+        });
+    }
+
     @Override
     public void notifyCourierItineraryFormed(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
@@ -391,18 +397,9 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyAddViolation(Long orderId) {
-        Set<NotificationParameter> parameters = new HashSet<>();
         Violation violation = violationRepository.findByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
-        parameters.add(NotificationParameter.builder()
-            .key("violationDescription")
-            .value(violation.getDescription())
-            .build());
-        parameters.add(NotificationParameter.builder()
-            .key(ORDER_NUMBER_KEY)
-            .value(orderId.toString())
-            .build());
-        fillAndSendNotification(parameters, violation.getOrder(), NotificationType.VIOLATION_THE_RULES);
+        createNewViolationParametersAndSend(orderId, violation);
     }
 
     /**
@@ -432,6 +429,197 @@ public class NotificationServiceImpl implements NotificationService {
             .build());
         fillAndSendNotification(parameters, violation.getOrder(),
             NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void notifyAllAddedViolations() {
+        var orders = getOrdersWithNewViolations();
+        notifyNewViolations(orders);
+    }
+
+    private List<Order> getOrdersWithNewViolations() {
+        return orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION, CHANGES_VIOLATION, DELETE_VIOLATION)
+            .stream()
+            .filter(order -> orderHasJustNewViolations(order.getEvents()))
+            .toList();
+    }
+
+    private boolean orderHasJustNewViolations(List<Event> events) {
+        var names = events.stream()
+            .map(Event::getEventName)
+            .toList();
+
+        return names.contains(ADD_VIOLATION)
+            && !names.contains(CHANGES_VIOLATION) && !names.contains(DELETE_VIOLATION);
+    }
+
+    private void notifyNewViolations(List<Order> orders) {
+        orders.forEach(order -> {
+            checkIfOrderNeedsNewNotification(order, NotificationType.VIOLATION_THE_RULES);
+            violationRepository.findByOrderId(order.getId())
+                .ifPresent((violation) -> createNewViolationParametersAndSend(order.getId(), violation));
+        });
+    }
+
+    private void createNewViolationParametersAndSend(Long orderId, Violation violation) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+        parameters.add(NotificationParameter.builder()
+            .key(VIOLATION_DESCRIPTION)
+            .value(violation.getDescription())
+            .build());
+        parameters.add(NotificationParameter.builder()
+            .key(ORDER_NUMBER_KEY)
+            .value(orderId.toString())
+            .build());
+        fillAndSendNotification(parameters, violation.getOrder(), NotificationType.VIOLATION_THE_RULES);
+    }
+
+    @Override
+    public void notifyAllCanceledViolations() {
+        var orders = orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION);
+        notifyViolations(orders, NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
+    }
+
+    @Override
+    public void notifyAllChangedViolations() {
+        var orders = getOrdersWithChangedViolations();
+        notifyViolations(orders, NotificationType.CHANGED_IN_RULE_VIOLATION_STATUS);
+    }
+
+    private List<Order> getOrdersWithChangedViolations() {
+        return orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION, DELETE_VIOLATION)
+            .stream()
+            .filter(o -> orderHasChangedViolations(o.getEvents()))
+            .toList();
+    }
+
+    private boolean orderHasChangedViolations(List<Event> events) {
+        var names = events.stream()
+            .map(Event::getEventName)
+            .toList();
+
+        return names.contains(CHANGES_VIOLATION) && !names.contains(DELETE_VIOLATION);
+    }
+
+    private void notifyViolations(List<Order> orders, NotificationType notificationType) {
+        orders.forEach(order -> {
+            checkIfOrderNeedsNewNotification(order, notificationType);
+            Set<NotificationParameter> parameters = new HashSet<>();
+            parameters.add(NotificationParameter.builder()
+                .key(ORDER_NUMBER_KEY)
+                .value(order.getId().toString())
+                .build());
+            fillAndSendNotification(parameters, order, notificationType);
+        });
+    }
+
+    @Override
+    public void notifyAllDoneOrCanceledUnpaidOrders() {
+        var orders = orderRepository.findAllByPaymentStatusesAndOrderStatuses(
+            List.of(OrderPaymentStatus.UNPAID, OrderPaymentStatus.HALF_PAID),
+            List.of(OrderStatus.DONE, OrderStatus.CANCELED));
+        orders.forEach(this::notifyDoneOrCanceledUnpaidOrder);
+    }
+
+    private void notifyDoneOrCanceledUnpaidOrder(Order order) {
+        if (checkByEventsOrderDoneOrCanceled(order)) {
+            notifyOrderWithStatus(order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
+        }
+    }
+
+    private boolean checkByEventsOrderDoneOrCanceled(Order order) {
+        return order.getEvents().stream()
+            .map(Event::getEventName)
+            .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
+                || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
+            .count() == 3;
+    }
+
+    @Override
+    public void notifyAllHalfPaidOrdersWithStatusBroughtByHimself() {
+        var orders = orderRepository.findAllByOrderStatusAndOrderPaymentStatus(
+            OrderStatus.BROUGHT_IT_HIMSELF, OrderPaymentStatus.HALF_PAID);
+
+        orders.forEach(
+            order -> notifyOrderWithStatus(order, NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF));
+    }
+
+    @Override
+    public void notifyAllChangedOrderStatuses() {
+        var orders = orderRepository.findAllByOrderStatusWithEvents(OrderStatus.BROUGHT_IT_HIMSELF);
+        orders.forEach(order -> {
+            if (checkByEventsOrderStatusIsChanged(order)) {
+                notifyOrderWithStatus(order, NotificationType.ORDER_STATUS_CHANGED);
+            }
+        });
+    }
+
+    private boolean checkByEventsOrderStatusIsChanged(Order order) {
+        return order.getEvents().stream()
+            .map(Event::getEventName)
+            .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED));
+    }
+
+    @Override
+    public void notifyUnpaidPackages() {
+        var orders = orderRepository.findAllByOrderPaymentStatusWithEvents(OrderPaymentStatus.HALF_PAID);
+        orders.forEach(this::notifyUnpaidPackage);
+    }
+
+    private void notifyUnpaidPackage(Order order) {
+        if (checkOrderWithUnpaidPackage(order)) {
+            notifyOrderWithStatus(order, NotificationType.UNPAID_PACKAGE);
+        }
+    }
+
+    private boolean checkOrderWithUnpaidPackage(Order order) {
+        return checkOrderIsNotBroughtByHimself(order) && checkOrderIsNotDoneOrCanceled(order);
+    }
+
+    private boolean checkOrderIsNotBroughtByHimself(Order order) {
+        return !(order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF);
+    }
+
+    private boolean checkOrderIsNotDoneOrCanceled(Order order) {
+        return !((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
+            && checkByEventsOrderDoneOrCanceled(order));
+    }
+
+    private void notifyOrderWithStatus(Order order, NotificationType notificationType) {
+        checkIfOrderNeedsNewNotification(order, notificationType);
+        var amountToPay = getAmountToPay(order);
+        var parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
+        fillAndSendNotification(parameters, order, notificationType);
+    }
+
+    private boolean checkIfOrderNeedsNewNotification(Order order, NotificationType notificationType) {
+        Optional<UserNotification> lastNotification = getLastOrderNotificationByType(order, notificationType);
+        return checkUserNeedNotification(lastNotification) && checkOrderNeedNotification(order);
+    }
+
+    private Optional<UserNotification> getLastOrderNotificationByType(Order order, NotificationType notificationType) {
+        return userNotificationRepository
+            .findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(order.getId(), notificationType);
+    }
+
+    private boolean checkUserNeedNotification(Optional<UserNotification> lastNotification) {
+        if (lastNotification.isEmpty()) {
+            return true;
+        }
+        LocalDateTime weekAgo = LocalDateTime.now(clock).minusWeeks(MAX_NOTIFICATIONS_PER_WEEK);
+        LocalDateTime lastNotificationTime = lastNotification.get().getNotificationTime();
+
+        return lastNotificationTime.isBefore(weekAgo) || lastNotificationTime.isEqual(weekAgo);
+    }
+
+    private boolean checkOrderNeedNotification(Order order) {
+        return (order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(MAX_NOTIFICATION_ORDER_AGE_MONTHS))
+            || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusMonths(MAX_NOTIFICATION_ORDER_AGE_MONTHS)))
+            && (order.getOrderDate().isBefore(LocalDateTime.now(clock).minusDays(MIN_NOTIFICATION_ORDER_AGE_DAYS))
+                || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(MIN_NOTIFICATION_ORDER_AGE_DAYS)));
     }
 
     /**

@@ -3,6 +3,7 @@ package greencity.repository;
 import greencity.enums.OrderPaymentStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import greencity.enums.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -181,4 +182,41 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             + "left join order_bag_mapping obm on o.id = obm.order_id "
             + "where obm.bag_id = :bagId")
     List<Order> findAllByBagId(Integer bagId);
+
+    /**
+     * method gets orders by order status and order payment status.
+     */
+    List<Order> findAllByOrderStatusAndOrderPaymentStatus(OrderStatus orderStatus, OrderPaymentStatus paymentStatus);
+
+    /**
+     * method gets orders by order status left join events.
+     */
+    @Query("select o from Order o "
+        + "left join fetch o.events e WHERE o.orderStatus =?1")
+    List<Order> findAllByOrderStatusWithEvents(OrderStatus orderStatus);
+
+    /**
+     * method gets orders by event names inner join events.
+     */
+    @Query("select o from Order o "
+        + "inner join fetch o.events e WHERE e.eventName IN (:eventNames)")
+    List<Order> findAllWithEventsByEventNames(@Param("eventNames") String... eventNames);
+
+    /**
+     * method gets orders by order payment status left join events.
+     */
+    @Query("select o from Order o "
+        + "left join fetch o.events e WHERE o.orderPaymentStatus =?1")
+    List<Order> findAllByOrderPaymentStatusWithEvents(OrderPaymentStatus orderStatus);
+
+    /**
+     * method gets orders by order payment statuses and order statuses inner join
+     * events.
+     */
+    @Query("select o from Order o "
+        + "inner join fetch o.events e "
+        + "WHERE o.orderStatus in (:orderStatuses) AND o.orderPaymentStatus in (:paymentStatuses)")
+    List<Order> findAllByPaymentStatusesAndOrderStatuses(
+        @Param("paymentStatuses") List<OrderPaymentStatus> paymentStatuses,
+        @Param("orderStatuses") List<OrderStatus> orderStatuses);
 }
