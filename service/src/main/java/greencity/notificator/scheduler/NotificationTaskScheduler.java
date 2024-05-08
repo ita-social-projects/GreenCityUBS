@@ -20,13 +20,13 @@ public class NotificationTaskScheduler {
 
     public ScheduledNotificationDto scheduleNotification(
         Runnable task, String schedule, NotificationType notificationType, Class<? extends ScheduledNotificator> type) {
-        var scheduledFuture = scheduleTask(task, schedule,notificationType);
+        var scheduledFuture = scheduleTask(task, schedule, notificationType);
         return new ScheduledNotificationDto(notificationType, scheduledFuture, type);
     }
 
     private ScheduledFuture<?> scheduleTask(Runnable task, String schedule, NotificationType notificationType) {
         ScheduledFuture<?> scheduledFuture = null;
-        if (isExpressionCorrect(schedule,notificationType)) {
+        if (isExpressionCorrect(schedule, notificationType)) {
             scheduledFuture = taskScheduler.schedule(task, new CronTrigger(schedule));
             log.info(AppConstant.NOTIFICATOR_SUCCESSFULLY_START_LOG_MESSAGE, notificationType, schedule);
         }
