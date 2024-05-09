@@ -80,6 +80,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_LINK + "/order-details-for-tariff",
                 ADMIN_EMPL_LINK + "/get-employees/{tariffId}",
                 UBS_LINK + "/tariffs/{locationId}")
+                UBS_LINK + "/getAllActiveCouriers",
+                UBS_LINK + "/locations/{courierId}")
             .permitAll()
             .antMatchers(HttpMethod.POST, UBS_LINK + "/userProfile/user/create")
             .permitAll()
