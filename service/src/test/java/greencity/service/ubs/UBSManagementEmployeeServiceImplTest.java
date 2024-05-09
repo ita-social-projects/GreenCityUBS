@@ -84,13 +84,11 @@ class UBSManagementEmployeeServiceImplTest {
             "", "application/json", "random Bytes".getBytes());
 
         when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
-        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(repository.save(any())).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         employeeService.save(dto, file);
 
         verify(repository, times(1)).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
-        verify(modelMapper, times(2)).map(any(), any());
         verify(repository, times(1)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
     }
@@ -160,14 +158,12 @@ class UBSManagementEmployeeServiceImplTest {
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
 
         when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
-        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(repository.save(any())).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         employeeService.save(dto, null);
 
         verify(repository, times(1))
             .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
-        verify(modelMapper, times(2)).map(any(), any());
         verify(repository, times(1)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
     }

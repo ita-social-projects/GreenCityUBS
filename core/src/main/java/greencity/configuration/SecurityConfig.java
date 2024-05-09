@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -38,6 +39,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 @EnableWebSecurity
 @EnableGlobalAuthentication
+@EnableMethodSecurity
 public class SecurityConfig {
     private final JwtTool jwtTool;
     private final FeignClientCallAsync userRemoteClient;
@@ -219,12 +221,14 @@ public class SecurityConfig {
                 .hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.PUT,
                     UBS_MANAG_LINK + "/**",
-                    UBS_LINK + "/update-recipients-data",
                     ADMIN_LINK + "/notification/update",
                     ADMIN_LINK + "/**",
                     "/notifications/updateTemplateForOTHER",
                     "/notifications/updateTemplateForSITE")
                 .hasAnyRole(ADMIN)
+                .requestMatchers(HttpMethod.PUT,
+                    UBS_LINK + "/update-recipients-data")
+                .hasAnyRole(ADMIN, UBS_EMPLOYEE, USER)
                 .requestMatchers(HttpMethod.HEAD,
                     UBS_MANAG_LINK + "/**",
                     SUPER_ADMIN_LINK + "/**",
