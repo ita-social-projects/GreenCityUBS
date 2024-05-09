@@ -1,6 +1,7 @@
 package greencity.service.notification;
 
 import greencity.client.UserRemoteClient;
+import greencity.dto.notification.EmailNotificationDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
@@ -42,6 +43,12 @@ public class EmailService extends AbstractNotificationProvider {
      */
     @Override
     protected void sendNotification(UserNotification notification, NotificationDto notificationDto) {
-        userRemoteClient.sendEmailNotification(notificationDto, notification.getUser().getRecipientEmail());
+        var emailNotification = EmailNotificationDto.builder()
+            .email(notification.getUser().getRecipientEmail())
+            .subject(notificationDto.getTitle())
+            .message(notificationDto.getBody())
+            .build();
+
+        userRemoteClient.sendEmailNotification(emailNotification);
     }
 }

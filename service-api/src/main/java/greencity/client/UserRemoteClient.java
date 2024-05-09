@@ -6,7 +6,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.EmailNotificationDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
@@ -110,11 +110,10 @@ public interface UserRemoteClient {
     /**
      * Sends an email notification for user.
      *
-     * @param notification {@link NotificationDto} - notification details.
-     * @param email        {@link String} user's email.
+     * @param notification {@link EmailNotificationDto} - notification details.
      */
-    @PostMapping("/email/notification")
-    void sendEmailNotification(NotificationDto notification, @RequestParam(EMAIL) String email);
+    @PostMapping("/email/general/notification")
+    void sendEmailNotification(@RequestBody EmailNotificationDto notification);
 
     /**
      * Get information about all employee's authorities.
