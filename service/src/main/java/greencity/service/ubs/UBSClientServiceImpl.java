@@ -536,8 +536,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkAndCalculateAddressCoordinatesIfEmpty(Address address) {
-        if (address.getCoordinates() == null || address.getCoordinates().getLatitude() == 0.0
-            || address.getCoordinates().getLongitude() == 0.0) {
+        if ((address.getCoordinates().getLatitude() == 0.0 && address.getCoordinates().getLongitude() == 0.0)
+            || address.getCoordinates() == null) {
             Coordinates addressCoordinates = googleApiService.getCoordinatesByGoogleMapsGeocoding(
                 UKRAINE_EN, address.getCityEn(), LANG_EN);
             address.setCoordinates(addressCoordinates);

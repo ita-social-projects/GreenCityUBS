@@ -37,6 +37,7 @@ import greencity.entity.viber.ViberBot;
 import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
@@ -55,13 +56,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.*;
 import static java.util.stream.Collectors.toList;
@@ -160,6 +158,7 @@ class UBSClientServiceImplTest {
     private OrderBagService orderBagService;
     @Mock
     private OrderBagRepository orderBagRepository;
+
     @Test
     void testGetAllDistricts() {
 
@@ -604,8 +603,8 @@ class UBSClientServiceImplTest {
         }
         tariffsInfo.setBags(Collections.singletonList(bag));
         order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
-        when(locationRepository.findAddressAndLocationNamesMatch(anyLong(),anyLong()))
-                .thenReturn(Optional.of("Bearded Lady"));
+        when(locationRepository.findAddressAndLocationNamesMatch(anyLong(), anyLong()))
+            .thenReturn(Optional.of("Bearded Lady"));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
@@ -622,7 +621,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testSaveToDB() throws  {
+    void testSaveToDBThrowsAddressNotWithinLocationAreaException() throws AddressNotWithinLocationAreaException {
         User user = getUserWithLastLocation();
         user.setAlternateEmail("test@mail.com");
         user.setCurrentPoints(900);
@@ -630,50 +629,63 @@ class UBSClientServiceImplTest {
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().getFirst().setAmount(15);
         dto.setAddressId(1L);
-        dto.setLocationId(15L);
-        Order order = getOrder();
-        user.setOrders(new ArrayList<>());
-        user.getOrders().add(order);
-        user.setChangeOfPointsList(new ArrayList<>());
+        dto.setLocationId(2L);
 
-        Bag bag = getBagForOrder();
-        TariffsInfo tariffsInfo = getTariffInfo();
-
-        UBSuser ubSuser = getUBSuser();
-
-        OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
-
-        Order order1 = getOrder();
-        order1.setPayment(new ArrayList<>());
-        Payment payment1 = getPayment();
-        payment1.setId(1L);
-        order1.getPayment().add(payment1);
-
-        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("merchantId")) {
-                f.setAccessible(true);
-                f.set(ubsService, "1");
-            }
-        }
-        tariffsInfo.setBags(Collections.singletonList(bag));
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
-        when(locationRepository.findAddressAndLocationNamesMatch(anyLong(),anyLong()))
-                .thenReturn(Optional.of("Bearded Lady"));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
-        when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
-        when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
-        Assertions.assertNotNull(result);
+        assertThrows(AddressNotWithinLocationAreaException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+        verify(addressRepository).findById(anyLong());
+        verify(userRepository).findByUuid(anyString());
+    }
+
+    @Test
+    void testSaveToDBWithNullCoordinatesThrowsException() throws AddressNotWithinLocationAreaException {
+        User user = getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().getFirst().setAmount(15);
+        dto.setAddressId(1L);
+        dto.setLocationId(2L);
+
+        Address addressWithNullCoordinates = ModelUtils.getAddress();
+        addressWithNullCoordinates.setCityEn("Poltava");
+        Coordinates coordinates = ModelUtils.getCoordinates();
+        coordinates.setLatitude(0.0);
+        coordinates.setLongitude(0.0);
+        addressWithNullCoordinates.setCoordinates(coordinates);
+        when(googleApiService.getCoordinatesByGoogleMapsGeocoding(anyString(), anyString(), anyString()))
+            .thenReturn(ModelUtils.getCoordinates());
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(addressWithNullCoordinates));
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        assertThrows(AddressNotWithinLocationAreaException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+        verify(addressRepository).findById(anyLong());
+        verify(userRepository).findByUuid(anyString());
+
+        coordinates = null;
+        addressWithNullCoordinates.setCoordinates(coordinates);
+        assertThrows(AddressNotWithinLocationAreaException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+    }
+
+    @Test
+    void testSaveToDBThrowsEntityNotFoundException() throws EntityNotFoundException {
+        User user = getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().getFirst().setAmount(15);
+        dto.setAddressId(1L);
+        dto.setLocationId(1L);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        assertThrows(EntityNotFoundException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+        verify(userRepository).findByUuid(anyString());
     }
 
     @Test

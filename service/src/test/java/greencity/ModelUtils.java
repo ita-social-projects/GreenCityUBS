@@ -426,7 +426,7 @@ public class ModelUtils {
 
     public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
-                .addressId(1L)
+            .addressId(1L)
             .additionalOrders(new HashSet<>(List.of("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .locationId(1L)
@@ -1676,7 +1676,7 @@ public class ModelUtils {
             .regionEn(KYIV_REGION_EN)
             .region(KYIV_REGION_UA)
             .city("City")
-                .cityEn("Kyiv")
+            .cityEn("Kyiv")
             .actual(false)
             .build();
     }
