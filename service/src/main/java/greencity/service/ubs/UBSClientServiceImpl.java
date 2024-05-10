@@ -354,7 +354,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkIsOrderOfCurrentUser(User user, Order order) {
-        if (!order.getUser().equals(user)) {
+        if (!order.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException(ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER);
         }
     }
