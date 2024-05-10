@@ -554,8 +554,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         double angle = haversine(differenceLatInRad) + Math.cos(point1LatInRad)
             * Math.cos(point2LatInRad) * haversine(differenceLongInRad);
-        double distance = EARTH_RADIUS * 2 * Math.atan2(Math.sqrt(angle), Math.sqrt(1 - angle));
-        return distance;
+        return EARTH_RADIUS * 2 * Math.atan2(Math.sqrt(angle), Math.sqrt(1 - angle));
     }
 
     private double haversine(double distance) {
