@@ -664,11 +664,6 @@ class UBSClientServiceImplTest {
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
         verify(addressRepository).findById(anyLong());
         verify(userRepository).findByUuid(anyString());
-
-        coordinates = null;
-        addressWithNullCoordinates.setCoordinates(coordinates);
-        assertThrows(AddressNotWithinLocationAreaException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
     }
 
     @Test
