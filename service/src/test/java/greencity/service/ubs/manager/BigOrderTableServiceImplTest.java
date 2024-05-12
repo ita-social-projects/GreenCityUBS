@@ -47,11 +47,12 @@ class BigOrderTableServiceImplTest {
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         List<Long> tariffsInfoIds = new ArrayList<>();
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(employee);
-        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria, tariffsInfoIds)).thenReturn(Page.empty());
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria, tariffsInfoIds, "eng"))
+            .thenReturn(Page.empty());
 
         bigOrderTableService.getOrders(orderPage, orderSearchCriteria, "test@gmail.com");
 
-        verify(bigOrderTableRepository).findAll(orderPage, orderSearchCriteria, tariffsInfoIds);
+        verify(bigOrderTableRepository).findAll(orderPage, orderSearchCriteria, tariffsInfoIds, "eng");
     }
 
     @Test

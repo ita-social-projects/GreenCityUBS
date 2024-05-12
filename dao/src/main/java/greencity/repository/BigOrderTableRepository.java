@@ -1,8 +1,10 @@
 package greencity.repository;
 
 import greencity.entity.order.BigOrderTableViews;
+import greencity.enums.OrderStatusSortingTranslation;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -10,13 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import static java.util.Objects.nonNull;
 
 @Repository
@@ -45,14 +41,14 @@ public class BigOrderTableRepository {
      * @author Kuzbyt Maksym
      */
     public Page<BigOrderTableViews> findAll(OrderPage orderPage, OrderSearchCriteria searchCriteria,
-        List<Long> tariffsInfoIds) {
+        List<Long> tariffsInfoIds, String userLanguage) {
         var criteriaQuery = criteriaBuilder.createQuery(BigOrderTableViews.class);
         var orderRoot = criteriaQuery.from(BigOrderTableViews.class);
 
         var predicate = getPredicate(searchCriteria, orderRoot, tariffsInfoIds);
 
         criteriaQuery.select(orderRoot).where(predicate);
-        sort(orderPage, criteriaQuery, orderRoot);
+        sort(orderPage, criteriaQuery, orderRoot, userLanguage);
 
         var typedQuery = entityManager.createQuery(criteriaQuery);
         typedQuery.setFirstResult(orderPage.getPageNumber() * orderPage.getPageSize());
@@ -130,11 +126,49 @@ public class BigOrderTableRepository {
         predicates.add(criteriaPredicate.filter(tariffsInfoIds, orderRoot, "tariffsInfoId"));
     }
 
-    private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root) {
-        if (orderPage.getSortDirection().equals(Sort.Direction.ASC)) {
-            cq.orderBy(criteriaBuilder.asc(root.get(orderPage.getSortBy())));
+    private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root,
+        String userLanguage) {
+        String sortBy = orderPage.getSortBy();
+        if (userLanguage.equals("ua") && (sortBy.equals("orderStatus") || sortBy.equals("orderPaymentStatus"))) {
+            sortingForUkrainianLocalization(orderPage, cq, root);
         } else {
-            cq.orderBy(criteriaBuilder.desc(root.get(orderPage.getSortBy())));
+            sortingForEnglishLocalization(orderPage, cq, root);
+        }
+    }
+
+    private void sortingForEnglishLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+        Root<BigOrderTableViews> root) {
+        String sortBy = orderPage.getSortBy();
+        if (orderPage.getSortDirection().equals(Sort.Direction.ASC)) {
+            cq.orderBy(criteriaBuilder.asc(root.get(sortBy)));
+        } else {
+            cq.orderBy(criteriaBuilder.desc(root.get(sortBy)));
+        }
+    }
+
+    private void sortingForUkrainianLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+        Root<BigOrderTableViews> root) {
+        switch (orderPage.getSortBy()) {
+            case ("orderStatus"):
+                Map<OrderStatusSortingTranslation, Integer> sortOrderMap =
+                    OrderStatusSortingTranslation.getOrderMapSortedByAsc();
+                CriteriaBuilder.Case<Integer> selectCase = criteriaBuilder.selectCase();
+                Expression<Integer> otherwiseExpression =
+                    criteriaBuilder.literal(OrderStatusSortingTranslation.OTHER.getSortOrder());
+                for (Map.Entry<OrderStatusSortingTranslation, Integer> entry : sortOrderMap.entrySet()) {
+                    selectCase = selectCase.when(
+                        criteriaBuilder.equal(root.get("orderStatus"), entry.getKey().name()),
+                        entry.getValue());
+                }
+                Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
+                cq.orderBy(criteriaBuilder.asc(sortOrder));
+                break;
+            // should implement custom realization with #7100
+            case ("orderPaymentStatus"):
+                sortingForEnglishLocalization(orderPage, cq, root);
+                break;
+            default:
+                sortingForEnglishLocalization(orderPage, cq, root);
         }
     }
 
