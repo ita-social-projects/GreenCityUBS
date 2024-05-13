@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.LatLng;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
@@ -537,8 +538,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkAndCalculateAddressCoordinatesIfEmpty(Address address) {
         if (address.getCoordinates().getLatitude() == 0.0 && address.getCoordinates().getLongitude() == 0.0) {
-            Coordinates addressCoordinates = googleApiService.getCoordinatesByGoogleMapsGeocoding(
-                UKRAINE_EN, address.getCityEn(), LANG_EN);
+            LatLng latLng = googleApiService
+                .getGeocodingResultByCityAndCountryAndLocale(UKRAINE_EN, address.getCityEn(),
+                    LANG_EN).geometry.location;
+            Coordinates addressCoordinates = Coordinates.builder().latitude(latLng.lat).longitude(latLng.lng).build();
             address.setCoordinates(addressCoordinates);
             addressRepo.save(address);
         }

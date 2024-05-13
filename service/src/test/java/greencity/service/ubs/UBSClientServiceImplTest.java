@@ -652,12 +652,10 @@ class UBSClientServiceImplTest {
 
         Address addressWithNullCoordinates = ModelUtils.getAddress();
         addressWithNullCoordinates.setCityEn("Poltava");
-        Coordinates coordinates = ModelUtils.getCoordinates();
-        coordinates.setLatitude(0.0);
-        coordinates.setLongitude(0.0);
+        Coordinates coordinates = Coordinates.builder().latitude(0.0).longitude(0.0).build();
         addressWithNullCoordinates.setCoordinates(coordinates);
-        when(googleApiService.getCoordinatesByGoogleMapsGeocoding(anyString(), anyString(), anyString()))
-            .thenReturn(ModelUtils.getCoordinates());
+        when(googleApiService.getGeocodingResultByCityAndCountryAndLocale(anyString(), anyString(), anyString()))
+            .thenReturn(getGeocodingResultWithKyivRegion().getFirst());
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(addressWithNullCoordinates));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         assertThrows(AddressNotWithinLocationAreaException.class,
