@@ -128,47 +128,11 @@ public class BigOrderTableRepository {
 
     private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root,
         String userLanguage) {
-        String sortBy = orderPage.getSortBy();
-        if (userLanguage.equals("ua") && (sortBy.equals("orderStatus") || sortBy.equals("orderPaymentStatus"))) {
+        if (userLanguage.equals("ua")
+            && (orderPage.getSortBy().equals("orderStatus") || orderPage.getSortBy().equals("orderPaymentStatus"))) {
             sortingForUkrainianLocalization(orderPage, cq, root);
         } else {
-            sortingForEnglishLocalization(orderPage, cq, root);
-        }
-    }
-
-    private void sortingForEnglishLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
-        Root<BigOrderTableViews> root) {
-        String sortBy = orderPage.getSortBy();
-        if (orderPage.getSortDirection().equals(Sort.Direction.ASC)) {
-            cq.orderBy(criteriaBuilder.asc(root.get(sortBy)));
-        } else {
-            cq.orderBy(criteriaBuilder.desc(root.get(sortBy)));
-        }
-    }
-
-    private void sortingForUkrainianLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
-        Root<BigOrderTableViews> root) {
-        switch (orderPage.getSortBy()) {
-            case ("orderStatus"):
-                Map<OrderStatusSortingTranslation, Integer> sortOrderMap =
-                    OrderStatusSortingTranslation.getOrderMapSortedByAsc();
-                CriteriaBuilder.Case<Integer> selectCase = criteriaBuilder.selectCase();
-                Expression<Integer> otherwiseExpression =
-                    criteriaBuilder.literal(OrderStatusSortingTranslation.OTHER.getSortOrder());
-                for (Map.Entry<OrderStatusSortingTranslation, Integer> entry : sortOrderMap.entrySet()) {
-                    selectCase = selectCase.when(
-                        criteriaBuilder.equal(root.get("orderStatus"), entry.getKey().name()),
-                        entry.getValue());
-                }
-                Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
-                cq.orderBy(criteriaBuilder.asc(sortOrder));
-                break;
-            // should implement custom realization with #7100
-            case ("orderPaymentStatus"):
-                sortingForEnglishLocalization(orderPage, cq, root);
-                break;
-            default:
-                sortingForEnglishLocalization(orderPage, cq, root);
+            defaultSorting(orderPage, cq, root, Optional.empty());
         }
     }
 
@@ -178,5 +142,35 @@ public class BigOrderTableRepository {
         var countPredicate = getPredicate(searchCriteria, countOrderRoot, tariffsInfoIds);
         countQuery.select(criteriaBuilder.count(countOrderRoot)).where(countPredicate);
         return entityManager.createQuery(countQuery).getSingleResult();
+    }
+
+    private void defaultSorting(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+        Root<BigOrderTableViews> root, Optional<Expression<Integer>> sortingOrderUkrainianLocalization) {
+        Expression<?> expression = sortingOrderUkrainianLocalization.orElseGet(() -> root.get(orderPage.getSortBy()));
+        if (orderPage.getSortDirection().equals(Sort.Direction.ASC)) {
+            cq.orderBy(criteriaBuilder.asc(expression));
+        } else {
+            cq.orderBy(criteriaBuilder.desc(expression));
+        }
+    }
+
+    private void sortingForUkrainianLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+        Root<BigOrderTableViews> root) {
+        if ("orderStatus".equals(orderPage.getSortBy())) {
+            Map<OrderStatusSortingTranslation, Integer> sortOrderMap =
+                OrderStatusSortingTranslation.getOrderMapSortedByAsc();
+            CriteriaBuilder.Case<Integer> selectCase = criteriaBuilder.selectCase();
+            Expression<Integer> otherwiseExpression =
+                criteriaBuilder.literal(OrderStatusSortingTranslation.OTHER.getSortOrder());
+            for (Map.Entry<OrderStatusSortingTranslation, Integer> entry : sortOrderMap.entrySet()) {
+                selectCase = selectCase.when(
+                    criteriaBuilder.equal(root.get("orderStatus"), entry.getKey().name()),
+                    entry.getValue());
+            }
+            Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
+            defaultSorting(orderPage, cq, root, Optional.of(sortOrder));
+        } else {
+            defaultSorting(orderPage, cq, root, Optional.empty());
+        }
     }
 }
