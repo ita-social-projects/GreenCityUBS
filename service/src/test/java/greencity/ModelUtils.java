@@ -315,7 +315,7 @@ public class ModelUtils {
                 .email("employee@gmail.com")
                 .employeeStatus(EmployeeStatus.ACTIVE)
                 .employeePosition(new HashSet<>())
-//                .tariffInfos(new HashSet<>())
+                .tariffs(List.of())
                 .imagePath("path")
                 .tariffs(List.of(getTariffInfo()))
                 .build());
@@ -1249,10 +1249,10 @@ public class ModelUtils {
                 .name("Водій")
                 .nameEn("Driver")
                 .build()))
-//            .tariffInfos(Set.of(TariffsInfo.builder()
-//                .id(1L)
-//                .service(new Service())
-//                .build()))
+            .tariffs(List.of(TariffsInfo.builder()
+                .id(1L)
+                .service(new Service())
+                .build()))
             .imagePath("path")
             .build();
     }
@@ -1270,9 +1270,8 @@ public class ModelUtils {
                 .name("Водій")
                 .nameEn("Driver")
                 .build()))
-//            .tariffInfos(Set.of(getTariffsInfo()))
-//            .imagePath("path")
-//            .tariffs(List.of(getTariffInfo()))
+            .imagePath("path")
+            .tariffs(List.of(getTariffInfo()))
             .build();
     }
 
@@ -1290,7 +1289,7 @@ public class ModelUtils {
                     .name("Супер адмін")
                     .nameEn("Super admin")
                     .build()))
-//                .tariffInfos(new HashSet<>())
+                .tariffs(List.of())
                 .imagePath("path")
                 .tariffs(List.of(getTariffInfo()))
                 .build());
@@ -1309,11 +1308,11 @@ public class ModelUtils {
                 .name("Водій")
                 .nameEn("Driver")
                 .build()))
-//            .tariffInfos(Set.of(TariffsInfo.builder()
-//                .id(1L)
-//                .service(new Service())
-//                .build()))
-//            .imagePath("path")
+            .tariffs(List.of(TariffsInfo.builder()
+                .id(1L)
+                .service(new Service())
+                .build()))
+            .imagePath("path")
             .build();
     }
 
@@ -1331,13 +1330,6 @@ public class ModelUtils {
                 .name("Водій")
                 .nameEn("Driver")
                 .build()))
-//            .tariffInfos(Set.of(TariffsInfo.builder()
-//                .id(1L)
-//                .service(getService())
-//                .courier(getCourier())
-//                .tariffLocations(Set.of(getTariffLocation()))
-//                .receivingStationList(Set.of(getReceivingStation()))
-//                .build()))
             .tariffs(List.of(TariffsInfo.builder()
                 .id(1L)
                 .service(getService())
@@ -1378,26 +1370,6 @@ public class ModelUtils {
                 .locationStatus(LocationStatus.ACTIVE)
                 .build());
     }
-
-//    public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
-//        return EmployeeWithTariffsIdDto
-//            .builder()
-//            .employeeDto(EmployeeDto.builder()
-//                .id(1L)
-//                .firstName("Петро")
-//                .lastName("Петренко")
-//                .phoneNumber("+380935577455")
-//                .email("test@gmail.com")
-//                .image("path")
-//                .employeePositions(List.of(PositionDto.builder()
-//                    .id(1L)
-//                    .name("Водій")
-//                    .nameEn("Driver")
-//                    .build()))
-//                .build())
-////            .tariffId(List.of(1L))
-//            .build();
-//    }
 
     public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
         return EmployeeWithTariffsIdDto.builder()
