@@ -113,6 +113,7 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationPlatform;
@@ -1194,13 +1195,14 @@ public class ModelUtils {
                 .phoneNumber("+380935577455")
                 .email("test@gmail.com")
                 .image("path")
+                .employeeStatus(EmployeeStatus.ACTIVE)
                 .employeePositions(List.of(PositionDto.builder()
                     .id(1L)
                     .name("Водій")
                     .nameEn("Driver")
                     .build()))
                 .build())
-            .tariffs(List.of(getTariffInfoForEmployeeDto()))
+            .tariffs(List.of())
             .build();
     }
 
@@ -1217,6 +1219,15 @@ public class ModelUtils {
             .receivingStationDtos(List.of(getGetReceivingStationDto()))
             .courier(getCourierTranslationDto(1L))
             .build();
+    }
+
+    public static TariffsInfoRecievingEmployee getTariffsInfoRecievingEmployee(){
+        return TariffsInfoRecievingEmployee
+                .builder()
+                .employee(getEmployee())
+                .tariffsInfo(getTariffInfo())
+                .hasChat(Boolean.TRUE)
+                .build();
     }
 
     public static LocationsDtos getLocationsDtos(Long id) {
@@ -1272,6 +1283,7 @@ public class ModelUtils {
                 .build()))
             .imagePath("path")
             .tariffs(List.of(getTariffInfo()))
+            .tariffsInfoReceivingEmployees(new ArrayList<>())
             .build();
     }
 

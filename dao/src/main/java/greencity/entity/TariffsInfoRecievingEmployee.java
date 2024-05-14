@@ -4,6 +4,7 @@ import greencity.TariffsInfoRecievingEmployeeId;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import javax.persistence.*;
 
 @Data
 @Entity
+@Builder
 @Table(name = "tariff_infos_receiving_employee_mapping")
 @IdClass(TariffsInfoRecievingEmployeeId.class)
 @AllArgsConstructor
