@@ -168,9 +168,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyPaidOrder(PaymentResponseDto dto) {
-        if (dto.getOrder_id() != null) {
-            Long orderId = Long.valueOf(dto.getOrder_id().split("_")[0]);
+    public void notifyPaidOrder(Long orderId) {
+        if (orderId != null) {
             Optional<Order> orderOptional = orderRepository.findById(orderId);
             orderOptional.ifPresent(this::notifyPaidOrder);
         }
@@ -633,5 +632,16 @@ public class NotificationServiceImpl implements NotificationService {
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
         created.setParameters(new HashSet<>(notificationParameters));
         sendNotificationsForBotsAndEmail(created, 0L);
+    }
+
+    /**
+     * Method that creates notification for paid order from PaymentResponseDto.
+     *
+     * @param dto
+     * @author Danylo Hlynskyi
+     */
+    @Override
+    public void notifyPaidOrder(PaymentResponseDto dto) {
+
     }
 }

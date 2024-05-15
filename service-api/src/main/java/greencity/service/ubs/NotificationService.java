@@ -30,6 +30,8 @@ public interface NotificationService {
      */
     void notifyPaidOrder(PaymentResponseDto dto);
 
+    void notifyPaidOrder(Long orderId);
+
     /**
      * Method that creates notification for courier.
      *

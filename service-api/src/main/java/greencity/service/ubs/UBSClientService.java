@@ -26,6 +26,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -51,6 +52,8 @@ public interface UBSClientService {
      * @param dto {@link PaymentResponseDto} - response order data.
      */
     void validatePayment(PaymentResponseDto dto);
+
+    Long validatePaymentLiqPay(PaymentResponseLiqPayDto dto);
 
     /**
      * Methods returns all available for order bags and current user's bonus points.
@@ -422,4 +425,6 @@ public interface UBSClientService {
      */
 
     List<DistrictDto> getAllDistricts(String region, String city);
+
+    String liqPayTest();
 }

@@ -14,6 +14,7 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.*;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -195,10 +196,10 @@ public class OrderController {
     })
     @PostMapping("/receivePayment")
     public ResponseEntity<HttpStatus> receivePayment(
-        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
-        ubsClientService.validatePayment(dto);
+        PaymentResponseLiqPayDto dto, HttpServletResponse response) throws IOException {
+        Long orderId = ubsClientService.validatePaymentLiqPay(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            notificationService.notifyPaidOrder(dto);
+            notificationService.notifyPaidOrder(orderId);
             response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -432,5 +433,11 @@ public class OrderController {
     @GetMapping("/orders/{id}/tariff")
     public ResponseEntity<TariffsForLocationDto> getTariffForOrder(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffForOrder(id));
+    }
+
+    @GetMapping("/liqPayTest")
+    public ResponseEntity<String> liqPayTest() {
+        String result = ubsClientService.liqPayTest();
+        return ResponseEntity.ok(result);
     }
 }
