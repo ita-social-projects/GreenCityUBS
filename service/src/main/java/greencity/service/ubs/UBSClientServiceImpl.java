@@ -5,7 +5,11 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
-import greencity.constant.*;
+import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
+import greencity.constant.OrderHistory;
+import greencity.constant.TariffLocation;
+import greencity.constant.KyivTariffLocation;
 import greencity.dto.AllActiveLocationsDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDtos;
@@ -109,6 +113,7 @@ import greencity.repository.TelegramBotRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
+import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
@@ -521,8 +526,11 @@ public class UBSClientServiceImpl implements UBSClientService {
             double addressLatitude = address.getCoordinates().getLatitude();
             double addressLongitude = address.getCoordinates().getLongitude();
 
-            return calculateDistanceInKmByHaversineFormula(KYIV_LATITUDE, KYIV_LONGITUDE,
-                addressLatitude, addressLongitude) <= LOCATION_40_KM_ZONE_VALUE && !isKyivTariff;
+            double distanceInKm =
+                DistanceCalculationUtils.calculateDistanceInKmByHaversineFormula(KYIV_LATITUDE, KYIV_LONGITUDE,
+                    addressLatitude, addressLongitude);
+
+            return distanceInKm <= LOCATION_40_KM_ZONE_VALUE && !isKyivTariff;
         } else {
             return locationRepository.findAddressAndLocationNamesMatch(locationId, addressId).isPresent();
         }
@@ -542,23 +550,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             address.setCoordinates(addressCoordinates);
             addressRepo.save(address);
         }
-    }
-
-    private double calculateDistanceInKmByHaversineFormula(double point1Lat, double point1Long,
-        double point2Lat, double point2Long) {
-        double differenceLatInRad = Math.toRadians((point2Lat - point1Lat));
-        double differenceLongInRad = Math.toRadians((point2Long - point1Long));
-
-        double point1LatInRad = Math.toRadians(point1Lat);
-        double point2LatInRad = Math.toRadians(point2Lat);
-
-        double angle = haversine(differenceLatInRad) + Math.cos(point1LatInRad)
-            * Math.cos(point2LatInRad) * haversine(differenceLongInRad);
-        return EARTH_RADIUS * 2 * Math.atan2(Math.sqrt(angle), Math.sqrt(1 - angle));
-    }
-
-    private double haversine(double distance) {
-        return Math.pow(Math.sin(distance / 2), 2);
     }
 
     private List<Integer> getBagIds(List<BagDto> dto) {
