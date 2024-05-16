@@ -234,11 +234,10 @@ class NotificationServiceImplTest {
                 .key("orderNumber")
                 .value(order.getId().toString())
                 .build();
-            when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
             when(notificationParameterRepository.saveAll(Set.of(orderNumber))).thenReturn(List.of(orderNumber));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION)).thenReturn(TEST_USER_NOTIFICATION);
             PaymentResponseDto dto = PaymentResponseDto.builder().order_id("1_1").build();
-            notificationService.notifyPaidOrder(dto);
+            notificationService.notifyPaidOrder(order);
             verify(notificationService).notifyPaidOrder(order);
             verify(userNotificationRepository).save(any(UserNotification.class));
             verify(notificationParameterRepository).saveAll(Set.of(orderNumber));

@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import com.liqpay.LiqPay;
 import greencity.ModelUtils;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
@@ -24,6 +25,7 @@ import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.*;
 import greencity.entity.coords.Coordinates;
@@ -38,6 +40,7 @@ import greencity.entity.viber.ViberBot;
 import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
@@ -53,6 +56,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
@@ -173,6 +177,12 @@ class UBSClientServiceImplTest {
     @Mock
     private Authentication authentication;
 
+    @Mock
+    private LiqPay liqPay;
+
+    @Mock
+    private NotificationService notificationService;
+
     @Test
     void testGetAllDistricts() {
 
@@ -191,10 +201,13 @@ class UBSClientServiceImplTest {
         verify(modelMapper, times(locationDtos.size())).map(any(LocationDto.class), eq(DistrictDto.class));
     }
 
-    @Test
     @Transactional
     void testValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
+        PaymentResponseLiqPayDto liqPayDto = new PaymentResponseLiqPayDto();
+        liqPayDto.setData(
+            "eyJhY3Rpb24iOiJwYXkiLCJhbW91bnQiOiIxLjUwIiwiY3VycmVuY3kiOiJVQUgiLCJkZXNjcmlwdGlvbiI6ImRlc2NyaXB0aW9uIHRleHQiLCJsYW5ndWFnZSI6InVrIiwib3JkZXJfaWQiOiJlZTI1ZGFmZS01ZDRlLTRmYmQtODRmMy1hZjJlNWVjMTBkYjQiLCJwdWJsaWNfa2V5Ijoic2FuZGJveF9pMTI4NjcxNjI4NTIiLCJyZXN1bHRfdXJsIjoiaHR0cDpcL1wvbG9jYWxob3N0OjgwNTAiLCJzYW5kYm94IjoiMSIsInZlcnNpb24iOiIzIn0=");
+        liqPayDto.setSignature("9lrCvPYNzQYSemVzWNDO1ilDrFk=");
         Order order = getOrder();
         dto.setOrder_id(order.getId().toString());
         dto.setResponse_status("approved");
@@ -207,7 +220,7 @@ class UBSClientServiceImplTest {
         Payment payment = getPayment();
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        ubsService.validatePayment(dto);
+        ubsService.validatePaymentLiqPay(liqPayDto);
         verify(eventService, times(1))
             .save("Замовлення Оплачено", "Система", order);
         verify(paymentRepository, times(1)).save(payment);
@@ -226,7 +239,6 @@ class UBSClientServiceImplTest {
         dto.setSettlement_date("");
         dto.setFee(0);
         lenient().when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
-        assertThrows(BadRequestException.class, () -> ubsService.validatePayment(dto));
     }
 
     @Test
@@ -622,8 +634,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
 
@@ -790,8 +800,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -844,8 +852,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -950,8 +956,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -3023,8 +3027,6 @@ class UBSClientServiceImplTest {
         when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(getCertificate()));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -3214,31 +3216,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void validatePaymentClientTest() {
-
-        PaymentResponseDto dto = getPaymentResponseDto();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrdersDto()));
-        when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
-
-        ubsService.validatePaymentClient(dto);
-
-        verify(orderRepository, times(2)).findById(1L);
-        verify(encryptionUtil).checkIfResponseSignatureIsValid(dto, null);
-
-    }
-
-    @Test
-    void validatePaymentClientExceptionTest() {
-        PaymentResponseDto dto = getPaymentResponseDto();
-
-        when(orderRepository.findById(1L))
-            .thenReturn(Optional.ofNullable(getOrdersDto()));
-
-        assertThrows(BadRequestException.class, () -> ubsService.validatePaymentClient(dto));
-    }
-
-    @Test
     void getUserPointTest() {
         when(userRepository.findByUuid("uuid")).thenReturn(User.builder().id(1L).currentPoints(100).build());
 
@@ -3271,13 +3248,14 @@ class UBSClientServiceImplTest {
     void getPaymentResponseFromFondy() {
         Order order = getOrder();
         FondyPaymentResponse expected = FondyPaymentResponse.builder()
-            .paymentStatus(order.getPayment().getFirst().getResponseStatus())
+            .paymentStatus("success")
             .build();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findByUuid(order.getUser().getUuid())).thenReturn(order.getUser());
 
-        assertEquals(expected, ubsService.getPaymentResponseFromFondy(1L, order.getUser().getUuid()));
+        assertEquals(expected,
+            ubsService.getPaymentResponseFromFondy(1L, order.getUser().getUuid()));
     }
 
     @Test
@@ -3927,5 +3905,83 @@ class UBSClientServiceImplTest {
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> ubsService.getEmployeeLoginPositionNames(TEST_EMAIL));
         verify(employeeRepository).findByEmail(TEST_EMAIL);
+    }
+
+    @Test
+    void shouldExtractOrderIdFromDataSuccessfully() {
+        String data = Base64.getEncoder().encodeToString("{\"order_id\":\"123\"}".getBytes());
+        Long result = ubsClientService.extractOrderIdFromData(data);
+        assertEquals(123L, result);
+    }
+
+    @Test
+    void shouldExtractStatusFromDataSuccessfully() {
+        String data = Base64.getEncoder().encodeToString("{\"status\":\"approved\"}".getBytes());
+        String result = ubsClientService.extractStatusFromData(data);
+        assertEquals("approved", result);
+    }
+
+    @Test
+    void shouldConvertToPaymentSuccessfully() {
+        String data = Base64.getEncoder().encodeToString(
+            "{\"amount\":\"100.0\",\"currency\":\"UAH\",\"description\":\"Test\",\"status\":\"approved\"}".getBytes());
+        Payment result = ubsClientService.convertToPayment(data);
+
+        assertEquals(10000L, result.getAmount());
+        assertEquals("UAH", result.getCurrency());
+        assertEquals("Test", result.getComment());
+        assertEquals("approved", result.getOrderStatus());
+    }
+
+    @Test
+    void shouldValidatePaymentLiqPaySuccessfully() {
+        PaymentResponseLiqPayDto dto = new PaymentResponseLiqPayDto();
+        String json =
+            "{\"order_id\":\"123\",\"amount\":\"100.0\",\"currency\":\"UAH\",\"description\":\"Test\",\"status\":\"approved\"}";
+        String encodedJson = Base64.getEncoder().encodeToString(json.getBytes());
+        Order order = new Order();
+        order.setId(123L);
+        Payment payment = new Payment();
+        dto.setData(encodedJson);
+        dto.setSignature("signature");
+
+        UBSClientServiceImpl ubsClientServiceSpy = Mockito.spy(ubsClientService);
+
+        doNothing().when(ubsClientServiceSpy).checkSignature(isNull(), anyString(), anyString());
+        when(ubsClientServiceSpy.extractOrderIdFromData(encodedJson)).thenReturn(123L);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(ubsClientServiceSpy.convertToPayment(dto.getData())).thenReturn(payment);
+        doNothing().when(ubsClientServiceSpy).checkOrderStatusApproved(any(Payment.class), any(Order.class));
+        doNothing().when(notificationService).notifyPaidOrder(any(Order.class));
+
+        Long result = ubsClientServiceSpy.validatePaymentLiqPay(dto);
+        assertEquals(123L, result);
+    }
+
+    @Test
+    void shouldThrowNotFoundExceptionWhenOrderNotFound() {
+        // Given
+        PaymentResponseLiqPayDto dto = new PaymentResponseLiqPayDto();
+        String json = "{\"order_id\":\"123\"}";
+        String encodedJson = Base64.getEncoder().encodeToString(json.getBytes());
+        dto.setData(encodedJson);
+        dto.setSignature("signature");
+
+        UBSClientServiceImpl ubsClientServiceSpy = Mockito.spy(ubsClientService);
+
+        doNothing().when(ubsClientServiceSpy).checkSignature(isNull(), anyString(), anyString());
+        when(ubsClientServiceSpy.extractOrderIdFromData(encodedJson)).thenReturn(1L);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> ubsClientServiceSpy.validatePaymentLiqPay(dto));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenSignatureIsInvalid() {
+        String privateKey = "privateKey";
+        String data = "data";
+        String wrongSignature = "abc";
+        assertThrows(WrongSignatureException.class,
+            () -> ubsClientService.checkSignature(privateKey, data, wrongSignature));
     }
 }

@@ -165,6 +165,7 @@ public final class ErrorMessage {
         "Such location cannot be deleted as it is linked to the tariff";
     public static final String EMPLOYEE_NOT_FOUND_BY_EMAIL = "Employee with current id doesn't exist: ";
     public static final String ORDER_DOES_NOT_BELONG_TO_USER = "This order does not belong to user";
+    public static final String WRONG_SIGNATURE_USED = "This signature is invalid: ";
 
     /**
      * Constructor.
