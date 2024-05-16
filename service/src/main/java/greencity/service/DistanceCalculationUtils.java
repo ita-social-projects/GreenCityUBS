@@ -1,7 +1,10 @@
 package greencity.service;
 
-public class DistanceCalculationUtils {
+public final class DistanceCalculationUtils {
     private static final double EARTH_RADIUS_IN_KM = 6371.0;
+
+    private DistanceCalculationUtils() {
+    }
 
     /**
      * Calculates the distance between two points on the Earth using the Haversine
