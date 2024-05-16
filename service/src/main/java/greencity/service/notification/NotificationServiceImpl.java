@@ -167,15 +167,6 @@ public class NotificationServiceImpl implements NotificationService {
         fillAndSendNotification(Set.of(orderNumber), order, NotificationType.ORDER_IS_PAID);
     }
 
-    @Override
-    public void notifyPaidOrder(PaymentResponseDto dto) {
-        if (dto.getOrder_id() != null) {
-            Long orderId = Long.valueOf(dto.getOrder_id().split("_")[0]);
-            Optional<Order> orderOptional = orderRepository.findById(orderId);
-            orderOptional.ifPresent(this::notifyPaidOrder);
-        }
-    }
-
     /**
      * {@inheritDoc}
      */

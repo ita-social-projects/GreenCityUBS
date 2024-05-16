@@ -335,21 +335,6 @@ class OrderControllerTest {
     RedirectionConfigProp redirectionConfigProp;
 
     @Test
-    void receivePaymentClientTest() throws Exception {
-        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String paymentResponseJson = objectMapper.writeValueAsString(dto);
-
-        setRedirectionConfigProp();
-
-        mockMvc.perform(post(ubsLink + "/receivePaymentClient")
-            .content(paymentResponseJson)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
     @SneakyThrows
     void getInfoAboutTariffTest() {
         mockMvc.perform(get(ubsLink + "/tariffinfo/{locationId}", 1L)
