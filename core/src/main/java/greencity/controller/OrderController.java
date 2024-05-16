@@ -66,7 +66,6 @@ public class OrderController {
     private final UBSClientService ubsClientService;
     private final UBSManagementService ubsManagementService;
     private final RedirectionConfigProp redirectionConfigProp;
-    private final NotificationService notificationService;
 
     /**
      * Controller returns all available bags and bonus points of current user by
@@ -419,11 +418,5 @@ public class OrderController {
     @GetMapping("/orders/{id}/tariff")
     public ResponseEntity<TariffsForLocationDto> getTariffForOrder(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffForOrder(id));
-    }
-
-    @GetMapping("/liqPayTest")
-    public ResponseEntity<String> liqPayTest() {
-        String result = ubsClientService.liqPayTest();
-        return ResponseEntity.ok(result);
     }
 }

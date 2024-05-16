@@ -55,6 +55,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
@@ -177,6 +178,9 @@ class UBSClientServiceImplTest {
 
     @Mock
     private LiqPay liqPay;
+
+    @Mock
+    private NotificationService notificationService;
 
     @Test
     void testGetAllDistricts() {
@@ -3899,5 +3903,75 @@ class UBSClientServiceImplTest {
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> ubsService.getEmployeeLoginPositionNames(TEST_EMAIL));
         verify(employeeRepository).findByEmail(TEST_EMAIL);
+    }
+
+    @Test
+    void shouldExtractOrderIdFromDataSuccessfully() {
+        String data = Base64.getEncoder().encodeToString("{\"order_id\":\"123\"}".getBytes());
+        Long result = ubsClientService.extractOrderIdFromData(data);
+        assertEquals(123L, result);
+    }
+
+    @Test
+    void shouldExtractStatusFromDataSuccessfully() {
+        String data = Base64.getEncoder().encodeToString("{\"status\":\"approved\"}".getBytes());
+        String result = ubsClientService.extractStatusFromData(data);
+        assertEquals("approved", result);
+    }
+
+    @Test
+    void shouldConvertToPaymentSuccessfully() {
+        String data = Base64.getEncoder().encodeToString(
+            "{\"amount\":\"100.0\",\"currency\":\"UAH\",\"description\":\"Test\",\"status\":\"approved\"}".getBytes());
+        Payment result = ubsClientService.convertToPayment(data);
+
+        assertEquals(10000L, result.getAmount());
+        assertEquals("UAH", result.getCurrency());
+        assertEquals("Test", result.getComment());
+        assertEquals("approved", result.getOrderStatus());
+    }
+
+    @Test
+    void shouldValidatePaymentLiqPaySuccessfully() {
+        PaymentResponseLiqPayDto dto = new PaymentResponseLiqPayDto();
+        String json =
+            "{\"order_id\":\"123\",\"amount\":\"100.0\",\"currency\":\"UAH\",\"description\":\"Test\",\"status\":\"approved\"}";
+        String encodedJson = Base64.getEncoder().encodeToString(json.getBytes());
+        Order order = new Order();
+        order.setId(123L);
+        Payment payment = new Payment();
+        dto.setData(encodedJson);
+        dto.setSignature("signature");
+
+        UBSClientServiceImpl ubsClientServiceSpy = Mockito.spy(ubsClientService);
+
+        doNothing().when(ubsClientServiceSpy).checkSignature(isNull(), anyString(), anyString());
+        when(ubsClientServiceSpy.extractOrderIdFromData(encodedJson)).thenReturn(123L);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(ubsClientServiceSpy.convertToPayment(dto.getData())).thenReturn(payment);
+        doNothing().when(ubsClientServiceSpy).checkOrderStatusApproved(any(Payment.class), any(Order.class));
+        doNothing().when(notificationService).notifyPaidOrder(any(Order.class));
+
+        Long result = ubsClientServiceSpy.validatePaymentLiqPay(dto);
+        assertEquals(123L, result);
+    }
+
+    @Test
+    void shouldThrowNotFoundExceptionWhenOrderNotFound() {
+        // Given
+        PaymentResponseLiqPayDto dto = new PaymentResponseLiqPayDto();
+        String json = "{\"order_id\":\"123\"}";
+        String encodedJson = Base64.getEncoder().encodeToString(json.getBytes());
+        dto.setData(encodedJson);
+        dto.setSignature("signature");
+
+        UBSClientServiceImpl ubsClientServiceSpy = Mockito.spy(ubsClientService);
+
+        doNothing().when(ubsClientServiceSpy).checkSignature(isNull(), anyString(), anyString());
+        when(ubsClientServiceSpy.extractOrderIdFromData(encodedJson)).thenReturn(1L);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(NotFoundException.class, () -> ubsClientServiceSpy.validatePaymentLiqPay(dto));
     }
 }

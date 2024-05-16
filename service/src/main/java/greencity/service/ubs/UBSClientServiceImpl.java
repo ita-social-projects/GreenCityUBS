@@ -303,7 +303,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * @param data The Base64 encoded string containing the payment details.
      * @return The Payment object created from the extracted payment details.
      */
-    private Payment convertToPayment(String data) {
+    protected Payment convertToPayment(String data) {
         byte[] decodedBytes = Base64.getDecoder().decode(data);
         String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
         JSONObject jsonObject = new JSONObject(decodedString);
@@ -326,7 +326,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * @param data              The data received from LiqPay.
      * @param receivedSignature The signature received from LiqPay.
      */
-    private void checkSignature(String privateKey, String data, String receivedSignature) {
+    protected void checkSignature(String privateKey, String data, String receivedSignature) {
         String message = privateKey + data + privateKey;
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
@@ -349,7 +349,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * @param data The Base64 encoded string containing the order ID.
      * @return The order ID extracted from the data.
      */
-    private Long extractOrderIdFromData(String data) {
+    protected Long extractOrderIdFromData(String data) {
         byte[] decodedBytes = Base64.getDecoder().decode(data);
         String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
         JSONObject jsonObject = new JSONObject(decodedString);
@@ -367,13 +367,14 @@ public class UBSClientServiceImpl implements UBSClientService {
      * @return The status extracted from the data.
      * @note This method is not intended for use in a test environment.
      */
-    private String extractStatusFromData(String data) { // Don`t use in test env
+    protected String extractStatusFromData(String data) { // Don`t use in test env
         byte[] decodedBytes = Base64.getDecoder().decode(data);
         String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
         JSONObject jsonObject = new JSONObject(decodedString);
         return jsonObject.getString("status");
     }
 
+    @Deprecated
     private Payment mapPayment(PaymentResponseDto dto) {
         if (dto.getFee() == null) {
             dto.setFee(0);
@@ -400,6 +401,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
+    @Deprecated
     private String parseFondySettlementDate(String settlementDate) {
         return settlementDate.isEmpty()
             ? LocalDate.now().toString()
@@ -1913,7 +1915,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void checkOrderStatusApproved(Payment orderPayment, Order order) {
+    protected void checkOrderStatusApproved(Payment orderPayment, Order order) {
         orderPayment.setOrderStatus(APPROVED_STATUS); // TODO: need to be changed in production
         orderPayment.setPaymentId(String.valueOf(orderPayment.getPaymentId()));
         orderPayment.setPaymentStatus(PaymentStatus.PAID);
