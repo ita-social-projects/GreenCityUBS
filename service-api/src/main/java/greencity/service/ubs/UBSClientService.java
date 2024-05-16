@@ -47,12 +47,16 @@ import java.util.Set;
 
 public interface UBSClientService {
     /**
-     * Method validates received payment response.
+     * This method is used to validate the payment received from LiqPay. It checks
+     * the signature of the payment, extracts the order ID from the data, retrieves
+     * the corresponding order from the database, converts the data to a Payment
+     * object, checks if the order status is approved, and finally, notifies that
+     * the order has been paid.
      *
-     * @param dto {@link PaymentResponseDto} - response order data.
+     * @param dto The PaymentResponseLiqPayDto object containing the data and
+     *            signature of the payment.
+     * @return The ID of the order associated with the payment.
      */
-    void validatePayment(PaymentResponseDto dto);
-
     Long validatePaymentLiqPay(PaymentResponseLiqPayDto dto);
 
     /**
@@ -314,13 +318,6 @@ public interface UBSClientService {
      * @author Max Boiarchuk
      */
     FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws PaymentLinkException;
-
-    /**
-     * Method validates received payment client response.
-     *
-     * @param dto {@link PaymentResponseDto} - response order data.
-     */
-    void validatePaymentClient(PaymentResponseDto dto);
 
     /**
      * Methods returns current user's bonus points.

@@ -11,7 +11,11 @@ import greencity.dto.certificate.CertificateDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.*;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseLiqPayDto;
@@ -40,7 +44,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
@@ -197,9 +208,8 @@ public class OrderController {
     @PostMapping("/receivePayment")
     public ResponseEntity<HttpStatus> receivePayment(
         PaymentResponseLiqPayDto dto, HttpServletResponse response) throws IOException {
-        Long orderId = ubsClientService.validatePaymentLiqPay(dto);
+        ubsClientService.validatePaymentLiqPay(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            notificationService.notifyPaidOrder(orderId);
             response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -321,30 +331,6 @@ public class OrderController {
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getPaymentResponseFromFondy(orderId, uuid));
-    }
-
-    /**
-     * Controller checks if received data Client is valid and stores payment info if
-     * is.
-     *
-     * @param dto {@link PaymentResponseDto} - response order data.
-     * @return {@link HttpStatus} - http status.
-     * @author Max Boiarchuk
-     */
-    @Operation(summary = "Receive payment from  Client Fondy.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
-    })
-    @PostMapping("/receivePaymentClient")
-    public ResponseEntity<HttpStatus> receivePaymentClient(
-        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
-        ubsClientService.validatePaymentClient(dto);
-        if (HttpStatus.OK.is2xxSuccessful()) {
-            notificationService.notifyPaidOrder(dto);
-            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
-        }
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**

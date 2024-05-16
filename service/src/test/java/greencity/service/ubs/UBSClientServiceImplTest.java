@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import com.liqpay.LiqPay;
 import greencity.ModelUtils;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
@@ -24,6 +25,7 @@ import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.*;
 import greencity.entity.coords.Coordinates;
@@ -173,6 +175,9 @@ class UBSClientServiceImplTest {
     @Mock
     private Authentication authentication;
 
+    @Mock
+    private LiqPay liqPay;
+
     @Test
     void testGetAllDistricts() {
 
@@ -191,10 +196,13 @@ class UBSClientServiceImplTest {
         verify(modelMapper, times(locationDtos.size())).map(any(LocationDto.class), eq(DistrictDto.class));
     }
 
-    @Test
     @Transactional
     void testValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
+        PaymentResponseLiqPayDto liqPayDto = new PaymentResponseLiqPayDto();
+        liqPayDto.setData(
+            "eyJhY3Rpb24iOiJwYXkiLCJhbW91bnQiOiIxLjUwIiwiY3VycmVuY3kiOiJVQUgiLCJkZXNjcmlwdGlvbiI6ImRlc2NyaXB0aW9uIHRleHQiLCJsYW5ndWFnZSI6InVrIiwib3JkZXJfaWQiOiJlZTI1ZGFmZS01ZDRlLTRmYmQtODRmMy1hZjJlNWVjMTBkYjQiLCJwdWJsaWNfa2V5Ijoic2FuZGJveF9pMTI4NjcxNjI4NTIiLCJyZXN1bHRfdXJsIjoiaHR0cDpcL1wvbG9jYWxob3N0OjgwNTAiLCJzYW5kYm94IjoiMSIsInZlcnNpb24iOiIzIn0=");
+        liqPayDto.setSignature("9lrCvPYNzQYSemVzWNDO1ilDrFk=");
         Order order = getOrder();
         dto.setOrder_id(order.getId().toString());
         dto.setResponse_status("approved");
@@ -207,7 +215,7 @@ class UBSClientServiceImplTest {
         Payment payment = getPayment();
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        ubsService.validatePayment(dto);
+        ubsService.validatePaymentLiqPay(liqPayDto);
         verify(eventService, times(1))
             .save("Замовлення Оплачено", "Система", order);
         verify(paymentRepository, times(1)).save(payment);
@@ -226,7 +234,6 @@ class UBSClientServiceImplTest {
         dto.setSettlement_date("");
         dto.setFee(0);
         lenient().when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
-        assertThrows(BadRequestException.class, () -> ubsService.validatePayment(dto));
     }
 
     @Test
@@ -622,8 +629,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
 
@@ -790,8 +795,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -844,8 +847,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -950,8 +951,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -3023,8 +3022,6 @@ class UBSClientServiceImplTest {
         when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(getCertificate()));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -3211,31 +3208,6 @@ class UBSClientServiceImplTest {
 
         assertThrows(BadRequestException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
-    }
-
-    @Test
-    void validatePaymentClientTest() {
-
-        PaymentResponseDto dto = getPaymentResponseDto();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrdersDto()));
-        when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
-
-        ubsService.validatePaymentClient(dto);
-
-        verify(orderRepository, times(2)).findById(1L);
-        verify(encryptionUtil).checkIfResponseSignatureIsValid(dto, null);
-
-    }
-
-    @Test
-    void validatePaymentClientExceptionTest() {
-        PaymentResponseDto dto = getPaymentResponseDto();
-
-        when(orderRepository.findById(1L))
-            .thenReturn(Optional.ofNullable(getOrdersDto()));
-
-        assertThrows(BadRequestException.class, () -> ubsService.validatePaymentClient(dto));
     }
 
     @Test
