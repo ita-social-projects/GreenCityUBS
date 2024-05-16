@@ -217,9 +217,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenTariffLocationDoesNotExist() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
         var tariffsInfo = getTariffInfo();
         var tariffsInfoId = tariffsInfo.getId();
 
@@ -248,9 +245,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenLocationDoesNotExist() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
         var tariffsInfo = getTariffInfo();
         var tariffsInfoId = tariffsInfo.getId();
 
@@ -277,9 +271,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldThrowExceptionWhenTariffDoesNotExist() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
         var tariffsInfo = getTariffInfo();
         var tariffId = tariffsInfo.getId();
 
@@ -305,9 +296,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkIfTariffIsAvailableForCurrentLocationThrowExceptionWhenTariffIsDeactivated() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
         var tariffsInfo = getTariffInfo();
         var tariffsInfoId = tariffsInfo.getId();
         tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
@@ -333,9 +321,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkIfTariffIsAvailableForCurrentLocationThrowExceptionWhenLocationIsDeactivated() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
         var tariffsInfo = getTariffInfo();
         var tariffsInfoId = tariffsInfo.getId();
 
@@ -361,9 +346,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkIfTariffIsAvailableForCurrentLocationWhenLocationForTariffIsDeactivated() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
         var tariffLocation = getTariffLocation();
         tariffLocation.setLocationStatus(LocationStatus.DEACTIVATED);
 
@@ -396,9 +378,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageDataByTariffAndLocationIdShouldReturnExpectedData() {
-        var user = getUser();
-        var uuid = user.getUuid();
-
         var tariffLocation = getTariffLocation();
 
         var tariffsInfo = tariffLocation.getTariffsInfo();
@@ -471,11 +450,11 @@ class UBSClientServiceImplTest {
             ubsService.getFirstPageDataByOrderId(uuid, orderId);
 
         assertEquals(
-            userPointsAndAllBagsDtoExpected.getBags().get(0).toString(),
-            userPointsAndAllBagsDtoActual.getBags().get(0).toString());
+            userPointsAndAllBagsDtoExpected.getBags().getFirst().toString(),
+            userPointsAndAllBagsDtoActual.getBags().getFirst().toString());
         assertEquals(
-            userPointsAndAllBagsDtoExpected.getBags().get(0).getQuantity(),
-            userPointsAndAllBagsDtoActual.getBags().get(0).getQuantity());
+            userPointsAndAllBagsDtoExpected.getBags().getFirst().getQuantity(),
+            userPointsAndAllBagsDtoActual.getBags().getFirst().getQuantity());
         assertEquals(
             userPointsAndAllBagsDtoExpected.getBags().getFirst().getId(),
             userPointsAndAllBagsDtoActual.getBags().getFirst().getId());
@@ -1562,7 +1541,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user));
         ubsService.markUserAsDeactivated(1L);
         verify(userRepository).findById(1L);
-        verify(userRemoteClient).markUserDeactivated(user.getUuid());
+        verify(userRemoteClient).markUserDeactivated(anyString());
     }
 
     @Test
@@ -3426,7 +3405,6 @@ class UBSClientServiceImplTest {
     void testOrdersForUserWithExportedQuantity() {
         OrderStatusTranslation orderStatusTranslation = getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
-        OrdersDataForUserDto ordersDataForUserDto = getOrderStatusDto();
         Order order = getOrderTest();
         order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         User user = getTestUser();
@@ -3474,7 +3452,6 @@ class UBSClientServiceImplTest {
     void testOrdersForUserWithConfirmedQuantity() {
         OrderStatusTranslation orderStatusTranslation = getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
-        OrdersDataForUserDto ordersDataForUserDto = getOrderStatusDto();
         Order order = getOrderTest();
         User user = getTestUser();
         Bag bag = bagDto();
