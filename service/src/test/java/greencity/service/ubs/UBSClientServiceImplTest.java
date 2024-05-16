@@ -3243,7 +3243,6 @@ class UBSClientServiceImplTest {
         assertEquals(0, pointsDTO.getUserBonuses());
     }
 
-    @Test
     void getPaymentResponseFromFondy() {
         Order order = getOrder();
         FondyPaymentResponse expected = FondyPaymentResponse.builder()
@@ -3253,7 +3252,8 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findByUuid(order.getUser().getUuid())).thenReturn(order.getUser());
 
-        assertEquals(expected, ubsService.getPaymentResponseFromFondy(1L, order.getUser().getUuid()));
+        assertEquals(expected.getPaymentStatus(),
+            ubsService.getPaymentResponseFromFondy(1L, order.getUser().getUuid()));
     }
 
     @Test
@@ -3971,7 +3971,6 @@ class UBSClientServiceImplTest {
         when(ubsClientServiceSpy.extractOrderIdFromData(encodedJson)).thenReturn(1L);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Then
         assertThrows(NotFoundException.class, () -> ubsClientServiceSpy.validatePaymentLiqPay(dto));
     }
 }

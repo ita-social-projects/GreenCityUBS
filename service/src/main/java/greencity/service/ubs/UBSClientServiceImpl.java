@@ -353,7 +353,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         byte[] decodedBytes = Base64.getDecoder().decode(data);
         String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
         JSONObject jsonObject = new JSONObject(decodedString);
-        System.out.println(jsonObject);
         return Long.valueOf(jsonObject.getString("order_id"));
     }
 
@@ -374,39 +373,28 @@ public class UBSClientServiceImpl implements UBSClientService {
         return jsonObject.getString("status");
     }
 
-    @Deprecated
-    private Payment mapPayment(PaymentResponseDto dto) {
-        if (dto.getFee() == null) {
-            dto.setFee(0);
-        }
-        return Payment.builder()
-            .id(Long.valueOf(dto.getOrder_id().substring(dto.getOrder_id().indexOf("_") + 1)))
-            .currency(dto.getCurrency())
-            .amount(Long.valueOf(dto.getAmount()))
-            .orderStatus(dto.getOrder_status())
-            .responseStatus(dto.getResponse_status())
-            .senderCellPhone(dto.getSender_cell_phone())
-            .senderAccount(dto.getSender_account())
-            .maskedCard(dto.getMasked_card())
-            .cardType(dto.getCard_type())
-            .responseCode(dto.getResponse_code())
-            .responseDescription(dto.getResponse_description())
-            .orderTime(dto.getOrder_time())
-            .settlementDate(parseFondySettlementDate(dto.getSettlement_date()))
-            .fee(Long.valueOf(dto.getFee()))
-            .paymentSystem(dto.getPayment_system())
-            .senderEmail(dto.getSender_email())
-            .paymentId(String.valueOf(dto.getPayment_id()))
-            .paymentStatus(PaymentStatus.UNPAID)
-            .build();
-    }
-
-    @Deprecated
-    private String parseFondySettlementDate(String settlementDate) {
-        return settlementDate.isEmpty()
-            ? LocalDate.now().toString()
-            : LocalDate.parse(settlementDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString();
-    }
+    /**
+     * private Payment mapPayment(PaymentResponseDto dto) { if (dto.getFee() ==
+     * null) { dto.setFee(0); } return Payment.builder()
+     * .id(Long.valueOf(dto.getOrder_id().substring(dto.getOrder_id().indexOf("_") +
+     * 1))) .currency(dto.getCurrency()) .amount(Long.valueOf(dto.getAmount()))
+     * .orderStatus(dto.getOrder_status()) .responseStatus(dto.getResponse_status())
+     * .senderCellPhone(dto.getSender_cell_phone())
+     * .senderAccount(dto.getSender_account()) .maskedCard(dto.getMasked_card())
+     * .cardType(dto.getCard_type()) .responseCode(dto.getResponse_code())
+     * .responseDescription(dto.getResponse_description())
+     * .orderTime(dto.getOrder_time())
+     * .settlementDate(parseFondySettlementDate(dto.getSettlement_date()))
+     * .fee(Long.valueOf(dto.getFee())) .paymentSystem(dto.getPayment_system())
+     * .senderEmail(dto.getSender_email())
+     * .paymentId(String.valueOf(dto.getPayment_id()))
+     * .paymentStatus(PaymentStatus.UNPAID) .build(); }
+     *
+     * private String parseFondySettlementDate(String settlementDate) { return
+     * settlementDate.isEmpty() ? LocalDate.now().toString() :
+     * LocalDate.parse(settlementDate,
+     * DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString(); }
+     **/
 
     /**
      * {@inheritDoc}
@@ -644,7 +632,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private FondyPaymentResponse getFondyPaymentResponse(Order order) {
         Payment payment = order.getPayment().getLast();
         return FondyPaymentResponse.builder()
-            .paymentStatus(payment.getResponseStatus())
+            .paymentStatus(payment.getPaymentStatus().name().equals("PAID") ? "success" : "failure")
             .build();
     }
 
@@ -1887,7 +1875,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .responseCode(dto.getResponse_code())
             .responseDescription(dto.getResponse_description())
             .orderTime(dto.getOrder_time())
-            .settlementDate(parseFondySettlementDate(dto.getSettlement_date()))
             .fee(Optional.ofNullable(dto.getFee()).map(Long::valueOf).orElse(0L))
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
@@ -2110,20 +2097,5 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
         return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
             .collect(Collectors.toList());
-    }
-
-    public String liqPayTest() {
-        Map params = new HashMap();
-        params.put("action", "pay");
-        params.put("amount", "1.50");
-        params.put("currency", "UAH");
-        params.put("order_id", UUID.randomUUID().toString());
-        params.put("description", "description text");
-        params.put("language", "uk");
-        params.put("result_url", "http://localhost:8050");
-        params.put("sandbox", "1");
-        String html = liqPay.cnb_form(params);
-        System.out.println(html);
-        return html;
     }
 }

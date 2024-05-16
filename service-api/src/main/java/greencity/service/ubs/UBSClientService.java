@@ -422,6 +422,4 @@ public interface UBSClientService {
      */
 
     List<DistrictDto> getAllDistricts(String region, String city);
-
-    String liqPayTest();
 }
