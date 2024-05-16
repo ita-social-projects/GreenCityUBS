@@ -5,10 +5,7 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
-import greencity.constant.AppConstant;
-import greencity.constant.ErrorMessage;
-import greencity.constant.OrderHistory;
-import greencity.constant.KyivTariffLocation;
+import greencity.constant.*;
 import greencity.dto.AllActiveLocationsDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDtos;
@@ -516,9 +513,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getCityEn());
 
-        if (locationId == 1L) {
+        if (locationId == TariffLocation.KYIV_TARIFF.getLocationId()) {
             return isKyivTariff;
-        } else if (locationId == 2L) {
+        } else if (locationId == TariffLocation.KYIV_REGION_20_KM_TARIFF.getLocationId()) {
             checkAndCalculateAddressCoordinatesIfEmpty(address);
 
             double addressLatitude = address.getCoordinates().getLatitude();
