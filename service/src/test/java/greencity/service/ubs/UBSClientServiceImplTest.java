@@ -2444,7 +2444,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findAnyByUserIdAndAddressStatusNotDeleted(user.getId())).thenReturn(Optional.empty());
         doReturn(new OrderWithAddressesResponseDto()).when(ubsClientServiceSpy).findAllAddressesForCurrentOrder(uuid);
 
-        ubsClientService.deleteCurrentAddressForOrder(firstAddressId, uuid);
+        ubsClientServiceSpy.deleteCurrentAddressForOrder(firstAddressId, uuid);
 
         Assertions.assertFalse(firstAddress.getActual());
         assertEquals(AddressStatus.DELETED, firstAddress.getAddressStatus());
