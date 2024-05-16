@@ -118,6 +118,8 @@ import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
@@ -129,8 +131,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -153,60 +153,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
-import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
-import static greencity.constant.ErrorMessage.BAD_ORDER_STATUS_REQUEST;
-import static greencity.constant.ErrorMessage.BAGS_QUANTITY_NOT_FOUND_MESSAGE;
-import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
-import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
-import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
-import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
-import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
-import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
-import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
-import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
-import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
-import static greencity.constant.ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED;
-import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
-import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
-import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
-import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
-import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
-import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
-import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.AppConstant.USER_WITH_PREFIX;
+import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -372,29 +328,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         JSONObject jsonObject = new JSONObject(decodedString);
         return jsonObject.getString("status");
     }
-
-    /**
-     * private Payment mapPayment(PaymentResponseDto dto) { if (dto.getFee() ==
-     * null) { dto.setFee(0); } return Payment.builder()
-     * .id(Long.valueOf(dto.getOrder_id().substring(dto.getOrder_id().indexOf("_") +
-     * 1))) .currency(dto.getCurrency()) .amount(Long.valueOf(dto.getAmount()))
-     * .orderStatus(dto.getOrder_status()) .responseStatus(dto.getResponse_status())
-     * .senderCellPhone(dto.getSender_cell_phone())
-     * .senderAccount(dto.getSender_account()) .maskedCard(dto.getMasked_card())
-     * .cardType(dto.getCard_type()) .responseCode(dto.getResponse_code())
-     * .responseDescription(dto.getResponse_description())
-     * .orderTime(dto.getOrder_time())
-     * .settlementDate(parseFondySettlementDate(dto.getSettlement_date()))
-     * .fee(Long.valueOf(dto.getFee())) .paymentSystem(dto.getPayment_system())
-     * .senderEmail(dto.getSender_email())
-     * .paymentId(String.valueOf(dto.getPayment_id()))
-     * .paymentStatus(PaymentStatus.UNPAID) .build(); }
-     *
-     * private String parseFondySettlementDate(String settlementDate) { return
-     * settlementDate.isEmpty() ? LocalDate.now().toString() :
-     * LocalDate.parse(settlementDate,
-     * DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString(); }
-     **/
 
     /**
      * {@inheritDoc}
@@ -632,7 +565,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private FondyPaymentResponse getFondyPaymentResponse(Order order) {
         Payment payment = order.getPayment().getLast();
         return FondyPaymentResponse.builder()
-            .paymentStatus(payment.getPaymentStatus().name().equals("PAID") ? "success" : "failure")
+            .paymentStatus(payment.getPaymentStatus().name().equals("PAID") ? "success" : null)
             .build();
     }
 

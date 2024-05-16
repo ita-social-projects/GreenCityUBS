@@ -40,6 +40,7 @@ import greencity.entity.viber.ViberBot;
 import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
@@ -3243,16 +3244,17 @@ class UBSClientServiceImplTest {
         assertEquals(0, pointsDTO.getUserBonuses());
     }
 
+    @Test
     void getPaymentResponseFromFondy() {
         Order order = getOrder();
         FondyPaymentResponse expected = FondyPaymentResponse.builder()
-            .paymentStatus(order.getPayment().getFirst().getResponseStatus())
+            .paymentStatus("success")
             .build();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findByUuid(order.getUser().getUuid())).thenReturn(order.getUser());
 
-        assertEquals(expected.getPaymentStatus(),
+        assertEquals(expected,
             ubsService.getPaymentResponseFromFondy(1L, order.getUser().getUuid()));
     }
 
@@ -3972,5 +3974,14 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> ubsClientServiceSpy.validatePaymentLiqPay(dto));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenSignatureIsInvalid() {
+        String privateKey = "privateKey";
+        String data = "data";
+        String wrongSignature = "abc";
+        assertThrows(WrongSignatureException.class,
+            () -> ubsClientService.checkSignature(privateKey, data, wrongSignature));
     }
 }
