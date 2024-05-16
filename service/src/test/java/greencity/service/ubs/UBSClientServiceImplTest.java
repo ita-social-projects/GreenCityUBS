@@ -147,8 +147,7 @@ class UBSClientServiceImplTest {
 
     @Mock
     private ViberBotRepository viberBotRepository;
-    @Mock
-    private UBSManagementService ubsManagementService;
+
     @InjectMocks
     private UBSClientServiceImpl ubsClientService;
 
@@ -1483,10 +1482,11 @@ class UBSClientServiceImplTest {
                         .build()))
             .build();
         Order order = getOrderDoneByUser();
+
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(bagRepository.findAllByOrder(dto.getOrderId())).thenReturn(getBag4list());
-        MakeOrderAgainDto result = ubsService.makeOrderAgain(new Locale("en"), 1L);
+        MakeOrderAgainDto result = ubsService.makeOrderAgain(Locale.forLanguageTag("en"), 1L);
 
         assertEquals(dto, result);
         verify(orderRepository, times(1)).findById(1L);
@@ -1495,7 +1495,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void makeOrderAgainShouldThrowOrderNotFoundException() {
-        Locale locale = new Locale("en");
+        Locale locale = Locale.forLanguageTag("en");
         Exception thrown = assertThrows(NotFoundException.class,
             () -> ubsService.makeOrderAgain(locale, 1L));
         assertEquals(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
@@ -1506,7 +1506,7 @@ class UBSClientServiceImplTest {
         Order order = getOrderDoneByUser();
         order.setOrderStatus(OrderStatus.CANCELED);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        Locale locale = new Locale("en");
+        Locale locale = Locale.forLanguageTag("en");
         Exception thrown = assertThrows(BadRequestException.class,
             () -> ubsService.makeOrderAgain(locale, 1L));
         assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST
@@ -3310,14 +3310,11 @@ class UBSClientServiceImplTest {
         Order order = getOrderTest();
         User user = getTestUser();
         Bag bag = bagDto();
-
-        List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
 
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
         order.setAmountOfBagsOrdered(Map.of(1, 10));
-        bags.add(bag);
         order.setUser(user);
         order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
@@ -3361,14 +3358,11 @@ class UBSClientServiceImplTest {
         Order order = getOrderTest();
         User user = getTestUser();
         Bag bag = bagDto();
-
-        List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
 
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
         order.setAmountOfBagsOrdered(Map.of(1, 10));
-        bags.add(bag);
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
@@ -3409,14 +3403,11 @@ class UBSClientServiceImplTest {
         order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         User user = getTestUser();
         Bag bag = bagDto();
-
-        List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
 
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
         order.setExportedQuantity(Map.of(1, 10));
-        bags.add(bag);
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
@@ -3455,14 +3446,11 @@ class UBSClientServiceImplTest {
         Order order = getOrderTest();
         User user = getTestUser();
         Bag bag = bagDto();
-
-        List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
 
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
         order.setConfirmedQuantity(Map.of(1, 10));
-        bags.add(bag);
         order.setUser(user);
         order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
@@ -3789,7 +3777,8 @@ class UBSClientServiceImplTest {
     void getAllAuthoritiesService() {
         Optional<Employee> employeeOptional = Optional.ofNullable(getEmployee());
         when(employeeRepository.findByEmail(anyString())).thenReturn(employeeOptional);
-        when(userRemoteClient.getAllAuthorities(employeeOptional.get().getEmail()))
+        Employee employee = employeeOptional.orElseThrow(() -> new IllegalStateException("Employee not found"));
+        when(userRemoteClient.getAllAuthorities(employee.getEmail()))
             .thenReturn(Set.copyOf(ModelUtils.getAllAuthorities()));
         Set<String> authoritiesResult = ubsService.getAllAuthorities(employeeOptional.get().getEmail());
         Set<String> authExpected = Set.of("SEE_CLIENTS_PAGE");
@@ -3806,13 +3795,10 @@ class UBSClientServiceImplTest {
         Order order = getOrderTest();
         User user = getTestUser();
         Bag bag = bagDto();
-
-        List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
 
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
-        bags.add(bag);
         order.setUser(user);
         order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
