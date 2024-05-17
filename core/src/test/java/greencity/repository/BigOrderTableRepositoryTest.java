@@ -2,13 +2,15 @@ package greencity.repository;
 
 import greencity.IntegrationTestBase;
 import greencity.UbsApplication;
+import greencity.entity.order.BigOrderTableViews;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
+import greencity.enums.OrderStatusSortingTranslation;
 import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,10 +24,60 @@ import java.util.List;
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class)
-@Ignore
 class BigOrderTableRepositoryTest extends IntegrationTestBase {
     @Autowired
     private BigOrderTableRepository bigOrderTableRepository;
+
+    @Test
+    void get_All_Orders_Sort_By_OrderStatus_UA_Localization_ASC() {
+        OrderPage orderPage = new OrderPage().setPageNumber(0).setPageSize(15).setSortBy("orderStatus")
+            .setSortDirection(Sort.Direction.ASC);
+        List<Long> tariffsInfoIds = new ArrayList<>();
+        tariffsInfoIds.add(1L);
+        var result = bigOrderTableRepository.findAll(orderPage,
+            getOrderSearchCriteria(), tariffsInfoIds, "ua").getContent();
+        Assertions.assertTrue(isListSortedCorrectlyByOrderStatusWithUALocalizationASC(result));
+    }
+
+    @Test
+    void get_All_Orders_Sort_By_OrderStatus_UA_Localization_DESC() {
+        OrderPage orderPage = new OrderPage().setPageNumber(0).setPageSize(15).setSortBy("orderStatus")
+            .setSortDirection(Sort.Direction.DESC);
+        List<Long> tariffsInfoIds = new ArrayList<>();
+        tariffsInfoIds.add(1L);
+        var result = bigOrderTableRepository.findAll(orderPage,
+            getOrderSearchCriteria(), tariffsInfoIds, "ua").getContent();
+        Assertions.assertTrue(isListSortedCorrectlyByOrderStatusWithUALocalizationDesc(result));
+    }
+
+    private boolean isListSortedCorrectlyByOrderStatusWithUALocalizationASC(
+        List<BigOrderTableViews> bigOrderTableViewsList) {
+        for (int i = 0; i < bigOrderTableViewsList.size() - 1; i++) {
+            OrderStatusSortingTranslation currentStatus =
+                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i).getOrderStatus());
+            OrderStatusSortingTranslation nextStatus =
+                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i + 1).getOrderStatus());
+            if (currentStatus.getSortOrder() > nextStatus.getSortOrder()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isListSortedCorrectlyByOrderStatusWithUALocalizationDesc(
+        List<BigOrderTableViews> bigOrderTableViewsList) {
+        for (int i = 0; i < bigOrderTableViewsList.size() - 1; i++) {
+            OrderStatusSortingTranslation currentStatus =
+                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i).getOrderStatus());
+            OrderStatusSortingTranslation nextStatus =
+                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i + 1).getOrderStatus());
+            boolean isSortedCorrectly = currentStatus.getSortOrder() >= nextStatus.getSortOrder();
+            if (currentStatus.getSortOrder() < nextStatus.getSortOrder()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     // @Test
     void get_All_Orders_Default_Page_ASC() {
@@ -333,7 +385,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
     }
 
     private OrderPage getOrderPageStandardASC() {
-        return new OrderPage().setPageNumber(0).setPageSize(10).setSortBy("id").setSortDirection(Sort.Direction.ASC);
+        return new OrderPage().setPageNumber(0).setPageSize(15).setSortBy("id").setSortDirection(Sort.Direction.ASC);
     }
 
     private OrderPage getOrderPage_Two_Element_On_Page_ASC() {

@@ -126,7 +126,7 @@ public class BigOrderTableRepository {
         predicates.add(criteriaPredicate.filter(tariffsInfoIds, orderRoot, "tariffsInfoId"));
     }
 
-    private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root,
+    public void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root,
         String userLanguage) {
         if (userLanguage.equals("ua")
             && (orderPage.getSortBy().equals("orderStatus") || orderPage.getSortBy().equals("orderPaymentStatus"))) {
@@ -144,7 +144,7 @@ public class BigOrderTableRepository {
         return entityManager.createQuery(countQuery).getSingleResult();
     }
 
-    private void defaultSorting(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+    public void defaultSorting(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
         Root<BigOrderTableViews> root, Optional<Expression<Integer>> sortingOrderUkrainianLocalization) {
         Expression<?> expression = sortingOrderUkrainianLocalization.orElseGet(() -> root.get(orderPage.getSortBy()));
         if (orderPage.getSortDirection().equals(Sort.Direction.ASC)) {
@@ -154,7 +154,7 @@ public class BigOrderTableRepository {
         }
     }
 
-    private void sortingForUkrainianLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+    public void sortingForUkrainianLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
         Root<BigOrderTableViews> root) {
         if ("orderStatus".equals(orderPage.getSortBy())) {
             Map<OrderStatusSortingTranslation, Integer> sortOrderMap =
