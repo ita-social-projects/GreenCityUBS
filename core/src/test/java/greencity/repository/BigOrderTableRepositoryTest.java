@@ -34,9 +34,9 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             .setSortDirection(Sort.Direction.ASC);
         List<Long> tariffsInfoIds = new ArrayList<>();
         tariffsInfoIds.add(1L);
-        var result = bigOrderTableRepository.findAll(orderPage,
+        List<BigOrderTableViews> bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
             getOrderSearchCriteria(), tariffsInfoIds, "ua").getContent();
-        Assertions.assertTrue(isListSortedCorrectlyByOrderStatusWithUALocalizationASC(result));
+        Assertions.assertTrue(isListSortedCorrectlyByOrderStatusWithUALocalizationASC(bigOrderTableViewsList));
     }
 
     @Test
