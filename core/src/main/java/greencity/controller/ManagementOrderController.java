@@ -689,7 +689,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/return-overpayment-as-bonuses-info")
+    @PostMapping("/return-overpayment-as-bonuses-info")
     public ResponseEntity<PaymentTableInfoDto> returnOverpaymentAsBonusesInfo(@RequestParam Long orderId,
         @RequestParam Double sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -712,7 +712,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/return-overpayment-as-money-info")
+    @PostMapping("/return-overpayment-as-money-info")
     public ResponseEntity<PaymentTableInfoDto> returnOverpaymentAsMoneyInfo(@RequestParam Long orderId,
         @RequestParam Double sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)

@@ -416,7 +416,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void returnOverpaymentAsMoneyInfoTest() throws Exception {
-        mockMvc.perform(get(ubsLink + "/return-overpayment-as-money-info")
+        mockMvc.perform(post(ubsLink + "/return-overpayment-as-money-info")
             .param("orderId", "2")
             .param("sumToPay", "1")
             .contentType(MediaType.APPLICATION_JSON))
