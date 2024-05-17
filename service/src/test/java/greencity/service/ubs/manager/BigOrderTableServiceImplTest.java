@@ -1,6 +1,9 @@
 package greencity.service.ubs.manager;
 
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
+import greencity.dto.language.LanguageVO;
+import greencity.dto.user.UserVO;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.employee.Employee;
 import greencity.filters.DateFilter;
@@ -39,6 +42,8 @@ class BigOrderTableServiceImplTest {
     private EmployeeRepository employeeRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private UserRemoteClient userRemoteClient;
 
     @Test
     void getOrders() {
@@ -47,6 +52,8 @@ class BigOrderTableServiceImplTest {
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         List<Long> tariffsInfoIds = new ArrayList<>();
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(employee);
+        UserVO userVO = new UserVO().setLanguageVO(new LanguageVO(null, "eng"));
+        when(userRemoteClient.findNotDeactivatedByEmail("test@gmail.com")).thenReturn(Optional.of(userVO));
         when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria, tariffsInfoIds, "eng"))
             .thenReturn(Page.empty());
 
