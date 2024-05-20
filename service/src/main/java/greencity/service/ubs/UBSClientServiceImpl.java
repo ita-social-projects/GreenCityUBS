@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
+import com.liqpay.LiqPay;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
@@ -38,6 +39,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -79,6 +81,7 @@ import greencity.enums.PaymentStatus;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
@@ -125,21 +128,13 @@ import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -185,7 +180,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final LocationApiService locationApiService;
     private final OrderBagRepository orderBagRepository;
     private final OrderBagService orderBagService;
+    private final NotificationService notificationService;
     private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
+    private final LiqPay liqPay;
 
     @Lazy
     @Autowired
@@ -202,6 +199,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String resultUrlForPersonalCabinetOfUser;
     @Value("${greencity.redirect.result-url-fondy}")
     private String resultUrlFondy;
+    @Value("${liqpay.public.key}")
+    private String publicKey;
+    @Value("${liqpay.private.key}")
+    private String privateKey;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
@@ -216,41 +217,110 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String LANGUAGE_EN = "en";
 
     @Override
-    @Transactional
-    public void validatePayment(PaymentResponseDto dto) {
-        Payment orderPayment = mapPayment(dto);
-        String[] ids = dto.getOrder_id().split("_");
-        Order order = orderRepository.findById(Long.valueOf(ids[0]))
-            .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
-        checkResponseStatusFailure(dto, orderPayment, order);
-        checkResponseValidationSignature(dto);
-        checkOrderStatusApproved(dto, orderPayment, order);
+    public Long validatePaymentLiqPay(PaymentResponseLiqPayDto dto) {
+        String data = dto.getData();
+        String signature = dto.getSignature();
+        checkSignature(privateKey, dto.getData(), signature);
+        Long orderId = extractOrderIdFromData(data);
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException());
+        Payment payment = convertToPayment(data);
+        checkOrderStatusApproved(payment, order);
+        notificationService.notifyPaidOrder(order);
+        return orderId;
     }
 
-    private Payment mapPayment(PaymentResponseDto dto) {
-        if (dto.getFee() == null) {
-            dto.setFee(0);
+    /**
+     * This method is used to convert the provided data into a Payment object. The
+     * data is a Base64 encoded string, which is first decoded into a regular
+     * string. The decoded string is then converted into a JSON object, from which
+     * the payment details are extracted.
+     *
+     * @param data The Base64 encoded string containing the payment details.
+     * @return The Payment object created from the extracted payment details.
+     */
+    protected Payment convertToPayment(String data) {
+        byte[] decodedBytes = Base64.getDecoder().decode(data);
+        String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+        JSONObject jsonObject = new JSONObject(decodedString);
+        Payment payment = new Payment();
+        payment.setAmount((long) (Double.valueOf(jsonObject.getString("amount")) * 100));
+        payment.setCurrency(jsonObject.getString("currency"));
+        payment.setComment(jsonObject.getString("description"));
+        payment.setOrderStatus(jsonObject.getString("status"));
+        return payment;
+    }
+
+    /**
+     * This method is used to validate the signature of the payment received from
+     * LiqPay. It concatenates the private key and data, generates a SHA-1 hash,
+     * encodes it in Base64, and compares it with the received signature. If the
+     * generated signature doesn't match the received one, it throws a
+     * `WrongSignatureException`.
+     *
+     * @param privateKey        The private key used for signature validation.
+     * @param data              The data received from LiqPay.
+     * @param receivedSignature The signature received from LiqPay.
+     */
+    protected void checkSignature(String privateKey, String data, String receivedSignature) {
+        String message = privateKey + data + privateKey;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] messageDigest = md.digest(message.getBytes(StandardCharsets.UTF_8));
+            String signature = Base64.getEncoder().encodeToString(messageDigest);
+            if (!receivedSignature.equals(signature)) {
+                throw new WrongSignatureException(ErrorMessage.WRONG_SIGNATURE_USED);
+            }
+        } catch (NoSuchAlgorithmException e) {
+            throw new WrongSignatureException(ErrorMessage.WRONG_SIGNATURE_USED);
         }
-        return Payment.builder()
-            .id(Long.valueOf(dto.getOrder_id().substring(dto.getOrder_id().indexOf("_") + 1)))
-            .currency(dto.getCurrency())
-            .amount(Long.valueOf(dto.getAmount()))
-            .orderStatus(dto.getOrder_status())
-            .responseStatus(dto.getResponse_status())
-            .senderCellPhone(dto.getSender_cell_phone())
-            .senderAccount(dto.getSender_account())
-            .maskedCard(dto.getMasked_card())
-            .cardType(dto.getCard_type())
-            .responseCode(dto.getResponse_code())
-            .responseDescription(dto.getResponse_description())
-            .orderTime(dto.getOrder_time())
-            .settlementDate(parseFondySettlementDate(dto.getSettlement_date()))
-            .fee(Long.valueOf(dto.getFee()))
-            .paymentSystem(dto.getPayment_system())
-            .senderEmail(dto.getSender_email())
-            .paymentId(String.valueOf(dto.getPayment_id()))
-            .paymentStatus(PaymentStatus.UNPAID)
-            .build();
+    }
+
+    /**
+     * This method is used to extract the order ID from the provided data. The data
+     * is a Base64 encoded string, which is first decoded into a regular string. The
+     * decoded string is then converted into a JSON object, from which the order ID
+     * is extracted.
+     *
+     * @param data The Base64 encoded string containing the order ID.
+     * @return The order ID extracted from the data.
+     */
+    protected Long extractOrderIdFromData(String data) {
+        byte[] decodedBytes = Base64.getDecoder().decode(data);
+        String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+        JSONObject jsonObject = new JSONObject(decodedString);
+        return Long.valueOf(jsonObject.getString("order_id"));
+    }
+
+    /**
+     * This method is used to extract the status from the provided data. The data is
+     * a Base64 encoded string, which is first decoded into a regular string. The
+     * decoded string is then converted into a JSON object, from which the status is
+     * extracted.
+     *
+     * @param data The Base64 encoded string containing the status.
+     * @return The status extracted from the data.
+     * @note This method is not intended for use in a test environment.
+     */
+    protected String extractStatusFromData(String data) { // Don`t use in test env
+        byte[] decodedBytes = Base64.getDecoder().decode(data);
+        String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+        JSONObject jsonObject = new JSONObject(decodedString);
+        return jsonObject.getString("status");
+    }
+
+    private HashMap<String, String> formPaymentRequestLiqPay(Long orderId, long sumToPayInCoins) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("order_id", String.valueOf(order.getId()));
+        map.put("amount", String.valueOf(convertCoinsIntoBills(sumToPayInCoins)));
+        map.put("description", "UBS Courier");
+        map.put("sandbox", String.valueOf(1));
+        map.put("currency", "UAH");
+        map.put("action", "pay");
+        map.put("result_url", resultUrlFondy);
+        return map;
     }
 
     private String parseFondySettlementDate(String settlementDate) {
@@ -431,9 +501,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, null);
         } else {
-            PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPayInCoins);
-            String link = getLinkFromFondyCheckoutResponse(fondyClient.getCheckoutResponse(paymentRequestDto));
-            return getPaymentRequestDto(order, link);
+            HashMap<String, String> requestLiqPayDto = formPaymentRequestLiqPay(order.getId(), sumToPayInCoins);
+            return getPaymentRequestDto(order, liqPay.cnb_form(requestLiqPayDto));
         }
     }
 
@@ -490,7 +559,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private FondyPaymentResponse getFondyPaymentResponse(Order order) {
         Payment payment = order.getPayment().get(order.getPayment().size() - 1);
         return FondyPaymentResponse.builder()
-            .paymentStatus(payment.getResponseStatus())
+            .paymentStatus(payment.getPaymentStatus().name().equals("PAID") ? "success" : null)
             .build();
     }
 
@@ -1680,19 +1749,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return sumToPay <= 0;
     }
 
-    @Override
-    @Transactional
-    public void validatePaymentClient(PaymentResponseDto dto) {
-        Payment orderPayment = mapPaymentClient(dto);
-        String[] id = orderIdInfo(dto);
-        Order order = orderRepository.findById(Long.valueOf(id[0]))
-            .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
-
-        checkResponseStatusFailure(dto, orderPayment, order);
-        checkResponseValidationSignature(dto);
-        checkOrderStatusApproved(dto, orderPayment, order);
-    }
-
     private Payment mapPaymentClient(PaymentResponseDto dto) {
         String[] idClient = orderIdInfo(dto);
         Order order = orderRepository.findById(Long.valueOf(idClient[0]))
@@ -1742,9 +1798,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void checkOrderStatusApproved(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getOrder_status().equals(APPROVED_STATUS)) {
-            orderPayment.setPaymentId(String.valueOf(dto.getPayment_id()));
+    protected void checkOrderStatusApproved(Payment orderPayment, Order order) {
+//        if (orderPayment.getOrderStatus().equals(APPROVED_STATUS)) {
+            orderPayment.setOrderStatus(APPROVED_STATUS);
+            orderPayment.setPaymentId(String.valueOf(orderPayment.getPaymentId()));
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderPayment.setOrder(order);
@@ -1752,8 +1809,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderRepository.save(order);
             eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM, order);
-        }
+                    OrderHistory.SYSTEM, order);
+//        }
     }
 
     private void checkDtoFee(PaymentResponseDto dto) {

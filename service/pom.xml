@@ -156,6 +156,11 @@
             <version>1.9</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.liqpay</groupId>
+            <artifactId>liqpay-sdk</artifactId>
+            <version>0.8-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <repositories>

@@ -171,6 +171,7 @@ public final class ErrorMessage {
     public static final String BAGS_QUANTITY_NOT_FOUND_MESSAGE = "Bags quantity not found by current orderId "
         + "and bagId.";
     public static final String TARIFF_NOT_FOUND_BY_LOCATION_ID = "Tariff with location id: %d not found";
+    public static final String WRONG_SIGNATURE_USED = "This signature is invalid: ";
 
     /**
      * Constructor.

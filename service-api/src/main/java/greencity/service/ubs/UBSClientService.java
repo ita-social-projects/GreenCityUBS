@@ -27,6 +27,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -47,12 +48,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface UBSClientService {
-    /**
-     * Method validates received payment response.
-     *
-     * @param dto {@link PaymentResponseDto} - response order data.
-     */
-    void validatePayment(PaymentResponseDto dto);
+    Long validatePaymentLiqPay(PaymentResponseLiqPayDto dto);
 
     /**
      * Methods returns all available for order bags and current user's bonus points.
@@ -313,13 +309,6 @@ public interface UBSClientService {
      * @author Max Boiarchuk
      */
     FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws PaymentLinkException;
-
-    /**
-     * Method validates received payment client response.
-     *
-     * @param dto {@link PaymentResponseDto} - response order data.
-     */
-    void validatePaymentClient(PaymentResponseDto dto);
 
     /**
      * Methods returns current user's bonus points.

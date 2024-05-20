@@ -3,8 +3,8 @@ package greencity.controller;
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
-import greencity.constants.HttpStatuses;
 import greencity.constant.ValidationConstant;
+import greencity.constants.HttpStatuses;
 import greencity.dto.LocationsDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
@@ -12,23 +12,18 @@ import greencity.dto.certificate.CertificateDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderDetailStatusDto;
-import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.*;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserVO;
-import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.exceptions.NotFoundException;
-import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
@@ -40,14 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
@@ -67,7 +55,6 @@ public class OrderController {
     private final UBSClientService ubsClientService;
     private final UBSManagementService ubsManagementService;
     private final RedirectionConfigProp redirectionConfigProp;
-    private final NotificationService notificationService;
 
     /**
      * Controller returns all available bags and bonus points of current user by
@@ -204,10 +191,9 @@ public class OrderController {
     })
     @PostMapping("/receivePayment")
     public ResponseEntity<HttpStatus> receivePayment(
-        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
-        ubsClientService.validatePayment(dto);
+            PaymentResponseLiqPayDto dto, HttpServletResponse response) throws IOException {
+        ubsClientService.validatePaymentLiqPay(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            notificationService.notifyPaidOrder(dto);
             response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -325,30 +311,6 @@ public class OrderController {
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getPaymentResponseFromFondy(orderId, uuid));
-    }
-
-    /**
-     * Controller checks if received data Client is valid and stores payment info if
-     * is.
-     *
-     * @param dto {@link PaymentResponseDto} - response order data.
-     * @return {@link HttpStatus} - http status.
-     * @author Max Boiarchuk
-     */
-    @ApiOperation(value = "Receive payment from  Client Fondy.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
-    })
-    @PostMapping("/receivePaymentClient")
-    public ResponseEntity<HttpStatus> receivePaymentClient(
-        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
-        ubsClientService.validatePaymentClient(dto);
-        if (HttpStatus.OK.is2xxSuccessful()) {
-            notificationService.notifyPaidOrder(dto);
-            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
-        }
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
