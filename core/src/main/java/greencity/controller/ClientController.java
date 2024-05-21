@@ -9,7 +9,6 @@ import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
@@ -209,29 +208,6 @@ public class ClientController {
     @GetMapping("/order-payment-detail/{orderId}")
     public ResponseEntity<OrderPaymentDetailDto> getOrderPaymentDetail(@PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderPaymentDetail(orderId));
-    }
-
-    /**
-     * Controller for getting order info data about surcharge.
-     *
-     * @return {@link OrderStatusPageDto}.
-     * @author Igor Boykov
-     */
-    @Operation(summary = "Controller for getting order info data about surcharge")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = OrderStatusPageDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @GetMapping("/get-data-for-order-surcharge/{id}")
-    public ResponseEntity<OrderStatusPageDto> getDataForOrderSurcharge(
-        @PathVariable(name = "id") Long orderId,
-        @Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getOrderInfoForSurcharge(orderId, uuid));
     }
 
     /**

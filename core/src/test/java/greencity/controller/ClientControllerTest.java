@@ -102,12 +102,6 @@ class ClientControllerTest {
     }
 
     @Test
-    void getDataForOrderStatusPageTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-data-for-order-surcharge/{id}", 1L));
-        verify(ubsClientService).getOrderInfoForSurcharge(1L, null);
-    }
-
-    @Test
     void getAllPointsForUserTest() throws Exception {
         this.mockMvc.perform(get(ubsLink + getAllPointsForUser)
             .principal(principal)
