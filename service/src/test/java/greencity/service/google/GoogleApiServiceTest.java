@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class GoogleApiServiceTest {
@@ -94,6 +95,72 @@ class GoogleApiServiceTest {
             when(request.await()).thenThrow(new InterruptedException());
 
             assertThrows(GoogleApiException.class, () -> googleApiService.getResultFromGeoCode(placeId, langCode));
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void testGetResultFromGoogleMapsGeocodingByCityAndCounty() {
+        String lang = "en";
+        String cityName = "Kyiv";
+        String countryName = "Ukraine";
+
+        try (MockedStatic<GeocodingApi> utilities = Mockito.mockStatic(GeocodingApi.class)) {
+            utilities.when(() -> GeocodingApi.geocode(context, cityName + ", " + countryName))
+                .thenReturn(request);
+
+            when(request.language(lang)).thenReturn(request);
+            when(request.await()).thenReturn(new GeocodingResult[1]);
+
+            assertDoesNotThrow(() -> googleApiService
+                .getGeocodingResultByCityAndCountryAndLocale(countryName, cityName, lang));
+
+            verify(request).language(lang);
+            verify(request).await();
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void testGetResultFromGoogleMapsGeocodingByCityAndCountryThrowsGoogleApiException() {
+        String lang = "en";
+        String cityName = "Kyiv";
+        String countryName = "Ukraine";
+
+        try (MockedStatic<GeocodingApi> utilities = Mockito.mockStatic(GeocodingApi.class)) {
+            utilities.when(() -> GeocodingApi.geocode(context, cityName + ", " + countryName))
+                .thenReturn(request);
+
+            when(request.language(lang)).thenReturn(request);
+            when(request.await()).thenThrow(new InterruptedException());
+
+            assertThrows(GoogleApiException.class, () -> googleApiService
+                .getGeocodingResultByCityAndCountryAndLocale(countryName, cityName, lang));
+
+            verify(request).language(lang);
+            verify(request).await();
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void testGetGeocodingResultByCityAndCountryAndLocaleThrowsNotFoundException() {
+        String lang = "en";
+        String cityName = "Kyiv";
+        String countryName = "Ukraine";
+
+        try (MockedStatic<GeocodingApi> utilities = Mockito.mockStatic(GeocodingApi.class)) {
+            utilities.when(() -> GeocodingApi.geocode(context, cityName + ", " + countryName))
+                .thenReturn(request);
+
+            when(request.language(lang)).thenReturn(request);
+            when(request.await()).thenThrow(new InvalidRequestException("message"));
+
+            assertThrows(NotFoundException.class, () -> googleApiService
+                .getGeocodingResultByCityAndCountryAndLocale(countryName, cityName, lang));
+
+            verify(request).language(lang);
+            verify(request).await();
         }
     }
 }

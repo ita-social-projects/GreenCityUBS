@@ -2,12 +2,15 @@ package greencity.service.ubs;
 
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.LatLng;
 import com.liqpay.LiqPay;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
+import greencity.constant.TariffLocation;
+import greencity.constant.KyivTariffLocation;
 import greencity.dto.AllActiveLocationsDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDtos;
@@ -90,6 +93,7 @@ import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
+import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -111,6 +115,7 @@ import greencity.repository.TelegramBotRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
+import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
@@ -232,6 +237,17 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String KYIV_EN = "Kyiv";
     private static final String KYIV_UA = "місто Київ";
     private static final String LANGUAGE_EN = "en";
+    private static final Double KYIV_LATITUDE = 50.4546600;
+    private static final Double KYIV_LONGITUDE = 30.5238000;
+    private static final Integer EARTH_RADIUS = 6371;
+    private static final Double LOCATION_40_KM_ZONE_VALUE = 40.00;
+    private static final String UKRAINE_EN = "Ukraine";
+    private static final String LANG_EN = "en";
+    private static final String ADDRESS_NOT_FOUND_BY_ID_MESSAGE = "Address not found with id: ";
+    private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected "
+        + "does not match, reselect correct data.";
+    private static final String USER_IS_NOT_ORDER_OWNER_MESSAGE = "Current user has no owner rights to process "
+        + "the order with id: ";
 
     /**
      * {@inheritDoc}
@@ -364,7 +380,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkIsOrderOfCurrentUser(User user, Order order) {
-        if (!order.getUser().equals(user)) {
+        if (!order.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException(ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER);
         }
     }
@@ -479,6 +495,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
         final User currentUser = userRepository.findByUuid(uuid);
+        if (!checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
+            throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
+        }
+
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
         List<OrderBag> bagsOrdered = new ArrayList<>();
 
@@ -493,6 +513,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
 
         Order order = isExistOrder(dto, orderId);
+        if (orderId != null) {
+            checkIsOrderOfCurrentUser(currentUser, order);
+        }
         order.setTariffsInfo(tariffsInfo);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPayInCoins = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPayInCoins);
@@ -508,6 +531,46 @@ public class UBSClientServiceImpl implements UBSClientService {
         } else {
             HashMap<String, String> requestLiqPayDto = formPaymentRequestLiqPay(order.getId(), sumToPayInCoins);
             return getPaymentRequestDto(order, liqPay.cnb_form(requestLiqPayDto));
+        }
+    }
+
+    private boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
+        Address address = addressRepo.findById(addressId)
+            .orElseThrow(() -> new EntityNotFoundException(ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
+
+        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getCityEn());
+
+        if (locationId == TariffLocation.KYIV_TARIFF.getLocationId()) {
+            return isKyivTariff;
+        } else if (locationId == TariffLocation.KYIV_REGION_20_KM_TARIFF.getLocationId()) {
+            checkAndCalculateAddressCoordinatesIfEmpty(address);
+
+            double addressLatitude = address.getCoordinates().getLatitude();
+            double addressLongitude = address.getCoordinates().getLongitude();
+
+            double distanceInKm =
+                DistanceCalculationUtils.calculateDistanceInKmByHaversineFormula(KYIV_LATITUDE, KYIV_LONGITUDE,
+                    addressLatitude, addressLongitude);
+
+            return distanceInKm <= LOCATION_40_KM_ZONE_VALUE && !isKyivTariff;
+        } else {
+            return locationRepository.findAddressAndLocationNamesMatch(locationId, addressId).isPresent();
+        }
+    }
+
+    private boolean checkIfCityBelongsToKyivTariff(String cityName) {
+        return Arrays.stream(KyivTariffLocation.values())
+            .anyMatch(kyivTariffLocation -> kyivTariffLocation.getLocationName().equalsIgnoreCase(cityName));
+    }
+
+    private void checkAndCalculateAddressCoordinatesIfEmpty(Address address) {
+        if (address.getCoordinates().getLatitude() == 0.0 && address.getCoordinates().getLongitude() == 0.0) {
+            LatLng latLng = googleApiService
+                .getGeocodingResultByCityAndCountryAndLocale(UKRAINE_EN, address.getCityEn(),
+                    LANG_EN).geometry.location;
+            Coordinates addressCoordinates = Coordinates.builder().latitude(latLng.lat).longitude(latLng.lng).build();
+            address.setCoordinates(addressCoordinates);
+            addressRepo.save(address);
         }
     }
 
