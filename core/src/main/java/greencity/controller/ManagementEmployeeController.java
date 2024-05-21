@@ -51,7 +51,6 @@ public class ManagementEmployeeController {
      * @param employeeWithTariffsIdDto DTO for {@link EmployeeWithTariffsIdDto}.
      * @param image                    Image of the employee (optional).
      * @return ResponseEntity with {@link EmployeeWithTariffsDto} instance.
-     * @author [Author Name]
      */
     @ApiOperation(value = "Save employee")
     @ApiResponses(value = {

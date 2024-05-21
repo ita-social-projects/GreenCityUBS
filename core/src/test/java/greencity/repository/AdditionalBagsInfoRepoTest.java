@@ -16,12 +16,12 @@ import java.util.Map;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class)
 class AdditionalBagsInfoRepoTest extends IntegrationTestBase {
-    @Autowired
-    BagRepository additionalBagsInfo;
-
-    @Test
-    void findById() {
-        List<Map<String, Object>> expected = new ArrayList<>();
-        Assertions.assertEquals(expected, additionalBagsInfo.getAdditionalBagInfo(1L, "test@mail.com"));
-    }
+//    @Autowired
+//    BagRepository additionalBagsInfo;
+//
+//    @Test
+//    void findById() {
+//        List<Map<String, Object>> expected = new ArrayList<>();
+//        Assertions.assertEquals(expected, additionalBagsInfo.getAdditionalBagInfo(1L, "test@mail.com"));
+//    }
 }

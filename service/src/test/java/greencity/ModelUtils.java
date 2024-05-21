@@ -1221,13 +1221,13 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffsInfoRecievingEmployee getTariffsInfoRecievingEmployee(){
+    public static TariffsInfoRecievingEmployee getTariffsInfoRecievingEmployee() {
         return TariffsInfoRecievingEmployee
-                .builder()
-                .employee(getEmployee())
-                .tariffsInfo(getTariffInfo())
-                .hasChat(Boolean.TRUE)
-                .build();
+            .builder()
+            .employee(getEmployee())
+            .tariffsInfo(getTariffInfo())
+            .hasChat(Boolean.TRUE)
+            .build();
     }
 
     public static LocationsDtos getLocationsDtos(Long id) {
