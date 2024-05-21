@@ -84,7 +84,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         }
         checkValidPosition(dto.getEmployeeDto().getEmployeePositions());
 
-        Employee employee = modelMapper.map(dto, Employee.class);
+        Employee employee = buildEmployeeFromEmployeeWithTariffsIdDto(dto);
         employee.setUuid(UUID.randomUUID().toString());
         employee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
@@ -95,6 +95,22 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         }
         signUpEmployee(employee);
         return modelMapper.map(employeeRepository.save(employee), EmployeeWithTariffsDto.class);
+    }
+
+    private Employee buildEmployeeFromEmployeeWithTariffsIdDto(EmployeeWithTariffsIdDto employeeWithTariffsIdDto) {
+        return Employee.builder()
+            .firstName(employeeWithTariffsIdDto.getEmployeeDto().getFirstName())
+            .lastName(employeeWithTariffsIdDto.getEmployeeDto().getLastName())
+            .phoneNumber(employeeWithTariffsIdDto.getEmployeeDto().getPhoneNumber())
+            .email(employeeWithTariffsIdDto.getEmployeeDto().getEmail())
+            .employeePosition(employeeWithTariffsIdDto.getEmployeeDto().getEmployeePositions().stream()
+                .map(positionDto -> Position.builder()
+                    .id(positionDto.getId())
+                    .name(positionDto.getName())
+                    .nameEn(positionDto.getNameEn())
+                    .build())
+                .collect(Collectors.toSet()))
+            .build();
     }
 
     private void signUpEmployee(Employee employee) {

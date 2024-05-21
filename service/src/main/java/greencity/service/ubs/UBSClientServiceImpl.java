@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
+import com.liqpay.LiqPay;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
@@ -46,6 +47,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -87,6 +89,7 @@ import greencity.enums.PaymentStatus;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
@@ -120,6 +123,8 @@ import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
@@ -129,19 +134,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -153,50 +162,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
-import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
-import static greencity.constant.ErrorMessage.BAD_ORDER_STATUS_REQUEST;
-import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
-import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
-import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
-import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
-import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
-import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
-import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
-import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
-import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
-import static greencity.constant.ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED;
-import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
-import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
-import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
-import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
-import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
-import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
-import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.BAGS_QUANTITY_NOT_FOUND_MESSAGE;
+import static greencity.constant.AppConstant.USER_WITH_PREFIX;
+import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -237,6 +204,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final LocationApiService locationApiService;
     private final OrderBagRepository orderBagRepository;
     private final OrderBagService orderBagService;
+    private final NotificationService notificationService;
+    private final LiqPay liqPay;
 
     @Lazy
     @Autowired
@@ -253,6 +222,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String resultUrlForPersonalCabinetOfUser;
     @Value("${greencity.redirect.result-url-fondy}")
     private String resultUrlFondy;
+    @Value("${liqpay.public.key}")
+    private String publicKey;
+    @Value("${liqpay.private.key}")
+    private String privateKey;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
@@ -277,48 +250,99 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String USER_IS_NOT_ORDER_OWNER_MESSAGE = "Current user has no owner rights to process "
         + "the order with id: ";
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    @Transactional
-    public void validatePayment(PaymentResponseDto dto) {
-        Payment orderPayment = mapPayment(dto);
-        String[] ids = dto.getOrder_id().split("_");
-        Order order = orderRepository.findById(Long.valueOf(ids[0]))
-            .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
-        checkResponseStatusFailure(dto, orderPayment, order);
-        checkResponseValidationSignature(dto);
-        checkOrderStatusApproved(dto, orderPayment, order);
+    public Long validatePaymentLiqPay(PaymentResponseLiqPayDto dto) {
+        String data = dto.getData();
+        String signature = dto.getSignature();
+        checkSignature(privateKey, dto.getData(), signature);
+        Long orderId = extractOrderIdFromData(data);
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException());
+        Payment payment = convertToPayment(data);
+        checkOrderStatusApproved(payment, order);
+        notificationService.notifyPaidOrder(order);
+        return orderId;
     }
 
-    private Payment mapPayment(PaymentResponseDto dto) {
-        if (dto.getFee() == null) {
-            dto.setFee(0);
+    /**
+     * This method is used to convert the provided data into a Payment object. The
+     * data is a Base64 encoded string, which is first decoded into a regular
+     * string. The decoded string is then converted into a JSON object, from which
+     * the payment details are extracted.
+     *
+     * @param data The Base64 encoded string containing the payment details.
+     * @return The Payment object created from the extracted payment details.
+     */
+    protected Payment convertToPayment(String data) {
+        byte[] decodedBytes = Base64.getDecoder().decode(data);
+        String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+        JSONObject jsonObject = new JSONObject(decodedString);
+        Payment payment = new Payment();
+        payment.setAmount((long) (Double.valueOf(jsonObject.getString("amount")) * 100));
+        payment.setCurrency(jsonObject.getString("currency"));
+        payment.setComment(jsonObject.getString("description"));
+        payment.setOrderStatus(jsonObject.getString("status"));
+        return payment;
+    }
+
+    /**
+     * This method is used to validate the signature of the payment received from
+     * LiqPay. It concatenates the private key and data, generates a SHA-1 hash,
+     * encodes it in Base64, and compares it with the received signature. If the
+     * generated signature doesn't match the received one, it throws a
+     * `WrongSignatureException`.
+     *
+     * @param privateKey        The private key used for signature validation.
+     * @param data              The data received from LiqPay.
+     * @param receivedSignature The signature received from LiqPay.
+     */
+    protected void checkSignature(String privateKey, String data, String receivedSignature) {
+        String message = privateKey + data + privateKey;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] messageDigest = md.digest(message.getBytes(StandardCharsets.UTF_8));
+            String signature = Base64.getEncoder().encodeToString(messageDigest);
+            if (!receivedSignature.equals(signature)) {
+                throw new WrongSignatureException(ErrorMessage.WRONG_SIGNATURE_USED);
+            }
+        } catch (NoSuchAlgorithmException e) {
+            throw new WrongSignatureException(ErrorMessage.WRONG_SIGNATURE_USED);
         }
-        return Payment.builder()
-            .id(Long.valueOf(dto.getOrder_id().substring(dto.getOrder_id().indexOf("_") + 1)))
-            .currency(dto.getCurrency())
-            .amount(Long.valueOf(dto.getAmount()))
-            .orderStatus(dto.getOrder_status())
-            .responseStatus(dto.getResponse_status())
-            .senderCellPhone(dto.getSender_cell_phone())
-            .senderAccount(dto.getSender_account())
-            .maskedCard(dto.getMasked_card())
-            .cardType(dto.getCard_type())
-            .responseCode(dto.getResponse_code())
-            .responseDescription(dto.getResponse_description())
-            .orderTime(dto.getOrder_time())
-            .settlementDate(parseFondySettlementDate(dto.getSettlement_date()))
-            .fee(Long.valueOf(dto.getFee()))
-            .paymentSystem(dto.getPayment_system())
-            .senderEmail(dto.getSender_email())
-            .paymentId(String.valueOf(dto.getPayment_id()))
-            .paymentStatus(PaymentStatus.UNPAID)
-            .build();
     }
 
-    private String parseFondySettlementDate(String settlementDate) {
-        return settlementDate.isEmpty()
-            ? LocalDate.now().toString()
-            : LocalDate.parse(settlementDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString();
+    /**
+     * This method is used to extract the order ID from the provided data. The data
+     * is a Base64 encoded string, which is first decoded into a regular string. The
+     * decoded string is then converted into a JSON object, from which the order ID
+     * is extracted.
+     *
+     * @param data The Base64 encoded string containing the order ID.
+     * @return The order ID extracted from the data.
+     */
+    protected Long extractOrderIdFromData(String data) {
+        byte[] decodedBytes = Base64.getDecoder().decode(data);
+        String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+        JSONObject jsonObject = new JSONObject(decodedString);
+        return Long.valueOf(jsonObject.getString("order_id"));
+    }
+
+    /**
+     * This method is used to extract the status from the provided data. The data is
+     * a Base64 encoded string, which is first decoded into a regular string. The
+     * decoded string is then converted into a JSON object, from which the status is
+     * extracted.
+     *
+     * @param data The Base64 encoded string containing the status.
+     * @return The status extracted from the data.
+     * @note This method is not intended for use in a test environment.
+     */
+    protected String extractStatusFromData(String data) { // Don`t use in test env
+        byte[] decodedBytes = Base64.getDecoder().decode(data);
+        String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+        JSONObject jsonObject = new JSONObject(decodedString);
+        return jsonObject.getString("status");
     }
 
     /**
@@ -506,9 +530,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, null);
         } else {
-            PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPayInCoins);
-            String link = getLinkFromFondyCheckoutResponse(fondyClient.getCheckoutResponse(paymentRequestDto));
-            return getPaymentRequestDto(order, link);
+            HashMap<String, String> requestLiqPayDto = formPaymentRequestLiqPay(order.getId(), sumToPayInCoins);
+            return getPaymentRequestDto(order, liqPay.cnb_form(requestLiqPayDto));
         }
     }
 
@@ -605,7 +628,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private FondyPaymentResponse getFondyPaymentResponse(Order order) {
         Payment payment = order.getPayment().getLast();
         return FondyPaymentResponse.builder()
-            .paymentStatus(payment.getResponseStatus())
+            .paymentStatus(payment.getPaymentStatus().name().equals("PAID") ? "success" : null)
             .build();
     }
 
@@ -1136,19 +1159,37 @@ public class UBSClientServiceImpl implements UBSClientService {
      * @author Rusanovscaia Nadejda
      */
     @Override
-    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String email) {
-        Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getRecipientId());
-        if (optionalUbsUser.isEmpty()) {
-            throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getRecipientId());
-        }
-        UBSuser user = optionalUbsUser.get();
-        ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
-        eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().getFirst());
+    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String userUuid) {
+        var ubsUser = getUbsUserById(dtoUpdate.getRecipientId());
+        checkUserHasAccessToUpdateData(ubsUser, userUuid);
+
+        ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
+        eventService.save(OrderHistory.CHANGED_SENDER, ubsUser.getUser().getRecipientEmail(),
+            ubsUser.getOrders().getFirst());
+
         return UbsCustomersDto.builder()
-            .name(user.getSenderFirstName() + " " + user.getSenderLastName())
-            .email(user.getSenderEmail())
-            .phoneNumber(user.getSenderPhoneNumber())
+            .name(ubsUser.getSenderFirstName() + " " + ubsUser.getSenderLastName())
+            .email(ubsUser.getSenderEmail())
+            .phoneNumber(ubsUser.getSenderPhoneNumber())
             .build();
+    }
+
+    private UBSuser getUbsUserById(Long recipientId) {
+        return ubsUserRepository.findById(recipientId)
+            .orElseThrow(() -> new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + recipientId));
+    }
+
+    private void checkUserHasAccessToUpdateData(UBSuser ubsUser, String userUuid) {
+        var uuid = ubsUser.getUser().getUuid();
+        if (checkUserRoleIsUser() && !(uuid.equals(userUuid))) {
+            throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
+        }
+    }
+
+    private boolean checkUserRoleIsUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals(USER_WITH_PREFIX));
     }
 
     @Override
@@ -1241,6 +1282,28 @@ public class UBSClientServiceImpl implements UBSClientService {
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
 
         return paymentRequestDto;
+    }
+
+    private HashMap<String, String> formPaymentRequestLiqPay(Long orderId, long sumToPayInCoins) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("order_id", String.valueOf(order.getId()));
+        map.put("amount", String.valueOf(convertCoinsIntoBills(sumToPayInCoins)));
+        map.put("description", "UBS Courier");
+        map.put("sandbox", String.valueOf(1));
+        map.put("currency", "UAH");
+        map.put("action", "pay");
+        map.put("result_url", resultUrlFondy);
+        return map;
+    }
+
+    private Double convertCoinsIntoBills(Long coins) {
+        return BigDecimal.valueOf(coins)
+            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+            .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+            .doubleValue();
     }
 
     private UBSuser formUserDataToBeSaved(PersonalDataDto dto, Long addressId, Long locationId, User currentUser) {
@@ -1631,13 +1694,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .longValue();
     }
 
-    private Double convertCoinsIntoBills(Long coins) {
-        return BigDecimal.valueOf(coins)
-            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-            .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
-            .doubleValue();
-    }
-
     private void checkIsOrderPaid(OrderPaymentStatus orderPaymentStatus) {
         if (OrderPaymentStatus.PAID.equals(orderPaymentStatus)) {
             throw new BadRequestException(ORDER_ALREADY_PAID);
@@ -1794,19 +1850,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return sumToPay <= 0;
     }
 
-    @Override
-    @Transactional
-    public void validatePaymentClient(PaymentResponseDto dto) {
-        Payment orderPayment = mapPaymentClient(dto);
-        String[] id = orderIdInfo(dto);
-        Order order = orderRepository.findById(Long.valueOf(id[0]))
-            .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
-
-        checkResponseStatusFailure(dto, orderPayment, order);
-        checkResponseValidationSignature(dto);
-        checkOrderStatusApproved(dto, orderPayment, order);
-    }
-
     private Payment mapPaymentClient(PaymentResponseDto dto) {
         String[] idClient = orderIdInfo(dto);
         Order order = orderRepository.findById(Long.valueOf(idClient[0]))
@@ -1828,7 +1871,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .responseCode(dto.getResponse_code())
             .responseDescription(dto.getResponse_description())
             .orderTime(dto.getOrder_time())
-            .settlementDate(parseFondySettlementDate(dto.getSettlement_date()))
             .fee(Optional.ofNullable(dto.getFee()).map(Long::valueOf).orElse(0L))
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
@@ -1856,18 +1898,17 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void checkOrderStatusApproved(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getOrder_status().equals(APPROVED_STATUS)) {
-            orderPayment.setPaymentId(String.valueOf(dto.getPayment_id()));
-            orderPayment.setPaymentStatus(PaymentStatus.PAID);
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-            orderPayment.setOrder(order);
-            paymentRepository.save(orderPayment);
-            orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM, order);
-        }
+    protected void checkOrderStatusApproved(Payment orderPayment, Order order) {
+        orderPayment.setOrderStatus(APPROVED_STATUS); // TODO: need to be changed in production
+        orderPayment.setPaymentId(String.valueOf(orderPayment.getPaymentId()));
+        orderPayment.setPaymentStatus(PaymentStatus.PAID);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        orderPayment.setOrder(order);
+        paymentRepository.save(orderPayment);
+        orderRepository.save(order);
+        eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
+            OrderHistory.SYSTEM, order);
     }
 
     private void checkDtoFee(PaymentResponseDto dto) {
