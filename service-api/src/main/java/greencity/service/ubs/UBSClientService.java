@@ -170,16 +170,6 @@ public interface UBSClientService {
     List<OrderClientDto> getAllOrdersDoneByUser(String uuid);
 
     /**
-     * Method creates the same order again if order's status is ON_THE_ROUTE,
-     * CONFIRMED or DONE.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link OrderClientDto} that contains client's order;
-     * @author Danylko Mykola
-     */
-    MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId);
-
-    /**
      * Method that returns info about all orders for specified userID.
      *
      * @param uuid current {@link User}'s uuid;

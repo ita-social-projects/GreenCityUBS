@@ -867,25 +867,6 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    @Transactional
-    public MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
-            || order.getOrderStatus() == OrderStatus.CONFIRMED
-            || order.getOrderStatus() == OrderStatus.DONE) {
-            List<Bag> bags = bagRepository.findAllByOrder(orderId);
-            return buildOrderBagDto(order, bags);
-        } else {
-            throw new BadRequestException(BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-
-    @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
         Page<Order> orderPages = nonNull(statuses)
             ? ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(page, uuid, statuses)
