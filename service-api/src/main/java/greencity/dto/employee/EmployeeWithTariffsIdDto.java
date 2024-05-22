@@ -1,5 +1,6 @@
 package greencity.dto.employee;
 
+import greencity.dto.tariff.TariffWithChatAccess;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +18,5 @@ public class EmployeeWithTariffsIdDto {
     @Valid
     private EmployeeDto employeeDto;
     @NotEmpty
-    private List<Long> tariffId;
+    private List<TariffWithChatAccess> tariffs;
 }

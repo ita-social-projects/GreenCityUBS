@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.RedirectionConfigProp;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.LocationsDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.FondyOrderResponse;
@@ -39,6 +40,7 @@ import org.springframework.web.util.NestedServletException;
 
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.List;
 
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getRedirectionConfig;
@@ -384,6 +386,46 @@ class OrderControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void checkIfTariffExistsByIdTest() throws Exception {
+        Long tariffId = 1L;
+        when(ubsClientService.checkIfTariffExistsById(tariffId)).thenReturn(true);
+
+        mockMvc.perform(get(ubsLink + "/check-if-tariff-exists/{id}", tariffId)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().string("true"));
+
+        verify(ubsClientService).checkIfTariffExistsById(tariffId);
+    }
+
+    @Test
+    void getAllLocationsTest() throws Exception {
+        List<LocationsDto> locationsDtoList = Arrays.asList(new LocationsDto(), new LocationsDto());
+        when(ubsClientService.getAllLocations()).thenReturn(locationsDtoList);
+
+        mockMvc.perform(get(ubsLink + "/locations")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
+
+        verify(ubsClientService).getAllLocations();
+    }
+
+    @Test
+    void getTariffIdByLocationIdTest() throws Exception {
+        Long locationId = 1L;
+        Long tariffId = 2L;
+        when(ubsClientService.getTariffIdByLocationId(locationId)).thenReturn(tariffId);
+
+        mockMvc.perform(get(ubsLink + "/tariffs/{locationId}", locationId)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().string(String.valueOf(tariffId)));
+
+        verify(ubsClientService).getTariffIdByLocationId(locationId);
     }
 
     private void setRedirectionConfigProp() {

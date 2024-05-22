@@ -149,4 +149,16 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
             + "LEFT JOIN employees e on te.employee_id = e.id "
             + "WHERE ti.id = :tariffId AND e.id = :employeeId")
     Optional<TariffsInfo> findTariffsInfoByIdForEmployee(Long tariffId, Long employeeId);
+
+    /**
+     * Retrieves the tariff ID associated with the specified location ID.
+     *
+     * @param locationId The ID of the location to retrieve the tariff ID for.
+     * @return An Optional containing the tariff ID if found, otherwise an empty
+     *         Optional.
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT tariffs_info_id FROM tariffs_locations "
+            + "WHERE location_id = :locationId")
+    Optional<Long> findTariffIdByLocationId(Long locationId);
 }

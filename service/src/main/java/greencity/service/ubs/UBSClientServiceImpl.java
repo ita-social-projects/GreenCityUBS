@@ -9,6 +9,7 @@ import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.AllActiveLocationsDto;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
 import greencity.dto.LocationsDtos;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.RegionDto;
@@ -88,6 +89,7 @@ import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
+import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -151,8 +153,8 @@ import java.util.stream.LongStream;
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.BAD_ORDER_STATUS_REQUEST;
-import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.BAGS_QUANTITY_NOT_FOUND_MESSAGE;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
@@ -184,6 +186,7 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NO
 import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
@@ -232,6 +235,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final LocationApiService locationApiService;
     private final OrderBagRepository orderBagRepository;
     private final OrderBagService orderBagService;
+    private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
 
     @Lazy
     @Autowired
@@ -1984,5 +1988,41 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
         return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Checks if a tariff exists by its ID.
+     *
+     * @param tariffInfoId The ID of the tariff to check.
+     * @return {@code true} if the tariff exists, {@code false} otherwise.
+     */
+    @Override
+    public boolean checkIfTariffExistsById(Long tariffInfoId) {
+        return tariffsInfoRepository.existsById(tariffInfoId);
+    }
+
+    /**
+     * Retrieves all active locations and converts them to DTOs.
+     *
+     * @return List of DTOs representing all active locations.
+     */
+    @Override
+    public List<LocationsDto> getAllLocations() {
+        List<Location> allActiveLocations = locationRepository.findAllActiveLocations();
+        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).collect(toList());
+    }
+
+    /**
+     * Retrieves the tariff ID associated with the specified location ID.
+     *
+     * @param locationId The ID of the location to retrieve the tariff ID for.
+     * @return The tariff ID if found.
+     * @throws NotFoundException if the tariff ID is not found for the given
+     *                           location ID.
+     */
+    @Override
+    public Long getTariffIdByLocationId(Long locationId) {
+        return tariffsInfoRepository.findTariffIdByLocationId(locationId)
+            .orElseThrow(() -> new NotFoundException(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationId)));
     }
 }

@@ -78,6 +78,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
             .antMatchers(HttpMethod.GET,
                 UBS_LINK + "/order-details-for-tariff",
+                ADMIN_EMPL_LINK + "/get-employees/{tariffId}",
+                UBS_LINK + "/tariffs/{locationId}",
                 UBS_LINK + "/getAllActiveCouriers",
                 UBS_LINK + "/locations/{courierId}")
             .permitAll()
@@ -98,7 +100,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/get-not-taken-order-reason/{id}",
                 UBS_MANAG_LINK + "/orderTableColumnsWidth",
                 UBS_LINK + "/order_history/{orderId}",
-                ADMIN_EMPL_LINK + "/**",
+                // ADMIN_EMPL_LINK + "/**",
                 ADMIN_LINK + "/notification/get-all-templates",
                 ADMIN_LINK + "/notification/get-template/{id}",
                 SUPER_ADMIN_LINK + "/get-all-receiving-station",
@@ -178,7 +180,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_LINK + "/order/{id}/cancellation",
                 ADMIN_LINK + "/notification/get-all",
                 ADMIN_LINK + "/notification/{id}",
-                ADMIN_LINK + "/**",
+                // ADMIN_LINK + "/**",
                 "/accountinfo",
                 "/removewebhook",
                 "/setwebhook")
@@ -231,6 +233,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_LINK + "/client/**",
                 "/notifications",
                 "/notifications/**",
+                UBS_LINK + "/check-if-tariff-exists/{id}",
+                UBS_LINK + "/locations",
                 "/notifications/quantityUnreadenNotifications")
             .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PUT,

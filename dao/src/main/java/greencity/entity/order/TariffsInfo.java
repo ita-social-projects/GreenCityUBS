@@ -1,5 +1,6 @@
 package greencity.entity.order;
 
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierLimit;
@@ -39,8 +40,8 @@ public class TariffsInfo {
         inverseJoinColumns = @JoinColumn(name = "receiving_station_id"))
     private Set<ReceivingStation> receivingStationList;
 
-    @ManyToMany(mappedBy = "tariffInfos")
-    private Set<Employee> employees;
+    @OneToMany(mappedBy = "tariffsInfo")
+    private List<TariffsInfoRecievingEmployee> employeeAssoc;
 
     @Column
     @Enumerated(EnumType.STRING)

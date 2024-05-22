@@ -242,7 +242,7 @@ class ViolationServiceImplTest {
             .phoneNumber("+380935577455")
             .email("test@gmail.com")
             .uuid("Test")
-            .tariffInfos(Set.of(
+            .tariffs(List.of(
                 TariffsInfo.builder()
                     .id(2L)
                     .service(ModelUtils.getService())
@@ -254,7 +254,7 @@ class ViolationServiceImplTest {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(order));
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(employee));
         when(employeeRepository.findTariffsInfoForEmployee(anyLong()))
-            .thenReturn(employee.getTariffInfos().stream().map(TariffsInfo::getId).collect(Collectors.toList()));
+            .thenReturn(employee.getTariffs().stream().map(TariffsInfo::getId).collect(Collectors.toList()));
         assertThrows(BadRequestException.class, () -> {
             violationService.addUserViolation(add, new MultipartFile[2], "test@gmail.com");
         });

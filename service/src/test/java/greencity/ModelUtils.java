@@ -102,11 +102,7 @@ import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.table.ColumnWidthDto;
-import greencity.dto.tariff.EditTariffDto;
-import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
-import greencity.dto.tariff.GetTariffLimitsDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.dto.tariff.*;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -117,6 +113,7 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationPlatform;
@@ -319,7 +316,7 @@ public class ModelUtils {
                 .email("employee@gmail.com")
                 .employeeStatus(EmployeeStatus.ACTIVE)
                 .employeePosition(new HashSet<>())
-                .tariffInfos(new HashSet<>())
+                .tariffs(List.of())
                 .imagePath("path")
                 .tariffs(List.of(getTariffInfo()))
                 .build());
@@ -1198,13 +1195,14 @@ public class ModelUtils {
                 .phoneNumber("+380935577455")
                 .email("test@gmail.com")
                 .image("path")
+                .employeeStatus(EmployeeStatus.ACTIVE)
                 .employeePositions(List.of(PositionDto.builder()
                     .id(1L)
                     .name("Водій")
                     .nameEn("Driver")
                     .build()))
                 .build())
-            .tariffs(List.of(getTariffInfoForEmployeeDto()))
+            .tariffs(List.of())
             .build();
     }
 
@@ -1220,6 +1218,15 @@ public class ModelUtils {
             .locationsDtos(List.of(getLocationsDtos(1L)))
             .receivingStationDtos(List.of(getGetReceivingStationDto()))
             .courier(getCourierTranslationDto(1L))
+            .build();
+    }
+
+    public static TariffsInfoRecievingEmployee getTariffsInfoRecievingEmployee() {
+        return TariffsInfoRecievingEmployee
+            .builder()
+            .employee(getEmployee())
+            .tariffsInfo(getTariffInfo())
+            .hasChat(Boolean.TRUE)
             .build();
     }
 
@@ -1253,7 +1260,7 @@ public class ModelUtils {
                 .name("Водій")
                 .nameEn("Driver")
                 .build()))
-            .tariffInfos(Set.of(TariffsInfo.builder()
+            .tariffs(List.of(TariffsInfo.builder()
                 .id(1L)
                 .service(new Service())
                 .build()))
@@ -1274,9 +1281,9 @@ public class ModelUtils {
                 .name("Водій")
                 .nameEn("Driver")
                 .build()))
-            .tariffInfos(Set.of(getTariffsInfo()))
             .imagePath("path")
             .tariffs(List.of(getTariffInfo()))
+            .tariffsInfoReceivingEmployees(new ArrayList<>())
             .build();
     }
 
@@ -1294,7 +1301,7 @@ public class ModelUtils {
                     .name("Супер адмін")
                     .nameEn("Super admin")
                     .build()))
-                .tariffInfos(new HashSet<>())
+                .tariffs(List.of())
                 .imagePath("path")
                 .tariffs(List.of(getTariffInfo()))
                 .build());
@@ -1313,7 +1320,7 @@ public class ModelUtils {
                 .name("Водій")
                 .nameEn("Driver")
                 .build()))
-            .tariffInfos(Set.of(TariffsInfo.builder()
+            .tariffs(List.of(TariffsInfo.builder()
                 .id(1L)
                 .service(new Service())
                 .build()))
@@ -1334,13 +1341,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .nameEn("Driver")
-                .build()))
-            .tariffInfos(Set.of(TariffsInfo.builder()
-                .id(1L)
-                .service(getService())
-                .courier(getCourier())
-                .tariffLocations(Set.of(getTariffLocation()))
-                .receivingStationList(Set.of(getReceivingStation()))
                 .build()))
             .tariffs(List.of(TariffsInfo.builder()
                 .id(1L)
@@ -1384,8 +1384,7 @@ public class ModelUtils {
     }
 
     public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
-        return EmployeeWithTariffsIdDto
-            .builder()
+        return EmployeeWithTariffsIdDto.builder()
             .employeeDto(EmployeeDto.builder()
                 .id(1L)
                 .firstName("Петро")
@@ -1399,7 +1398,7 @@ public class ModelUtils {
                     .nameEn("Driver")
                     .build()))
                 .build())
-            .tariffId(List.of(1L))
+            .tariffs(null)
             .build();
     }
 

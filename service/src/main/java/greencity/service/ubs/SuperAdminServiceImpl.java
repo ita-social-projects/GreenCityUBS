@@ -634,9 +634,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void setEmployeeTariffInfos(Employee employee, TariffsInfo tariffsInfo) {
-        Set<TariffsInfo> tariffsInfos = employee.getTariffInfos();
-        tariffsInfos.add(tariffsInfo);
-        employee.setTariffInfos(tariffsInfos);
+        // TODO: fix that
     }
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {
