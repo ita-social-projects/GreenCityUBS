@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
-
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Locale;
@@ -201,28 +200,6 @@ public class ClientController {
     @GetMapping("/order-payment-detail/{orderId}")
     public ResponseEntity<OrderPaymentDetailDto> getOrderPaymentDetail(@PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderPaymentDetail(orderId));
-    }
-
-    /**
-     * Controller for getting order info data about surcharge.
-     *
-     * @return {@link OrderStatusPageDto}.
-     * @author Igor Boykov
-     */
-    @ApiOperation(value = "Controller for getting order info data about surcharge")
-    @ApiResponses({
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @GetMapping("/get-data-for-order-surcharge/{id}")
-    public ResponseEntity<OrderStatusPageDto> getDataForOrderSurcharge(
-        @PathVariable(name = "id") Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getOrderInfoForSurcharge(orderId, uuid));
     }
 
     /**
