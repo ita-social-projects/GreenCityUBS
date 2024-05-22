@@ -1532,7 +1532,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public void saveReason(Order order, String description, MultipartFile[] images) {
         List<String> pictures = (images != null) ? Arrays.stream(images)
-            .map(image -> image != null ? fileService.upload(image) : DEFAULT_IMAGE_PATH)
+            .map(this::processImage)
             .collect(Collectors.toList())
             : new ArrayList<>();
         ReasonNotTakeBagDto dto = new ReasonNotTakeBagDto();
@@ -1543,6 +1543,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setImageReasonNotTakingBags(pictures);
         order.setReasonNotTakingBagDescription(description);
         orderRepository.save(order);
+    }
+
+    private String processImage(MultipartFile image) {
+        return (image != null) ? fileService.upload(image) : DEFAULT_IMAGE_PATH;
     }
 
     /**
