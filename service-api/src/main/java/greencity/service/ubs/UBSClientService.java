@@ -20,7 +20,6 @@ import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -40,7 +39,6 @@ import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -289,14 +287,6 @@ public interface UBSClientService {
      * @author Yuriy Bahlay.
      */
     List<EventDto> getAllEventsForOrder(Long orderId, String email, String language);
-
-    /**
-     * Method that returns order info for surcharge.
-     *
-     * @return {@link OrderStatusPageDto}.
-     * @author Igor Boykov
-     */
-    OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, String uuid);
 
     /**
      * Method for delete user order.

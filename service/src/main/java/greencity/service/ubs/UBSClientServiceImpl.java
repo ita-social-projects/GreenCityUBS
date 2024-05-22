@@ -37,7 +37,6 @@ import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -1494,20 +1493,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         orderAddressRepository.save(orderAddress);
 
         return orderAddress;
-    }
-
-    @Override
-    public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, String uuid) {
-        OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId, uuid);
-        Map<Integer, Integer> amountBagsOrder = orderStatusPageDto.getAmountOfBagsOrdered();
-        Map<Integer, Integer> amountBagsOrderExported = orderStatusPageDto.getAmountOfBagsExported();
-        amountBagsOrderExported.replaceAll((id, quantity) -> quantity = quantity - amountBagsOrder.get(id));
-        orderStatusPageDto.setAmountOfBagsExported(amountBagsOrderExported);
-        Double exportedPrice = orderStatusPageDto.getOrderExportedDiscountedPrice();
-        Double initialPrice = orderStatusPageDto.getOrderDiscountedPrice();
-        orderStatusPageDto.setOrderExportedDiscountedPrice(BigDecimal.valueOf(exportedPrice - initialPrice)
-            .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP).doubleValue());
-        return orderStatusPageDto;
     }
 
     @Override
