@@ -94,4 +94,24 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      * @author Denys Ryhal
      */
     Optional<Location> findByIdAndIsDeletedIsFalse(Long locationId);
+
+    /**
+     * Method for getting city name by locationId and addressId.
+     *
+     * @param addressId  {@link Long} - id of address
+     * @param locationId {@link Long} - id of location
+     *
+     * @return {@link Optional} of {@link String} - returns name of city in English
+     *         if location city and address city names match
+     * @author Olena Sotnik
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT a.city_en from locations AS l "
+            + "JOIN address AS a "
+            + "ON a.city_en = l.name_en "
+            + "WHERE a.id = :addressId "
+            + "AND l.id = :locationId "
+            + "GROUP BY a.city_en")
+    Optional<String> findAddressAndLocationNamesMatch(@Param("locationId") Long locationId,
+        @Param("addressId") Long addressId);
 }
