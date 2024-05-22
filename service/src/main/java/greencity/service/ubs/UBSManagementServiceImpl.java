@@ -126,6 +126,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
@@ -1530,14 +1531,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public void saveReason(Order order, String description, MultipartFile[] images) {
-        List<String> pictures = new ArrayList<>();
-        for (MultipartFile image : images) {
-            if (image != null) {
-                pictures.add(fileService.upload(image));
-            } else {
-                pictures.add(DEFAULT_IMAGE_PATH);
-            }
-        }
+        List<String> pictures = (images != null) ? Arrays.stream(images)
+            .map(this::processImage)
+            .collect(Collectors.toList())
+            : new ArrayList<>();
         ReasonNotTakeBagDto dto = new ReasonNotTakeBagDto();
         dto.setImages(pictures);
         dto.setDescription(description);
@@ -1546,6 +1543,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setImageReasonNotTakingBags(pictures);
         order.setReasonNotTakingBagDescription(description);
         orderRepository.save(order);
+    }
+
+    private String processImage(MultipartFile image) {
+        return (image != null) ? fileService.upload(image) : DEFAULT_IMAGE_PATH;
     }
 
     /**
