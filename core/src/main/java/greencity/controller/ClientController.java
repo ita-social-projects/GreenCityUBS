@@ -2,10 +2,8 @@ package greencity.controller;
 
 import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
-import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
@@ -38,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Locale;
 
 @RestController
 @RequestMapping("/ubs/client")
@@ -145,29 +142,6 @@ public class ClientController {
         @Valid @RequestBody OrderFondyClientDto dto,
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) throws PaymentLinkException {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClient(dto, userUuid));
-    }
-
-    /**
-     * Controller that make order again if our status of Order is ON_THE_ROUTE,
-     * CONFIRMED, DONE.
-     *
-     * @param orderId {@link Long} order id.
-     * @return {@link HttpStatus} - http status.
-     * @author Danylko Mykola
-     */
-    @Operation(summary = "Make order again if our status of Order is ON_THE_ROUTE, CONFIRMED, DONE")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = MakeOrderAgainDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @PostMapping("/{id}/make-order-again")
-    public ResponseEntity<MakeOrderAgainDto> makeOrderAgain(@PathVariable(name = "id") Long orderId,
-        @Parameter(hidden = true) @ValidLanguage Locale locale) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.makeOrderAgain(locale, orderId));
     }
 
     /**
