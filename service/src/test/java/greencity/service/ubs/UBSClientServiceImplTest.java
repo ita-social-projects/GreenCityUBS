@@ -12,7 +12,6 @@ import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
-import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.courier.CourierDto;
@@ -1472,61 +1471,6 @@ class UBSClientServiceImplTest {
         List<OrderClientDto> result = ubsService.getAllOrdersDoneByUser(anyString());
 
         assertEquals(expected, result);
-    }
-
-    @Test
-    void makeOrderAgain() {
-        MakeOrderAgainDto dto = MakeOrderAgainDto.builder()
-            .orderId(1L)
-            .orderAmount(350L)
-            .bagOrderDtoList(
-                Arrays.asList(
-                    BagOrderDto.builder()
-                        .bagId(1)
-                        .capacity(10)
-                        .price(100.)
-                        .bagAmount(1)
-                        .name("name")
-                        .nameEng("nameEng")
-                        .build(),
-                    BagOrderDto.builder()
-                        .bagId(2)
-                        .capacity(10)
-                        .price(100.)
-                        .name("name")
-                        .nameEng("nameEng")
-                        .build()))
-            .build();
-        Order order = getOrderDoneByUser();
-
-        order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(bagRepository.findAllByOrder(dto.getOrderId())).thenReturn(getBag4list());
-        MakeOrderAgainDto result = ubsService.makeOrderAgain(Locale.forLanguageTag("en"), 1L);
-
-        assertEquals(dto, result);
-        verify(orderRepository, times(1)).findById(1L);
-        verify(bagRepository, times(1)).findAllByOrder(any());
-    }
-
-    @Test
-    void makeOrderAgainShouldThrowOrderNotFoundException() {
-        Locale locale = Locale.forLanguageTag("en");
-        Exception thrown = assertThrows(NotFoundException.class,
-            () -> ubsService.makeOrderAgain(locale, 1L));
-        assertEquals(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
-    }
-
-    @Test
-    void makeOrderAgainShouldThrowBadOrderStatusException() {
-        Order order = getOrderDoneByUser();
-        order.setOrderStatus(OrderStatus.CANCELED);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        Locale locale = Locale.forLanguageTag("en");
-        Exception thrown = assertThrows(BadRequestException.class,
-            () -> ubsService.makeOrderAgain(locale, 1L));
-        assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST
-            + order.getOrderStatus());
     }
 
     @Test
