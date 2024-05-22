@@ -12,7 +12,6 @@ import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
-import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.courier.CourierDto;
@@ -1473,8 +1472,7 @@ class UBSClientServiceImplTest {
 
         assertEquals(expected, result);
     }
-    
-   
+
     @Test
     void findUserByUuid() {
         String uuid = "87df9ad5-6393-441f-8423-8b2e770b01a8";

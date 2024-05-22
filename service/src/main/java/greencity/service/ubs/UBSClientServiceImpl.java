@@ -152,7 +152,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -1070,27 +1069,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
             .map(Payment::getAmount)
             .reduce(0L, Long::sum);
-    }
-
-    private MakeOrderAgainDto buildOrderBagDto(Order order, List<Bag> bags) {
-        List<BagOrderDto> bagOrderDtoList = new ArrayList<>();
-        for (Bag bag : bags) {
-            bagOrderDtoList.add(BagOrderDto.builder()
-                .bagId(bag.getId())
-                .name(bag.getName())
-                .nameEng(bag.getNameEng())
-                .capacity(bag.getCapacity())
-                .price(convertCoinsIntoBills(bag.getPrice()))
-                .bagAmount(order.getAmountOfBagsOrdered().get(bag.getId()))
-                .build());
-        }
-        return MakeOrderAgainDto.builder()
-            .orderId(order.getId())
-            .orderAmount(order.getPayment().stream()
-                .flatMapToLong(p -> LongStream.of(p.getAmount()))
-                .reduce(Long::sum).orElse(0L))
-            .bagOrderDtoList(bagOrderDtoList)
-            .build();
     }
 
     /**
