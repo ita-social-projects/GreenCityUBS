@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
-import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
@@ -57,6 +56,7 @@ import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
@@ -68,9 +68,23 @@ import greencity.repository.RefundRepository;
 import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
-import greencity.repository.OrderBagRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -92,21 +106,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import jakarta.persistence.EntityNotFoundException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
 import static greencity.ModelUtils.ORDER_DETAIL_STATUS_DTO;
 import static greencity.ModelUtils.TEST_ADDITIONAL_BAG_INFO_DTO;
 import static greencity.ModelUtils.TEST_ADDITIONAL_BAG_INFO_DTO_LIST;
@@ -122,8 +121,6 @@ import static greencity.ModelUtils.TEST_ORDER_DETAILS_INFO_DTO_LIST;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
 import static greencity.ModelUtils.TEST_USER;
 import static greencity.ModelUtils.UPDATE_ORDER_PAGE_ADMIN_DTO;
-import static greencity.ModelUtils.getOrdersStatusCanceledDto;
-import static greencity.ModelUtils.getOrdersStatusFormedDto2;
 import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getAdminCommentDto;
 import static greencity.ModelUtils.getBagInfoDto;
@@ -154,9 +151,11 @@ import static greencity.ModelUtils.getOrderStatusTranslations;
 import static greencity.ModelUtils.getOrderUserFirst;
 import static greencity.ModelUtils.getOrderWithoutPayment;
 import static greencity.ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto;
+import static greencity.ModelUtils.getOrdersStatusCanceledDto;
 import static greencity.ModelUtils.getOrdersStatusConfirmedDto;
 import static greencity.ModelUtils.getOrdersStatusDoneDto;
 import static greencity.ModelUtils.getOrdersStatusFormedDto;
+import static greencity.ModelUtils.getOrdersStatusFormedDto2;
 import static greencity.ModelUtils.getOrdersStatusNotTakenOutDto;
 import static greencity.ModelUtils.getOrdersStatusOnThe_RouteDto;
 import static greencity.ModelUtils.getPayment;
@@ -691,40 +690,6 @@ class UBSManagementServiceImplTest {
         assertThrows(NotFoundException.class,
             () -> ubsManagementService.updateManualPayment(1L, manualPaymentRequestDto, null, "abc"));
         verify(paymentRepository, times(1)).findById(1L);
-    }
-
-    @Test
-    void checkReturnOverpaymentInfo() {
-        Order order = getOrder();
-        when(orderRepository.findUserById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-
-        order.setUser(ModelUtils.getUser());
-
-        Double sumToPay = 0.;
-
-        assertEquals("Зарахування на бонусний рахунок", ubsManagementService.returnOverpaymentInfo(1L, sumToPay, 0L)
-            .getPaymentInfoDtos().get(1).getComment());
-
-        assertEquals(0L, ubsManagementService.returnOverpaymentInfo(1L, sumToPay, 1L)
-            .getOverpayment());
-        assertEquals(AppConstant.PAYMENT_REFUND,
-            ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L).getPaymentInfoDtos().get(1)
-                .getComment());
-    }
-
-    @Test
-    void checkReturnOverpaymentThrowsException() {
-        Assertions.assertThrows(NotFoundException.class,
-            () -> ubsManagementService.returnOverpaymentInfo(100L, 1., 1L));
-    }
-
-    @Test
-    void checkReturnOverpaymentThrowsExceptionInGetPaymentInfo() {
-        Order order = getOrder();
-        when(orderRepository.findUserById(1L)).thenReturn(Optional.of(order));
-        Assertions.assertThrows(NotFoundException.class, () -> ubsManagementService.returnOverpaymentInfo(1L, 1., 1L));
-        verify(orderRepository).findUserById(1L);
     }
 
     @Test

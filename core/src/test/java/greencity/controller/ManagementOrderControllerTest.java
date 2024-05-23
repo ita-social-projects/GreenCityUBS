@@ -21,6 +21,8 @@ import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
+import java.security.Principal;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,8 +38,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-import java.security.Principal;
-import java.util.Optional;
+
 import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getRequestDto;
@@ -381,15 +382,6 @@ class ManagementOrderControllerTest {
     void getUserViolationsTest() throws Exception {
         mockMvc.perform(get(ubsLink + "/getUsersViolations")
             .param("email", "max@email.com")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void returnOverpaymentAsMoneyInfoTest() throws Exception {
-        mockMvc.perform(get(ubsLink + "/return-overpayment-as-money-info")
-            .param("orderId", "2")
-            .param("sumToPay", "1")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
