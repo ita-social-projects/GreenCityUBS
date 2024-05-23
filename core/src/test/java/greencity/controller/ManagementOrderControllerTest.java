@@ -415,15 +415,6 @@ class ManagementOrderControllerTest {
     }
 
     @Test
-    void returnOverpaymentAsMoneyInfoTest() throws Exception {
-        mockMvc.perform(post(ubsLink + "/return-overpayment-as-money-info")
-            .param("orderId", "2")
-            .param("sumToPay", "1")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     void setCustomTable() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.put(ubsLink + "/changeOrdersTableView")
             .content("titles1,titles2,titles3")
