@@ -30,12 +30,11 @@ import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.order.Order;
 import greencity.enums.SortingOrder;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UBSManagementService {
     /**
@@ -45,14 +44,6 @@ public interface UBSManagementService {
      * @author Struk Nazar
      */
     PaymentTableInfoDto getPaymentInfo(long orderId, Double sumToPay);
-
-    /**
-     * Method returns overpayment to user.
-     *
-     * @return {@link PaymentTableInfoDto};
-     * @author Ostap Mykhailivskyi
-     */
-    PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Double sumToPay, Long marker);
 
     /**
      * Method returns all certificates.

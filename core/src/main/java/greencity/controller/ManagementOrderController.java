@@ -53,6 +53,12 @@ import greencity.service.ubs.manager.BigOrderTableServiceView;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import javax.validation.Valid;
+import javax.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -76,13 +82,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Email;
-import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/ubs/management")
@@ -671,52 +670,6 @@ public class ManagementOrderController {
         @ApiIgnore @CurrentUserUuid String uuid) {
         violationService.deleteViolation(orderId, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    /**
-     * Controller returns overpayment as bonuses information.
-     *
-     * @param orderId  {@link Long}.
-     * @param sumToPay {@link Long}.
-     * @return list of {@link PaymentTableInfoDto}.
-     * @author Ostap Mykhailivskyi
-     */
-    @ApiOperation(value = "Return overpayment as bonuses information")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/return-overpayment-as-bonuses-info")
-    public ResponseEntity<PaymentTableInfoDto> returnOverpaymentAsBonusesInfo(@RequestParam Long orderId,
-        @RequestParam Double sumToPay) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.returnOverpaymentInfo(orderId, sumToPay, 2L));
-    }
-
-    /**
-     * Controller returns overpayment as money information.
-     *
-     * @param orderId  {@link Long}.
-     * @param sumToPay {@link Long}.
-     * @return list of {@link PaymentTableInfoDto}.
-     * @author Ostap Mykhailivskyi
-     */
-    @ApiOperation(value = "Return overpayment as Money information")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/return-overpayment-as-money-info")
-    public ResponseEntity<PaymentTableInfoDto> returnOverpaymentAsMoneyInfo(@RequestParam Long orderId,
-        @RequestParam Double sumToPay) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.returnOverpaymentInfo(orderId, sumToPay, 1L));
     }
 
     /**
