@@ -24,13 +24,6 @@ public interface NotificationService {
     void notifyPaidOrder(Order order);
 
     /**
-     * Method that creates notification for paid order from PaymentResponseDto.
-     *
-     * @author Danylo Hlynskyi
-     */
-    void notifyPaidOrder(PaymentResponseDto dto);
-
-    /**
      * Method that creates notification for courier.
      *
      * @author Ann Sakhno

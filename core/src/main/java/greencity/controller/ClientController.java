@@ -2,14 +2,11 @@ package greencity.controller;
 
 import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
-import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
@@ -39,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Locale;
 
 @RestController
 @RequestMapping("/ubs/client")
@@ -149,29 +145,6 @@ public class ClientController {
     }
 
     /**
-     * Controller that make order again if our status of Order is ON_THE_ROUTE,
-     * CONFIRMED, DONE.
-     *
-     * @param orderId {@link Long} order id.
-     * @return {@link HttpStatus} - http status.
-     * @author Danylko Mykola
-     */
-    @Operation(summary = "Make order again if our status of Order is ON_THE_ROUTE, CONFIRMED, DONE")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = MakeOrderAgainDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @PostMapping("/{id}/make-order-again")
-    public ResponseEntity<MakeOrderAgainDto> makeOrderAgain(@PathVariable(name = "id") Long orderId,
-        @Parameter(hidden = true) @ValidLanguage Locale locale) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.makeOrderAgain(locale, orderId));
-    }
-
-    /**
      * Controller returns all bonuses of user..
      *
      * @param uuid {@link String} id.
@@ -209,29 +182,6 @@ public class ClientController {
     @GetMapping("/order-payment-detail/{orderId}")
     public ResponseEntity<OrderPaymentDetailDto> getOrderPaymentDetail(@PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderPaymentDetail(orderId));
-    }
-
-    /**
-     * Controller for getting order info data about surcharge.
-     *
-     * @return {@link OrderStatusPageDto}.
-     * @author Igor Boykov
-     */
-    @Operation(summary = "Controller for getting order info data about surcharge")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = OrderStatusPageDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @GetMapping("/get-data-for-order-surcharge/{id}")
-    public ResponseEntity<OrderStatusPageDto> getDataForOrderSurcharge(
-        @PathVariable(name = "id") Long orderId,
-        @Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getOrderInfoForSurcharge(orderId, uuid));
     }
 
     /**

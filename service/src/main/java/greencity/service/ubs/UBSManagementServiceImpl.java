@@ -100,6 +100,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -1492,14 +1493,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public void saveReason(Order order, String description, MultipartFile[] images) {
-        List<String> pictures = new ArrayList<>();
-        for (MultipartFile image : images) {
-            if (image != null) {
-                pictures.add(fileService.upload(image));
-            } else {
-                pictures.add(DEFAULT_IMAGE_PATH);
-            }
-        }
+        List<String> pictures = (images != null) ? Arrays.stream(images)
+            .map(this::processImage)
+            .collect(Collectors.toList())
+            : new ArrayList<>();
         ReasonNotTakeBagDto dto = new ReasonNotTakeBagDto();
         dto.setImages(pictures);
         dto.setDescription(description);
@@ -1508,6 +1505,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setImageReasonNotTakingBags(pictures);
         order.setReasonNotTakingBagDescription(description);
         orderRepository.save(order);
+    }
+
+    private String processImage(MultipartFile image) {
+        return (image != null) ? fileService.upload(image) : DEFAULT_IMAGE_PATH;
     }
 
     /**

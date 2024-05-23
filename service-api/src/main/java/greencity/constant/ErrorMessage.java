@@ -19,6 +19,8 @@ public final class ErrorMessage {
     public static final String NO_SUCH_COORDINATES = "There are no any order with coordinates: ";
     public static final String INVALID_LITRES_AMOUNT = "The amount of litres should be between 0 and 10.000 litres.";
     public static final String NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER = "Not found address with such id: ";
+    public static final String NOT_FOUND_ADDRESS_BY_CITY_AND_COUNTRY =
+        "Not found address in current city and country: ";
     public static final String NOT_FOUND_ADDRESS_BY_PLACE_ID = "Not found address with such place id: ";
     public static final String UNDELIVERED_ORDERS_NOT_FOUND = "There are no any undelivered orders found.";
     public static final String PAYMENT_VALIDATION_ERROR = "The received payment data is not valid.";
@@ -165,6 +167,7 @@ public final class ErrorMessage {
         "Such location cannot be deleted as it is linked to the tariff";
     public static final String EMPLOYEE_NOT_FOUND_BY_EMAIL = "Employee with current id doesn't exist: ";
     public static final String ORDER_DOES_NOT_BELONG_TO_USER = "This order does not belong to user";
+    public static final String WRONG_SIGNATURE_USED = "This signature is invalid: ";
 
     /**
      * Constructor.
