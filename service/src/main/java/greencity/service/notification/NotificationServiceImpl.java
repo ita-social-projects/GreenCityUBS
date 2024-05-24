@@ -7,7 +7,6 @@ import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Order;
@@ -217,6 +216,16 @@ public class NotificationServiceImpl implements NotificationService {
                 .count() == 3) {
             fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
         } else {
+            fillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
+        }
+    }
+
+    @Override
+    public void notifyUnpaidPaidPackage(Order order) {
+        Double amountToPay = getAmountToPay(order);
+        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
+
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
             fillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
         }
     }

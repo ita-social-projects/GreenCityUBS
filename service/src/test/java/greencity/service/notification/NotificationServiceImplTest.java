@@ -728,6 +728,27 @@ class NotificationServiceImplTest {
     }
 
     @Test
+    void testNotifyUnpaidPackage() {
+        User user = getUser();
+        Order order = ModelUtils.getOrdersStatusFormedDto();
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.UNPAID_PACKAGE);
+        notification.setUser(user);
+        notification.setOrder(order);
+
+        when(userNotificationRepository.save(any())).thenReturn(notification);
+        when(notificationParameterRepository.saveAll(any())).thenReturn(Collections.emptyList());
+        when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
+
+        notificationService.notifyUnpaidPaidPackage(order);
+
+        verify(userNotificationRepository).save(any());
+        verify(notificationParameterRepository).saveAll(any());
+    }
+
+    @Test
     void createNotificationDtoTitleUaLanguageTest() {
         String language = "ua";
 
