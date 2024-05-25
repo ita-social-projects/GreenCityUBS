@@ -1292,24 +1292,28 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private long formBagsToBeSavedAndCalculateOrderSum(List<OrderBag> orderBagList, List<BagDto> bags,
         TariffsInfo tariffsInfo) {
-        long sumToPayInCoins = 0L;
-        List<Integer> bagIds = bags.stream().map(BagDto::getId).collect(toList());
+        long totalSumToPayInCoins = 0L;
+        long limitedSumToPayInCoins = 0L;
+        final List<Integer> bagIds = bags.stream().map(BagDto::getId).collect(toList());
         for (BagDto temp : bags) {
             Bag bag = findActiveBagById(temp.getId());
-            if (bag.getLimitIncluded().booleanValue()) {
+            if (Boolean.TRUE.equals(bag.getLimitIncluded())) {
                 checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, temp.getAmount());
-                checkSumIfCourierLimitBySumOfOrder(tariffsInfo, bag.getFullPrice() * temp.getAmount());
+                limitedSumToPayInCoins += bag.getFullPrice() * temp.getAmount();
+            } else {
+                totalSumToPayInCoins += bag.getFullPrice() * temp.getAmount();
             }
-            sumToPayInCoins += bag.getFullPrice() * temp.getAmount();
             OrderBag orderBag = createOrderBag(bag);
             orderBag.setAmount(temp.getAmount());
             orderBagList.add(orderBag);
         }
+        checkSumIfCourierLimitBySumOfOrder(tariffsInfo, limitedSumToPayInCoins);
+        totalSumToPayInCoins += limitedSumToPayInCoins;
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
             .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
             .map(this::createOrderBag).collect(toList());
         orderBagList.addAll(notOrderedBags.stream().peek(orderBag -> orderBag.setAmount(0)).collect(toList()));
-        return sumToPayInCoins;
+        return totalSumToPayInCoins;
     }
 
     private OrderBag createOrderBag(Bag bag) {
