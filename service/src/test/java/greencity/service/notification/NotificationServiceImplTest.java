@@ -629,7 +629,7 @@ class NotificationServiceImplTest {
         }
 
         @ParameterizedTest
-        @MethodSource(value = {"correctArguments"})
+        @MethodSource("correctArguments")
         void testNotifyUnpaidPackages(OrderStatus orderStatus, List<String> eventNames) {
             Order order = getOrderWithAmountToPay();
             order.setOrderStatus(orderStatus);
