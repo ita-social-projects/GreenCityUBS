@@ -5,8 +5,10 @@ import greencity.notificator.scheduler.NotificationTaskScheduler;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notificator.ScheduledNotificator;
 import greencity.service.ubs.NotificationService;
+import java.util.concurrent.ScheduledFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import static greencity.dto.notification.ScheduledNotificationDto.*;
 import static greencity.enums.NotificationType.UNPAID_ORDER;
 
 @Component
@@ -15,11 +17,14 @@ public class UnpaidOrderNotificator implements ScheduledNotificator {
     private final NotificationTemplateRepository notificationTemplateRepository;
     private final NotificationService notificationService;
     private final NotificationTaskScheduler taskScheduler;
+    private ScheduledFuture<?> scheduledFuture;
 
     @Override
     public ScheduledNotificationDto notifyBySchedule() {
+        closePreviousTaskIfPresent(scheduledFuture);
         var schedule = notificationTemplateRepository.findScheduleOfActiveTemplateByType(UNPAID_ORDER);
-        return taskScheduler.scheduleNotification(notificationService::notifyUnpaidOrders,
-            schedule, UNPAID_ORDER, this.getClass());
+        scheduledFuture = taskScheduler.scheduleNotification(notificationService::notifyUnpaidOrders,
+            schedule, UNPAID_ORDER);
+        return build(UNPAID_ORDER, this.getClass());
     }
 }

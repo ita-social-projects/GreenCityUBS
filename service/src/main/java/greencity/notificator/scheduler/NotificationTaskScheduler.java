@@ -1,9 +1,7 @@
 package greencity.notificator.scheduler;
 
 import greencity.constant.AppConstant;
-import greencity.dto.notification.ScheduledNotificationDto;
 import greencity.enums.NotificationType;
-import greencity.service.notificator.ScheduledNotificator;
 import java.util.concurrent.ScheduledFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +16,9 @@ import org.springframework.stereotype.Component;
 public class NotificationTaskScheduler {
     private final TaskScheduler taskScheduler;
 
-    public ScheduledNotificationDto scheduleNotification(
-        Runnable task, String schedule, NotificationType notificationType, Class<? extends ScheduledNotificator> type) {
-        var scheduledFuture = scheduleTask(task, schedule, notificationType);
-        return new ScheduledNotificationDto(notificationType, scheduledFuture, type);
+    public ScheduledFuture<?> scheduleNotification(
+        Runnable task, String schedule, NotificationType notificationType) {
+        return scheduleTask(task, schedule, notificationType);
     }
 
     private ScheduledFuture<?> scheduleTask(Runnable task, String schedule, NotificationType notificationType) {

@@ -54,6 +54,9 @@ public class NotificationTemplate {
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 
+    @Column(unique = true, name = "template_uuid", columnDefinition = "varchar(60)")
+    private String templateUuid;
+
     @Column(nullable = false, name = "trigger")
     @Enumerated(EnumType.STRING)
     private NotificationTrigger trigger;
@@ -78,4 +81,9 @@ public class NotificationTemplate {
     @Builder.Default
     @Column(name = "is_schedule_update_forbidden", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean isScheduleUpdateForbidden = false;
+
+    public void addPlatforms(List<NotificationPlatform> notificationPlatforms) {
+        notificationPlatforms.forEach(platform -> platform.setNotificationTemplate(this));
+        this.notificationPlatforms.addAll(notificationPlatforms);
+    }
 }

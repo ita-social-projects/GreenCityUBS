@@ -48,6 +48,9 @@ public class UserNotification {
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 
+    @Column(name = "template_uuid", columnDefinition = "varchar(60)")
+    private String templateUuid;
+
     @OneToMany(mappedBy = "userNotification")
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<NotificationParameter> parameters = new HashSet<>();

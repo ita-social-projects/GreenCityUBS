@@ -6,17 +6,15 @@ import java.util.concurrent.ScheduledFuture;
 import lombok.*;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
 public class ScheduledNotificationDto {
     private NotificationType notificationType;
-    private ScheduledFuture<?> scheduledFuture;
     private Class<? extends ScheduledNotificator> type;
 
-    public ScheduledNotificationDto(NotificationType notificationType, ScheduledFuture<?> scheduledFuture) {
-        this.notificationType = notificationType;
-        this.scheduledFuture = scheduledFuture;
+    public static ScheduledNotificationDto build(
+        NotificationType notificationType, Class<? extends ScheduledNotificator> type) {
+        return new ScheduledNotificationDto(notificationType, type);
     }
 }

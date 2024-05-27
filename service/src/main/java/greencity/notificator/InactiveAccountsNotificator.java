@@ -5,8 +5,10 @@ import greencity.notificator.scheduler.NotificationTaskScheduler;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notificator.ScheduledNotificator;
 import greencity.service.ubs.NotificationService;
+import java.util.concurrent.ScheduledFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import static greencity.dto.notification.ScheduledNotificationDto.*;
 import static greencity.enums.NotificationType.LETS_STAY_CONNECTED;
 
 @Component
@@ -15,16 +17,19 @@ public class InactiveAccountsNotificator implements ScheduledNotificator {
     private final NotificationTemplateRepository notificationTemplateRepository;
     private final NotificationService notificationService;
     private final NotificationTaskScheduler taskScheduler;
+    private ScheduledFuture<?> scheduledFuture;
 
     @Override
     public ScheduledNotificationDto notifyBySchedule() {
+        closePreviousTaskIfPresent(scheduledFuture);
         var notificationSchedule =
             notificationTemplateRepository.findScheduleOfActiveTemplateByType(LETS_STAY_CONNECTED);
         return createNotificationScheduler(notificationSchedule);
     }
 
     private ScheduledNotificationDto createNotificationScheduler(String schedule) {
-        return taskScheduler.scheduleNotification(notificationService::notifyInactiveAccounts,
-            schedule, LETS_STAY_CONNECTED, this.getClass());
+        scheduledFuture = taskScheduler.scheduleNotification(notificationService::notifyInactiveAccounts,
+            schedule, LETS_STAY_CONNECTED);
+        return build(LETS_STAY_CONNECTED, this.getClass());
     }
 }
