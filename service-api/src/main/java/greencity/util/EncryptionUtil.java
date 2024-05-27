@@ -6,6 +6,11 @@ import lombok.ToString;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
 
 @Component
@@ -21,13 +26,24 @@ public class EncryptionUtil {
      */
     public String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
         StringBuilder stringBuilder = new StringBuilder(password);
-        stringBuilder.append("|" + dto.getAmount());
-        stringBuilder.append("|" + dto.getCurrency());
-        stringBuilder.append("|" + merchantId);
-        stringBuilder.append("|" + dto.getOrderDescription());
-        stringBuilder.append("|" + dto.getOrderId());
-        stringBuilder.append("|" + dto.getResponseUrl());
-        return sha1Hex(stringBuilder.toString());
+        stringBuilder.append("380951900542");
+        stringBuilder.append(";" + dto.getMerchantDomainName());
+        stringBuilder.append(";" + dto.getOrderReference());
+        stringBuilder.append(";" + dto.getOrderDate());
+        stringBuilder.append(";" + dto.getAmount());
+        stringBuilder.append(";" + dto.getCurrency());
+        stringBuilder.append(";" + dto.getProductName());
+        stringBuilder.append(";" + dto.getProductCount());
+        stringBuilder.append(";" + dto.getProductPrice());
+        try {
+            Mac mac = Mac.getInstance("HmacMD5");
+            SecretKeySpec secretKey = new SecretKeySpec(password.getBytes(StandardCharsets.UTF_8), "HmacMD5");
+            mac.init(secretKey);
+            byte[] hmacBytes = mac.doFinal(stringBuilder.toString().getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hmacBytes);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to calculate HMAC", e);
+        }
     }
 
     /**

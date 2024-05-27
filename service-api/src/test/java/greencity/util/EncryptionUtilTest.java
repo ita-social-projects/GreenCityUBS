@@ -42,7 +42,7 @@ public class EncryptionUtilTest {
             "|" + paymentRequestDto.getCurrency() +
             "|" + MERCHANT_ID +
             "|" + paymentRequestDto.getOrderDescription() +
-            "|" + paymentRequestDto.getOrderId() +
+            "|" + paymentRequestDto.getOrderReference() +
             "|" + paymentRequestDto.getResponseUrl();
         String expected = sha1Hex(stringBuilder);
 

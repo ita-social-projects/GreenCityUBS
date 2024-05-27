@@ -97,7 +97,7 @@ public class ModelUtils {
 
     public static PaymentRequestDto getPaymentRequestDto() {
         return PaymentRequestDto.builder()
-            .orderId("1")
+            .orderReference("1")
             .merchantId(2)
             .orderDescription("")
             .currency("USD")

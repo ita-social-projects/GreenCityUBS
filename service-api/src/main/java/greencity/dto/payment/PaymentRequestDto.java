@@ -14,18 +14,22 @@ import lombok.*;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 @JsonSubTypes(@JsonSubTypes.Type(value = PaymentRequestDto.class, name = "request"))
 public class PaymentRequestDto {
-    @JsonProperty("order_id")
-    private String orderId;
-    @JsonProperty("merchant_id")
-    private Integer merchantId;
-    @JsonProperty("order_desc")
-    private String orderDescription;
-    @JsonProperty("currency")
-    private String currency;
+    @JsonProperty("merchantDomainName")
+    private String merchantDomainName;
+    @JsonProperty("orderReference")
+    private String orderReference;
+    @JsonProperty("orderDate")
+    private String orderDate;
     @JsonProperty("amount")
     private Long amount;
-    @JsonProperty("signature")
+    @JsonProperty("currency")
+    private String currency;
+    @JsonProperty("productName")
+    private String productName;
+    @JsonProperty("productCount")
+    private String productCount;
+    @JsonProperty("productPrice")
+    private String productPrice;
+    @JsonProperty("merchantSignature")
     private String signature;
-    @JsonProperty("response_url")
-    private String responseUrl;
-}
+    }

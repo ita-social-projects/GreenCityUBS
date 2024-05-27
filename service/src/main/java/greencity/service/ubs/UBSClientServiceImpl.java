@@ -4,6 +4,7 @@ import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
+import greencity.client.WayForPayClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
@@ -130,6 +131,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -217,6 +219,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderAddressRepository orderAddressRepository;
     private final UserRemoteClient userRemoteClient;
     private final FondyClient fondyClient;
+    private final WayForPayClient wayForPayClient;
     private final PaymentRepository paymentRepository;
     private final EncryptionUtil encryptionUtil;
     private final EventRepository eventRepository;
@@ -251,6 +254,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String resultUrlForPersonalCabinetOfUser;
     @Value("${greencity.redirect.result-url-fondy}")
     private String resultUrlFondy;
+    @Value("${greencity.wayforpay.login}")
+    private String wayForPayLogin;
+    @Value("${greencity.wayforpay.secret}")
+    private String wayForPaySecret;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
@@ -481,7 +488,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             return getPaymentRequestDto(order, null);
         } else {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPayInCoins);
-            String link = getLinkFromFondyCheckoutResponse(fondyClient.getCheckoutResponse(paymentRequestDto));
+            String link = getLinkFromFondyCheckoutResponse(wayForPayClient.getCheckoutResponse(paymentRequestDto));
             return getPaymentRequestDto(order, link);
         }
     }
@@ -1160,20 +1167,23 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private PaymentRequestDto formPaymentRequest(Long orderId, long sumToPayInCoins) {
+        Instant instant = Instant.now();
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
-            .merchantId(Integer.parseInt(merchantId))
-            .orderId(orderId + "_"
-                + order.getPayment().get(order.getPayment().size() - 1).getId().toString())
-            .orderDescription("ubs courier")
-            .currency("UAH")
-            .amount(sumToPayInCoins)
-            .responseUrl(resultUrlFondy)
+                .orderReference(orderId + "_"
+                        + order.getPayment().get(order.getPayment().size() - 1).getId().toString())
+                .merchantDomainName(wayForPayLogin)
+                .orderDate(String.valueOf(instant.getEpochSecond()))
+                .currency("UAH")
+                .amount(convertBillsIntoCoins((double) sumToPayInCoins))
+                .productName(order.getOrderBags().stream().map(OrderBag::getName).collect(Collectors.joining(";")))
+                .productCount(String.valueOf(order.getOrderBags().size()))
+                .productPrice(order.getOrderBags().stream().map(String::valueOf).collect(Collectors.joining(";")))
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil
-            .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
+            .formRequestSignature(paymentRequestDto, wayForPaySecret, merchantId));
 
         return paymentRequestDto;
     }
@@ -1636,14 +1646,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private String getLinkFromFondyCheckoutResponse(String fondyResponse) {
         JSONObject json = new JSONObject(fondyResponse);
-        if (!json.has("response")) {
-            throw new BadRequestException("Wrong response");
-        }
         JSONObject response = json.getJSONObject("response");
-        if ("success".equals(response.getString("response_status"))) {
-            return response.getString("checkout_url");
-        }
-        throw new BadRequestException(response.getString("error_message"));
+        return response.getString("checkout_url");
     }
 
     private Order incrementCounter(Order order) {
@@ -1657,12 +1661,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
-            .merchantId(Integer.parseInt(merchantId))
-            .orderId(OrderUtils.generateOrderIdForPayment(orderId, order))
-            .orderDescription("courier")
+            //.merchantId(Integer.parseInt(merchantId))
+            .orderReference(OrderUtils.generateOrderIdForPayment(orderId, order))
+            //.orderDescription("courier")
             .currency("UAH")
             .amount(sumToPayInCoins)
-            .responseUrl(resultUrlForPersonalCabinetOfUser)
+            //.responseUrl(resultUrlForPersonalCabinetOfUser)
             .build();
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
