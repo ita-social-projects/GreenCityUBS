@@ -57,6 +57,7 @@ import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.notification.SenderInfoDto;
@@ -2491,7 +2492,7 @@ public class ModelUtils {
 
     private static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
-            .notificationTemplateMainInfoDto(createNotificationTemplateMainInfoDto())
+            .notificationTemplateUpdateInfo(createNotificationTemplateUpdateInfoDto())
             .platforms(List.of(
                 createNotificationPlatformDto()))
             .build();
@@ -2535,6 +2536,17 @@ public class ModelUtils {
             .title("Title")
             .titleEng("TitleEng")
             .notificationStatus(ACTIVE)
+            .build();
+    }
+
+    private static NotificationTemplateUpdateInfoDto createNotificationTemplateUpdateInfoDto() {
+        return NotificationTemplateUpdateInfoDto.builder()
+            .type(UNPAID_ORDER)
+            .trigger(ORDER_NOT_PAID_FOR_3_DAYS)
+            .time(AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .schedule("0 0 18 * * ?")
+            .title("Title")
+            .titleEng("TitleEng")
             .build();
     }
 
