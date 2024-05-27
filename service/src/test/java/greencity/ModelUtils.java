@@ -203,9 +203,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class ModelUtils {
-    private static final LocalDateTime LOCAL_DATE_TIME = LocalDateTime.of(1994, 3, 28, 15, 10);
     private static final Clock fixedClock =
-        Clock.fixed(LOCAL_DATE_TIME.toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
+        Clock.fixed(LocalDateTime.now().toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
 
     public static final String TEST_EMAIL = "test@gmail.com";
     public static final Order TEST_ORDER = createOrder();

@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verify;
 import static greencity.enums.NotificationType.LETS_STAY_CONNECTED;
 
 @ExtendWith(MockitoExtension.class)
-public class InactiveUserAccountsNotificatorTest {
+class InactiveUserAccountsNotificatorTest {
     @InjectMocks
     private InactiveAccountsNotificator notificator;
 

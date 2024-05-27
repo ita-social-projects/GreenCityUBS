@@ -206,8 +206,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * method gets orders by order payment status left join events.
      */
     @Query("select o from Order o "
-        + "left join fetch o.events e WHERE o.orderPaymentStatus =?1")
-    List<Order> findAllByOrderPaymentStatusWithEvents(OrderPaymentStatus orderStatus);
+        + "left join fetch o.events e WHERE o.orderPaymentStatus = :orderStatus")
+    List<Order> findAllByOrderPaymentStatusWithEvents(@Param("orderStatus") OrderPaymentStatus orderStatus);
 
     /**
      * method gets orders by order payment statuses and order statuses inner join

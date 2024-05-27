@@ -460,7 +460,7 @@ public class NotificationServiceImpl implements NotificationService {
         orders.forEach(order -> {
             checkIfOrderNeedsNewNotification(order, NotificationType.VIOLATION_THE_RULES);
             violationRepository.findByOrderId(order.getId())
-                .ifPresent((violation) -> createNewViolationParametersAndSend(order.getId(), violation));
+                .ifPresent(violation -> createNewViolationParametersAndSend(order.getId(), violation));
         });
     }
 
@@ -580,7 +580,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private boolean checkOrderIsNotBroughtByHimself(Order order) {
-        return !(order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF);
+        return order.getOrderStatus() != OrderStatus.BROUGHT_IT_HIMSELF;
     }
 
     private boolean checkOrderIsNotDoneOrCanceled(Order order) {
