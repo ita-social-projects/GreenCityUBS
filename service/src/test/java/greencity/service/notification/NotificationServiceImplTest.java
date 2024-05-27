@@ -679,7 +679,7 @@ class NotificationServiceImplTest {
 
         private void setEventsToOrder(Order order, String... eventNames) {
             List<Event> events = Stream.of(eventNames)
-                .map((e) -> Event.builder().eventName(e).build())
+                .map(e -> Event.builder().eventName(e).build())
                 .toList();
             order.setEvents(events);
         }
