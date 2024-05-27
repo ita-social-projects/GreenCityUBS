@@ -622,6 +622,22 @@ public class NotificationServiceImpl implements NotificationService {
                 || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(MIN_NOTIFICATION_ORDER_AGE_DAYS)));
     }
 
+    @Override
+    public void notifyCustomNotification(String templateUuid) {
+        var users = userRepository.findAll();
+        users.forEach(user -> fillAndSendCustomNotification(user, templateUuid));
+    }
+
+    private void fillAndSendCustomNotification(User user, String templateUuid) {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.CUSTOM);
+        userNotification.setTemplateUuid(templateUuid);
+        userNotification.setUser(user);
+        UserNotification created = userNotificationRepository.save(userNotification);
+        created.setParameters(new HashSet<>());
+        sendNotificationsForBotsAndEmail(created, 0L);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -776,10 +792,8 @@ public class NotificationServiceImpl implements NotificationService {
     public static NotificationDto createNotificationDto(UserNotification notification, String language,
         NotificationReceiverType receiverType,
         NotificationTemplateRepository templateRepository, long monthsOfAccountInactivity) {
-        NotificationTemplate template = templateRepository
-            .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
-                notification.getNotificationType(), receiverType)
-            .orElseThrow(() -> new NotFoundException("Template not found"));
+        NotificationTemplate template = getNotificationTemplate(notification, receiverType, templateRepository);
+
         String templateBody = resolveTemplateBody(language, receiverType, template);
         if (notification.getParameters() == null) {
             notification.setParameters(Collections.emptySet());
@@ -793,6 +807,19 @@ public class NotificationServiceImpl implements NotificationService {
 
         return NotificationDto.builder().title(title)
             .body(resultBody).build();
+    }
+
+    private static NotificationTemplate getNotificationTemplate(
+        UserNotification notification, NotificationReceiverType receiverType,
+        NotificationTemplateRepository templateRepository) {
+        Optional<NotificationTemplate> templateOptional =
+            notification.getNotificationType().equals(NotificationType.CUSTOM)
+                ? templateRepository.findNotificationTemplateByUuidAndNotificationReceiverType(
+                    notification.getTemplateUuid(), receiverType)
+                : templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+                    notification.getNotificationType(), receiverType);
+
+        return templateOptional.orElseThrow(() -> new NotFoundException("Template not found"));
     }
 
     private static String resolveTemplateBody(String language, NotificationReceiverType receiverType,

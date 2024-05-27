@@ -3,6 +3,7 @@ package greencity.repository;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationType;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,6 +33,18 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
      * @author Denys Ryhal
      */
     @Query("SELECT t.schedule FROM NotificationTemplate t "
-        + "WHERE t.notificationType = :type AND t.notificationStatus = 'ACTIVE'")
+        + "WHERE t.notificationType = :type AND t.notificationStatus = 'ACTIVE' "
+        + "ORDER BY t.id DESC "
+        + "LIMIT 1")
     String findScheduleOfActiveTemplateByType(@Param(value = "type") NotificationType type);
+
+    @Query("SELECT t FROM NotificationTemplate t "
+        + "WHERE t.notificationType = 'CUSTOM' AND t.notificationStatus = 'ACTIVE'")
+    List<NotificationTemplate> findAllActiveCustomNotificationsTemplates();
+
+    @Query("select nt from NotificationTemplate nt inner join fetch nt.notificationPlatforms as np "
+        + "where nt.templateUuid = :templateUuid and np.notificationReceiverType = :receiverType")
+    Optional<NotificationTemplate> findNotificationTemplateByUuidAndNotificationReceiverType(
+        @Param(value = "templateUuid") String templateUuid,
+        @Param(value = "receiverType") NotificationReceiverType receiverType);
 }
