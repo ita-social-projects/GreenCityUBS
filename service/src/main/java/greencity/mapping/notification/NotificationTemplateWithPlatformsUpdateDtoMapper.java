@@ -1,32 +1,26 @@
 package greencity.mapping.notification;
 
 import greencity.dto.notification.NotificationPlatformDto;
-import greencity.dto.notification.NotificationTemplateMainInfoDto;
-import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.entity.notifications.NotificationTemplate;
+import java.util.stream.Collectors;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-import java.util.stream.Collectors;
 
 @Component
-class NotificationTemplateWithPlatformsDtoMapper
-    extends AbstractConverter<NotificationTemplate, NotificationTemplateWithPlatformsDto> {
+public class NotificationTemplateWithPlatformsUpdateDtoMapper
+    extends AbstractConverter<NotificationTemplate, NotificationTemplateWithPlatformsUpdateDto> {
     @Override
-    protected NotificationTemplateWithPlatformsDto convert(NotificationTemplate notificationTemplate) {
-        return NotificationTemplateWithPlatformsDto.builder()
-            .notificationTemplateMainInfoDto(NotificationTemplateMainInfoDto.builder()
+    protected NotificationTemplateWithPlatformsUpdateDto convert(NotificationTemplate notificationTemplate) {
+        return NotificationTemplateWithPlatformsUpdateDto.builder()
+            .notificationTemplateUpdateInfo(NotificationTemplateUpdateInfoDto.builder()
                 .type(notificationTemplate.getNotificationType())
                 .trigger(notificationTemplate.getTrigger())
-                .triggerDescription(notificationTemplate.getTrigger().getDescription())
-                .triggerDescriptionEng(notificationTemplate.getTrigger().getDescriptionEng())
                 .time(notificationTemplate.getTime())
-                .timeDescription(notificationTemplate.getTime().getDescription())
-                .timeDescriptionEng(notificationTemplate.getTime().getDescriptionEng())
                 .schedule(notificationTemplate.getSchedule())
                 .title(notificationTemplate.getTitle())
                 .titleEng(notificationTemplate.getTitleEng())
-                .notificationStatus(notificationTemplate.getNotificationStatus())
-                .scheduleUpdateForbidden(notificationTemplate.isScheduleUpdateForbidden())
                 .build())
             .platforms(notificationTemplate.getNotificationPlatforms().stream()
                 .map(platform -> NotificationPlatformDto.builder()
