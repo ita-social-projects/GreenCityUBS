@@ -3,14 +3,13 @@ package greencity.notificator;
 import greencity.dto.notification.ScheduledNotificationDto;
 import greencity.notificator.scheduler.NotificationTaskScheduler;
 import greencity.repository.NotificationTemplateRepository;
-import greencity.service.notificator.ScheduledNotificator;
 import greencity.service.ubs.NotificationService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import static greencity.dto.notification.ScheduledNotificationDto.*;
+import static greencity.dto.notification.ScheduledNotificationDto.build;
 import static greencity.enums.NotificationType.CUSTOM;
 
 @Component
@@ -37,6 +36,6 @@ public class CustomNotificationsNotificator implements ScheduledNotificator {
 
     private void createNotificationScheduler(String templateUuid, String schedule) {
         scheduledFutures.add(taskScheduler.scheduleNotification(
-            () -> notificationService.notifyCustomNotification(templateUuid), schedule, CUSTOM));
+            () -> notificationService.notifyCustom(templateUuid), schedule, CUSTOM));
     }
 }

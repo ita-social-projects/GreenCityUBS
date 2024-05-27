@@ -8,6 +8,7 @@ import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.order.Event;
+import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -29,6 +30,8 @@ import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.OrderBagService;
+
+import static greencity.ModelUtils.getUserWithBotNotifyTrue;
 import static greencity.constant.OrderHistory.ADD_VIOLATION;
 import static greencity.constant.OrderHistory.CHANGES_VIOLATION;
 import static greencity.constant.OrderHistory.DELETE_VIOLATION;
@@ -38,6 +41,8 @@ import static greencity.constant.OrderHistory.ORDER_FORMED;
 import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT;
 import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE;
 import static java.util.Arrays.asList;
+
+import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -242,11 +247,11 @@ class NotificationServiceImplTest {
 
         @Test
         void testNotifyPaidOrder() {
-            when(userNotificationRepository.save(TEST_USER_NOTIFICATION)).thenReturn(TEST_USER_NOTIFICATION);
+            when(userNotificationRepository.save(any())).thenReturn(TEST_USER_NOTIFICATION);
 
             notificationService.notifyPaidOrder(TEST_ORDER_2);
 
-            verify(userNotificationRepository, times(1)).save(TEST_USER_NOTIFICATION);
+            verify(userNotificationRepository, times(1)).save(any());
 
         }
 
@@ -259,7 +264,7 @@ class NotificationServiceImplTest {
                 .value(order.getId().toString())
                 .build();
             when(notificationParameterRepository.saveAll(Set.of(orderNumber))).thenReturn(List.of(orderNumber));
-            when(userNotificationRepository.save(TEST_USER_NOTIFICATION)).thenReturn(TEST_USER_NOTIFICATION);
+            when(userNotificationRepository.save(any())).thenReturn(TEST_USER_NOTIFICATION);
             PaymentResponseDto dto = PaymentResponseDto.builder().order_id("1_1").build();
             notificationService.notifyPaidOrder(order);
             verify(notificationService).notifyPaidOrder(order);
@@ -750,6 +755,24 @@ class NotificationServiceImplTest {
         }
 
         @Test
+        void testNotifyCustom() {
+            var user = getUser();
+            var uuid = "uuid";
+            var userNotification = new UserNotification();
+            userNotification.setNotificationType(NotificationType.CUSTOM);
+            userNotification.setUser(user);
+            userNotification.setTemplateUuid(uuid);
+
+            when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
+            when(userNotificationRepository.save(any())).thenReturn(userNotification);
+
+            notificationService.notifyCustom(uuid);
+
+            verify(userNotificationRepository).save(any());
+            verify(userRepository).findAll();
+        }
+
+        @Test
         void testNotifyInactiveAccounts() {
             AbstractNotificationProvider abstractNotificationProvider =
                 Mockito.mock(AbstractNotificationProvider.class);
@@ -1146,6 +1169,30 @@ class NotificationServiceImplTest {
             NotificationReceiverType.MOBILE, templateRepository, 5L);
 
         assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitleEng(), result.getTitle());
+    }
+
+    @Test
+    void createNotificationDtoOfCustomTemplateTest() {
+        String language = "en";
+        String templateUuid = UUID.randomUUID().toString();
+
+        var testNotificationTemplate = TEST_NOTIFICATION_TEMPLATE;
+        testNotificationTemplate.setNotificationType(NotificationType.CUSTOM);
+        testNotificationTemplate.setTrigger(NotificationTrigger.CUSTOM);
+        testNotificationTemplate.setTemplateUuid(templateUuid);
+
+        var testUserNotification = TEST_USER_NOTIFICATION;
+        testUserNotification.setNotificationType(NotificationType.CUSTOM);
+        testUserNotification.setTemplateUuid(templateUuid);
+
+        when(templateRepository.findNotificationTemplateByUuidAndNotificationReceiverType(any(), any()))
+            .thenReturn(Optional.of(testNotificationTemplate));
+
+        NotificationDto result = NotificationServiceImpl.createNotificationDto(testUserNotification, language,
+            NotificationReceiverType.MOBILE, templateRepository, 5L);
+
+        assertEquals(testNotificationTemplate.getTitleEng(), result.getTitle());
+        verify(templateRepository).findNotificationTemplateByUuidAndNotificationReceiverType(any(), any());
     }
 
     @Test

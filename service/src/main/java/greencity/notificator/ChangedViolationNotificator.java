@@ -3,12 +3,11 @@ package greencity.notificator;
 import greencity.dto.notification.ScheduledNotificationDto;
 import greencity.notificator.scheduler.NotificationTaskScheduler;
 import greencity.repository.NotificationTemplateRepository;
-import greencity.service.notificator.ScheduledNotificator;
 import greencity.service.ubs.NotificationService;
 import java.util.concurrent.ScheduledFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import static greencity.dto.notification.ScheduledNotificationDto.*;
+import static greencity.dto.notification.ScheduledNotificationDto.build;
 import static greencity.enums.NotificationType.CHANGED_IN_RULE_VIOLATION_STATUS;
 
 @Component
