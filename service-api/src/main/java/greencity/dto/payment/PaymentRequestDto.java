@@ -21,15 +21,15 @@ public class PaymentRequestDto {
     @JsonProperty("orderDate")
     private String orderDate;
     @JsonProperty("amount")
-    private Long amount;
+    private Double amount;
     @JsonProperty("currency")
     private String currency;
     @JsonProperty("productName")
-    private String productName;
+    private String[] productName;
     @JsonProperty("productCount")
-    private String productCount;
+    private String[] productCount;
     @JsonProperty("productPrice")
-    private String productPrice;
+    private String[] productPrice;
     @JsonProperty("merchantSignature")
     private String signature;
     }

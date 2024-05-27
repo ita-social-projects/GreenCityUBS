@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "wayforpay-client",
-        url = "https://secure.wayforpay.com/pay")
-
+        url = "https://secure.wayforpay.com/pay",
+        fallbackFactory = WayForPayClientFallbackFactory.class)
 public interface WayForPayClient {
-    @PostMapping("/pay?behavior=offline")
+    @PostMapping
     String getCheckoutResponse(@RequestBody PaymentRequestDto dto);
 }
 

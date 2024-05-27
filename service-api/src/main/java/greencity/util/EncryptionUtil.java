@@ -26,7 +26,7 @@ public class EncryptionUtil {
      */
     public String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
         StringBuilder stringBuilder = new StringBuilder(password);
-        stringBuilder.append("380951900542");
+        stringBuilder.append("www_greencity_social");
         stringBuilder.append(";" + dto.getMerchantDomainName());
         stringBuilder.append(";" + dto.getOrderReference());
         stringBuilder.append(";" + dto.getOrderDate());

@@ -1176,10 +1176,19 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .merchantDomainName(wayForPayLogin)
                 .orderDate(String.valueOf(instant.getEpochSecond()))
                 .currency("UAH")
-                .amount(convertBillsIntoCoins((double) sumToPayInCoins))
-                .productName(order.getOrderBags().stream().map(OrderBag::getName).collect(Collectors.joining(";")))
-                .productCount(String.valueOf(order.getOrderBags().size()))
-                .productPrice(order.getOrderBags().stream().map(String::valueOf).collect(Collectors.joining(";")))
+                .amount(convertCoinsIntoBills(sumToPayInCoins))
+                .productName(order.getOrderBags().stream()
+                    .map(OrderBag::getName)
+                    .flatMap(name -> Arrays.stream(name.split(",")))
+                    .toArray(String[]::new))
+                .productCount(order.getOrderBags().stream()
+                        .map(orderBag -> String.valueOf(orderBag.getAmount()))
+                        .flatMap(amount -> Arrays.stream(amount.split(",")))
+                        .toArray(String[]::new))
+                .productPrice(order.getOrderBags().stream()
+                        .map(orderBag -> String.valueOf(orderBag.getPrice()))
+                        .flatMap(amount -> Arrays.stream(amount.split(",")))
+                        .toArray(String[]::new))
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil
@@ -1645,9 +1654,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private String getLinkFromFondyCheckoutResponse(String fondyResponse) {
+        System.out.println("\n" + fondyResponse);
         JSONObject json = new JSONObject(fondyResponse);
-        JSONObject response = json.getJSONObject("response");
-        return response.getString("checkout_url");
+        return json.getString("checkout_url");
     }
 
     private Order incrementCounter(Order order) {
@@ -1665,7 +1674,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderReference(OrderUtils.generateOrderIdForPayment(orderId, order))
             //.orderDescription("courier")
             .currency("UAH")
-            .amount(sumToPayInCoins)
+            //.amount(sumToPayInCoins)
             //.responseUrl(resultUrlForPersonalCabinetOfUser)
             .build();
         paymentRequestDto.setSignature(encryptionUtil

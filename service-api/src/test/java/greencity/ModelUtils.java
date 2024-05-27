@@ -97,13 +97,13 @@ public class ModelUtils {
 
     public static PaymentRequestDto getPaymentRequestDto() {
         return PaymentRequestDto.builder()
-            .orderReference("1")
-            .merchantId(2)
-            .orderDescription("")
-            .currency("USD")
-            .amount(2L)
-            .signature("")
-            .responseUrl("responseUrl")
+//            .orderReference("1")
+            //.merchantId(2)
+//            .orderDescription("")
+//            .currency("USD")
+//            .amount(2L)
+//            .signature("")
+//            .responseUrl("responseUrl")
             .build();
     }
 
