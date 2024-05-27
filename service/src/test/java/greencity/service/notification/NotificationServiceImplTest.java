@@ -30,19 +30,6 @@ import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.OrderBagService;
-
-import static greencity.ModelUtils.getUserWithBotNotifyTrue;
-import static greencity.constant.OrderHistory.ADD_VIOLATION;
-import static greencity.constant.OrderHistory.CHANGES_VIOLATION;
-import static greencity.constant.OrderHistory.DELETE_VIOLATION;
-import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT;
-import static greencity.constant.OrderHistory.ORDER_CONFIRMED;
-import static greencity.constant.OrderHistory.ORDER_FORMED;
-import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT;
-import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE;
-import static java.util.Arrays.asList;
-
-import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -113,6 +100,15 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.anyLong;
+import static greencity.constant.OrderHistory.ADD_VIOLATION;
+import static greencity.constant.OrderHistory.CHANGES_VIOLATION;
+import static greencity.constant.OrderHistory.DELETE_VIOLATION;
+import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT;
+import static greencity.constant.OrderHistory.ORDER_CONFIRMED;
+import static greencity.constant.OrderHistory.ORDER_FORMED;
+import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT;
+import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE;
+import static java.util.Arrays.asList;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
@@ -757,16 +753,16 @@ class NotificationServiceImplTest {
         @Test
         void testNotifyCustom() {
             var user = getUser();
-            var uuid = "uuid";
+            var templateId = 1L;
             var userNotification = new UserNotification();
             userNotification.setNotificationType(NotificationType.CUSTOM);
             userNotification.setUser(user);
-            userNotification.setTemplateUuid(uuid);
+            userNotification.setTemplateId(templateId);
 
             when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
             when(userNotificationRepository.save(any())).thenReturn(userNotification);
 
-            notificationService.notifyCustom(uuid);
+            notificationService.notifyCustom(templateId);
 
             verify(userNotificationRepository).save(any());
             verify(userRepository).findAll();
@@ -1174,25 +1170,23 @@ class NotificationServiceImplTest {
     @Test
     void createNotificationDtoOfCustomTemplateTest() {
         String language = "en";
-        String templateUuid = UUID.randomUUID().toString();
 
         var testNotificationTemplate = TEST_NOTIFICATION_TEMPLATE;
         testNotificationTemplate.setNotificationType(NotificationType.CUSTOM);
         testNotificationTemplate.setTrigger(NotificationTrigger.CUSTOM);
-        testNotificationTemplate.setTemplateUuid(templateUuid);
 
         var testUserNotification = TEST_USER_NOTIFICATION;
         testUserNotification.setNotificationType(NotificationType.CUSTOM);
-        testUserNotification.setTemplateUuid(templateUuid);
+        testUserNotification.setTemplateId(testNotificationTemplate.getId());
 
-        when(templateRepository.findNotificationTemplateByUuidAndNotificationReceiverType(any(), any()))
+        when(templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(any(), any()))
             .thenReturn(Optional.of(testNotificationTemplate));
 
         NotificationDto result = NotificationServiceImpl.createNotificationDto(testUserNotification, language,
             NotificationReceiverType.MOBILE, templateRepository, 5L);
 
         assertEquals(testNotificationTemplate.getTitleEng(), result.getTitle());
-        verify(templateRepository).findNotificationTemplateByUuidAndNotificationReceiverType(any(), any());
+        verify(templateRepository).findNotificationTemplateByIdAndNotificationReceiverType(any(), any());
     }
 
     @Test

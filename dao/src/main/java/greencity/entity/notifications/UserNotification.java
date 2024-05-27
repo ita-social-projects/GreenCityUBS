@@ -48,8 +48,8 @@ public class UserNotification {
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 
-    @Column(name = "template_uuid", columnDefinition = "varchar(60)")
-    private String templateUuid;
+    @Column(name = "template_id", columnDefinition = "bigint")
+    private Long templateId;
 
     @OneToMany(mappedBy = "userNotification")
     @Cascade(org.hibernate.annotations.CascadeType.ALL)

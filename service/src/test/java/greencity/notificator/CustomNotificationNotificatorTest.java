@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static greencity.enums.NotificationType.CUSTOM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -46,7 +47,7 @@ class CustomNotificationNotificatorTest {
         var runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
         when(notificationTemplateRepository.findAllActiveCustomNotificationsTemplates()).thenReturn(templates);
-        doNothing().when(notificationService).notifyCustom(anyString());
+        doNothing().when(notificationService).notifyCustom(anyLong());
         when(taskScheduler.scheduleNotification(
             runnableCaptor.capture(),
             anyString(), any())).thenReturn(mock(ScheduledFuture.class));
@@ -57,7 +58,7 @@ class CustomNotificationNotificatorTest {
 
         runnableCaptor.getAllValues().forEach(Runnable::run);
         verify(notificationTemplateRepository).findAllActiveCustomNotificationsTemplates();
-        verify(notificationService, times(2)).notifyCustom(anyString());
+        verify(notificationService, times(2)).notifyCustom(anyLong());
         verify(taskScheduler, times(2)).scheduleNotification(any(), anyString(), any());
     }
 
@@ -65,7 +66,6 @@ class CustomNotificationNotificatorTest {
         var template1 = ModelUtils.getCustomNotificationTemplate();
         var template2 = ModelUtils.getCustomNotificationTemplate();
         template2.setId(template1.getId() + 1);
-        template2.setTemplateUuid(template1.getTemplateUuid() + 1);
         return List.of(template1, template2);
     }
 
