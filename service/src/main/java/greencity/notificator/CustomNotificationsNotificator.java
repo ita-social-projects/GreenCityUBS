@@ -25,7 +25,7 @@ public class CustomNotificationsNotificator implements ScheduledNotificator {
         closePreviousTasksIfPresent();
         var templates = notificationTemplateRepository.findAllActiveCustomNotificationsTemplates();
         templates.forEach(
-            template -> createNotificationScheduler(template.getTemplateUuid(), template.getSchedule()));
+            template -> createNotificationScheduler(template.getId(), template.getSchedule()));
         return build(CUSTOM, this.getClass());
     }
 
@@ -34,8 +34,8 @@ public class CustomNotificationsNotificator implements ScheduledNotificator {
         scheduledFutures.clear();
     }
 
-    private void createNotificationScheduler(String templateUuid, String schedule) {
+    private void createNotificationScheduler(Long templateId, String schedule) {
         scheduledFutures.add(taskScheduler.scheduleNotification(
-            () -> notificationService.notifyCustom(templateUuid), schedule, CUSTOM));
+            () -> notificationService.notifyCustom(templateId), schedule, CUSTOM));
     }
 }

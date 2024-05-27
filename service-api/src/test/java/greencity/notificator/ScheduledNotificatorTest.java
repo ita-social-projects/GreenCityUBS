@@ -1,6 +1,5 @@
 package greencity.notificator;
 
-import greencity.dto.notification.ScheduledNotificationDto;
 import java.util.concurrent.ScheduledFuture;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

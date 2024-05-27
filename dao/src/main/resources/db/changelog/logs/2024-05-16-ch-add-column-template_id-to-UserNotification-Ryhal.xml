@@ -6,7 +6,7 @@
 
     <changeSet id="2024-05-13-add-column-template_uuid-to-UserNotification" author="Ryhal Denys">
         <addColumn tableName="user_notifications">
-            <column name="template_uuid" type="varchar(60)"/>
+            <column name="template_id" type="bigint"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>

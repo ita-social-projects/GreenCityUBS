@@ -54,9 +54,6 @@ public class NotificationTemplate {
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 
-    @Column(unique = true, name = "template_uuid", columnDefinition = "varchar(60)")
-    private String templateUuid;
-
     @Column(nullable = false, name = "trigger")
     @Enumerated(EnumType.STRING)
     private NotificationTrigger trigger;

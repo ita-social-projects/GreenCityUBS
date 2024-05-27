@@ -5228,7 +5228,6 @@ public class ModelUtils {
             .titleEng("Title")
             .schedule("0 2 * * * *")
             .trigger(NotificationTrigger.CUSTOM)
-            .templateUuid("uuid")
             .time(NotificationTime.IMMEDIATELY)
             .build();
     }

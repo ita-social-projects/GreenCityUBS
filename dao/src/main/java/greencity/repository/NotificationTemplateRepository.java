@@ -43,8 +43,8 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
     List<NotificationTemplate> findAllActiveCustomNotificationsTemplates();
 
     @Query("select nt from NotificationTemplate nt inner join fetch nt.notificationPlatforms as np "
-        + "where nt.templateUuid = :templateUuid and np.notificationReceiverType = :receiverType")
-    Optional<NotificationTemplate> findNotificationTemplateByUuidAndNotificationReceiverType(
-        @Param(value = "templateUuid") String templateUuid,
+        + "where nt.id = :templateId and np.notificationReceiverType = :receiverType")
+    Optional<NotificationTemplate> findNotificationTemplateByIdAndNotificationReceiverType(
+        @Param(value = "templateId") Long templateId,
         @Param(value = "receiverType") NotificationReceiverType receiverType);
 }

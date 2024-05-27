@@ -623,15 +623,15 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyCustom(String templateUuid) {
+    public void notifyCustom(Long templateUuid) {
         var users = userRepository.findAll();
         users.forEach(user -> fillAndSendCustomNotification(user, templateUuid));
     }
 
-    private void fillAndSendCustomNotification(User user, String templateUuid) {
+    private void fillAndSendCustomNotification(User user, Long templateUuid) {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.CUSTOM);
-        userNotification.setTemplateUuid(templateUuid);
+        userNotification.setTemplateId(templateUuid);
         userNotification.setUser(user);
         UserNotification created = userNotificationRepository.save(userNotification);
         created.setParameters(new HashSet<>());
@@ -814,8 +814,8 @@ public class NotificationServiceImpl implements NotificationService {
         NotificationTemplateRepository templateRepository) {
         Optional<NotificationTemplate> templateOptional =
             notification.getNotificationType().equals(NotificationType.CUSTOM)
-                ? templateRepository.findNotificationTemplateByUuidAndNotificationReceiverType(
-                    notification.getTemplateUuid(), receiverType)
+                ? templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(
+                    notification.getId(), receiverType)
                 : templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                     notification.getNotificationType(), receiverType);
 
