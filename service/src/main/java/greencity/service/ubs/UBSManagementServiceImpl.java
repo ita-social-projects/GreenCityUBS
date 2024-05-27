@@ -73,12 +73,12 @@ import greencity.enums.PaymentType;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.OrderBagRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
@@ -92,6 +92,24 @@ import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -110,23 +128,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import jakarta.persistence.EntityNotFoundException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
@@ -226,44 +227,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
                 .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
                 .doubleValue();
-    }
-
-    /**
-     * Method return's information about overpayment and used bonuses on canceled
-     * and done orders.
-     *
-     * @param orderId  of {@link Long} order id;
-     * @param sumToPay of {@link Double} sum to pay;
-     * @param marker   of {@link Long} marker;
-     * @return {@link PaymentTableInfoDto }
-     * @author Ostap Mykhailivskyi
-     */
-    @Override
-    public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Double sumToPay, Long marker) {
-        Order order = orderRepository.findUserById(orderId).orElseThrow(
-            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        Long overpaymentInCoins = calculateOverpayment(order, convertBillsIntoCoins(sumToPay));
-
-        PaymentTableInfoDto dto = getPaymentInfo(orderId, sumToPay);
-        PaymentInfoDto payDto = PaymentInfoDto.builder()
-            .amount(convertCoinsIntoBills(overpaymentInCoins))
-            .settlementdate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
-            .build();
-        if (marker == 1L) {
-            payDto.setComment(AppConstant.PAYMENT_REFUND);
-        } else {
-            payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
-            int uahPoints = convertCoinsIntoBills(overpaymentInCoins).intValue();
-
-            User user = order.getUser();
-            user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
-            orderRepository.save(order);
-        }
-        dto.getPaymentInfoDtos().add(payDto);
-        long previousOverpaymentAmount = convertBillsIntoCoins(dto.getOverpayment());
-        dto.setOverpayment(
-            convertCoinsIntoBills(previousOverpaymentAmount) - convertCoinsIntoBills(overpaymentInCoins));
-        return dto;
     }
 
     @Override
@@ -1530,14 +1493,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public void saveReason(Order order, String description, MultipartFile[] images) {
-        List<String> pictures = new ArrayList<>();
-        for (MultipartFile image : images) {
-            if (image != null) {
-                pictures.add(fileService.upload(image));
-            } else {
-                pictures.add(DEFAULT_IMAGE_PATH);
-            }
-        }
+        List<String> pictures = (images != null) ? Arrays.stream(images)
+            .map(this::processImage)
+            .collect(Collectors.toList())
+            : new ArrayList<>();
         ReasonNotTakeBagDto dto = new ReasonNotTakeBagDto();
         dto.setImages(pictures);
         dto.setDescription(description);
@@ -1546,6 +1505,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setImageReasonNotTakingBags(pictures);
         order.setReasonNotTakingBagDescription(description);
         orderRepository.save(order);
+    }
+
+    private String processImage(MultipartFile image) {
+        return (image != null) ? fileService.upload(image) : DEFAULT_IMAGE_PATH;
     }
 
     /**

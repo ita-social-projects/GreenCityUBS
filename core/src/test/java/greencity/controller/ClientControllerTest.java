@@ -5,7 +5,6 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.order.OrderBagDto;
 import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.service.ubs.UBSClientService;
@@ -22,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 import java.util.List;
-import java.util.Locale;
 import static greencity.ModelUtils.getOrderClientDto;
 import static greencity.ModelUtils.getUuid;
 import static org.mockito.Mockito.*;
@@ -74,24 +72,6 @@ class ClientControllerTest {
     }
 
     @Test
-    void makeOrderAgain() throws Exception {
-        OrderBagDto dto = OrderBagDto.builder()
-            .id(1)
-            .amount(3)
-            .build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/" + 1L + makeOrderAgainLink)
-            .principal(principal)
-            .content(responseJSON)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService, times(1)).makeOrderAgain(new Locale("en"), 1L);
-    }
-
-    @Test
     void getOrderPaymentDetail() throws Exception {
         mockMvc.perform(get(ubsLink + getOrderPaymentDetailLink + 1L)
             .principal(principal)
@@ -99,12 +79,6 @@ class ClientControllerTest {
             .andExpect(status().isOk());
 
         verify(ubsClientService, times(1)).getOrderPaymentDetail(1L);
-    }
-
-    @Test
-    void getDataForOrderStatusPageTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-data-for-order-surcharge/{id}", 1L));
-        verify(ubsClientService).getOrderInfoForSurcharge(1L, null);
     }
 
     @Test

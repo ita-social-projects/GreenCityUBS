@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
 import org.springframework.data.domain.Pageable;
@@ -22,13 +21,6 @@ public interface NotificationService {
      * @author Ann Sakhno
      */
     void notifyPaidOrder(Order order);
-
-    /**
-     * Method that creates notification for paid order from PaymentResponseDto.
-     *
-     * @author Danylo Hlynskyi
-     */
-    void notifyPaidOrder(PaymentResponseDto dto);
 
     /**
      * Method that creates notifications for all orders with status
@@ -51,6 +43,13 @@ public interface NotificationService {
      * @author Ann Sakhno
      */
     void notifyHalfPaidPackage(Order order);
+
+    /**
+     * Method that creates notification for unpaid package.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyUnpaidPaidPackage(Order order);
 
     /**
      * Method that creates notification for users bonuses.

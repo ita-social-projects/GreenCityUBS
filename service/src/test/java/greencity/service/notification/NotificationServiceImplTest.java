@@ -258,11 +258,10 @@ class NotificationServiceImplTest {
                 .key("orderNumber")
                 .value(order.getId().toString())
                 .build();
-            when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
             when(notificationParameterRepository.saveAll(Set.of(orderNumber))).thenReturn(List.of(orderNumber));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION)).thenReturn(TEST_USER_NOTIFICATION);
             PaymentResponseDto dto = PaymentResponseDto.builder().order_id("1_1").build();
-            notificationService.notifyPaidOrder(dto);
+            notificationService.notifyPaidOrder(order);
             verify(notificationService).notifyPaidOrder(order);
             verify(userNotificationRepository).save(any(UserNotification.class));
             verify(notificationParameterRepository).saveAll(Set.of(orderNumber));
@@ -1097,6 +1096,27 @@ class NotificationServiceImplTest {
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyHalfPaidPackage(order);
+
+        verify(userNotificationRepository).save(any());
+        verify(notificationParameterRepository).saveAll(any());
+    }
+
+    @Test
+    void testNotifyUnpaidPackage() {
+        User user = getUser();
+        Order order = ModelUtils.getOrdersStatusFormedDto();
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.UNPAID_PACKAGE);
+        notification.setUser(user);
+        notification.setOrder(order);
+
+        when(userNotificationRepository.save(any())).thenReturn(notification);
+        when(notificationParameterRepository.saveAll(any())).thenReturn(Collections.emptyList());
+        when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
+
+        notificationService.notifyUnpaidPaidPackage(order);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());

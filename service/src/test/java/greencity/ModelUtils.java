@@ -431,6 +431,7 @@ public class ModelUtils {
 
     public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
+            .addressId(1L)
             .additionalOrders(new HashSet<>(List.of("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .locationId(1L)
@@ -1680,6 +1681,7 @@ public class ModelUtils {
             .regionEn(KYIV_REGION_EN)
             .region(KYIV_REGION_UA)
             .city("City")
+            .cityEn("Kyiv")
             .actual(false)
             .build();
     }
@@ -1702,7 +1704,7 @@ public class ModelUtils {
                 .longitude(30.4477005)
                 .build())
             .regionEn("RegionEng")
-            .cityEn("CityEng")
+            .cityEn("Kyiv")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
             .build();
@@ -1722,11 +1724,11 @@ public class ModelUtils {
             .actual(true)
             .addressStatus(AddressStatus.NEW)
             .coordinates(Coordinates.builder()
-                .latitude(50.4459068)
-                .longitude(30.4477005)
+                .latitude(50.3072388)
+                .longitude(30.3316833)
                 .build())
             .regionEn("RegionEng")
-            .cityEn("CityEng")
+            .cityEn("Boiarka")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
             .build();
