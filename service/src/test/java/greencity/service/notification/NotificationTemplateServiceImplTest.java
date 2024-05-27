@@ -6,6 +6,7 @@ import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.notificator.listener.NotificationPlanner;
 import greencity.repository.NotificationTemplateRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.any;
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PAGEABLE;
 import static greencity.ModelUtils.TEMPLATE_PAGE;
@@ -28,17 +34,18 @@ import static greencity.constant.ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND_BY
 import static greencity.enums.NotificationStatus.INACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.any;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationTemplateServiceImplTest {
     @Mock
     NotificationTemplateRepository templateRepository;
+
+    @Mock
+    NotificationPlanner notificationPlanner;
+
     @Mock
     ModelMapper modelMapper;
+
     @InjectMocks
     private NotificationTemplateServiceImpl notificationService;
 
@@ -74,6 +81,7 @@ class NotificationTemplateServiceImplTest {
         var platform = notification.getNotificationPlatforms().getFirst();
 
         when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
+        doNothing().when(notificationPlanner).restartNotificator(notification.getNotificationType());
 
         notificationService.update(id, updateDto);
 
@@ -89,6 +97,7 @@ class NotificationTemplateServiceImplTest {
         assertEquals(platformDto.getStatus(), platform.getNotificationStatus());
 
         verify(templateRepository).findById(id);
+        verify(notificationPlanner).restartNotificator(any());
     }
 
     @Test

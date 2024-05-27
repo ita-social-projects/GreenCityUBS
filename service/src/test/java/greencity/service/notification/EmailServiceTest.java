@@ -2,6 +2,7 @@ package greencity.service.notification;
 
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
+import greencity.dto.notification.EmailNotificationDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
@@ -41,11 +42,17 @@ class EmailServiceTest {
         UserNotification notification = ModelUtils.TEST_USER_NOTIFICATION;
         NotificationDto notificationDto = ModelUtils.TEST_NOTIFICATION_DTO;
 
+        EmailNotificationDto emailNotificationDto = EmailNotificationDto.builder()
+            .email(notification.getUser().getRecipientEmail())
+            .subject(notificationDto.getTitle())
+            .message(notificationDto.getBody())
+            .build();
+
         doNothing().when(userRemoteClient)
-            .sendEmailNotification(notificationDto, notification.getUser().getRecipientEmail());
+            .sendEmailNotification(emailNotificationDto);
 
         emailService.sendNotification(notification, notificationDto);
 
-        verify(userRemoteClient).sendEmailNotification(notificationDto, notification.getUser().getRecipientEmail());
+        verify(userRemoteClient).sendEmailNotification(emailNotificationDto);
     }
 }

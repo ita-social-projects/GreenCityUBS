@@ -9,8 +9,10 @@ import greencity.dto.pageble.PageableDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationType;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.notificator.listener.NotificationPlanner;
 import greencity.repository.NotificationTemplateRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class NotificationTemplateServiceImpl implements NotificationTemplateService {
     private NotificationTemplateRepository notificationTemplateRepository;
+    private NotificationPlanner notificationPlanner;
     private final ModelMapper modelMapper;
 
     /**
@@ -40,6 +43,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         NotificationTemplate template = getById(id);
 
         updateNotificationTemplateFromDto(template, dto);
+        restartNotificationSchedule(template.getNotificationType());
     }
 
     private void updateNotificationTemplateFromDto(NotificationTemplate template,
@@ -69,6 +73,10 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
             platform.setBodyEng(platformDto.getBodyEng());
             platform.setNotificationStatus(platformDto.getStatus());
         }
+    }
+
+    private void restartNotificationSchedule(NotificationType notificationType) {
+        notificationPlanner.restartNotificator(notificationType);
     }
 
     /**

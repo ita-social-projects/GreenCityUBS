@@ -23,6 +23,14 @@ public interface NotificationService {
     void notifyPaidOrder(Order order);
 
     /**
+     * Method that creates notifications for all orders with status
+     * COURIER_ITINERARY_FORMED.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllCourierItineraryFormed();
+
+    /**
      * Method that creates notification for courier.
      *
      * @author Ann Sakhno
@@ -79,6 +87,61 @@ public interface NotificationService {
     void notifyDeleteViolation(Long orderId);
 
     /**
+     * Method that creates notifications for all orders with status
+     * CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllCanceledViolations();
+
+    /**
+     * Method that creates notifications for all orders with status
+     * CHANGED_IN_RULE_VIOLATION_STATUS.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllChangedViolations();
+
+    /**
+     * Method that creates notifications for all orders with status
+     * VIOLATION_THE_RULES.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllAddedViolations();
+
+    /**
+     * Method that creates notifications for all orders with status
+     * DONE_OR_CANCELED_UNPAID_ORDER.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllDoneOrCanceledUnpaidOrders();
+
+    /**
+     * Method that creates notifications for all orders with status
+     * ORDER_STATUS_CHANGED.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllChangedOrderStatuses();
+
+    /**
+     * Method that creates notifications for all orders with status UNPAID_PACKAGE.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyUnpaidPackages();
+
+    /**
+     * Method that creates notifications for all orders with status
+     * HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllHalfPaidOrdersWithStatusBroughtByHimself();
+
+    /**
      * Method that creates notification for inactive users.
      *
      * @author Ann Sakhno
@@ -107,7 +170,7 @@ public interface NotificationService {
      * @param order The order {@link Order} which status was changed.
      * @author Maksym Lenets
      */
-    public void notifySelfPickupOrder(Order order);
+    void notifySelfPickupOrder(Order order);
 
     /**
      * Method that returns page with notifications for user by UUID.

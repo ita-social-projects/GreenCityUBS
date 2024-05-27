@@ -24,4 +24,14 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
     Optional<NotificationTemplate> findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
         @Param(value = "type") NotificationType type,
         @Param(value = "receiverType") NotificationReceiverType receiverType);
+
+    /**
+     * method, that finds schedule of active Notification by Notification type.
+     *
+     * @return {@link String}
+     * @author Denys Ryhal
+     */
+    @Query("SELECT t.schedule FROM NotificationTemplate t "
+        + "WHERE t.notificationType = :type AND t.notificationStatus = 'ACTIVE'")
+    String findScheduleOfActiveTemplateByType(@Param(value = "type") NotificationType type);
 }

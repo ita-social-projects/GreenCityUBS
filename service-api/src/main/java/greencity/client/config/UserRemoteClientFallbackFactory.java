@@ -7,7 +7,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.EmailNotificationDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
@@ -58,7 +58,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void sendEmailNotification(NotificationDto notification, String email) {
+            public void sendEmailNotification(EmailNotificationDto emailNotificationDto) {
                 log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
             }
 
