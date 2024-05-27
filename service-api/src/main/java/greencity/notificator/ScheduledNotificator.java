@@ -1,4 +1,4 @@
-package greencity.service.notificator;
+package greencity.notificator;
 
 import greencity.dto.notification.ScheduledNotificationDto;
 import java.util.Objects;

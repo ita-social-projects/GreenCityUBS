@@ -84,7 +84,7 @@ class NotificationTemplateServiceImplTest {
         var platform = notification.getNotificationPlatforms().getFirst();
 
         when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
-        doNothing().when(notificationPlanner).restartNotificator(notification.getNotificationType());
+        doNothing().when(notificationPlanner).restartNotificator(any());
 
         notificationService.update(id, updateDto);
 

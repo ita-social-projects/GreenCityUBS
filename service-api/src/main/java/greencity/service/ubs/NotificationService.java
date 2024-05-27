@@ -141,7 +141,7 @@ public interface NotificationService {
      */
     void notifyAllHalfPaidOrdersWithStatusBroughtByHimself();
 
-    void notifyCustomNotification(String templateUuid);
+    void notifyCustom(String templateUuid);
 
     /**
      * Method that creates notification for inactive users.

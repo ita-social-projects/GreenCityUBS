@@ -163,6 +163,8 @@ import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationTime;
+import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -198,6 +200,7 @@ import static greencity.enums.NotificationReceiverType.SITE;
 import static greencity.enums.NotificationStatus.ACTIVE;
 import static greencity.enums.NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID;
 import static greencity.enums.NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS;
+import static greencity.enums.NotificationType.CUSTOM;
 import static greencity.enums.NotificationType.UNPAID_ORDER;
 import static greencity.enums.ViolationLevel.MAJOR;
 import static java.util.Collections.emptyList;
@@ -5214,6 +5217,19 @@ public class ModelUtils {
             .orderStatus(OrderStatus.ADJUSTMENT)
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .orderDate(LocalDateTime.now(fixedClock))
+            .build();
+    }
+
+    public static NotificationTemplate getCustomNotificationTemplate() {
+        return NotificationTemplate.builder()
+            .id(1L)
+            .isScheduleUpdateForbidden(false)
+            .title("Заголовок")
+            .titleEng("Title")
+            .schedule("0 2 * * * *")
+            .trigger(NotificationTrigger.CUSTOM)
+            .templateUuid("uuid")
+            .time(NotificationTime.IMMEDIATELY)
             .build();
     }
 

@@ -1,8 +1,7 @@
 package greencity.dto.notification;
 
 import greencity.enums.NotificationType;
-import greencity.service.notificator.ScheduledNotificator;
-import java.util.concurrent.ScheduledFuture;
+import greencity.notificator.ScheduledNotificator;
 import lombok.*;
 
 @Data

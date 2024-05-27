@@ -623,7 +623,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyCustomNotification(String templateUuid) {
+    public void notifyCustom(String templateUuid) {
         var users = userRepository.findAll();
         users.forEach(user -> fillAndSendCustomNotification(user, templateUuid));
     }

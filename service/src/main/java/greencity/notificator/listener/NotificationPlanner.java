@@ -3,7 +3,7 @@ package greencity.notificator.listener;
 import greencity.constant.AppConstant;
 import greencity.dto.notification.ScheduledNotificationDto;
 import greencity.enums.NotificationType;
-import greencity.service.notificator.ScheduledNotificator;
+import greencity.notificator.ScheduledNotificator;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
