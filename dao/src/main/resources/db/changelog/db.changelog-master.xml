@@ -223,6 +223,7 @@
     <include file="/db/changelog/logs/ch-add-columns-nameEventEng-and-authorEng-to-Events-Bokalo.xml"/>
     <include file="/db/changelog/logs/ch-update-employees-set-new-main-email-Midianyi.xml"/>
     <include file="/db/changelog/logs/2024-04-26-ch-add-column-isDeleted-to-Locations-Ryhal.xml"/>
+    <include file="/db/changelog/logs/2024-05-10-ch-add-column-isScheduleUpdateForbidden-toNotificationTemplate-Ryhal.xml"/>
 
 </databaseChangeLog>
 
