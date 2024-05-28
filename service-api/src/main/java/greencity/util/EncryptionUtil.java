@@ -4,6 +4,7 @@ import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import lombok.ToString;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.digest.HmacUtils;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
@@ -11,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
 import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
 
 @Component
@@ -25,25 +27,25 @@ public class EncryptionUtil {
      * @return {@String} - encrypted signature.
      */
     public String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
-        StringBuilder stringBuilder = new StringBuilder(password);
-        stringBuilder.append("www_greencity_social");
-        stringBuilder.append(";" + dto.getMerchantDomainName());
-        stringBuilder.append(";" + dto.getOrderReference());
-        stringBuilder.append(";" + dto.getOrderDate());
-        stringBuilder.append(";" + dto.getAmount());
-        stringBuilder.append(";" + dto.getCurrency());
-        stringBuilder.append(";" + dto.getProductName());
-        stringBuilder.append(";" + dto.getProductCount());
-        stringBuilder.append(";" + dto.getProductPrice());
-        try {
-            Mac mac = Mac.getInstance("HmacMD5");
-            SecretKeySpec secretKey = new SecretKeySpec(password.getBytes(StandardCharsets.UTF_8), "HmacMD5");
-            mac.init(secretKey);
-            byte[] hmacBytes = mac.doFinal(stringBuilder.toString().getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(hmacBytes);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to calculate HMAC", e);
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append(dto.getMerchantAccount()).append(";");
+        stringBuilder.append(dto.getMerchantDomainName()).append(";");
+        stringBuilder.append(dto.getOrderReference()).append(";");
+        stringBuilder.append(dto.getOrderDate()).append(";");
+        stringBuilder.append(dto.getAmount()).append(";");
+        stringBuilder.append(dto.getCurrency()).append(";");
+        for (String name : dto.getProductName()) {
+            stringBuilder.append(name).append(";");
         }
+        for (String count : dto.getProductCount()) {
+            stringBuilder.append(count).append(";");
+        }
+        for (String price : dto.getProductPrice()) {
+            stringBuilder.append(price).append(";");
+        }
+        String hmacMD5 = new HmacUtils("HmacMD5", password).hmacHex(stringBuilder.toString());
+        return hmacMD5;
     }
 
     /**

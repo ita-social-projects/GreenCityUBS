@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,8 +16,12 @@ import lombok.*;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 @JsonSubTypes(@JsonSubTypes.Type(value = PaymentRequestDto.class, name = "request"))
 public class PaymentRequestDto {
+    @JsonProperty("merchantAccount")
+    private String merchantAccount;
     @JsonProperty("merchantDomainName")
     private String merchantDomainName;
+    @JsonProperty("merchantTransactionSecureType")
+    private String merchantTransactionSecureType;
     @JsonProperty("orderReference")
     private String orderReference;
     @JsonProperty("orderDate")
@@ -25,11 +31,11 @@ public class PaymentRequestDto {
     @JsonProperty("currency")
     private String currency;
     @JsonProperty("productName")
-    private String[] productName;
-    @JsonProperty("productCount")
-    private String[] productCount;
+    private List<String> productName;
     @JsonProperty("productPrice")
-    private String[] productPrice;
+    private List<String> productPrice;
+    @JsonProperty("productCount")
+    private List<String> productCount;
     @JsonProperty("merchantSignature")
     private String signature;
     }
