@@ -12,20 +12,18 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
-import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -40,17 +38,22 @@ import greencity.enums.OrderStatus;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
 public interface UBSClientService {
     /**
-     * Method validates received payment response.
+     * This method is used to validate the payment received from LiqPay. It checks
+     * the signature of the payment, extracts the order ID from the data, retrieves
+     * the corresponding order from the database, converts the data to a Payment
+     * object, checks if the order status is approved, and finally, notifies that
+     * the order has been paid.
      *
-     * @param dto {@link PaymentResponseDto} - response order data.
+     * @param dto The PaymentResponseLiqPayDto object containing the data and
+     *            signature of the payment.
+     * @return The ID of the order associated with the payment.
      */
-    void validatePayment(PaymentResponseDto dto);
+    Long validatePaymentLiqPay(PaymentResponseLiqPayDto dto);
 
     /**
      * Methods returns all available for order bags and current user's bonus points.
@@ -161,16 +164,6 @@ public interface UBSClientService {
      * @author Danylko Mykola
      */
     List<OrderClientDto> getAllOrdersDoneByUser(String uuid);
-
-    /**
-     * Method creates the same order again if order's status is ON_THE_ROUTE,
-     * CONFIRMED or DONE.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link OrderClientDto} that contains client's order;
-     * @author Danylko Mykola
-     */
-    MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId);
 
     /**
      * Method that returns info about all orders for specified userID.
@@ -289,14 +282,6 @@ public interface UBSClientService {
     List<EventDto> getAllEventsForOrder(Long orderId, String email, String language);
 
     /**
-     * Method that returns order info for surcharge.
-     *
-     * @return {@link OrderStatusPageDto}.
-     * @author Igor Boykov
-     */
-    OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, String uuid);
-
-    /**
      * Method for delete user order.
      *
      * @param id - current order id.
@@ -311,13 +296,6 @@ public interface UBSClientService {
      * @author Max Boiarchuk
      */
     FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws PaymentLinkException;
-
-    /**
-     * Method validates received payment client response.
-     *
-     * @param dto {@link PaymentResponseDto} - response order data.
-     */
-    void validatePaymentClient(PaymentResponseDto dto);
 
     /**
      * Methods returns current user's bonus points.

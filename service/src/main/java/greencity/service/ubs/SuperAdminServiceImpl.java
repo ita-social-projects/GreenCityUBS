@@ -124,6 +124,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final OrderRepository orderRepository;
     private final OrderBagService orderBagService;
     private final OrderAddressRepository orderAddressRepository;
+    private final NotificationService notificationService;
 
     @Override
     public GetTariffServiceDto addTariffService(long tariffId, TariffServiceDto dto, String employeeUuid) {
@@ -210,11 +211,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
 
         List<Order> orders = orderRepository.findAllUnpaidOrdersByBagId(bagId);
+        updateAmountToPayForOrders(orders, bag);
+        return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
+    }
+
+    private void updateAmountToPayForOrders(List<Order> orders, Bag bag) {
         if (CollectionUtils.isNotEmpty(orders)) {
             orders.forEach(it -> updateOrderSumToPay(it, bag));
             orderRepository.saveAll(orders);
         }
-        return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
     }
 
     private void updateOrderSumToPay(Order order, Bag bag) {
@@ -222,7 +227,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Long sumToPayInCoins = order.getOrderBags().stream()
             .map(orderBag -> amount.get(orderBag.getBag().getId()) * getBagPrice(orderBag, bag))
             .reduce(0L, Long::sum);
-        order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
+
+        if (!Objects.equals(order.getSumTotalAmountWithoutDiscounts(), sumToPayInCoins)) {
+            order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
+            notificationService.notifyUnpaidPaidPackage(order);
+        }
     }
 
     private Long getBagPrice(OrderBag orderBag, Bag bag) {

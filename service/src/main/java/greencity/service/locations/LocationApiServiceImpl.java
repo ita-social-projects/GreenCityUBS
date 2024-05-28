@@ -342,8 +342,7 @@ public class LocationApiServiceImpl implements LocationApiService {
     }
 
     private static String removeWordCity(String sentence) {
-        String withoutSpaces = sentence.replace(" ", "");
-        String withoutRegion = withoutSpaces.replaceAll("(?iu)city", "");
-        return replaceAllQuotes(withoutRegion.replaceAll("(?iu)місто", ""));
+        String withoutRegion = sentence.replaceAll("(?iu)city", "").trim();
+        return replaceAllQuotes(withoutRegion.replaceAll("(?iu)місто", "").trim());
     }
 }

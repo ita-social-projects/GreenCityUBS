@@ -168,15 +168,18 @@ import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.TariffStatus;
 import greencity.util.Bot;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -200,6 +203,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class ModelUtils {
+    private static final Clock fixedClock =
+        Clock.fixed(LocalDateTime.now().toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
 
     public static final String TEST_EMAIL = "test@gmail.com";
     public static final Order TEST_ORDER = createOrder();
@@ -426,6 +431,7 @@ public class ModelUtils {
 
     public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
+            .addressId(1L)
             .additionalOrders(new HashSet<>(List.of("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .locationId(1L)
@@ -1675,6 +1681,7 @@ public class ModelUtils {
             .regionEn(KYIV_REGION_EN)
             .region(KYIV_REGION_UA)
             .city("City")
+            .cityEn("Kyiv")
             .actual(false)
             .build();
     }
@@ -1697,7 +1704,7 @@ public class ModelUtils {
                 .longitude(30.4477005)
                 .build())
             .regionEn("RegionEng")
-            .cityEn("CityEng")
+            .cityEn("Kyiv")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
             .build();
@@ -1717,11 +1724,11 @@ public class ModelUtils {
             .actual(true)
             .addressStatus(AddressStatus.NEW)
             .coordinates(Coordinates.builder()
-                .latitude(50.4459068)
-                .longitude(30.4477005)
+                .latitude(50.3072388)
+                .longitude(30.3316833)
                 .build())
             .regionEn("RegionEng")
-            .cityEn("CityEng")
+            .cityEn("Boiarka")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
             .build();
@@ -5185,4 +5192,17 @@ public class ModelUtils {
                     .build()),
             100);
     }
+
+    public static Order getNotifyInternallyFormedOrder() {
+        return Order.builder()
+            .id(1L)
+            .user(User.builder().id(1L).build())
+            .deliverFrom(LocalDateTime.now(fixedClock).minusHours(3))
+            .deliverTo(LocalDateTime.now(fixedClock).minusHours(2))
+            .orderStatus(OrderStatus.ADJUSTMENT)
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
+            .orderDate(LocalDateTime.now(fixedClock))
+            .build();
+    }
+
 }

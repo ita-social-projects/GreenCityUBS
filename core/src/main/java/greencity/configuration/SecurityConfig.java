@@ -72,7 +72,7 @@ public class SecurityConfig {
      *
      * @param http {@link HttpSecurity}
      */
-
+    @SuppressWarnings("java:S4502")
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
@@ -98,6 +98,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(req -> req
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, UBS_LINK + "/userProfile/user/create").permitAll()
+                .requestMatchers(HttpMethod.GET,
+                    UBS_LINK + "/getAllActiveCouriers",
+                    UBS_LINK + "/locations/{courierId}",
+                    UBS_LINK + "/order-details-for-tariff")
+                .permitAll()
                 .requestMatchers("/v2/api-docs/**",
                     "/v3/api-docs/**",
                     "/swagger.json",
@@ -108,9 +113,6 @@ public class SecurityConfig {
                     UBS_LINK + "/receivePayment",
                     UBS_LINK + "/receiveLiqPayPayment",
                     UBS_LINK + "/receivePaymentClient",
-                    UBS_LINK + "/getAllActiveCouriers",
-                    UBS_LINK + "/locations/{courierId}",
-                    UBS_LINK + "/order-details-for-tariff",
                     "/bot")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
