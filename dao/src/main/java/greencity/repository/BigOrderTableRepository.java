@@ -1,10 +1,15 @@
 package greencity.repository;
 
 import greencity.entity.order.BigOrderTableViews;
+import greencity.enums.OrderPaymentStatusSortingTranslation;
 import greencity.enums.OrderStatusSortingTranslation;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -12,11 +17,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import jakarta.persistence.EntityManager;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import static java.util.Objects.nonNull;
 
 @Repository
 public class BigOrderTableRepository {
+    public static final String ORDER_STATUS = "orderStatus";
+    public static final String ORDER_PAYMENT_STATUS = "orderPaymentStatus";
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
     private final CustomCriteriaPredicate criteriaPredicate;
@@ -129,7 +140,7 @@ public class BigOrderTableRepository {
     public void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root,
         String userLanguage) {
         if (userLanguage.equals("ua")
-            && (orderPage.getSortBy().equals("orderStatus") || orderPage.getSortBy().equals("orderPaymentStatus"))) {
+            && (orderPage.getSortBy().equals(ORDER_STATUS) || orderPage.getSortBy().equals(ORDER_PAYMENT_STATUS))) {
             sortingForUkrainianLocalization(orderPage, cq, root);
         } else {
             defaultSorting(orderPage, cq, root, Optional.empty());
@@ -144,7 +155,7 @@ public class BigOrderTableRepository {
         return entityManager.createQuery(countQuery).getSingleResult();
     }
 
-    public void defaultSorting(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+    private void defaultSorting(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
         Root<BigOrderTableViews> root, Optional<Expression<Integer>> sortingOrderUkrainianLocalization) {
         Expression<?> expression = sortingOrderUkrainianLocalization.orElseGet(() -> root.get(orderPage.getSortBy()));
         if (orderPage.getSortDirection().equals(Sort.Direction.ASC)) {
@@ -154,23 +165,30 @@ public class BigOrderTableRepository {
         }
     }
 
-    public void sortingForUkrainianLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+    private void sortingForUkrainianLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
         Root<BigOrderTableViews> root) {
-        if ("orderStatus".equals(orderPage.getSortBy())) {
-            Map<OrderStatusSortingTranslation, Integer> sortOrderMap =
-                OrderStatusSortingTranslation.getOrderMapSortedByAsc();
-            CriteriaBuilder.Case<Integer> selectCase = criteriaBuilder.selectCase();
-            Expression<Integer> otherwiseExpression =
-                criteriaBuilder.literal(OrderStatusSortingTranslation.OTHER.getSortOrder());
-            for (Map.Entry<OrderStatusSortingTranslation, Integer> entry : sortOrderMap.entrySet()) {
-                selectCase = selectCase.when(
-                    criteriaBuilder.equal(root.get("orderStatus"), entry.getKey().name()),
-                    entry.getValue());
-            }
-            Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
-            defaultSorting(orderPage, cq, root, Optional.of(sortOrder));
+        if (orderPage.getSortBy().equals(ORDER_STATUS)) {
+            setLocalizedSorting(orderPage, cq, root, OrderStatusSortingTranslation.getOrderMapSortedByAsc(),
+                ORDER_STATUS, OrderStatusSortingTranslation.class);
+        } else if (orderPage.getSortBy().equals(ORDER_PAYMENT_STATUS)) {
+            setLocalizedSorting(orderPage, cq, root,
+                OrderPaymentStatusSortingTranslation.orderPaymentStatusSortingMapByAsc(),
+                ORDER_PAYMENT_STATUS, OrderPaymentStatusSortingTranslation.class);
         } else {
             defaultSorting(orderPage, cq, root, Optional.empty());
         }
+    }
+
+    private <T extends Enum<T>> void setLocalizedSorting(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+        Root<BigOrderTableViews> root, Map<T, Integer> sortOrderMap, String field, Class<T> enumType) {
+        CriteriaBuilder.Case<Integer> selectCase = criteriaBuilder.selectCase();
+        Expression<Integer> otherwiseExpression =
+            criteriaBuilder.literal(sortOrderMap.get(Enum.valueOf(enumType, "OTHER")));
+        for (Map.Entry<T, Integer> entry : sortOrderMap.entrySet()) {
+            selectCase =
+                selectCase.when(criteriaBuilder.equal(root.get(field), entry.getKey().name()), entry.getValue());
+        }
+        Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
+        defaultSorting(orderPage, cq, root, Optional.of(sortOrder));
     }
 }
