@@ -677,11 +677,15 @@ class NotificationServiceImplTest {
         void testNotifyAllOrdersWithIncreasedTariffPrice() {
             Order order = getOrderWithAmountToPay();
             List<Order> orders = Collections.singletonList(order);
+            Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order);
 
             when(orderRepository.findAllUnpaidOrdersByBagId(anyInt())).thenReturn(orders);
+            when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
+            mockFillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
 
             notificationService.notifyAllOrdersWithIncreasedTariffPrice(anyInt());
-            verify(orderRepository).findAllByPaymentStatusesAndOrderStatuses(any(), any());
+            verify(orderRepository).findAllUnpaidOrdersByBagId(any());
+            verifyFillAndSendNotification();
         }
 
         private static Stream<OrderStatus> wrongForUnpaidOrderStatusesProvider() {
