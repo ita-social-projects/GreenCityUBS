@@ -370,7 +370,7 @@ class SuperAdminServiceImplTest {
         when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(List.of(order));
         when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(getOrderBag())))
             .thenReturn(ModelUtils.getAmount());
-        doNothing().when(notificationService).notifyUnpaidPaidPackage(any());
+        doNothing().when(notificationService).notifyIncreasedTariffPrice(any());
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
@@ -383,7 +383,7 @@ class SuperAdminServiceImplTest {
         verify(orderBagRepository)
             .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         verify(orderRepository).findAllUnpaidOrdersByBagId(1);
-        verify(notificationService).notifyUnpaidPaidPackage(any());
+        verify(notificationService).notifyIncreasedTariffPrice(any());
         verify(orderRepository).saveAll(anyList());
     }
 
@@ -408,7 +408,7 @@ class SuperAdminServiceImplTest {
         when(orderBagService
             .getActualBagsAmountForOrder(Collections.singletonList(getOrderBag().setConfirmedQuantity(2))))
             .thenReturn(ModelUtils.getAmount());
-        doNothing().when(notificationService).notifyUnpaidPaidPackage(any());
+        doNothing().when(notificationService).notifyIncreasedTariffPrice(any());
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
@@ -421,7 +421,7 @@ class SuperAdminServiceImplTest {
         verify(orderBagRepository)
             .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         verify(orderRepository).findAllUnpaidOrdersByBagId(1);
-        verify(notificationService).notifyUnpaidPaidPackage(any());
+        verify(notificationService).notifyIncreasedTariffPrice(any());
         verify(orderRepository).saveAll(anyList());
     }
 
@@ -448,7 +448,7 @@ class SuperAdminServiceImplTest {
             .thenReturn(ModelUtils.getAmount());
 
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
-        doNothing().when(notificationService).notifyUnpaidPaidPackage(any());
+        doNothing().when(notificationService).notifyIncreasedTariffPrice(any());
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 
         assertEquals(editedDto, actual);
@@ -461,7 +461,7 @@ class SuperAdminServiceImplTest {
         verify(orderBagRepository)
             .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         verify(orderRepository).findAllUnpaidOrdersByBagId(1);
-        verify(notificationService).notifyUnpaidPaidPackage(any());
+        verify(notificationService).notifyIncreasedTariffPrice(any());
         verify(orderRepository).saveAll(anyList());
     }
 

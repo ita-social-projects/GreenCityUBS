@@ -227,12 +227,12 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyUnpaidPaidPackage(Order order) {
+    public void notifyIncreasedTariffPrice(Order order) {
         Double amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
         if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
-            fillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
+            fillAndSendNotification(parameters, order, NotificationType.TARIFF_PRICE_WAS_CHANGED);
         }
     }
 

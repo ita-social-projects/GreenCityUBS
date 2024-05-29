@@ -230,7 +230,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         if (!Objects.equals(order.getSumTotalAmountWithoutDiscounts(), sumToPayInCoins)) {
             order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
-            notificationService.notifyUnpaidPaidPackage(order);
+            notificationService.notifyIncreasedTariffPrice(order);
         }
     }
 

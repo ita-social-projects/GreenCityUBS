@@ -45,11 +45,12 @@ public interface NotificationService {
     void notifyHalfPaidPackage(Order order);
 
     /**
-     * Method that creates notification for unpaid package.
+     * Method that creates notification for unpaid orders which tariff price was
+     * increased.
      *
      * @author Denys Ryhal
      */
-    void notifyUnpaidPaidPackage(Order order);
+    void notifyIncreasedTariffPrice(Order order);
 
     /**
      * Method that creates notification for users bonuses.

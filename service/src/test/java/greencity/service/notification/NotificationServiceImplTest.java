@@ -1116,7 +1116,7 @@ class NotificationServiceImplTest {
         when(notificationParameterRepository.saveAll(any())).thenReturn(Collections.emptyList());
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
-        notificationService.notifyUnpaidPaidPackage(order);
+        notificationService.notifyIncreasedTariffPrice(order);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());
