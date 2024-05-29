@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OrderStatusSortingTranslationTest {
     @Test
-    public void testGetSortOrder() {
+    void testGetSortOrder() {
         assertEquals(1, OrderStatusSortingTranslation.DONE.getSortOrder());
         assertEquals(2, OrderStatusSortingTranslation.ON_THE_ROUTE.getSortOrder());
         assertEquals(3, OrderStatusSortingTranslation.NOT_TAKEN_OUT.getSortOrder());
@@ -21,7 +21,7 @@ class OrderStatusSortingTranslationTest {
     }
 
     @Test
-    public void testGetOrderMapSortedByAsc() {
+    void testGetOrderMapSortedByAsc() {
         Map<OrderStatusSortingTranslation, Integer> sortedAsc = OrderStatusSortingTranslation.getOrderMapSortedByAsc();
 
         assertEquals(OrderStatusSortingTranslation.values().length, sortedAsc.size());
@@ -34,7 +34,7 @@ class OrderStatusSortingTranslationTest {
     }
 
     @Test
-    public void testGetOrderMapSortedByDesc() {
+    void testGetOrderMapSortedByDesc() {
         Map<OrderStatusSortingTranslation, Integer> sortedDesc =
             OrderStatusSortingTranslation.getOrderMapSortedByDesc();
 

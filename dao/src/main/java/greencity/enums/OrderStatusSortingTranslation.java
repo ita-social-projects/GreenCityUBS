@@ -1,8 +1,9 @@
 package greencity.enums;
 
-import java.util.HashMap;
-import java.util.Map;
+import lombok.Getter;
+import java.util.EnumMap;
 
+@Getter
 public enum OrderStatusSortingTranslation {
     DONE(1),
     ON_THE_ROUTE(2),
@@ -20,20 +21,18 @@ public enum OrderStatusSortingTranslation {
         this.sortOrder = sortOrder;
     }
 
-    public int getSortOrder() {
-        return sortOrder;
-    }
-
-    public static Map<OrderStatusSortingTranslation, Integer> getOrderMapSortedByAsc() {
-        Map<OrderStatusSortingTranslation, Integer> sortOrderMap = new HashMap<>();
+    public static EnumMap<OrderStatusSortingTranslation, Integer> getOrderMapSortedByAsc() {
+        EnumMap<OrderStatusSortingTranslation, Integer> sortOrderMap =
+            new EnumMap<>(OrderStatusSortingTranslation.class);
         for (OrderStatusSortingTranslation status : OrderStatusSortingTranslation.values()) {
             sortOrderMap.put(status, status.getSortOrder());
         }
         return sortOrderMap;
     }
 
-    public static Map<OrderStatusSortingTranslation, Integer> getOrderMapSortedByDesc() {
-        Map<OrderStatusSortingTranslation, Integer> sortOrderMap = new HashMap<>();
+    public static EnumMap<OrderStatusSortingTranslation, Integer> getOrderMapSortedByDesc() {
+        EnumMap<OrderStatusSortingTranslation, Integer> sortOrderMap =
+            new EnumMap<>(OrderStatusSortingTranslation.class);
         int maxOrder = OrderStatusSortingTranslation.values().length;
         for (OrderStatusSortingTranslation status : OrderStatusSortingTranslation.values()) {
             sortOrderMap.put(status, maxOrder - status.getSortOrder() + 1);
