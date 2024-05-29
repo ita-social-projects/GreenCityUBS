@@ -2,6 +2,7 @@ package greencity.enums;
 
 import lombok.Getter;
 import java.util.EnumMap;
+import java.util.Map;
 
 @Getter
 public enum OrderStatusSortingTranslation {
@@ -21,7 +22,7 @@ public enum OrderStatusSortingTranslation {
         this.sortOrder = sortOrder;
     }
 
-    public static EnumMap<OrderStatusSortingTranslation, Integer> getOrderMapSortedByAsc() {
+    public static Map<OrderStatusSortingTranslation, Integer> getOrderMapSortedByAsc() {
         EnumMap<OrderStatusSortingTranslation, Integer> sortOrderMap =
             new EnumMap<>(OrderStatusSortingTranslation.class);
         for (OrderStatusSortingTranslation status : OrderStatusSortingTranslation.values()) {
@@ -30,7 +31,7 @@ public enum OrderStatusSortingTranslation {
         return sortOrderMap;
     }
 
-    public static EnumMap<OrderStatusSortingTranslation, Integer> getOrderMapSortedByDesc() {
+    public static Map<OrderStatusSortingTranslation, Integer> getOrderMapSortedByDesc() {
         EnumMap<OrderStatusSortingTranslation, Integer> sortOrderMap =
             new EnumMap<>(OrderStatusSortingTranslation.class);
         int maxOrder = OrderStatusSortingTranslation.values().length;

@@ -158,7 +158,7 @@ public class BigOrderTableRepository {
     private void sortingForUkrainianLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
         Root<BigOrderTableViews> root) {
         if (ORDER_STATUS.equals(orderPage.getSortBy())) {
-            EnumMap<OrderStatusSortingTranslation, Integer> sortOrderMap =
+            Map<OrderStatusSortingTranslation, Integer> sortOrderMap =
                 OrderStatusSortingTranslation.getOrderMapSortedByAsc();
             CriteriaBuilder.Case<Integer> selectCase = criteriaBuilder.selectCase();
             Expression<Integer> otherwiseExpression =
