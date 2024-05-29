@@ -44,6 +44,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -227,13 +228,16 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyIncreasedTariffPrice(Order order) {
+    @Async
+    public void notifyAllOrdersWithIncreasedTariffPrice(Integer bagId) {
+        var orders = orderRepository.findAllUnpaidOrdersByBagId(bagId);
+        orders.forEach(this::notifyIncreasedTariffPrice);
+    }
+
+    private void notifyIncreasedTariffPrice(Order order) {
         Double amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
-
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
-            fillAndSendNotification(parameters, order, NotificationType.TARIFF_PRICE_WAS_CHANGED);
-        }
+        fillAndSendNotification(parameters, order, NotificationType.TARIFF_PRICE_WAS_CHANGED);
     }
 
     @Override

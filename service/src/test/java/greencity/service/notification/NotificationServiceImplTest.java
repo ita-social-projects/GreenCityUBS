@@ -47,6 +47,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -166,8 +168,6 @@ class NotificationServiceImplTest {
     class ClockNotification {
         @BeforeEach
         public void setUp() {
-            MockitoAnnotations.initMocks(this);
-
             fixedClock = Clock.fixed(LOCAL_DATE_TIME.toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
             lenient().doReturn(fixedClock.instant()).when(clock).instant();
             lenient().doReturn(fixedClock.getZone()).when(clock).getZone();
@@ -673,6 +673,17 @@ class NotificationServiceImplTest {
             verify(orderRepository).findAllByOrderPaymentStatusWithEvents(any());
         }
 
+        @Test
+        void testNotifyAllOrdersWithIncreasedTariffPrice() {
+            Order order = getOrderWithAmountToPay();
+            List<Order> orders = Collections.singletonList(order);
+
+            when(orderRepository.findAllUnpaidOrdersByBagId(anyInt())).thenReturn(orders);
+
+            notificationService.notifyAllOrdersWithIncreasedTariffPrice(anyInt());
+            verify(orderRepository).findAllByPaymentStatusesAndOrderStatuses(any(), any());
+        }
+
         private static Stream<OrderStatus> wrongForUnpaidOrderStatusesProvider() {
             return Stream.of(OrderStatus.DONE, OrderStatus.CANCELED);
         }
@@ -1096,27 +1107,6 @@ class NotificationServiceImplTest {
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyHalfPaidPackage(order);
-
-        verify(userNotificationRepository).save(any());
-        verify(notificationParameterRepository).saveAll(any());
-    }
-
-    @Test
-    void testNotifyUnpaidPackage() {
-        User user = getUser();
-        Order order = ModelUtils.getOrdersStatusFormedDto();
-        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-
-        UserNotification notification = new UserNotification();
-        notification.setNotificationType(NotificationType.UNPAID_PACKAGE);
-        notification.setUser(user);
-        notification.setOrder(order);
-
-        when(userNotificationRepository.save(any())).thenReturn(notification);
-        when(notificationParameterRepository.saveAll(any())).thenReturn(Collections.emptyList());
-        when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
-
-        notificationService.notifyIncreasedTariffPrice(order);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());

@@ -203,16 +203,43 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer bagId, String employeeUuid) {
         Bag bag = tryToFindBagById(bagId);
-        Employee employee = tryToFindEmployeeByUuid(employeeUuid);
-        updateTariffService(dto, bag);
-        bag.setEditedBy(employee);
+        boolean isPriceChanged = checkIsPriceOfTariffWasChanged(dto, bag);
+        updateTariffService(dto, bag, employeeUuid);
+        updateOrdersBags(bagId, bag);
 
+        if (isPriceChanged) {
+            updateAmountToPay(bagId, bag);
+        }
+        return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
+    }
+
+    private boolean checkIsPriceOfTariffWasChanged(TariffServiceDto dto, Bag bag) {
+        return !Objects.equals(convertBillsIntoCoins(dto.getCommission()), bag.getCommission())
+            || !Objects.equals(convertBillsIntoCoins(dto.getPrice()), bag.getPrice());
+    }
+
+    private void updateTariffService(TariffServiceDto dto, Bag bag, String employeeUuid) {
+        bag.setCapacity(dto.getCapacity());
+        bag.setPrice(convertBillsIntoCoins(dto.getPrice()));
+        bag.setCommission(convertBillsIntoCoins(dto.getCommission()));
+        bag.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
+        bag.setName(dto.getName());
+        bag.setNameEng(dto.getNameEng());
+        bag.setDescription(dto.getDescription());
+        bag.setDescriptionEng(dto.getDescriptionEng());
+        bag.setEditedAt(LocalDate.now());
+        bag.setEditedBy(tryToFindEmployeeByUuid(employeeUuid));
+    }
+
+    private void updateOrdersBags(Integer bagId, Bag bag) {
         orderBagRepository.updateAllByBagIdForUnpaidOrders(
             bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
+    }
 
+    private void updateAmountToPay(Integer bagId, Bag bag) {
         List<Order> orders = orderRepository.findAllUnpaidOrdersByBagId(bagId);
         updateAmountToPayForOrders(orders, bag);
-        return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
+        notificationService.notifyAllOrdersWithIncreasedTariffPrice(bagId);
     }
 
     private void updateAmountToPayForOrders(List<Order> orders, Bag bag) {
@@ -228,28 +255,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .map(orderBag -> amount.get(orderBag.getBag().getId()) * getBagPrice(orderBag, bag))
             .reduce(0L, Long::sum);
 
-        if (!Objects.equals(order.getSumTotalAmountWithoutDiscounts(), sumToPayInCoins)) {
-            order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
-            notificationService.notifyIncreasedTariffPrice(order);
-        }
+        order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
     }
 
     private Long getBagPrice(OrderBag orderBag, Bag bag) {
         return bag.getId().equals(orderBag.getBag().getId())
             ? bag.getFullPrice()
             : orderBag.getPrice();
-    }
-
-    private void updateTariffService(TariffServiceDto dto, Bag bag) {
-        bag.setCapacity(dto.getCapacity());
-        bag.setPrice(convertBillsIntoCoins(dto.getPrice()));
-        bag.setCommission(convertBillsIntoCoins(dto.getCommission()));
-        bag.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
-        bag.setName(dto.getName());
-        bag.setNameEng(dto.getNameEng());
-        bag.setDescription(dto.getDescription());
-        bag.setDescriptionEng(dto.getDescriptionEng());
-        bag.setEditedAt(LocalDate.now());
     }
 
     private Long convertBillsIntoCoins(Double bills) {

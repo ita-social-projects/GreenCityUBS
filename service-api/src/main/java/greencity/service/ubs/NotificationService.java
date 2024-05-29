@@ -45,14 +45,6 @@ public interface NotificationService {
     void notifyHalfPaidPackage(Order order);
 
     /**
-     * Method that creates notification for unpaid orders which tariff price was
-     * increased.
-     *
-     * @author Denys Ryhal
-     */
-    void notifyIncreasedTariffPrice(Order order);
-
-    /**
      * Method that creates notification for users bonuses.
      *
      * @author Ann Sakhno
@@ -155,6 +147,14 @@ public interface NotificationService {
      * @author Ann Sakhno
      */
     void notifyAllHalfPaidPackages();
+
+    /**
+     * Method that creates notification for unpaid orders which tariff price was
+     * increased.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllOrdersWithIncreasedTariffPrice(Integer bagId);
 
     /**
      * Method sends messages by e-mail/notification that order is unpaid.
