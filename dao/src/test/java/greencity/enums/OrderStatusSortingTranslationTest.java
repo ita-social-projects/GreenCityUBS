@@ -20,7 +20,7 @@ class OrderStatusSortingTranslationTest {
     }
 
     @Test
-    public void testOrderListSortedByAsc() {
+    void testOrderListSortedByAsc() {
         List<OrderStatusSortingTranslation> expectedAscList = Arrays.asList(
             OrderStatusSortingTranslation.DONE,
             OrderStatusSortingTranslation.ON_THE_ROUTE,
