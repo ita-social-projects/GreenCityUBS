@@ -86,10 +86,10 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      * @return {@link Optional} of {@link Integer} returns actual bags' amount
      * @author Olena Sotnik
      */
-    @Query(value = "SELECT COALESCE(obm.exported_quantity, obm.confirmed_quantity, obm.amount) "
+    @Query(value = "SELECT COALESCE(MAX(obm.exported_quantity), MAX(obm.confirmed_quantity), MAX(obm.amount), 0) "
         + "FROM order_bag_mapping AS obm "
         + "WHERE obm.order_id = :orderId "
         + "AND obm.bag_id = :bagId", nativeQuery = true)
-    Optional<Integer> getAmountOfOrderBagsByOrderIdAndBagId(@Param("orderId") Long orderId,
+    Integer getAmountOfOrderBagsByOrderIdAndBagId(@Param("orderId") Long orderId,
         @Param("bagId") Integer bagId);
 }
