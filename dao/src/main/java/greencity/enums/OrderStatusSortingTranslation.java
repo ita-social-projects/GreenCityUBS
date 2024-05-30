@@ -22,12 +22,9 @@ public enum OrderStatusSortingTranslation {
     private final int sortOrder;
 
     private static final List<OrderStatusSortingTranslation> ASC_ORDER_LIST = new ArrayList<>();
-    private static final List<OrderStatusSortingTranslation> DESC_ORDER_LIST = new ArrayList<>();
 
     static {
         Collections.addAll(ASC_ORDER_LIST, OrderStatusSortingTranslation.values());
-        Collections.addAll(DESC_ORDER_LIST, OrderStatusSortingTranslation.values());
-        Collections.reverse(DESC_ORDER_LIST);
     }
 
     public static List<OrderStatusSortingTranslation> getOrderListSortedByAsc() {
