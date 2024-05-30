@@ -1175,7 +1175,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .merchantAccount(wayForPayLogin)
             .merchantDomainName("https://www.greencity.social")
             .apiVersion(1)
-            .serviceUrl("http://159.224.122.130:8050/ubs/receivePayment")
+            .serviceUrl(resultUrlFondy)
             .orderDate(instant.getEpochSecond())
             .currency("UAH")
             .amount(1) // convertCoinsIntoBills(sumToPayInCoins)
