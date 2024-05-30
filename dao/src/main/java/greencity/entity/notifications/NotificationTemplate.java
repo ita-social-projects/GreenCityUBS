@@ -74,4 +74,13 @@ public class NotificationTemplate {
 
     @Column(name = "title_eng")
     private String titleEng;
+
+    @Builder.Default
+    @Column(name = "is_schedule_update_forbidden", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean isScheduleUpdateForbidden = false;
+
+    public void addPlatforms(List<NotificationPlatform> notificationPlatforms) {
+        notificationPlatforms.forEach(platform -> platform.setNotificationTemplate(this));
+        this.notificationPlatforms.addAll(notificationPlatforms);
+    }
 }

@@ -20,6 +20,7 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.order.AdminCommentDto;
@@ -438,9 +439,20 @@ public class ModelUtils {
 
     public static NotificationTemplateWithPlatformsUpdateDto getNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
-            .notificationTemplateMainInfoDto(getNotificationTemplateMainInfoDto())
+            .notificationTemplateUpdateInfo(getNotificationTemplateUpdateInfoDto())
             .platforms(List.of(
                 getNotificationPlatformDto(NotificationReceiverType.SITE)))
+            .build();
+    }
+
+    public static NotificationTemplateUpdateInfoDto getNotificationTemplateUpdateInfoDto() {
+        return NotificationTemplateUpdateInfoDto.builder()
+            .type(NotificationType.UNPAID_ORDER)
+            .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
+            .time(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .schedule("0 0 18 * * ?")
+            .title("Неопачене замовлення")
+            .titleEng("Unpaid order")
             .build();
     }
 

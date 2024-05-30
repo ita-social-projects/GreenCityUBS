@@ -57,6 +57,7 @@ import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.notification.SenderInfoDto;
@@ -162,6 +163,8 @@ import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationTime;
+import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -2491,7 +2494,7 @@ public class ModelUtils {
 
     private static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
-            .notificationTemplateMainInfoDto(createNotificationTemplateMainInfoDto())
+            .notificationTemplateUpdateInfo(createNotificationTemplateUpdateInfoDto())
             .platforms(List.of(
                 createNotificationPlatformDto()))
             .build();
@@ -2535,6 +2538,17 @@ public class ModelUtils {
             .title("Title")
             .titleEng("TitleEng")
             .notificationStatus(ACTIVE)
+            .build();
+    }
+
+    private static NotificationTemplateUpdateInfoDto createNotificationTemplateUpdateInfoDto() {
+        return NotificationTemplateUpdateInfoDto.builder()
+            .type(UNPAID_ORDER)
+            .trigger(ORDER_NOT_PAID_FOR_3_DAYS)
+            .time(AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .schedule("0 0 18 * * ?")
+            .title("Title")
+            .titleEng("TitleEng")
             .build();
     }
 
@@ -5202,6 +5216,18 @@ public class ModelUtils {
             .orderStatus(OrderStatus.ADJUSTMENT)
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .orderDate(LocalDateTime.now(fixedClock))
+            .build();
+    }
+
+    public static NotificationTemplate getCustomNotificationTemplate() {
+        return NotificationTemplate.builder()
+            .id(1L)
+            .isScheduleUpdateForbidden(false)
+            .title("Заголовок")
+            .titleEng("Title")
+            .schedule("0 2 * * * *")
+            .trigger(NotificationTrigger.CUSTOM)
+            .time(NotificationTime.IMMEDIATELY)
             .build();
     }
 

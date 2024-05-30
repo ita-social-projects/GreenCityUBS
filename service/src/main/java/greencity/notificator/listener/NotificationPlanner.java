@@ -3,7 +3,7 @@ package greencity.notificator.listener;
 import greencity.constant.AppConstant;
 import greencity.dto.notification.ScheduledNotificationDto;
 import greencity.enums.NotificationType;
-import greencity.service.notificator.ScheduledNotificator;
+import greencity.notificator.ScheduledNotificator;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class NotificationPlanner {
     private final List<ScheduledNotificator> scheduledNotificators;
-
     private final List<ScheduledNotificationDto> scheduledNotificationDtos = new ArrayList<>();
 
     @EventListener(value = ApplicationReadyEvent.class)
@@ -43,15 +42,8 @@ public class NotificationPlanner {
     }
 
     private void restart(ScheduledNotificator scheduledNotificator, ScheduledNotificationDto scheduledNotificationDto) {
-        restartSchedule(scheduledNotificationDto);
         scheduledNotificationDtos.remove(scheduledNotificationDto);
         scheduledNotificationDtos.add(scheduledNotificator.notifyBySchedule());
         log.info(AppConstant.NOTIFICATOR_RESTART_LOG_MESSAGE, scheduledNotificator.getClass());
-    }
-
-    private void restartSchedule(ScheduledNotificationDto scheduledNotification) {
-        if (Objects.nonNull(scheduledNotification.getScheduledFuture())) {
-            scheduledNotification.getScheduledFuture().cancel(true);
-        }
     }
 }
