@@ -378,16 +378,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static PaymentResponseDto getPaymentResponseDto() {
-        return PaymentResponseDto.builder()
-            .order_id("1_1")
-            .merchant_id(1)
-            .actual_amount(1)
-            .actual_currency("1")
-            .amount(1)
-            .build();
-    }
-
     public static AddingPointsToUserDto getAddingPointsToUserDto() {
         return AddingPointsToUserDto.builder()
             .email("ddd@email.com")

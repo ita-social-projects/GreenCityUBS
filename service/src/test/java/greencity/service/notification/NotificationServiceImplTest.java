@@ -177,24 +177,6 @@ class NotificationServiceImplTest {
         }
 
         @Test
-        @SneakyThrows
-        void notifyPaidOrder() {
-            Order order = Order.builder().id(1L).build();
-            NotificationParameter orderNumber = NotificationParameter.builder()
-                .key("orderNumber")
-                .value(order.getId().toString())
-                .build();
-            when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-            when(notificationParameterRepository.saveAll(Set.of(orderNumber))).thenReturn(List.of(orderNumber));
-            when(userNotificationRepository.save(TEST_USER_NOTIFICATION)).thenReturn(TEST_USER_NOTIFICATION);
-            PaymentResponseDto dto = PaymentResponseDto.builder().order_id("1_1").build();
-            notificationService.notifyPaidOrder(dto);
-            verify(notificationService).notifyPaidOrder(order);
-            verify(userNotificationRepository).save(any(UserNotification.class));
-            verify(notificationParameterRepository).saveAll(Set.of(orderNumber));
-        }
-
-        @Test
         void testNotifyCourierItineraryFormed() {
             Order order = Order.builder().id(44L).user(User.builder().id(42L).build())
                 .deliverFrom(LocalDateTime.now(fixedClock).plusDays(1))

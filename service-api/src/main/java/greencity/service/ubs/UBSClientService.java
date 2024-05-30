@@ -26,6 +26,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -39,6 +40,8 @@ import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
+
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -46,11 +49,13 @@ import java.util.Set;
 
 public interface UBSClientService {
     /**
-     * Method validates received payment response.
+     * Validates the payment response received from the payment gateway.
      *
-     * @param dto {@link PaymentResponseDto} - response order data.
+     * @param response The payment response data.
+     * @return An object representing the validated payment response.
      */
-    void validatePayment(PaymentResponseDto dto);
+    @Transactional
+    PaymentResponseWayForPay validatePayment(PaymentResponseDto response);
 
     /**
      * Methods returns all available for order bags and current user's bonus points.

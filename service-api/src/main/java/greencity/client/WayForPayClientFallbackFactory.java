@@ -6,7 +6,7 @@ import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.springframework.stereotype.Component;
 
 @Component
-public class WayForPayClientFallbackFactory implements FallbackFactory<WayForPayClient>  {
+public class WayForPayClientFallbackFactory implements FallbackFactory<WayForPayClient> {
     @Override
     public WayForPayClient create(Throwable throwable) {
         return dto -> {

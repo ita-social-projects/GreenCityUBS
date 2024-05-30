@@ -13,29 +13,31 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
-@JsonSubTypes(@JsonSubTypes.Type(value = PaymentRequestDto.class, name = "request"))
 public class PaymentRequestDto {
+    @JsonProperty("transactionType")
+    private String transactionType;
     @JsonProperty("merchantAccount")
     private String merchantAccount;
     @JsonProperty("merchantDomainName")
     private String merchantDomainName;
-    @JsonProperty("merchantTransactionSecureType")
-    private String merchantTransactionSecureType;
+    @JsonProperty("apiVersion")
+    private Integer apiVersion;
+    @JsonProperty("serviceUrl")
+    private String serviceUrl;
     @JsonProperty("orderReference")
     private String orderReference;
     @JsonProperty("orderDate")
-    private String orderDate;
+    private Long orderDate;
     @JsonProperty("amount")
-    private Double amount;
+    private Integer amount;
     @JsonProperty("currency")
     private String currency;
     @JsonProperty("productName")
     private List<String> productName;
     @JsonProperty("productPrice")
-    private List<String> productPrice;
+    private List<Integer> productPrice;
     @JsonProperty("productCount")
-    private List<String> productCount;
+    private List<Integer> productCount;
     @JsonProperty("merchantSignature")
     private String signature;
-    }
+}
