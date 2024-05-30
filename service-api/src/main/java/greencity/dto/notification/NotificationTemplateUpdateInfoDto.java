@@ -3,6 +3,7 @@ package greencity.dto.notification;
 import greencity.enums.NotificationTime;
 import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
+import greencity.enums.UserCategory;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,8 @@ public class NotificationTemplateUpdateInfoDto {
     private NotificationTrigger trigger;
     @NotEmpty
     private NotificationType type;
+    @NotEmpty
+    private UserCategory userCategory;
     @NotNull
     private NotificationTime time;
     private String schedule;

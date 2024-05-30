@@ -7,6 +7,8 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
+import greencity.exceptions.notification.IncorrectTemplateException;
+import greencity.exceptions.notification.TemplateDeleteException;
 import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
@@ -40,7 +42,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Method interceptor exception {@link BadRequestException},
      * {@link ConstraintViolationException}, {@link MappingException},
-     * {@link CourierAlreadyExists}.
+     * {@link CourierAlreadyExists}, {@link IncorrectTemplateException},
+     * {@link TemplateDeleteException}.
      *
      * @param request contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
@@ -51,7 +54,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ConstraintViolationException.class,
         MappingException.class,
         CourierAlreadyExists.class,
-        ServiceAlreadyExistsException.class
+        ServiceAlreadyExistsException.class,
+        IncorrectTemplateException.class,
+        TemplateDeleteException.class
     })
     public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
