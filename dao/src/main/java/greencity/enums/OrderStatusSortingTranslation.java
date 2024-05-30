@@ -1,10 +1,13 @@
 package greencity.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Getter
+@AllArgsConstructor
 public enum OrderStatusSortingTranslation {
     DONE(1),
     ON_THE_ROUTE(2),
@@ -18,26 +21,16 @@ public enum OrderStatusSortingTranslation {
 
     private final int sortOrder;
 
-    OrderStatusSortingTranslation(int sortOrder) {
-        this.sortOrder = sortOrder;
+    private static final List<OrderStatusSortingTranslation> ASC_ORDER_LIST = new ArrayList<>();
+    private static final List<OrderStatusSortingTranslation> DESC_ORDER_LIST = new ArrayList<>();
+
+    static {
+        Collections.addAll(ASC_ORDER_LIST, OrderStatusSortingTranslation.values());
+        Collections.addAll(DESC_ORDER_LIST, OrderStatusSortingTranslation.values());
+        Collections.reverse(DESC_ORDER_LIST);
     }
 
-    public static Map<OrderStatusSortingTranslation, Integer> getOrderMapSortedByAsc() {
-        EnumMap<OrderStatusSortingTranslation, Integer> sortOrderMap =
-            new EnumMap<>(OrderStatusSortingTranslation.class);
-        for (OrderStatusSortingTranslation status : OrderStatusSortingTranslation.values()) {
-            sortOrderMap.put(status, status.getSortOrder());
-        }
-        return sortOrderMap;
-    }
-
-    public static Map<OrderStatusSortingTranslation, Integer> getOrderMapSortedByDesc() {
-        EnumMap<OrderStatusSortingTranslation, Integer> sortOrderMap =
-            new EnumMap<>(OrderStatusSortingTranslation.class);
-        int maxOrder = OrderStatusSortingTranslation.values().length;
-        for (OrderStatusSortingTranslation status : OrderStatusSortingTranslation.values()) {
-            sortOrderMap.put(status, maxOrder - status.getSortOrder() + 1);
-        }
-        return sortOrderMap;
+    public static List<OrderStatusSortingTranslation> getOrderListSortedByAsc() {
+        return ASC_ORDER_LIST;
     }
 }

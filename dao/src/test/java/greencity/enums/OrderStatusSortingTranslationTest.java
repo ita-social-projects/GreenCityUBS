@@ -1,9 +1,8 @@
 package greencity.enums;
 
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
+import java.util.Arrays;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OrderStatusSortingTranslationTest {
@@ -21,29 +20,20 @@ class OrderStatusSortingTranslationTest {
     }
 
     @Test
-    void testGetOrderMapSortedByAsc() {
-        Map<OrderStatusSortingTranslation, Integer> sortedAsc = OrderStatusSortingTranslation.getOrderMapSortedByAsc();
+    public void testOrderListSortedByAsc() {
+        List<OrderStatusSortingTranslation> expectedAscList = Arrays.asList(
+            OrderStatusSortingTranslation.DONE,
+            OrderStatusSortingTranslation.ON_THE_ROUTE,
+            OrderStatusSortingTranslation.NOT_TAKEN_OUT,
+            OrderStatusSortingTranslation.CONFIRMED,
+            OrderStatusSortingTranslation.BROUGHT_IT_HIMSELF,
+            OrderStatusSortingTranslation.CANCELED,
+            OrderStatusSortingTranslation.FORMED,
+            OrderStatusSortingTranslation.ADJUSTMENT,
+            OrderStatusSortingTranslation.OTHER);
 
-        assertEquals(OrderStatusSortingTranslation.values().length, sortedAsc.size());
+        List<OrderStatusSortingTranslation> actualAscList = OrderStatusSortingTranslation.getOrderListSortedByAsc();
 
-        int[] expectedOrderAsc = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        int i = 0;
-        for (OrderStatusSortingTranslation status : OrderStatusSortingTranslation.values()) {
-            assertEquals(expectedOrderAsc[i++], sortedAsc.get(status));
-        }
-    }
-
-    @Test
-    void testGetOrderMapSortedByDesc() {
-        Map<OrderStatusSortingTranslation, Integer> sortedDesc =
-            OrderStatusSortingTranslation.getOrderMapSortedByDesc();
-
-        assertEquals(OrderStatusSortingTranslation.values().length, sortedDesc.size());
-
-        int[] expectedOrderDesc = {9, 8, 7, 6, 5, 4, 3, 2, 1};
-        int i = 0;
-        for (OrderStatusSortingTranslation status : OrderStatusSortingTranslation.values()) {
-            assertEquals(expectedOrderDesc[i++], sortedDesc.get(status));
-        }
+        assertEquals(expectedAscList, actualAscList);
     }
 }

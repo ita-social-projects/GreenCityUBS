@@ -18,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
@@ -81,7 +80,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             .setSortDirection(Sort.Direction.DESC);
         var expectedOrdersList = ModelUtils.getAllBOTViewsDESC().stream()
             .sorted(Comparator.comparing(BigOrderTableViews::getOrderPaymentStatus).reversed())
-            .collect(Collectors.toList());
+            .toList();
         Assertions.assertEquals(expectedOrdersList.stream()
             .map(BigOrderTableViews::getOrderPaymentStatus)
             .collect(Collectors.toList()),
@@ -161,7 +160,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setDistricts(new String[] {"Подільський"});
         var expectedOrdersList = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(a -> a.getDistrict().equals("Подільський"))
-            .collect(Collectors.toList());
+            .toList();
         Assertions.assertEquals(
             expectedOrdersList.stream().map(BigOrderTableViews::getDistrict).collect(Collectors.toList()),
             bigOrderTableRepository
@@ -316,34 +315,6 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertTrue(isListSortedCorrectlyByOrderStatusWithUALocalizationDesc(result));
     }
 
-    private boolean isListSortedCorrectlyByOrderStatusWithUALocalizationASC(
-        List<BigOrderTableViews> bigOrderTableViewsList) {
-        for (int i = 0; i < bigOrderTableViewsList.size() - 1; i++) {
-            OrderStatusSortingTranslation currentStatus =
-                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i).getOrderStatus());
-            OrderStatusSortingTranslation nextStatus =
-                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i + 1).getOrderStatus());
-            if (currentStatus.getSortOrder() > nextStatus.getSortOrder()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean isListSortedCorrectlyByOrderStatusWithUALocalizationDesc(
-        List<BigOrderTableViews> bigOrderTableViewsList) {
-        for (int i = 0; i < bigOrderTableViewsList.size() - 1; i++) {
-            OrderStatusSortingTranslation currentStatus =
-                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i).getOrderStatus());
-            OrderStatusSortingTranslation nextStatus =
-                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i + 1).getOrderStatus());
-            if (currentStatus.getSortOrder() < nextStatus.getSortOrder()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     @Test
     void get_All_Orders_Search_by_Client_Name_DESC() {
         var filter = new OrderSearchCriteria().setSearch(new String[] {"Anna Maria"});
@@ -424,5 +395,33 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(orders.getNumberOfElements(),
             bigOrderTableRepository.findAll(ORDER_PAGE_PAGE_NUMBER_3_PAGE_SIZE_2_ASC, DEFAULT_ORDER_SEARCH_CRITERIA,
                 TARIFFS_ID_LIST, "eng").getNumberOfElements());
+    }
+
+    private boolean isListSortedCorrectlyByOrderStatusWithUALocalizationASC(
+        List<BigOrderTableViews> bigOrderTableViewsList) {
+        for (int i = 0; i < bigOrderTableViewsList.size() - 1; i++) {
+            OrderStatusSortingTranslation currentStatus =
+                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i).getOrderStatus());
+            OrderStatusSortingTranslation nextStatus =
+                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i + 1).getOrderStatus());
+            if (currentStatus.getSortOrder() > nextStatus.getSortOrder()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isListSortedCorrectlyByOrderStatusWithUALocalizationDesc(
+        List<BigOrderTableViews> bigOrderTableViewsList) {
+        for (int i = 0; i < bigOrderTableViewsList.size() - 1; i++) {
+            OrderStatusSortingTranslation currentStatus =
+                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i).getOrderStatus());
+            OrderStatusSortingTranslation nextStatus =
+                OrderStatusSortingTranslation.valueOf(bigOrderTableViewsList.get(i + 1).getOrderStatus());
+            if (currentStatus.getSortOrder() < nextStatus.getSortOrder()) {
+                return false;
+            }
+        }
+        return true;
     }
 }
