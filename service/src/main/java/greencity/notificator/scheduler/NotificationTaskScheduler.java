@@ -16,15 +16,16 @@ import org.springframework.stereotype.Component;
 public class NotificationTaskScheduler {
     private final TaskScheduler taskScheduler;
 
-    public ScheduledFuture<?> scheduleNotification(
+    public ScheduledFuture<Void> scheduleNotification(
         Runnable task, String schedule, NotificationType notificationType) {
         return scheduleTask(task, schedule, notificationType);
     }
 
-    private ScheduledFuture<?> scheduleTask(Runnable task, String schedule, NotificationType notificationType) {
-        ScheduledFuture<?> scheduledFuture = null;
+    @SuppressWarnings("unchecked")
+    private ScheduledFuture<Void> scheduleTask(Runnable task, String schedule, NotificationType notificationType) {
+        ScheduledFuture<Void> scheduledFuture = null;
         if (isExpressionCorrect(schedule, notificationType)) {
-            scheduledFuture = taskScheduler.schedule(task, new CronTrigger(schedule));
+            scheduledFuture = (ScheduledFuture<Void>) taskScheduler.schedule(task, new CronTrigger(schedule));
             log.info(AppConstant.NOTIFICATOR_SUCCESSFULLY_START_LOG_MESSAGE, notificationType, schedule);
         }
         return scheduledFuture;

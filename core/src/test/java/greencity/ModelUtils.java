@@ -445,7 +445,7 @@ public class ModelUtils {
             .build();
     }
 
-    private static NotificationTemplateUpdateInfoDto getNotificationTemplateUpdateInfoDto() {
+    public static NotificationTemplateUpdateInfoDto getNotificationTemplateUpdateInfoDto() {
         return NotificationTemplateUpdateInfoDto.builder()
             .type(NotificationType.UNPAID_ORDER)
             .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
