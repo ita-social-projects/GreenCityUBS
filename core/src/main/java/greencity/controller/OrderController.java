@@ -226,7 +226,6 @@ public class OrderController {
             objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
 
         if (HttpStatus.OK.is2xxSuccessful()) {
-            notificationService.notifyPaidOrder(paymentResponseDto);
             servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ubsClientService.validatePayment(paymentResponseDto);
