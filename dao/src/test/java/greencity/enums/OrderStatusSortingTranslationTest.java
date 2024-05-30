@@ -1,8 +1,9 @@
 package greencity.enums;
 
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
-import java.util.List;
+import java.util.EnumSet;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OrderStatusSortingTranslationTest {
@@ -20,20 +21,9 @@ class OrderStatusSortingTranslationTest {
     }
 
     @Test
-    void testOrderListSortedByAsc() {
-        List<OrderStatusSortingTranslation> expectedAscList = Arrays.asList(
-            OrderStatusSortingTranslation.DONE,
-            OrderStatusSortingTranslation.ON_THE_ROUTE,
-            OrderStatusSortingTranslation.NOT_TAKEN_OUT,
-            OrderStatusSortingTranslation.CONFIRMED,
-            OrderStatusSortingTranslation.BROUGHT_IT_HIMSELF,
-            OrderStatusSortingTranslation.CANCELED,
-            OrderStatusSortingTranslation.FORMED,
-            OrderStatusSortingTranslation.ADJUSTMENT,
-            OrderStatusSortingTranslation.OTHER);
-
-        List<OrderStatusSortingTranslation> actualAscList = OrderStatusSortingTranslation.getOrderListSortedByAsc();
-
-        assertEquals(expectedAscList, actualAscList);
+    void testOrderSetSortedByAsc() {
+        Set<OrderStatusSortingTranslation> expectedAscSet = EnumSet.allOf(OrderStatusSortingTranslation.class);
+        Set<OrderStatusSortingTranslation> actualAscSet = OrderStatusSortingTranslation.getOrderSetSortedByAsc();
+        assertEquals(expectedAscSet, actualAscSet);
     }
 }

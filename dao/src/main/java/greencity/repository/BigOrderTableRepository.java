@@ -19,7 +19,7 @@ import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import static java.util.Objects.nonNull;
 
 @Repository
@@ -137,11 +137,11 @@ public class BigOrderTableRepository {
 
     private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root,
         String userLanguage) {
-        if (userLanguage.equals(UKRAINIAN_LANGUAGE)
-            && (orderPage.getSortBy().equals(ORDER_STATUS) || orderPage.getSortBy().equals("orderPaymentStatus"))) {
-            sortingForUkrainianLocalization(orderPage, cq, root);
+        if (UKRAINIAN_LANGUAGE.equals(userLanguage)
+            && ORDER_STATUS.equals(orderPage.getSortBy())) {
+            applySortingByOrderStatusForUkrainianLocalization(orderPage, cq, root);
         } else {
-            applySortingCriteria(orderPage, cq, root, Optional.empty());
+            applySortingCriteria(orderPage, cq, root.get(orderPage.getSortBy()));
         }
     }
 
@@ -154,31 +154,25 @@ public class BigOrderTableRepository {
     }
 
     private void applySortingCriteria(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
-        Root<BigOrderTableViews> root, Optional<Expression<Integer>> sortingOrderUkrainianLocalization) {
-        Expression<?> expression = sortingOrderUkrainianLocalization.orElseGet(() -> root.get(orderPage.getSortBy()));
-        if (orderPage.getSortDirection() == (Sort.Direction.ASC)) {
-            cq.orderBy(criteriaBuilder.asc(expression));
+        Expression<?> sortingExpression) {
+        if (orderPage.getSortDirection() == Sort.Direction.ASC) {
+            cq.orderBy(criteriaBuilder.asc(sortingExpression));
         } else {
-            cq.orderBy(criteriaBuilder.desc(expression));
+            cq.orderBy(criteriaBuilder.desc(sortingExpression));
         }
     }
 
-    private void sortingForUkrainianLocalization(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+    private void applySortingByOrderStatusForUkrainianLocalization(OrderPage orderPage,
+        CriteriaQuery<BigOrderTableViews> cq,
         Root<BigOrderTableViews> root) {
-        if (ORDER_STATUS.equals(orderPage.getSortBy())) {
-            List<OrderStatusSortingTranslation> sortOrderList = OrderStatusSortingTranslation.getOrderListSortedByAsc();
-            CriteriaBuilder.Case<Integer> selectCase = criteriaBuilder.selectCase();
-            Expression<Integer> otherwiseExpression =
-                criteriaBuilder.literal(OrderStatusSortingTranslation.OTHER.getSortOrder());
-            for (OrderStatusSortingTranslation status : sortOrderList) {
-                selectCase = selectCase.when(
-                    criteriaBuilder.equal(root.get(ORDER_STATUS), status.name()),
-                    status.getSortOrder());
-            }
-            Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
-            applySortingCriteria(orderPage, cq, root, Optional.of(sortOrder));
-        } else {
-            applySortingCriteria(orderPage, cq, root, Optional.empty());
-        }
+        Set<OrderStatusSortingTranslation> sortOrderList = OrderStatusSortingTranslation.getOrderSetSortedByAsc();
+        CriteriaBuilder.Case<Integer> selectCase = criteriaBuilder.selectCase();
+        Expression<Integer> otherwiseExpression =
+            criteriaBuilder.literal(OrderStatusSortingTranslation.OTHER.getSortOrder());
+        sortOrderList.forEach(status -> selectCase.when(
+            criteriaBuilder.equal(root.get(ORDER_STATUS), status.name()),
+            status.getSortOrder()));
+        Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
+        applySortingCriteria(orderPage, cq, sortOrder);
     }
 }

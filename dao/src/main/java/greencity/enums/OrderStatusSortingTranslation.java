@@ -2,9 +2,9 @@ package greencity.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.EnumSet;
+import java.util.Set;
 
 @Getter
 @AllArgsConstructor
@@ -21,13 +21,10 @@ public enum OrderStatusSortingTranslation {
 
     private final int sortOrder;
 
-    private static final List<OrderStatusSortingTranslation> ASC_ORDER_LIST = new ArrayList<>();
+    private static final Set<OrderStatusSortingTranslation> ASC_ORDER_SET =
+        Collections.unmodifiableSet(EnumSet.allOf(OrderStatusSortingTranslation.class));
 
-    static {
-        Collections.addAll(ASC_ORDER_LIST, OrderStatusSortingTranslation.values());
-    }
-
-    public static List<OrderStatusSortingTranslation> getOrderListSortedByAsc() {
-        return ASC_ORDER_LIST;
+    public static Set<OrderStatusSortingTranslation> getOrderSetSortedByAsc() {
+        return ASC_ORDER_SET;
     }
 }
