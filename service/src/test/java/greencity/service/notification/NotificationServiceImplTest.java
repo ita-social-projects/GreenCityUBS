@@ -20,9 +20,10 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
+import greencity.enums.UserCategory;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
-import greencity.repository.BagRepository;
+import greencity.filters.UserSpecification;
 import greencity.repository.NotificationParameterRepository;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.OrderRepository;
@@ -138,9 +139,6 @@ class NotificationServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private BagRepository bagRepository;
 
     @Mock
     private NotificationTemplateRepository templateRepository;
@@ -773,13 +771,13 @@ class NotificationServiceImplTest {
             userNotification.setUser(user);
             userNotification.setTemplateId(templateId);
 
-            when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
+            when(userRepository.findAll(any(UserSpecification.class))).thenReturn(Collections.singletonList(user));
             when(userNotificationRepository.save(any())).thenReturn(userNotification);
 
-            notificationService.notifyCustom(templateId);
+            notificationService.notifyCustom(templateId, UserCategory.USERS_WITH_ORDERS_MADE_LESS_THAN_3_MONTHS);
 
             verify(userNotificationRepository).save(any());
-            verify(userRepository).findAll();
+            verify(userRepository).findAll(any(UserSpecification.class));
         }
 
         @Test
@@ -789,7 +787,6 @@ class NotificationServiceImplTest {
             NotificationServiceImpl notificationService1 = new NotificationServiceImpl(
                 userRepository,
                 userNotificationRepository,
-                bagRepository,
                 orderRepository,
                 violationRepository,
                 notificationParameterRepository,

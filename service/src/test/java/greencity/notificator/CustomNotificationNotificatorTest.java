@@ -3,6 +3,7 @@ package greencity.notificator;
 import greencity.ModelUtils;
 import greencity.dto.notification.ScheduledNotificationDto;
 import greencity.entity.notifications.NotificationTemplate;
+import greencity.enums.UserCategory;
 import greencity.notificator.scheduler.NotificationTaskScheduler;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.ubs.NotificationService;
@@ -47,7 +48,7 @@ class CustomNotificationNotificatorTest {
         var runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
         when(notificationTemplateRepository.findAllActiveCustomNotificationsTemplates()).thenReturn(templates);
-        doNothing().when(notificationService).notifyCustom(anyLong());
+        doNothing().when(notificationService).notifyCustom(anyLong(), any(UserCategory.class));
         when(taskScheduler.scheduleNotification(
             runnableCaptor.capture(),
             anyString(), any())).thenReturn(mock(ScheduledFuture.class));
@@ -58,7 +59,8 @@ class CustomNotificationNotificatorTest {
 
         runnableCaptor.getAllValues().forEach(Runnable::run);
         verify(notificationTemplateRepository).findAllActiveCustomNotificationsTemplates();
-        verify(notificationService, times(2)).notifyCustom(anyLong());
+        verify(notificationService, times(2))
+            .notifyCustom(anyLong(), any(UserCategory.class));
         verify(taskScheduler, times(2)).scheduleNotification(any(), anyString(), any());
     }
 

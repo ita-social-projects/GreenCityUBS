@@ -28,6 +28,7 @@ class NotificationTemplateWithPlatformsUpdateDtoMapperTest {
         assertEquals(notification.getSchedule(), mainInfoDto.getSchedule());
         assertEquals(notification.getTitle(), mainInfoDto.getTitle());
         assertEquals(notification.getTitleEng(), mainInfoDto.getTitleEng());
+        assertEquals(notification.getUserCategory(), mainInfoDto.getUserCategory());
 
         assertEquals(platform.getId(), platformDto.getId());
         assertEquals(platform.getNotificationReceiverType(), platformDto.getReceiverType());

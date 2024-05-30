@@ -52,6 +52,8 @@ import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
+import greencity.dto.notification.AddNotificationPlatformDto;
+import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationShortDto;
@@ -170,6 +172,7 @@ import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.TariffStatus;
+import greencity.enums.UserCategory;
 import greencity.util.Bot;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -2492,7 +2495,7 @@ public class ModelUtils {
             1);
     }
 
-    private static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {
+    public static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
             .notificationTemplateUpdateInfo(createNotificationTemplateUpdateInfoDto())
             .platforms(List.of(
@@ -2552,7 +2555,7 @@ public class ModelUtils {
             .build();
     }
 
-    private static NotificationTemplate createNotificationTemplate() {
+    public static NotificationTemplate createNotificationTemplate() {
         return NotificationTemplate.builder()
             .id(1L)
             .notificationType(UNPAID_ORDER)
@@ -2562,6 +2565,7 @@ public class ModelUtils {
             .title("Title")
             .titleEng("TitleEng")
             .notificationStatus(ACTIVE)
+            .userCategory(UserCategory.ALL_USERS)
             .notificationPlatforms(List.of(
                 createNotificationPlatform(SITE),
                 createNotificationPlatform(EMAIL),
@@ -2577,6 +2581,28 @@ public class ModelUtils {
             .bodyEng("BodyEng")
             .notificationReceiverType(receiverType)
             .notificationStatus(ACTIVE)
+            .build();
+    }
+
+    public static AddNotificationTemplateWithPlatformsDto createAddNotificationTemplateWithPlatforms() {
+        return AddNotificationTemplateWithPlatformsDto.builder()
+            .schedule("0 0 18 * * ?")
+            .title("Title")
+            .titleEng("TitleEng")
+            .userCategory(UserCategory.ALL_USERS)
+            .platforms(List.of(
+                createAddNotificationPlatform(SITE),
+                createAddNotificationPlatform(EMAIL),
+                createAddNotificationPlatform(MOBILE)))
+            .build();
+    }
+
+    public static AddNotificationPlatformDto createAddNotificationPlatform(
+        NotificationReceiverType receiverType) {
+        return AddNotificationPlatformDto.builder()
+            .body("Body")
+            .bodyEng("BodyEng")
+            .notificationReceiverType(receiverType)
             .build();
     }
 
@@ -5228,6 +5254,7 @@ public class ModelUtils {
             .schedule("0 2 * * * *")
             .trigger(NotificationTrigger.CUSTOM)
             .time(NotificationTime.IMMEDIATELY)
+            .userCategory(UserCategory.USERS_WITH_ORDERS_MADE_LESS_THAN_3_MONTHS)
             .build();
     }
 

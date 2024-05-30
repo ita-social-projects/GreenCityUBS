@@ -16,6 +16,8 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
+import greencity.dto.notification.AddNotificationPlatformDto;
+import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
@@ -65,6 +67,7 @@ import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.UserCategory;
 import org.springframework.http.HttpStatus;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -75,6 +78,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static greencity.enums.NotificationReceiverType.EMAIL;
+import static greencity.enums.NotificationReceiverType.MOBILE;
+import static greencity.enums.NotificationReceiverType.SITE;
 import static greencity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
@@ -613,4 +620,27 @@ public class ModelUtils {
             .notTakenOutReason("not taken out")
             .build();
     }
+
+    public static AddNotificationTemplateWithPlatformsDto getAddNotificationTemplateWithPlatforms() {
+        return AddNotificationTemplateWithPlatformsDto.builder()
+            .schedule("0 0 18 * * ?")
+            .title("Title")
+            .titleEng("TitleEng")
+            .userCategory(UserCategory.ALL_USERS)
+            .platforms(List.of(
+                getAddNotificationPlatform(SITE),
+                getAddNotificationPlatform(EMAIL),
+                getAddNotificationPlatform(MOBILE)))
+            .build();
+    }
+
+    public static AddNotificationPlatformDto getAddNotificationPlatform(
+        NotificationReceiverType receiverType) {
+        return AddNotificationPlatformDto.builder()
+            .body("Body")
+            .bodyEng("BodyEng")
+            .notificationReceiverType(receiverType)
+            .build();
+    }
+
 }
