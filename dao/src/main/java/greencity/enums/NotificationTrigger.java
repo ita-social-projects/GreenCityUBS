@@ -52,7 +52,8 @@ public enum NotificationTrigger {
     UNDERPAYMENT_WHEN_STATUS_DONE_OR_CANCELED(
                                               "Статус не оплаченого"
                                                   + "замовлення змінено на «Виконано» або «Скасовано»",
-                                              "Status of unpaid order changed to «Done» or «Canceled»");
+                                              "Status of unpaid order changed to «Done» or «Canceled»"),
+    TARIFF_PRICE_WAS_CHANGED("Зміна вартості тарифу", "Change in the price of the tariff");
 
     private final String description;
     private final String descriptionEng;

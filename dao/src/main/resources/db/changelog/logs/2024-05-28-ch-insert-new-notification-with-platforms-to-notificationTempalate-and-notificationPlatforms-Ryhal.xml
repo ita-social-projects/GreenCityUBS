@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1-insert-new-template" author="Denys Ryhal">
+        <insert tableName="notification_templates">
+            <column name="title" value="Вартість тарифу була змінена."/>
+            <column name="title_eng" value="Tariff price was changed."/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_type" value="TARIFF_PRICE_WAS_CHANGED"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="trigger" value="TARIFF_PRICE_WAS_CHANGED"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="2-insert-new-platforms-mobile" author="Denys Ryhal">
+        <sql>
+            INSERT INTO notification_platforms (body, body_eng, notification_receiver_type, notification_status, notification_id)
+            SELECT
+                'Вітання! Адміністратор вніс зміни у тариф замовлення №${orderNumber}. Просимо вас, будь ласка, оплатити ${amountToPay} грн.' ||
+                ' Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім!' ||
+                ' Чат з менеджером https://t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua.',
+                'Hello! The administrator made changes to the tariff of order №${orderNumber}.' ||
+                ' Please pay ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! ' ||
+                'Chat with a manager https://t.me/nowaste_service_bot or email hello@nowaste.org.ua.',
+                'MOBILE',
+                'ACTIVE',
+                id
+            FROM notification_templates
+            WHERE notification_type = 'TARIFF_PRICE_WAS_CHANGED';
+        </sql>
+    </changeSet>
+
+    <changeSet id="3-insert-new-platforms-email" author="Denys Ryhal">
+        <sql>
+            INSERT INTO notification_platforms (body, body_eng, notification_receiver_type, notification_status, notification_id)
+            SELECT
+                'Вітання! Адміністратор вніс зміни у тариф замовлення №${orderNumber}. Просимо вас, будь ласка, оплатити ${amountToPay} грн.' ||
+                ' Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! ' ||
+                'Чат з менеджером https://t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua.',
+                'Hello! The administrator made changes to the tariff of order №${orderNumber}.' ||
+                ' Please pay ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have!' ||
+                ' Chat with a manager https://t.me/nowaste_service_bot or email hello@nowaste.org.ua.',
+                'EMAIL',
+                'ACTIVE',
+                id
+            FROM notification_templates
+            WHERE notification_type = 'TARIFF_PRICE_WAS_CHANGED';
+        </sql>
+    </changeSet>
+
+    <changeSet id="4-insert-new-platforms-site" author="Denys Ryhal">
+        <sql>
+            INSERT INTO notification_platforms (body, body_eng, notification_receiver_type, notification_status, notification_id)
+            SELECT
+                'Вітання! Адміністратор вніс зміни у тариф замовлення №${orderNumber}. Просимо вас, будь ласка, оплатити ${amountToPay} грн.' ||
+                ' Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! ' ||
+                'Чат з менеджером https://t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua.',
+                'Hello! The administrator made changes to the tariff of order №${orderNumber}.' ||
+                ' Please pay ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! ' ||
+                'Chat with a manager https://t.me/nowaste_service_bot or email hello@nowaste.org.ua.',
+                'SITE',
+                'ACTIVE',
+                id
+            FROM notification_templates
+            WHERE notification_type = 'TARIFF_PRICE_WAS_CHANGED';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

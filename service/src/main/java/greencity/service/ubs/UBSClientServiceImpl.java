@@ -299,7 +299,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     protected void checkSignature(String privateKey, String data, String receivedSignature) {
         String message = privateKey + data + privateKey;
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            MessageDigest md = MessageDigest.getInstance("SHA-1"); // NOSONAR
             byte[] messageDigest = md.digest(message.getBytes(StandardCharsets.UTF_8));
             String signature = Base64.getEncoder().encodeToString(messageDigest);
             if (!receivedSignature.equals(signature)) {
@@ -684,6 +684,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
+        dtoRequest.setHouseNumber(addressRequestDto.getHouseNumber());
 
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
             modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
