@@ -433,7 +433,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
 
     @Test
     void get_All_Orders_PageImpl_Number_Of_Elements_ASC() {
-        var expectedValue = ModelUtils.getPageableAllBOTViews_Two_Element_On_Page_ASC().getTotalElements();
+        var expectedValue = ModelUtils.getPageableAllBOTViews_Two_Element_On_Page_ASC().getNumberOfElements();
         var actualValue =
             bigOrderTableRepository.findAll(ORDER_PAGE_PAGE_NUMBER_3_PAGE_SIZE_2_ASC, DEFAULT_ORDER_SEARCH_CRITERIA,
                 TARIFFS_ID_LIST, USER_LANGUAGE_ENG).getNumberOfElements();
