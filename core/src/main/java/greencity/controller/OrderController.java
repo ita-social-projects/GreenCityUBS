@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
@@ -18,7 +19,9 @@ import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.FondyPaymentResponse;
+import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -35,6 +38,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +58,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
@@ -63,6 +69,7 @@ import java.util.Optional;
 @RequestMapping("/ubs")
 @Validated
 @RequiredArgsConstructor
+@Slf4j
 public class OrderController {
     private final UBSClientService ubsClientService;
     private final UBSManagementService ubsManagementService;
@@ -192,25 +199,37 @@ public class OrderController {
     }
 
     /**
-     * Controller checks if received data is valid and stores payment info if is.
+     * Receives payment information from Fondy payment gateway. This method decodes
+     * the received response, converts it into a PaymentResponseDto object, and
+     * validates the payment. If the HTTP status is successful, it sends a
+     * notification for the paid order and redirects to the GreenCityClient.
      *
-     * @param dto {@link PaymentResponseDto} - response order data.
-     * @return {@link HttpStatus} - http status.
+     * @param response The payment response received from Fondy, in String format.
+     * @param servlet  The HttpServletResponse object to handle the redirection.
+     * @return A PaymentResponseWayForPay object representing the validated payment
+     *         response.
+     * @throws IOException If an input or output exception occurred during the
+     *                     redirection.
      */
-    @ApiOperation(value = "Receive payment from Fondy.")
+    @ApiOperation(value = "Receive payment from Way For Pay.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @PostMapping("/receivePayment")
-    public ResponseEntity<HttpStatus> receivePayment(
-        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
-        ubsClientService.validatePayment(dto);
+    public PaymentResponseWayForPay receivePayment(
+        @RequestBody String response, HttpServletResponse servlet) throws IOException {
+        String decodedResponse =
+            URLDecoder.decode(response, StandardCharsets.UTF_8.name());
+        ObjectMapper objectMapper = new ObjectMapper();
+        PaymentResponseDto paymentResponseDto =
+            objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
+
         if (HttpStatus.OK.is2xxSuccessful()) {
-            notificationService.notifyPaidOrder(dto);
-            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
+            notificationService.notifyPaidOrder(paymentResponseDto);
+            servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ubsClientService.validatePayment(paymentResponseDto);
     }
 
     /**

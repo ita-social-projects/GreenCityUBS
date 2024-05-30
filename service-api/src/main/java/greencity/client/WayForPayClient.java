@@ -1,0 +1,21 @@
+package greencity.client;
+
+import greencity.dto.payment.PaymentRequestDto;
+import org.json.JSONObject;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+@FeignClient(name = "wayforpay-client",
+    url = "https://api.wayforpay.com/api",
+    fallbackFactory = WayForPayClientFallbackFactory.class)
+public interface WayForPayClient {
+    /**
+     * Sends a POST request to the WayForPay API to get a checkout response.
+     *
+     * @param dto The payment request data.
+     * @return A string representing the response from the WayForPay API.
+     */
+    @PostMapping
+    String getCheckoutResponse(@RequestBody PaymentRequestDto dto);
+}
