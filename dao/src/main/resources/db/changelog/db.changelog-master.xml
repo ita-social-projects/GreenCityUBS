@@ -224,6 +224,8 @@
     <include file="/db/changelog/logs/ch-update-employees-set-new-main-email-Midianyi.xml"/>
     <include file="/db/changelog/logs/2024-04-26-ch-add-column-isDeleted-to-Locations-Ryhal.xml"/>
     <include file="/db/changelog/logs/2024-05-28-ch-insert-new-notification-with-platforms-to-notificationTempalate-and-notificationPlatforms-Ryhal.xml"/>
+    <include file="/db/changelog/logs/2024-05-10-ch-add-column-isScheduleUpdateForbidden-toNotificationTemplate-Ryhal.xml"/>
+    <include file="/db/changelog/logs/2024-05-16-ch-add-column-template_id-to-UserNotification-Ryhal.xml"/>
 
 </databaseChangeLog>
 

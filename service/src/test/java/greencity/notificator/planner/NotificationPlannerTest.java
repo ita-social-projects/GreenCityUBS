@@ -4,7 +4,7 @@ import greencity.dto.notification.ScheduledNotificationDto;
 import greencity.enums.NotificationType;
 import greencity.notificator.*;
 import greencity.notificator.listener.NotificationPlanner;
-import greencity.service.notificator.ScheduledNotificator;
+import greencity.notificator.ScheduledNotificator;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -17,9 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.times;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -53,35 +51,17 @@ class NotificationPlannerTest {
     }
 
     @Test
-    void restartNotificationsWithNotNullScheduledFeatureOfNotificator() {
-        var scheduledNotification = new ScheduledNotificationDto(
-            NotificationType.UNPAID_ORDER, scheduledFuture, UnpaidOrderNotificator.class);
+    void restartNotificationsTest() {
+        var scheduledNotification =
+            new ScheduledNotificationDto(NotificationType.UNPAID_ORDER, UnpaidOrderNotificator.class);
         var unpaidOrderNotificator = mock(UnpaidOrderNotificator.class);
         notificationPlanner = new NotificationPlanner(Collections.singletonList(unpaidOrderNotificator));
 
-        when(scheduledFuture.cancel(anyBoolean())).thenReturn(true);
         when(unpaidOrderNotificator.notifyBySchedule()).thenReturn(scheduledNotification);
 
         notificationPlanner.scheduleNotifications();
         assertDoesNotThrow(() -> notificationPlanner.restartNotificator(NotificationType.UNPAID_ORDER));
 
-        verify(scheduledFuture).cancel(anyBoolean());
-        verify(unpaidOrderNotificator, times(2)).notifyBySchedule();
-    }
-
-    @Test
-    void restartNotificationsWithNullScheduledFeatureOfNotificator() {
-        var scheduledNotification = new ScheduledNotificationDto(
-            NotificationType.UNPAID_ORDER, null, UnpaidOrderNotificator.class);
-        var unpaidOrderNotificator = mock(UnpaidOrderNotificator.class);
-        notificationPlanner = new NotificationPlanner(Collections.singletonList(unpaidOrderNotificator));
-
-        when(unpaidOrderNotificator.notifyBySchedule()).thenReturn(scheduledNotification);
-        notificationPlanner.scheduleNotifications();
-
-        assertDoesNotThrow(() -> notificationPlanner.restartNotificator(NotificationType.UNPAID_ORDER));
-
-        verify(scheduledFuture, never()).cancel(anyBoolean());
         verify(unpaidOrderNotificator, times(2)).notifyBySchedule();
     }
 }

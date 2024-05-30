@@ -18,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doNothing;
@@ -74,10 +76,45 @@ class NotificationTemplateServiceImplTest {
         Long id = 1L;
 
         var updateDto = TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
-        var mainInfoDto = updateDto.getNotificationTemplateMainInfoDto();
+        var mainInfoDto = updateDto.getNotificationTemplateUpdateInfo();
         var platformDto = updateDto.getPlatforms().getFirst();
 
         var notification = TEST_NOTIFICATION_TEMPLATE;
+
+        var platform = notification.getNotificationPlatforms().getFirst();
+
+        when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
+        doNothing().when(notificationPlanner).restartNotificator(any());
+
+        notificationService.update(id, updateDto);
+
+        assertEquals(mainInfoDto.getTitle(), notification.getTitle());
+        assertEquals(mainInfoDto.getTitleEng(), notification.getTitleEng());
+        assertEquals(mainInfoDto.getType(), notification.getNotificationType());
+        assertEquals(mainInfoDto.getTrigger(), notification.getTrigger());
+        assertEquals(mainInfoDto.getTime(), notification.getTime());
+        assertEquals(mainInfoDto.getSchedule(), notification.getSchedule());
+
+        assertEquals(platformDto.getBody(), platform.getBody());
+        assertEquals(platformDto.getBodyEng(), platform.getBodyEng());
+        assertEquals(platformDto.getStatus(), platform.getNotificationStatus());
+
+        verify(templateRepository).findById(id);
+        verify(notificationPlanner).restartNotificator(any());
+    }
+
+    @Test
+    void updateTestWhenUpdateScheduleColumnIsForbidden() {
+        Long id = 1L;
+
+        var updateDto = TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+        var mainInfoDto = updateDto.getNotificationTemplateUpdateInfo();
+        var platformDto = updateDto.getPlatforms().getFirst();
+
+        var notification = TEST_NOTIFICATION_TEMPLATE;
+        notification.setSchedule("");
+        notification.setScheduleUpdateForbidden(true);
+
         var platform = notification.getNotificationPlatforms().getFirst();
 
         when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
@@ -90,7 +127,7 @@ class NotificationTemplateServiceImplTest {
         assertEquals(mainInfoDto.getType(), notification.getNotificationType());
         assertEquals(mainInfoDto.getTrigger(), notification.getTrigger());
         assertEquals(mainInfoDto.getTime(), notification.getTime());
-        assertEquals(mainInfoDto.getSchedule(), notification.getSchedule());
+        assertNotEquals(mainInfoDto.getSchedule(), notification.getSchedule());
 
         assertEquals(platformDto.getBody(), platform.getBody());
         assertEquals(platformDto.getBodyEng(), platform.getBodyEng());
