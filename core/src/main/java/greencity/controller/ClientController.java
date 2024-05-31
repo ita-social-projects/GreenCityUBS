@@ -4,7 +4,6 @@ import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrdersDataForUserDto;
@@ -17,7 +16,6 @@ import greencity.exceptions.payment.PaymentLinkException;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -42,25 +40,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClientController {
     private final UBSClientService ubsClientService;
-
-    /**
-     * Controller returns all user's orders.
-     *
-     * @param userUuid {@link UserVO} id.
-     * @return {@link OrderClientDto} list of user's orders.
-     * @author Danylko Mykola.
-     */
-    @Operation(summary = "Get all orders done by user")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(array = @ArraySchema(schema = @Schema(implementation = OrderClientDto.class)))),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content)
-    })
-    @GetMapping("/getAll-users-orders")
-    public ResponseEntity<List<OrderClientDto>> getAllOrdersDoneByUser(
-        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getAllOrdersDoneByUser(userUuid));
-    }
 
     /**
      * Controller for getting all user orders.

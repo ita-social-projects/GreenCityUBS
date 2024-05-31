@@ -74,7 +74,6 @@ import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
@@ -1112,14 +1111,6 @@ public class ModelUtils {
             .violationDescription("String1 string1 string1")
             .violationLevel("low")
             .imagesToDelete(listImages)
-            .build();
-    }
-
-    public static OrderClientDto getOrderClientDto() {
-        return OrderClientDto.builder()
-            .id(1L)
-            .orderStatus(OrderStatus.DONE)
-            .amount(350L)
             .build();
     }
 
