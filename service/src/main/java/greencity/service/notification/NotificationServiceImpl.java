@@ -230,7 +230,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Async
     public void notifyAllOrdersWithIncreasedTariffPrice(Integer bagId) {
-        var orders = orderRepository.findAllUnpaidOrdersByBagId(bagId);
+        var orders = orderRepository.findAllUnpaidOrdersWithUsersByBagId(bagId);
         orders.forEach(this::notifyIncreasedTariffPrice);
     }
 

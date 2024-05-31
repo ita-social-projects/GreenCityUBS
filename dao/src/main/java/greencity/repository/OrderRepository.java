@@ -168,11 +168,20 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * method returns all unpaid orders that contain a bag with id.
      */
-    @Query(nativeQuery = true,
-        value = "select o.* from orders o "
-            + "left join order_bag_mapping obm on o.id = obm.order_id "
-            + "where obm.bag_id = :bagId and o.order_payment_status = 'UNPAID'")
+    @Query(value = "select o from Order o "
+        + "join fetch OrderBag obm on o.id = obm.order.id "
+        + "join fetch Bag b on obm.bag.id = b.id "
+        + "where obm.bag.id = :bagId and o.orderPaymentStatus = 'UNPAID'")
     List<Order> findAllUnpaidOrdersByBagId(Integer bagId);
+
+    /**
+     * method returns all unpaid orders that contain a bag with id.
+     */
+    @Query(value = "select o from Order o "
+        + "join fetch o.ubsUser "
+        + "join fetch OrderBag obm on o.id = obm.order.id "
+        + "where obm.bag.id = :bagId and o.orderPaymentStatus = 'UNPAID'")
+    List<Order> findAllUnpaidOrdersWithUsersByBagId(Integer bagId);
 
     /**
      * method returns all orders that contain a bag with id.
