@@ -216,7 +216,7 @@ public class SecurityConfig {
                     "/setwebhook")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
-                    ADMIN_LINK + "/notification/remove-template/{id}")
+                    ADMIN_LINK + "/notification/remove-custom-template/{id}")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     UBS_MANAG_LINK + "/**",
