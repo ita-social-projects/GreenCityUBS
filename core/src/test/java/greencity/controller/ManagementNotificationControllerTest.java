@@ -13,7 +13,6 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.notification.IncorrectTemplateException;
 import greencity.exceptions.notification.TemplateDeleteException;
 import greencity.service.notification.NotificationTemplateService;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,7 +70,6 @@ class ManagementNotificationControllerTest {
 
     @Test
     void getAllTest() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(List.of(ModelUtils.getNotificationTemplateDto()));
         mockMvc.perform(get(url + "/get-all-templates")
             .content(responseJSON)
@@ -81,7 +79,6 @@ class ManagementNotificationControllerTest {
 
     @Test
     void updateNotificationTemplateTest() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
         String jsonDto = objectMapper.writeValueAsString(
             ModelUtils.getNotificationTemplateWithPlatformsUpdateDto());
         mockMvc.perform(put(url + "/update-template/{id}", 1L)
@@ -93,7 +90,6 @@ class ManagementNotificationControllerTest {
 
     @Test
     void getNotificationTemplateTest() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(ModelUtils.getNotificationTemplateWithPlatformsDto());
         mockMvc.perform(get(url + "/get-template/{id}", 1L)
             .content(responseJSON)
@@ -168,7 +164,7 @@ class ManagementNotificationControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post(url + "/add-template")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(writeObjetsAsString(ModelUtils.getAddNotificationTemplateWithPlatforms())))
+            .content(objectMapper.writeValueAsString(ModelUtils.getAddNotificationTemplateWithPlatforms())))
             .andExpect(MockMvcResultMatchers.status().isCreated());
 
         verify(notificationTemplateService).createNotificationTemplate(any());
@@ -181,7 +177,7 @@ class ManagementNotificationControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post(url + "/add-template")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(writeObjetsAsString(ModelUtils.getAddNotificationTemplateWithPlatforms())))
+            .content(objectMapper.writeValueAsString(ModelUtils.getAddNotificationTemplateWithPlatforms())))
             .andExpect(MockMvcResultMatchers.status().isBadRequest());
         verify(notificationTemplateService).createNotificationTemplate(any());
     }
@@ -217,10 +213,5 @@ class ManagementNotificationControllerTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
         verify(notificationTemplateService).removeNotificationTemplate(any());
-    }
-
-    @SneakyThrows
-    private <T> String writeObjetsAsString(T object) {
-        return objectMapper.writeValueAsString(object);
     }
 }
