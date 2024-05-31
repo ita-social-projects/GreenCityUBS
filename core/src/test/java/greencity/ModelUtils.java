@@ -28,7 +28,6 @@ import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderFondyClientDto;
@@ -37,7 +36,6 @@ import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
@@ -66,7 +64,6 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import org.springframework.http.HttpStatus;
-
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -77,7 +74,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import static greencity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
@@ -177,14 +173,6 @@ public class ModelUtils {
             .recipientEmail("petrov@gmail.com")
             .telegramIsNotify(true)
             .viberIsNotify(false)
-            .build();
-    }
-
-    public static OrderClientDto getOrderClientDto() {
-        return OrderClientDto.builder()
-            .id(1L)
-            .orderStatus(OrderStatus.FORMED)
-            .amount(450L)
             .build();
     }
 

@@ -25,7 +25,6 @@ import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
@@ -169,7 +168,6 @@ import static greencity.ModelUtils.getListOfEvents;
 import static greencity.ModelUtils.getLocation;
 import static greencity.ModelUtils.getMaximumAmountOfAddresses;
 import static greencity.ModelUtils.getOrder;
-import static greencity.ModelUtils.getOrderClientDto;
 import static greencity.ModelUtils.getOrderCount;
 import static greencity.ModelUtils.getOrderCountWithPaymentStatusPaid;
 import static greencity.ModelUtils.getOrderDetails;
@@ -241,7 +239,6 @@ import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -1162,21 +1159,6 @@ class UBSClientServiceImplTest {
     @Test
     void checkCertificateWithNoAvailable() {
         assertThrows(NotFoundException.class, () -> ubsService.checkCertificate("randomstring"));
-    }
-
-    @Test
-    void getAllOrdersDoneByUser() {
-        Order order = getOrderDoneByUser();
-        OrderClientDto dto = getOrderClientDto();
-        List<Order> orderList = Collections.singletonList(order);
-        List<OrderClientDto> expected = Collections.singletonList(dto);
-
-        when(orderRepository.getAllOrdersOfUser(any())).thenReturn(orderList);
-        when(modelMapper.map(order, OrderClientDto.class)).thenReturn(dto);
-
-        List<OrderClientDto> result = ubsService.getAllOrdersDoneByUser(anyString());
-
-        assertEquals(expected, result);
     }
 
     @Test

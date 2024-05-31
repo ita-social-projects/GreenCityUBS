@@ -34,7 +34,6 @@ import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
@@ -154,7 +153,6 @@ import java.util.stream.LongStream;
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.BAD_ORDER_STATUS_REQUEST;
-import static greencity.constant.ErrorMessage.BAGS_QUANTITY_NOT_FOUND_MESSAGE;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
@@ -829,17 +827,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .build());
         }
         userRepository.save(currentUser);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<OrderClientDto> getAllOrdersDoneByUser(String uuid) {
-        return orderRepository.getAllOrdersOfUser(uuid).stream()
-            .sorted(Comparator.comparing(Order::getOrderDate))
-            .map(order -> modelMapper.map(order, OrderClientDto.class))
-            .collect(toList());
     }
 
     /**

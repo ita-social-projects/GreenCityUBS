@@ -6,7 +6,6 @@ import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderStatusPageDto;
@@ -43,24 +42,6 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class ClientController {
     private final UBSClientService ubsClientService;
-
-    /**
-     * Controller returns all user's orders.
-     *
-     * @param userUuid {@link UserVO} id.
-     * @return {@link OrderClientDto} list of user's orders.
-     * @author Danylko Mykola.
-     */
-    @ApiOperation(value = "Get all orders done by user")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderClientDto[].class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-    })
-    @GetMapping("/getAll-users-orders")
-    public ResponseEntity<List<OrderClientDto>> getAllOrdersDoneByUser(
-        @ApiIgnore @CurrentUserUuid String userUuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getAllOrdersDoneByUser(userUuid));
-    }
 
     /**
      * Controller for getting all user orders.
