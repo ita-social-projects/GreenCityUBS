@@ -29,7 +29,6 @@ import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderFondyClientDto;
@@ -174,14 +173,6 @@ public class ModelUtils {
             .recipientEmail("petrov@gmail.com")
             .telegramIsNotify(true)
             .viberIsNotify(false)
-            .build();
-    }
-
-    public static OrderClientDto getOrderClientDto() {
-        return OrderClientDto.builder()
-            .id(1L)
-            .orderStatus(OrderStatus.FORMED)
-            .amount(450L)
             .build();
     }
 
