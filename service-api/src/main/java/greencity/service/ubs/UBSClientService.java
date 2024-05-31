@@ -16,7 +16,6 @@ import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
@@ -40,7 +39,6 @@ import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
-
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Locale;
@@ -159,20 +157,11 @@ public interface UBSClientService {
     OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid);
 
     /**
-     * Method returns list of all orders done by user.
-     *
-     * @param uuid current {@link User}'s uuid;
-     * @return {@link OrderClientDto} that contains client's orders.
-     * @author Danylko Mykola
-     */
-    List<OrderClientDto> getAllOrdersDoneByUser(String uuid);
-
-    /**
      * Method creates the same order again if order's status is ON_THE_ROUTE,
      * CONFIRMED or DONE.
      *
      * @param orderId of {@link Long} order id;
-     * @return {@link OrderClientDto} that contains client's order;
+     * @return {@link MakeOrderAgainDto} that contains client's order;
      * @author Danylko Mykola
      */
     MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId);

@@ -73,7 +73,6 @@ import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
@@ -92,7 +91,6 @@ import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
-import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
@@ -1144,14 +1142,6 @@ public class ModelUtils {
             .violationDescription("String1 string1 string1")
             .violationLevel("low")
             .imagesToDelete(listImages)
-            .build();
-    }
-
-    public static OrderClientDto getOrderClientDto() {
-        return OrderClientDto.builder()
-            .id(1L)
-            .orderStatus(OrderStatus.DONE)
-            .amount(350L)
             .build();
     }
 
