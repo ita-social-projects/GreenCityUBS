@@ -99,7 +99,6 @@ class ManagementNotificationControllerTest {
 
     @Test
     void saveBadRequestTest() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
         NotificationTemplateWithPlatformsUpdateDto dto = ModelUtils.getNotificationTemplateWithPlatformsUpdateDto();
         Long id = 1L;
         String JsonDto = objectMapper.writeValueAsString(dto);
