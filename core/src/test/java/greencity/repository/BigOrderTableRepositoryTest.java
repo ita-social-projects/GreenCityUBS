@@ -337,7 +337,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         List<BigOrderTableViews> bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
-            Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(true));
+            Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(false));
         Assertions.assertTrue(isListCorrectlySorted);
     }
 
@@ -348,7 +348,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
-            Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(false));
+            Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(true));
         Assertions.assertTrue(isListCorrectlySorted);
     }
 
@@ -445,9 +445,9 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    private Comparator<BigOrderTableViews> orderStatusTranslationComparator(boolean ascending) {
+    private Comparator<BigOrderTableViews> orderStatusTranslationComparator(boolean descending) {
         Comparator<BigOrderTableViews> comparator = Comparator.comparingInt(
             view -> OrderStatusSortingTranslation.valueOf(view.getOrderStatus()).getSortOrder());
-        return ascending ? comparator.reversed() : comparator;
+        return descending ? comparator.reversed() : comparator;
     }
 }
