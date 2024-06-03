@@ -1,6 +1,7 @@
 package greencity.notificator;
 
 import greencity.dto.notification.ScheduledNotificationDto;
+import greencity.entity.notifications.NotificationTemplate;
 import greencity.notificator.scheduler.NotificationTaskScheduler;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.ubs.NotificationService;
@@ -25,7 +26,7 @@ public class CustomNotificationsNotificator implements ScheduledNotificator {
         closePreviousTasksIfPresent();
         var templates = notificationTemplateRepository.findAllActiveCustomNotificationsTemplates();
         templates.forEach(
-            template -> createNotificationScheduler(template.getId(), template.getSchedule()));
+            this::createNotificationScheduler);
         return build(CUSTOM, this.getClass());
     }
 
@@ -34,8 +35,8 @@ public class CustomNotificationsNotificator implements ScheduledNotificator {
         scheduledFutures.clear();
     }
 
-    private void createNotificationScheduler(Long templateId, String schedule) {
-        scheduledFutures.add(taskScheduler.scheduleNotification(
-            () -> notificationService.notifyCustom(templateId), schedule, CUSTOM));
+    private void createNotificationScheduler(NotificationTemplate template) {
+        scheduledFutures.add(taskScheduler.scheduleNotification(() -> notificationService.notifyCustom(
+            template.getId(), template.getUserCategory()), template.getSchedule(), CUSTOM));
     }
 }

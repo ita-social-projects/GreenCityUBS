@@ -23,9 +23,10 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.UserCategory;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
-import greencity.repository.BagRepository;
+import greencity.filters.UserSpecification;
 import greencity.repository.NotificationParameterRepository;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.OrderRepository;
@@ -86,7 +87,6 @@ import static greencity.constant.OrderHistory.DELETE_VIOLATION;
 public class NotificationServiceImpl implements NotificationService {
     private final UserRepository userRepository;
     private final UserNotificationRepository userNotificationRepository;
-    private final BagRepository bagRepository;
     private final OrderRepository orderRepository;
     private final ViolationRepository violationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
@@ -627,15 +627,15 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyCustom(Long templateUuid) {
-        var users = userRepository.findAll();
-        users.forEach(user -> fillAndSendCustomNotification(user, templateUuid));
+    public void notifyCustom(Long templateId, UserCategory userCategory) {
+        var users = userRepository.findAll(new UserSpecification(userCategory));
+        users.forEach(user -> fillAndSendCustomNotification(user, templateId));
     }
 
-    private void fillAndSendCustomNotification(User user, Long templateUuid) {
+    private void fillAndSendCustomNotification(User user, Long templateId) {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.CUSTOM);
-        userNotification.setTemplateId(templateUuid);
+        userNotification.setTemplateId(templateId);
         userNotification.setUser(user);
         UserNotification created = userNotificationRepository.save(userNotification);
         created.setParameters(new HashSet<>());
@@ -819,7 +819,7 @@ public class NotificationServiceImpl implements NotificationService {
         Optional<NotificationTemplate> templateOptional =
             notification.getNotificationType().equals(NotificationType.CUSTOM)
                 ? templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(
-                    notification.getId(), receiverType)
+                    notification.getTemplateId(), receiverType)
                 : templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                     notification.getNotificationType(), receiverType);
 

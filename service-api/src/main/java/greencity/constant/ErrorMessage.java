@@ -163,11 +163,13 @@ public final class ErrorMessage {
     public static final String REGIONS_NOT_FOUND_BY_LOCATION_STATUS =
         "Regions containing locations with a status: %s, not found";
     public static final String ORDER_CAN_NOT_BE_UPDATED = "An order with the status: %s, can not be updated";
-    public static final String LOCATION_CAN_NOT_BE_DELETED =
-        "Such location cannot be deleted as it is linked to the tariff";
     public static final String EMPLOYEE_NOT_FOUND_BY_EMAIL = "Employee with current id doesn't exist: ";
     public static final String ORDER_DOES_NOT_BELONG_TO_USER = "This order does not belong to user";
     public static final String WRONG_SIGNATURE_USED = "This signature is invalid: ";
+    public static final String TEMPLATE_DOES_NOT_CONTAIN_ALL_PLATFORMS =
+        "This template does not contain messages for all platforms: ";
+    public static final String PREDEFINED_NOTIFICATION_CANNOT_BE_DELETED =
+        "Predefined notification template cannot be deleted.";
 
     /**
      * Constructor.

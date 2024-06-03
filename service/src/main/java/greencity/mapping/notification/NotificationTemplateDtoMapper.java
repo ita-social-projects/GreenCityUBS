@@ -3,6 +3,7 @@ package greencity.mapping.notification;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.entity.notifications.NotificationTemplate;
+import java.util.Objects;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,10 @@ public class NotificationTemplateDtoMapper
                     .title(notificationTemplate.getTitle())
                     .titleEng(notificationTemplate.getTitleEng())
                     .notificationStatus(notificationTemplate.getNotificationStatus())
+                    .userCategoryDescription(Objects.isNull(notificationTemplate.getUserCategory()) ? null
+                        : notificationTemplate.getUserCategory().getDescription())
+                    .userCategoryDescriptionEng(Objects.isNull(notificationTemplate.getUserCategory()) ? null
+                        : notificationTemplate.getUserCategory().getDescriptionEng())
                     .build())
             .build();
     }

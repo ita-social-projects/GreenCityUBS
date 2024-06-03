@@ -198,6 +198,9 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/activeLocations/{id}")
                 .hasAnyRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
+                    ADMIN_LINK + "/notification/add-template")
+                .hasAnyRole(ADMIN, UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.POST,
                     UBS_MANAG_LINK + "/**",
                     ADMIN_LINK + "/**",
                     "/accountinfo")
@@ -211,6 +214,9 @@ public class SecurityConfig {
                     "/accountinfo",
                     "/removewebhook",
                     "/setwebhook")
+                .hasAnyRole(ADMIN, UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.DELETE,
+                    ADMIN_LINK + "/notification/remove-custom-template/{id}")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     UBS_MANAG_LINK + "/**",

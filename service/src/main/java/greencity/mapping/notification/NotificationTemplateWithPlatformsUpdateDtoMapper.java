@@ -21,6 +21,7 @@ public class NotificationTemplateWithPlatformsUpdateDtoMapper
                 .schedule(notificationTemplate.getSchedule())
                 .title(notificationTemplate.getTitle())
                 .titleEng(notificationTemplate.getTitleEng())
+                .userCategory(notificationTemplate.getUserCategory())
                 .build())
             .platforms(notificationTemplate.getNotificationPlatforms().stream()
                 .map(platform -> NotificationPlatformDto.builder()
