@@ -40,5 +40,9 @@ public class NotificationTemplateMainInfoDto {
     @NotNull
     private NotificationStatus notificationStatus;
     @NotNull
+    private String userCategoryDescription;
+    @NotNull
+    private String userCategoryDescriptionEng;
+    @NotNull
     private boolean scheduleUpdateForbidden;
 }

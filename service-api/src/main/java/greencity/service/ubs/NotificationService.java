@@ -5,6 +5,7 @@ import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
+import greencity.enums.UserCategory;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
@@ -134,7 +135,7 @@ public interface NotificationService {
      */
     void notifyAllHalfPaidOrdersWithStatusBroughtByHimself();
 
-    void notifyCustom(Long templateUuid);
+    void notifyCustom(Long templateUuid, UserCategory userCategory);
 
     /**
      * Method that creates notification for inactive users.

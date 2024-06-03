@@ -4,6 +4,7 @@ import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.entity.notifications.NotificationTemplate;
+import java.util.Objects;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
@@ -27,6 +28,11 @@ class NotificationTemplateWithPlatformsDtoMapper
                 .titleEng(notificationTemplate.getTitleEng())
                 .notificationStatus(notificationTemplate.getNotificationStatus())
                 .scheduleUpdateForbidden(notificationTemplate.isScheduleUpdateForbidden())
+                .userCategoryDescription(
+                    Objects.isNull(notificationTemplate.getUserCategory()) ? null
+                        : notificationTemplate.getUserCategory().getDescription())
+                .userCategoryDescriptionEng(Objects.isNull(notificationTemplate.getUserCategory()) ? null
+                    : notificationTemplate.getUserCategory().getDescriptionEng())
                 .build())
             .platforms(notificationTemplate.getNotificationPlatforms().stream()
                 .map(platform -> NotificationPlatformDto.builder()
