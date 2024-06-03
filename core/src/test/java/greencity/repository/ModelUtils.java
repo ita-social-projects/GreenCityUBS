@@ -88,484 +88,603 @@ public class ModelUtils {
     }
 
     public static BigOrderTableViews getBOTViews_82() {
-        return new BigOrderTableViews()
-            .setId(82L)
-            .setOrderStatus("CONFIRMED")
-            .setOrderPaymentStatus("PAID")
-            .setOrderDate(LocalDate.parse("2022-02-02", DATE_TIME_FORMATTER))
-            .setPaymentDate(LocalDate.parse("2022-02-02", DATE_TIME_FORMATTER))
-            .setClientName("Anna Maria")
-            .setClientPhoneNumber("+380631144678")
-            .setClientEmail("testgreencity323@gmail.com")
-            .setSenderName("")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn("Kyiv region")
-            .setCity("Київ")
-            .setCityEn("Kyiv")
-            .setDistrict("Дарницький")
-            .setDistrictEn("Darnyts'kyi")
-            .setAddress("проспект Петра Григоренка 3, корп.- , п.- ")
-            .setAddressEn("Petra Hryhorenka Avenue 3, b.- , e.- ")
-            .setCommentToAddressForClient("")
-            .setBagAmount("20л - 1шт; 120л - 2шт")
-            .setTotalOrderSum(600L)
-            .setAmountDue(0L)
-            .setGeneralDiscount(0L)
-            .setCommentForOrderByClient("hey")
-            .setTotalPayment(600L)
-            .setDateOfExport(LocalDate.parse("2022-02-04", DATE_TIME_FORMATTER))
-            .setTimeOfExport("21:22:04-23:22:22")
-            .setReceivingStationId(1L)
-            .setReceivingStation("Саперно-Слобідська")
-            .setResponsibleLogicManId(2L)
-            .setResponsibleLogicMan("Tapsoy, Ipsi")
-            .setResponsibleDriverId(10L)
-            .setResponsibleDriver("Abu, Dabi")
-            .setResponsibleCallerId(15L)
-            .setResponsibleCaller("Test, User")
-            .setResponsibleNavigatorId(3L)
-            .setResponsibleNavigator("Migno, Tekku")
-            .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffsInfoId(1L);
-
+        return BigOrderTableViews.builder()
+            .id(82L)
+            .orderStatus("CONFIRMED")
+            .orderPaymentStatus("PAID")
+            .orderDate(LocalDate.parse("2022-02-02"))
+            .paymentDate(LocalDate.parse("2022-02-02"))
+            .clientName("Abu Dabi")
+            .clientPhoneNumber("+380380634654")
+            .clientEmail("lvnmwyvsrvcruhfwbn@sdvgeft.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Одеська область")
+            .city("Одеса")
+            .district("Приморський")
+            .address("Дерибасівська 33, корп.- , п.4")
+            .regionEn("Odessa Oblast")
+            .cityEn("Odessa")
+            .districtEn("Primorskyi")
+            .addressEn("Deribasivska 33, b.- , e.4")
+            .commentToAddressForClient("Коментар до адреси 5")
+            .bagAmount("120л - 1шт; 60л - 1шт; 20л - 1шт")
+            .totalOrderSum(600L)
+            .orderCertificateCode(null)
+            .generalDiscount(0L)
+            .amountDue(-59400L)
+            .commentForOrderByClient("hey")
+            .commentForOrderByAdmin(null)
+            .totalPayment(60000L)
+            .dateOfExport(null)
+            .timeOfExport("21:22:04-23:22:22")
+            .idOrderFromShop(null)
+            .receivingStation("Саперно-Слобідська")
+            .receivingStationId(1L)
+            .responsibleLogicMan("Tapsoy, Ipsi")
+            .responsibleLogicManId(2L)
+            .responsibleDriver("Abu, Dabi")
+            .responsibleDriverId(10L)
+            .responsibleCaller("Test, User")
+            .responsibleCallerId(15L)
+            .responsibleNavigator("Migno, Tekku")
+            .responsibleNavigatorId(3L)
+            .isBlocked(false)
+            .blockedBy("")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_83() {
-        return new BigOrderTableViews()
-            .setId(83L)
-            .setOrderStatus("DONE")
-            .setOrderPaymentStatus("PAID")
-            .setOrderDate(LocalDate.parse("2022-02-02", DATE_TIME_FORMATTER))
-            .setPaymentDate(LocalDate.parse("2022-02-02", DATE_TIME_FORMATTER))
-            .setClientName("Anna Maria")
-            .setClientPhoneNumber("+380631144678")
-            .setClientEmail("testgreencity323@gmail.com")
-            .setSenderName("")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn("Kyiv region")
-            .setCity("Київ")
-            .setCityEn("Kyiv")
-            .setDistrict("Дарницький")
-            .setDistrictEn("Darnyts'kyi")
-            .setAddress("проспект Петра Григоренка 3, корп.- , п.- ")
-            .setAddressEn("Petra Hryhorenka Avenue 3, b.- , e.- ")
-            .setCommentToAddressForClient("")
-            .setBagAmount("20л - 5шт; 120л - 3шт")
-            .setTotalOrderSum(1050L)
-            .setGeneralDiscount(0L)
-            .setAmountDue(0L)
-            .setCommentForOrderByClient("hi")
-            .setTotalPayment(1050L)
-            .setDateOfExport(LocalDate.parse("2022-02-03", DATE_TIME_FORMATTER))
-            .setTimeOfExport("07:00:00-18:00:10")
-            .setReceivingStationId(2L)
-            .setReceivingStation("Грибовицька")
-            .setResponsibleLogicManId(3L)
-            .setResponsibleLogicMan("Migno, Tekku")
-            .setResponsibleDriverId(15L)
-            .setResponsibleDriver("Test, User")
-            .setResponsibleCallerId(2L)
-            .setResponsibleCaller("Tapsoy, Ipsi")
-            .setResponsibleNavigatorId(10L)
-            .setResponsibleNavigator("Abu, Dabi")
-            .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(83L)
+            .orderStatus("DONE")
+            .orderPaymentStatus("PAID")
+            .orderDate(LocalDate.parse("2022-02-02"))
+            .paymentDate(LocalDate.parse("2022-02-02"))
+            .clientName("Anna Maria")
+            .clientPhoneNumber("+380631144678")
+            .clientEmail("testgreencity323@gmail.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Київська область")
+            .city("Київ")
+            .district("Шевченківський")
+            .address("Хрещатик 27, корп.- , п.1")
+            .regionEn("Kyiv Oblast")
+            .cityEn("Kyiv")
+            .districtEn("Shevchenkivskyi")
+            .addressEn("Khreshchatyk 27, b.- , e.1")
+            .commentToAddressForClient("Коментар до адреси 2")
+            .bagAmount("120л - 2шт; 60л - 5шт; 20л - 1шт")
+            .totalOrderSum(1050L)
+            .orderCertificateCode(null)
+            .generalDiscount(0L)
+            .amountDue(-43950L)
+            .commentForOrderByClient("hi")
+            .commentForOrderByAdmin(null)
+            .totalPayment(45000L)
+            .dateOfExport(null)
+            .timeOfExport("07:00:00-18:00:10")
+            .idOrderFromShop(null)
+            .receivingStation("Грибовицька")
+            .receivingStationId(2L)
+            .responsibleLogicMan("Migno, Tekku")
+            .responsibleLogicManId(3L)
+            .responsibleDriver("Test, User")
+            .responsibleDriverId(15L)
+            .responsibleCaller("Tapsoy, Ipsi")
+            .responsibleCallerId(2L)
+            .responsibleNavigator("Abu, Dabi")
+            .responsibleNavigatorId(10L)
+            .isBlocked(false)
+            .blockedBy("")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_84() {
-        return new BigOrderTableViews()
-            .setId(84L)
-            .setOrderStatus("FORMED")
-            .setOrderPaymentStatus("UNPAID")
-            .setOrderDate(LocalDate.parse("2022-02-01", DATE_TIME_FORMATTER))
-            .setClientName("Migno Tekku")
-            .setClientPhoneNumber("+380508003301")
-            .setClientEmail("mignotekku@vusra.com")
-            .setSenderName("")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn("Kyiv region")
-            .setCity("Київ")
-            .setCityEn("Kyiv")
-            .setDistrict("Печерський")
-            .setDistrictEn("Pechers'kyi")
-            .setAddress("Khorolska Street 7, корп.8, п.- ")
-            .setAddressEn("Khorolska Street 7, b.8, e.- ")
-            .setCommentToAddressForClient("")
-            .setBagAmount("120л - 4шт")
-            .setTotalOrderSum(1200L)
-            .setGeneralDiscount(0L)
-            .setAmountDue(1200L)
-            .setCommentForOrderByClient("by")
-            .setTotalPayment(0L)
-            .setDateOfExport(LocalDate.parse("2022-02-05", DATE_TIME_FORMATTER))
-            .setTimeOfExport("10:00:00-18:00:10")
-            .setIsBlocked(true)
-            .setBlockedBy("Abu, Dabi")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(84L)
+            .orderStatus("FORMED")
+            .orderPaymentStatus("UNPAID")
+            .orderDate(LocalDate.parse("2022-02-01"))
+            .paymentDate(null)
+            .clientName("Abu Dabi")
+            .clientPhoneNumber("+380380634654")
+            .clientEmail("lvnmwyvsrvcruhfwbn@sdvgeft.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Львівська область")
+            .city("Львів")
+            .district("Галицький")
+            .address("Вулиця Крушельницької 10, корп.- , п.2")
+            .regionEn("Lviv Oblast")
+            .cityEn("Lviv")
+            .districtEn("Halychskyi")
+            .addressEn("Krushelnytska Street 10, b.- , e.2")
+            .commentToAddressForClient("Коментар до адреси 4")
+            .bagAmount("20л - 4шт")
+            .totalOrderSum(1200L)
+            .orderCertificateCode(null)
+            .generalDiscount(0L)
+            .amountDue(1200L)
+            .commentForOrderByClient("by")
+            .commentForOrderByAdmin(null)
+            .totalPayment(0L)
+            .dateOfExport(null)
+            .timeOfExport("10:00:00-18:00:10")
+            .idOrderFromShop(null)
+            .receivingStation(null)
+            .receivingStationId(null)
+            .responsibleLogicMan(null)
+            .responsibleLogicManId(null)
+            .responsibleDriver(null)
+            .responsibleDriverId(null)
+            .responsibleCaller(null)
+            .responsibleCallerId(null)
+            .responsibleNavigator(null)
+            .responsibleNavigatorId(null)
+            .isBlocked(true)
+            .blockedBy("Abu, Dabi")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_85() {
-        return new BigOrderTableViews()
-            .setId(85L)
-            .setOrderStatus("FORMED")
-            .setOrderPaymentStatus("UNPAID")
-            .setOrderDate(LocalDate.parse("2022-02-04", DATE_TIME_FORMATTER))
-            .setClientName("Abu Dabi")
-            .setClientPhoneNumber("+380380634654")
-            .setClientEmail("lvnmwyvsrvcruhfwbn@sdvgeft.com")
-            .setSenderName("")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn(null)
-            .setCity("Київ")
-            .setCityEn(null)
-            .setDistrict("Дніпровський")
-            .setDistrictEn(null)
-            .setAddress("Kharkivs'ke Highway 5, корп.4, п.- ")
-            .setAddressEn(" 5, b.4, e.- ")
-            .setBagAmount("120л - 2шт")
-            .setTotalOrderSum(600L)
-            .setGeneralDiscount(0L)
-            .setAmountDue(600L)
-            .setCommentForOrderByClient("hey")
-            .setTotalPayment(0L)
-            .setDateOfExport(LocalDate.parse("2022-02-05", DATE_TIME_FORMATTER))
-            .setTimeOfExport("10:00:00-18:00:10")
-            .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(85L)
+            .orderStatus("FORMED")
+            .orderPaymentStatus("UNPAID")
+            .orderDate(LocalDate.parse("2022-02-04"))
+            .paymentDate(null)
+            .clientName("Anna Maria")
+            .clientPhoneNumber("+380631144678")
+            .clientEmail("testgreencity323@gmail.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(0)
+            .region("Київська область")
+            .city("Київ")
+            .district("Подільський")
+            .address("Велика Васильківська 14, корп.Б, п.2")
+            .regionEn("Kyiv Oblast")
+            .cityEn("Kyiv")
+            .districtEn("Podilskyi")
+            .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
+            .commentToAddressForClient("Коментар до адреси 1")
+            .bagAmount("20л - 2шт")
+            .totalOrderSum(600L)
+            .orderCertificateCode(null)
+            .generalDiscount(0L)
+            .amountDue(600L)
+            .commentForOrderByClient("hey")
+            .commentForOrderByAdmin(null)
+            .totalPayment(0L)
+            .dateOfExport(null)
+            .timeOfExport("10:00:00-18:00:10")
+            .idOrderFromShop(null)
+            .receivingStation(null)
+            .receivingStationId(null)
+            .responsibleLogicMan(null)
+            .responsibleLogicManId(null)
+            .responsibleDriver(null)
+            .responsibleDriverId(null)
+            .responsibleCaller(null)
+            .responsibleCallerId(null)
+            .responsibleNavigator(null)
+            .responsibleNavigatorId(null)
+            .isBlocked(false)
+            .blockedBy("")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_86() {
-        return new BigOrderTableViews()
-            .setId(86L)
-            .setOrderStatus("CONFIRMED")
-            .setOrderPaymentStatus("PAID")
-            .setOrderDate(LocalDate.parse("2022-02-05", DATE_TIME_FORMATTER))
-            .setPaymentDate(LocalDate.parse("2022-02-05", DATE_TIME_FORMATTER))
-            .setClientName("Abu Dabi")
-            .setClientPhoneNumber("+380380634654")
-            .setClientEmail("lvnmwyvsrvcruhfwbn@sdvgeft.com")
-            .setSenderName("")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn(null)
-            .setCity("Київ")
-            .setCityEn(null)
-            .setDistrict("Дніпровський")
-            .setDistrictEn(null)
-            .setAddress("Kharkivs'ke Highway 5, корп.4, п.- ")
-            .setAddressEn(" 5, b.4, e.- ")
-            .setBagAmount("120л - 2шт")
-            .setTotalOrderSum(600L)
-            .setOrderCertificateCode("3003-1992")
-            .setGeneralDiscount(500L)
-            .setAmountDue(-400L)
-            .setCommentForOrderByClient("hey")
-            .setTotalPayment(500L)
-            .setDateOfExport(LocalDate.parse("2022-02-06", DATE_TIME_FORMATTER))
-            .setTimeOfExport("22:27:00-22:27:03")
-            .setReceivingStationId(2L)
-            .setReceivingStation("Грибовицька")
-            .setResponsibleLogicManId(3L)
-            .setResponsibleLogicMan("Migno, Tekku")
-            .setResponsibleDriverId(10L)
-            .setResponsibleDriver("Abu, Dabi")
-            .setResponsibleCallerId(2L)
-            .setResponsibleCaller("Tapsoy, Ipsi")
-            .setResponsibleNavigatorId(15L)
-            .setResponsibleNavigator("Test, User")
-            .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(86L)
+            .orderStatus("CONFIRMED")
+            .orderPaymentStatus("PAID")
+            .orderDate(LocalDate.parse("2022-02-05"))
+            .paymentDate(LocalDate.parse("2022-02-05"))
+            .clientName("Anna Maria")
+            .clientPhoneNumber("+380631144678")
+            .clientEmail("testgreencity323@gmail.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Київська область")
+            .city("Київ")
+            .district("Шевченківський")
+            .address("Хрещатик 27, корп.- , п.1")
+            .regionEn("Kyiv Oblast")
+            .cityEn("Kyiv")
+            .districtEn("Shevchenkivskyi")
+            .addressEn("Khreshchatyk 27, b.- , e.1")
+            .commentToAddressForClient("Коментар до адреси 2")
+            .bagAmount("20л - 2шт")
+            .totalOrderSum(600L)
+            .orderCertificateCode("3003-1992")
+            .generalDiscount(500L)
+            .amountDue(-49400L)
+            .commentForOrderByClient("hey")
+            .commentForOrderByAdmin(null)
+            .totalPayment(50000L)
+            .dateOfExport(null)
+            .timeOfExport("22:27:00-22:27:03")
+            .idOrderFromShop(null)
+            .receivingStation("Грибовицька")
+            .receivingStationId(2L)
+            .responsibleLogicMan("Migno, Tekku")
+            .responsibleLogicManId(3L)
+            .responsibleDriver("Abu, Dabi")
+            .responsibleDriverId(10L)
+            .responsibleCaller("Tapsoy, Ipsi")
+            .responsibleCallerId(2L)
+            .responsibleNavigator("Test, User")
+            .responsibleNavigatorId(15L)
+            .isBlocked(false)
+            .blockedBy("")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_87() {
-        return new BigOrderTableViews()
-            .setId(87L)
-            .setOrderStatus("CONFIRMED")
-            .setOrderPaymentStatus("PAID")
-            .setOrderDate(LocalDate.parse("2022-02-07", DATE_TIME_FORMATTER))
-            .setPaymentDate(LocalDate.parse("2022-03-07", DATE_TIME_FORMATTER))
-            .setClientName("name surname")
-            .setClientPhoneNumber("+380972222222")
-            .setClientEmail("testgreencity323@gmail.com")
-            .setSenderName("")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn("Kyiv region")
-            .setCity("Київ")
-            .setCityEn("Kyiv")
-            .setDistrict("Дарницький")
-            .setDistrictEn("Darnyts'kyi")
-            .setAddress("проспект Петра Григоренка 3, корп.- , п.- ")
-            .setAddressEn("Petra Hryhorenka Avenue 3, b.- , e.- ")
-            .setCommentToAddressForClient("")
-            .setBagAmount("20л - 5шт; 120л - 10шт")
-            .setTotalOrderSum(3000L)
-            .setOrderCertificateCode("3113-3113, 3113-3114")
-            .setGeneralDiscount(2400L)
-            .setAmountDue(0L)
-            .setCommentForOrderByClient("by")
-            .setTotalPayment(600L)
-            .setDateOfExport(LocalDate.parse("2022-02-08", DATE_TIME_FORMATTER))
-            .setTimeOfExport("22:27:07-22:27:12")
-            .setReceivingStationId(2L)
-            .setReceivingStation("Грибовицька")
-            .setResponsibleLogicManId(3L)
-            .setResponsibleLogicMan("Migno, Tekku")
-            .setResponsibleDriverId(10L)
-            .setResponsibleDriver("Abu, Dabi")
-            .setResponsibleCallerId(2L)
-            .setResponsibleCaller("Tapsoy, Ipsi")
-            .setResponsibleNavigatorId(15L)
-            .setResponsibleNavigator("Test, User")
-            .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(87L)
+            .orderStatus("CONFIRMED")
+            .orderPaymentStatus("PAID")
+            .orderDate(LocalDate.parse("2022-02-07"))
+            .paymentDate(LocalDate.parse("2022-03-07"))
+            .clientName("Migno Tekku")
+            .clientPhoneNumber("+380508003301")
+            .clientEmail("mignotekku@vusra.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Львівська область")
+            .city("Львів")
+            .district("Шевченківський")
+            .address("Площа Ринок 5, корп.А, п.3")
+            .regionEn("Lviv Oblast")
+            .cityEn("Lviv")
+            .districtEn("Shevchenkivskyi")
+            .addressEn("Rynok Square 5, b.А, e.3")
+            .commentToAddressForClient("Коментар до адреси 3")
+            .bagAmount("120л - 5шт; 60л - 5шт; 20л - 5шт")
+            .totalOrderSum(3000L)
+            .orderCertificateCode("3113-3113, 3113-3114")
+            .generalDiscount(2000L)
+            .amountDue(-207000L)
+            .commentForOrderByClient("by")
+            .commentForOrderByAdmin(null)
+            .totalPayment(210000L)
+            .dateOfExport(null)
+            .timeOfExport("22:27:07-22:27:12")
+            .idOrderFromShop(null)
+            .receivingStation("Грибовицька")
+            .receivingStationId(2L)
+            .responsibleLogicMan("Migno, Tekku")
+            .responsibleLogicManId(3L)
+            .responsibleDriver("Abu, Dabi")
+            .responsibleDriverId(10L)
+            .responsibleCaller("Tapsoy, Ipsi")
+            .responsibleCallerId(2L)
+            .responsibleNavigator("Test, User")
+            .responsibleNavigatorId(15L)
+            .isBlocked(false)
+            .blockedBy("")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_88() {
-        return new BigOrderTableViews()
-            .setId(88L)
-            .setOrderStatus("DONE")
-            .setOrderPaymentStatus("PAID")
-            .setOrderDate(LocalDate.parse("2022-01-30", DATE_TIME_FORMATTER))
-            .setPaymentDate(LocalDate.parse("2022-01-30", DATE_TIME_FORMATTER))
-            .setClientName("Anna Maria")
-            .setClientPhoneNumber("+380631144678")
-            .setClientEmail("testgreencity323@gmail.com")
-            .setSenderName("замовник інша")
-            .setSenderPhone("+380979875456")
-            .setSenderEmail("test@ukr.net")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn("Kyiv region")
-            .setCity("Київ")
-            .setCityEn("Kyiv")
-            .setDistrict("Дарницький")
-            .setDistrictEn("Darnyts'kyi")
-            .setAddress("проспект Петра Григоренка 3, корп.- , п.- ")
-            .setAddressEn("Petra Hryhorenka Avenue 3, b.- , e.- ")
-            .setCommentToAddressForClient("")
-            .setBagAmount("20л - 1шт; 120л - 2шт")
-            .setTotalOrderSum(600L)
-            .setGeneralDiscount(0L)
-            .setAmountDue(0L)
-            .setCommentForOrderByClient("by")
-            .setTotalPayment(600L)
-            .setDateOfExport(LocalDate.parse("2022-02-08", DATE_TIME_FORMATTER))
-            .setTimeOfExport("22:27:16-22:27:21")
-            .setReceivingStationId(1L)
-            .setReceivingStation("Саперно-Слобідська")
-            .setResponsibleLogicManId(10L)
-            .setResponsibleLogicMan("Abu, Dabi")
-            .setResponsibleDriverId(15L)
-            .setResponsibleDriver("Test, User")
-            .setResponsibleCallerId(2L)
-            .setResponsibleCaller("Tapsoy, Ipsi")
-            .setResponsibleNavigatorId(3L)
-            .setResponsibleNavigator("Migno, Tekku")
-            .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(88L)
+            .orderStatus("DONE")
+            .orderPaymentStatus("PAID")
+            .orderDate(LocalDate.parse("2022-01-30"))
+            .paymentDate(LocalDate.parse("2022-01-30"))
+            .clientName("Anna Maria")
+            .clientPhoneNumber("+380631144678")
+            .clientEmail("testgreencity323@gmail.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Київська область")
+            .city("Київ")
+            .district("Подільський")
+            .address("Велика Васильківська 14, корп.Б, п.2")
+            .regionEn("Kyiv Oblast")
+            .cityEn("Kyiv")
+            .districtEn("Podilskyi")
+            .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
+            .commentToAddressForClient("Коментар до адреси 1")
+            .bagAmount("120л - 1шт; 60л - 1шт; 20л - 1шт")
+            .totalOrderSum(600L)
+            .orderCertificateCode(null)
+            .generalDiscount(0L)
+            .amountDue(-59400L)
+            .commentForOrderByClient("by")
+            .commentForOrderByAdmin(null)
+            .totalPayment(60000L)
+            .dateOfExport(null)
+            .timeOfExport("22:27:16-22:27:21")
+            .idOrderFromShop(null)
+            .receivingStation("Саперно-Слобідська")
+            .receivingStationId(1L)
+            .responsibleLogicMan("Abu, Dabi")
+            .responsibleLogicManId(10L)
+            .responsibleDriver("Test, User")
+            .responsibleDriverId(15L)
+            .responsibleCaller("Tapsoy, Ipsi")
+            .responsibleCallerId(2L)
+            .responsibleNavigator("Migno, Tekku")
+            .responsibleNavigatorId(3L)
+            .isBlocked(false)
+            .blockedBy("")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_89() {
-        return new BigOrderTableViews()
-            .setId(89L)
-            .setOrderStatus("FORMED")
-            .setOrderPaymentStatus("UNPAID")
-            .setOrderDate(LocalDate.parse("2022-02-08", DATE_TIME_FORMATTER))
-            .setClientName("Anna Maria")
-            .setClientPhoneNumber("+380631144678")
-            .setClientEmail("testgreencity323@gmail.com")
-            .setSenderName("")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn("Kyiv region")
-            .setCity("Київ")
-            .setCityEn("Kyiv")
-            .setDistrict("Солом'янський")
-            .setDistrictEn("Solom'yans'kyi")
-            .setAddress("Севастопольська площа 19, корп.- , п.- ")
-            .setAddressEn("Sevastopol's'ka Square 19, b.- , e.- ")
-            .setCommentToAddressForClient("")
-            .setBagAmount("20л - 1шт; 120л - 3шт")
-            .setTotalOrderSum(850L)
-            .setGeneralDiscount(0L)
-            .setAmountDue(850L)
-            .setCommentForOrderByClient("by")
-            .setTotalPayment(0L)
-            .setDateOfExport(LocalDate.parse("2022-02-09", DATE_TIME_FORMATTER))
-            .setTimeOfExport("22:27:25-22:27:29")
-            .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(89L)
+            .orderStatus("FORMED")
+            .orderPaymentStatus("UNPAID")
+            .orderDate(LocalDate.parse("2022-02-08"))
+            .paymentDate(null)
+            .clientName("Migno Tekku")
+            .clientPhoneNumber("+380508003301")
+            .clientEmail("mignotekku@vusra.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Львівська область")
+            .city("Львів")
+            .district("Шевченківський")
+            .address("Площа Ринок 5, корп.А, п.3")
+            .regionEn("Lviv Oblast")
+            .cityEn("Lviv")
+            .districtEn("Shevchenkivskyi")
+            .addressEn("Rynok Square 5, b.А, e.3")
+            .commentToAddressForClient("Коментар до адреси 3")
+            .bagAmount("120л - 2шт; 60л - 1шт; 20л - 1шт")
+            .totalOrderSum(850L)
+            .orderCertificateCode(null)
+            .generalDiscount(0L)
+            .amountDue(850L)
+            .commentForOrderByClient("by")
+            .commentForOrderByAdmin(null)
+            .totalPayment(0L)
+            .dateOfExport(null)
+            .timeOfExport("22:27:25-22:27:29")
+            .idOrderFromShop(null)
+            .receivingStation(null)
+            .receivingStationId(null)
+            .responsibleLogicMan(null)
+            .responsibleLogicManId(null)
+            .responsibleDriver(null)
+            .responsibleDriverId(null)
+            .responsibleCaller(null)
+            .responsibleCallerId(null)
+            .responsibleNavigator(null)
+            .responsibleNavigatorId(null)
+            .isBlocked(false)
+            .blockedBy("")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_90() {
-        return new BigOrderTableViews()
-            .setId(90L)
-            .setOrderStatus("ON_THE_ROUTE")
-            .setOrderPaymentStatus("PAID")
-            .setOrderDate(LocalDate.parse("2022-02-08", DATE_TIME_FORMATTER))
-            .setPaymentDate(LocalDate.parse("2022-02-08", DATE_TIME_FORMATTER))
-            .setClientName("Ross Sihovsk")
-            .setClientPhoneNumber("+380676666666")
-            .setClientEmail("rsihovskiy@gmail.com")
-            .setSenderName("TestlastForSearch testLast")
-            .setSenderPhone("+380974563223")
-            .setSenderEmail("test@email.ua")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn("Kyiv region")
-            .setCity("Київ")
-            .setCityEn("Kyiv")
-            .setDistrict("Солом'янський")
-            .setDistrictEn("Solom'yans'kyi")
-            .setAddress("Вулиця Федора Ернста 10, корп.16, п.- ")
-            .setAddressEn("Fedora Ernsta Street 10, b.16, e.- ")
-            .setCommentToAddressForClient("Ого, який коментар до адреси")
-            .setBagAmount("20л - 6шт; 120л - 14шт")
-            .setTotalOrderSum(4200L)
-            .setOrderCertificateCode("7777-7777, 1212-1212, 1111-2222")
-            .setGeneralDiscount(2050L)
-            .setAmountDue(0L)
-            .setCommentForOrderByClient("234")
-            .setTotalPayment(2150L)
-            .setDateOfExport(LocalDate.parse("2022-02-10", DATE_TIME_FORMATTER))
-            .setTimeOfExport("07:00:00-15:00:00")
-            .setReceivingStationId(2L)
-            .setReceivingStation("Грибовицька")
-            .setResponsibleLogicManId(3L)
-            .setResponsibleLogicMan("Migno, Tekku")
-            .setResponsibleDriverId(15L)
-            .setResponsibleDriver("Test, User")
-            .setResponsibleCallerId(2L)
-            .setResponsibleCaller("Tapsoy, Ipsi")
-            .setResponsibleNavigatorId(10L)
-            .setResponsibleNavigator("Abu, Dabi")
-            .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(90L)
+            .orderStatus("ON_THE_ROUTE")
+            .orderPaymentStatus("PAID")
+            .orderDate(LocalDate.parse("2022-02-08"))
+            .paymentDate(LocalDate.parse("2022-02-08"))
+            .clientName("Anna Maria")
+            .clientPhoneNumber("+380631144678")
+            .clientEmail("testgreencity323@gmail.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Київська область")
+            .city("Київ")
+            .district("Подільський")
+            .address("Велика Васильківська 14, корп.Б, п.2")
+            .regionEn("Kyiv Oblast")
+            .cityEn("Kyiv")
+            .districtEn("Podilskyi")
+            .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
+            .commentToAddressForClient("Коментар до адреси 1")
+            .bagAmount("120л - 6шт; 60л - 6шт; 20л - 8шт")
+            .totalOrderSum(4200L)
+            .orderCertificateCode("7777-7777, 1212-1212, 1111-2222")
+            .generalDiscount(2050L)
+            .amountDue(-200800L)
+            .commentForOrderByClient("234")
+            .commentForOrderByAdmin(null)
+            .totalPayment(205000L)
+            .dateOfExport(null)
+            .timeOfExport("07:00:00-15:00:00")
+            .idOrderFromShop(null)
+            .receivingStation("Грибовицька")
+            .receivingStationId(2L)
+            .responsibleLogicMan("Migno, Tekku")
+            .responsibleLogicManId(3L)
+            .responsibleDriver("Test, User")
+            .responsibleDriverId(15L)
+            .responsibleCaller("Tapsoy, Ipsi")
+            .responsibleCallerId(2L)
+            .responsibleNavigator("Abu, Dabi")
+            .responsibleNavigatorId(10L)
+            .isBlocked(false)
+            .blockedBy("")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_91() {
-        return new BigOrderTableViews()
-            .setId(91L)
-            .setOrderStatus("FORMED")
-            .setOrderPaymentStatus("PAID")
-            .setOrderDate(LocalDate.parse("2022-01-30", DATE_TIME_FORMATTER))
-            .setPaymentDate(LocalDate.parse("2022-01-30", DATE_TIME_FORMATTER))
-            .setClientName("John Doe")
-            .setClientPhoneNumber("+380631144678")
-            .setClientEmail("testgreencity323@gmail.com")
-            .setSenderName("")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn("Kyiv region")
-            .setCity("Київ")
-            .setCityEn("Kyiv")
-            .setDistrict("Солом'янський")
-            .setDistrictEn("Solom'yans'kyi")
-            .setAddress("Севастопольська площа 19, корп.- , п.- ")
-            .setAddressEn("Sevastopol's'ka Square 19, b.- , e.- ")
-            .setCommentToAddressForClient("")
-            .setBagAmount("20л - 2шт; 120л - 2шт")
-            .setTotalOrderSum(650L)
-            .setGeneralDiscount(0L)
-            .setAmountDue(0L)
-            .setCommentForOrderByClient("")
-            .setTotalPayment(650L)
-            .setDateOfExport(LocalDate.parse("2022-02-10", DATE_TIME_FORMATTER))
-            .setTimeOfExport("07:00:00-15:00:00")
-            .setIsBlocked(true)
-            .setBlockedBy("Abu, Dabi")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(91L)
+            .orderStatus("FORMED")
+            .orderPaymentStatus("PAID")
+            .orderDate(LocalDate.parse("2022-01-30"))
+            .paymentDate(LocalDate.parse("2022-01-30"))
+            .clientName("Anna Maria")
+            .clientPhoneNumber("+380631144678")
+            .clientEmail("testgreencity323@gmail.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Київська область")
+            .city("Київ")
+            .district("Подільський")
+            .address("Велика Васильківська 14, корп.Б, п.2")
+            .regionEn("Kyiv Oblast")
+            .cityEn("Kyiv")
+            .districtEn("Podilskyi")
+            .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
+            .commentToAddressForClient("Коментар до адреси 1")
+            .bagAmount("120л - 1шт; 60л - 2шт; 20л - 1шт")
+            .totalOrderSum(650L)
+            .orderCertificateCode(null)
+            .generalDiscount(0L)
+            .amountDue(-64350L)
+            .commentForOrderByClient("")
+            .commentForOrderByAdmin(null)
+            .totalPayment(65000L)
+            .dateOfExport(null)
+            .timeOfExport("07:00:00-15:00:00")
+            .idOrderFromShop(null)
+            .receivingStation(null)
+            .receivingStationId(null)
+            .responsibleLogicMan(null)
+            .responsibleLogicManId(null)
+            .responsibleDriver(null)
+            .responsibleDriverId(null)
+            .responsibleCaller(null)
+            .responsibleCallerId(null)
+            .responsibleNavigator(null)
+            .responsibleNavigatorId(null)
+            .isBlocked(true)
+            .blockedBy("Abu, Dabi")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_92() {
-        return new BigOrderTableViews()
-            .setId(92L)
-            .setOrderStatus("FORMED")
-            .setOrderPaymentStatus("PAID")
-            .setOrderDate(LocalDate.parse("2022-01-30", DATE_TIME_FORMATTER))
-            .setPaymentDate(LocalDate.parse("2022-01-30", DATE_TIME_FORMATTER))
-            .setClientName("John Doe")
-            .setClientPhoneNumber("+380631144678")
-            .setClientEmail("testgreencity323@gmail.com")
-            .setSenderName("")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn("Kyiv region")
-            .setCity("Київ")
-            .setCityEn("Kyiv")
-            .setDistrict("Дарницький")
-            .setDistrictEn("Darnyts'kyi")
-            .setAddress("проспект Петра Григоренка 3, корп.- , п.- ")
-            .setAddressEn("Petra Hryhorenka Avenue 3, b.- , e.- ")
-            .setCommentToAddressForClient("")
-            .setBagAmount("20л - 2шт; 120л - 2шт")
-            .setTotalOrderSum(650L)
-            .setGeneralDiscount(0L)
-            .setAmountDue(0L)
-            .setCommentForOrderByClient("")
-            .setTotalPayment(650L)
-            .setDateOfExport(LocalDate.parse("2022-02-18", DATE_TIME_FORMATTER))
-            .setTimeOfExport("22:27:59-22:28:11")
-            .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(92L)
+            .orderStatus("FORMED")
+            .orderPaymentStatus("PAID")
+            .orderDate(LocalDate.parse("2022-01-30"))
+            .paymentDate(LocalDate.parse("2022-01-30"))
+            .clientName("Anna Maria")
+            .clientPhoneNumber("+380631144678")
+            .clientEmail("testgreencity323@gmail.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Київська область")
+            .city("Київ")
+            .district("Подільський")
+            .address("Велика Васильківська 14, корп.Б, п.2")
+            .regionEn("Kyiv Oblast")
+            .cityEn("Kyiv")
+            .districtEn("Podilskyi")
+            .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
+            .commentToAddressForClient("Коментар до адреси 1")
+            .bagAmount("120л - 1шт; 60л - 2шт; 20л - 1шт")
+            .totalOrderSum(650L)
+            .orderCertificateCode(null)
+            .generalDiscount(0L)
+            .amountDue(-64350L)
+            .commentForOrderByClient("")
+            .commentForOrderByAdmin(null)
+            .totalPayment(65000L)
+            .dateOfExport(null)
+            .timeOfExport("22:27:59-22:28:11")
+            .idOrderFromShop(null)
+            .receivingStation(null)
+            .receivingStationId(null)
+            .responsibleLogicMan(null)
+            .responsibleLogicManId(null)
+            .responsibleDriver(null)
+            .responsibleDriverId(null)
+            .responsibleCaller(null)
+            .responsibleCallerId(null)
+            .responsibleNavigator(null)
+            .responsibleNavigatorId(null)
+            .isBlocked(false)
+            .blockedBy("")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_93() {
-        return new BigOrderTableViews()
-            .setId(93L)
-            .setOrderStatus("CONFIRMED")
-            .setOrderPaymentStatus("PAID")
-            .setOrderDate(LocalDate.parse("2022-01-27", DATE_TIME_FORMATTER))
-            .setPaymentDate(LocalDate.parse("2022-01-27", DATE_TIME_FORMATTER))
-            .setClientName("Myroslav Vir")
-            .setClientPhoneNumber("+380676079847")
-            .setClientEmail("xaratan242@nahetech.com")
-            .setSenderName("")
-            .setViolationsAmount(0)
-            .setRegion("Київська область")
-            .setRegionEn("Kyiv region")
-            .setCity("Київ")
-            .setCityEn("Kyiv")
-            .setDistrict("Шевченківський")
-            .setDistrictEn("Shevchenkivs'kyi")
-            .setAddress("улица Владимира Винниченко 10, корп.- , п.1")
-            .setAddressEn("Vladimir Vinnichenko Street 10, b.- , e.1")
-            .setCommentToAddressForClient("")
-            .setBagAmount("20л - 30шт; 120л - 70шт")
-            .setTotalOrderSum(5000L)
-            .setGeneralDiscount(0L)
-            .setAmountDue(-7650L)
-            .setCommentForOrderByClient("")
-            .setTotalPayment(12650L)
-            .setDateOfExport(LocalDate.parse("2022-02-03", DATE_TIME_FORMATTER))
-            .setTimeOfExport("22:28:18-22:28:24")
-            .setReceivingStationId(2L)
-            .setReceivingStation("Грибовицька")
-            .setResponsibleLogicManId(3L)
-            .setResponsibleLogicMan("Migno, Tekku")
-            .setResponsibleDriverId(2L)
-            .setResponsibleDriver("Tapsoy, Ipsi")
-            .setResponsibleCallerId(15L)
-            .setResponsibleCaller("Test, User")
-            .setResponsibleNavigatorId(10L)
-            .setResponsibleNavigator("Abu, Dabi")
-            .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffsInfoId(1L);
+        return BigOrderTableViews.builder()
+            .id(93L)
+            .orderStatus("CONFIRMED")
+            .orderPaymentStatus("PAID")
+            .orderDate(LocalDate.parse("2022-01-27"))
+            .paymentDate(LocalDate.parse("2022-01-27"))
+            .clientName("Anna Maria")
+            .clientPhoneNumber("+380631144678")
+            .clientEmail("testgreencity323@gmail.com")
+            .senderName("")
+            .senderPhone(null)
+            .senderEmail(null)
+            .violationsAmount(345)
+            .region("Київська область")
+            .city("Київ")
+            .district("Подільський")
+            .address("Велика Васильківська 14, корп.Б, п.2")
+            .regionEn("Kyiv Oblast")
+            .cityEn("Kyiv")
+            .districtEn("Podilskyi")
+            .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
+            .commentToAddressForClient("Коментар до адреси 1")
+            .bagAmount("120л - 20шт; 60л - 30шт; 20л - 50шт")
+            .totalOrderSum(5000L)
+            .orderCertificateCode(null)
+            .generalDiscount(0L)
+            .amountDue(-1260000L)
+            .commentForOrderByClient("")
+            .commentForOrderByAdmin(null)
+            .totalPayment(1265000L)
+            .dateOfExport(null)
+            .timeOfExport("22:28:18-22:28:24")
+            .idOrderFromShop(null)
+            .receivingStation("Грибовицька")
+            .receivingStationId(2L)
+            .responsibleLogicMan("Migno, Tekku")
+            .responsibleLogicManId(3L)
+            .responsibleDriver("Tapsoy, Ipsi")
+            .responsibleDriverId(2L)
+            .responsibleCaller("Test, User")
+            .responsibleCallerId(15L)
+            .responsibleNavigator("Abu, Dabi")
+            .responsibleNavigatorId(10L)
+            .isBlocked(false)
+            .blockedBy("")
+            .tariffsInfoId(1L)
+            .build();
     }
 
     public static List<BigOrderTableViews> getListBOTViewsStandardPageASC() {
@@ -580,6 +699,38 @@ public class ModelUtils {
             getBOTViews_89(),
             getBOTViews_90(),
             getBOTViews_91());
+    }
+
+    public static List<BigOrderTableViews> getAllBOTViewsDESC() {
+        return Arrays.asList(
+            getBOTViews_93(),
+            getBOTViews_92(),
+            getBOTViews_91(),
+            getBOTViews_90(),
+            getBOTViews_89(),
+            getBOTViews_88(),
+            getBOTViews_87(),
+            getBOTViews_86(),
+            getBOTViews_85(),
+            getBOTViews_84(),
+            getBOTViews_83(),
+            getBOTViews_82());
+    }
+
+    public static List<BigOrderTableViews> getAllBOTViewsASC() {
+        return Arrays.asList(
+            getBOTViews_82(),
+            getBOTViews_83(),
+            getBOTViews_84(),
+            getBOTViews_85(),
+            getBOTViews_86(),
+            getBOTViews_87(),
+            getBOTViews_88(),
+            getBOTViews_89(),
+            getBOTViews_90(),
+            getBOTViews_91(),
+            getBOTViews_92(),
+            getBOTViews_93());
     }
 
     public static List<BigOrderTableViews> getListBOTViewsStandardPageASC_by_pageSize_Two() {
@@ -606,153 +757,6 @@ public class ModelUtils {
         return Arrays.asList(
             getBOTViews_91(),
             getBOTViews_90());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Order_Status_Is_Formed() {
-        return Arrays.asList(
-            getBOTViews_92(),
-            getBOTViews_91(),
-            getBOTViews_89(),
-            getBOTViews_85(),
-            getBOTViews_84());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Order_Status_Is_Formed_And_CONFIRMED() {
-        return Arrays.asList(
-            getBOTViews_93(),
-            getBOTViews_92(),
-            getBOTViews_91(),
-            getBOTViews_89(),
-            getBOTViews_87(),
-            getBOTViews_86(),
-            getBOTViews_85(),
-            getBOTViews_84(),
-            getBOTViews_82());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Payment_Status_Is_PAID() {
-        return Arrays.asList(
-            getBOTViews_93(),
-            getBOTViews_92(),
-            getBOTViews_91(),
-            getBOTViews_90(),
-            getBOTViews_88(),
-            getBOTViews_87(),
-            getBOTViews_86(),
-            getBOTViews_83(),
-            getBOTViews_82());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Order_Date_Between() {
-        return Arrays.asList(
-            getBOTViews_84(),
-            getBOTViews_83(),
-            getBOTViews_82());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Order_Date_Less_Then_Or_Equal() {
-        return Arrays.asList(
-            getBOTViews_93(),
-            getBOTViews_92(),
-            getBOTViews_91(),
-            getBOTViews_88(),
-            getBOTViews_84());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Order_Date_Greater_Then_Or_Equal() {
-        return Arrays.asList(
-            getBOTViews_90(),
-            getBOTViews_89(),
-            getBOTViews_87(),
-            getBOTViews_86(),
-            getBOTViews_85(),
-            getBOTViews_84(),
-            getBOTViews_83(),
-            getBOTViews_82());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Date_Of_Export_Between() {
-        return Arrays.asList(
-            getBOTViews_93(),
-            getBOTViews_83(),
-            getBOTViews_82());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Payment_Date_Between() {
-        return Arrays.asList(
-            getBOTViews_83(),
-            getBOTViews_82());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Receving_station() {
-        return Arrays.asList(
-            getBOTViews_88(),
-            getBOTViews_82());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_District() {
-        return List.of(getBOTViews_84());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Responsible_Caller() {
-        return Arrays.asList(
-            getBOTViews_93(),
-            getBOTViews_82());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Logic_Man() {
-        return List.of(
-            getBOTViews_88());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Responsible_Driver() {
-        return Arrays.asList(
-            getBOTViews_87(),
-            getBOTViews_86(),
-            getBOTViews_82());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Responsible_Navigator() {
-        return Arrays.asList(
-            getBOTViews_93(),
-            getBOTViews_90(),
-            getBOTViews_83());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_Search() {
-        return List.of(
-            getBOTViews_90());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_Search_by_Client_name() {
-        return List.of(
-            getBOTViews_93());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_Combination_DESC() {
-        return Arrays.asList(
-            getBOTViews_92(),
-            getBOTViews_91());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_Combination_ASC() {
-        return Arrays.asList(
-            getBOTViews_91(),
-            getBOTViews_92());
-    }
-
-    public static List<BigOrderTableViews> getListBOTViewsOSC_Sorting_By_Order_Payment_Status_DESC() {
-        return Arrays.asList(
-            getBOTViews_89(),
-            getBOTViews_85(),
-            getBOTViews_84(),
-            getBOTViews_91(),
-            getBOTViews_86(),
-            getBOTViews_93(),
-            getBOTViews_87(),
-            getBOTViews_88(),
-            getBOTViews_83(),
-            getBOTViews_92());
     }
 
     public static Page<BigOrderTableViews> getPageableAllBOTViews_ASC() {
