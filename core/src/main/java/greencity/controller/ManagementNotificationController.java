@@ -121,7 +121,7 @@ public class ManagementNotificationController {
      */
     @Operation(summary = "Create notification template")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.CREATED, content = @Content),
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
@@ -134,13 +134,13 @@ public class ManagementNotificationController {
     }
 
     /**
-     * Controller that creates notification template with platforms.
+     * Controller that removes notification template with platforms.
      *
      * @author Denys Ryhal.
      */
     @Operation(summary = "Remove custom notification template")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = HttpStatuses.CREATED, content = @Content),
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
