@@ -160,8 +160,15 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
 
         if (!isPlatformsSizesIdentical(notificationReceiverTypes)
             || !isAllPlatformTypesPresent(notificationReceiverTypes)) {
-            throw new IncorrectTemplateException(ErrorMessage.TEMPLATE_DOES_NOT_CONTAIN_ALL_PLATFORMS);
+            throw new IncorrectTemplateException(
+                ErrorMessage.TEMPLATE_DOES_NOT_CONTAIN_ALL_PLATFORMS + getPlatformNames());
         }
+    }
+
+    private String getPlatformNames() {
+        return Arrays.stream(NotificationReceiverType.values())
+            .map(NotificationReceiverType::getName)
+            .reduce("", (s1, s2) -> s1 + "," + s2);
     }
 
     private boolean isPlatformsSizesIdentical(List<NotificationReceiverType> notificationReceiverTypes) {
