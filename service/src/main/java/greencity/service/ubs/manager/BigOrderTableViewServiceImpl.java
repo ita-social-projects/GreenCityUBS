@@ -5,6 +5,10 @@ import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
+import greencity.client.UserRemoteClient;
+import greencity.constant.ErrorMessage;
+import greencity.dto.user.UserVO;
+import greencity.exceptions.user.UserNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,13 +35,17 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     private final ModelMapper modelMapper;
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
+    private final UserRemoteClient userRemoteClient;
 
     @Override
     public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String email) {
+        UserVO userVO = userRemoteClient.findNotDeactivatedByEmail(email).orElseThrow(() -> new UserNotFoundException(
+            ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST));
         Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
-        var orders = bigOrderTableRepository.findAll(orderPage, searchCriteria, tariffsInfoIds);
+        var orders = bigOrderTableRepository.findAll(orderPage, searchCriteria, tariffsInfoIds,
+            userVO.getLanguageVO().getCode());
         var orderList = new ArrayList<BigOrderTableDTO>();
         orders.forEach(o -> orderList.add(modelMapper.map(o, BigOrderTableDTO.class)));
         return new PageImpl<>(orderList, orders.getPageable(), orders.getTotalElements());
