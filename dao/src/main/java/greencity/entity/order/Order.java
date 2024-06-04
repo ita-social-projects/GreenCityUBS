@@ -10,6 +10,7 @@ import greencity.enums.CancellationReason;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.filters.StringListConverter;
+import jakarta.persistence.FetchType;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -69,7 +70,7 @@ public class Order {
     @JoinColumn(name = "users_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ubs_user_id")
     private UBSuser ubsUser;
 
@@ -81,7 +82,7 @@ public class Order {
 
     private boolean blocked;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id")
     private Employee blockedByEmployee;
 
@@ -129,7 +130,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderPaymentStatus orderPaymentStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiving_station_id")
     private ReceivingStation receivingStation;
 
@@ -172,7 +173,7 @@ public class Order {
     @Column(name = "counter_order_payment_id")
     private Long counterOrderPaymentId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private TariffsInfo tariffsInfo;
 
     @Column(name = "sum_total_amount_without_discounts")

@@ -677,12 +677,12 @@ class NotificationServiceImplTest {
             List<Order> orders = Collections.singletonList(order);
             Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order);
 
-            when(orderRepository.findAllUnpaidOrdersByBagId(anyInt())).thenReturn(orders);
+            when(orderRepository.findAllUnpaidOrdersWithUsersByBagId(anyInt())).thenReturn(orders);
             when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
             mockFillAndSendNotification(parameters, order, NotificationType.TARIFF_PRICE_WAS_CHANGED);
 
             notificationService.notifyAllOrdersWithIncreasedTariffPrice(anyInt());
-            verify(orderRepository).findAllUnpaidOrdersByBagId(any());
+            verify(orderRepository).findAllUnpaidOrdersWithUsersByBagId(any());
             verifyFillAndSendNotification();
         }
 
