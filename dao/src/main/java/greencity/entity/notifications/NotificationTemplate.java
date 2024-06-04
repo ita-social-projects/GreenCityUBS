@@ -4,6 +4,7 @@ import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationTime;
 import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
+import greencity.enums.UserCategory;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,6 +49,7 @@ public class NotificationTemplate {
         fetch = FetchType.LAZY,
         orphanRemoval = true)
     @Setter(AccessLevel.PRIVATE)
+    @Builder.Default
     private List<NotificationPlatform> notificationPlatforms = new ArrayList<>();
 
     @Column(nullable = false, name = "notification_type")
@@ -57,6 +59,10 @@ public class NotificationTemplate {
     @Column(nullable = false, name = "trigger")
     @Enumerated(EnumType.STRING)
     private NotificationTrigger trigger;
+
+    @Column(name = "user_category")
+    @Enumerated(EnumType.STRING)
+    private UserCategory userCategory;
 
     @Column(nullable = false, name = "time")
     @Enumerated(EnumType.STRING)
@@ -74,4 +80,13 @@ public class NotificationTemplate {
 
     @Column(name = "title_eng")
     private String titleEng;
+
+    @Builder.Default
+    @Column(name = "is_schedule_update_forbidden", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean isScheduleUpdateForbidden = false;
+
+    public void addPlatforms(List<NotificationPlatform> notificationPlatforms) {
+        notificationPlatforms.forEach(platform -> platform.setNotificationTemplate(this));
+        this.notificationPlatforms.addAll(notificationPlatforms);
+    }
 }

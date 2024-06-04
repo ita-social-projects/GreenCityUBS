@@ -23,9 +23,10 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.UserCategory;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
-import greencity.repository.BagRepository;
+import greencity.filters.UserSpecification;
 import greencity.repository.NotificationParameterRepository;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.OrderRepository;
@@ -44,6 +45,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -85,7 +87,6 @@ import static greencity.constant.OrderHistory.DELETE_VIOLATION;
 public class NotificationServiceImpl implements NotificationService {
     private final UserRepository userRepository;
     private final UserNotificationRepository userNotificationRepository;
-    private final BagRepository bagRepository;
     private final OrderRepository orderRepository;
     private final ViolationRepository violationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
@@ -227,13 +228,16 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyUnpaidPaidPackage(Order order) {
+    @Async
+    public void notifyAllOrdersWithIncreasedTariffPrice(Integer bagId) {
+        var orders = orderRepository.findAllUnpaidOrdersWithUsersByBagId(bagId);
+        orders.forEach(this::notifyIncreasedTariffPrice);
+    }
+
+    private void notifyIncreasedTariffPrice(Order order) {
         Double amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
-
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
-            fillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
-        }
+        fillAndSendNotification(parameters, order, NotificationType.TARIFF_PRICE_WAS_CHANGED);
     }
 
     @Override
@@ -622,6 +626,22 @@ public class NotificationServiceImpl implements NotificationService {
                 || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(MIN_NOTIFICATION_ORDER_AGE_DAYS)));
     }
 
+    @Override
+    public void notifyCustom(Long templateId, UserCategory userCategory) {
+        var users = userRepository.findAll(new UserSpecification(userCategory));
+        users.forEach(user -> fillAndSendCustomNotification(user, templateId));
+    }
+
+    private void fillAndSendCustomNotification(User user, Long templateId) {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.CUSTOM);
+        userNotification.setTemplateId(templateId);
+        userNotification.setUser(user);
+        UserNotification created = userNotificationRepository.save(userNotification);
+        created.setParameters(new HashSet<>());
+        sendNotificationsForBotsAndEmail(created, 0L);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -776,10 +796,8 @@ public class NotificationServiceImpl implements NotificationService {
     public static NotificationDto createNotificationDto(UserNotification notification, String language,
         NotificationReceiverType receiverType,
         NotificationTemplateRepository templateRepository, long monthsOfAccountInactivity) {
-        NotificationTemplate template = templateRepository
-            .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
-                notification.getNotificationType(), receiverType)
-            .orElseThrow(() -> new NotFoundException("Template not found"));
+        NotificationTemplate template = getNotificationTemplate(notification, receiverType, templateRepository);
+
         String templateBody = resolveTemplateBody(language, receiverType, template);
         if (notification.getParameters() == null) {
             notification.setParameters(Collections.emptySet());
@@ -793,6 +811,19 @@ public class NotificationServiceImpl implements NotificationService {
 
         return NotificationDto.builder().title(title)
             .body(resultBody).build();
+    }
+
+    private static NotificationTemplate getNotificationTemplate(
+        UserNotification notification, NotificationReceiverType receiverType,
+        NotificationTemplateRepository templateRepository) {
+        Optional<NotificationTemplate> templateOptional =
+            notification.getNotificationType().equals(NotificationType.CUSTOM)
+                ? templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(
+                    notification.getTemplateId(), receiverType)
+                : templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+                    notification.getNotificationType(), receiverType);
+
+        return templateOptional.orElseThrow(() -> new NotFoundException("Template not found"));
     }
 
     private static String resolveTemplateBody(String language, NotificationReceiverType receiverType,

@@ -14,7 +14,6 @@ import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
@@ -155,15 +154,6 @@ public interface UBSClientService {
      * @author Veremchuk Zakhar
      */
     OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid);
-
-    /**
-     * Method returns list of all orders done by user.
-     *
-     * @param uuid current {@link User}'s uuid;
-     * @return {@link OrderClientDto} that contains client's orders.
-     * @author Danylko Mykola
-     */
-    List<OrderClientDto> getAllOrdersDoneByUser(String uuid);
 
     /**
      * Method that returns info about all orders for specified userID.

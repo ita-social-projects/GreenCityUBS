@@ -1,8 +1,13 @@
 package greencity.enums;
 
-import java.util.HashMap;
-import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 
+@Getter
+@AllArgsConstructor
 public enum OrderStatusSortingTranslation {
     DONE(1),
     ON_THE_ROUTE(2),
@@ -16,28 +21,10 @@ public enum OrderStatusSortingTranslation {
 
     private final int sortOrder;
 
-    OrderStatusSortingTranslation(int sortOrder) {
-        this.sortOrder = sortOrder;
-    }
+    private static final Set<OrderStatusSortingTranslation> ASC_ORDER_SET =
+        Collections.unmodifiableSet(EnumSet.allOf(OrderStatusSortingTranslation.class));
 
-    public int getSortOrder() {
-        return sortOrder;
-    }
-
-    public static Map<OrderStatusSortingTranslation, Integer> getOrderMapSortedByAsc() {
-        Map<OrderStatusSortingTranslation, Integer> sortOrderMap = new HashMap<>();
-        for (OrderStatusSortingTranslation status : OrderStatusSortingTranslation.values()) {
-            sortOrderMap.put(status, status.getSortOrder());
-        }
-        return sortOrderMap;
-    }
-
-    public static Map<OrderStatusSortingTranslation, Integer> getOrderMapSortedByDesc() {
-        Map<OrderStatusSortingTranslation, Integer> sortOrderMap = new HashMap<>();
-        int maxOrder = OrderStatusSortingTranslation.values().length;
-        for (OrderStatusSortingTranslation status : OrderStatusSortingTranslation.values()) {
-            sortOrderMap.put(status, maxOrder - status.getSortOrder() + 1);
-        }
-        return sortOrderMap;
+    public static Set<OrderStatusSortingTranslation> getOrderSetSortedByAsc() {
+        return ASC_ORDER_SET;
     }
 }

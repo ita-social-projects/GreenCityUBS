@@ -1,8 +1,7 @@
 package greencity.notificator.scheduler;
 
-import greencity.dto.notification.ScheduledNotificationDto;
 import greencity.enums.NotificationType;
-import greencity.notificator.CourierInternallyFormedNotificator;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
@@ -29,18 +29,15 @@ class NotificationTaskSchedulerTest {
     private TaskScheduler taskScheduler;
 
     @Test
+    @SuppressWarnings("unchecked")
     void scheduleNotificationWithCorrectCronExpressionTest() {
-        var expected = new ScheduledNotificationDto(
-            NotificationType.COURIER_ITINERARY_FORMED, null, CourierInternallyFormedNotificator.class);
+        var expected = mock(ScheduledFuture.class);
+        when(taskScheduler.schedule(any(Runnable.class), any(CronTrigger.class)))
+            .thenReturn(expected);
 
-        when(taskScheduler.schedule(any(Runnable.class), any(CronTrigger.class))).thenReturn(null);
-
-        var actual = notificationTaskScheduler
-            .scheduleNotification(() -> {
-            }, "0 4 * * * *", NotificationType.COURIER_ITINERARY_FORMED,
-                CourierInternallyFormedNotificator.class);
-
-        assertNotNull(actual);
+        var actual = notificationTaskScheduler.scheduleNotification(() -> {
+        },
+            "0 4 * * * *", NotificationType.COURIER_ITINERARY_FORMED);
         assertEquals(expected, actual);
         verify(taskScheduler).schedule(any(Runnable.class), any(CronTrigger.class));
     }
@@ -48,16 +45,11 @@ class NotificationTaskSchedulerTest {
     @ParameterizedTest
     @MethodSource(value = "incorrectCronExpressionsProvider")
     void scheduleNotificationWithIncorrectCronExpressionTest(String cronExpression) {
-        var expected = new ScheduledNotificationDto(
-            NotificationType.COURIER_ITINERARY_FORMED, null, CourierInternallyFormedNotificator.class);
-
         var actual = notificationTaskScheduler
             .scheduleNotification(() -> {
-            }, cronExpression, NotificationType.COURIER_ITINERARY_FORMED,
-                CourierInternallyFormedNotificator.class);
+            }, cronExpression, NotificationType.COURIER_ITINERARY_FORMED);
 
-        assertNotNull(actual);
-        assertEquals(expected, actual);
+        assertNull(actual);
         verify(taskScheduler, never()).schedule(any(Runnable.class), any(CronTrigger.class));
     }
 

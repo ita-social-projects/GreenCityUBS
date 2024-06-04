@@ -5,6 +5,7 @@ import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
+import greencity.enums.UserCategory;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
@@ -43,13 +44,6 @@ public interface NotificationService {
      * @author Ann Sakhno
      */
     void notifyHalfPaidPackage(Order order);
-
-    /**
-     * Method that creates notification for unpaid package.
-     *
-     * @author Denys Ryhal
-     */
-    void notifyUnpaidPaidPackage(Order order);
 
     /**
      * Method that creates notification for users bonuses.
@@ -141,6 +135,8 @@ public interface NotificationService {
      */
     void notifyAllHalfPaidOrdersWithStatusBroughtByHimself();
 
+    void notifyCustom(Long templateUuid, UserCategory userCategory);
+
     /**
      * Method that creates notification for inactive users.
      *
@@ -154,6 +150,14 @@ public interface NotificationService {
      * @author Ann Sakhno
      */
     void notifyAllHalfPaidPackages();
+
+    /**
+     * Method that creates notification for unpaid orders which tariff price was
+     * increased.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllOrdersWithIncreasedTariffPrice(Integer bagId);
 
     /**
      * Method sends messages by e-mail/notification that order is unpaid.
