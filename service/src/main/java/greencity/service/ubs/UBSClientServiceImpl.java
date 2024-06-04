@@ -600,6 +600,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
+        dtoRequest.setHouseNumber(addressRequestDto.getHouseNumber());
 
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
             modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
