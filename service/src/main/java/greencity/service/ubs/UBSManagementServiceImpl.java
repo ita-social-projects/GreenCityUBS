@@ -596,11 +596,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         long totalPriceInCoins = convertBillsIntoCoins(setTotalPrice(getPriceDetails(orderId)));
         long needToPayInCoins = totalPriceInCoins - wasPaidInCoins - discountInCoins;
 
-        updatePaymentStatus(order, wasPaidInCoins, discountInCoins, totalPriceInCoins, needToPayInCoins);
+        updatePaymentStatus(order, wasPaidInCoins, discountInCoins, totalPriceInCoins, needToPayInCoins, email);
     }
 
     private void updatePaymentStatus(Order order, long wasPaidInCoins, long discountInCoins,
-        long totalPriceInCoins, long needToPayInCoins) {
+        long totalPriceInCoins, long needToPayInCoins, String email) {
         Long orderId = order.getId();
 
         if (needToPayInCoins == 0) {
@@ -612,17 +612,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
             recalculateCertificates(totalPriceInCoins - wasPaidInCoins, order);
+            eventService.saveEvent(OrderHistory.ORDER_PAID, email, order);
             return;
         }
         if (totalPriceInCoins < wasPaidInCoins) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
+            eventService.saveEvent(OrderHistory.ORDER_PAID, email, order);
             recalculateCertificates(0L, order);
             return;
         }
         if (needToPayInCoins > 0 && wasPaidInCoins + discountInCoins != 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.HALF_PAID.name());
+            eventService.saveEvent(OrderHistory.ORDER_HALF_PAID, email, order);
             notificationService.notifyHalfPaidPackage(order);
             return;
         }
