@@ -33,12 +33,11 @@ public class OrderBag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bag_id")
     private Bag bag;
 

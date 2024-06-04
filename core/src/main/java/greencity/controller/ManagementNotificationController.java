@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
+import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
@@ -17,8 +18,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -108,5 +112,43 @@ public class ManagementNotificationController {
         @PathVariable Long id, @RequestParam String status) {
         notificationTemplateService.changeNotificationStatusById(id, status);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller that creates notification template with platforms.
+     *
+     * @author Denys Ryhal.
+     */
+    @Operation(summary = "Create notification template")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+    })
+    @PostMapping("/add-template")
+    public ResponseEntity<HttpStatus> addNotificationTemplate(
+        @RequestBody @Validated AddNotificationTemplateWithPlatformsDto template) {
+        notificationTemplateService.createNotificationTemplate(template);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller that removes notification template with platforms.
+     *
+     * @author Denys Ryhal.
+     */
+    @Operation(summary = "Remove custom notification template")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content),
+    })
+    @DeleteMapping("/remove-custom-template/{id}")
+    public ResponseEntity<HttpStatus> removeNotificationTemplate(@PathVariable Long id) {
+        notificationTemplateService.removeNotificationTemplate(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

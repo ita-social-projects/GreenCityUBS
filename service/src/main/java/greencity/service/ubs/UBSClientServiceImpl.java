@@ -21,7 +21,6 @@ import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
-import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.courier.CourierDto;
@@ -33,10 +32,8 @@ import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
@@ -912,17 +909,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .build());
         }
         userRepository.save(currentUser);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<OrderClientDto> getAllOrdersDoneByUser(String uuid) {
-        return orderRepository.getAllOrdersOfUser(uuid).stream()
-            .sorted(Comparator.comparing(Order::getOrderDate))
-            .map(order -> modelMapper.map(order, OrderClientDto.class))
-            .collect(toList());
     }
 
     /**

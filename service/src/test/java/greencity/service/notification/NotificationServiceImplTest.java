@@ -8,6 +8,7 @@ import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.order.Event;
+import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -19,9 +20,10 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
+import greencity.enums.UserCategory;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
-import greencity.repository.BagRepository;
+import greencity.filters.UserSpecification;
 import greencity.repository.NotificationParameterRepository;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.OrderRepository;
@@ -29,15 +31,6 @@ import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.OrderBagService;
-import static greencity.constant.OrderHistory.ADD_VIOLATION;
-import static greencity.constant.OrderHistory.CHANGES_VIOLATION;
-import static greencity.constant.OrderHistory.DELETE_VIOLATION;
-import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT;
-import static greencity.constant.OrderHistory.ORDER_CONFIRMED;
-import static greencity.constant.OrderHistory.ORDER_FORMED;
-import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT;
-import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE;
-import static java.util.Arrays.asList;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -109,6 +102,15 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.anyLong;
+import static greencity.constant.OrderHistory.ADD_VIOLATION;
+import static greencity.constant.OrderHistory.CHANGES_VIOLATION;
+import static greencity.constant.OrderHistory.DELETE_VIOLATION;
+import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT;
+import static greencity.constant.OrderHistory.ORDER_CONFIRMED;
+import static greencity.constant.OrderHistory.ORDER_FORMED;
+import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT;
+import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE;
+import static java.util.Arrays.asList;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
@@ -137,9 +139,6 @@ class NotificationServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private BagRepository bagRepository;
 
     @Mock
     private NotificationTemplateRepository templateRepository;
@@ -241,11 +240,11 @@ class NotificationServiceImplTest {
 
         @Test
         void testNotifyPaidOrder() {
-            when(userNotificationRepository.save(TEST_USER_NOTIFICATION)).thenReturn(TEST_USER_NOTIFICATION);
+            when(userNotificationRepository.save(any())).thenReturn(TEST_USER_NOTIFICATION);
 
             notificationService.notifyPaidOrder(TEST_ORDER_2);
 
-            verify(userNotificationRepository, times(1)).save(TEST_USER_NOTIFICATION);
+            verify(userNotificationRepository, times(1)).save(any());
 
         }
 
@@ -258,7 +257,7 @@ class NotificationServiceImplTest {
                 .value(order.getId().toString())
                 .build();
             when(notificationParameterRepository.saveAll(Set.of(orderNumber))).thenReturn(List.of(orderNumber));
-            when(userNotificationRepository.save(TEST_USER_NOTIFICATION)).thenReturn(TEST_USER_NOTIFICATION);
+            when(userNotificationRepository.save(any())).thenReturn(TEST_USER_NOTIFICATION);
             PaymentResponseDto dto = PaymentResponseDto.builder().order_id("1_1").build();
             notificationService.notifyPaidOrder(order);
             verify(notificationService).notifyPaidOrder(order);
@@ -678,12 +677,12 @@ class NotificationServiceImplTest {
             List<Order> orders = Collections.singletonList(order);
             Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order);
 
-            when(orderRepository.findAllUnpaidOrdersByBagId(anyInt())).thenReturn(orders);
+            when(orderRepository.findAllUnpaidOrdersWithUsersByBagId(anyInt())).thenReturn(orders);
             when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
             mockFillAndSendNotification(parameters, order, NotificationType.TARIFF_PRICE_WAS_CHANGED);
 
             notificationService.notifyAllOrdersWithIncreasedTariffPrice(anyInt());
-            verify(orderRepository).findAllUnpaidOrdersByBagId(any());
+            verify(orderRepository).findAllUnpaidOrdersWithUsersByBagId(any());
             verifyFillAndSendNotification();
         }
 
@@ -764,13 +763,30 @@ class NotificationServiceImplTest {
         }
 
         @Test
+        void testNotifyCustom() {
+            var user = getUser();
+            var templateId = 1L;
+            var userNotification = new UserNotification();
+            userNotification.setNotificationType(NotificationType.CUSTOM);
+            userNotification.setUser(user);
+            userNotification.setTemplateId(templateId);
+
+            when(userRepository.findAll(any(UserSpecification.class))).thenReturn(Collections.singletonList(user));
+            when(userNotificationRepository.save(any())).thenReturn(userNotification);
+
+            notificationService.notifyCustom(templateId, UserCategory.USERS_WITH_ORDERS_MADE_LESS_THAN_3_MONTHS);
+
+            verify(userNotificationRepository).save(any());
+            verify(userRepository).findAll(any(UserSpecification.class));
+        }
+
+        @Test
         void testNotifyInactiveAccounts() {
             AbstractNotificationProvider abstractNotificationProvider =
                 Mockito.mock(AbstractNotificationProvider.class);
             NotificationServiceImpl notificationService1 = new NotificationServiceImpl(
                 userRepository,
                 userNotificationRepository,
-                bagRepository,
                 orderRepository,
                 violationRepository,
                 notificationParameterRepository,
@@ -1139,6 +1155,28 @@ class NotificationServiceImplTest {
             NotificationReceiverType.MOBILE, templateRepository, 5L);
 
         assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitleEng(), result.getTitle());
+    }
+
+    @Test
+    void createNotificationDtoOfCustomTemplateTest() {
+        String language = "en";
+
+        var testNotificationTemplate = TEST_NOTIFICATION_TEMPLATE;
+        testNotificationTemplate.setNotificationType(NotificationType.CUSTOM);
+        testNotificationTemplate.setTrigger(NotificationTrigger.CUSTOM);
+
+        var testUserNotification = TEST_USER_NOTIFICATION;
+        testUserNotification.setNotificationType(NotificationType.CUSTOM);
+        testUserNotification.setTemplateId(testNotificationTemplate.getId());
+
+        when(templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(any(), any()))
+            .thenReturn(Optional.of(testNotificationTemplate));
+
+        NotificationDto result = NotificationServiceImpl.createNotificationDto(testUserNotification, language,
+            NotificationReceiverType.MOBILE, templateRepository, 5L);
+
+        assertEquals(testNotificationTemplate.getTitleEng(), result.getTitle());
+        verify(templateRepository).findNotificationTemplateByIdAndNotificationReceiverType(any(), any());
     }
 
     @Test

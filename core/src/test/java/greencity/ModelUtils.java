@@ -16,10 +16,13 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
+import greencity.dto.notification.AddNotificationPlatformDto;
+import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.order.AdminCommentDto;
@@ -28,7 +31,6 @@ import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderFondyClientDto;
@@ -64,6 +66,7 @@ import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.UserCategory;
 import org.springframework.http.HttpStatus;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -74,6 +77,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static greencity.enums.NotificationReceiverType.EMAIL;
+import static greencity.enums.NotificationReceiverType.MOBILE;
+import static greencity.enums.NotificationReceiverType.SITE;
 import static greencity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
@@ -173,14 +180,6 @@ public class ModelUtils {
             .recipientEmail("petrov@gmail.com")
             .telegramIsNotify(true)
             .viberIsNotify(false)
-            .build();
-    }
-
-    public static OrderClientDto getOrderClientDto() {
-        return OrderClientDto.builder()
-            .id(1L)
-            .orderStatus(OrderStatus.FORMED)
-            .amount(450L)
             .build();
     }
 
@@ -438,9 +437,20 @@ public class ModelUtils {
 
     public static NotificationTemplateWithPlatformsUpdateDto getNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
-            .notificationTemplateMainInfoDto(getNotificationTemplateMainInfoDto())
+            .notificationTemplateUpdateInfo(getNotificationTemplateUpdateInfoDto())
             .platforms(List.of(
                 getNotificationPlatformDto(NotificationReceiverType.SITE)))
+            .build();
+    }
+
+    public static NotificationTemplateUpdateInfoDto getNotificationTemplateUpdateInfoDto() {
+        return NotificationTemplateUpdateInfoDto.builder()
+            .type(NotificationType.UNPAID_ORDER)
+            .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
+            .time(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
+            .schedule("0 0 18 * * ?")
+            .title("Неопачене замовлення")
+            .titleEng("Unpaid order")
             .build();
     }
 
@@ -601,4 +611,27 @@ public class ModelUtils {
             .notTakenOutReason("not taken out")
             .build();
     }
+
+    public static AddNotificationTemplateWithPlatformsDto getAddNotificationTemplateWithPlatforms() {
+        return AddNotificationTemplateWithPlatformsDto.builder()
+            .schedule("0 0 18 * * ?")
+            .title("Title")
+            .titleEng("TitleEng")
+            .userCategory(UserCategory.ALL_USERS)
+            .platforms(List.of(
+                getAddNotificationPlatform(SITE),
+                getAddNotificationPlatform(EMAIL),
+                getAddNotificationPlatform(MOBILE)))
+            .build();
+    }
+
+    public static AddNotificationPlatformDto getAddNotificationPlatform(
+        NotificationReceiverType receiverType) {
+        return AddNotificationPlatformDto.builder()
+            .body("Body")
+            .bodyEng("BodyEng")
+            .notificationReceiverType(receiverType)
+            .build();
+    }
+
 }

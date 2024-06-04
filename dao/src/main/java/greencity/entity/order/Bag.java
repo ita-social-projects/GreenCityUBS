@@ -76,14 +76,14 @@ public class Bag {
     @Column(nullable = false)
     private LocalDate createdAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Employee createdBy;
 
     @Column
     private LocalDate editedAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
     private Employee editedBy;
 

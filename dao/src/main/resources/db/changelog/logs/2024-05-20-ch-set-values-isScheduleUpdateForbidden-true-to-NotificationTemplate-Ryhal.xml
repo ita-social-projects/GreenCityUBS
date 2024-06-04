@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2024-05-20-ch-set-values-isScheduleUpdateForbidden-true-to-NotificationTemplates-Ryhal" author="Denys Ryhal">
+        <update tableName="notification_templates">
+            <column name="is_schedule_update_forbidden" value="true"/>
+            <where>
+                notification_type in ('ACCRUED_BONUSES_TO_ACCOUNT','ORDER_IS_PAID',
+                                    'BONUSES_FROM_CANCELLED_ORDER','TARIFF_PRICE_WAS_CHANGED')
+            </where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

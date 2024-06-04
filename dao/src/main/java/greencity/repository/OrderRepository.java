@@ -168,11 +168,20 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * method returns all unpaid orders that contain a bag with id.
      */
-    @Query(nativeQuery = true,
-        value = "select o.* from orders o "
-            + "left join order_bag_mapping obm on o.id = obm.order_id "
-            + "where obm.bag_id = :bagId and o.order_payment_status = 'UNPAID'")
+    @Query(value = "select o from Order o "
+        + "join fetch OrderBag obm on o.id = obm.order.id "
+        + "join fetch Bag b on obm.bag.id = b.id "
+        + "where obm.bag.id = :bagId and o.orderPaymentStatus = 'UNPAID'")
     List<Order> findAllUnpaidOrdersByBagId(Integer bagId);
+
+    /**
+     * method returns all unpaid orders that contain a bag with id.
+     */
+    @Query(value = "select o from Order o "
+        + "join fetch o.ubsUser "
+        + "join fetch OrderBag obm on o.id = obm.order.id "
+        + "where obm.bag.id = :bagId and o.orderPaymentStatus = 'UNPAID'")
+    List<Order> findAllUnpaidOrdersWithUsersByBagId(Integer bagId);
 
     /**
      * method returns all orders that contain a bag with id.
@@ -184,34 +193,46 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByBagId(Integer bagId);
 
     /**
-     * method gets orders by order status and order payment status.
+     * Method retrieves orders by order status and order payment status.
+     *
+     * @param orderStatus   - status of the order.
+     * @param paymentStatus - payment status of the order.
      */
     List<Order> findAllByOrderStatusAndOrderPaymentStatus(OrderStatus orderStatus, OrderPaymentStatus paymentStatus);
 
     /**
-     * method gets orders by order status left join events.
+     * Method retrieves orders by order status join events.
+     *
+     * @param orderStatus - status of the order.
      */
     @Query("select o from Order o "
-        + "left join fetch o.events e WHERE o.orderStatus =?1")
-    List<Order> findAllByOrderStatusWithEvents(OrderStatus orderStatus);
+        + "left join fetch o.events e WHERE o.orderStatus = :orderStatus")
+    List<Order> findAllByOrderStatusWithEvents(@Param("orderStatus") OrderStatus orderStatus);
 
     /**
-     * method gets orders by event names inner join events.
+     * Method retrieves orders by event names join events.
+     *
+     * @param eventNames - names of events which are related to the order.
      */
     @Query("select o from Order o "
         + "inner join fetch o.events e WHERE e.eventName IN (:eventNames)")
     List<Order> findAllWithEventsByEventNames(@Param("eventNames") String... eventNames);
 
     /**
-     * method gets orders by order payment status left join events.
+     * Method retrieves orders by order payment status join events.
+     *
+     * @param orderStatus - payment status of the orders.
      */
     @Query("select o from Order o "
         + "left join fetch o.events e WHERE o.orderPaymentStatus = :orderStatus")
     List<Order> findAllByOrderPaymentStatusWithEvents(@Param("orderStatus") OrderPaymentStatus orderStatus);
 
     /**
-     * method gets orders by order payment statuses and order statuses inner join
+     * Method retrieves orders by order payment statuses and order statuses join
      * events.
+     *
+     * @param paymentStatuses - list of payment statues of the order.
+     * @param orderStatuses   - list of order statues.
      */
     @Query("select o from Order o "
         + "inner join fetch o.events e "

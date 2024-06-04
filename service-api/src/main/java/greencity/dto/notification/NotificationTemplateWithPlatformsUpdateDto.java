@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 public class NotificationTemplateWithPlatformsUpdateDto {
     @NotNull
-    private NotificationTemplateMainInfoDto notificationTemplateMainInfoDto;
+    private NotificationTemplateUpdateInfoDto notificationTemplateUpdateInfo;
     @NotNull
     private List<NotificationPlatformDto> platforms;
 }

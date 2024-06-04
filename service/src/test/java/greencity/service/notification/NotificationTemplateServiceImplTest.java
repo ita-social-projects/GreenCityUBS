@@ -1,11 +1,17 @@
 package greencity.service.notification;
 
+import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.entity.notifications.NotificationTemplate;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationType;
+import greencity.enums.UserCategory;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.notification.IncorrectTemplateException;
+import greencity.exceptions.notification.TemplateDeleteException;
 import greencity.notificator.listener.NotificationPlanner;
 import greencity.repository.NotificationTemplateRepository;
 import org.junit.jupiter.api.Test;
@@ -18,6 +24,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
+
+import static greencity.ModelUtils.createNotificationTemplate;
+import static greencity.ModelUtils.createNotificationTemplateWithPlatformsUpdateDto;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doNothing;
@@ -73,15 +86,16 @@ class NotificationTemplateServiceImplTest {
     void updateTest() {
         Long id = 1L;
 
-        var updateDto = TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
-        var mainInfoDto = updateDto.getNotificationTemplateMainInfoDto();
+        var updateDto = createNotificationTemplateWithPlatformsUpdateDto();
+        var mainInfoDto = updateDto.getNotificationTemplateUpdateInfo();
         var platformDto = updateDto.getPlatforms().getFirst();
 
-        var notification = TEST_NOTIFICATION_TEMPLATE;
+        var notification = createNotificationTemplate();
+
         var platform = notification.getNotificationPlatforms().getFirst();
 
         when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
-        doNothing().when(notificationPlanner).restartNotificator(notification.getNotificationType());
+        doNothing().when(notificationPlanner).restartNotificator(any());
 
         notificationService.update(id, updateDto);
 
@@ -95,6 +109,32 @@ class NotificationTemplateServiceImplTest {
         assertEquals(platformDto.getBody(), platform.getBody());
         assertEquals(platformDto.getBodyEng(), platform.getBodyEng());
         assertEquals(platformDto.getStatus(), platform.getNotificationStatus());
+
+        verify(templateRepository).findById(id);
+        verify(notificationPlanner).restartNotificator(any());
+    }
+
+    @Test
+    void updateCustomTestWhenUpdateScheduleColumnIsForbidden() {
+        Long id = 1L;
+
+        var updateDto = createNotificationTemplateWithPlatformsUpdateDto();
+        var mainInfoDto = updateDto.getNotificationTemplateUpdateInfo();
+        mainInfoDto.setUserCategory(UserCategory.ALL_USERS);
+        mainInfoDto.setType(NotificationType.CUSTOM);
+
+        var notification = TEST_NOTIFICATION_TEMPLATE;
+        notification.setNotificationType(NotificationType.CUSTOM);
+        notification.setSchedule("");
+        notification.setScheduleUpdateForbidden(true);
+
+        when(templateRepository.findById(id)).thenReturn(Optional.of(notification));
+        doNothing().when(notificationPlanner).restartNotificator(notification.getNotificationType());
+
+        notificationService.update(id, updateDto);
+
+        assertNotEquals(mainInfoDto.getSchedule(), notification.getSchedule());
+        assertEquals(mainInfoDto.getUserCategory(), notification.getUserCategory());
 
         verify(templateRepository).findById(id);
         verify(notificationPlanner).restartNotificator(any());
@@ -199,4 +239,75 @@ class NotificationTemplateServiceImplTest {
 
         verify(templateRepository).findById(id);
     }
+
+    @Test
+    void createNotificationTemplateTest() {
+        var dto = ModelUtils.createAddNotificationTemplateWithPlatforms();
+        var template = createNotificationTemplate();
+        template.setNotificationType(NotificationType.CUSTOM);
+        template.setUserCategory(UserCategory.ALL_USERS);
+
+        when(modelMapper.map(dto, NotificationTemplate.class)).thenReturn(template);
+
+        when(templateRepository.save(any(NotificationTemplate.class)))
+            .thenReturn(template);
+
+        doNothing().when(notificationPlanner).restartNotificator(NotificationType.CUSTOM);
+
+        assertDoesNotThrow(() -> notificationService.createNotificationTemplate(dto));
+
+        verify(modelMapper).map(any(), eq(NotificationTemplate.class));
+        verify(templateRepository).save(any());
+        verify(notificationPlanner).restartNotificator(any(NotificationType.class));
+    }
+
+    @Test
+    void createNotificationTemplateThrowsIncorrectTemplateExceptionTest() {
+        var dto = ModelUtils.createAddNotificationTemplateWithPlatforms();
+        var template = createNotificationTemplate();
+        template.setNotificationType(NotificationType.CUSTOM);
+        template.setUserCategory(UserCategory.ALL_USERS);
+        template.getNotificationPlatforms().getFirst().setNotificationReceiverType(NotificationReceiverType.MOBILE);
+
+        when(modelMapper.map(dto, NotificationTemplate.class)).thenReturn(template);
+
+        assertThrows(IncorrectTemplateException.class, () -> notificationService.createNotificationTemplate(dto));
+        verify(modelMapper).map(any(), eq(NotificationTemplate.class));
+    }
+
+    @Test
+    void removeNotificationTemplateTest() {
+        var template = createNotificationTemplate();
+        template.setNotificationType(NotificationType.CUSTOM);
+        template.setUserCategory(UserCategory.ALL_USERS);
+
+        when(templateRepository.findById(1L)).thenReturn(Optional.of(template));
+        doNothing().when(templateRepository).deleteById(1L);
+        doNothing().when(notificationPlanner).restartNotificator(NotificationType.CUSTOM);
+
+        assertDoesNotThrow(() -> notificationService.removeNotificationTemplate(1L));
+        verify(templateRepository).findById(anyLong());
+        verify(templateRepository).deleteById(anyLong());
+        verify(notificationPlanner).restartNotificator(any());
+    }
+
+    @Test
+    void removeNotificationTemplateThrowsNotFoundTest(){
+        when(templateRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,() -> notificationService.removeNotificationTemplate(1L));
+        verify(templateRepository).findById(anyLong());
+    }
+
+    @Test
+    void removeNotificationTemplateThrowsTemplateDeleteExceptionTest() {
+        var template = createNotificationTemplate();
+        template.setNotificationType(NotificationType.COURIER_ITINERARY_FORMED);
+
+        when(templateRepository.findById(1L)).thenReturn(Optional.of(template));
+
+        assertThrows(TemplateDeleteException.class, () -> notificationService.removeNotificationTemplate(1L));
+        verify(templateRepository).findById(anyLong());
+    }
+
 }

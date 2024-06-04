@@ -1,6 +1,7 @@
 package greencity.service.notification;
 
 import greencity.constant.ErrorMessage;
+import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
@@ -8,13 +9,17 @@ import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
+import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationType;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.notification.IncorrectTemplateException;
+import greencity.exceptions.notification.TemplateDeleteException;
 import greencity.notificator.listener.NotificationPlanner;
 import greencity.repository.NotificationTemplateRepository;
-import lombok.AllArgsConstructor;
+import java.util.HashSet;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,11 +33,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class NotificationTemplateServiceImpl implements NotificationTemplateService {
-    private NotificationTemplateRepository notificationTemplateRepository;
-    private NotificationPlanner notificationPlanner;
+    private final NotificationTemplateRepository notificationTemplateRepository;
+    private final NotificationPlanner notificationPlanner;
     private final ModelMapper modelMapper;
+    private final NotificationPlanner planner;
 
     /**
      * {@inheritDoc}
@@ -54,12 +60,27 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
 
     private void updateNotificationTemplate(NotificationTemplate template,
         NotificationTemplateWithPlatformsUpdateDto dto) {
-        template.setTitle(dto.getNotificationTemplateMainInfoDto().getTitle());
-        template.setTitleEng(dto.getNotificationTemplateMainInfoDto().getTitleEng());
-        template.setNotificationType(dto.getNotificationTemplateMainInfoDto().getType());
-        template.setTrigger(dto.getNotificationTemplateMainInfoDto().getTrigger());
-        template.setTime(dto.getNotificationTemplateMainInfoDto().getTime());
-        template.setSchedule(dto.getNotificationTemplateMainInfoDto().getSchedule());
+        template.setTitle(dto.getNotificationTemplateUpdateInfo().getTitle());
+        template.setTitleEng(dto.getNotificationTemplateUpdateInfo().getTitleEng());
+        template.setTrigger(dto.getNotificationTemplateUpdateInfo().getTrigger());
+        template.setTime(dto.getNotificationTemplateUpdateInfo().getTime());
+
+        updateScheduleIfUpdateIsNotForbidden(template, dto);
+        updateUserCategoryIfTemplateIsCustom(template, dto);
+    }
+
+    private void updateScheduleIfUpdateIsNotForbidden(
+        NotificationTemplate template, NotificationTemplateWithPlatformsUpdateDto dto) {
+        if (!template.isScheduleUpdateForbidden()) {
+            template.setSchedule(dto.getNotificationTemplateUpdateInfo().getSchedule());
+        }
+    }
+
+    private void updateUserCategoryIfTemplateIsCustom(
+        NotificationTemplate template, NotificationTemplateWithPlatformsUpdateDto dto) {
+        if (template.getNotificationType().equals(NotificationType.CUSTOM)) {
+            template.setUserCategory(dto.getNotificationTemplateUpdateInfo().getUserCategory());
+        }
     }
 
     private void updateNotificationTemplatePlatforms(List<NotificationPlatform> platforms,
@@ -120,6 +141,65 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
             .filter(s -> s.name().equals(status))
             .findAny()
             .orElseThrow(() -> new BadRequestException(ErrorMessage.NOTIFICATION_STATUS_DOES_NOT_EXIST + status));
+    }
+
+    @Override
+    @Transactional
+    public void createNotificationTemplate(AddNotificationTemplateWithPlatformsDto notificationTemplateDto) {
+        NotificationTemplate notificationTemplate =
+            modelMapper.map(notificationTemplateDto, NotificationTemplate.class);
+        checkTemplateContainsMessagesForAllPlatforms(notificationTemplate.getNotificationPlatforms());
+        notificationTemplateRepository.save(notificationTemplate);
+        restartCustomNotificator();
+    }
+
+    private void checkTemplateContainsMessagesForAllPlatforms(List<NotificationPlatform> notificationPlatforms) {
+        var notificationReceiverTypes = notificationPlatforms.stream()
+            .map(NotificationPlatform::getNotificationReceiverType)
+            .toList();
+
+        if (!isPlatformsSizesIdentical(notificationReceiverTypes)
+            || !isAllPlatformTypesPresent(notificationReceiverTypes)) {
+            throw new IncorrectTemplateException(
+                ErrorMessage.TEMPLATE_DOES_NOT_CONTAIN_ALL_PLATFORMS + getPlatformNames());
+        }
+    }
+
+    private String getPlatformNames() {
+        return Arrays.stream(NotificationReceiverType.values())
+            .map(NotificationReceiverType::getName)
+            .reduce("", (s1, s2) -> s1 + "," + s2);
+    }
+
+    private boolean isPlatformsSizesIdentical(List<NotificationReceiverType> notificationReceiverTypes) {
+        return notificationReceiverTypes.size() == NotificationReceiverType.values().length;
+    }
+
+    private boolean isAllPlatformTypesPresent(List<NotificationReceiverType> notificationReceiverTypes) {
+        return (new HashSet<>(notificationReceiverTypes).containsAll(List.of(NotificationReceiverType.values())));
+    }
+
+    @Override
+    @Transactional
+    public void removeNotificationTemplate(Long id) {
+        checkTemplateIsCustom(id);
+        removeTemplate(id);
+        restartCustomNotificator();
+    }
+
+    private void checkTemplateIsCustom(Long id) {
+        NotificationTemplate template = getById(id);
+        if (!template.getNotificationType().equals(NotificationType.CUSTOM)) {
+            throw new TemplateDeleteException(ErrorMessage.PREDEFINED_NOTIFICATION_CANNOT_BE_DELETED);
+        }
+    }
+
+    private void removeTemplate(Long id) {
+        notificationTemplateRepository.deleteById(id);
+    }
+
+    private void restartCustomNotificator() {
+        planner.restartNotificator(NotificationType.CUSTOM);
     }
 
     /**
