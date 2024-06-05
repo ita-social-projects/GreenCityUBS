@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.order.BigOrderTableViews;
+import greencity.enums.OrderStatusSortingTranslation;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +12,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.nonNull;
 
@@ -27,6 +26,8 @@ public class BigOrderTableRepository {
     private final CriteriaBuilder criteriaBuilder;
     private final CustomCriteriaPredicate criteriaPredicate;
     private final OrderFilterDataProvider orderFilterDataProvider;
+    private static final String ORDER_STATUS = "orderStatus";
+    private static final String UKRAINIAN_LANGUAGE = "ua";
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -47,14 +48,14 @@ public class BigOrderTableRepository {
      * @author Kuzbyt Maksym
      */
     public Page<BigOrderTableViews> findAll(OrderPage orderPage, OrderSearchCriteria searchCriteria,
-        List<Long> tariffsInfoIds) {
+        List<Long> tariffsInfoIds, String userLanguage) {
         var criteriaQuery = criteriaBuilder.createQuery(BigOrderTableViews.class);
         var orderRoot = criteriaQuery.from(BigOrderTableViews.class);
 
         var predicate = getPredicate(searchCriteria, orderRoot, tariffsInfoIds);
 
         criteriaQuery.select(orderRoot).where(predicate);
-        sort(orderPage, criteriaQuery, orderRoot);
+        sort(orderPage, criteriaQuery, orderRoot, userLanguage);
 
         var typedQuery = entityManager.createQuery(criteriaQuery);
         typedQuery.setFirstResult(orderPage.getPageNumber() * orderPage.getPageSize());
@@ -132,11 +133,13 @@ public class BigOrderTableRepository {
         predicates.add(criteriaPredicate.filter(tariffsInfoIds, orderRoot, "tariffsInfoId"));
     }
 
-    private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root) {
-        if (orderPage.getSortDirection().equals(Sort.Direction.ASC)) {
-            cq.orderBy(criteriaBuilder.asc(root.get(orderPage.getSortBy())));
+    private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root,
+        String userLanguage) {
+        if (UKRAINIAN_LANGUAGE.equals(userLanguage)
+            && ORDER_STATUS.equals(orderPage.getSortBy())) {
+            applySortingByOrderStatusForUkrainianLocalization(orderPage, cq, root);
         } else {
-            cq.orderBy(criteriaBuilder.desc(root.get(orderPage.getSortBy())));
+            applySortingCriteria(orderPage, cq, root.get(orderPage.getSortBy()));
         }
     }
 
@@ -145,5 +148,28 @@ public class BigOrderTableRepository {
         var countOrderRoot = countQuery.from(BigOrderTableViews.class);
         countQuery.select(criteriaBuilder.count(countOrderRoot)).where(predicate);
         return entityManager.createQuery(countQuery).getSingleResult();
+    }
+
+    private void applySortingCriteria(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
+        Expression<?> sortingExpression) {
+        if (orderPage.getSortDirection() == Sort.Direction.ASC) {
+            cq.orderBy(criteriaBuilder.asc(sortingExpression));
+        } else {
+            cq.orderBy(criteriaBuilder.desc(sortingExpression));
+        }
+    }
+
+    private void applySortingByOrderStatusForUkrainianLocalization(OrderPage orderPage,
+        CriteriaQuery<BigOrderTableViews> cq,
+        Root<BigOrderTableViews> root) {
+        Set<OrderStatusSortingTranslation> sortOrderList = OrderStatusSortingTranslation.getOrderSetSortedByAsc();
+        CriteriaBuilder.Case<Integer> selectCase = criteriaBuilder.selectCase();
+        Expression<Integer> otherwiseExpression =
+            criteriaBuilder.literal(OrderStatusSortingTranslation.OTHER.getSortOrder());
+        sortOrderList.forEach(status -> selectCase.when(
+            criteriaBuilder.equal(root.get(ORDER_STATUS), status.name()),
+            status.getSortOrder()));
+        Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
+        applySortingCriteria(orderPage, cq, sortOrder);
     }
 }

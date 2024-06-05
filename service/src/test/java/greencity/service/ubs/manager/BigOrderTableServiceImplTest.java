@@ -1,7 +1,10 @@
 package greencity.service.ubs.manager;
 
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
+import greencity.dto.language.LanguageVO;
 import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.user.UserVO;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -36,6 +39,8 @@ class BigOrderTableServiceImplTest {
     private EmployeeRepository employeeRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private UserRemoteClient userRemoteClient;
 
     @Test
     void getOrders() {
@@ -44,12 +49,15 @@ class BigOrderTableServiceImplTest {
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<User> user = Optional.of(ModelUtils.getUser());
         List<Long> tariffsInfoIds = new ArrayList<>();
+        UserVO userVO = new UserVO().setLanguageVO(new LanguageVO(null, "eng"));
+        when(userRemoteClient.findNotDeactivatedByEmail("test@gmail.com")).thenReturn(Optional.of(userVO));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(employee);
-        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria, tariffsInfoIds)).thenReturn(Page.empty());
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria, tariffsInfoIds, "eng"))
+            .thenReturn(Page.empty());
 
         bigOrderTableService.getOrders(orderPage, orderSearchCriteria, "test@gmail.com");
 
-        verify(bigOrderTableRepository).findAll(orderPage, orderSearchCriteria, tariffsInfoIds);
+        verify(bigOrderTableRepository).findAll(orderPage, orderSearchCriteria, tariffsInfoIds, "eng");
     }
 
     @Test

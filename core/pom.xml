@@ -15,6 +15,7 @@
         <swagger.version>2.9.2</swagger.version>
         <jjwt.version>0.9.1</jjwt.version>
         <liquibase.version>3.8.4</liquibase.version>
+        <google-guava.version>33.0.0-jre</google-guava.version>
     </properties>
 
     <dependencies>
@@ -167,6 +168,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${google-guava.version}</version>
         </dependency>
 
         <!-- feign -->
