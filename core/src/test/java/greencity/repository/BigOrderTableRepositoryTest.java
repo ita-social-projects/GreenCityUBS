@@ -470,7 +470,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
 
     private Comparator<BigOrderTableViews> orderStatusTranslationComparator(boolean descending) {
         Comparator<BigOrderTableViews> comparator = Comparator.comparingInt(
-            view -> OrderStatusSortingTranslation.valueOf(view.getOrderPaymentStatus()).getSortOrder());
+            view -> OrderStatusSortingTranslation.valueOf(view.getOrderStatus()).getSortOrder());
         return descending ? comparator.reversed() : comparator;
     }
 
