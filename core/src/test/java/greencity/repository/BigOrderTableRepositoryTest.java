@@ -4,7 +4,11 @@ import com.google.common.collect.Comparators;
 import greencity.IntegrationTestBase;
 import greencity.UbsApplication;
 import greencity.entity.order.BigOrderTableViews;
-import greencity.enums.*;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderPaymentStatusSortingTranslation;
+import greencity.enums.OrderStatus;
+import greencity.enums.OrderStatusSortingTranslation;
+import greencity.enums.PaymentStatus;
 import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
@@ -445,22 +449,22 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
     @Test
     void get_All_Orders_Sort_By_OrderPaymentStatus_UA_Localization_ASC() {
         OrderPage orderPage = new OrderPage().setPageNumber(0).setPageSize(15).setSortBy("orderPaymentStatus")
-                .setSortDirection(Sort.Direction.ASC);
+            .setSortDirection(Sort.Direction.ASC);
         List<BigOrderTableViews> bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
-                DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
+            DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
-                Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(false));
+            Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(false));
         Assertions.assertTrue(isListCorrectlySorted);
     }
 
     @Test
     void get_All_Orders_Sort_By_OrderPaymentStatus_UA_Localization_DESC() {
         OrderPage orderPage = new OrderPage().setPageNumber(0).setPageSize(15).setSortBy("orderPaymentStatus")
-                .setSortDirection(Sort.Direction.DESC);
+            .setSortDirection(Sort.Direction.DESC);
         var bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
-                DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
+            DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
-                Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(true));
+            Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(true));
         Assertions.assertTrue(isListCorrectlySorted);
     }
 
@@ -472,7 +476,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
 
     private Comparator<BigOrderTableViews> orderPaymentStatusTranslationComparator(boolean descending) {
         Comparator<BigOrderTableViews> comparator = Comparator.comparingInt(
-                view -> OrderPaymentStatusSortingTranslation.valueOf(view.getOrderStatus()).getSortOrder());
+            view -> OrderPaymentStatusSortingTranslation.valueOf(view.getOrderStatus()).getSortOrder());
         return descending ? comparator.reversed() : comparator;
     }
 }
