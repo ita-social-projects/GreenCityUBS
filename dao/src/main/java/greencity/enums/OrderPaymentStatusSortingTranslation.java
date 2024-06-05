@@ -2,37 +2,37 @@ package greencity.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public enum OrderPaymentStatusSortingTranslation {
+public enum OrderPaymentStatusSortingTranslation implements SortingTranslation<OrderPaymentStatusSortingTranslation> {
     UNPAID(1),
     PAYMENT_REFUNDED(2),
     PAID(3),
     HALF_PAID(4),
     OTHER(5);
 
-    private int sortingOrder;
+    private final int sortOrder;
 
-    public static Map<OrderPaymentStatusSortingTranslation, Integer> orderPaymentStatusSortingMapByAsc() {
-        Map<OrderPaymentStatusSortingTranslation, Integer> orderPaymentStatusSortingMap =
-            new HashMap<>();
-        for (OrderPaymentStatusSortingTranslation translation : OrderPaymentStatusSortingTranslation.values()) {
-            orderPaymentStatusSortingMap.put(translation, translation.getSortingOrder());
-        }
-        return orderPaymentStatusSortingMap;
+    private static final Set<OrderPaymentStatusSortingTranslation> ASC_ORDER_PAYMENT_STATUS_TRANSLATIONS =
+        Collections.unmodifiableSet(EnumSet.allOf(OrderPaymentStatusSortingTranslation.class));
+
+    /**
+     * Method returns order payment status translations sorted in ascending order
+     * according to the Ukrainian alphabet.
+     *
+     * @return {@link Set} of {@link OrderPaymentStatusSortingTranslation}
+     */
+    @Override
+    public Set<OrderPaymentStatusSortingTranslation> getSortedTranslations() {
+        return ASC_ORDER_PAYMENT_STATUS_TRANSLATIONS;
     }
 
-    public static Map<OrderPaymentStatusSortingTranslation, Integer> orderStatusSortingTranslationIntegerMapByDesc() {
-        Map<OrderPaymentStatusSortingTranslation, Integer> orderStatusSortingTranslationIntegerMap = new HashMap<>();
-        int maxValue = OrderStatusSortingTranslation.values().length;
-        for (OrderPaymentStatusSortingTranslation translation : OrderPaymentStatusSortingTranslation.values()) {
-            orderStatusSortingTranslationIntegerMap.put(translation, maxValue - translation.getSortingOrder() + 1);
-        }
-        return orderStatusSortingTranslationIntegerMap;
+    @Override
+    public OrderPaymentStatusSortingTranslation getOtherStatus() {
+        return OTHER;
     }
 }
