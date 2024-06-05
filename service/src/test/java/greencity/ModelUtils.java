@@ -251,6 +251,14 @@ public class ModelUtils {
         createNotificationTemplateWithPlatformsDto();
     public static final Pageable TEST_PAGEABLE = PageRequest.of(0, 5, Sort.by("notificationTime").descending());
     public static final Pageable TEST_NOTIFICATION_PAGEABLE = PageRequest.of(0, 5, Sort.by("id").descending());
+    public static final Pageable TEST_NOTIFICATION_SORTED_PAGEABLE_BY_TITLE =
+        PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "titleEng"));
+    public static final Pageable TEST_NOTIFICATION_SORTED_PAGEABLE_BY_TRIGGER =
+        PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "trigger"));
+    public static final Pageable TEST_NOTIFICATION_SORTED_PAGEABLE_BY_STATUS_ACTIVE =
+        PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "notificationStatus"));
+    public static final Pageable TEST_NOTIFICATION_SORTED_PAGEABLE_BY_STATUS_INACTIVE =
+        PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "notificationStatus"));
     public static final NotificationShortDto TEST_NOTIFICATION_SHORT_DTO = createNotificationShortDto();
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
         List.of(TEST_NOTIFICATION_SHORT_DTO);

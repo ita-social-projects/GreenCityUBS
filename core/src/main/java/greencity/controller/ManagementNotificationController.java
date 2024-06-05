@@ -7,6 +7,7 @@ import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.pageble.PageableDto;
+import greencity.enums.NotificationTemplateSortType;
 import greencity.service.notification.NotificationTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,9 +49,10 @@ public class ManagementNotificationController {
     })
     @GetMapping("/get-all-templates")
     @ApiPageable
-    public ResponseEntity<PageableDto<NotificationTemplateDto>> getAll(@Parameter(hidden = true) Pageable pageable) {
+    public ResponseEntity<PageableDto<NotificationTemplateDto>> getAll(@Parameter(hidden = true) Pageable pageable,
+        @RequestParam(required = false) NotificationTemplateSortType notificationTemplateSortType) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(notificationTemplateService.findAll(pageable));
+            .body(notificationTemplateService.findAll(pageable, notificationTemplateSortType));
     }
 
     /**

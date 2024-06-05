@@ -5,6 +5,7 @@ import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.pageble.PageableDto;
+import greencity.enums.NotificationTemplateSortType;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationTemplateService {
@@ -20,7 +21,8 @@ public interface NotificationTemplateService {
      *
      * @author Safarov Renat
      */
-    PageableDto<NotificationTemplateDto> findAll(Pageable pageable);
+    PageableDto<NotificationTemplateDto> findAll(Pageable pageable,
+        NotificationTemplateSortType notificationTemplateSortType);
 
     /**
      * Method that finds and returns notification template by id.
