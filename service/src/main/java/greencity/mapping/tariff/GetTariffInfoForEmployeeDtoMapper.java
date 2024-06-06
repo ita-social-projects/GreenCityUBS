@@ -21,7 +21,7 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .nameUk(tariffLocation.getLocation().getRegion().getUkrName())
                 .nameEn(tariffLocation.getLocation().getRegion().getEnName())
                 .build())
-            .toList().getFirst();
+            .findFirst().orElse(null);
 
         List<LocationsDtos> locationsDtos = source.getTariffLocations().stream()
             .map(tariffLocation -> LocationsDtos.builder()
@@ -29,7 +29,7 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .nameUk(tariffLocation.getLocation().getNameUk())
                 .nameEn(tariffLocation.getLocation().getNameEn())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
 
         List<GetReceivingStationDto> getReceivingStationDtos = source.getReceivingStationList()
             .stream()
@@ -37,7 +37,7 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .stationId(receivingStation.getId())
                 .name(receivingStation.getName())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
 
         return GetTariffInfoForEmployeeDto.builder()
             .id(source.getId())
