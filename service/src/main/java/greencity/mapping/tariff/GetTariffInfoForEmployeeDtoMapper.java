@@ -1,5 +1,6 @@
 package greencity.mapping.tariff;
 
+import greencity.constant.AppConstant;
 import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
@@ -9,7 +10,6 @@ import greencity.entity.order.TariffsInfo;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<TariffsInfo, GetTariffInfoForEmployeeDto> {
@@ -21,7 +21,7 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .nameUk(tariffLocation.getLocation().getRegion().getUkrName())
                 .nameEn(tariffLocation.getLocation().getRegion().getEnName())
                 .build())
-            .toList().getFirst();
+            .findFirst().orElse(getDefaultRegionDto());
 
         List<LocationsDtos> locationsDtos = source.getTariffLocations().stream()
             .map(tariffLocation -> LocationsDtos.builder()
@@ -29,7 +29,7 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .nameUk(tariffLocation.getLocation().getNameUk())
                 .nameEn(tariffLocation.getLocation().getNameEn())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
 
         List<GetReceivingStationDto> getReceivingStationDtos = source.getReceivingStationList()
             .stream()
@@ -37,7 +37,7 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .stationId(receivingStation.getId())
                 .name(receivingStation.getName())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
 
         return GetTariffInfoForEmployeeDto.builder()
             .id(source.getId())
@@ -48,6 +48,14 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .id(source.getCourier().getId())
                 .nameEn(source.getCourier().getNameEn())
                 .nameUk(source.getCourier().getNameUk()).build())
+            .build();
+    }
+
+    private RegionDto getDefaultRegionDto() {
+        return RegionDto.builder()
+            .nameEn(AppConstant.UNKNOWN_ENG)
+            .nameUk(AppConstant.UNKNOWN_UA)
+            .regionId(0L)
             .build();
     }
 }

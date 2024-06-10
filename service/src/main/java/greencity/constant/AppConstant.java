@@ -26,4 +26,7 @@ public final class AppConstant {
     public static final String NOTIFICATOR_SUCCESSFULLY_START_LOG_MESSAGE =
         "Scheduled notificator for {} notification template by {} cron";
     public static final String NOTIFICATOR_RESTART_LOG_MESSAGE = "Restarting scheduled notificator {}";
+
+    public static final String UNKNOWN_ENG = "Unknown";
+    public static final String UNKNOWN_UA = "Невідомо";
 }
