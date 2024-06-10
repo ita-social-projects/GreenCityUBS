@@ -22,7 +22,6 @@ class GetTariffInfoForEmployeeDtoMapperTest {
         assertEquals(mapper.convert(tariffsInfo), dto);
     }
 
-
     @Test
     void convertTariffsInfoToGetTariffInfoForEmployeeDtoWhenRegionIsNullTest() {
         TariffsInfo tariffsInfo = ModelUtils.getTariffWithUknownRegionInfo();

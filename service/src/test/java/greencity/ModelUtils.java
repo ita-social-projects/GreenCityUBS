@@ -4422,7 +4422,6 @@ public class ModelUtils {
             .build();
     }
 
-
     public static AddNewTariffDto getAddNewTariffDto() {
         return AddNewTariffDto.builder()
             .courierId(1L)
