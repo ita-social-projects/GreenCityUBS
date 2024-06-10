@@ -1,5 +1,6 @@
 package greencity.mapping.tariff;
 
+import greencity.constant.AppConstant;
 import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
@@ -20,7 +21,7 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .nameUk(tariffLocation.getLocation().getRegion().getUkrName())
                 .nameEn(tariffLocation.getLocation().getRegion().getEnName())
                 .build())
-            .findFirst().orElse(null);
+            .findFirst().orElse(getDefaultRegionDto());
 
         List<LocationsDtos> locationsDtos = source.getTariffLocations().stream()
             .map(tariffLocation -> LocationsDtos.builder()
@@ -47,6 +48,14 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .id(source.getCourier().getId())
                 .nameEn(source.getCourier().getNameEn())
                 .nameUk(source.getCourier().getNameUk()).build())
+            .build();
+    }
+
+    private RegionDto getDefaultRegionDto() {
+        return RegionDto.builder()
+            .nameEn(AppConstant.UNKNOWN_ENG)
+            .nameUk(AppConstant.UNKNOWN_UA)
+            .regionId(0L)
             .build();
     }
 }

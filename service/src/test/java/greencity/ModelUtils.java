@@ -6,6 +6,7 @@ import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
+import greencity.constant.AppConstant;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -1175,6 +1176,21 @@ public class ModelUtils {
                 .regionId(1L)
                 .nameEn("Kyiv region")
                 .nameUk("Київська область")
+                .build())
+            .locationsDtos(List.of(getLocationsDtos(1L)))
+            .receivingStationDtos(List.of(getGetReceivingStationDto()))
+            .courier(getCourierTranslationDto(1L))
+            .build();
+    }
+
+    public static GetTariffInfoForEmployeeDto getTariffInfoForEmployeeDtoWithUnknownRegion() {
+        return GetTariffInfoForEmployeeDto
+            .builder()
+            .id(1L)
+            .region(RegionDto.builder()
+                .regionId(0L)
+                .nameEn(AppConstant.UNKNOWN_ENG)
+                .nameUk(AppConstant.UNKNOWN_UA)
                 .build())
             .locationsDtos(List.of(getLocationsDtos(1L)))
             .receivingStationDtos(List.of(getGetReceivingStationDto()))
@@ -3575,6 +3591,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static Region getUnknownRegion() {
+        return Region.builder()
+            .id(0L)
+            .ukrName(AppConstant.UNKNOWN_UA)
+            .enName(AppConstant.UNKNOWN_ENG)
+            .locations(List.of(getLocation()))
+            .build();
+    }
+
     public static Region getRegionForMapper() {
         return Region.builder()
             .id(1L)
@@ -4268,7 +4293,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffsInfo getTariffInfo() {
+    public static TariffsInfo getTariffWithUknownRegionInfo() {
         return TariffsInfo.builder()
             .id(1L)
             .courier(ModelUtils.getCourier())
@@ -4278,7 +4303,7 @@ public class ModelUtils {
                 .locationStatus(LocationStatus.ACTIVE)
                 .location(Location.builder().id(1L)
                     .locationStatus(LocationStatus.ACTIVE)
-                    .region(ModelUtils.getRegion())
+                    .region(ModelUtils.getUnknownRegion())
                     .nameUk("Київ")
                     .nameEn("Kyiv")
                     .coordinates(ModelUtils.getCoordinates())
@@ -4366,6 +4391,37 @@ public class ModelUtils {
             .orders(List.of(ModelUtils.getOrder()))
             .build();
     }
+
+    public static TariffsInfo getTariffInfo() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .courier(ModelUtils.getCourier())
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .tariffsInfo(ModelUtils.getTariffInfoWithLimitOfBags())
+                .locationStatus(LocationStatus.ACTIVE)
+                .location(Location.builder().id(1L)
+                    .locationStatus(LocationStatus.ACTIVE)
+                    .region(ModelUtils.getRegion())
+                    .nameUk("Київ")
+                    .nameEn("Kyiv")
+                    .coordinates(ModelUtils.getCoordinates())
+                    .build())
+                .build()))
+            .tariffStatus(TariffStatus.ACTIVE)
+            .creator(ModelUtils.getEmployee())
+            .createdAt(LocalDate.of(2022, 10, 20))
+            .max(6000L)
+            .min(500L)
+            .orders(Collections.emptyList())
+            .receivingStationList(Set.of(ReceivingStation.builder()
+                .id(1L)
+                .name("Петрівка")
+                .createdBy(ModelUtils.createEmployee())
+                .build()))
+            .build();
+    }
+
 
     public static AddNewTariffDto getAddNewTariffDto() {
         return AddNewTariffDto.builder()
