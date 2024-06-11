@@ -84,8 +84,8 @@ public class OrderBagService {
         }
         if (bagsForOrder.stream().allMatch(orderBag -> orderBag.getAmount() != null)) {
             return bagsForOrder.stream()
-                    .collect(Collectors.toMap(orderBag -> orderBag.getBag().getId(),
-                            OrderBag::getAmount, (oldValue, newValue) -> oldValue));
+                .collect(Collectors.toMap(orderBag -> orderBag.getBag().getId(),
+                    OrderBag::getAmount, (oldValue, newValue) -> oldValue));
         }
         return new HashMap<>();
     }
