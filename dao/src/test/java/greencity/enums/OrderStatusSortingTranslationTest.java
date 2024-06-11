@@ -23,7 +23,7 @@ class OrderStatusSortingTranslationTest {
     @Test
     void testOrderSetSortedByAsc() {
         Set<OrderStatusSortingTranslation> expectedAscSet = EnumSet.allOf(OrderStatusSortingTranslation.class);
-        Set<OrderStatusSortingTranslation> actualAscSet = OrderStatusSortingTranslation.getOrderSetSortedByAsc();
+        Set<OrderStatusSortingTranslation> actualAscSet = OrderStatusSortingTranslation.OTHER.getSortedTranslations();
         assertEquals(expectedAscSet, actualAscSet);
     }
 }

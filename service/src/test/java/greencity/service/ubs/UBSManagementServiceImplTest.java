@@ -1151,17 +1151,10 @@ class UBSManagementServiceImplTest {
         Order order = getOrdersStatusDoneDto();
 
         when(bagRepository.findCapacityById(1)).thenReturn(1);
-//<<<<<<< HEAD
         doNothing().when(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-////        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
-//=======
-//        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-//        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
-//        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBag1list());
-//>>>>>>> dev
         when(paymentRepository.selectSumPaid(1L)).thenReturn(5000L);
 
         ubsManagementService.setOrderDetail(order,
@@ -1177,7 +1170,7 @@ class UBSManagementServiceImplTest {
     void testSetOrderDetailNeedToChangeStatusToHalfPaid() {
         Order order = getOrdersStatusDoneDto();
         when(bagRepository.findCapacityById(1)).thenReturn(1);
-//<<<<<<< HEAD
+
         doNothing().when(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
@@ -1186,13 +1179,7 @@ class UBSManagementServiceImplTest {
         when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
 
         doNothing().when(orderRepository).updateOrderPaymentStatus(1L, OrderPaymentStatus.HALF_PAID.name());
-//=======
-//
-//        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-//        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
-//        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBag1list());
-//        when(paymentRepository.selectSumPaid(1L)).thenReturn(5000L);
-//>>>>>>> dev
+        doNothing().when(eventService).saveEvent(anyString(), anyString(), any());
 
         ubsManagementService.setOrderDetail(order,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1201,6 +1188,7 @@ class UBSManagementServiceImplTest {
         verify(bagRepository, times(2)).findCapacityById(1);
         verify(orderRepository).getOrderDetails(1L);
         verify(paymentRepository, times(2)).selectSumPaid(1L);
+        verify(eventService, times(2)).saveEvent(anyString(), anyString(), any());
     }
 
     @Test
@@ -1211,7 +1199,6 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
-//        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         when(paymentRepository.selectSumPaid(1L)).thenReturn(null);
         doNothing().when(orderRepository).updateOrderPaymentStatus(1L, OrderPaymentStatus.UNPAID.name());
         when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
@@ -1291,7 +1278,6 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findSumOfCertificatesByOrderId(order.getId())).thenReturn(600L);
         when(orderRepository.getOrderDetails(1L))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto2()));
-//        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.setOrderDetail(order,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
