@@ -906,7 +906,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Long paidAmountInCoins = countPaidAmount(payments);
 
-        Double amountBeforePayment = convertCoinsIntoBills(amountWithDiscountInCoins - paidAmountInCoins);
+        Double amountBeforePayment = convertCoinsIntoBills(amountWithDiscountInCoins) - paidAmountInCoins;
 
         return OrdersDataForUserDto.builder()
             .id(order.getId())
@@ -1166,7 +1166,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .serviceUrl(resultUrlFondy)
             .orderDate(instant.getEpochSecond())
             .currency("UAH")
-            .amount(1) // convertCoinsIntoBills(sumToPayInCoins)
+            .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
             .productName(order.getOrderBags().stream()
                 .map(orderBag -> orderBag.getName().trim())
                 .flatMap(name -> Arrays.stream(name.split(",")))
