@@ -86,6 +86,9 @@ public class Order {
     @JoinColumn(name = "employee_id")
     private Employee blockedByEmployee;
 
+    @Column(name = "blocked_at", columnDefinition = "TIMESTAMP")
+    private LocalDateTime blockedAt;
+
     @ElementCollection
     @CollectionTable(name = "order_bag_mapping",
         joinColumns = {@JoinColumn(name = "order_id", referencedColumnName = "id")})

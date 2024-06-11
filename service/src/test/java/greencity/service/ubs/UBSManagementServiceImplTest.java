@@ -274,6 +274,8 @@ class UBSManagementServiceImplTest {
     private OrderBagService orderBagService;
     @Mock
     private OrderBagRepository orderBagRepository;
+    @Mock
+    private OrderLockService orderLockService;
 
     @Test
     void getAllCertificates() {

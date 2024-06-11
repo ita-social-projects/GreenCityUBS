@@ -128,17 +128,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
-import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -170,6 +170,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrdersAdminsPageService ordersAdminsPageService;
     private final LocationApiService locationApiService;
     private final RefundRepository refundRepository;
+    private final OrderLockService orderLockService;
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
 
     private final Set<OrderStatus> orderStatusesBeforeShipment =
@@ -328,6 +329,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public OrderStatusPageDto getOrderStatusData(Long orderId, String email) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        Employee employee = employeeRepository.findByEmail(email)
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
+
+        if (!order.isBlocked()) {
+            orderLockService.lockOrder(order, employee);
+        }
+
         checkAvailableOrderForEmployee(order, email);
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
 
@@ -459,6 +467,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orderStatusName(currentOrderStatusTranslation)
             .orderStatusNameEng(currentOrderStatusTranslationEng)
             .adminComment(currentOrder.getAdminComment())
+            .blocked(currentOrder.isBlocked())
             .build();
     }
 
