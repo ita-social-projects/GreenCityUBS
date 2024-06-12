@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -73,6 +72,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersAdminsPageServiceImplTest {
@@ -108,6 +108,8 @@ class OrdersAdminsPageServiceImplTest {
     private UserRemoteClient userRemoteClient;
     @Mock
     private TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
+    @Mock
+    private OrderLockService orderLockService;
     @InjectMocks
     private OrdersAdminsPageServiceImpl ordersAdminsPageService;
 
@@ -265,8 +267,6 @@ class OrdersAdminsPageServiceImplTest {
     void timeOfExportForDevelopStageTest() {
         var ordersId = List.of(1L);
         var newValue = "10:30-15:00";
-        LocalTime timeFrom = LocalTime.parse("10:30", DateTimeFormatter.ISO_TIME);
-        LocalTime timeTo = LocalTime.parse("15:00", DateTimeFormatter.ISO_TIME);
         var employeeId = 3L;
         LocalDate exportDate = LocalDate.of(2023, 5, 23);
 
@@ -277,18 +277,12 @@ class OrdersAdminsPageServiceImplTest {
                 .id(employeeId).build())
             .dateOfExport(exportDate)
             .build();
-        var expectedOrder = Order.builder()
-            .id(1L)
-            .deliverFrom(LocalDateTime.of(order.getDateOfExport(), timeFrom))
-            .deliverTo(LocalDateTime.of(order.getDateOfExport(), timeTo))
-            .dateOfExport(exportDate)
-            .build();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
         List<Long> result = ordersAdminsPageService.timeOfExportForDevelopStage(ordersId, newValue, employeeId);
 
-        verify(orderRepository).save(expectedOrder);
+        verify(orderLockService).unlockOrder(order);
 
         assertTrue(result.isEmpty());
     }
@@ -360,7 +354,6 @@ class OrdersAdminsPageServiceImplTest {
         LocalTime timeTo = LocalTime.parse("15:00", DateTimeFormatter.ISO_TIME);
         var employeeId = 3L;
         LocalDate previousExportDate = LocalDate.of(2023, 5, 23);
-        LocalDate newExportDate = LocalDate.of(2023, 6, 30);
 
         var order = Order.builder()
             .id(1L)
@@ -372,18 +365,11 @@ class OrdersAdminsPageServiceImplTest {
             .deliverTo(LocalDateTime.of(previousExportDate, timeTo))
             .build();
 
-        var expectedOrder = Order.builder()
-            .id(1L)
-            .dateOfExport(newExportDate)
-            .deliverFrom(LocalDateTime.of(newExportDate, timeFrom))
-            .deliverTo(LocalDateTime.of(newExportDate, timeTo))
-            .build();
-
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
         var result = ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, newValue, employeeId);
 
-        verify(orderRepository).save(expectedOrder);
+        verify(orderLockService).unlockOrder(order);
 
         assertTrue(result.isEmpty());
     }
@@ -468,6 +454,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        doNothing().when(orderLockService).unlockOrder(order);
 
         var changeOrderResponseDto = ordersAdminsPageService.chooseOrdersDataSwitcher(
             email,
@@ -476,15 +463,13 @@ class OrdersAdminsPageServiceImplTest {
         assertEquals(
             0,
             changeOrderResponseDto.getUnresolvedGoalsOrderId().size());
-        assertNull(order.getBlockedByEmployee());
-        assertFalse(order.isBlocked());
         assertEquals(1, order.getEvents().size());
 
         int orderRepositoryFindByIdCalls = requestToChangeOrdersDataDto.getOrderIdsList().size();
 
         verify(employeeRepository).findByEmail(email);
         verify(orderRepository, times(orderRepositoryFindByIdCalls)).findById(anyLong());
-        verify(orderRepository, times(orderRepositoryFindByIdCalls)).save(any(Order.class));
+        verify(orderLockService, times(orderRepositoryFindByIdCalls)).unlockOrder(any(Order.class));
 
     }
 
@@ -556,7 +541,7 @@ class OrdersAdminsPageServiceImplTest {
         assertNotNull(order.getReceivingStation());
         assertNotNull(order.getEmployeeOrderPositions());
 
-        verify(orderRepository).save(order);
+        verify(orderLockService).unlockOrder(order);
     }
 
     @Test
@@ -578,7 +563,7 @@ class OrdersAdminsPageServiceImplTest {
 
         verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF), anyString(), any(Order.class));
         verify(notificationService).notifySelfPickupOrder(expected);
-        verify(orderRepository).save(expected);
+        verify(orderLockService).unlockOrder(expected);
     }
 
     @ParameterizedTest
@@ -604,7 +589,7 @@ class OrdersAdminsPageServiceImplTest {
 
         ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
 
-        verify(orderRepository).save(order);
+        verify(orderLockService).unlockOrder(order);
     }
 
     @Test
@@ -825,7 +810,7 @@ class OrdersAdminsPageServiceImplTest {
         when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
 
         ordersAdminsPageService.receivingStationForDevelopStage(List.of(1L), "1", 1L);
-        verify(orderRepository).save(order.get());
+        verify(orderLockService).unlockOrder(order.get());
     }
 
     @Test
@@ -908,10 +893,6 @@ class OrdersAdminsPageServiceImplTest {
             .blocked(true)
             .blockedByEmployee(employee)
             .build();
-        Order expectedSavedOrder = Order.builder()
-            .id(orderId)
-            .cancellationReason(CancellationReason.DELIVERED_HIMSELF)
-            .build();
 
         ChangeOrderResponseDTO expectedResult = ChangeOrderResponseDTO.builder()
             .httpStatus(HttpStatus.OK)
@@ -919,13 +900,12 @@ class OrdersAdminsPageServiceImplTest {
             .build();
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        doNothing().when(orderLockService).unlockOrder(order);
 
         var result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
 
-        verify(orderRepository).save(expectedSavedOrder);
+        verify(orderLockService).unlockOrder(order);
 
-        assertFalse(order.isBlocked());
-        assertNull(order.getBlockedByEmployee());
         assertEquals(CancellationReason.DELIVERED_HIMSELF, order.getCancellationReason());
         assertEquals(expectedResult, result);
     }
@@ -1023,6 +1003,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        doNothing().when(orderLockService).unlockOrder(order);
 
         ChangeOrderResponseDTO result;
         try (MockedStatic<LocalDateTime> localDateTime = Mockito.mockStatic(LocalDateTime.class)) {
@@ -1031,10 +1012,8 @@ class OrdersAdminsPageServiceImplTest {
             result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         }
 
-        verify(orderRepository).save(expectedSavedOrder);
+        verify(orderLockService).unlockOrder(order);
 
-        assertFalse(order.isBlocked());
-        assertNull(order.getBlockedByEmployee());
         assertEquals(List.of(event), order.getEvents());
         assertEquals(expectedResult, result);
     }

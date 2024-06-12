@@ -43,7 +43,7 @@ import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.modelmapper.ModelMapper;
@@ -77,7 +77,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Service
-@Data
+@RequiredArgsConstructor
 public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;
@@ -96,6 +96,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final EventService eventService;
     private final NotificationServiceImpl notificationService;
     private final SuperAdminService superAdminService;
+    private final OrderLockService orderLockService;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String DATE_OF_EXPORT = "dateOfExport";
     private static final String RECEIVING = "receivingStation";
@@ -456,7 +457,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
-                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new BadRequestException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 if (existedOrder.getOrderStatus().checkPossibleStatus(updatedStatusValue)) {
                     existedOrder.setOrderStatus(OrderStatus.valueOf(updatedStatusValue));
@@ -471,9 +472,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     notificationService.notifyBonusesFromCanceledOrder(existedOrder);
                     returnAllPointsFromOrder(existedOrder);
                 }
-                existedOrder.setBlocked(false);
-                existedOrder.setBlockedByEmployee(null);
-                orderRepository.save(existedOrder);
+
+                orderLockService.unlockOrder(existedOrder);
 
                 if (OrderStatus.BROUGHT_IT_HIMSELF == OrderStatus.valueOf(updatedStatusValue)) {
                     eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF,
@@ -540,13 +540,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     Order existedOrder = orderRepository.findById(orderId)
                         .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                     if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
-                        throw new IllegalArgumentException(
+                        throw new BadRequestException(
                             ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                     }
                     existedOrder.setCancellationReason(CancellationReason.valueOf(value));
-                    existedOrder.setBlocked(false);
-                    existedOrder.setBlockedByEmployee(null);
-                    orderRepository.save(existedOrder);
+                    orderLockService.unlockOrder(existedOrder);
                 } catch (Exception e) {
                     unresolvedGoals.add(orderId);
                 }
@@ -563,10 +561,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
-                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new BadRequestException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
-                existedOrder.setBlocked(false);
-                existedOrder.setBlockedByEmployee(null);
                 existedOrder.getEvents().add(Event.builder()
                     .order(existedOrder)
                     .eventDate(LocalDateTime.now())
@@ -574,7 +570,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .eventName(OrderHistory.ORDER_CANCELLED + "  " + value)
                     .build());
                 existedOrder.setCancellationComment(value);
-                orderRepository.save(existedOrder);
+                orderLockService.unlockOrder(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -590,7 +586,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
-                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new BadRequestException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
 
                 existedOrder.getEvents().add(Event.builder()
@@ -600,9 +596,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .eventName(OrderHistory.ADD_ADMIN_COMMENT + "  " + value)
                     .build());
                 existedOrder.setAdminComment(value);
-                existedOrder.setBlocked(false);
-                existedOrder.setBlockedByEmployee(null);
-                orderRepository.save(existedOrder);
+                orderLockService.unlockOrder(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -619,7 +613,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
-                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new BadRequestException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 existedOrder.setDateOfExport(date);
                 if (existedOrder.getDeliverFrom() != null) {
@@ -628,9 +622,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 if (existedOrder.getDeliverTo() != null) {
                     existedOrder.setDeliverTo(LocalDateTime.of(date, existedOrder.getDeliverTo().toLocalTime()));
                 }
-                existedOrder.setBlocked(false);
-                existedOrder.setBlockedByEmployee(null);
-                orderRepository.save(existedOrder);
+                orderLockService.unlockOrder(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -650,16 +642,14 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
-                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new BadRequestException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 if (existedOrder.getDateOfExport() == null) {
                     throw new IllegalStateException(DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER + existedOrder.getId());
                 }
                 existedOrder.setDeliverFrom(LocalDateTime.of(existedOrder.getDateOfExport(), timeFrom));
                 existedOrder.setDeliverTo(LocalDateTime.of(existedOrder.getDateOfExport(), timeTo));
-                existedOrder.setBlocked(false);
-                existedOrder.setBlockedByEmployee(null);
-                orderRepository.save(existedOrder);
+                orderLockService.unlockOrder(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -676,12 +666,10 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employeeId)) {
-                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new BadRequestException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 existedOrder.setReceivingStation(station);
-                existedOrder.setBlocked(false);
-                existedOrder.setBlockedByEmployee(null);
-                orderRepository.save(existedOrder);
+                orderLockService.unlockOrder(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -705,7 +693,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (isOrderBlockedByAnotherEmployee(existedOrder, currentEmployee.getId())) {
-                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
+                    throw new BadRequestException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 Boolean existedBefore =
                     employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
@@ -726,9 +714,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     historyChanges =
                         eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.FALSE);
                 }
-                existedOrder.setBlocked(false);
-                existedOrder.setBlockedByEmployee(null);
-                orderRepository.save(existedOrder);
+                orderLockService.unlockOrder(existedOrder);
                 eventService.saveEvent(historyChanges, email, existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
@@ -745,7 +731,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         List<BlockedOrderDto> blockedOrderDTOS = new ArrayList<>();
         if (orders.isEmpty()) {
-            orderRepository.setBlockedEmployeeForAllOrders(employee.getId());
+            orderRepository.setBlockedEmployeeForAllOrders(employee.getId(), LocalDateTime.now());
         }
         for (Long orderId : orders) {
             Order order = orderRepository.findById(orderId)
@@ -756,9 +742,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                         order.getBlockedByEmployee().getFirstName(), order.getBlockedByEmployee().getLastName()))
                     .build());
             } else {
-                order.setBlocked(true);
-                order.setBlockedByEmployee(employee);
-                orderRepository.save(order);
+                orderLockService.lockOrder(order, employee);
             }
         }
         return blockedOrderDTOS;
@@ -778,9 +762,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
             if (order.isBlocked() && order.getBlockedByEmployee().equals(employee)) {
-                order.setBlocked(false);
-                order.setBlockedByEmployee(null);
-                orderRepository.save(order);
+                orderLockService.unlockOrder(order);
                 unblockedOrdersId.add(order.getId());
             }
         }
