@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,9 +78,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(value = "UPDATE ORDERS SET EMPLOYEE_ID = :employee_id, BLOCKED = TRUE WHERE BLOCKED = FALSE",
+    @Query(
+        value = "UPDATE ORDERS SET EMPLOYEE_ID = :employee_id,"
+            + "BLOCKED = TRUE, BLOCKED_AT = :blocked_at WHERE BLOCKED = FALSE",
         nativeQuery = true)
-    void setBlockedEmployeeForAllOrders(@Param("employee_id") Long id);
+    void setBlockedEmployeeForAllOrders(@Param("employee_id") Long id, @Param("blocked_at") LocalDateTime blockedAt);
 
     /**
      * Method unblocks all orders. Needs some improvement.
@@ -87,7 +90,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(value = "UPDATE ORDERS SET BLOCKED = FALSE, EMPLOYEE_ID = NULL WHERE employee_id = :employee_id",
+    @Query(
+        value = "UPDATE ORDERS SET BLOCKED = FALSE, EMPLOYEE_ID = NULL,"
+            + "BLOCKED_AT = NULL WHERE employee_id = :employee_id",
         nativeQuery = true)
     void unblockAllOrders(@Param("employee_id") Long employeeId);
 
@@ -240,4 +245,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByPaymentStatusesAndOrderStatuses(
         @Param("paymentStatuses") List<OrderPaymentStatus> paymentStatuses,
         @Param("orderStatuses") List<OrderStatus> orderStatuses);
+
+    /**
+     * Method to unblock orders that have been blocked for more than 5 minutes.
+     *
+     * @param expirationTime the cutoff time for unblocking orders.
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE Order o SET o.blocked = false, o.blockedByEmployee = NULL,"
+        + "o.blockedAt = NULL WHERE o.blockedAt < :expirationTime")
+    void unlockExpiredOrders(@Param("expirationTime") LocalDateTime expirationTime);
 }
