@@ -382,7 +382,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private boolean checkEmployeePositionsIsAdmin(Set<Position> positions) {
-        List<Long> adminsIds = List.of(6L, 7L);
+        Long adminId = 7L;
+        Long superAdminId = 6L;
+        List<Long> adminsIds = List.of(adminId, superAdminId);
         return positions.stream()
             .anyMatch(p -> adminsIds.contains(p.getId()));
     }
