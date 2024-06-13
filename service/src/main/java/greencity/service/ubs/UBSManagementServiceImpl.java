@@ -332,7 +332,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
 
-        if (!order.isBlocked()) {
+        if (!order.isBlocked() && checkEmployeePositionsIsAdmin(employee.getEmployeePosition())) {
             orderLockService.lockOrder(order, employee);
         }
 
@@ -379,6 +379,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
             .writeOffStationSum(convertCoinsIntoBills(order.getWriteOffStationSum()))
             .build();
+    }
+
+    private boolean checkEmployeePositionsIsAdmin(Set<Position> positions) {
+        List<Long> adminsIds = List.of(6L, 7L);
+        return positions.stream()
+            .anyMatch(p -> adminsIds.contains(p.getId()));
     }
 
     private Double setTotalPrice(CounterOrderDetailsDto dto) {
