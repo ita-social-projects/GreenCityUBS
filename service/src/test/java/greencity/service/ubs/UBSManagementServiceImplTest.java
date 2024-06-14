@@ -170,6 +170,7 @@ import static greencity.ModelUtils.getTestOrderDetailStatusRequestDto;
 import static greencity.ModelUtils.getTestUser;
 import static greencity.ModelUtils.updateAllOrderPageDto;
 import static greencity.ModelUtils.updateOrderPageAdminDto;
+import static greencity.ModelUtils.getAdminEmployee;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static java.util.Collections.singletonList;
@@ -2979,4 +2980,76 @@ class UBSManagementServiceImplTest {
         verify(receivingStationRepository).findById(1L);
     }
 
+    @Test
+    void getOrderStatusDataTestIfEmployeeIsNotAdmin() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        BagInfoDto bagInfoDto = getBagInfoDto();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        Employee employee = getEmployee();
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
+        when(orderPaymentStatusTranslationRepository.getById(1L))
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+        when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
+        when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
+        when(positionRepository.findAllIdsFromNames(any())).thenReturn(List.of(6L, 7L));
+
+        order.setBlocked(false);
+        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
+
+        verify(orderLockService, times(0)).lockOrder(order, employee);
+
+        order.setBlocked(true);
+        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
+
+        verify(orderLockService, times(0)).lockOrder(order, employee);
+    }
+
+    @Test
+    void getOrderStatusDataTestIfEmployeeIsAdmin() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        BagInfoDto bagInfoDto = getBagInfoDto();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        Employee employee = getAdminEmployee();
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
+        when(orderPaymentStatusTranslationRepository.getById(1L))
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+        when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
+        when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
+        when(positionRepository.findAllIdsFromNames(any())).thenReturn(List.of(6L, 7L));
+
+        order.setBlocked(true);
+        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
+
+        verify(orderLockService, times(0)).lockOrder(order, employee);
+    }
 }
