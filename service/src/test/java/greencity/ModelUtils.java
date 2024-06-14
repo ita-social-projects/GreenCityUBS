@@ -5304,4 +5304,25 @@ public class ModelUtils {
             .build();
     }
 
+    public static Employee getAdminEmployee() {
+        return Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .uuid("Test")
+            .employeeStatus(EmployeeStatus.ACTIVE)
+            .employeePosition(Set.of(Position.builder()
+                .id(7L)
+                .name("Адмін")
+                .nameEn("Admin")
+                .build()))
+            .tariffInfos(Set.of(TariffsInfo.builder()
+                .id(1L)
+                .service(new Service())
+                .build()))
+            .imagePath("path")
+            .build();
+    }
 }

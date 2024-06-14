@@ -106,70 +106,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import static greencity.ModelUtils.ORDER_DETAIL_STATUS_DTO;
-import static greencity.ModelUtils.TEST_ADDITIONAL_BAG_INFO_DTO;
-import static greencity.ModelUtils.TEST_ADDITIONAL_BAG_INFO_DTO_LIST;
-import static greencity.ModelUtils.TEST_BAG;
-import static greencity.ModelUtils.TEST_BAG_INFO_DTO;
-import static greencity.ModelUtils.TEST_BAG_LIST;
-import static greencity.ModelUtils.TEST_BAG_MAPPING_DTO_LIST;
-import static greencity.ModelUtils.TEST_MAP_ADDITIONAL_BAG_LIST;
-import static greencity.ModelUtils.TEST_ORDER;
-import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_RESPONSE;
-import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_UPDATE;
-import static greencity.ModelUtils.TEST_ORDER_DETAILS_INFO_DTO_LIST;
-import static greencity.ModelUtils.TEST_PAYMENT_LIST;
-import static greencity.ModelUtils.TEST_USER;
-import static greencity.ModelUtils.UPDATE_ORDER_PAGE_ADMIN_DTO;
-import static greencity.ModelUtils.getAddBonusesToUserDto;
-import static greencity.ModelUtils.getAdminCommentDto;
-import static greencity.ModelUtils.getBagInfoDto;
-import static greencity.ModelUtils.getBaglist;
-import static greencity.ModelUtils.getCertificateList;
-import static greencity.ModelUtils.getEcoNumberDto;
-import static greencity.ModelUtils.getEmployee;
-import static greencity.ModelUtils.getExportDetailsRequest;
-import static greencity.ModelUtils.getExportDetailsRequestToday;
-import static greencity.ModelUtils.getFormedOrder;
-import static greencity.ModelUtils.getInfoPayment;
-import static greencity.ModelUtils.getManualPayment;
-import static greencity.ModelUtils.getManualPaymentRequestDto;
-import static greencity.ModelUtils.getOrder;
-import static greencity.ModelUtils.getOrderAddress;
-import static greencity.ModelUtils.getOrderDoneByUser;
-import static greencity.ModelUtils.getOrderExportDetails;
-import static greencity.ModelUtils.getOrderExportDetailsWithDeliverFromTo;
-import static greencity.ModelUtils.getOrderExportDetailsWithExportDate;
-import static greencity.ModelUtils.getOrderExportDetailsWithExportDateDeliverFrom;
-import static greencity.ModelUtils.getOrderExportDetailsWithExportDateDeliverFromTo;
-import static greencity.ModelUtils.getOrderExportDetailsWithNullValues;
-import static greencity.ModelUtils.getOrderForGetOrderStatusData2Test;
-import static greencity.ModelUtils.getOrderForGetOrderStatusEmptyPriceDetails;
-import static greencity.ModelUtils.getOrderStatusPaymentTranslations;
-import static greencity.ModelUtils.getOrderStatusTranslation;
-import static greencity.ModelUtils.getOrderStatusTranslations;
-import static greencity.ModelUtils.getOrderUserFirst;
-import static greencity.ModelUtils.getOrderWithoutPayment;
-import static greencity.ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto;
-import static greencity.ModelUtils.getOrdersStatusCanceledDto;
-import static greencity.ModelUtils.getOrdersStatusConfirmedDto;
-import static greencity.ModelUtils.getOrdersStatusDoneDto;
-import static greencity.ModelUtils.getOrdersStatusFormedDto;
-import static greencity.ModelUtils.getOrdersStatusFormedDto2;
-import static greencity.ModelUtils.getOrdersStatusNotTakenOutDto;
-import static greencity.ModelUtils.getOrdersStatusOnThe_RouteDto;
-import static greencity.ModelUtils.getPayment;
-import static greencity.ModelUtils.getReceivingList;
-import static greencity.ModelUtils.getReceivingStation;
-import static greencity.ModelUtils.getRefund;
-import static greencity.ModelUtils.getService;
-import static greencity.ModelUtils.getStatusTranslation;
-import static greencity.ModelUtils.getTariffsInfo;
-import static greencity.ModelUtils.getTestDetailsOrderInfoDto;
-import static greencity.ModelUtils.getTestOrderDetailStatusRequestDto;
-import static greencity.ModelUtils.getTestUser;
-import static greencity.ModelUtils.updateAllOrderPageDto;
-import static greencity.ModelUtils.updateOrderPageAdminDto;
+
+import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static java.util.Collections.singletonList;
@@ -2979,4 +2917,76 @@ class UBSManagementServiceImplTest {
         verify(receivingStationRepository).findById(1L);
     }
 
+    @Test
+    void getOrderStatusDataTestIfEmployeeIsNotAdmin() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        BagInfoDto bagInfoDto = getBagInfoDto();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        Employee employee = getEmployee();
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
+        when(orderPaymentStatusTranslationRepository.getById(1L))
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+        when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
+        when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
+        when(positionRepository.findAllIdsFromNames(any())).thenReturn(List.of(6L, 7L));
+
+        order.setBlocked(false);
+        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
+
+        verify(orderLockService, times(0)).lockOrder(order, employee);
+
+        order.setBlocked(true);
+        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
+
+        verify(orderLockService, times(0)).lockOrder(order, employee);
+    }
+
+    @Test
+    void getOrderStatusDataTestIfEmployeeIsAdmin() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        BagInfoDto bagInfoDto = getBagInfoDto();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        Employee employee = getAdminEmployee();
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
+        when(orderPaymentStatusTranslationRepository.getById(1L))
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+        when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
+        when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
+        when(positionRepository.findAllIdsFromNames(any())).thenReturn(List.of(6L, 7L));
+
+        order.setBlocked(true);
+        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
+
+        verify(orderLockService, times(0)).lockOrder(order, employee);
+    }
 }
