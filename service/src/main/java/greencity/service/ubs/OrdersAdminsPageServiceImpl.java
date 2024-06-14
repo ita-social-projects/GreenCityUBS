@@ -735,7 +735,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         }
         for (Long orderId : orders) {
             Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
             if (order.isBlocked() && !order.getBlockedByEmployee().equals(employee)) {
                 blockedOrderDTOS.add(BlockedOrderDto
                     .builder().orderId(orderId).userName(String.format("%s %s",
@@ -760,7 +760,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         List<Long> unblockedOrdersId = new ArrayList<>();
         for (Long orderId : orders) {
             Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
             if (order.isBlocked() && order.getBlockedByEmployee().equals(employee)) {
                 orderLockService.unlockOrder(order);
                 unblockedOrdersId.add(order.getId());

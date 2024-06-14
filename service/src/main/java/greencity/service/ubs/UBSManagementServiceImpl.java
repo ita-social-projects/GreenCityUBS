@@ -332,10 +332,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
 
-        if (!order.isBlocked() && checkEmployeePositionsIsAdmin(employee.getEmployeePosition())) {
-            orderLockService.lockOrder(order, employee);
-        }
-
         checkAvailableOrderForEmployee(order, email);
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
 
@@ -354,6 +350,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
             getInfoAboutStatusesAndDateFormed(Optional.of(order));
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(orderAddress);
+
+        if (!order.isBlocked() && checkEmployeePositionsIsAdmin(employee.getEmployeePosition())) {
+            orderLockService.lockOrder(order, employee);
+        }
+
         return OrderStatusPageDto.builder()
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
             .userInfoDto(userInfoDto)

@@ -8,12 +8,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.any;
 
 @ExtendWith(MockitoExtension.class)
 class OrderLockServiceImplTest {
@@ -59,5 +62,12 @@ class OrderLockServiceImplTest {
         assertFalse(order.isBlocked());
         assertNull(order.getBlockedByEmployee());
         assertNull(order.getBlockedAt());
+    }
+
+    @Test
+    void testCheckLockOrders() {
+        doNothing().when(orderRepository).unlockExpiredOrders(any(LocalDateTime.class));
+        orderLockService.checkLockOrders();
+        verify(orderRepository, times(1)).unlockExpiredOrders(any(LocalDateTime.class));
     }
 }
