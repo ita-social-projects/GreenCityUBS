@@ -172,7 +172,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final RefundRepository refundRepository;
     private final OrderLockService orderLockService;
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
-
+    private static final List<String> ADMIN_POSITION_NAMES = List.of("Admin", "Super Admin");
     private final Set<OrderStatus> orderStatusesBeforeShipment =
         EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
@@ -332,7 +332,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
 
-        if (!order.isBlocked()) {
+        if (!order.isBlocked() && checkEmployeePositionsIsAdmin(employee.getEmployeePosition())) {
             orderLockService.lockOrder(order, employee);
         }
 
@@ -379,6 +379,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
             .writeOffStationSum(convertCoinsIntoBills(order.getWriteOffStationSum()))
             .build();
+    }
+
+    /**
+     * Checks if any position in the given set has administrative permissions.
+     * Specifically, it checks if any position's ID matches the IDs associated with
+     * the "Admin" or "Super Admin" roles.
+     *
+     * @param positions the set of positions to check
+     * @return true if any position in the set is an admin position, false otherwise
+     */
+    private boolean checkEmployeePositionsIsAdmin(Set<Position> positions) {
+        List<Long> idsWithValidPermissionsToEditOrder = positionRepository
+            .findAllIdsFromNames(ADMIN_POSITION_NAMES);
+        return positions.stream()
+            .anyMatch(p -> idsWithValidPermissionsToEditOrder.contains(p.getId()));
     }
 
     private Double setTotalPrice(CounterOrderDetailsDto dto) {

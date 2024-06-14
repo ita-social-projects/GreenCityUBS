@@ -141,6 +141,7 @@ public class AdminUbsController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PutMapping("/changingOrder")
     public ResponseEntity<List<Long>> saveNewValueFromOrdersTable(
         @Parameter(hidden = true) HttpServletRequest request,

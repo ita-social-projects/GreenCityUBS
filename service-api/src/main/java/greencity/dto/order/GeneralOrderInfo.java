@@ -31,5 +31,5 @@ public class GeneralOrderInfo {
     private String orderPaymentStatusName;
     private String orderPaymentStatusNameEng;
     private String adminComment;
-    private Boolean blocked;
+    private boolean blocked;
 }

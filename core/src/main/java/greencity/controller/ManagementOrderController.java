@@ -612,7 +612,8 @@ public class ManagementOrderController {
      */
     @Operation(summary = "Controller to check current employee for order")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = OrderStatusPageDto.class))),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
