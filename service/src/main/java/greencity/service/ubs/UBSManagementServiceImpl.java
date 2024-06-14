@@ -172,7 +172,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final RefundRepository refundRepository;
     private final OrderLockService orderLockService;
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
-
+    private static final List<String> ADMIN_POSITION_NAMES = List.of("Admin", "Super Admin");
     private final Set<OrderStatus> orderStatusesBeforeShipment =
         EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
@@ -381,12 +381,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
+    /**
+     * Checks if any position in the given set has administrative permissions.
+     * Specifically, it checks if any position's ID matches the IDs associated with
+     * the "Admin" or "Super Admin" roles.
+     *
+     * @param positions the set of positions to check
+     * @return true if any position in the set is an admin position, false otherwise
+     */
     private boolean checkEmployeePositionsIsAdmin(Set<Position> positions) {
-        Long adminId = 7L;
-        Long superAdminId = 6L;
-        List<Long> adminsIds = List.of(adminId, superAdminId);
+        List<Long> idsWithValidPermissionsToEditOrder = positionRepository
+            .findAllIdsFromNames(ADMIN_POSITION_NAMES);
         return positions.stream()
-            .anyMatch(p -> adminsIds.contains(p.getId()));
+            .anyMatch(p -> idsWithValidPermissionsToEditOrder.contains(p.getId()));
     }
 
     private Double setTotalPrice(CounterOrderDetailsDto dto) {
