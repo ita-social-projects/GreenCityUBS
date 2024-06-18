@@ -293,7 +293,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             dto.setFee("0");
         }
         return Payment.builder()
-            .id(Long.valueOf(dto.getOrderReference().substring(dto.getOrderReference().indexOf("_") + 1)))
+            .id(Long.valueOf(dto.getOrderReference().substring(dto.getOrderReference().lastIndexOf("_") + 1)))
             .currency(dto.getCurrency())
             .amount(Long.valueOf(dto.getAmount()))
             .orderStatus(dto.getTransactionStatus())
@@ -1158,8 +1158,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .transactionType("CREATE_INVOICE")
-            .orderReference(orderId + "_"
-                + order.getPayment().get(order.getPayment().size() - 1).getId().toString())
+            .orderReference(OrderUtils.generateOrderIdForPayment(orderId, order))
             .merchantAccount(wayForPayLogin)
             .merchantDomainName("https://www.greencity.social")
             .apiVersion(1)
@@ -1640,8 +1639,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private String formedLink(Order order, long sumToPayInCoins) {
         Order increment = incrementCounter(order);
-        PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), sumToPayInCoins);
-        return "";
+        PaymentRequestDto paymentRequestDto = formPaymentRequest(increment.getId(), sumToPayInCoins);
+        paymentRequestDto.setOrderReference(OrderUtils.generateOrderIdForPayment(increment.getId(), order));
+        return getLinkFromFondyCheckoutResponse(wayForPayClient.getCheckoutResponse(paymentRequestDto));
     }
 
     private String getLinkFromFondyCheckoutResponse(String wayForPayResponse) {
@@ -1653,23 +1653,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setCounterOrderPaymentId(order.getCounterOrderPaymentId() + 1);
         orderRepository.save(order);
         return order;
-    }
-
-    private PaymentRequestDto formPayment(Long orderId, long sumToPayInCoins) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-
-        PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
-            // .merchantId(Integer.parseInt(merchantId))
-            .orderReference(OrderUtils.generateOrderIdForPayment(orderId, order))
-            // .orderDescription("courier")
-            .currency("UAH")
-            // .amount(sumToPayInCoins)
-            // .responseUrl(resultUrlForPersonalCabinetOfUser)
-            .build();
-        paymentRequestDto.setSignature(encryptionUtil
-            .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
-        return paymentRequestDto;
     }
 
     private long formCertificatesToBeSavedAndCalculateOrderSumClient(OrderFondyClientDto dto,
