@@ -194,6 +194,7 @@ import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static java.lang.Double.valueOf;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -918,7 +919,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .bags(bagForUserDtos)
             .additionalOrders(order.getAdditionalOrders())
             .amountBeforePayment(amountBeforePayment)
-            .paidAmount(convertCoinsIntoBills(paidAmountInCoins))
+            .paidAmount(valueOf(paidAmountInCoins))
             .orderFullPrice(convertCoinsIntoBills(fullPriceInCoins))
             .certificate(certificateDtos)
             .bonuses(order.getPointsToUse().doubleValue())
