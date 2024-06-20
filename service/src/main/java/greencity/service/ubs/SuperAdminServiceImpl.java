@@ -159,13 +159,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void deleteTariffService(Integer bagId) {
         Bag bag = tryToFindBagById(bagId);
         if (CollectionUtils.isEmpty(orderBagRepository.findOrderBagsByBagId(bagId))) {
-            bagRepository.delete(bag);
-            return;
+            bagRepository.deleteBagById(bagId);
+        } else {
+            bag.setStatus(BagStatus.DELETED);
+            bagRepository.save(bag);
+            deleteTariffsInfo(bag);
+            orderRepository.findAllByBagId(bagId).forEach(order -> deleteBagFromOrder(order, bag));
         }
-        bag.setStatus(BagStatus.DELETED);
-        bagRepository.save(bag);
-        deleteTariffsInfo(bag);
-        orderRepository.findAllByBagId(bagId).forEach(order -> deleteBagFromOrder(order, bag));
     }
 
     private void deleteBagFromOrder(Order order, Bag bag) {
