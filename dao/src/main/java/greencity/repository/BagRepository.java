@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.order.Bag;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -89,4 +90,14 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         value = "SELECT * FROM bag "
             + "WHERE tariffs_info_id = :tariffInfoId AND status = 'ACTIVE'")
     List<Bag> findAllActiveBagsByTariffsInfoId(Long tariffInfoId);
+
+    /**
+     * Method for deleting of active {@link Bag} by bag id.
+     *
+     * @param bagId {@link Integer} bag id
+     * @author Olena Sotnik
+     */
+    @Modifying
+    @Query(value = "DELETE FROM bag AS b WHERE b.id = :bagId", nativeQuery = true)
+    void deleteBagById(@Param("bagId") Integer bagId);
 }

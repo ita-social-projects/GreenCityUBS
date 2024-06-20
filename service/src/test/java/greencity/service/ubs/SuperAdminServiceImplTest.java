@@ -309,12 +309,12 @@ class SuperAdminServiceImplTest {
     void deleteTariffServiceWhenTariffBagsListIsEmpty() {
         Bag bag = ModelUtils.getBag();
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
-
+        when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(new ArrayList<>());
         superAdminService.deleteTariffService(1);
 
         verify(orderBagRepository).findOrderBagsByBagId(any());
         verify(bagRepository).findActiveBagById(1);
-        verify(bagRepository).delete(any());
+        verify(bagRepository).deleteBagById(any());
 
     }
 
