@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -124,14 +125,13 @@ class UBSManagementEmployeeServiceImplTest {
         when(repository.save(any())).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         employeeService.save(dto, file);
-        employeeService.update(dto, file);
 
         verify(repository, times(1))
             .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(repository, times(1))
             .existsByEmailAndInactiveStatus(getAddEmployeeDto().getEmail());
-        verify(modelMapper, times(4)).map(any(), any());
-        verify(repository, times(3)).save(any());
+        verify(modelMapper, times(2)).map(any(), any());
+        verify(repository, times(2)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
     }
 
@@ -214,6 +214,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void updateEmployeeTest() {
         Employee employee = getEmployeeForUpdateEmailCheck();
+        Employee retrievedEmployee = getEmployeeForUpdateEmailCheck();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
         Position position = getPosition();
 
@@ -222,10 +223,14 @@ class UBSManagementEmployeeServiceImplTest {
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
-        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
+        when(repository.save(any())).thenReturn(employee);
+        doNothing().when(fileService).delete(retrievedEmployee.getImagePath());
+        when(repository.findById(anyLong())).thenReturn(Optional.of(retrievedEmployee));
         employeeService.update(dto, file);
 
         verify(modelMapper, times(2)).map(any(), any());
+        verify(repository).save(any());
+        verify(fileService).delete(eq(retrievedEmployee.getImagePath()));
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
         verify(repository, times(2)).findById(anyLong());
     }
