@@ -230,10 +230,15 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
 
         if (image != null) {
+            String imageUrlToDelete = upEmployee.getImagePath();
             updatedEmployee.setImagePath(fileService.upload(image));
+            if (!imageUrlToDelete.equals(defaultImagePath)) {
+                fileService.delete(upEmployee.getImagePath());
+            }
         } else {
-            updatedEmployee.setImagePath(upEmployee.getImagePath());
+            updatedEmployee.setImagePath(dto.getEmployeeDto().getImage());
         }
+
         return modelMapper.map(employeeRepository.save(updatedEmployee), EmployeeWithTariffsDto.class);
     }
 
