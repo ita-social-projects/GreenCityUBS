@@ -22,7 +22,7 @@ public enum OrderPaymentStatusSortingTranslation implements SortingTranslation<O
         Collections.unmodifiableSet(EnumSet.allOf(OrderPaymentStatusSortingTranslation.class));
 
     /**
-     * Method returns order payment status translations sorted in ascending order
+     * Method returns order status translations sorted in ascending order
      * according to the Ukrainian alphabet.
      *
      * @return {@link Set} of {@link OrderPaymentStatusSortingTranslation}
