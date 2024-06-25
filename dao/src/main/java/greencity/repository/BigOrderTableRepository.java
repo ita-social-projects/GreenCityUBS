@@ -1,7 +1,9 @@
 package greencity.repository;
 
 import greencity.entity.order.BigOrderTableViews;
+import greencity.enums.OrderPaymentStatusSortingTranslation;
 import greencity.enums.OrderStatusSortingTranslation;
+import greencity.enums.SortingTranslation;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ public class BigOrderTableRepository {
     private final CustomCriteriaPredicate criteriaPredicate;
     private final OrderFilterDataProvider orderFilterDataProvider;
     private static final String ORDER_STATUS = "orderStatus";
+    private static final String ORDER_PAYMENT_STATUS = "orderPaymentStatus";
     private static final String UKRAINIAN_LANGUAGE = "ua";
 
     /**
@@ -136,8 +139,8 @@ public class BigOrderTableRepository {
     private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root,
         String userLanguage) {
         if (UKRAINIAN_LANGUAGE.equals(userLanguage)
-            && ORDER_STATUS.equals(orderPage.getSortBy())) {
-            applySortingByOrderStatusForUkrainianLocalization(orderPage, cq, root);
+                && (ORDER_STATUS.equals(orderPage.getSortBy()) || ORDER_PAYMENT_STATUS.equals(orderPage.getSortBy()))) {
+            applySortingForUkrainianLocalization(orderPage, cq, root);
         } else {
             applySortingCriteria(orderPage, cq, root.get(orderPage.getSortBy()));
         }
@@ -159,16 +162,40 @@ public class BigOrderTableRepository {
         }
     }
 
-    private void applySortingByOrderStatusForUkrainianLocalization(OrderPage orderPage,
-        CriteriaQuery<BigOrderTableViews> cq,
-        Root<BigOrderTableViews> root) {
-        Set<OrderStatusSortingTranslation> sortOrderList = OrderStatusSortingTranslation.getOrderSetSortedByAsc();
+    private void applySortingForUkrainianLocalization(OrderPage orderPage,
+                                                      CriteriaQuery<BigOrderTableViews> cq,
+                                                      Root<BigOrderTableViews> root) {
+        switch (orderPage.getSortBy()) {
+            case (ORDER_STATUS):
+                applySortingOrderForUALocalizationByEnumeration(orderPage, cq, root,
+                        OrderStatusSortingTranslation.class);
+                break;
+            case (ORDER_PAYMENT_STATUS):
+                applySortingOrderForUALocalizationByEnumeration(orderPage, cq, root,
+                        OrderPaymentStatusSortingTranslation.class);
+                break;
+            default:
+                applySortingCriteria(orderPage, cq, root);
+                break;
+        }
+    }
+
+    private <T extends Enum<T> & SortingTranslation<T>> void applySortingOrderForUALocalizationByEnumeration(
+            OrderPage orderPage,
+            CriteriaQuery<BigOrderTableViews> cq,
+            Root<BigOrderTableViews> root,
+            Class<T> enumClass) {
+        T[] enumConstants = enumClass.getEnumConstants();
+        Set<T> sortOrderList = enumConstants[0].getSortedTranslations();
+        T otherStatus = enumConstants[0].getOtherStatus();
+
         CriteriaBuilder.Case<Integer> selectCase = criteriaBuilder.selectCase();
-        Expression<Integer> otherwiseExpression =
-            criteriaBuilder.literal(OrderStatusSortingTranslation.OTHER.getSortOrder());
+        Expression<Integer> otherwiseExpression = criteriaBuilder.literal(otherStatus.getSortOrder());
+
         sortOrderList.forEach(status -> selectCase.when(
-            criteriaBuilder.equal(root.get(ORDER_STATUS), status.name()),
-            status.getSortOrder()));
+                criteriaBuilder.equal(root.get(orderPage.getSortBy()), status.name()),
+                status.getSortOrder()));
+
         Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
         applySortingCriteria(orderPage, cq, sortOrder);
     }
