@@ -19,7 +19,7 @@ public enum OrderPaymentStatusSortingTranslation implements SortingTranslation<O
     private final int sortOrder;
 
     private static final Set<OrderPaymentStatusSortingTranslation> ASC_ORDER_PAYMENT_STATUS_TRANSLATIONS =
-            Collections.unmodifiableSet(EnumSet.allOf(OrderPaymentStatusSortingTranslation.class));
+        Collections.unmodifiableSet(EnumSet.allOf(OrderPaymentStatusSortingTranslation.class));
 
     /**
      * Method returns order payment status translations sorted in ascending order

@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Getter
 @AllArgsConstructor
-public enum OrderStatusSortingTranslation implements SortingTranslation<OrderStatusSortingTranslation>{
+public enum OrderStatusSortingTranslation implements SortingTranslation<OrderStatusSortingTranslation> {
     DONE(1),
     ON_THE_ROUTE(2),
     NOT_TAKEN_OUT(3),

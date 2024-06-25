@@ -8,7 +8,7 @@ import java.util.Set;
  *
  * @param <T> the type represent different statuses.
  */
-public interface SortingTranslation <T extends Enum<T>> {
+public interface SortingTranslation<T extends Enum<T>> {
     /**
      * Method returns the sort order value of the current enum constant.
      *

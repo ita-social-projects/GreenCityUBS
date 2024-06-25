@@ -139,7 +139,7 @@ public class BigOrderTableRepository {
     private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root,
         String userLanguage) {
         if (UKRAINIAN_LANGUAGE.equals(userLanguage)
-                && (ORDER_STATUS.equals(orderPage.getSortBy()) || ORDER_PAYMENT_STATUS.equals(orderPage.getSortBy()))) {
+            && (ORDER_STATUS.equals(orderPage.getSortBy()) || ORDER_PAYMENT_STATUS.equals(orderPage.getSortBy()))) {
             applySortingForUkrainianLocalization(orderPage, cq, root);
         } else {
             applySortingCriteria(orderPage, cq, root.get(orderPage.getSortBy()));
@@ -163,16 +163,16 @@ public class BigOrderTableRepository {
     }
 
     private void applySortingForUkrainianLocalization(OrderPage orderPage,
-                                                      CriteriaQuery<BigOrderTableViews> cq,
-                                                      Root<BigOrderTableViews> root) {
+        CriteriaQuery<BigOrderTableViews> cq,
+        Root<BigOrderTableViews> root) {
         switch (orderPage.getSortBy()) {
             case (ORDER_STATUS):
                 applySortingOrderForUALocalizationByEnumeration(orderPage, cq, root,
-                        OrderStatusSortingTranslation.class);
+                    OrderStatusSortingTranslation.class);
                 break;
             case (ORDER_PAYMENT_STATUS):
                 applySortingOrderForUALocalizationByEnumeration(orderPage, cq, root,
-                        OrderPaymentStatusSortingTranslation.class);
+                    OrderPaymentStatusSortingTranslation.class);
                 break;
             default:
                 applySortingCriteria(orderPage, cq, root);
@@ -181,10 +181,10 @@ public class BigOrderTableRepository {
     }
 
     private <T extends Enum<T> & SortingTranslation<T>> void applySortingOrderForUALocalizationByEnumeration(
-            OrderPage orderPage,
-            CriteriaQuery<BigOrderTableViews> cq,
-            Root<BigOrderTableViews> root,
-            Class<T> enumClass) {
+        OrderPage orderPage,
+        CriteriaQuery<BigOrderTableViews> cq,
+        Root<BigOrderTableViews> root,
+        Class<T> enumClass) {
         T[] enumConstants = enumClass.getEnumConstants();
         Set<T> sortOrderList = enumConstants[0].getSortedTranslations();
         T otherStatus = enumConstants[0].getOtherStatus();
@@ -193,8 +193,8 @@ public class BigOrderTableRepository {
         Expression<Integer> otherwiseExpression = criteriaBuilder.literal(otherStatus.getSortOrder());
 
         sortOrderList.forEach(status -> selectCase.when(
-                criteriaBuilder.equal(root.get(orderPage.getSortBy()), status.name()),
-                status.getSortOrder()));
+            criteriaBuilder.equal(root.get(orderPage.getSortBy()), status.name()),
+            status.getSortOrder()));
 
         Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
         applySortingCriteria(orderPage, cq, sortOrder);

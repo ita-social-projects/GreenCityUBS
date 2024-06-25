@@ -1,6 +1,5 @@
 package greencity.enums;
 
-
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumSet;
@@ -21,9 +20,9 @@ public class OrderPaymentStatusSortingTranslationTest {
     @Test
     void testOrderSetSortedByAsc() {
         Set<OrderPaymentStatusSortingTranslation> expectedAscSet =
-                EnumSet.allOf(OrderPaymentStatusSortingTranslation.class);
+            EnumSet.allOf(OrderPaymentStatusSortingTranslation.class);
         Set<OrderPaymentStatusSortingTranslation> actualAscSet =
-                OrderPaymentStatusSortingTranslation.OTHER.getSortedTranslations();
+            OrderPaymentStatusSortingTranslation.OTHER.getSortedTranslations();
         assertEquals(expectedAscSet, actualAscSet);
     }
 }
