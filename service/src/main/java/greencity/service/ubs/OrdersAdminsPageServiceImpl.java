@@ -165,7 +165,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("violationsAmount", "Кількість порушень клієнта", "Violations"),
                 "violationsAmount", 20, false, true, false, 12, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
             new ColumnDTO(new TitleDto("region", "Область", "Region"), "region", 20, false,
-                true, false, 35, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
+                true, true, 35, EditType.READ_ONLY, regionsList(), exportAddress),
             new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
                 true, true, 36, EditType.READ_ONLY, cityList(), exportAddress),
@@ -790,5 +790,17 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private boolean isOrderBlockedByAnotherEmployee(Order order, Long employeeId) {
         return order.getBlockedByEmployee() != null
             && !Objects.equals(employeeId, order.getBlockedByEmployee().getId());
+    }
+
+    private List<OptionForColumnDTO> regionsList() {
+        return addressRepository.findDistinctRegions()
+                .stream()
+                .map(address -> OptionForColumnDTO
+                        .builder()
+                        .key(address.getId().toString())
+                        .en(address.getRegionEn())
+                        .ua(address.getRegion())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
