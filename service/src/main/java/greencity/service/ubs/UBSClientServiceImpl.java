@@ -82,6 +82,7 @@ import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.TariffStatus;
+import greencity.enums.BagStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
@@ -1323,6 +1324,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         checkSumIfCourierLimitBySumOfOrder(tariffsInfo, limitedSumToPayInCoins);
         checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, limitedBags);
         totalSumToPayInCoins += limitedSumToPayInCoins;
+        List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
+                .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
+                .map(this::createOrderBag).collect(toList());
+        orderBagList.addAll(notOrderedBags.stream().peek(orderBag -> orderBag.setAmount(0)).collect(toList()));
         return totalSumToPayInCoins;
     }
 
