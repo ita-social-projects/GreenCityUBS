@@ -485,9 +485,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
-        PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPayInCoins);
-        String link = getLinkFromFondyCheckoutResponse(wayForPayClient.getCheckoutResponse(paymentRequestDto));
-        return getPaymentRequestDto(order, link);
+        if (dto.isShouldBePaid()) {
+            PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPayInCoins);
+            String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckoutResponse(paymentRequestDto));
+            return getPaymentRequestDto(order, link);
+        } else {
+            return getPaymentRequestDto(order, "");
+        }
     }
 
     private List<Integer> getBagIds(List<BagDto> dto) {
@@ -1642,10 +1646,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order increment = incrementCounter(order);
         PaymentRequestDto paymentRequestDto = formPaymentRequest(increment.getId(), sumToPayInCoins);
         paymentRequestDto.setOrderReference(OrderUtils.generateOrderIdForPayment(increment.getId(), order));
-        return getLinkFromFondyCheckoutResponse(wayForPayClient.getCheckoutResponse(paymentRequestDto));
+        return getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckoutResponse(paymentRequestDto));
     }
 
-    private String getLinkFromFondyCheckoutResponse(String wayForPayResponse) {
+    private String getLinkFromWayForPayCheckoutResponse(String wayForPayResponse) {
         JSONObject jsonObject = new JSONObject(wayForPayResponse);
         return jsonObject.getString("invoiceUrl");
     }
