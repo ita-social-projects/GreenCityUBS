@@ -101,7 +101,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK + "/getAllActiveCouriers",
                     UBS_LINK + "/locations/{courierId}",
-                    UBS_LINK + "/order-details-for-tariff")
+                    UBS_LINK + "/order-details-for-tariff",
+                    UBS_LINK + "/tariffinfo/**")
                 .permitAll()
                 .requestMatchers("/v2/api-docs/**",
                     "/v3/api-docs/**",
