@@ -244,7 +244,7 @@ class OrdersAdminsPageServiceImplTest {
         when(addressRepository.findDistinctCities())
             .thenReturn(addressList);
         when(addressRepository.findDistinctRegions())
-                .thenReturn(addressList);
+            .thenReturn(addressList);
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
