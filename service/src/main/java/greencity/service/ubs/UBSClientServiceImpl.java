@@ -1176,6 +1176,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .currency("UAH")
             .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
             .productName(order.getOrderBags().stream()
+                .filter(bag -> bag.getAmount() != 0)
                 .map(orderBag -> orderBag.getName().trim())
                 .flatMap(name -> Arrays.stream(name.split(",")))
                 .collect(Collectors.toList()))
@@ -1184,6 +1185,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .filter(amount -> amount != 0)
                 .collect(Collectors.toList()))
             .productPrice(order.getOrderBags().stream()
+                .filter(bag -> bag.getAmount() != 0)
                 .map(p -> convertCoinsIntoBills(p.getPrice()).intValue())
                 .collect(Collectors.toList()))
             .build();
