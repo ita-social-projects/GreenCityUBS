@@ -108,7 +108,7 @@ public interface NotificationService {
      * @param order The order {@link Order} which status was changed.
      * @author Maksym Lenets
      */
-    public void notifySelfPickupOrder(Order order);
+    void notifySelfPickupOrder(Order order);
 
     /**
      * Method that returns page with notifications for user by UUID.
@@ -131,4 +131,11 @@ public interface NotificationService {
      * @author Igor Boykov
      */
     long getUnreadenNotifications(String userUuid);
+
+    /**
+     * Notifies that a new order has been created.
+     *
+     * @param order the created order
+     */
+    void notifyCreatedOrder(Order order);
 }
