@@ -337,6 +337,8 @@ class UBSClientServiceImplTest {
     private OrderBagRepository orderBagRepository;
     @Mock
     private LocationToLocationsDtoMapper locationToLocationsDtoMapper;
+    @Mock
+    private NotificationService notificationService;
 
     @Test
     void testGetAllDistricts() {

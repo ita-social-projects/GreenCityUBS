@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="Kizerov">
+        <insert tableName="notification_templates">
+            <column name="notification_type" value="CREATE_NEW_ORDER" />
+            <column name="trigger" value="CREATED_NEW_ORDER" />
+            <column name="time" value="IMMEDIATELY" />
+            <column name="title" value="Нове замовлення" />
+            <column name="title_eng" value="New order" />
+            <column name="notification_status" value="ACTIVE" />
+        </insert>
+    </changeSet>
+</databaseChangeLog>

@@ -238,6 +238,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderBagRepository orderBagRepository;
     private final OrderBagService orderBagService;
     private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
+    private final NotificationService notificationService;
 
     @Lazy
     @Autowired
@@ -485,6 +486,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+
+        notificationService.notifyCreatedOrder(order);
 
         if (dto.isShouldBePaid()) {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPayInCoins);
