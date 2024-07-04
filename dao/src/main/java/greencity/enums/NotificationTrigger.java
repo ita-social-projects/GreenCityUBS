@@ -53,7 +53,10 @@ public enum NotificationTrigger {
                                               "Статус не оплаченого"
                                                   + "замовлення змінено на «Виконано» або «Скасовано»",
                                               "Status of unpaid order changed to «Done» or «Canceled»"),
-    TARIFF_PRICE_WAS_CHANGED("Зміна вартості тарифу", "Change in the price of the tariff");
+    TARIFF_PRICE_WAS_CHANGED("Зміна вартості тарифу", "Change in the price of the tariff"),
+    CREATED_NEW_ORDER(
+                      "Створення нового замовлення",
+                      "Create a new order");
 
     private final String description;
     private final String descriptionEng;

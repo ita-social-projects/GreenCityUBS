@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="Kizerov">
+        <sql>
+            INSERT INTO notification_platforms (body, body_eng, notification_receiver_type, notification_status, notification_id)
+            SELECT
+                'Шановний(-а) ${customerName}, Дякуємо за Ваше замовлення на нашому сайті! Ми раді повідомити, що Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було успішно розміщене та обробляється. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua.',
+                'Dear ${customerName}, Thank you for your order on our website! We are pleased to inform you that your order №${orderNumber} for the amount of ${amountToPay} UAH has been successfully placed and is being processed. If you have any questions, we are happy to assist! You can chat with a manager at t.me/nowaste_service_bot or email us at hello@nowaste.org.ua.',
+                'SITE', 'ACTIVE', id
+            FROM notification_templates WHERE notification_type = 'CREATE_NEW_ORDER';
+
+            INSERT INTO notification_platforms (body, body_eng, notification_receiver_type, notification_status, notification_id)
+            SELECT
+                'Шановний(-а) ${customerName}, Дякуємо за Ваше замовлення на нашому сайті! Ми раді повідомити, що Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було успішно розміщене та обробляється. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua.',
+                'Dear ${customerName}, Thank you for your order on our website! We are pleased to inform you that your order №${orderNumber} for the amount of ${amountToPay} UAH has been successfully placed and is being processed. If you have any questions, we are happy to assist! You can chat with a manager at t.me/nowaste_service_bot or email us at hello@nowaste.org.ua.',
+                'EMAIL', 'ACTIVE', id
+            FROM notification_templates WHERE notification_type = 'CREATE_NEW_ORDER';
+
+            INSERT INTO notification_platforms (body, body_eng, notification_receiver_type, notification_status, notification_id)
+            SELECT
+                'Шановний(-а) ${customerName}, Дякуємо за Ваше замовлення на нашому сайті! Ми раді повідомити, що Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було успішно розміщене та обробляється. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua.',
+                'Dear ${customerName}, Thank you for your order on our website! We are pleased to inform you that your order №${orderNumber} for the amount of ${amountToPay} UAH has been successfully placed and is being processed. If you have any questions, we are happy to assist! You can chat with a manager at t.me/nowaste_service_bot or email us at hello@nowaste.org.ua.',
+                'MOBILE', 'ACTIVE', id
+            FROM notification_templates WHERE notification_type = 'CREATE_NEW_ORDER';
+        </sql>
+    </changeSet>
+</databaseChangeLog>
