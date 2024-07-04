@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Getter
 @AllArgsConstructor
-public enum OrderStatusSortingTranslation {
+public enum OrderStatusSortingTranslation implements SortingTranslation<OrderStatusSortingTranslation> {
     DONE(1),
     ON_THE_ROUTE(2),
     NOT_TAKEN_OUT(3),
@@ -25,12 +25,18 @@ public enum OrderStatusSortingTranslation {
         Collections.unmodifiableSet(EnumSet.allOf(OrderStatusSortingTranslation.class));
 
     /**
-     * This method return Set collection of OrderStatus translation in ascending
-     * order.
+     * Method returns order payment status translations sorted in ascending order
+     * according to the Ukrainian alphabet.
      *
-     * @return Set of {@link OrderStatusSortingTranslation}
+     * @return {@link Set} of {@link OrderStatusSortingTranslation}
      */
-    public static Set<OrderStatusSortingTranslation> getOrderSetSortedByAsc() {
+    @Override
+    public Set<OrderStatusSortingTranslation> getSortedTranslations() {
         return ASC_ORDER_SET;
+    }
+
+    @Override
+    public OrderStatusSortingTranslation getOtherStatus() {
+        return OTHER;
     }
 }

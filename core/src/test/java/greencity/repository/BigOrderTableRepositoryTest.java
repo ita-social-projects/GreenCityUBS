@@ -5,6 +5,7 @@ import greencity.IntegrationTestBase;
 import greencity.UbsApplication;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderPaymentStatusSortingTranslation;
 import greencity.enums.OrderStatus;
 import greencity.enums.OrderStatusSortingTranslation;
 import greencity.enums.PaymentStatus;
@@ -436,6 +437,28 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
     }
 
     @Test
+    void get_All_Orders_Sort_By_OrderPaymentStatus_UA_Localization_ASC() {
+        OrderPage orderPage = new OrderPage().setPageNumber(0).setPageSize(15).setSortBy("orderPaymentStatus")
+            .setSortDirection(Sort.Direction.ASC);
+        List<BigOrderTableViews> bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
+            DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
+        boolean isListCorrectlySorted =
+            Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(false));
+        Assertions.assertTrue(isListCorrectlySorted);
+    }
+
+    @Test
+    void get_All_Orders_Sort_By_OrderPaymentStatus_UA_Localization_DESC() {
+        OrderPage orderPage = new OrderPage().setPageNumber(0).setPageSize(15).setSortBy("orderPaymentStatus")
+            .setSortDirection(Sort.Direction.DESC);
+        var bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
+            DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
+        boolean isListCorrectlySorted =
+            Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(true));
+        Assertions.assertTrue(isListCorrectlySorted);
+    }
+
+    @Test
     void get_All_Orders_PageImpl_Number_Of_Elements_ASC() {
         var expectedValue = ModelUtils.getPageableAllBOTViews_Two_Element_On_Page_ASC().getNumberOfElements();
         var actualValue =
@@ -448,5 +471,11 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Comparator<BigOrderTableViews> comparator = Comparator.comparingInt(
             view -> OrderStatusSortingTranslation.valueOf(view.getOrderStatus()).getSortOrder());
         return ascending ? comparator.reversed() : comparator;
+    }
+
+    private Comparator<BigOrderTableViews> orderPaymentStatusTranslationComparator(boolean descending) {
+        Comparator<BigOrderTableViews> comparator = Comparator.comparingInt(
+            view -> OrderPaymentStatusSortingTranslation.valueOf(view.getOrderPaymentStatus()).getSortOrder());
+        return descending ? comparator.reversed() : comparator;
     }
 }
