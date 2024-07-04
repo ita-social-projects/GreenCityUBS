@@ -195,7 +195,6 @@ import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static java.lang.Double.valueOf;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -910,12 +909,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
             .collect(toList());
 
-        Long amountWithDiscountInCoins = fullPriceInCoins
-            - 100L * (order.getPointsToUse() + countCertificatesBonuses(certificateDtos));
+        Long amountWithDiscountInCoins =
+            fullPriceInCoins - (long) (order.getPointsToUse() + countCertificatesBonuses(certificateDtos));
 
         Long paidAmountInCoins = countPaidAmount(payments);
 
-        Double amountBeforePayment = convertCoinsIntoBills(amountWithDiscountInCoins) - paidAmountInCoins;
+        Double amountBeforePayment = convertCoinsIntoBills(amountWithDiscountInCoins) - paidAmountInCoins / 100L;
 
         return OrdersDataForUserDto.builder()
             .id(order.getId())
@@ -927,7 +926,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .bags(bagForUserDtos)
             .additionalOrders(order.getAdditionalOrders())
             .amountBeforePayment(amountBeforePayment)
-            .paidAmount(valueOf(paidAmountInCoins))
+            .paidAmount(convertCoinsIntoBills(paidAmountInCoins))
             .orderFullPrice(convertCoinsIntoBills(fullPriceInCoins))
             .certificate(certificateDtos)
             .bonuses(order.getPointsToUse().doubleValue())
