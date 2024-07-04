@@ -1217,8 +1217,8 @@ class NotificationServiceImplTest {
         notification.setUser(user);
         notification.setOrder(newOrder);
         Set<NotificationParameter> parameters = Set.of(NotificationParameter.builder()
-                .key(ORDER_NUMBER_KEY)
-                .value(newOrder.getId().toString())
+            .key(ORDER_NUMBER_KEY)
+            .value(newOrder.getId().toString())
             .build(),
             NotificationParameter.builder()
                 .key(AMOUNT_TO_PAY_KEY)
@@ -1227,8 +1227,7 @@ class NotificationServiceImplTest {
             NotificationParameter.builder()
                 .key(CUSTOMER)
                 .value(newOrder.getUser().getRecipientName())
-                .build()
-            );
+                .build());
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
