@@ -124,6 +124,7 @@ class NotificationServiceImplTest {
     private static final String START_TIME_KEY = "startTime";
     private static final String END_TIME_KEY = "endTime";
     private static final String PHONE_NUMBER_KEY = "phoneNumber";
+    private static final String CUSTOMER = "customerName";
 
     @Mock
     private OrderRepository orderRepository;
@@ -1201,6 +1202,37 @@ class NotificationServiceImplTest {
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
 
         notificationService.notifySelfPickupOrder(order);
+
+        verify(userNotificationRepository).save(notification);
+        verify(notificationParameterRepository).saveAll(parameters);
+    }
+
+    @Test
+    void notifyCreateNewOrderTest() {
+        User user = getUser();
+        Order newOrder = ModelUtils.getOrder();
+        newOrder.setSumTotalAmountWithoutDiscounts(100L);
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.CREATE_NEW_ORDER);
+        notification.setUser(user);
+        notification.setOrder(newOrder);
+        Set<NotificationParameter> parameters = Set.of(NotificationParameter.builder()
+            .key(ORDER_NUMBER_KEY)
+            .value(newOrder.getId().toString())
+            .build(),
+            NotificationParameter.builder()
+                .key(AMOUNT_TO_PAY_KEY)
+                .value(String.valueOf(newOrder.getSumTotalAmountWithoutDiscounts() / 100))
+                .build(),
+            NotificationParameter.builder()
+                .key(CUSTOMER)
+                .value(newOrder.getUser().getRecipientName())
+                .build());
+
+        when(userNotificationRepository.save(any())).thenReturn(notification);
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+
+        notificationService.notifyCreatedOrder(newOrder);
 
         verify(userNotificationRepository).save(notification);
         verify(notificationParameterRepository).saveAll(parameters);

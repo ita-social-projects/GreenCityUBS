@@ -229,4 +229,6 @@
     <include file="/db/changelog/logs/2024-05-20-ch-add-column-userCategory-to-NotificationTemplate-Ryhal.xml"/>
     <include file="/db/changelog/logs/2024-05-20-ch-set-values-isScheduleUpdateForbidden-true-to-NotificationTemplate-Ryhal.xml"/>
     <include file="db/changelog/logs/ch-add-column-blocked-at-to-orders-table-Kizerov.xml"/>
+    <include file="/db/changelog/logs/ch-insert-data-into-notification_templates-Kizerov.xml"/>
+    <include file="/db/changelog/logs/ch-insert-data-into-notification-platforms-Kizerov.xml"/>
 </databaseChangeLog>

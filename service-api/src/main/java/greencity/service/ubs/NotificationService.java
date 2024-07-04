@@ -197,4 +197,13 @@ public interface NotificationService {
      * @author Igor Boykov
      */
     long getUnreadenNotifications(String userUuid);
+
+    /**
+     * Notifies that a new order has been created.
+     *
+     * @param order the created order
+     *
+     * @author Kizerov Dmytro
+     */
+    void notifyCreatedOrder(Order order);
 }
