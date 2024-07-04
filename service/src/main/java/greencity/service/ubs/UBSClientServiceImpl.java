@@ -522,6 +522,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
+        notificationService.notifyCreatedOrder(order);
+
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, null);
         } else {

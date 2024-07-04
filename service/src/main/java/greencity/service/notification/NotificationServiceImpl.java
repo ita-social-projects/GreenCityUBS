@@ -104,6 +104,7 @@ public class NotificationServiceImpl implements NotificationService {
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
     private static final String PAY_BUTTON = "payButton";
     private static final String VIOLATION_DESCRIPTION = "violationDescription";
+    private static final String CUSTOMER = "customerName";
 
     private static final int MAX_NOTIFICATION_ORDER_AGE_MONTHS = 1;
     private static final int MIN_NOTIFICATION_ORDER_AGE_DAYS = 3;
@@ -736,6 +737,34 @@ public class NotificationServiceImpl implements NotificationService {
     public long getUnreadenNotifications(String userUuid) {
         User user = userRepository.findByUuid(userUuid);
         return userNotificationRepository.countUserNotificationByUserAndReadIsFalse(user);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void notifyCreatedOrder(Order order) {
+        fillAndSendNotification(
+            getNotificationParametersForNewOrder(order),
+            order,
+            NotificationType.CREATE_NEW_ORDER);
+    }
+
+    private Set<NotificationParameter> getNotificationParametersForNewOrder(Order order) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+        parameters.add(NotificationParameter.builder()
+            .key(ORDER_NUMBER_KEY)
+            .value(String.valueOf(order.getId()))
+            .build());
+        parameters.add(NotificationParameter.builder()
+            .key(AMOUNT_TO_PAY_KEY)
+            .value(String.valueOf((order.getSumTotalAmountWithoutDiscounts() / 100)))
+            .build());
+        parameters.add(NotificationParameter.builder()
+            .key(CUSTOMER)
+            .value(order.getUser().getRecipientName())
+            .build());
+        return parameters;
     }
 
     /**
