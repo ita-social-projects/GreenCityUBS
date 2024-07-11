@@ -278,7 +278,7 @@ public class SecurityConfig {
                 .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.PUT,
                     "/user/markUserAsDeactivated")
-                .hasAnyRole(USER, ADMIN)
+                .hasAnyRole(USER)
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK + "/userProfile/**",
                     UBS_LINK + "/get-all-districts")
