@@ -1476,16 +1476,16 @@ class UBSClientServiceImplTest {
     @Test
     void markUserAsDeactivatedByIdThrowsNotFoundException() {
         Exception thrown = assertThrows(NotFoundException.class,
-            () -> ubsService.markUserAsDeactivated(1L));
+            () -> ubsService.markUserAsDeactivated("test"));
         assertEquals(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, thrown.getMessage());
     }
 
     @Test
     void markUserAsDeactivatedById() {
         User user = getUser();
-        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user));
-        ubsService.markUserAsDeactivated(1L);
-        verify(userRepository).findById(1L);
+        when(userRepository.findByUuid("test")).thenReturn(user);
+        ubsService.markUserAsDeactivated("test");
+        verify(userRepository).findByUuid("test");
         verify(userRemoteClient).markUserDeactivated(anyString());
     }
 

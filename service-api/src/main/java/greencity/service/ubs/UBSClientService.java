@@ -242,11 +242,11 @@ public interface UBSClientService {
     /**
      * Method that mark user as DEACTIVATED.
      *
-     * @param id {@link Long}
+     * @param uuid {@link String} current user uuid.
      *
      * @author Liubomyr Bratakh
      */
-    void markUserAsDeactivated(Long id);
+    void markUserAsDeactivated(String uuid);
 
     /**
      * Method returns cancellation reason and comment.

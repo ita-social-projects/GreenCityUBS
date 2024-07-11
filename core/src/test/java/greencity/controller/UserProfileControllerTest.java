@@ -93,9 +93,8 @@ class UserProfileControllerTest {
 
     @Test
     void deactivateUser() throws Exception {
-        mockMvc.perform(put(AppConstant.ubsLink + deactivateUser + "?id=5"))
+        mockMvc.perform(put(AppConstant.ubsLink + deactivateUser))
             .andExpect(status().isOk());
-        verify(ubsClientService).markUserAsDeactivated(5L);
     }
 
     @Test

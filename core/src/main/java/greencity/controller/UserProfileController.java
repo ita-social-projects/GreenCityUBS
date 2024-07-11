@@ -99,16 +99,12 @@ public class UserProfileController {
     @Operation(summary = "mark user as DEACTIVATED")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content),
-        @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
     })
     @PutMapping("/user/markUserAsDeactivated")
-    public ResponseEntity<HttpStatus> deactivateUser(
-        @RequestParam Long id) {
-        ubsClientService.markUserAsDeactivated(id);
+    public ResponseEntity<HttpStatus> deactivateUser(@CurrentUserUuid String uuid) {
+        ubsClientService.markUserAsDeactivated(uuid);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

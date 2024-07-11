@@ -1526,10 +1526,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public void markUserAsDeactivated(Long id) {
-        User user =
-            userRepository.findById(id).orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-        userRemoteClient.markUserDeactivated(user.getUuid());
+    public void markUserAsDeactivated(String uuid) {
+        User currentUser = userRepository.findByUuid(uuid);
+        if (currentUser == null) {
+            throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
+        }
+        userRemoteClient.markUserDeactivated(currentUser.getUuid());
     }
 
     @Override
