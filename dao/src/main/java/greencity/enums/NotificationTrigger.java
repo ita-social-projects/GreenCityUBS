@@ -42,15 +42,15 @@ public enum NotificationTrigger {
            "Кастомна",
            "Custom"),
     ORDER_STATUS_CHANGED_FROM_FORMED_TO_BROUGHT_BY_HIMSELF(
-                                                           "Статус замовлення змінений"
+                                                           "Статус замовлення змінений "
                                                                + "з «Сформовано» на «Привезе сам»",
-                                                           "Order status changed"
+                                                           "Order status changed "
                                                                + "from «Formed» to «Brought by himself»"),
     HALF_PAID_ORDER_STATUS_BROUGHT_BY_HIMSELF(
                                               "Статус не повністю оплаченого замовлення змінено на «Привезе сам»",
                                               "Status of half paid order changed to «Brought by himself»"),
     UNDERPAYMENT_WHEN_STATUS_DONE_OR_CANCELED(
-                                              "Статус не оплаченого"
+                                              "Статус не оплаченого "
                                                   + "замовлення змінено на «Виконано» або «Скасовано»",
                                               "Status of unpaid order changed to «Done» or «Canceled»"),
     CREATED_NEW_ORDER(
