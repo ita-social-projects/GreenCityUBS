@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
@@ -242,11 +243,12 @@ public interface UBSClientService {
     /**
      * Method that mark user as DEACTIVATED.
      *
-     * @param uuid {@link String} current user uuid.
+     * @param uuid    {@link String} current user uuid.
+     * @param request {@link DeactivateUserRequestDto} information for deactivation.
      *
      * @author Liubomyr Bratakh
      */
-    void markUserAsDeactivated(String uuid);
+    void markUserAsDeactivated(String uuid, DeactivateUserRequestDto request);
 
     /**
      * Method returns cancellation reason and comment.

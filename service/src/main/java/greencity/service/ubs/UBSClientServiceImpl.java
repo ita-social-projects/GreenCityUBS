@@ -11,12 +11,7 @@ import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.constant.TariffLocation;
 import greencity.constant.KyivTariffLocation;
-import greencity.dto.AllActiveLocationsDto;
-import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.LocationsDtos;
-import greencity.dto.OrderCourierPopUpDto;
-import greencity.dto.RegionDto;
-import greencity.dto.TariffsForLocationDto;
+import greencity.dto.*;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagDto;
@@ -45,15 +40,7 @@ import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.position.PositionAuthoritiesDto;
-import greencity.dto.user.AllPointsUserDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.PointsForUbsUserDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserPointDto;
-import greencity.dto.user.UserPointsAndAllBagsDto;
-import greencity.dto.user.UserProfileCreateDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
@@ -1526,12 +1513,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public void markUserAsDeactivated(String uuid) {
+    public void markUserAsDeactivated(String uuid, DeactivateUserRequestDto request) {
         User currentUser = userRepository.findByUuid(uuid);
         if (currentUser == null) {
             throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
         }
-        userRemoteClient.markUserDeactivated(currentUser.getUuid());
+        userRemoteClient.markUserDeactivated(currentUser.getUuid(), request);
     }
 
     @Override
