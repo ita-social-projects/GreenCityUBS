@@ -3,6 +3,7 @@ package greencity.client.config;
 import feign.hystrix.FallbackFactory;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeePositionsDto;
@@ -48,7 +49,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void markUserDeactivated(String uuid) {
+            public void markUserDeactivated(String uuid, DeactivateUserRequestDto request) {
                 throw new RemoteServerUnavailableException(ErrorMessage.USER_HAS_NOT_BEEN_DEACTIVATED, throwable);
             }
 
