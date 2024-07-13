@@ -2,6 +2,7 @@ package greencity.client;
 
 import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.client.config.UserRemoteClientFallbackFactory;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeePositionsDto;
@@ -94,10 +95,10 @@ public interface UserRemoteClient {
     /**
      * Changes userStatus to "DEACTIVATED" by UUID.
      *
-     * @param uuid {@link User}'s UUID.
+     * @param uuid {@link User}'s uuid.
      */
-    @PutMapping("/user/markUserAsDeactivated")
-    void markUserDeactivated(@RequestParam(UUID) String uuid);
+    @PutMapping("/user/deactivate")
+    void markUserDeactivated(@RequestParam(UUID) String uuid, @RequestBody DeactivateUserRequestDto request);
 
     /**
      * Gets current user's password status.

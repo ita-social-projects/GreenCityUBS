@@ -1,6 +1,7 @@
 package greencity.client.config;
 
 import greencity.client.UserRemoteClient;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -53,7 +54,10 @@ class UserRemoteClientFallbackFactoryTest {
 
     @Test
     void markUserDeactivated() {
-        assertThrows(RemoteServerUnavailableException.class, () -> client.markUserDeactivated(USER_UUID));
+        DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
+            .reason("test")
+            .build();
+        assertThrows(RemoteServerUnavailableException.class, () -> client.markUserDeactivated(USER_UUID, request));
     }
 
     @Test

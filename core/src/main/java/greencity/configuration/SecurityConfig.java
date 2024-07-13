@@ -276,6 +276,9 @@ public class SecurityConfig {
                     UBS_LINK + "/userProfile/**",
                     UBS_LINK + "/update-order-address")
                 .hasAnyRole(USER, ADMIN)
+                .requestMatchers(HttpMethod.PUT,
+                    "/user/markUserAsDeactivated")
+                .hasAnyRole(USER)
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK + "/userProfile/**",
                     UBS_LINK + "/get-all-districts")

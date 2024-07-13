@@ -7,6 +7,7 @@ import greencity.client.UserRemoteClient;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
@@ -1475,18 +1476,24 @@ class UBSClientServiceImplTest {
 
     @Test
     void markUserAsDeactivatedByIdThrowsNotFoundException() {
+        DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
+            .reason("test")
+            .build();
         Exception thrown = assertThrows(NotFoundException.class,
-            () -> ubsService.markUserAsDeactivated(1L));
+            () -> ubsService.markUserAsDeactivated("test", request));
         assertEquals(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, thrown.getMessage());
     }
 
     @Test
     void markUserAsDeactivatedById() {
         User user = getUser();
-        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user));
-        ubsService.markUserAsDeactivated(1L);
-        verify(userRepository).findById(1L);
-        verify(userRemoteClient).markUserDeactivated(anyString());
+        DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
+            .reason("test")
+            .build();
+        when(userRepository.findByUuid("test")).thenReturn(user);
+        ubsService.markUserAsDeactivated("test", request);
+        verify(userRepository).findByUuid("test");
+        verify(userRemoteClient).markUserDeactivated(user.getUuid(), request);
     }
 
     @Test
