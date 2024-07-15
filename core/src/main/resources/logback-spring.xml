@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
@@ -37,7 +38,6 @@
         </encoder>
     </appender>
     <springProfile name="dev">
-        <statusListener class="greencity.logger.DoNotPrintInfoLogbackStatusListener" />
         <root level="${ROOT_LEVEL}">
             <appender-ref ref="CONSOLE" />
         </root>
