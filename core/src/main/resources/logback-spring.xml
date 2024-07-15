@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!-- Define logging root level from application properties -->
+    <springProperty scope="context" name="ROOT_LEVEL" source="logging.level.root" defaultValue="INFO"/>
+
+    <!-- Define logging file path from application properties -->
+    <springProperty scope="context" name="FILE_PATH" source="logging.file.path"/>
+
+    <!-- Define logging file name from application properties -->
+    <springProperty scope="context" name="FILE_NAME" source="logging.file.name"/>
+
+    <!-- Define regexp for logging date formating name from application properties -->
+    <springProperty scope="context" name="DATE_FORMAT" source="logging.pattern.dateformat" defaultValue="yyyy-MM-dd HH:mm:ss"/>
+    
+    <!-- Define the log pattern with the custom date format from application properties -->
+    <springProperty scope="context" name="LOG_PATTERN" source="logging.pattern.console" defaultValue="[%d{${DATE_FORMAT}}] %highlight(%-5level) %cyan(%-40.40logger{40}) %magenta(%-5.5(:%line)) %msg%n" />
+    <springProperty scope="context" name="LOG_EXCEPTION_HANDLER" source="logging.level.greencity.exception.handler.CustomExceptionHandler" defaultValue="TRACE"/>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- Use the log pattern with the custom date format -->
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${FILE_PATH}/${FILE_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${FILE_PATH}/${FILE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>3</maxHistory>
+            <totalSizeCap>15MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <springProfile name="dev">
+        <statusListener class="greencity.logger.DoNotPrintInfoLogbackStatusListener" />
+        <root level="${ROOT_LEVEL}">
+            <appender-ref ref="CONSOLE" />
+        </root>
+        <if condition='isDefined("FILE_PATH")'>
+            <then>
+                <root level="INFO">
+                    <appender-ref ref="FILE" />
+                </root>
+            </then>
+        </if>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="${ROOT_LEVEL}">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="FILE" />
+        </root>
+    </springProfile>
+</configuration>
