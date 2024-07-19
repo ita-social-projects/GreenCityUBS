@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-column-status-and-deleteDate-to-Violation" author="MarynaChekhovska">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="violations_description_mapping" columnName="violation_status"/>
+            </not>
+            <not>
+                <columnExists tableName="violations_description_mapping" columnName="delete_date"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="violations_description_mapping">
+            <column name="violation_status" type="VARCHAR(15)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delete_date" type="TIMESTAMP"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="set-status-to-Violation" author="MarynaChekhovska">
+        <update tableName="violations_description_mapping">
+            <column name="violation_status" value="ACTIVE"/>
+            <where>violation_status IS NULL</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>
