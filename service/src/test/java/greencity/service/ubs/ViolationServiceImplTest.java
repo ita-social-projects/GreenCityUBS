@@ -110,7 +110,6 @@ class ViolationServiceImplTest {
         Employee user = ModelUtils.getEmployee();
         when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(user));
         Violation violation = ModelUtils.getViolation2();
-        Long id = ModelUtils.getViolation().getOrder().getId();
         when(violationRepository.findActiveViolationByOrderId(1L)).thenReturn(Optional.of(violation));
 
         violationService.deleteViolation(1L, "abc");
@@ -382,7 +381,6 @@ class ViolationServiceImplTest {
         Employee user = ModelUtils.getEmployee();
         when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(user));
         Violation violation = ModelUtils.getViolation();
-        Long id = ModelUtils.getViolation().getOrder().getId();
         when(violationRepository.findActiveViolationByOrderId(1L)).thenReturn(Optional.of(violation));
         violationService.deleteViolation(1L, "abc");
 
