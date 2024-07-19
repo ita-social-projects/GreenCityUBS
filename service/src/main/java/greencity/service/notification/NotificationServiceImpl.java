@@ -788,7 +788,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (NotificationType.VIOLATION_THE_RULES.equals(notification.getNotificationType())) {
             NotificationParameter notificationParameter = notification.getParameters().stream()
                 .filter(parameter -> parameter.getKey().equals(VIOLATION_DESCRIPTION))
-                .findFirst().get();
+                .findFirst().orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
             Violation violation = violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(),
                 notificationParameter.getValue())
                 .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
