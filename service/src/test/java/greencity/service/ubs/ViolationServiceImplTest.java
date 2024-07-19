@@ -115,10 +115,10 @@ class ViolationServiceImplTest {
 
         violationService.deleteViolation(1L, "abc");
 
-        verify(employeeRepository, times(1)).findByUuid(anyString());
-        verify(violationRepository, times(1)).save(violation);
-        verify(notificationService, times(1)).notifyDeleteViolation(1L);
-        verify(userRepository, times(1)).save(any(User.class));
+        verify(employeeRepository).findByUuid(anyString());
+        verify(violationRepository).save(violation);
+        verify(notificationService).notifyDeleteViolation(1L);
+        verify(userRepository).save(any(User.class));
 
         assertEquals(ViolationStatus.DELETED, violation.getViolationStatus());
         assertNotNull(violation.getDeleteDate());
@@ -386,8 +386,8 @@ class ViolationServiceImplTest {
         when(violationRepository.findActiveViolationByOrderId(1L)).thenReturn(Optional.of(violation));
         violationService.deleteViolation(1L, "abc");
 
-        verify(employeeRepository, times(1)).findByUuid(anyString());
-        verify(violationRepository, times(1)).save(violation);
+        verify(employeeRepository).findByUuid(anyString());
+        verify(violationRepository).save(violation);
 
         assertEquals(ViolationStatus.DELETED, violation.getViolationStatus());
         assertNotNull(violation.getDeleteDate());
