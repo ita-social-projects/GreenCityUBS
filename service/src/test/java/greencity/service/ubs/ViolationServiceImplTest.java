@@ -11,6 +11,7 @@ import greencity.constant.OrderHistory;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import greencity.enums.OrderStatus;
+import greencity.enums.ViolationStatus;
 import greencity.exceptions.BadRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,7 @@ import greencity.repository.ViolationRepository;
 import greencity.service.notification.NotificationServiceImpl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
@@ -97,9 +99,9 @@ class ViolationServiceImplTest {
     void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
         Employee employee = ModelUtils.getEmployee();
         when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
-        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.empty());
+        when(violationRepository.findActiveViolationByOrderId(1L)).thenReturn(Optional.empty());
         Assertions.assertThrows(NotFoundException.class, () -> violationService.deleteViolation(1L, "abc"));
-        verify(violationRepository, times(1)).findByOrderId(1L);
+        verify(violationRepository, times(1)).findActiveViolationByOrderId(1L);
         verify(employeeRepository, times(1)).findByUuid(anyString());
     }
 
@@ -108,13 +110,17 @@ class ViolationServiceImplTest {
         Employee user = ModelUtils.getEmployee();
         when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(user));
         Violation violation = ModelUtils.getViolation2();
-        Long id = ModelUtils.getViolation().getOrder().getId();
-        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
-        doNothing().when(violationRepository).deleteById(1L);
+        when(violationRepository.findActiveViolationByOrderId(1L)).thenReturn(Optional.of(violation));
+
         violationService.deleteViolation(1L, "abc");
 
-        verify(violationRepository, times(1)).deleteById(id);
-        verify(employeeRepository, times(1)).findByUuid(anyString());
+        verify(employeeRepository).findByUuid(anyString());
+        verify(violationRepository).save(violation);
+        verify(notificationService).notifyDeleteViolation(1L);
+        verify(userRepository).save(any(User.class));
+
+        assertEquals(ViolationStatus.DELETED, violation.getViolationStatus());
+        assertNotNull(violation.getDeleteDate());
     }
 
     @ParameterizedTest
@@ -155,7 +161,7 @@ class ViolationServiceImplTest {
         when(employeeRepository.findByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(List.of(tariffsInfo.getId()));
         if (violation != null) {
-            when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(violation));
+            when(violationRepository.findActiveViolationByOrderId(order.getId())).thenReturn(Optional.of(violation));
         }
 
         Exception ex =
@@ -196,7 +202,7 @@ class ViolationServiceImplTest {
         List<String> violationImages = violation.getImages();
 
         when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
-        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
+        when(violationRepository.findActiveViolationByOrderId(1L)).thenReturn(Optional.of(violation));
         if (updateViolationToUserDto.getImagesToDelete() != null) {
             List<String> images = updateViolationToUserDto.getImagesToDelete();
             for (String image : images) {
@@ -210,7 +216,7 @@ class ViolationServiceImplTest {
         assertEquals(2, violation.getImages().size());
 
         verify(employeeRepository).findByUuid("abc");
-        verify(violationRepository).findByOrderId(1L);
+        verify(violationRepository).findActiveViolationByOrderId(1L);
     }
 
     @Test
@@ -218,7 +224,7 @@ class ViolationServiceImplTest {
         Violation violation = ModelUtils.getViolation();
         Optional<ViolationDetailInfoDto> expected = Optional.of(ModelUtils.getViolationDetailInfoDto());
         when(userRepository.findById(1L)).thenReturn(Optional.of(violation.getAddedByUser()));
-        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
+        when(violationRepository.findActiveViolationByOrderId(1L)).thenReturn(Optional.of(violation));
         Optional<ViolationDetailInfoDto> actual = violationService.getViolationDetailsByOrderId(1L);
 
         assertEquals(expected, actual);
@@ -226,7 +232,7 @@ class ViolationServiceImplTest {
 
     @Test
     void getViolationDetailsByOrderIdWhenOptionalViolationIsEmptyTest() {
-        when(violationRepository.findByOrderId(anyLong())).thenReturn(Optional.empty());
+        when(violationRepository.findActiveViolationByOrderId(anyLong())).thenReturn(Optional.empty());
         assertEquals(Optional.empty(), violationService.getViolationDetailsByOrderId(1L));
     }
 
@@ -322,11 +328,11 @@ class ViolationServiceImplTest {
         UpdateViolationToUserDto add = ModelUtils.getUpdateViolationToUserDto();
         multipartFiles[0] = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
         when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(employee));
-        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(violation));
+        when(violationRepository.findActiveViolationByOrderId(order.getId())).thenReturn(Optional.of(violation));
         violationService.updateUserViolation(add, multipartFiles, "uuid");
 
         verify(employeeRepository).findByUuid(anyString());
-        verify(violationRepository).findByOrderId(order.getId());
+        verify(violationRepository).findActiveViolationByOrderId(order.getId());
     }
 
     @Test
@@ -339,11 +345,11 @@ class ViolationServiceImplTest {
         MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
         UpdateViolationToUserDto add = ModelUtils.getUpdateViolationToUserDto();
         when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(employee));
-        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(violation));
+        when(violationRepository.findActiveViolationByOrderId(order.getId())).thenReturn(Optional.of(violation));
 
         violationService.updateUserViolation(add, multipartFiles, "uuid");
         verify(employeeRepository).findByUuid(anyString());
-        verify(violationRepository).findByOrderId(order.getId());
+        verify(violationRepository).findActiveViolationByOrderId(order.getId());
     }
 
     @Test
@@ -363,11 +369,11 @@ class ViolationServiceImplTest {
             .build();
 
         when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(employee));
-        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(violation));
+        when(violationRepository.findActiveViolationByOrderId(order.getId())).thenReturn(Optional.of(violation));
 
         violationService.updateUserViolation(add, multipartFiles, "uuid");
         verify(employeeRepository).findByUuid(anyString());
-        verify(violationRepository).findByOrderId(order.getId());
+        verify(violationRepository).findActiveViolationByOrderId(order.getId());
     }
 
     @Test
@@ -375,12 +381,13 @@ class ViolationServiceImplTest {
         Employee user = ModelUtils.getEmployee();
         when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(user));
         Violation violation = ModelUtils.getViolation();
-        Long id = ModelUtils.getViolation().getOrder().getId();
-        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
-        doNothing().when(violationRepository).deleteById(1L);
+        when(violationRepository.findActiveViolationByOrderId(1L)).thenReturn(Optional.of(violation));
         violationService.deleteViolation(1L, "abc");
 
-        verify(violationRepository, times(1)).deleteById(id);
-        verify(employeeRepository, times(1)).findByUuid(anyString());
+        verify(employeeRepository).findByUuid(anyString());
+        verify(violationRepository).save(violation);
+
+        assertEquals(ViolationStatus.DELETED, violation.getViolationStatus());
+        assertNotNull(violation.getDeleteDate());
     }
 }
