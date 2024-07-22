@@ -260,7 +260,8 @@ class NotificationServiceImplTest {
                 .value("46")
                 .build());
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
-            when(violationRepository.findByOrderId(TEST_ORDER_4.getId())).thenReturn(Optional.of(violation));
+            when(violationRepository.findActiveViolationByOrderId(TEST_ORDER_4.getId()))
+                .thenReturn(Optional.of(violation));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_3)).thenReturn(TEST_USER_NOTIFICATION_3);
             parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_3));
             when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
@@ -297,7 +298,8 @@ class NotificationServiceImplTest {
                 .value("46")
                 .build());
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
-            when(violationRepository.findByOrderId(TEST_ORDER_4.getId())).thenReturn(Optional.of(violation));
+            when(violationRepository.findActiveViolationByOrderId(TEST_ORDER_4.getId()))
+                .thenReturn(Optional.of(violation));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_7)).thenReturn(TEST_USER_NOTIFICATION_7);
             parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_7));
             when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
@@ -484,13 +486,13 @@ class NotificationServiceImplTest {
 
     @Test
     void getNotificationViolation() {
-        UserNotification notification = createUserNotificationForViolation();
+        UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             NotificationType.VIOLATION_THE_RULES,
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
-        when(violationRepository.findByOrderId(notification.getOrder().getId()))
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
             .thenReturn(Optional.of(getViolation()));
 
         NotificationDto actual = notificationService.getNotification("abc", 1L, "ua");
@@ -500,13 +502,13 @@ class NotificationServiceImplTest {
 
     @Test
     void getNotificationViolationNotFoundException() {
-        UserNotification notification = createUserNotificationForViolation();
+        UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             NotificationType.VIOLATION_THE_RULES,
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
-        when(violationRepository.findByOrderId(notification.getOrder().getId()))
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
             .thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,

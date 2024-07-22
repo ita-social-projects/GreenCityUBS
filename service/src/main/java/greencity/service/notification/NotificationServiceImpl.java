@@ -76,6 +76,7 @@ public class NotificationServiceImpl implements NotificationService {
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
     private static final String PAY_BUTTON = "payButton";
     private static final String CUSTOMER = "customerName";
+    private static final String VIOLATION_DESCRIPTION = "violationDescription";
     @Autowired
     private final OrderBagService orderBagService;
 
@@ -368,10 +369,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyAddViolation(Long orderId) {
         Set<NotificationParameter> parameters = new HashSet<>();
-        Violation violation = violationRepository.findByOrderId(orderId)
+        Violation violation = violationRepository.findActiveViolationByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
         parameters.add(NotificationParameter.builder()
-            .key("violationDescription")
+            .key(VIOLATION_DESCRIPTION)
             .value(violation.getDescription())
             .build());
         parameters.add(NotificationParameter.builder()
@@ -400,7 +401,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyDeleteViolation(Long orderId) {
         Set<NotificationParameter> parameters = new HashSet<>();
-        Violation violation = violationRepository.findByOrderId(orderId)
+        Violation violation = violationRepository.findActiveViolationByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
         parameters.add(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
@@ -553,7 +554,11 @@ public class NotificationServiceImpl implements NotificationService {
         NotificationDto notificationDto = createNotificationDto(notification, language, SITE, templateRepository, 0L);
 
         if (NotificationType.VIOLATION_THE_RULES.equals(notification.getNotificationType())) {
-            Violation violation = violationRepository.findByOrderId(notification.getOrder().getId())
+            NotificationParameter notificationParameter = notification.getParameters().stream()
+                .filter(parameter -> parameter.getKey().equals(VIOLATION_DESCRIPTION))
+                .findFirst().orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
+            Violation violation = violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(),
+                notificationParameter.getValue())
                 .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
             notificationDto.setImages(violation.getImages());
         }
