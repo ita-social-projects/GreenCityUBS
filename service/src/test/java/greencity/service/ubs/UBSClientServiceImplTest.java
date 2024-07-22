@@ -1,12 +1,14 @@
 package greencity.service.ubs;
 
-import com.liqpay.LiqPay;
 import greencity.ModelUtils;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
+
+import greencity.client.WayForPayClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
@@ -24,8 +26,6 @@ import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
-import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseLiqPayDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.*;
 import greencity.entity.coords.Coordinates;
@@ -57,7 +57,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
@@ -65,7 +64,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
@@ -175,7 +173,7 @@ class UBSClientServiceImplTest {
     private Authentication authentication;
 
     @Mock
-    private LiqPay liqPay;
+    private WayForPayClient wayForPayClient;
 
     @Mock
     private NotificationService notificationService;
@@ -196,46 +194,6 @@ class UBSClientServiceImplTest {
         assertEquals(districtDtos.size(), results.size());
         verify(locationApiService, times(1)).getAllDistrictsInCityByNames(anyString(), anyString());
         verify(modelMapper, times(locationDtos.size())).map(any(LocationDto.class), eq(DistrictDto.class));
-    }
-
-    @Transactional
-    void testValidatePayment() {
-        PaymentResponseDto dto = new PaymentResponseDto();
-        PaymentResponseLiqPayDto liqPayDto = new PaymentResponseLiqPayDto();
-        liqPayDto.setData(
-            "eyJhY3Rpb24iOiJwYXkiLCJhbW91bnQiOiIxLjUwIiwiY3VycmVuY3kiOiJVQUgiLCJkZXNjcmlwdGlvbiI6ImRlc2NyaXB0aW9uIHRleHQiLCJsYW5ndWFnZSI6InVrIiwib3JkZXJfaWQiOiJlZTI1ZGFmZS01ZDRlLTRmYmQtODRmMy1hZjJlNWVjMTBkYjQiLCJwdWJsaWNfa2V5Ijoic2FuZGJveF9pMTI4NjcxNjI4NTIiLCJyZXN1bHRfdXJsIjoiaHR0cDpcL1wvbG9jYWxob3N0OjgwNTAiLCJzYW5kYm94IjoiMSIsInZlcnNpb24iOiIzIn0=");
-        liqPayDto.setSignature("9lrCvPYNzQYSemVzWNDO1ilDrFk=");
-        Order order = getOrder();
-        dto.setOrder_id(order.getId().toString());
-        dto.setResponse_status("approved");
-        dto.setOrder_status("approved");
-        dto.setAmount(95000);
-        dto.setPayment_id(1);
-        dto.setCurrency("UAH");
-        dto.setSettlement_date("");
-        dto.setFee(null);
-        Payment payment = getPayment();
-        when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        ubsService.validatePaymentLiqPay(liqPayDto);
-        verify(eventService, times(1))
-            .save("Замовлення Оплачено", "Система", order);
-        verify(paymentRepository, times(1)).save(payment);
-    }
-
-    @Test
-    void unvalidValidatePayment() {
-        PaymentResponseDto dto = new PaymentResponseDto();
-        Order order = getOrder();
-        dto.setOrder_id(order.getId().toString());
-        dto.setResponse_status("approved");
-        dto.setOrder_status("approved");
-        dto.setAmount(95000);
-        dto.setPayment_id(1);
-        dto.setCurrency("UAH");
-        dto.setSettlement_date("");
-        dto.setFee(0);
-        lenient().when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
     }
 
     @Test
@@ -572,22 +530,15 @@ class UBSClientServiceImplTest {
         User user = getUserWithLastLocation();
         user.setAlternateEmail("test@mail.com");
         user.setCurrentPoints(900);
-
-        OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().getFirst().setAmount(15);
-        dto.setAddressId(1L);
-        dto.setLocationId(15L);
-        Order order = getOrder();
         user.setOrders(new ArrayList<>());
-        user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
 
+        Order order = getOrder();
         Bag bag = getBagForOrder();
         TariffsInfo tariffsInfo = getTariffInfo();
 
-        UBSuser ubSuser = getUBSuser();
-
-        OrderAddress orderAddress = ubSuser.getOrderAddress();
+        UBSuser ubsUser = getUBSuser();
+        OrderAddress orderAddress = ubsUser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -596,15 +547,22 @@ class UBSClientServiceImplTest {
         payment1.setId(1L);
         order1.getPayment().add(payment1);
 
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().getFirst().setAmount(15);
+        dto.setAddressId(1L);
+        dto.setLocationId(15L);
+
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("merchantId")) {
-                f.setAccessible(true);
-                f.set(ubsService, "1");
+        for (Field field : fields) {
+            if (field.getName().equals("merchantId")) {
+                field.setAccessible(true);
+                field.set(ubsService, "1");
             }
         }
+
         tariffsInfo.setBags(Collections.singletonList(bag));
         order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+
         when(locationRepository.findAddressAndLocationNamesMatch(anyLong(), anyLong()))
             .thenReturn(Optional.of("Bearded Lady"));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
@@ -612,12 +570,17 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubsUser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+
+        String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
+        when(wayForPayClient.getCheckOutResponse(any(PaymentRequestDto.class))).thenReturn(mockWayForPayResponse);
+
+        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
+        Assertions.assertEquals("http://example.com/invoice", result.getLink());
     }
 
     @Test
@@ -845,7 +808,10 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
+        when(wayForPayClient.getCheckOutResponse(any(PaymentRequestDto.class))).thenReturn(mockWayForPayResponse);
+
+        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
 
     }
@@ -898,7 +864,10 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
+        when(wayForPayClient.getCheckOutResponse(any(PaymentRequestDto.class))).thenReturn(mockWayForPayResponse);
+
+        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
     }
 
@@ -952,7 +921,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
 
     }
@@ -1004,7 +973,10 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
+        when(wayForPayClient.getCheckOutResponse(any(PaymentRequestDto.class))).thenReturn(mockWayForPayResponse);
+
+        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
 
     }
@@ -1240,7 +1212,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
+        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
         Assertions.assertNotNull(result);
 
         verify(userRepository, times(1)).findByUuid("35467585763t4sfgchjfuyetf");
@@ -2767,208 +2739,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void processOrderFondyClient2() throws Exception {
-        Order order = getOrderCount();
-        Certificate certificate = getCertificate();
-
-        HashMap<Integer, Integer> value = new HashMap<>();
-        value.put(1, 22);
-        order.setAmountOfBagsOrdered(value);
-        order.setPointsToUse(100);
-        order.setSumTotalAmountWithoutDiscounts(1000_00L);
-        order.setCertificates(Set.of(certificate));
-        order.setPayment(TEST_PAYMENT_LIST);
-        User user = getUser();
-        user.setCurrentPoints(100);
-        user.setChangeOfPointsList(new ArrayList<>());
-        order.setUser(user);
-
-        OrderFondyClientDto dto = getOrderFondyClientDto();
-        dto.setCertificates(Set.of("1111-1234"));
-
-        order.setCertificates(Set.of(getCertificate()));
-        order.setPayment(TEST_PAYMENT_LIST);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
-        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("merchantId")) {
-                f.setAccessible(true);
-                f.set(ubsService, "1");
-            }
-        }
-
-        order.setPointsToUse(-10000);
-        CertificateDto certificateDto = createCertificateDto();
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
-        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
-        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
-        when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
-            CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
-        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(ModelUtils.getOrderBag())))
-            .thenReturn(ModelUtils.getAmount());
-
-        ubsService.processOrderFondyClient(dto, "uuid");
-
-        verify(userRepository).findUserByUuid("uuid");
-        verify(certificateRepository).findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
-            CertificateStatus.ACTIVE);
-        verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
-    }
-
-    @Test
-    void processOrderFondyClientCertificeteNotFoundExeption() throws Exception {
-        Order order = getOrderCount();
-        Certificate certificate = getCertificate();
-        certificate.setPoints(1500);
-        HashMap<Integer, Integer> value = new HashMap<>();
-        value.put(1, 22);
-        order.setAmountOfBagsOrdered(value);
-        order.setPointsToUse(100);
-        order.setSumTotalAmountWithoutDiscounts(1000_00L);
-        order.setCertificates(Set.of(certificate));
-        order.setPayment(TEST_PAYMENT_LIST);
-        User user = getUser();
-        user.setCurrentPoints(100);
-        user.setChangeOfPointsList(new ArrayList<>());
-        order.setUser(user);
-        OrderFondyClientDto dto = getOrderFondyClientDto();
-        dto.setCertificates(Set.of("1111-1234"));
-
-        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("merchantId")) {
-                f.setAccessible(true);
-                f.set(ubsService, "1");
-            }
-        }
-
-        CertificateDto certificateDto = createCertificateDto();
-        certificateDto.setPoints(1500);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
-        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(ModelUtils.getOrderBag())))
-            .thenReturn(ModelUtils.getAmount());
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
-        when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
-            CertificateStatus.ACTIVE)).thenReturn(Collections.emptySet());
-        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
-        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
-        assertThrows(NotFoundException.class, () -> ubsService.processOrderFondyClient(dto, "uuid"));
-        verify(orderRepository).findById(1L);
-        verify(userRepository).findUserByUuid("uuid");
-        verify(certificateRepository).findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
-            CertificateStatus.ACTIVE);
-        verify(modelMapper).map(certificate, CertificateDto.class);
-        verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
-    }
-
-    @Test
-    void processOrderFondyClientCertificeteNotFoundExeption2() throws Exception {
-        Order order = getOrderCount();
-        Certificate certificate = getCertificate();
-        certificate.setPoints(1500);
-        HashMap<Integer, Integer> value = new HashMap<>();
-        value.put(1, 22);
-        order.setAmountOfBagsOrdered(value);
-        order.setPointsToUse(100);
-        order.setSumTotalAmountWithoutDiscounts(1000_00L);
-        order.setCertificates(Set.of(certificate));
-        order.setPayment(TEST_PAYMENT_LIST);
-        User user = getUser();
-        user.setCurrentPoints(100);
-        user.setChangeOfPointsList(new ArrayList<>());
-        order.setUser(user);
-
-        OrderFondyClientDto dto = getOrderFondyClientDto();
-        dto.setCertificates(Set.of("1111-1234", "2222-1234"));
-
-        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("merchantId")) {
-                f.setAccessible(true);
-                f.set(ubsService, "1");
-            }
-        }
-
-        CertificateDto certificateDto = createCertificateDto();
-        certificateDto.setPoints(1500);
-        order.setPointsToUse(-1000);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
-        when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
-            CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
-        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
-        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
-        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(ModelUtils.getOrderBag())))
-            .thenReturn(ModelUtils.getAmount());
-
-        assertThrows(NotFoundException.class, () -> ubsService.processOrderFondyClient(dto, "uuid"));
-
-        verify(orderRepository).findById(1L);
-        verify(userRepository).findUserByUuid("uuid");
-        verify(certificateRepository).findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
-            CertificateStatus.ACTIVE);
-        verify(modelMapper).map(certificate, CertificateDto.class);
-        verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
-    }
-
-    @Test
-    void processOrderFondyClientIfSumToPayLessThanPoints() throws Exception {
-        Order order = getOrderCount();
-        HashMap<Integer, Integer> value = new HashMap<>();
-        value.put(1, 22);
-        order.setAmountOfBagsOrdered(value);
-        order.setPointsToUse(100);
-        order.setSumTotalAmountWithoutDiscounts(1000_00L);
-        order.setCertificates(Set.of(getCertificate()));
-        order.setPayment(TEST_PAYMENT_LIST);
-        order.getPayment().getFirst().setAmount(1000_00L);
-        User user = getUser();
-        user.setCurrentPoints(100);
-        user.setChangeOfPointsList(new ArrayList<>());
-        order.setUser(user);
-        order.setPointsToUse(-10000);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
-        OrderFondyClientDto dto = getOrderFondyClientDto();
-        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("merchantId")) {
-                f.setAccessible(true);
-                f.set(ubsService, "1");
-            }
-        }
-
-        Certificate certificate = getCertificate();
-        CertificateDto certificateDto = createCertificateDto();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
-        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
-        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
-        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(ModelUtils.getOrderBag())))
-            .thenReturn(ModelUtils.getAmount());
-
-        ubsService.processOrderFondyClient(dto, "uuid");
-
-        verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
-        verify(fondyClient).getCheckoutResponse(any());
-    }
-
-    @Test
-    void processOrderFondyClientFailPaidOrder() {
-        Order order = getOrderCountWithPaymentStatusPaid();
-        OrderFondyClientDto dto = getOrderFondyClientDto();
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        assertThrows(BadRequestException.class, () -> ubsService.processOrderFondyClient(dto, "uuid"));
-    }
-
-    @Test
     void saveFullOrderToDBForIF() throws IllegalAccessException {
         User user = getUserWithLastLocation();
         user.setCurrentPoints(900);
@@ -3021,7 +2791,10 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
+        when(wayForPayClient.getCheckOutResponse(any(PaymentRequestDto.class))).thenReturn(mockWayForPayResponse);
+
+        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
     }
 
@@ -3079,7 +2852,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(modelMapper.map(address, OrderAddress.class)).thenReturn(orderAddress);
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
     }
 
@@ -3899,61 +3672,6 @@ class UBSClientServiceImplTest {
         String data = Base64.getEncoder().encodeToString("{\"status\":\"approved\"}".getBytes());
         String result = ubsClientService.extractStatusFromData(data);
         assertEquals("approved", result);
-    }
-
-    @Test
-    void shouldConvertToPaymentSuccessfully() {
-        String data = Base64.getEncoder().encodeToString(
-            "{\"amount\":\"100.0\",\"currency\":\"UAH\",\"description\":\"Test\",\"status\":\"approved\"}".getBytes());
-        Payment result = ubsClientService.convertToPayment(data);
-
-        assertEquals(10000L, result.getAmount());
-        assertEquals("UAH", result.getCurrency());
-        assertEquals("Test", result.getComment());
-        assertEquals("approved", result.getOrderStatus());
-    }
-
-    @Test
-    void shouldValidatePaymentLiqPaySuccessfully() {
-        PaymentResponseLiqPayDto dto = new PaymentResponseLiqPayDto();
-        String json =
-            "{\"order_id\":\"123\",\"amount\":\"100.0\",\"currency\":\"UAH\",\"description\":\"Test\",\"status\":\"approved\"}";
-        String encodedJson = Base64.getEncoder().encodeToString(json.getBytes());
-        Order order = new Order();
-        order.setId(123L);
-        Payment payment = new Payment();
-        dto.setData(encodedJson);
-        dto.setSignature("signature");
-
-        UBSClientServiceImpl ubsClientServiceSpy = Mockito.spy(ubsClientService);
-
-        doNothing().when(ubsClientServiceSpy).checkSignature(isNull(), anyString(), anyString());
-        when(ubsClientServiceSpy.extractOrderIdFromData(encodedJson)).thenReturn(123L);
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(ubsClientServiceSpy.convertToPayment(dto.getData())).thenReturn(payment);
-        doNothing().when(ubsClientServiceSpy).checkOrderStatusApproved(any(Payment.class), any(Order.class));
-        doNothing().when(notificationService).notifyPaidOrder(any(Order.class));
-
-        Long result = ubsClientServiceSpy.validatePaymentLiqPay(dto);
-        assertEquals(123L, result);
-    }
-
-    @Test
-    void shouldThrowNotFoundExceptionWhenOrderNotFound() {
-        // Given
-        PaymentResponseLiqPayDto dto = new PaymentResponseLiqPayDto();
-        String json = "{\"order_id\":\"123\"}";
-        String encodedJson = Base64.getEncoder().encodeToString(json.getBytes());
-        dto.setData(encodedJson);
-        dto.setSignature("signature");
-
-        UBSClientServiceImpl ubsClientServiceSpy = Mockito.spy(ubsClientService);
-
-        doNothing().when(ubsClientServiceSpy).checkSignature(isNull(), anyString(), anyString());
-        when(ubsClientServiceSpy.extractOrderIdFromData(encodedJson)).thenReturn(1L);
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> ubsClientServiceSpy.validatePaymentLiqPay(dto));
     }
 
     @Test

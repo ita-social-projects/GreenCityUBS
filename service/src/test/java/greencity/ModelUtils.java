@@ -3654,29 +3654,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static PaymentResponseDto getPaymentResponseDto() {
-        return PaymentResponseDto.builder()
-            .order_id("1_1_1")
-            .payment_id(2)
-            .currency("a")
-            .amount(1)
-            .order_status("approved")
-            .response_status("failure")
-            .sender_cell_phone("sss")
-            .sender_account("ss")
-            .masked_card("s")
-            .card_type("s")
-            .response_code(2)
-            .response_description("ddd")
-            .order_time("s")
-            .settlement_date("21.12.2014")
-            .fee(null)
-            .payment_system("s")
-            .sender_email("s")
-            .payment_id(2)
-            .build();
-    }
-
     public static BigOrderTableViews getBigOrderTableViews() {
         return new BigOrderTableViews()
             .setId(3333L)
