@@ -14,20 +14,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class WayForPayClientFallbackFactoryTest {
-	@InjectMocks
-	private WayForPayClientFallbackFactory fallbackFactory;
-	@Mock
-	private WayForPayClient client;
+    @InjectMocks
+    private WayForPayClientFallbackFactory fallbackFactory;
+    @Mock
+    private WayForPayClient client;
 
-	@BeforeEach
-	void setUp() {
-		Throwable throwable = new RuntimeException();
-		client = fallbackFactory.create(throwable);
-	}
+    @BeforeEach
+    void setUp() {
+        Throwable throwable = new RuntimeException();
+        client = fallbackFactory.create(throwable);
+    }
 
-	@Test
-	void getCheckoutResponse() {
-		PaymentRequestDto dto = PaymentRequestDto.builder().build();
-		assertThrows(RemoteServerUnavailableException.class, () -> client.getCheckOutResponse(dto));
-	}
+    @Test
+    void getCheckoutResponse() {
+        PaymentRequestDto dto = PaymentRequestDto.builder().build();
+        assertThrows(RemoteServerUnavailableException.class, () -> client.getCheckOutResponse(dto));
+    }
 }
