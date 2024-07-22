@@ -2,6 +2,7 @@ package greencity.entity.user;
 
 import greencity.enums.ViolationLevel;
 import greencity.entity.order.Order;
+import greencity.enums.ViolationStatus;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -60,4 +61,11 @@ public class Violation {
     @ManyToOne
     @JoinColumn(name = "added_by_user_id")
     private User addedByUser;
+
+    @Column(nullable = false, name = "violation_status", length = 15)
+    @Enumerated(EnumType.STRING)
+    private ViolationStatus violationStatus;
+
+    @Column(name = "delete_date")
+    private LocalDateTime deleteDate;
 }

@@ -15,6 +15,7 @@ import greencity.enums.ViolationLevel;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
+import greencity.enums.ViolationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -100,7 +102,7 @@ public class ViolationServiceImpl implements ViolationService {
         if (orderStatus != OrderStatus.NOT_TAKEN_OUT && orderStatus != OrderStatus.DONE) {
             throw new BadRequestException(INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + orderStatus.name());
         }
-        if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
+        if (violationRepository.findActiveViolationByOrderId(order.getId()).isEmpty()) {
             User user = order.getUser();
             Violation violation = violationBuilder(add, order, user);
             if (multipartFiles.length > 0) {
@@ -143,6 +145,7 @@ public class ViolationServiceImpl implements ViolationService {
             .violationDate(order.getOrderDate())
             .order(order)
             .addedByUser(addedByUser)
+            .violationStatus(ViolationStatus.ACTIVE)
             .build();
     }
 
@@ -157,7 +160,7 @@ public class ViolationServiceImpl implements ViolationService {
     @Override
     @Transactional
     public Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId) {
-        Optional<Violation> optionalViolation = violationRepository.findByOrderId(orderId);
+        Optional<Violation> optionalViolation = violationRepository.findActiveViolationByOrderId(orderId);
         if (optionalViolation.isEmpty()) {
             return Optional.empty();
         }
@@ -181,16 +184,13 @@ public class ViolationServiceImpl implements ViolationService {
         Employee currentUser = employeeRepository.findByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
-        Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
+        Optional<Violation> violationOptional = violationRepository.findActiveViolationByOrderId(id);
         if (violationOptional.isPresent()) {
-            List<String> images = violationOptional.get().getImages();
-            if (!images.isEmpty()) {
-                for (String image : images) {
-                    fileService.delete(image);
-                }
-            }
+            Violation violation = violationOptional.get();
+            violation.setViolationStatus(ViolationStatus.DELETED);
+            violation.setDeleteDate(LocalDateTime.now());
+            violationRepository.save(violation);
             notificationService.notifyDeleteViolation(id);
-            violationRepository.deleteById(violationOptional.get().getId());
             User user = violationOptional.get().getOrder().getUser();
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
@@ -205,7 +205,7 @@ public class ViolationServiceImpl implements ViolationService {
     public void updateUserViolation(UpdateViolationToUserDto add, MultipartFile[] multipartFiles, String uuid) {
         Employee currentUser = employeeRepository.findByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Violation violation = violationRepository.findByOrderId(add.getOrderID())
+        Violation violation = violationRepository.findActiveViolationByOrderId(add.getOrderID())
             .orElseThrow(() -> new NotFoundException(ORDER_HAS_NOT_VIOLATION));
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
