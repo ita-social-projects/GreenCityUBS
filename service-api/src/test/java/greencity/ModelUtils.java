@@ -2,8 +2,6 @@ package greencity;
 
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.courier.CreateCourierDto;
-import greencity.dto.payment.PaymentRequestDto;
-import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.position.PositionDto;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;

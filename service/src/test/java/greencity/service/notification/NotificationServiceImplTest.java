@@ -6,7 +6,6 @@ import greencity.config.InternalUrlConfigProp;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.order.Event;
 import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
