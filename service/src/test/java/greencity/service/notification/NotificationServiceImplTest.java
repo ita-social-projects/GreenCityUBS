@@ -83,7 +83,7 @@ import static greencity.ModelUtils.TEST_USER_NOTIFICATION_5;
 import static greencity.ModelUtils.TEST_USER_NOTIFICATION_6;
 import static greencity.ModelUtils.TEST_USER_NOTIFICATION_7;
 import static greencity.ModelUtils.TEST_VIOLATION;
-import static greencity.ModelUtils.createUserNotificationForViolation;
+import static greencity.ModelUtils.createUserNotificationForViolationWithParameters;
 import static greencity.ModelUtils.createViolationNotificationDto;
 import static greencity.ModelUtils.getBag1list;
 import static greencity.ModelUtils.getBag4list;
@@ -377,7 +377,8 @@ class NotificationServiceImplTest {
                 .value("46")
                 .build());
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
-            when(violationRepository.findByOrderId(TEST_ORDER_4.getId())).thenReturn(Optional.of(violation));
+            when(violationRepository.findActiveViolationByOrderId(TEST_ORDER_4.getId()))
+                .thenReturn(Optional.of(violation));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_3)).thenReturn(TEST_USER_NOTIFICATION_3);
             parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_3));
             when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
@@ -414,7 +415,8 @@ class NotificationServiceImplTest {
                 .value("46")
                 .build());
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
-            when(violationRepository.findByOrderId(TEST_ORDER_4.getId())).thenReturn(Optional.of(violation));
+            when(violationRepository.findActiveViolationByOrderId(TEST_ORDER_4.getId()))
+                .thenReturn(Optional.of(violation));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_7)).thenReturn(TEST_USER_NOTIFICATION_7);
             parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_7));
             when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
@@ -436,14 +438,14 @@ class NotificationServiceImplTest {
             mockUserNeedNotificationCheck(order, NotificationType.VIOLATION_THE_RULES);
             when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION, CHANGES_VIOLATION, DELETE_VIOLATION))
                 .thenReturn(orders);
-            when(violationRepository.findByOrderId(anyLong())).thenReturn(Optional.of(violation));
+            when(violationRepository.findActiveViolationByOrderId(anyLong())).thenReturn(Optional.of(violation));
             mockFillAndSendNotification(parameters, order, NotificationType.VIOLATION_THE_RULES);
 
             notificationService.notifyAllAddedViolations();
 
             verify(userNotificationRepository).save(any());
             verify(orderRepository).findAllWithEventsByEventNames(anyString(), anyString(), anyString());
-            verify(violationRepository).findByOrderId(anyLong());
+            verify(violationRepository).findActiveViolationByOrderId(anyLong());
             verifyFillAndSendNotification();
         }
 
@@ -956,13 +958,13 @@ class NotificationServiceImplTest {
 
     @Test
     void getNotificationViolation() {
-        UserNotification notification = createUserNotificationForViolation();
+        UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             NotificationType.VIOLATION_THE_RULES,
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
-        when(violationRepository.findByOrderId(notification.getOrder().getId()))
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
             .thenReturn(Optional.of(getViolation()));
 
         NotificationDto actual = notificationService.getNotification("abc", 1L, "ua");
@@ -972,13 +974,13 @@ class NotificationServiceImplTest {
 
     @Test
     void getNotificationViolationNotFoundException() {
-        UserNotification notification = createUserNotificationForViolation();
+        UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             NotificationType.VIOLATION_THE_RULES,
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
-        when(violationRepository.findByOrderId(notification.getOrder().getId()))
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
             .thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
