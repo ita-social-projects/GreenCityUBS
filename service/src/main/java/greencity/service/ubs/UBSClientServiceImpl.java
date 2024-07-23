@@ -191,8 +191,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
-    @Value("${greencity.payment.merchant-id}")
-    private String merchantId;
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
@@ -1242,7 +1240,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil
-            .formRequestSignature(paymentRequestDto, wayForPaySecret, merchantId));
+            .formRequestSignature(paymentRequestDto, wayForPaySecret));
 
         return paymentRequestDto;
     }
