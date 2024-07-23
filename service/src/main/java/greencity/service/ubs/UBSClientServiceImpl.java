@@ -146,7 +146,6 @@ import java.util.stream.LongStream;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -192,22 +191,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
-    @Value("${greencity.payment.fondy-payment-key}")
-    private String fondyPaymentKey;
     @Value("${greencity.payment.merchant-id}")
     private String merchantId;
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
-    @Value("${greencity.redirect.result-url-fondy-personal-cabinet}")
-    private String resultUrlForPersonalCabinetOfUser;
     @Value("${greencity.redirect.result-url-fondy}")
     private String resultUrlFondy;
-    @Value("${liqpay.public.key}")
-    private String publicKey;
-    @Value("${liqpay.private.key}")
-    private String privateKey;
     @Value("${greencity.wayforpay.login}")
     private String merchantAccount;
     @Value("${greencity.wayforpay.secret}")
