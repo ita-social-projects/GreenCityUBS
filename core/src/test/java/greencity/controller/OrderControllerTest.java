@@ -8,7 +8,7 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.WayForPayOrderResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
@@ -22,6 +22,7 @@ import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import jakarta.servlet.ServletException;
+import java.util.Arrays;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,9 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
-import java.util.Arrays;
 import static greencity.ModelUtils.getPrincipal;
-import static greencity.ModelUtils.getRedirectionConfig;
 import static greencity.ModelUtils.getUbsCustomersDto;
 import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
 import static greencity.ModelUtils.getUserInfoDto;
@@ -84,6 +83,9 @@ class OrderControllerTest {
 
     @InjectMocks
     OrderController orderController;
+
+    @Mock
+    RedirectionConfigProp prop;
 
     @Mock
     private UBSuserRepository ubSuserRepository;
@@ -172,7 +174,7 @@ class OrderControllerTest {
         OrderDetailStatusDto orderDetailStatusDto = getUnpaidOrderDetailStatusDto();
         orderDetailStatusDto.setOrderStatus(OrderStatus.FORMED.name());
 
-        FondyOrderResponse resultObject = FondyOrderResponse.builder()
+        WayForPayOrderResponse resultObject = WayForPayOrderResponse.builder()
             .orderId(orderId)
             .link("Link")
             .build();
@@ -331,9 +333,6 @@ class OrderControllerTest {
             .andExpect(status().isOk());
     }
 
-    @Mock
-    RedirectionConfigProp redirectionConfigProp;
-
     @Test
     @SneakyThrows
     void getInfoAboutTariffTest() {
@@ -366,7 +365,7 @@ class OrderControllerTest {
     }
 
     private void setRedirectionConfigProp() {
-        RedirectionConfigProp redirectionConfigProp = getRedirectionConfig();
+        RedirectionConfigProp redirectionConfigProp = ModelUtils.getRedirectionConfig();
 
         Arrays.stream(OrderController.class.getDeclaredFields())
             .filter(field -> field.getName().equals("redirectionConfigProp"))

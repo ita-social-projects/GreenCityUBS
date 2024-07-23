@@ -365,16 +365,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static PaymentResponseDto getPaymentResponseDto() {
-        return PaymentResponseDto.builder()
-            .order_id("1_1")
-            .merchant_id(1)
-            .actual_amount(1)
-            .actual_currency("1")
-            .amount(1)
-            .build();
-    }
-
     public static AddingPointsToUserDto getAddingPointsToUserDto() {
         return AddingPointsToUserDto.builder()
             .email("ddd@email.com")
@@ -632,6 +622,32 @@ public class ModelUtils {
             .bodyEng("BodyEng")
             .notificationReceiverType(receiverType)
             .build();
+    }
+
+    public static PaymentResponseDto getPaymentResponseDto() {
+        PaymentResponseDto dto = new PaymentResponseDto();
+        dto.setMerchantAccount("merchant123");
+        dto.setOrderReference("order456");
+        dto.setMerchantSignature("signature123");
+        dto.setAmount("100.00");
+        dto.setCurrency("USD");
+        dto.setAuthCode("auth123");
+        dto.setEmail("test@mail.com");
+        dto.setPhone("+1234567890");
+        dto.setCreatedDate("2023-07-19T12:00:00");
+        dto.setProcessingDate("2023-07-19T12:05:00");
+        dto.setCardPan("4111111111111111");
+        dto.setCardType("VISA");
+        dto.setIssuerBankCountry("USA");
+        dto.setIssuerBankName("Bank of America");
+        dto.setRecToken("token123");
+        dto.setTransactionStatus("approved");
+        dto.setReason("None");
+        dto.setReasonCode("00");
+        dto.setFee("1.00");
+        dto.setPaymentSystem("card");
+        dto.setAcquirerBankName("Chase");
+        return dto;
     }
 
 }

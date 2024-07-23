@@ -1,12 +1,13 @@
 package greencity.dto.payment;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
@@ -14,65 +15,68 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @Builder
 @ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentResponseDto {
-    // CHECKSTYLE:OFF
-    @Length(max = 1024)
-    private String order_id;
-    private Integer merchant_id;
-    private Integer amount;
-    @Length(max = 3)
+    @JsonProperty("merchantAccount")
+    private String merchantAccount;
+
+    @JsonProperty("orderReference")
+    private String orderReference;
+
+    @JsonProperty("merchantSignature")
+    private String merchantSignature;
+
+    @JsonProperty("amount")
+    private String amount;
+
+    @JsonProperty("currency")
     private String currency;
-    @Length(max = 50)
-    private String order_status;
-    @Length(max = 50)
-    private String response_status;
-    @Length(max = 40)
-    private String signature;
-    @Length(max = 50)
-    private String tran_type;
-    @Length(max = 16)
-    private String sender_cell_phone;
-    @Length(max = 50)
-    private String sender_account;
-    @Length(max = 19)
-    private String masked_card;
-    private Integer card_bin;
-    @Length(max = 50)
-    private String card_type;
-    @Length(max = 50)
-    private String rrn;
-    @Length(max = 6)
-    private String approval_code;
-    private Integer response_code;
-    @Length(max = 1024)
-    private String response_description;
-    private Integer reversal_amount;
-    private Integer settlement_amount;
-    @Length(max = 3)
-    private String settlement_currency;
-    @Length(max = 19)
-    private String order_time;
-    @Length(max = 10)
-    private String settlement_date;
-    private Integer eci;
-    private Integer fee;
-    @Length(max = 50)
-    private String payment_system;
-    @Length(max = 254)
-    private String sender_email;
-    private Integer payment_id;
-    private Integer actual_amount;
-    @Length(max = 3)
-    private String actual_currency;
-    @Length(max = 1024)
-    private String product_id;
-    @Length(max = 2048)
-    private String merchant_data;
-    @Length(max = 50)
-    private String verification_status;
-    @Length(max = 40)
-    private String rectoken;
-    @Length(max = 19)
-    private String rectoken_lifetime;
-    private Integer parent_order_id;
+
+    @JsonProperty("authCode")
+    private String authCode;
+
+    @JsonProperty("email")
+    private String email;
+
+    @JsonProperty("phone")
+    private String phone;
+
+    @JsonProperty("createdDate")
+    private String createdDate;
+
+    @JsonProperty("processingDate")
+    private String processingDate;
+
+    @JsonProperty("cardPan")
+    private String cardPan;
+
+    @JsonProperty("cardType")
+    private String cardType;
+
+    @JsonProperty("issuerBankCountry")
+    private String issuerBankCountry;
+
+    @JsonProperty("issuerBankName")
+    private String issuerBankName;
+
+    @JsonProperty("recToken")
+    private String recToken;
+
+    @JsonProperty("transactionStatus")
+    private String transactionStatus;
+
+    @JsonProperty("reason")
+    private String reason;
+
+    @JsonProperty("reasonCode")
+    private String reasonCode;
+
+    @JsonProperty("fee")
+    private String fee;
+
+    @JsonProperty("paymentSystem")
+    private String paymentSystem;
+
+    @JsonProperty("acquirerBankName")
+    private String acquirerBankName;
 }

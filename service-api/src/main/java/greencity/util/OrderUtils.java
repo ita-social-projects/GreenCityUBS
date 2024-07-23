@@ -19,7 +19,8 @@ public class OrderUtils {
      */
     public static String generateOrderIdForPayment(Long orderId, Order order) {
         int lastNumber = order.getPayment().size() - 1;
-        return String.format("%s_%s_%s", orderId, order.getCounterOrderPaymentId(),
+        return String.format("%s_%s_%s", orderId,
+            (order.getCounterOrderPaymentId() == null) ? 1 : order.getCounterOrderPaymentId(),
             order.getPayment().get(lastNumber).getId());
     }
 }
