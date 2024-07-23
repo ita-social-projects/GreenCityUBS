@@ -38,9 +38,8 @@ class EncryptionUtilTest {
             .build();
 
         String password = "testPassword";
-        String merchantId = "merchantId";
 
-        String signature = encryptionUtil.formRequestSignature(dto, password, merchantId);
+        String signature = encryptionUtil.formRequestSignature(dto, password);
 
         StringJoiner stringJoiner = new StringJoiner(";");
         stringJoiner.add(dto.getMerchantAccount())
