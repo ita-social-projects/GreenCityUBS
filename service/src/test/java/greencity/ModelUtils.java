@@ -95,6 +95,7 @@ import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
@@ -5299,6 +5300,32 @@ public class ModelUtils {
                 .service(new Service())
                 .build()))
             .imagePath("path")
+            .build();
+    }
+
+    public static PaymentResponseDto getPaymentResponseDto() {
+        return PaymentResponseDto.builder()
+            .merchantAccount("TestMerchant123")
+            .orderReference("1_001")
+            .merchantSignature("signature123")
+            .amount("150")
+            .currency("USD")
+            .authCode("AUTH12345")
+            .email("testuser@example.com")
+            .phone("+1234567890")
+            .createdDate("2024-07-23T12:00:00")
+            .processingDate("2024-07-23T12:05:00")
+            .cardPan("**** **** **** 1234")
+            .cardType("Visa")
+            .issuerBankCountry("USA")
+            .issuerBankName("Test Bank")
+            .recToken("rectoken123")
+            .transactionStatus("Approved")
+            .reason("None")
+            .reasonCode("0")
+            .fee("2.50")
+            .paymentSystem("TestPaymentSystem")
+            .acquirerBankName("Test Acquirer")
             .build();
     }
 }

@@ -9,6 +9,8 @@ import greencity.client.WayForPayClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.payment.PaymentRequestDto;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
@@ -51,6 +53,9 @@ import greencity.service.locations.LocationApiService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import jakarta.persistence.EntityNotFoundException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,6 +64,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -177,6 +183,9 @@ class UBSClientServiceImplTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Value("${greencity.wayforpay.secret}")
+    private String wayForPaySecret;
 
     @Test
     void testGetAllDistricts() {
@@ -3681,5 +3690,139 @@ class UBSClientServiceImplTest {
         String wrongSignature = "abc";
         assertThrows(WrongSignatureException.class,
             () -> ubsClientService.checkSignature(privateKey, data, wrongSignature));
+    }
+
+    @Test
+    void testValidatePaymentSuccess() {
+        PaymentResponseDto response = getPaymentResponseDto();
+
+        Order expectedOrder = new Order();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(expectedOrder));
+        when(encryptionUtil.formResponseSignature(any(PaymentResponseWayForPay.class), eq(wayForPaySecret)))
+            .thenReturn("signature");
+
+        PaymentResponseWayForPay result = ubsClientService.validatePayment(response);
+
+        assertNotNull(result);
+        assertEquals("accept", result.getStatus());
+        assertEquals(response.getOrderReference(), result.getOrderReference());
+        assertEquals("signature", result.getSignature());
+
+        verify(orderRepository).findById(1L);
+        verify(encryptionUtil).formResponseSignature(any(PaymentResponseWayForPay.class), eq(wayForPaySecret));
+    }
+
+    @Test
+    void testValidatePaymentOrderNotFound() {
+        PaymentResponseDto response = getPaymentResponseDto();
+        response.setOrderReference("2_001");
+
+        when(orderRepository.findById(2L)).thenReturn(Optional.empty());
+
+        BadRequestException exception = assertThrows(
+            BadRequestException.class,
+            () -> ubsClientService.validatePayment(response));
+
+        assertEquals(PAYMENT_VALIDATION_ERROR, exception.getMessage());
+        verify(orderRepository).findById(2L);
+        verifyNoInteractions(encryptionUtil);
+    }
+
+    @Test
+    void testMapPayment() {
+        PaymentResponseDto response = PaymentResponseDto.builder()
+            .orderReference("1_002")
+            .currency("USD")
+            .amount("150")
+            .transactionStatus("Approved")
+            .phone("+1234567890")
+            .cardPan("**** **** **** 1234")
+            .cardType("Visa")
+            .createdDate("2024-07-23T12:00:00")
+            .paymentSystem("Visa")
+            .email("testuser@example.com")
+            .build();
+
+        Payment result = invokeMapPayment(response);
+
+        assertNotNull(result);
+        assertEquals(2L, result.getId());
+        assertEquals("USD", result.getCurrency());
+        assertEquals(150L, result.getAmount());
+        assertEquals("Approved", result.getOrderStatus());
+        assertEquals("+1234567890", result.getSenderCellPhone());
+        assertEquals("**** **** **** 1234", result.getMaskedCard());
+        assertEquals("Visa", result.getCardType());
+        assertEquals("2024-07-23T12:00:00", result.getOrderTime());
+        assertEquals(LocalDate.now().toString(), result.getSettlementDate());
+        assertEquals("Visa", result.getPaymentSystem());
+        assertEquals("testuser@example.com", result.getSenderEmail());
+        assertEquals(PaymentStatus.UNPAID, result.getPaymentStatus());
+    }
+
+    private Payment invokeMapPayment(PaymentResponseDto response) {
+        try {
+            var method = UBSClientServiceImpl.class.getDeclaredMethod("mapPayment", PaymentResponseDto.class);
+            method.setAccessible(true);
+            return (Payment) method.invoke(ubsClientService, response);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void testParseSettlementDateEmpty() {
+        String settlementDate = "";
+
+        String result = invokeParseSettlementDate(settlementDate);
+
+        assertEquals(LocalDate.now().toString(), result);
+    }
+
+    @Test
+    void testParseSettlementDateValidDate() {
+        String settlementDate = "23.07.2024";
+
+        String result = invokeParseSettlementDate(settlementDate);
+
+        assertEquals("2024-07-23", result);
+    }
+
+    private String invokeParseSettlementDate(String settlementDate) {
+        try {
+            var method = UBSClientServiceImpl.class.getDeclaredMethod("parseFondySettlementDate", String.class);
+            method.setAccessible(true);
+            return (String) method.invoke(ubsClientService, settlementDate);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void testCheckSignatureValidSignature() throws NoSuchAlgorithmException {
+        String privateKey = "secretKey";
+        String data = "data";
+        String receivedSignature = createSignature(privateKey, data);
+
+        assertDoesNotThrow(() -> invokeCheckSignature(privateKey, data, receivedSignature));
+    }
+
+    private void invokeCheckSignature(String privateKey, String data, String receivedSignature) {
+        try {
+            var method = UBSClientServiceImpl.class.getDeclaredMethod("checkSignature", String.class, String.class,
+                String.class);
+            method.setAccessible(true);
+            method.invoke(ubsClientService, privateKey, data, receivedSignature);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String createSignature(String privateKey, String data) throws NoSuchAlgorithmException {
+        String message = privateKey + data + privateKey;
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        byte[] messageDigest = md.digest(message.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(messageDigest);
     }
 }
