@@ -13,12 +13,11 @@ public class EncryptionUtil {
     /**
      * Method forms encrypted signature based on order details.
      *
-     * @param dto        {@link PaymentRequestDto} - request order data.
-     * @param password   - fondy password.
-     * @param merchantId - fondy merchant id.
+     * @param dto      {@link PaymentRequestDto} - request order data.
+     * @param password - way for pay password.
      * @return {@link String} - encrypted signature.
      */
-    public String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
+    public String formRequestSignature(PaymentRequestDto dto, String password) {
         StringJoiner stringJoiner = new StringJoiner(";");
         stringJoiner.add(dto.getMerchantAccount())
             .add(dto.getMerchantDomainName())
