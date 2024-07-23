@@ -3669,29 +3669,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static PaymentResponseDto getPaymentResponseDto() {
-        return PaymentResponseDto.builder()
-            .order_id("1_1_1")
-            .payment_id(2)
-            .currency("a")
-            .amount(1)
-            .order_status("approved")
-            .response_status("failure")
-            .sender_cell_phone("sss")
-            .sender_account("ss")
-            .masked_card("s")
-            .card_type("s")
-            .response_code(2)
-            .response_description("ddd")
-            .order_time("s")
-            .settlement_date("21.12.2014")
-            .fee(null)
-            .payment_system("s")
-            .sender_email("s")
-            .payment_id(2)
-            .build();
-    }
-
     public static BigOrderTableViews getBigOrderTableViews() {
         return new BigOrderTableViews()
             .setId(3333L)
@@ -5338,6 +5315,32 @@ public class ModelUtils {
                 .service(new Service())
                 .build()))
             .imagePath("path")
+            .build();
+    }
+
+    public static PaymentResponseDto getPaymentResponseDto() {
+        return PaymentResponseDto.builder()
+            .merchantAccount("TestMerchant123")
+            .orderReference("1_001")
+            .merchantSignature("signature123")
+            .amount("150")
+            .currency("USD")
+            .authCode("AUTH12345")
+            .email("testuser@example.com")
+            .phone("+1234567890")
+            .createdDate("2024-07-23T12:00:00")
+            .processingDate("2024-07-23T12:05:00")
+            .cardPan("**** **** **** 1234")
+            .cardType("Visa")
+            .issuerBankCountry("USA")
+            .issuerBankName("Test Bank")
+            .recToken("rectoken123")
+            .transactionStatus("Approved")
+            .reason("None")
+            .reasonCode("0")
+            .fee("2.50")
+            .paymentSystem("TestPaymentSystem")
+            .acquirerBankName("Test Acquirer")
             .build();
     }
 }

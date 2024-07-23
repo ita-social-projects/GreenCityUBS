@@ -1,8 +1,7 @@
 package greencity.dto.payment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,21 +15,33 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @ToString
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
-@JsonSubTypes(@JsonSubTypes.Type(value = PaymentRequestDto.class, name = "request"))
 public class PaymentRequestDto {
-    @JsonProperty("order_id")
-    private String orderId;
-    @JsonProperty("merchant_id")
-    private Integer merchantId;
-    @JsonProperty("order_desc")
-    private String orderDescription;
+    @JsonProperty("transactionType")
+    private String transactionType;
+    @JsonProperty("merchantAccount")
+    private String merchantAccount;
+    @JsonProperty("merchantDomainName")
+    private String merchantDomainName;
+    @JsonProperty("apiVersion")
+    private Integer apiVersion;
+    @JsonProperty("serviceUrl")
+    private String serviceUrl;
+    @JsonProperty("orderReference")
+    private String orderReference;
+    @JsonProperty("orderDate")
+    private Long orderDate;
+    @JsonProperty("amount")
+    private Integer amount;
     @JsonProperty("currency")
     private String currency;
-    @JsonProperty("amount")
-    private Long amount;
-    @JsonProperty("signature")
+    @JsonProperty("productName")
+    private List<String> productName;
+    @JsonProperty("productPrice")
+    private List<Integer> productPrice;
+    @JsonProperty("productCount")
+    private List<Integer> productCount;
+    @JsonProperty("merchantSignature")
     private String signature;
-    @JsonProperty("response_url")
-    private String responseUrl;
+    @JsonProperty("paymentSystems")
+    private String paymentSystems;
 }
