@@ -2698,6 +2698,21 @@ public class ModelUtils {
         return userNotification;
     }
 
+    public static UserNotification createUserNotificationForViolationWithParameters() {
+        Set<NotificationParameter> parameter = new HashSet<>();
+        parameter.add(NotificationParameter.builder()
+            .key("violationDescription")
+            .value("Description")
+            .build());
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
+        userNotification.setUser(TEST_ORDER_4.getUser());
+        userNotification.setOrder(TEST_ORDER_4);
+        userNotification.setParameters(parameter);
+
+        return userNotification;
+    }
+
     public static UserNotification createUserNotificationForViolation6() {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.CHANGED_IN_RULE_VIOLATION_STATUS);

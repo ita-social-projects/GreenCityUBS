@@ -38,7 +38,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(nativeQuery = true,
         value = "select count(order_id) from violations_description_mapping as v join orders \n"
-            + "on v.order_id = orders.id where users_id = :userId")
+            + "on v.order_id = orders.id where users_id = :userId and v.violation_status = 'ACTIVE'")
     int countTotalUsersViolations(Long userId);
 
     /**
@@ -53,7 +53,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(nativeQuery = true, value = "SELECT CAST(CASE WHEN EXISTS "
         + " (SELECT TRUE FROM violations_description_mapping as v join orders as o "
         + " on v.order_id = o.id "
-        + " WHERE v.order_id = :orderId and o.users_id = :userId) "
+        + " WHERE v.order_id = :orderId and o.users_id = :userId and v.violation_status = 'ACTIVE') "
         + " THEN 1 ELSE 0 END AS INT);")
     int checkIfUserHasViolationForCurrentOrder(Long userId, Long orderId);
 
