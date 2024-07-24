@@ -297,7 +297,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return Payment.builder()
             .id(Long.valueOf(dto.getOrderReference().substring(dto.getOrderReference().lastIndexOf("_") + 1)))
             .currency(dto.getCurrency())
-            .amount(Long.valueOf(dto.getAmount()))
+            .amount(Long.parseLong(dto.getAmount()) * 100)
             .orderStatus(dto.getTransactionStatus())
             .senderCellPhone(dto.getPhone())
             .maskedCard(dto.getCardPan())
