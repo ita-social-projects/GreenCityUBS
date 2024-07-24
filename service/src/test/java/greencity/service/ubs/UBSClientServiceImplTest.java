@@ -3696,7 +3696,7 @@ class UBSClientServiceImplTest {
     void testValidatePaymentSuccess() {
         PaymentResponseDto response = getPaymentResponseDto();
 
-        Order expectedOrder = new Order();
+        Order expectedOrder = getOrder2();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(expectedOrder));
         when(encryptionUtil.formResponseSignature(any(PaymentResponseWayForPay.class), eq(wayForPaySecret)))
@@ -3749,7 +3749,7 @@ class UBSClientServiceImplTest {
         assertNotNull(result);
         assertEquals(2L, result.getId());
         assertEquals("USD", result.getCurrency());
-        assertEquals(150L, result.getAmount());
+        assertEquals(15000L, result.getAmount());
         assertEquals("Approved", result.getOrderStatus());
         assertEquals("+1234567890", result.getSenderCellPhone());
         assertEquals("**** **** **** 1234", result.getMaskedCard());

@@ -4145,6 +4145,7 @@ public class ModelUtils {
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>())
+            .sumTotalAmountWithoutDiscounts(20000L)
             .build();
     }
 

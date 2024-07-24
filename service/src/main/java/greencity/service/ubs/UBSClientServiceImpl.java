@@ -195,8 +195,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
-    @Value("${greencity.redirect.result-url-fondy}")
-    private String resultUrlFondy;
+    @Value("${greencity.redirect.result-way-for-pay-url}")
+    private String resultWayForPayUrl;
     @Value("${greencity.wayforpay.login}")
     private String merchantAccount;
     @Value("${greencity.wayforpay.secret}")
@@ -245,9 +245,28 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderReference(response.getOrderReference())
             .status("accept")
             .time(response.getCreatedDate()).build();
-
         accept.setSignature(encryptionUtil.formResponseSignature(accept, wayForPaySecret));
+        changeStatusForOrder(order, orderPayment);
         return accept;
+    }
+
+    private void changeStatusForOrder(Order order, Payment orderPayment) {
+        Long totalPaidAmount = order.getPayment().stream()
+            .filter(p -> p.getPaymentStatus().equals(PaymentStatus.PAID))
+            .mapToLong(Payment::getAmount)
+            .sum() + orderPayment.getAmount();
+
+        if (order.getSumTotalAmountWithoutDiscounts().compareTo(totalPaidAmount) == 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        } else {
+            order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+        }
+
+        orderPayment.setPaymentStatus(PaymentStatus.PAID);
+        Payment payment = paymentRepository.save(orderPayment);
+        order.getPayment().add(payment);
+
+        orderRepository.save(order);
     }
 
     private Payment mapPayment(PaymentResponseDto response) {
@@ -256,9 +275,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         return Payment.builder()
             .id(Long.valueOf(response.getOrderReference()
-                .substring(response.getOrderReference().indexOf("_") + 1)))
+                .substring(response.getOrderReference().lastIndexOf("_") + 1)))
             .currency(response.getCurrency())
-            .amount(Long.valueOf(response.getAmount()))
+            .amount(Long.parseLong(response.getAmount()) * 100)
             .orderStatus(response.getTransactionStatus())
             .senderCellPhone(response.getPhone())
             .maskedCard(response.getCardPan())
@@ -1218,7 +1237,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .merchantAccount(merchantAccount)
             .merchantDomainName(merchantDomainName)
             .apiVersion(1)
-            .serviceUrl(resultUrlFondy)
+            .serviceUrl(resultWayForPayUrl)
             .orderReference(OrderUtils.generateOrderIdForPayment(orderId, order))
             .orderDate(instant.getEpochSecond())
             .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
