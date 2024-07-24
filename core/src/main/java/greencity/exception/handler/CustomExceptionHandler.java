@@ -153,11 +153,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @return ResponseEntity which contain http status and body with message of
      *         exception.
      */
-    @ExceptionHandler(AccessDeniedException.class)
-    public final ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex,
-        WebRequest request) {
+    @ExceptionHandler({AccessDeniedException.class,
+            org.springframework.security.access.AccessDeniedException.class})
+    public final ResponseEntity<Object> handleAccessDeniedException(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
-        log.trace(ex.getMessage(), ex);
+        log.trace(exceptionResponse.getMessage(), exceptionResponse.getTrace());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
     }
 
