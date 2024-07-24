@@ -206,7 +206,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Value("${greencity.wayforpay.merchant.domain.name}")
     private String merchantDomainName;
     private static final String FAILED_STATUS = "failure";
-    private static final String APPROVED_STATUS = "approved";
+    private static final String APPROVED_STATUS = "Approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
     private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
     private static final String VIBER_PART_3_OF_LINK = "&context=";
@@ -246,27 +246,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .status("accept")
             .time(response.getCreatedDate()).build();
         accept.setSignature(encryptionUtil.formResponseSignature(accept, wayForPaySecret));
-        changeStatusForOrder(order, orderPayment);
         return accept;
-    }
-
-    private void changeStatusForOrder(Order order, Payment orderPayment) {
-        Long totalPaidAmount = order.getPayment().stream()
-            .filter(p -> p.getPaymentStatus().equals(PaymentStatus.PAID))
-            .mapToLong(Payment::getAmount)
-            .sum() + orderPayment.getAmount();
-
-        if (order.getSumTotalAmountWithoutDiscounts().compareTo(totalPaidAmount) == 0) {
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        } else {
-            order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
-        }
-
-        orderPayment.setPaymentStatus(PaymentStatus.PAID);
-        Payment payment = paymentRepository.save(orderPayment);
-        order.getPayment().add(payment);
-
-        orderRepository.save(order);
     }
 
     private Payment mapPayment(PaymentResponseDto response) {
