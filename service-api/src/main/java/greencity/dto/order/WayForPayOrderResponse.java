@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode
 @Builder
-public class FondyOrderResponse {
+public class WayForPayOrderResponse {
     private Long orderId;
     private String link;
 }

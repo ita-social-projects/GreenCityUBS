@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
@@ -12,13 +13,13 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.WayForPayOrderResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseLiqPayDto;
+import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -26,7 +27,6 @@ import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,7 +39,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -62,6 +65,7 @@ import java.util.Optional;
 @RequestMapping("/ubs")
 @Validated
 @RequiredArgsConstructor
+@Slf4j
 public class OrderController {
     private final UBSClientService ubsClientService;
     private final UBSManagementService ubsManagementService;
@@ -176,7 +180,7 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @PostMapping(value = {"/processOrder", "/processOrder/{id}"})
-    public ResponseEntity<FondyOrderResponse> processOrder(
+    public ResponseEntity<WayForPayOrderResponse> processOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
         @Valid @PathVariable("id") Optional<Long> id) {
@@ -194,24 +198,38 @@ public class OrderController {
     }
 
     /**
-     * Controller checks if received data is valid and stores payment info if is.
+     * Receives payment information from Way for Pay payment gateway. This method
+     * decodes the received response, converts it into a PaymentResponseDto object,
+     * and validates the payment. If the HTTP status is successful, it sends a
+     * notification for the paid order and redirects to the GreenCityClient.
      *
-     * @param dto {@link PaymentResponseDto} - response order data.
-     * @return {@link HttpStatus} - http status.
+     * @param response The payment response received from Way for Pay, in String
+     *                 format.
+     * @param servlet  The HttpServletResponse object to handle the redirection.
+     * @return A PaymentResponseWayForPay object representing the validated payment
+     *         response.
+     * @throws IOException If an input or output exception occurred during the
+     *                     redirection.
      */
-    @Operation(summary = "Receive payment from Fondy.")
+    @Operation(summary = "Receive payment from WayForPay.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
     })
     @PostMapping("/receivePayment")
-    public ResponseEntity<HttpStatus> receivePayment(
-        PaymentResponseLiqPayDto dto, HttpServletResponse response) throws IOException {
-        ubsClientService.validatePaymentLiqPay(dto);
+    public PaymentResponseWayForPay receivePayment(@RequestBody String response,
+        HttpServletResponse servlet) throws IOException {
+        log.info("Incoming request Way For Pay API" + servlet.toString());
+        String decodedResponse =
+            URLDecoder.decode(response, StandardCharsets.UTF_8);
+        ObjectMapper objectMapper = new ObjectMapper();
+        PaymentResponseDto paymentResponseDto =
+            objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
+
         if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
+            servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ubsClientService.validatePayment(paymentResponseDto);
     }
 
     /**

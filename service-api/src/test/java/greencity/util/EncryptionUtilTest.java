@@ -1,50 +1,80 @@
 package greencity.util;
 
-import greencity.ModelUtils;
 import greencity.dto.payment.PaymentRequestDto;
-import greencity.dto.payment.PaymentResponseDto;
-import org.junit.Assert;
-import org.junit.Test;
+import greencity.dto.payment.PaymentResponseWayForPay;
+import java.util.Arrays;
+import java.util.StringJoiner;
+import org.apache.commons.codec.digest.HmacUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static greencity.ModelUtils.getPaymentRequestDto;
-import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class EncryptionUtilTest {
+class EncryptionUtilTest {
+    private EncryptionUtil encryptionUtil;
 
-    @InjectMocks
-    EncryptionUtil encryptionUtil = new EncryptionUtil();
-    private static final String PASSWORD = "One2three";
-    private static final String INVALID_PASSWORD = "password";
-    private static final String SIGNATURE = "5aea51ef7b8b7a91ec4cc5ce8ccae59bf16e46eb4b7161d47ed6b19a863c5240";
-    private static final String MERCHANT_ID = "3";
-
-    @Test
-    public void checkIfResponseSignatureIsValid() {
-        PaymentResponseDto paymentResponseDto = ModelUtils.getPaymentResponseDto();
-
-        paymentResponseDto.setSignature(SIGNATURE);
-
-        Assert.assertEquals(Boolean.TRUE, encryptionUtil.checkIfResponseSignatureIsValid(paymentResponseDto, PASSWORD));
-        Assert.assertEquals(Boolean.FALSE,
-            encryptionUtil.checkIfResponseSignatureIsValid(paymentResponseDto, INVALID_PASSWORD));
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        encryptionUtil = new EncryptionUtil();
     }
 
     @Test
-    public void formRequestSignature() {
-        PaymentRequestDto paymentRequestDto = getPaymentRequestDto();
+    void testFormRequestSignature() {
+        PaymentRequestDto dto = PaymentRequestDto.builder()
+            .merchantAccount("merchant123")
+            .merchantDomainName("example.com")
+            .orderReference("order456")
+            .orderDate(1213124124124L)
+            .amount(2)
+            .currency("UAH")
+            .productName(Arrays.asList("Product1", "Product2"))
+            .productCount(Arrays.asList(1, 2))
+            .productPrice(Arrays.asList(50, 50))
+            .build();
 
-        String stringBuilder = PASSWORD + "|" + paymentRequestDto.getAmount() +
-            "|" + paymentRequestDto.getCurrency() +
-            "|" + MERCHANT_ID +
-            "|" + paymentRequestDto.getOrderDescription() +
-            "|" + paymentRequestDto.getOrderId() +
-            "|" + paymentRequestDto.getResponseUrl();
-        String expected = sha256Hex(stringBuilder);
-        System.out.println(expected);
+        String password = "testPassword";
 
-        Assert.assertEquals(expected, encryptionUtil.formRequestSignature(paymentRequestDto, PASSWORD, MERCHANT_ID));
+        String signature = encryptionUtil.formRequestSignature(dto, password);
+
+        StringJoiner stringJoiner = new StringJoiner(";");
+        stringJoiner.add(dto.getMerchantAccount())
+            .add(dto.getMerchantDomainName())
+            .add(dto.getOrderReference())
+            .add(String.valueOf(dto.getOrderDate()))
+            .add(String.valueOf(dto.getAmount()))
+            .add(dto.getCurrency());
+        dto.getProductName().forEach(stringJoiner::add);
+        dto.getProductCount().forEach(count -> stringJoiner.add(String.valueOf(count)));
+        dto.getProductPrice().forEach(price -> stringJoiner.add(String.valueOf(price)));
+
+        String expectedSignature = new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
+
+        assertEquals(expectedSignature, signature);
+    }
+
+    @Test
+    void testFormResponseSignature() {
+        PaymentResponseWayForPay dto = PaymentResponseWayForPay.builder()
+            .orderReference("order456")
+            .status("success")
+            .time("2023-07-19T12:00:00")
+            .build();
+
+        String password = "testPassword";
+
+        String signature = encryptionUtil.formResponseSignature(dto, password);
+
+        StringJoiner stringJoiner = new StringJoiner(";");
+        stringJoiner.add(dto.getOrderReference())
+            .add(dto.getStatus())
+            .add(dto.getTime());
+        String expectedSignature = new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
+
+        assertEquals(expectedSignature, signature);
     }
 }

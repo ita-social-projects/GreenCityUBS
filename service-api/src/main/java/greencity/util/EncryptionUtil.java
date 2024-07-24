@@ -1,10 +1,11 @@
 package greencity.util;
 
 import greencity.dto.payment.PaymentRequestDto;
-import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseWayForPay;
+import java.util.StringJoiner;
 import lombok.ToString;
+import org.apache.commons.codec.digest.HmacUtils;
 import org.springframework.stereotype.Component;
-import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
 
 @Component
 @ToString
@@ -12,82 +13,44 @@ public class EncryptionUtil {
     /**
      * Method forms encrypted signature based on order details.
      *
-     * @param dto        {@link PaymentRequestDto} - request order data.
-     * @param password   - fondy password.
-     * @param merchantId - fondy merchant id.
+     * @param dto      {@link PaymentRequestDto} - request order data.
+     * @param password - way for pay password.
      * @return {@link String} - encrypted signature.
      */
-    public String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
-        String stringBuilder = password + "|" + dto.getAmount()
-            + "|" + dto.getCurrency()
-            + "|" + merchantId
-            + "|" + dto.getOrderDescription()
-            + "|" + dto.getOrderId()
-            + "|" + dto.getResponseUrl();
-        return sha1Hex(stringBuilder);
+    public String formRequestSignature(PaymentRequestDto dto, String password) {
+        StringJoiner stringJoiner = new StringJoiner(";");
+        stringJoiner.add(dto.getMerchantAccount())
+            .add(dto.getMerchantDomainName())
+            .add(dto.getOrderReference())
+            .add(dto.getOrderDate().toString())
+            .add(dto.getAmount().toString())
+            .add(dto.getCurrency());
+        dto.getProductName().forEach(stringJoiner::add);
+        dto.getProductCount().forEach(count -> stringJoiner.add(count.toString()));
+        dto.getProductPrice().forEach(price -> stringJoiner.add(price.toString()));
+
+        return new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
     }
 
     /**
-     * Method checks if response details is valid.
+     * Forms an encrypted signature based on the response from Way For Pay. This
+     * method uses the HMAC-MD5 algorithm to create a hash-based message
+     * authentication code (HMAC). The HMAC is created from a string that is built
+     * by appending the order reference, status, and time from the response DTO,
+     * each separated by a semicolon. The HMAC is then returned as a hexadecimal
+     * string.
      *
-     * @param dto      {@link PaymentResponseDto} - response order data.
-     * @param password - fondy password.
-     * @return {@link Boolean} - whether the data is valid.
+     * @param dto      {@link PaymentResponseWayForPay} - response data from
+     *                 WayForPay.
+     * @param password The password used for the HMAC-MD5 encryption.
+     * @return {@String} - The HMAC-MD5 encrypted signature.
      */
-    public boolean checkIfResponseSignatureIsValid(PaymentResponseDto dto, String password) {
-        StringBuilder stringBuilder = new StringBuilder(password);
-        checkInteger(dto.getActual_amount(), stringBuilder);
-        checkString(dto.getActual_currency(), stringBuilder);
-        checkInteger(dto.getAmount(), stringBuilder);
-        checkString(dto.getApproval_code(), stringBuilder);
-        checkInteger(dto.getCard_bin(), stringBuilder);
-        checkString(dto.getCard_type(), stringBuilder);
-        checkString(dto.getCurrency(), stringBuilder);
-        checkInteger(dto.getEci(), stringBuilder);
-        checkInteger(dto.getFee(), stringBuilder);
-        checkString(dto.getMasked_card(), stringBuilder);
-        checkString(dto.getMerchant_data(), stringBuilder);
-        checkInteger(dto.getMerchant_id(), stringBuilder);
-        checkString(dto.getOrder_id(), stringBuilder);
-        checkString(dto.getOrder_status(), stringBuilder);
-        checkString(dto.getOrder_time(), stringBuilder);
-        checkInteger(dto.getPayment_id(), stringBuilder);
-        checkString(dto.getPayment_system(), stringBuilder);
-        checkString(dto.getProduct_id(), stringBuilder);
-        checkString(dto.getRectoken(), stringBuilder);
-        checkString(dto.getRectoken_lifetime(), stringBuilder);
-        checkInteger(dto.getResponse_code(), stringBuilder);
-        checkString(dto.getResponse_description(), stringBuilder);
-        checkString(dto.getResponse_status(), stringBuilder);
-        checkIntegerInclude0(dto.getReversal_amount(), stringBuilder);
-        checkString(dto.getRrn(), stringBuilder);
-        checkString(dto.getSender_account(), stringBuilder);
-        checkString(dto.getSender_cell_phone(), stringBuilder);
-        checkString(dto.getSender_email(), stringBuilder);
-        checkIntegerInclude0(dto.getSettlement_amount(), stringBuilder);
-        checkString(dto.getSettlement_currency(), stringBuilder);
-        checkString(dto.getSettlement_date(), stringBuilder);
-        checkString(dto.getTran_type(), stringBuilder);
-        checkString(dto.getVerification_status(), stringBuilder);
-        checkInteger(dto.getParent_order_id(), stringBuilder);
-        return sha1Hex(stringBuilder.toString()).equals(dto.getSignature());
-    }
-
-    private static void checkString(String string, StringBuilder stringBuilder) {
-        if (string != null && !string.isEmpty()) {
-            stringBuilder.append("|").append(string);
-        }
-    }
-
-    private static void checkInteger(Integer number, StringBuilder stringBuilder) {
-        if (number != null && number != 0) {
-            stringBuilder.append("|").append(number);
-        }
-    }
-
-    private static void checkIntegerInclude0(Integer number, StringBuilder stringBuilder) {
-        if (number != null) {
-            stringBuilder.append("|").append(number);
-        }
+    public String formResponseSignature(PaymentResponseWayForPay dto, String password) {
+        StringJoiner stringJoiner = new StringJoiner(";");
+        stringJoiner.add(dto.getOrderReference())
+            .add((dto.getStatus()))
+            .add(dto.getTime());
+        String hmacMD5 = new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
+        return hmacMD5;
     }
 }
