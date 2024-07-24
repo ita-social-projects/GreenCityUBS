@@ -25,7 +25,7 @@ public class Address {
     @ManyToOne
     private User user;
 
-    @Size(min = 1, max = 20, message = "Invalid region name")
+    @Size(min = 1, max = 30, message = "Invalid region name")
     @Column(columnDefinition = "varchar(30)", nullable = false)
     private String region;
 
