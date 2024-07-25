@@ -111,7 +111,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      * @return list of {@link Address}
      */
     @Query(
-            value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) "
-                    + "FROM Address  ad WHERE ad.region = a.region)")
+        value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) "
+            + "FROM Address  ad WHERE ad.region = a.region)")
     List<Address> findDistinctRegions();
 }

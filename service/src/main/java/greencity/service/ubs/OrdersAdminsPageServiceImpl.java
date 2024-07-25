@@ -800,13 +800,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<OptionForColumnDTO> regionsList() {
         return addressRepository.findDistinctRegions()
-                .stream()
-                .map(address -> OptionForColumnDTO
-                        .builder()
-                        .key(address.getId().toString())
-                        .en(address.getRegionEn())
-                        .ua(address.getRegion())
-                        .build())
-                .collect(Collectors.toList());
+            .stream()
+            .map(address -> OptionForColumnDTO
+                .builder()
+                .key(address.getId().toString())
+                .en(address.getRegionEn())
+                .ua(address.getRegion())
+                .build())
+            .collect(Collectors.toList());
     }
 }
