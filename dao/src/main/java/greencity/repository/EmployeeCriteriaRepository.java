@@ -155,7 +155,8 @@ public class EmployeeCriteriaRepository {
                 extractPossibleExpressionsForSearchLineFiltering(employeeFilterViewRoot);
 
             predicates.addAll(
-                getAllSearchLinePredicates(employeeFilterCriteria.getSearchLine(), toUpperCaseExpressions));
+                getAllSearchLinePredicates(employeeFilterCriteria.getSearchLine().toUpperCase(),
+                    toUpperCaseExpressions));
         }
     }
 
