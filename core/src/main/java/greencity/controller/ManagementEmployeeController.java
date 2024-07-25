@@ -293,7 +293,7 @@ public class ManagementEmployeeController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/getTariffs")
     public ResponseEntity<List<GetTariffInfoForEmployeeDto>> getTariffInfoForEmployee() {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.getTariffsForEmployee());
