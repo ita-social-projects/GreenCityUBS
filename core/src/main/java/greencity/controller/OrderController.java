@@ -221,7 +221,7 @@ public class OrderController {
         HttpServletResponse servlet) throws IOException {
         log.info("Incoming request Way For Pay API" + servlet.toString());
         String decodedResponse =
-            URLDecoder.decode(response, StandardCharsets.UTF_8);
+            URLDecoder.decode(response, StandardCharsets.UTF_8.name());
         ObjectMapper objectMapper = new ObjectMapper();
         PaymentResponseDto paymentResponseDto =
             objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
