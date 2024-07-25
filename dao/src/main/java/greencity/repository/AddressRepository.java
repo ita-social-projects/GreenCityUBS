@@ -104,4 +104,14 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query(value = "SELECT * FROM address WHERE user_id =:userId AND status != 'DELETED' LIMIT 1", nativeQuery = true)
     Optional<Address> findAnyByUserIdAndAddressStatusNotDeleted(Long userId);
+
+    /**
+     * Method returns first address {@link Address} from each distinct region.
+     *
+     * @return list of {@link Address}
+     */
+    @Query(
+            value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) "
+                    + "FROM Address  ad WHERE ad.region = a.region)")
+    List<Address> findDistinctRegions();
 }
