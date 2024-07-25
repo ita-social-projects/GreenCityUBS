@@ -220,8 +220,9 @@ public class OrderController {
     public PaymentResponseWayForPay receivePayment(@RequestBody String response,
         HttpServletResponse servlet) throws IOException {
         log.info("Incoming request Way For Pay API {}", servlet.toString());
+        log.info("Response: {}", response);
         String decodedResponse =
-            URLDecoder.decode(response, StandardCharsets.UTF_8.name());
+            URLDecoder.decode(response, StandardCharsets.UTF_8);
         log.info("Decoded response: {}", decodedResponse);
         ObjectMapper objectMapper = new ObjectMapper();
         PaymentResponseDto paymentResponseDto =
