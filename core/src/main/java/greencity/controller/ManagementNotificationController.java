@@ -140,7 +140,7 @@ public class ManagementNotificationController {
      */
     @Operation(summary = "Remove custom notification template")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
