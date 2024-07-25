@@ -714,6 +714,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new NotFoundException(
                 NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressRequestDto.getId()));
 
+        if (Objects.isNull(currentUser)) {
+            throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
+        }
+
         if (!address.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
