@@ -36,12 +36,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -221,29 +219,18 @@ public class OrderController {
     @PostMapping("/receivePayment")
     public PaymentResponseWayForPay receivePayment(
         @RequestBody String response,
-        HttpServletRequest request,
         HttpServletResponse servlet) throws IOException {
-        log.info("Body: {}", response);
-        log.info("Response from Way For Pay : {}", request.getRequestURI());
+        log.info("Response: {}", response);
 
-        ObjectMapper mapper = new ObjectMapper();
-        PaymentResponseDto paymentResponseDto;
+        String decodedResponse =
+            URLDecoder.decode(response, StandardCharsets.UTF_8);
+        log.info("DecodedResponse: {}", decodedResponse);
 
-        try (BufferedReader reader =
-            new BufferedReader(new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8))) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                log.info("Line: {}", line);
-                sb.append(line);
-            }
+        ObjectMapper objectMapper = new ObjectMapper();
 
-            String rawJson = sb.toString();
-            log.info("Response: {}", rawJson);
-
-            paymentResponseDto = mapper.readValue(rawJson, PaymentResponseDto.class);
-            log.info("Payment DTO: {}", paymentResponseDto);
-        }
+        PaymentResponseDto paymentResponseDto =
+            objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
+        log.info("PaymentResponseDto: {}", paymentResponseDto);
 
         if (HttpStatus.OK.is2xxSuccessful()) {
             servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());

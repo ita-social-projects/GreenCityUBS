@@ -42,6 +42,4 @@ public class PaymentRequestDto {
     private List<Integer> productCount;
     @JsonProperty("merchantSignature")
     private String signature;
-    @JsonProperty("paymentSystems")
-    private String paymentSystems;
 }
