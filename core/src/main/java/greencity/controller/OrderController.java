@@ -1,6 +1,5 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
@@ -39,8 +38,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -217,21 +214,13 @@ public class OrderController {
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
     })
     @PostMapping("/receivePayment")
-    public PaymentResponseWayForPay receivePayment(@RequestBody String response,
+    public PaymentResponseWayForPay receivePayment(
+        @RequestBody PaymentResponseDto response,
         HttpServletResponse servlet) throws IOException {
-        log.info("Incoming request Way For Pay API {}", servlet.toString());
-        log.info("Response: {}", response);
-        String decodedResponse =
-            URLDecoder.decode(response, StandardCharsets.UTF_8);
-        log.info("Decoded response: {}", decodedResponse);
-        ObjectMapper objectMapper = new ObjectMapper();
-        PaymentResponseDto paymentResponseDto =
-            objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
-        log.info("Payment response DTO: {}", paymentResponseDto);
         if (HttpStatus.OK.is2xxSuccessful()) {
             servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
-        return ubsClientService.validatePayment(paymentResponseDto);
+        return ubsClientService.validatePayment(response);
     }
 
     /**
