@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
@@ -35,9 +36,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -215,13 +220,36 @@ public class OrderController {
     })
     @PostMapping("/receivePayment")
     public PaymentResponseWayForPay receivePayment(
-        @RequestBody PaymentResponseDto response,
+        @RequestBody String response,
+        HttpServletRequest request,
         HttpServletResponse servlet) throws IOException {
-        log.info("Response : {}", response);
+        log.info("Body: {}", response);
+        log.info("Response from Way For Pay : {}", request.getRequestURI());
+
+        ObjectMapper mapper = new ObjectMapper();
+        PaymentResponseDto paymentResponseDto;
+
+        try (BufferedReader reader =
+            new BufferedReader(new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                log.info("Line: {}", line);
+                sb.append(line);
+            }
+
+            String rawJson = sb.toString();
+            log.info("Response: {}", rawJson);
+
+            paymentResponseDto = mapper.readValue(rawJson, PaymentResponseDto.class);
+            log.info("Payment DTO: {}", paymentResponseDto);
+        }
+
         if (HttpStatus.OK.is2xxSuccessful()) {
             servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
-        return ubsClientService.validatePayment(response);
+
+        return ubsClientService.validatePayment(paymentResponseDto);
     }
 
     /**
