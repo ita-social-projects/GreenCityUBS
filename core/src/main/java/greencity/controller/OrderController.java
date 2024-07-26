@@ -217,6 +217,7 @@ public class OrderController {
     public PaymentResponseWayForPay receivePayment(
         @RequestBody PaymentResponseDto response,
         HttpServletResponse servlet) throws IOException {
+        log.info("Response : {}", response);
         if (HttpStatus.OK.is2xxSuccessful()) {
             servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
