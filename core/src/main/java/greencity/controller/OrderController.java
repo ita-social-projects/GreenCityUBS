@@ -220,13 +220,17 @@ public class OrderController {
     public PaymentResponseWayForPay receivePayment(
         @RequestBody String response,
         HttpServletResponse servlet) throws IOException {
+        log.info("Response: {}", response);
+
         String decodedResponse =
             URLDecoder.decode(response, StandardCharsets.UTF_8);
+        log.info("DecodedResponse: {}", decodedResponse);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         PaymentResponseDto paymentResponseDto =
             objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
+        log.info("PaymentResponseDto: {}", paymentResponseDto);
 
         if (HttpStatus.OK.is2xxSuccessful()) {
             servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
