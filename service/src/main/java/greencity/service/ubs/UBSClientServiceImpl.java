@@ -201,8 +201,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String merchantAccount;
     @Value("${greencity.wayforpay.secret}")
     private String wayForPaySecret;
-    @Value("${greencity.wayforpay.payment.systems}")
-    private String paymentSystems;
     @Value("${greencity.wayforpay.merchant.domain.name}")
     private String merchantDomainName;
     private static final String FAILED_STATUS = "failure";
@@ -1235,7 +1233,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .map(OrderBag::getAmount)
                 .filter(amount -> amount != 0)
                 .toList())
-            .paymentSystems(paymentSystems)
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil

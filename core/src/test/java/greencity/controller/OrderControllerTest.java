@@ -311,7 +311,7 @@ class OrderControllerTest {
             .getAllEventsForOrder(1L, "test@gmail.com", "en");
     }
 
-    // @Test
+    @Test
     void receivePaymentTest() throws Exception {
         PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
         ObjectMapper objectMapper = new ObjectMapper();
