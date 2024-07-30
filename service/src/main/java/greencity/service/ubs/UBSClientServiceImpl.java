@@ -2003,4 +2003,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         return tariffsInfoRepository.findTariffIdByLocationId(locationId)
             .orElseThrow(() -> new NotFoundException(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationId)));
     }
+
+    @Override
+    public List<LocationsDto> getAllLocationsByCourierId(Long courierId) {
+        List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
+        return locations.stream()
+            .map(locationToLocationsDtoMapper::convert)
+            .map(locationsDto -> locationsDto.setTariffsId(
+                tariffsInfoRepository.findTariffIdByLocationId(locationsDto.getId())
+                    .orElseThrow(() -> new NotFoundException(
+                        String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationsDto.getId())))))
+            .collect(toList());
+    }
 }

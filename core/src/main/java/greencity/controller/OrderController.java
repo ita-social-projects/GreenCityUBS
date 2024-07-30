@@ -521,4 +521,24 @@ public class OrderController {
         Long tariffId = ubsClientService.getTariffIdByLocationId(locationId);
         return ResponseEntity.status(HttpStatus.OK).body(tariffId);
     }
+
+    /**
+     * Retrieves all active locations by courier id and returns them as DTOs.
+     *
+     * @return ResponseEntity with a list of DTOs representing all active locations
+     *         by courier id.
+     */
+    @ApiOperation(value = "Get All Active Locations by courier id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping(value = "/locationsByCourier/{courierId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<LocationsDto>> getAllLocationsByCourierId(
+        @PathVariable("courierId") Long courierId) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getAllLocationsByCourierId(courierId));
+    }
 }
