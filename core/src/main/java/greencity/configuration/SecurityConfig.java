@@ -236,6 +236,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/notifications/**",
                 UBS_LINK + "/check-if-tariff-exists/{id}",
                 UBS_LINK + "/locations",
+                UBS_LINK + "/locationsByCourier/{courierId}",
                 "/notifications/quantityUnreadenNotifications")
             .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PUT,

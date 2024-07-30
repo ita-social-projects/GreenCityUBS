@@ -227,6 +227,7 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -3434,5 +3435,48 @@ class UBSClientServiceImplTest {
         assertThrows(NotFoundException.class, () -> ubsClientService.getTariffIdByLocationId(locationId));
 
         verify(tariffsInfoRepository).findTariffIdByLocationId(locationId);
+    }
+
+    @Test
+    void getAllLocationsByCourierId_ShouldReturnLocations_WhenLocationsExist() {
+        Long id = 1L;
+        Location location = new Location();
+        LocationsDto locationsDto = new LocationsDto();
+        locationsDto.setId(id);
+        when(locationRepository.findAllActiveLocationsByCourierId(id)).thenReturn(Arrays.asList(location));
+        when(locationToLocationsDtoMapper.convert(location)).thenReturn(locationsDto);
+        when(tariffsInfoRepository.findTariffIdByLocationId(id)).thenReturn(Optional.of(id));
+
+        List<LocationsDto> result = ubsClientService.getAllLocationsByCourierId(id);
+
+        assertEquals(1, result.size());
+        assertEquals(id, result.get(0).getId());
+        assertEquals(id, result.get(0).getTariffsId());
+    }
+
+    @Test
+    void getAllLocationsByCourierId_ShouldThrowNotFoundException_WhenTariffNotFound() {
+        Long id = 1L;
+        Location location = new Location();
+        LocationsDto locationsDto = new LocationsDto();
+        locationsDto.setId(id);
+        when(locationRepository.findAllActiveLocationsByCourierId(id)).thenReturn(Arrays.asList(location));
+        when(locationToLocationsDtoMapper.convert(location)).thenReturn(locationsDto);
+        when(tariffsInfoRepository.findTariffIdByLocationId(id)).thenReturn(Optional.empty());
+
+        NotFoundException exception =
+            assertThrows(NotFoundException.class, () -> ubsClientService.getAllLocationsByCourierId(id));
+
+        assertEquals(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, id), exception.getMessage());
+    }
+
+    @Test
+    void getAllLocationsByCourierId_ShouldReturnEmptyList_WhenNoLocationsExist() {
+        Long id = 1L;
+        when(locationRepository.findAllActiveLocationsByCourierId(id)).thenReturn(Arrays.asList());
+
+        List<LocationsDto> result = ubsClientService.getAllLocationsByCourierId(id);
+
+        assertTrue(result.isEmpty());
     }
 }

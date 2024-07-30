@@ -1,12 +1,13 @@
 package greencity.dto;
 
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 @Builder
 public class LocationsDto {
     private Long id;
@@ -17,4 +18,5 @@ public class LocationsDto {
     private Double longitude;
     private String nameUk;
     private String nameEn;
+    private Long tariffsId;
 }

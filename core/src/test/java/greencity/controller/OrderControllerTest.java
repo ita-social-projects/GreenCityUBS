@@ -398,6 +398,20 @@ class OrderControllerTest {
         verify(ubsClientService).getTariffIdByLocationId(locationId);
     }
 
+    @Test
+    void getAllLocationsByCourierIdTest() throws Exception {
+        Long courierId = 1L;
+        List<LocationsDto> locationsDtoList = Arrays.asList(new LocationsDto(), new LocationsDto());
+        when(ubsClientService.getAllLocationsByCourierId(courierId)).thenReturn(locationsDtoList);
+
+        mockMvc.perform(get(ubsLink + "/locationsByCourier/{courierId}", courierId)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
+
+        verify(ubsClientService).getAllLocationsByCourierId(courierId);
+    }
+
     private void setRedirectionConfigProp() {
         RedirectionConfigProp redirectionConfigProp = getRedirectionConfig();
 
