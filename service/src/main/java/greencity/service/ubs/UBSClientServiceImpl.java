@@ -424,7 +424,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private Integer getQuantityOfBagsByBagIdAndOrderId(Long orderId, Integer bagId) {
         return orderBagRepository.getAmountOfOrderBagsByOrderIdAndBagId(orderId, bagId)
-            .orElseThrow(() -> new NotFoundException(BAGS_QUANTITY_NOT_FOUND_MESSAGE));
+            .orElse(0);
     }
 
     private Location getLocationByOrderIdThroughLazyInitialization(Order order) {
