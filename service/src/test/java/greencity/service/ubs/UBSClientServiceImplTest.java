@@ -585,7 +585,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(tariffLocation));
         when(bagRepository.findAllActiveBagsByTariffsInfoId(tariffsInfoId)).thenReturn(bags);
         when(orderBagRepository.getAmountOfOrderBagsByOrderIdAndBagId(anyLong(), anyInt()))
-            .thenReturn(2);
+            .thenReturn(Optional.of(2));
 
         var userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageDataByOrderId(uuid, orderId);
