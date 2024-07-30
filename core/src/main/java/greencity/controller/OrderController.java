@@ -220,6 +220,7 @@ public class OrderController {
     public PaymentResponseWayForPay receivePayment(
         @RequestBody String response,
         HttpServletResponse servlet) throws IOException {
+        log.info("Incoming request Way For Pay API: {}", servlet.toString());
         log.info("Response: {}", response);
 
         String decodedResponse =
