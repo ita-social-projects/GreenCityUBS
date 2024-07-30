@@ -90,6 +90,6 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
         + "FROM order_bag_mapping AS obm "
         + "WHERE obm.order_id = :orderId "
         + "AND obm.bag_id = :bagId", nativeQuery = true)
-    Integer getAmountOfOrderBagsByOrderIdAndBagId(@Param("orderId") Long orderId,
+    Optional<Integer> getAmountOfOrderBagsByOrderIdAndBagId(@Param("orderId") Long orderId,
         @Param("bagId") Integer bagId);
 }
