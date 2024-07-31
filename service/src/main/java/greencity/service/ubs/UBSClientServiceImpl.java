@@ -195,18 +195,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
-    @Value("${greencity.redirect.result-url-fondy}")
-    private String resultUrlFondy;
+    @Value("${greencity.redirect.result-way-for-pay-url}")
+    private String resultWayForPayUrl;
     @Value("${greencity.wayforpay.login}")
     private String merchantAccount;
     @Value("${greencity.wayforpay.secret}")
     private String wayForPaySecret;
-    @Value("${greencity.wayforpay.payment.systems}")
-    private String paymentSystems;
     @Value("${greencity.wayforpay.merchant.domain.name}")
     private String merchantDomainName;
     private static final String FAILED_STATUS = "failure";
-    private static final String APPROVED_STATUS = "approved";
+    private static final String APPROVED_STATUS = "Approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
     private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
     private static final String VIBER_PART_3_OF_LINK = "&context=";
@@ -245,7 +243,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderReference(response.getOrderReference())
             .status("accept")
             .time(response.getCreatedDate()).build();
-
         accept.setSignature(encryptionUtil.formResponseSignature(accept, wayForPaySecret));
         return accept;
     }
@@ -256,9 +253,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         return Payment.builder()
             .id(Long.valueOf(response.getOrderReference()
-                .substring(response.getOrderReference().indexOf("_") + 1)))
+                .substring(response.getOrderReference().lastIndexOf("_") + 1)))
             .currency(response.getCurrency())
-            .amount(Long.valueOf(response.getAmount()))
+            .amount(Long.parseLong(response.getAmount()) * 100)
             .orderStatus(response.getTransactionStatus())
             .senderCellPhone(response.getPhone())
             .maskedCard(response.getCardPan())
@@ -427,7 +424,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private Integer getQuantityOfBagsByBagIdAndOrderId(Long orderId, Integer bagId) {
         return orderBagRepository.getAmountOfOrderBagsByOrderIdAndBagId(orderId, bagId)
-            .orElseThrow(() -> new NotFoundException(BAGS_QUANTITY_NOT_FOUND_MESSAGE));
+            .orElse(0);
     }
 
     private Location getLocationByOrderIdThroughLazyInitialization(Order order) {
@@ -714,6 +711,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address = addressRepo.findById(addressRequestDto.getId())
             .orElseThrow(() -> new NotFoundException(
                 NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressRequestDto.getId()));
+
+        if (Objects.isNull(currentUser)) {
+            throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
+        }
 
         if (!address.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
@@ -1218,10 +1219,11 @@ public class UBSClientServiceImpl implements UBSClientService {
             .merchantAccount(merchantAccount)
             .merchantDomainName(merchantDomainName)
             .apiVersion(1)
-            .serviceUrl(resultUrlFondy)
+            .serviceUrl(resultWayForPayUrl)
             .orderReference(OrderUtils.generateOrderIdForPayment(orderId, order))
             .orderDate(instant.getEpochSecond())
-            .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
+            .amount(1)
+            // .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
             .currency("UAH")
             .productName(order.getOrderBags().stream()
                 .filter(bag -> bag.getAmount() != 0)
@@ -1236,7 +1238,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .map(OrderBag::getAmount)
                 .filter(amount -> amount != 0)
                 .toList())
-            .paymentSystems(paymentSystems)
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil

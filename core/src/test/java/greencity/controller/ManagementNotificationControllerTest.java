@@ -187,7 +187,7 @@ class ManagementNotificationControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.delete(url + "/remove-custom-template/{id}", 1L)
             .principal(principal))
-            .andExpect(MockMvcResultMatchers.status().isNoContent());
+            .andExpect(MockMvcResultMatchers.status().isOk());
 
         verify(notificationTemplateService).removeNotificationTemplate(any());
     }

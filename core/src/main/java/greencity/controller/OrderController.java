@@ -217,18 +217,26 @@ public class OrderController {
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
     })
     @PostMapping("/receivePayment")
-    public PaymentResponseWayForPay receivePayment(@RequestBody String response,
+    public PaymentResponseWayForPay receivePayment(
+        @RequestBody String response,
         HttpServletResponse servlet) throws IOException {
-        log.info("Incoming request Way For Pay API" + servlet.toString());
+        log.info("Incoming request Way For Pay API: {}", servlet.toString());
+        log.info("Response: {}", response);
+
         String decodedResponse =
             URLDecoder.decode(response, StandardCharsets.UTF_8);
+        log.info("DecodedResponse: {}", decodedResponse);
+
         ObjectMapper objectMapper = new ObjectMapper();
+
         PaymentResponseDto paymentResponseDto =
             objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
+        log.info("PaymentResponseDto: {}", paymentResponseDto);
 
         if (HttpStatus.OK.is2xxSuccessful()) {
             servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
+
         return ubsClientService.validatePayment(paymentResponseDto);
     }
 
