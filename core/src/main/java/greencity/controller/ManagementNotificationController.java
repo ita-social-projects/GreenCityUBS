@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,6 +108,7 @@ public class ManagementNotificationController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_MESSAGES_PAGE', authentication)")
     @PutMapping("/change-template-status/{id}")
     public ResponseEntity<HttpStatus> deactivateNotificationTemplate(
         @PathVariable Long id, @RequestParam String status) {
