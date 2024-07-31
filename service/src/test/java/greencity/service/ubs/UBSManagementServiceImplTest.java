@@ -132,7 +132,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-//@MockitoSettings(strictness = Strictness.LENIENT)
 class UBSManagementServiceImplTest {
     @Mock(lenient = true)
     OrderAddressRepository orderAddressRepository;
@@ -2027,7 +2026,6 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
-        when(paymentUtil.convertCoinsIntoBills(anyLong())).thenReturn(900.);
         ubsManagementService.addBonusesToUser(getAddBonusesToUserDto(), 1L, employee.getEmail());
 
         verify(orderRepository).findById(1L);
@@ -2047,7 +2045,6 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 //        when(orderBagService.findAllBagsByOrderId(1L)).thenReturn(getBaglist());
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
-        when(paymentUtil.convertCoinsIntoBills(anyLong())).thenReturn(200.0);
 
         ubsManagementService.addBonusesToUser(getAddBonusesToUserDto(), 1L, employee.getEmail());
 
@@ -2066,7 +2063,6 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
-        when(paymentUtil.convertCoinsIntoBills(anyLong())).thenReturn(300.);
         ubsManagementService.addBonusesToUser(getAddBonusesToUserDto(), 1L, employee.getEmail());
 
         verify(orderRepository).findById(1L);
@@ -2084,7 +2080,6 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
         when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
-        when(paymentUtil.convertBillsIntoCoins(anyDouble())).thenReturn(90000L);
 
         AddBonusesToUserDto addBonusesToUserDto = getAddBonusesToUserDto();
         assertThrows(BadRequestException.class,
