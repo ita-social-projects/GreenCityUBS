@@ -63,6 +63,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SecurityConfig.class)
 class OrderControllerTest {
     private static final String ubsLink = "/ubs";
+    private static final String TEST_UUID = "a1b2-c3d4";
 
     private MockMvc mockMvc;
 
@@ -130,7 +131,7 @@ class OrderControllerTest {
     void checkIfCertificateAvailable() throws Exception {
         mockMvc.perform(get(ubsLink + "/certificate/{code}", "qwefds"))
             .andExpect(status().isOk());
-        verify(ubsClientService).checkCertificate("qwefds");
+        verify(ubsClientService).checkCertificate("qwefds", TEST_UUID);
     }
 
     @Test

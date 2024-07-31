@@ -16,7 +16,7 @@ class CheckCertificateMapperTest {
 
     @Test
     void convert() {
-        Certificate certificate = ModelUtils.getCertificate();
+        Certificate certificate = ModelUtils.getActiveCertificateWith10Points();
         CertificateDto certificateDto = checkCertificateMapper.convert(certificate);
 
         Assertions.assertEquals(certificate.getCode(), certificateDto.getCode());
