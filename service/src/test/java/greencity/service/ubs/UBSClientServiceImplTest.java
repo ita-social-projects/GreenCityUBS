@@ -3445,7 +3445,7 @@ class UBSClientServiceImplTest {
         locationsDto.setId(id);
         when(locationRepository.findAllActiveLocationsByCourierId(id)).thenReturn(Arrays.asList(location));
         when(locationToLocationsDtoMapper.convert(location)).thenReturn(locationsDto);
-        when(tariffsInfoRepository.findTariffIdByLocationId(id)).thenReturn(Optional.of(id));
+        when(tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(id, id)).thenReturn(Optional.of(id));
 
         List<LocationsDto> result = ubsClientService.getAllLocationsByCourierId(id);
 
@@ -3462,7 +3462,7 @@ class UBSClientServiceImplTest {
         locationsDto.setId(id);
         when(locationRepository.findAllActiveLocationsByCourierId(id)).thenReturn(Arrays.asList(location));
         when(locationToLocationsDtoMapper.convert(location)).thenReturn(locationsDto);
-        when(tariffsInfoRepository.findTariffIdByLocationId(id)).thenReturn(Optional.empty());
+        when(tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(id, id)).thenReturn(Optional.empty());
 
         NotFoundException exception =
             assertThrows(NotFoundException.class, () -> ubsClientService.getAllLocationsByCourierId(id));
