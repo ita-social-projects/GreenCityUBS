@@ -161,7 +161,7 @@ public class PaymentServiceImpl implements PaymentService {
     private void updateOrderPaymentStatusForManualPayment(Order order) {
         CounterOrderDetailsDto dto = getPriceDetails(order.getId());
         double paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
-                        .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(paymentUtil::convertCoinsIntoBills).reduce(Double::sum)
+                        .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(PaymentUtil::convertCoinsIntoBills).reduce(Double::sum)
                 .orElse((double) 0);
         double totalPaidAmount = paymentsForCurrentOrder + dto.getCertificateBonus() + dto.getBonus();
         double totalAmount = paymentUtil.setTotalPrice(dto);

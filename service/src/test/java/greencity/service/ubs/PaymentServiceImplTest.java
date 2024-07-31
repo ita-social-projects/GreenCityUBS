@@ -197,11 +197,7 @@ class PaymentServiceImplTest {
     @Test
     void getPaymentInfoWithoutPayment() {
         Order order = getOrderWithoutPayment();
-
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(paymentUtil.convertBillsIntoCoins(anyDouble())).thenReturn(10000L);
-        when(paymentUtil.convertCoinsIntoBills(anyLong())).thenReturn(anyDouble());
-
         assertEquals(ModelUtils.getPaymentTableInfoDto2(), paymentServiceImpl.getPaymentInfo(order.getId(), 100.));
     }
 
@@ -332,7 +328,7 @@ class PaymentServiceImplTest {
         paymentServiceImpl.updateManualPayment(1L, getManualPaymentRequestDto(), file, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
-        verify(eventService, times(1)).save(any(), any(), any());
+        verify(eventService, times(2)).save(any(), any(), any());
     }
 
     @Test
@@ -365,7 +361,7 @@ class PaymentServiceImplTest {
         paymentServiceImpl.updateManualPayment(payment.getId(), requestDto, file, employee.getUuid());
 
         verify(paymentRepository).save(any(Payment.class));
-        verify(eventService, times(1)).save(any(), any(), any());
+        verify(eventService, times(2)).save(any(), any(), any());
     }
 
     @Test
