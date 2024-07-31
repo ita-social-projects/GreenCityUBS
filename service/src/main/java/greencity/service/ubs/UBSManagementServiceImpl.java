@@ -177,7 +177,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
-    private static final String FORMAT_DATE = "dd-MM-yyyy";
+    static final String FORMAT_DATE = "dd-MM-yyyy";
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
@@ -185,50 +185,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderBagService orderBagService;
     @Autowired
     private final OrderBagRepository orderBagRepository;
+    @Autowired
+    private PaymentService paymentService;
+    @Autowired
+    private PaymentUtil paymentUtil;
 
-    /**
-     * Method gets all order payments, count paid amount, amount which user should
-     * paid and overpayment amount.
-     *
-     * @param orderId  of {@link Long} order id;
-     * @param sumToPay of {@link Long} sum to pay;
-     * @return {@link PaymentTableInfoDto }
-     * @author Nazar Struk, Ostap Mykhailivskyi
-     */
-    @Override
-    public PaymentTableInfoDto getPaymentInfo(long orderId, Double sumToPay) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        Long sumToPayInCoins = convertBillsIntoCoins(sumToPay);
-        Long paidAmountInCoins = calculatePaidAmount(order);
-        Long overpaymentInCoins = calculateOverpayment(order, sumToPayInCoins);
-        Long unPaidAmountInCoins = calculateUnpaidAmount(order, sumToPayInCoins, paidAmountInCoins);
-        PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
-        paymentTableInfoDto.setOverpayment(convertCoinsIntoBills(overpaymentInCoins));
-        paymentTableInfoDto.setUnPaidAmount(convertCoinsIntoBills(unPaidAmountInCoins));
-        paymentTableInfoDto.setPaidAmount(convertCoinsIntoBills(paidAmountInCoins));
-        List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
-            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
-        paymentTableInfoDto.setPaymentInfoDtos(paymentInfoDtos);
-        return paymentTableInfoDto;
-    }
-
-    private Long convertBillsIntoCoins(Double bills) {
-        return bills == null ? 0
-            : BigDecimal.valueOf(bills)
-                .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-                .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
-                .longValue();
-    }
-
-    private Double convertCoinsIntoBills(Long coins) {
-        return coins == null ? 0
-            : BigDecimal.valueOf(coins)
-                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-                .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
-                .doubleValue();
-    }
 
     @Override
     public PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page, String columnName,
@@ -362,7 +323,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressComment(orderAddress.getAddressComment())
             .bags(bagInfoDtoList)
             .orderFullPrice(setTotalPrice(prices))
-            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount()).getUnPaidAmount())
+            .orderDiscountedPrice(paymentService.getPaymentInfo(orderId, prices.getSumAmount()).getUnPaidAmount())
             .orderBonusDiscount(prices.getBonus())
             .orderCertificateTotalDiscount(prices.getCertificateBonus())
             .orderExportedPrice(prices.getSumExported())
@@ -372,13 +333,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .amountOfBagsConfirmed(order.getConfirmedQuantity())
             .numbersFromShop(order.getAdditionalOrders())
             .certificates(prices.getCertificate())
-            .paymentTableInfoDto(getPaymentInfo(orderId, setTotalPrice(prices)))
+            .paymentTableInfoDto(paymentService.getPaymentInfo(orderId, setTotalPrice(prices)))
             .exportDetailsDto(getOrderExportDetails(orderId))
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId, email))
             .comment(order.getComment())
-            .courierPricePerPackage(convertCoinsIntoBills(servicePriceInCoins))
+            .courierPricePerPackage(paymentUtil.convertCoinsIntoBills(servicePriceInCoins))
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
-            .writeOffStationSum(convertCoinsIntoBills(order.getWriteOffStationSum()))
+            .writeOffStationSum(paymentUtil.convertCoinsIntoBills(order.getWriteOffStationSum()))
             .build();
     }
 
@@ -618,7 +579,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         long discountInCoins = orderRepository.findSumOfCertificatesByOrderId(orderId) * 100L;
-        long totalPriceInCoins = convertBillsIntoCoins(setTotalPrice(getPriceDetails(orderId)));
+        long totalPriceInCoins = paymentUtil.convertBillsIntoCoins(setTotalPrice(getPriceDetails(orderId)));
         long needToPayInCoins = totalPriceInCoins - wasPaidInCoins - discountInCoins;
 
         updatePaymentStatus(order, wasPaidInCoins, discountInCoins, totalPriceInCoins, needToPayInCoins, email);
@@ -672,7 +633,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 amountInCoins = 0L;
             }
         }
-        recalculatePoints(BigDecimal.valueOf(convertCoinsIntoBills(amountInCoins))
+        recalculatePoints(BigDecimal.valueOf(paymentUtil.convertCoinsIntoBills(amountInCoins))
             .setScale(0, RoundingMode.HALF_UP).intValue(), order);
     }
 
@@ -779,9 +740,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.getOrderDetails(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        long totalSumAmountInCoins = convertBillsIntoCoins(dto.getTotalSumAmount());
-        long totalSumConfirmedInCoins = convertBillsIntoCoins(dto.getTotalSumConfirmed());
-        long totalSumExportedInCoins = convertBillsIntoCoins(dto.getTotalSumExported());
+        long totalSumAmountInCoins = paymentUtil.convertBillsIntoCoins(dto.getTotalSumAmount());
+        long totalSumConfirmedInCoins = paymentUtil.convertBillsIntoCoins(dto.getTotalSumConfirmed());
+        long totalSumExportedInCoins = paymentUtil.convertBillsIntoCoins(dto.getTotalSumExported());
 
         updateOrderPaymentStatus(order, totalSumAmountInCoins, totalSumConfirmedInCoins, totalSumExportedInCoins);
         return dto;
@@ -898,12 +859,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void setDtoInfo(CounterOrderDetailsDto dto, long sumAmountInCoins, long sumExportedInCoins,
         long sumConfirmedInCoins, long totalSumAmountInCoins, long totalSumConfirmedInCoins,
         long totalSumExportedInCoins) {
-        dto.setSumAmount(convertCoinsIntoBills(sumAmountInCoins));
-        dto.setSumConfirmed(convertCoinsIntoBills(sumConfirmedInCoins));
-        dto.setSumExported(convertCoinsIntoBills(sumExportedInCoins));
-        dto.setTotalSumAmount(convertCoinsIntoBills(totalSumAmountInCoins));
-        dto.setTotalSumConfirmed(convertCoinsIntoBills(totalSumConfirmedInCoins));
-        dto.setTotalSumExported(convertCoinsIntoBills(totalSumExportedInCoins));
+        dto.setSumAmount(paymentUtil.convertCoinsIntoBills(sumAmountInCoins));
+        dto.setSumConfirmed(paymentUtil.convertCoinsIntoBills(sumConfirmedInCoins));
+        dto.setSumExported(paymentUtil.convertCoinsIntoBills(sumExportedInCoins));
+        dto.setTotalSumAmount(paymentUtil.convertCoinsIntoBills(totalSumAmountInCoins));
+        dto.setTotalSumConfirmed(paymentUtil.convertCoinsIntoBills(totalSumConfirmedInCoins));
+        dto.setTotalSumExported(paymentUtil.convertCoinsIntoBills(totalSumExportedInCoins));
     }
 
     private void updateOrderPaymentStatus(Order currentOrder, long totalSumAmountInCoins, long totalConfirmedInCoins,
@@ -1298,7 +1259,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @return {@link Long }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculateOverpayment(Order order, Long sumToPayInCoins) {
+    Long calculateOverpayment(Order order, Long sumToPayInCoins) {
         long paidAmountInCoins = calculatePaidAmount(order);
 
         long certificateSum = order.getCertificates().stream()
@@ -1320,7 +1281,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @return {@link Long } paid amount in coins;
      * @author Ostap Mykhailivskyi
      */
-    private Long calculatePaidAmount(Order order) {
+    Long calculatePaidAmount(Order order) {
         return order.getPayment().stream()
             .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(Payment::getAmount)
@@ -1336,7 +1297,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @return {@link Long } unpaid amount in coins
      * @author Ostap Mykhailivskyi
      */
-    private Long calculateUnpaidAmount(Order order, Long sumToPayInCoins, Long paidAmountInCoins) {
+    Long calculateUnpaidAmount(Order order, Long sumToPayInCoins, Long paidAmountInCoins) {
         long unpaidAmountInCoins = sumToPayInCoins - paidAmountInCoins
             - 100L * (order.getPointsToUse() + (order.getCertificates().stream()
                 .map(Certificate::getPoints)
@@ -1346,68 +1307,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return Math.max(unpaidAmountInCoins, 0);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image, String email) {
-        if (Objects.isNull(image) && StringUtils.isBlank(paymentRequestDto.getReceiptLink())) {
-            throw new BadRequestException("Receipt link or image must be present");
-        }
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        checkAvailableOrderForEmployee(order, email);
-        ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(
-            paymentRepository.save(buildPaymentEntity(order, paymentRequestDto, image, email)));
-        updateOrderPaymentStatusForManualPayment(order);
-        return manualPaymentResponseDto;
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public void deleteManualPayment(Long paymentId, String uuid) {
-        Employee employee = employeeRepository.findByUuid(uuid)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
-        Payment payment = paymentRepository.findById(paymentId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment not found"));
-        if (payment.getImagePath() != null) {
-            fileService.delete(payment.getImagePath());
-        }
-        paymentRepository.deletePaymentById(paymentId);
-        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
-            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
-        updateOrderPaymentStatusForManualPayment(payment.getOrder());
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ManualPaymentResponseDto updateManualPayment(Long paymentId,
-        ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image, String uuid) {
-        Employee employee = employeeRepository.findByUuid(uuid)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
-        Payment payment = paymentRepository.findById(paymentId).orElseThrow(
-            () -> new NotFoundException(PAYMENT_NOT_FOUND + paymentId));
-        Payment paymentUpdated = paymentRepository.save(changePaymentEntity(payment, paymentRequestDto, image));
-        eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
-            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
-
-        ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(paymentUpdated);
-        updateOrderPaymentStatusForManualPayment(payment.getOrder());
-        return manualPaymentResponseDto;
-    }
-
-    private void updateOrderPaymentStatusForManualPayment(Order order) {
+    void updateOrderPaymentStatusForManualPayment(Order order) {
         CounterOrderDetailsDto dto = getPriceDetails(order.getId());
         double paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
-            .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(this::convertCoinsIntoBills).reduce(Double::sum)
+            .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(paymentUtil::convertCoinsIntoBills).reduce(Double::sum)
             .orElse((double) 0);
         double totalPaidAmount = paymentsForCurrentOrder + dto.getCertificateBonus() + dto.getBonus();
         double totalAmount = setTotalPrice(dto);
@@ -1426,9 +1331,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         orderRepository.save(order);
     }
 
-    private Payment changePaymentEntity(Payment updatePayment,
-        ManualPaymentRequestDto requestDto,
-        MultipartFile image) {
+    Payment changePaymentEntity(Payment updatePayment,
+                                ManualPaymentRequestDto requestDto,
+                                MultipartFile image) {
         updatePayment.setSettlementDate(requestDto.getSettlementdate());
         updatePayment.setAmount(requestDto.getAmount());
         updatePayment.setPaymentId(requestDto.getPaymentId());
@@ -1445,7 +1350,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return updatePayment;
     }
 
-    private ManualPaymentResponseDto buildPaymentResponseDto(Payment payment) {
+    ManualPaymentResponseDto buildPaymentResponseDto(Payment payment) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
         return ManualPaymentResponseDto.builder()
             .id(payment.getId())
@@ -1458,8 +1363,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image,
-        String email) {
+    Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image,
+                               String email) {
         Payment payment = Payment.builder()
             .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
             .amount(paymentRequestDto.getAmount())
@@ -1711,10 +1616,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void setUbsCourierSumAndWriteOffStationSum(Order order, Double writeOffStationSum, Double ubsCourierSum) {
         if (writeOffStationSum != null) {
-            order.setWriteOffStationSum(convertBillsIntoCoins(writeOffStationSum));
+            order.setWriteOffStationSum(paymentUtil.convertBillsIntoCoins(writeOffStationSum));
         }
         if (ubsCourierSum != null) {
-            order.setUbsCourierSum(convertBillsIntoCoins(ubsCourierSum));
+            order.setUbsCourierSum(paymentUtil.convertBillsIntoCoins(ubsCourierSum));
         }
         orderRepository.save(order);
     }
@@ -1725,7 +1630,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF;
     }
 
-    private void checkAvailableOrderForEmployee(Order order, String email) {
+    void checkAvailableOrderForEmployee(Order order, String email) {
         Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         Optional<TariffsInfo> tariffsInfoOptional = tariffsInfoRepository.findTariffsInfoByIdForEmployee(
@@ -1807,7 +1712,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
-        Long overpaymentInCoins = calculateOverpayment(order, convertBillsIntoCoins(setTotalPrice(prices)));
+        Long overpaymentInCoins = calculateOverpayment(order, paymentUtil.convertBillsIntoCoins(setTotalPrice(prices)));
         checkOverpayment(overpaymentInCoins);
         User currentUser = order.getUser();
 
@@ -1837,8 +1742,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void transferPointsToUser(Order order, User user, long pointsInCoins) {
-        int uahPoints = convertCoinsIntoBills(pointsInCoins).intValue();
-
+        int uahPoints = paymentUtil.convertCoinsIntoBills(pointsInCoins).intValue();
         user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
 
         user.setChangeOfPointsList(ListUtils.defaultIfNull(user.getChangeOfPointsList(), new ArrayList<>()));

@@ -37,13 +37,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UBSManagementService {
-    /**
-     * Method returns payment info.
-     *
-     * @return {@link PaymentTableInfoDto};
-     * @author Struk Nazar
-     */
-    PaymentTableInfoDto getPaymentInfo(long orderId, Double sumToPay);
+
 
     /**
      * Method returns all certificates.
@@ -183,43 +177,6 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     List<AdditionalBagInfoDto> getAdditionalBagsInfo(Long orderId);
-
-    /**
-     * Method that saves manual payment and returns response with required fields.
-     *
-     * @param orderId           of {@link Long} order id;
-     * @param paymentRequestDto of {@link ManualPaymentRequestDto} manual payment
-     *                          request dto;
-     * @param image             {@link MultipartFile} image of receipt.
-     * @param email             {@link String}.
-     * @return {@link ManualPaymentResponseDto }
-     * @author Denys Kisliak
-     */
-    ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image, String email);
-
-    /**
-     * Method that deletes manual payment.
-     *
-     * @param paymentId of {@link Long} payment id;
-     * @param uuid      {@link String}.
-     * @author Denys Kisliak
-     */
-    void deleteManualPayment(Long paymentId, String uuid);
-
-    /**
-     * Method that updates manual payment and returns response with required fields.
-     *
-     * @param paymentId         of {@link Long} payment id;
-     * @param paymentRequestDto of {@link ManualPaymentRequestDto} manual payment
-     *                          request dto;
-     * @param image             {@link MultipartFile} image of receipt.
-     * @param uuid              {@link String}.
-     * @return {@link ManualPaymentResponseDto }
-     * @author Denys Kisliak
-     */
-    ManualPaymentResponseDto updateManualPayment(Long paymentId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image, String uuid);
 
     /**
      * Method that return all employees by position.
