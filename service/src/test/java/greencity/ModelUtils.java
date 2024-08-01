@@ -81,7 +81,7 @@ import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderDto;
-import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
@@ -3363,8 +3363,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderFondyClientDto getOrderFondyClientDto() {
-        return OrderFondyClientDto.builder()
+    public static OrderWayForPayClientDto getOrderFondyClientDto() {
+        return OrderWayForPayClientDto.builder()
             .orderId(1L)
             .pointsToUse(100)
             .build();

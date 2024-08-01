@@ -33,7 +33,7 @@ import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
-import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
@@ -372,8 +372,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderFondyClientDto getOrderFondyClientDto() {
-        return OrderFondyClientDto.builder()
+    public static OrderWayForPayClientDto getOrderFondyClientDto() {
+        return OrderWayForPayClientDto.builder()
             .orderId(1L)
             .pointsToUse(100)
             .certificates(Collections.emptySet())

@@ -55,11 +55,12 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
     /**
      * The query for get all Certificate.
      *
-     * @param code is list Certificate
+     * @param codes is list Certificate
      * @return set of {@link Certificate}
      */
-    @Query(nativeQuery = true, value = "SELECT c.* FROM certificate c WHERE c.code IN :codes AND c.status = :status")
-    Set<Certificate> findAllByCodeAndCertificateStatus(List<String> code, CertificateStatus status);
+    @Query("SELECT c FROM Certificate c WHERE c.code IN :codes AND c.certificateStatus = :status")
+    Set<Certificate> findByCodeInAndCertificateStatus(@Param("codes") List<String> codes,
+        @Param("status") CertificateStatus status);
 
     /**
      * Method to check if certificate is already exist by code.
