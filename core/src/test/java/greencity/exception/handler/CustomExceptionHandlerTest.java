@@ -147,11 +147,11 @@ class CustomExceptionHandlerTest {
     }
 
     @Test
-    void handleAccessDeniedExceptionTest() {
+    void handleForbiddenExceptionsTest() {
         ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
         when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
             .thenReturn(objectMap);
-        assertEquals(customExceptionHandler.handleAccessDeniedException(webRequest),
+        assertEquals(customExceptionHandler.handleForbiddenExceptions(webRequest),
             ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
@@ -193,16 +193,6 @@ class CustomExceptionHandlerTest {
             .thenReturn(objectMap);
         assertEquals(customExceptionHandler.handleEntityNotFoundException(webRequest),
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse));
-        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
-    }
-
-    @Test
-    void handleTemplateDeleteExceptionTest() {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
-        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
-            .thenReturn(objectMap);
-        assertEquals(customExceptionHandler.handleTemplateDeleteException(templateDeleteException, webRequest),
-            ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
 }
