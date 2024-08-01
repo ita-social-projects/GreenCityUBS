@@ -56,8 +56,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         MappingException.class,
         CourierAlreadyExists.class,
         ServiceAlreadyExistsException.class,
-        IncorrectTemplateException.class,
-        TemplateDeleteException.class
+        IncorrectTemplateException.class
     })
     public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
@@ -207,5 +206,18 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleEntityNotFoundException(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
+    /**
+     * Exception handler for {@link TemplateDeleteException}.
+     *
+     * @param request {@link WebRequest} with error details.
+     * @return {@link ResponseEntity} with HTTP status 403 and exception message.
+     */
+    @ExceptionHandler(TemplateDeleteException.class)
+    public final ResponseEntity<Object> handleTemplateDeleteException(WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        log.trace(exceptionResponse.getMessage(), exceptionResponse.getTrace());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
     }
 }
