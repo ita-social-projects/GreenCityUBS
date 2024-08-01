@@ -372,7 +372,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderWayForPayClientDto getOrderFondyClientDto() {
+    public static OrderWayForPayClientDto getOrderWayForPayClientDto() {
         return OrderWayForPayClientDto.builder()
             .orderId(1L)
             .pointsToUse(100)

@@ -3808,6 +3808,208 @@ class UBSClientServiceImplTest {
         assertDoesNotThrow(() -> invokeCheckSignature(privateKey, data, receivedSignature));
     }
 
+    @Test
+    void processOrderWFPClient2() throws Exception {
+        Order order = getOrderCount();
+        Certificate certificate = getCertificate();
+
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        order.setSumTotalAmountWithoutDiscounts(1000_00L);
+        order.setCertificates(Set.of(certificate));
+        order.setPayment(TEST_PAYMENT_LIST);
+        User user = getUser();
+        user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
+        order.setUser(user);
+
+        OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
+        dto.setCertificates(Set.of("1111-1234"));
+
+        order.setCertificates(Set.of(getCertificate()));
+        order.setPayment(TEST_PAYMENT_LIST);
+        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        order.setPointsToUse(-10000);
+        CertificateDto certificateDto = createCertificateDto();
+        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
+        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
+        when(certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
+        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(ModelUtils.getOrderBag())))
+            .thenReturn(ModelUtils.getAmount());
+        when(wayForPayClient.getCheckOutResponse(any())).thenReturn("{\"invoiceUrl\":\"link\"}");
+
+        ubsService.processOrder("uuid", dto);
+
+        verify(userRepository).findUserByUuid("uuid");
+        verify(certificateRepository).findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE);
+        verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
+    }
+
+    @Test
+    void processOrderWFPClientCertificeteNotFoundExeption() throws Exception {
+        Order order = getOrderCount();
+        Certificate certificate = getCertificate();
+        certificate.setPoints(1500);
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        order.setSumTotalAmountWithoutDiscounts(1000_00L);
+        order.setCertificates(Set.of(certificate));
+        order.setPayment(TEST_PAYMENT_LIST);
+        User user = getUser();
+        user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
+        order.setUser(user);
+        OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
+        dto.setCertificates(Set.of("1111-1234"));
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        CertificateDto certificateDto = createCertificateDto();
+        certificateDto.setPoints(1500);
+        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(ModelUtils.getOrderBag())))
+            .thenReturn(ModelUtils.getAmount());
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
+        when(certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE)).thenReturn(Collections.emptySet());
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
+        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
+        assertThrows(NotFoundException.class, () -> ubsService.processOrder("uuid", dto));
+        verify(orderRepository).findById(1L);
+        verify(userRepository).findUserByUuid("uuid");
+        verify(certificateRepository).findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE);
+        verify(modelMapper).map(certificate, CertificateDto.class);
+        verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
+    }
+
+    @Test
+    void processOrderWFPClientCertificeteNotFoundExeption2() throws Exception {
+        Order order = getOrderCount();
+        Certificate certificate = getCertificate();
+        certificate.setPoints(1500);
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        order.setSumTotalAmountWithoutDiscounts(1000_00L);
+        order.setCertificates(Set.of(certificate));
+        order.setPayment(TEST_PAYMENT_LIST);
+        User user = getUser();
+        user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
+        order.setUser(user);
+
+        OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
+        dto.setCertificates(Set.of("1111-1234", "2222-1234"));
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        CertificateDto certificateDto = createCertificateDto();
+        certificateDto.setPoints(1500);
+        order.setPointsToUse(-1000);
+        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
+        when(certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
+        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
+        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(ModelUtils.getOrderBag())))
+            .thenReturn(ModelUtils.getAmount());
+
+        assertThrows(NotFoundException.class, () -> ubsService.processOrder("uuid", dto));
+
+        verify(orderRepository).findById(1L);
+        verify(userRepository).findUserByUuid("uuid");
+        verify(certificateRepository).findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE);
+        verify(modelMapper).map(certificate, CertificateDto.class);
+        verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
+    }
+
+    @Test
+    void processOrderWFPClientIfSumToPayLessThanPoints() throws Exception {
+        Order order = getOrderCount();
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        order.setSumTotalAmountWithoutDiscounts(1000_00L);
+        order.setCertificates(Set.of(getCertificate()));
+        order.setPayment(TEST_PAYMENT_LIST);
+        order.getPayment().getFirst().setAmount(1000_00L);
+        User user = getUser();
+        user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
+        order.setUser(user);
+        order.setPointsToUse(-10000);
+        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        Certificate certificate = getCertificate();
+        CertificateDto certificateDto = createCertificateDto();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
+        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
+        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(ModelUtils.getOrderBag())))
+            .thenReturn(ModelUtils.getAmount());
+        when(wayForPayClient.getCheckOutResponse(any())).thenReturn("{\"invoiceUrl\":\"link\"}");
+
+        ubsService.processOrder("uuid", dto);
+
+        verify(encryptionUtil).formRequestSignature(any(), any());
+        verify(wayForPayClient).getCheckOutResponse(any());
+    }
+
+    @Test
+    void processOrderWFPClientFailPaidOrder() {
+        Order order = getOrderCountWithPaymentStatusPaid();
+        OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        assertThrows(BadRequestException.class, () -> ubsService.processOrder("uuid", dto));
+    }
+
     private void invokeCheckSignature(String privateKey, String data, String receivedSignature) {
         try {
             var method = UBSClientServiceImpl.class.getDeclaredMethod("checkSignature", String.class, String.class,

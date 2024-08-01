@@ -1821,7 +1821,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(dto.getOrderId())
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
         checkOrderIsPaid(order.getOrderPaymentStatus());
-        User currentUser = findUserByUuid(userUuid);
+        User currentUser = userRepository.findUserByUuid(userUuid)
+            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST + userUuid));
         checkForNullCounter(order);
         long sumToPayInCoins = calculateSumToPay(dto, order, currentUser);
 
@@ -1834,14 +1835,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             String link = formedLink(order, sumToPayInCoins);
             return getPaymentRequestDto(order, link);
         }
-    }
-
-    private User findUserByUuid(String userUuid) {
-        User user = userRepository.findByUuid(userUuid);
-        if (user != null) {
-            return user;
-        }
-        throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST + userUuid);
     }
 
     private String formedLink(Order order, long sumToPayInCoins) {
