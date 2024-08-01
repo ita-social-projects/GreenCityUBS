@@ -60,9 +60,6 @@ class CustomExceptionHandlerTest {
     FoundException foundException;
 
     @Mock
-    AccessDeniedException accessDeniedException;
-
-    @Mock
     TemplateDeleteException templateDeleteException;
 
     @Mock
@@ -154,7 +151,7 @@ class CustomExceptionHandlerTest {
         ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
         when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
             .thenReturn(objectMap);
-        assertEquals(customExceptionHandler.handleAccessDeniedException(accessDeniedException, webRequest),
+        assertEquals(customExceptionHandler.handleAccessDeniedException(webRequest),
             ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
