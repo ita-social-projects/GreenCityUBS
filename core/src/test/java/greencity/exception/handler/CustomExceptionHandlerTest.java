@@ -4,6 +4,7 @@ import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.http.AccessDeniedException;
+import greencity.exceptions.notification.TemplateDeleteException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,6 +58,12 @@ class CustomExceptionHandlerTest {
 
     @Mock
     FoundException foundException;
+
+    @Mock
+    AccessDeniedException accessDeniedException;
+
+    @Mock
+    TemplateDeleteException templateDeleteException;
 
     @Mock
     HttpStatus status;
@@ -147,7 +154,7 @@ class CustomExceptionHandlerTest {
         ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
         when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
             .thenReturn(objectMap);
-        assertEquals(customExceptionHandler.handleAccessDeniedException(webRequest),
+        assertEquals(customExceptionHandler.handleAccessDeniedException(accessDeniedException, webRequest),
             ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
@@ -197,7 +204,7 @@ class CustomExceptionHandlerTest {
         ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
         when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
             .thenReturn(objectMap);
-        assertEquals(customExceptionHandler.handleTemplateDeleteException(webRequest),
+        assertEquals(customExceptionHandler.handleTemplateDeleteException(templateDeleteException, webRequest),
             ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
