@@ -6,7 +6,6 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.OrderHistory;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
-import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
@@ -21,7 +20,6 @@ import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,21 +28,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-
 import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static java.util.Collections.singletonList;
@@ -54,7 +44,6 @@ import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class PaymentServiceImplTest {
     @Mock(lenient = true)
     OrderAddressRepository orderAddressRepository;
@@ -151,7 +140,6 @@ class PaymentServiceImplTest {
         order.setOrderStatus(OrderStatus.DONE);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
-
         assertEquals(100L, paymentServiceImpl.getPaymentInfo(order.getId(), 800.).getOverpayment());
         assertEquals(200L, paymentServiceImpl.getPaymentInfo(order.getId(), 100.).getPaidAmount());
         assertEquals(0L, paymentServiceImpl.getPaymentInfo(order.getId(), 100.).getUnPaidAmount());
@@ -169,7 +157,6 @@ class PaymentServiceImplTest {
         assertEquals(0L, paymentServiceImpl.getPaymentInfo(order.getId(), 100.).getUnPaidAmount());
         verify(orderRepository, times(3)).findById(order.getId());
     }
-
 
     @Test
     void checkGetPaymentInfoIfSumToPayIsNull() {
@@ -216,7 +203,6 @@ class PaymentServiceImplTest {
         assertEquals(0L, paymentServiceImpl.getPaymentInfo(order.getId(), 1100.).getOverpayment());
     }
 
-
     @Test
     void checkDeleteManualPayment() {
         Employee employee = getEmployee();
@@ -227,8 +213,8 @@ class PaymentServiceImplTest {
         doNothing().when(paymentRepository).deletePaymentById(1L);
         doNothing().when(fileService).delete("");
         doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + getManualPayment().getPaymentId(),
-                employee.getFirstName() + "  " + employee.getLastName(),
-                getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(),
+            getOrder());
         paymentServiceImpl.deleteManualPayment(1L, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).deletePaymentById(1L);
@@ -251,7 +237,7 @@ class PaymentServiceImplTest {
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService).delete(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
-                employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
 
     }
 
@@ -273,7 +259,7 @@ class PaymentServiceImplTest {
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService, times(0)).delete(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
-                employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
     }
 
     @Test
@@ -301,8 +287,8 @@ class PaymentServiceImplTest {
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
-                employee.getFirstName() + "  " + employee.getLastName(),
-                getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(),
+            getOrder());
         paymentServiceImpl.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
@@ -319,12 +305,12 @@ class PaymentServiceImplTest {
         when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         MockMultipartFile file = new MockMultipartFile("manualPaymentDto",
-                "", "application/json", "random Bytes".getBytes());
+            "", "application/json", "random Bytes".getBytes());
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         when(fileService.upload(file)).thenReturn("path");
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum",
-                getOrder());
+            getOrder());
         paymentServiceImpl.updateManualPayment(1L, getManualPaymentRequestDto(), file, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
@@ -338,7 +324,7 @@ class PaymentServiceImplTest {
         ManualPaymentRequestDto manualPaymentRequestDto = getManualPaymentRequestDto();
         when(paymentRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-                () -> paymentServiceImpl.updateManualPayment(1L, manualPaymentRequestDto, null, "abc"));
+            () -> paymentServiceImpl.updateManualPayment(1L, manualPaymentRequestDto, null, "abc"));
         verify(paymentRepository, times(1)).findById(1L);
     }
 
@@ -351,7 +337,7 @@ class PaymentServiceImplTest {
         requestDto.setImagePath("");
         payment.setImagePath("abc");
         MockMultipartFile file = new MockMultipartFile("manualPaymentDto",
-                "", "application/json", "random Bytes".getBytes());
+            "", "application/json", "random Bytes".getBytes());
 
         when(employeeRepository.findByUuid(employee.getUuid())).thenReturn(Optional.of(employee));
         when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
@@ -392,7 +378,8 @@ class PaymentServiceImplTest {
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong())).thenReturn(Optional.of(tariffsInfo));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any())).thenReturn(payment);
         doNothing().when(eventService).save(anyString(), anyString(), any(Order.class));
@@ -400,7 +387,7 @@ class PaymentServiceImplTest {
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, image, "test@gmail.com");
 
         verify(eventService, times(1))
-                .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -408,10 +395,10 @@ class PaymentServiceImplTest {
 
     private static Stream<Arguments> provideManualPaymentRequestDto() {
         return Stream.of(Arguments.of(ManualPaymentRequestDto.builder()
-                        .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
-                Arguments.of(ManualPaymentRequestDto.builder()
-                                .settlementdate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
-                        Mockito.mock(MultipartFile.class)));
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
+            Arguments.of(ManualPaymentRequestDto.builder()
+                .settlementdate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
+                Mockito.mock(MultipartFile.class)));
     }
 
     @Test
@@ -428,20 +415,20 @@ class PaymentServiceImplTest {
         payment.setAmount(0L);
         order.setPayment(singletonList(payment));
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-                .settlementdate("02-08-2021").amount(0L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(0L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
-                .thenReturn(payment);
+            .thenReturn(payment);
         doNothing().when(eventService).save(any(), any(), any());
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
-                "Петро  Петренко", order);
+            "Петро  Петренко", order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -461,15 +448,15 @@ class PaymentServiceImplTest {
         payment.setAmount(50_00L);
         order.setPayment(singletonList(payment));
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-                .settlementdate("02-08-2021").amount(50_00L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(50_00L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
-                .thenReturn(payment);
+            .thenReturn(payment);
         doNothing().when(eventService).save(any(), any(), any());
         when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
 
@@ -477,9 +464,9 @@ class PaymentServiceImplTest {
 
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
-                "Петро  Петренко", order);
+            "Петро  Петренко", order);
         verify(eventService, times(1))
-                .save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
+            .save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -498,22 +485,22 @@ class PaymentServiceImplTest {
         payment.setAmount(500_00L);
         order.setPayment(singletonList(payment));
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-                .settlementdate("02-08-2021").amount(500_00L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500_00L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
-                .thenReturn(payment);
+            .thenReturn(payment);
         doNothing().when(eventService).save(any(), any(), any());
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
-                "Петро  Петренко", order);
+            "Петро  Петренко", order);
         verify(eventService, times(1))
-                .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -530,19 +517,19 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-                .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
-                .thenReturn(payment);
+            .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(eventService, times(1))
-                .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -559,19 +546,19 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-                .settlementdate("02-08-2021").amount(200L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(200L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
-                .thenReturn(payment);
+            .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(eventService, times(1))
-                .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -588,19 +575,19 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-                .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
-                .thenReturn(payment);
+            .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(eventService, times(1))
-                .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -617,19 +604,19 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-                .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
-                .thenReturn(payment);
+            .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
         verify(eventService, times(1))
-                .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -646,21 +633,21 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-                .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
-                .thenReturn(payment);
+            .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, Mockito.mock(MultipartFile.class),
-                "test@gmail.com");
+            "test@gmail.com");
 
         verify(eventService, times(1))
-                .save("Замовлення Оплачено", "Система", order);
+            .save("Замовлення Оплачено", "Система", order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -669,8 +656,8 @@ class PaymentServiceImplTest {
     @Test
     void saveNewManualPaymentWithoutLinkAndImageTest() {
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-                .settlementdate("02-08-2021").amount(500L).paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).paymentId("1").build();
         assertThrows(BadRequestException.class,
-                () -> paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com"));
+            () -> paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com"));
     }
 }

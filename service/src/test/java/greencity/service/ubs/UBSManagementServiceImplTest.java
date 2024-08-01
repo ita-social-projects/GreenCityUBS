@@ -10,36 +10,13 @@ import greencity.dto.bag.BagMappingDto;
 import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.CounterOrderDetailsDto;
-import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.ExportDetailsDto;
-import greencity.dto.order.ExportDetailsDtoUpdate;
-import greencity.dto.order.NotTakenOrderReasonDto;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderDetailInfoDto;
-import greencity.dto.order.OrderDetailStatusDto;
-import greencity.dto.order.OrderDetailStatusRequestDto;
-import greencity.dto.order.OrderInfoDto;
-import greencity.dto.order.ReadAddressByOrderDto;
-import greencity.dto.order.UpdateAllOrderPageDto;
-import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.Refund;
-import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -51,40 +28,9 @@ import greencity.enums.OrderStatus;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeOrderPositionRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderBagRepository;
-import greencity.repository.OrderDetailRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RefundRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
-import jakarta.persistence.EntityNotFoundException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,40 +42,27 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementServiceImplTest {
@@ -315,14 +248,12 @@ class UBSManagementServiceImplTest {
         Assertions.assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderExportDetails(100L));
     }
 
-
-
     @Test
     void updateOrderDetailStatusThrowException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrder()));
         OrderDetailStatusRequestDto requestDto = getTestOrderDetailStatusRequestDto();
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updateOrderDetailStatusById(1L, requestDto, "uuid"));
+                () -> ubsManagementService.updateOrderDetailStatusById(1L, requestDto, "uuid"));
         verify(orderRepository).findById(1L);
     }
 
@@ -603,7 +534,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.getOrderDetailStatus(1L));
+                () -> ubsManagementService.getOrderDetailStatus(1L));
     }
 
     @Test
@@ -612,7 +543,7 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.findAllByOrderId(1)).thenReturn(Collections.emptyList());
 
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.getOrderDetailStatus(1L));
+                () -> ubsManagementService.getOrderDetailStatus(1L));
     }
 
     @Test
@@ -658,12 +589,12 @@ class UBSManagementServiceImplTest {
     @Test
     void testGetOrderExportDetailsReceivingStationNotFoundExceptionThrown() {
         when(orderRepository.findById(1L))
-            .thenReturn(Optional.of(getOrder()));
+                .thenReturn(Optional.of(getOrder()));
         List<ReceivingStation> receivingStations = new ArrayList<>();
         when(receivingStationRepository.findAll())
-            .thenReturn(receivingStations);
+                .thenReturn(receivingStations);
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.getOrderExportDetails(1L));
+                () -> ubsManagementService.getOrderExportDetails(1L));
     }
 
     @Test
@@ -671,7 +602,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.getOrderDetails(1L, "ua"));
+                () -> ubsManagementService.getOrderDetails(1L, "ua"));
     }
 
     @Test
@@ -717,9 +648,9 @@ class UBSManagementServiceImplTest {
     void testGetAdditionalBagsInfo() {
         when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(TEST_USER));
         when(bagRepository.getAdditionalBagInfo(1L, TEST_USER.getRecipientEmail()))
-            .thenReturn(TEST_MAP_ADDITIONAL_BAG_LIST);
+                .thenReturn(TEST_MAP_ADDITIONAL_BAG_LIST);
         when(objectMapper.convertValue(any(), eq(AdditionalBagInfoDto.class)))
-            .thenReturn(TEST_ADDITIONAL_BAG_INFO_DTO);
+                .thenReturn(TEST_ADDITIONAL_BAG_INFO_DTO);
 
         List<AdditionalBagInfoDto> actual = ubsManagementService.getAdditionalBagsInfo(1L);
 
@@ -735,7 +666,7 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.getAdditionalBagsInfo(1L));
+                () -> ubsManagementService.getAdditionalBagsInfo(1L));
     }
 
     @Test
@@ -886,15 +817,15 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusConfirmedDto()));
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
-            .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+                .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
         Order order = getOrdersStatusConfirmedDto();
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
 
         ubsManagementService.setOrderDetail(order,
-            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
-            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-            "test@gmail.com");
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+                "test@gmail.com");
 
         verify(bagRepository, times(2)).findCapacityById(1);
         verify(orderRepository).getOrderDetails(1L);
@@ -1117,7 +1048,7 @@ class UBSManagementServiceImplTest {
 
         EcoNumberDto ecoNumberDto = getEcoNumberDto();
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, 1L, "abc"));
+                () -> ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, 1L, "abc"));
         verify(orderRepository).findById(1L);
     }
 
@@ -1128,7 +1059,7 @@ class UBSManagementServiceImplTest {
         EcoNumberDto ecoNumberDto = getEcoNumberDto();
         ecoNumberDto.setEcoNumber(new HashSet<>(List.of("1234a")));
         assertThrows(BadRequestException.class,
-            () -> ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, 1L, "abc"));
+                () -> ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, 1L, "abc"));
         verify(orderRepository).findById(1L);
     }
 
@@ -1137,7 +1068,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         AdminCommentDto adminCommentDto = getAdminCommentDto();
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.saveAdminCommentToOrder(adminCommentDto, "abc"));
+                () -> ubsManagementService.saveAdminCommentToOrder(adminCommentDto, "abc"));
         verify(orderRepository).findById(1L);
     }
 
@@ -1593,7 +1524,6 @@ class UBSManagementServiceImplTest {
         verify(orderPaymentStatusTranslationRepository).getAllBy();
     }
 
-
     @Test
     void getOrderStatusDataTestEmptyPriceDetails() {
         Order order = getOrderForGetOrderStatusEmptyPriceDetails();
@@ -1804,7 +1734,6 @@ class UBSManagementServiceImplTest {
         verify(receivingStationRepository).findAll();
     }
 
-
     @Test
     void updateAllOrderAdminPageInfoUnexistingOrderExceptionTest() {
         Order order = getOrder();
@@ -1894,7 +1823,6 @@ class UBSManagementServiceImplTest {
 
         verify(orderRepository, times(2)).findById(1L);
     }
-
 
     @Test
     void testAddPointsToUserWhenCurrentPointIsNull() {
@@ -2014,9 +1942,6 @@ class UBSManagementServiceImplTest {
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
 
     }
-
-
-
 
     @Test
     void addBonusesToUserTest() {
@@ -2241,7 +2166,6 @@ class UBSManagementServiceImplTest {
         assertThrows(NotFoundException.class, () -> ubsManagementService.getNotTakenOrderReason(1L));
         verify(orderRepository).findById(1L);
     }
-
 
     @Test
     void saveOrderIdForRefundTest() {

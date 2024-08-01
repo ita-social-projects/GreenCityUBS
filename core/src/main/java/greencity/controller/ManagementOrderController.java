@@ -43,11 +43,7 @@ import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.OrderRepository;
-import greencity.service.ubs.CertificateService;
-import greencity.service.ubs.CoordinateService;
-import greencity.service.ubs.UBSClientService;
-import greencity.service.ubs.UBSManagementService;
-import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.*;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -95,6 +91,7 @@ public class ManagementOrderController {
     private final ViolationService violationService;
     private final BigOrderTableServiceView bigOrderTableService;
     private final OrderRepository orderRepository;
+    private final PaymentService paymentService;
 
     /**
      * Controller getting all certificates with sorting possibility.
@@ -396,7 +393,7 @@ public class ManagementOrderController {
     public ResponseEntity<PaymentTableInfoDto> paymentInfo(@RequestParam long orderId,
         @RequestParam Double sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getPaymentInfo(orderId, sumToPay));
+            .body(paymentService.getPaymentInfo(orderId, sumToPay));
     }
 
     /**
@@ -714,7 +711,7 @@ public class ManagementOrderController {
         @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.saveNewManualPayment(orderId, manualPaymentDto, image, principal.getName()));
+            .body(paymentService.saveNewManualPayment(orderId, manualPaymentDto, image, principal.getName()));
     }
 
     /**
@@ -735,7 +732,7 @@ public class ManagementOrderController {
     @DeleteMapping("/delete-manual-payment/{id}")
     public ResponseEntity<ResponseStatus> deleteManualPayment(@PathVariable(name = "id") Long paymentId,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        ubsManagementService.deleteManualPayment(paymentId, uuid);
+        paymentService.deleteManualPayment(paymentId, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -762,7 +759,7 @@ public class ManagementOrderController {
         @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image, @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));
+            .body(paymentService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));
     }
 
     /**

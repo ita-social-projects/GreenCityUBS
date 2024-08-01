@@ -17,15 +17,6 @@ public interface PaymentService {
      */
     PaymentTableInfoDto getPaymentInfo(long orderId, Double sumToPay);
 
-
-//    returnOverpayment(Long orderId,OverpaymentInfoRequestDto overpaymentInfoRequestDto, String uuid);
-//
-
-
-//    returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker);
-//
-
-
     /**
      * Method that saves manual payment and returns response with required fields.
      *
@@ -38,7 +29,7 @@ public interface PaymentService {
      * @author Denys Kisliak
      */
     ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
-                                                  MultipartFile image, String email);
+        MultipartFile image, String email);
 
     /**
      * Method that deletes manual payment.
@@ -61,5 +52,5 @@ public interface PaymentService {
      * @author Denys Kisliak
      */
     ManualPaymentResponseDto updateManualPayment(Long paymentId, ManualPaymentRequestDto paymentRequestDto,
-                                                 MultipartFile image, String uuid);
+        MultipartFile image, String uuid);
 }
