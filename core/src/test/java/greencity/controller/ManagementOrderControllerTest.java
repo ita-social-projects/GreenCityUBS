@@ -13,13 +13,10 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
+import greencity.entity.order.Payment;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
-import greencity.service.ubs.CertificateService;
-import greencity.service.ubs.CoordinateService;
-import greencity.service.ubs.UBSClientService;
-import greencity.service.ubs.UBSManagementService;
-import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.*;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
 import java.security.Principal;
 import java.util.Optional;
@@ -88,6 +85,9 @@ class ManagementOrderControllerTest {
 
     @Mock
     BigOrderTableServiceView bigOrderTableServiceView;
+
+    @Mock
+    PaymentService paymentService;
 
     private final Principal principal = getUuid();
 
