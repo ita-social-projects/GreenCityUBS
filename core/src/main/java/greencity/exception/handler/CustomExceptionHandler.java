@@ -215,9 +215,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @return {@link ResponseEntity} with HTTP status 403 and exception message.
      */
     @ExceptionHandler(TemplateDeleteException.class)
-    public final ResponseEntity<Object> handleTemplateDeleteException(WebRequest request) {
+    public final ResponseEntity<Object> handleTemplateDeleteException(TemplateDeleteException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
-        log.trace(exceptionResponse.getMessage(), exceptionResponse.getTrace());
+        log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
     }
 }
