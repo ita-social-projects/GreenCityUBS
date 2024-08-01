@@ -5357,4 +5357,13 @@ public class ModelUtils {
             .acquirerBankName("Test Acquirer")
             .build();
     }
+
+    public static Certificate getCertificate() {
+        return Certificate.builder()
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .points(100)
+            .code("7777-7777")
+            .creationDate(LocalDate.now().plusMonths(1))
+            .build();
+    }
 }
