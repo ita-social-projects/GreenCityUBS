@@ -191,4 +191,14 @@ class CustomExceptionHandlerTest {
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
+
+    @Test
+    void handleTemplateDeleteExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+                .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleTemplateDeleteException(webRequest),
+                ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
 }
