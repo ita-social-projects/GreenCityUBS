@@ -265,6 +265,7 @@ public class SecurityConfig {
                     UBS_LINK + "/**",
                     UBS_LINK + "/client/**",
                     UBS_LINK + "/order/{id}/cancellation",
+                    UBS_LINK + "/certificate/{responseCode}",
                     "/notifications",
                     "/notifications/**",
                     "/notifications/quantityUnreadenNotifications")
