@@ -3811,7 +3811,7 @@ class UBSClientServiceImplTest {
     @Test
     void processOrderWFPClient2() throws Exception {
         Order order = getOrderCount();
-        Certificate certificate = getCertificate();
+        Certificate certificate = ModelUtils.getCertificate();
 
         HashMap<Integer, Integer> value = new HashMap<>();
         value.put(1, 22);
@@ -3828,7 +3828,7 @@ class UBSClientServiceImplTest {
         OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
         dto.setCertificates(Set.of("1111-1234"));
 
-        order.setCertificates(Set.of(getCertificate()));
+        order.setCertificates(Set.of(ModelUtils.getCertificate()));
         order.setPayment(TEST_PAYMENT_LIST);
         order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -3864,7 +3864,7 @@ class UBSClientServiceImplTest {
     @Test
     void processOrderWFPClientCertificeteNotFoundExeption() throws Exception {
         Order order = getOrderCount();
-        Certificate certificate = getCertificate();
+        Certificate certificate = ModelUtils.getCertificate();
         certificate.setPoints(1500);
         HashMap<Integer, Integer> value = new HashMap<>();
         value.put(1, 22);
@@ -3911,7 +3911,7 @@ class UBSClientServiceImplTest {
     @Test
     void processOrderWFPClientCertificeteNotFoundExeption2() throws Exception {
         Order order = getOrderCount();
-        Certificate certificate = getCertificate();
+        Certificate certificate = ModelUtils.getCertificate();
         certificate.setPoints(1500);
         HashMap<Integer, Integer> value = new HashMap<>();
         value.put(1, 22);
@@ -3967,7 +3967,7 @@ class UBSClientServiceImplTest {
         order.setAmountOfBagsOrdered(value);
         order.setPointsToUse(100);
         order.setSumTotalAmountWithoutDiscounts(1000_00L);
-        order.setCertificates(Set.of(getCertificate()));
+        order.setCertificates(Set.of(ModelUtils.getCertificate()));
         order.setPayment(TEST_PAYMENT_LIST);
         order.getPayment().getFirst().setAmount(1000_00L);
         User user = getUser();
@@ -3985,7 +3985,7 @@ class UBSClientServiceImplTest {
             }
         }
 
-        Certificate certificate = getCertificate();
+        Certificate certificate = ModelUtils.getCertificate();
         CertificateDto certificateDto = createCertificateDto();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
