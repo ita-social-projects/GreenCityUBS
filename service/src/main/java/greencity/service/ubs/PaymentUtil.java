@@ -12,22 +12,18 @@ import greencity.exceptions.NotFoundException;
 import greencity.repository.CertificateRepository;
 import greencity.repository.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 
 @Slf4j
 public final class PaymentUtil {
-
     private PaymentUtil() {
-
     }
 
     public static Long convertBillsIntoCoins(Double bills) {
@@ -241,5 +237,4 @@ public final class PaymentUtil {
         dto.setTotalSumConfirmed(PaymentUtil.convertCoinsIntoBills(totalSumConfirmedInCoins));
         dto.setTotalSumExported(PaymentUtil.convertCoinsIntoBills(totalSumExportedInCoins));
     }
-
 }

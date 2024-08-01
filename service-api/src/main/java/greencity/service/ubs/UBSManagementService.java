@@ -37,7 +37,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UBSManagementService {
-
     /**
      * Method returns all certificates.
      *

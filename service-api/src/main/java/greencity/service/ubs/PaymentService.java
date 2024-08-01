@@ -6,7 +6,6 @@ import greencity.dto.payment.PaymentTableInfoDto;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface PaymentService {
-
     /**
      * Method returns payment info.
      *
