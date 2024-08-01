@@ -119,6 +119,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -462,10 +463,19 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public CertificateDto checkCertificate(String code) {
+    public CertificateDto checkCertificate(String code, String userUuid) {
         Certificate certificate = certificateRepository.findById(code)
             .orElseThrow(() -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
 
+        if (certificate.getCertificateStatus().equals(CertificateStatus.USED)
+            && !certificate.getOrder().getUser().getUuid().equals(userUuid)) {
+            return CertificateDto.builder()
+                .code(certificate.getCode())
+                .creationDate(certificate.getCreationDate())
+                .expirationDate(certificate.getExpirationDate())
+                .certificateStatus(certificate.getCertificateStatus().toString())
+                .build();
+        }
         return modelMapper.map(certificate, CertificateDto.class);
     }
 

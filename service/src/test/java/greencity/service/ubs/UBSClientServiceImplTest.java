@@ -867,7 +867,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
-        when(certificateRepository.findById(anyString())).thenReturn(Optional.of(getCertificate()));
+        when(certificateRepository.findById(anyString())).thenReturn(Optional.of(getActiveCertificateWith10Points()));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
@@ -898,7 +898,7 @@ class UBSClientServiceImplTest {
         TariffsInfo tariffsInfo = getTariffInfo();
         tariffsInfo.setBags(Collections.singletonList(bag));
 
-        Certificate certificate = getCertificate();
+        Certificate certificate = getActiveCertificateWith10Points();
         certificate.setPoints(1000_00);
 
         UBSuser ubSuser = getUBSuser();
@@ -1406,7 +1406,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkCertificate() {
-        Certificate certificate = getCertificate();
+        Certificate certificate = getActiveCertificateWith10Points();
         when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(certificate));
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(CertificateDto.builder()
             .code("1111-1234")
@@ -1416,28 +1416,34 @@ class UBSClientServiceImplTest {
             .points(10)
             .build());
 
-        assertEquals("ACTIVE", ubsService.checkCertificate("1111-1234").getCertificateStatus());
+        assertEquals("ACTIVE", ubsService.checkCertificate("1111-1234", TEST_UUID).getCertificateStatus());
     }
 
     @Test
-    void checkCertificateUSED() {
-        Certificate certificate = getCertificate();
-        certificate.setCertificateStatus(CertificateStatus.USED);
+    void checkCertificateUSEDWithForeignUUID() {
+        Certificate certificate = getUsedCertificateWith600Points();
+        when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(certificate));
+        assertEquals("USED", ubsService.checkCertificate("1111-1234", TEST_UUID).getCertificateStatus());
+    }
+
+    @Test
+    void checkCertificateUSEDWithCorrectUUID() {
+        Certificate certificate = getUsedCertificateWith600Points();
+        certificate.getOrder().getUser().setUuid(TEST_UUID);
         when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(certificate));
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(CertificateDto.builder()
             .code("1111-1234")
-            .certificateStatus("USED")
+            .certificateStatus("ACTIVE")
             .creationDate(LocalDate.now())
-            .dateOfUse(LocalDate.now().plusMonths(1))
+            .dateOfUse(null)
             .points(10)
             .build());
-
-        assertEquals("USED", ubsService.checkCertificate("1111-1234").getCertificateStatus());
+        assertNull(ubsService.checkCertificate("1111-1234", TEST_UUID).getDateOfUse());
     }
 
     @Test
     void checkCertificateWithNoAvailable() {
-        assertThrows(NotFoundException.class, () -> ubsService.checkCertificate("randomstring"));
+        assertThrows(NotFoundException.class, () -> ubsService.checkCertificate("randomstring", TEST_UUID));
     }
 
     @Test
@@ -2575,7 +2581,7 @@ class UBSClientServiceImplTest {
     @Test
     void getOrderPaymentDetail() {
         Order order = getOrder();
-        Certificate certificate = getCertificate();
+        Certificate certificate = getActiveCertificateWith10Points();
         certificate.setOrder(order);
         order.setCertificates(Set.of(certificate));
         order.setPayment(List.of(getPayment()));
@@ -2609,7 +2615,7 @@ class UBSClientServiceImplTest {
     void getOrderPaymentDetailIfPaymentIsEmpty() {
         Order order = getOrder();
         order.setPayment(List.of());
-        Certificate certificate = getCertificate();
+        Certificate certificate = getActiveCertificateWith10Points();
         certificate.setOrder(order);
         order.setCertificates(Set.of(certificate));
         order.setPayment(List.of(getPayment()));
@@ -2754,7 +2760,7 @@ class UBSClientServiceImplTest {
 
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().getFirst().setAmount(15);
-        dto.setCertificates(Set.of(getCertificate().getCode()));
+        dto.setCertificates(Set.of(getActiveCertificateWith10Points().getCode()));
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -2796,7 +2802,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(getCertificate()));
+        when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(getActiveCertificateWith10Points()));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 

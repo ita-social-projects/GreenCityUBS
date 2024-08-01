@@ -88,7 +88,7 @@ public interface UBSClientService {
      * @return {@link CertificateDto} which contains status.
      * @author Oleh Bilonizhka
      */
-    CertificateDto checkCertificate(String code);
+    CertificateDto checkCertificate(String code, String userUuid);
 
     /**
      * Methods saves all entered by user data to database.
