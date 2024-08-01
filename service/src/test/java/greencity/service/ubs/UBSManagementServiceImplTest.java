@@ -284,7 +284,7 @@ class UBSManagementServiceImplTest {
             PageRequest.of(0, 5, Sort.by(Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
         CertificateDtoForSearching certificateDtoForSearching = ModelUtils.getCertificateDtoForSearching();
         List<Certificate> certificates =
-            Collections.singletonList(ModelUtils.getCertificate());
+            Collections.singletonList(ModelUtils.getActiveCertificateWith10Points());
         List<CertificateDtoForSearching> certificateDtoForSearchings =
             Collections.singletonList(certificateDtoForSearching);
         PageableDto<CertificateDtoForSearching> certificateDtoForSearchingPageableDto =
@@ -830,7 +830,7 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectBroughtItHimself.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectBroughtItHimself.getDate());
 
-        order.setCertificates(Set.of(ModelUtils.getCertificate()));
+        order.setCertificates(Set.of(ModelUtils.getActiveCertificateWith10Points()));
         testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
         expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
         OrderDetailStatusDto producedObjectCancelled3 = ubsManagementService
@@ -1258,7 +1258,8 @@ class UBSManagementServiceImplTest {
     void testSetOrderDetailIfPaidAndPriceLessThanDiscount() {
         Order order = ModelUtils.getOrdersStatusAdjustmentDto2();
 
-        when(certificateRepository.findCertificate(order.getId())).thenReturn(List.of(ModelUtils.getCertificate2()));
+        when(certificateRepository.findCertificate(order.getId()))
+            .thenReturn(List.of(ModelUtils.getActiveCertificateWith600Points()));
         when(orderRepository.findSumOfCertificatesByOrderId(order.getId())).thenReturn(600L);
         when(orderRepository.getOrderDetails(1L))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto2()));
@@ -1266,7 +1267,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.setOrderDetail(order,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc");
-        verify(certificateRepository).save(ModelUtils.getCertificate2().setPoints(0));
+        verify(certificateRepository).save(ModelUtils.getActiveCertificateWith600Points().setPoints(0));
         verify(userRepository).updateUserCurrentPoints(1L, 100);
         verify(orderRepository).updateOrderPointsToUse(1L, 0);
     }
@@ -1275,7 +1276,8 @@ class UBSManagementServiceImplTest {
     void testSetOrderDetailIfPaidAndPriceLessThanPaidSum() {
         Order order = ModelUtils.getOrdersStatusAdjustmentDto2();
         when(paymentRepository.selectSumPaid(order.getId())).thenReturn(10000L);
-        when(certificateRepository.findCertificate(order.getId())).thenReturn(List.of(ModelUtils.getCertificate2()));
+        when(certificateRepository.findCertificate(order.getId()))
+            .thenReturn(List.of(ModelUtils.getActiveCertificateWith600Points()));
         when(orderRepository.findSumOfCertificatesByOrderId(order.getId())).thenReturn(600L);
         when(orderRepository.getOrderDetails(1L))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto2()));

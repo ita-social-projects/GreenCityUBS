@@ -128,9 +128,11 @@ class OrderControllerTest {
 
     @Test
     void checkIfCertificateAvailable() throws Exception {
-        mockMvc.perform(get(ubsLink + "/certificate/{code}", "qwefds"))
+        String certificateCode = "1111-1111";
+        mockMvc.perform(get(ubsLink + "/certificate/{code}", certificateCode)
+            .principal(principal))
             .andExpect(status().isOk());
-        verify(ubsClientService).checkCertificate("qwefds");
+        verify(ubsClientService).checkCertificate(certificateCode, null);
     }
 
     @Test

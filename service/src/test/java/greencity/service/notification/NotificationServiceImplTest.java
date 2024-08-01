@@ -87,7 +87,7 @@ import static greencity.ModelUtils.createUserNotificationForViolationWithParamet
 import static greencity.ModelUtils.createViolationNotificationDto;
 import static greencity.ModelUtils.getBag1list;
 import static greencity.ModelUtils.getBag4list;
-import static greencity.ModelUtils.getCertificate;
+import static greencity.ModelUtils.getActiveCertificateWith10Points;
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getViolation;
 import static greencity.ModelUtils.getNotifyInternallyFormedOrder;
@@ -840,7 +840,7 @@ class NotificationServiceImplTest {
                 Order.builder().id(53L).user(user)
                     .orderDate(LocalDateTime.now(fixedClock))
                     .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
-                    .certificates(Collections.singleton(getCertificate()))
+                    .certificates(Collections.singleton(getActiveCertificateWith10Points()))
                     .amountOfBagsOrdered(Collections.singletonMap(1, 3))
                     .exportedQuantity(Collections.singletonMap(1, 3))
                     .confirmedQuantity(Collections.singletonMap(1, 3))

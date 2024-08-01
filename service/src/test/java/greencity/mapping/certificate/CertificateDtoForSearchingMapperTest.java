@@ -17,7 +17,7 @@ class CertificateDtoForSearchingMapperTest {
 
     @Test
     void convertTestWithOrderNull() {
-        Certificate expected = ModelUtils.getCertificate();
+        Certificate expected = ModelUtils.getActiveCertificateWith10Points();
         CertificateDtoForSearching certificateDtoForSearching = certificateDtoForSearchingMapper.convert(expected);
 
         assertEquals(expected.getCertificateStatus(), certificateDtoForSearching.getCertificateStatus());
@@ -31,7 +31,7 @@ class CertificateDtoForSearchingMapperTest {
 
     @Test
     void convertTestWithOrderNotNull() {
-        Certificate expected = ModelUtils.getCertificate();
+        Certificate expected = ModelUtils.getActiveCertificateWith10Points();
         expected.setOrder(ModelUtils.getOrder());
         CertificateDtoForSearching certificateDtoForSearching = certificateDtoForSearchingMapper.convert(expected);
 
