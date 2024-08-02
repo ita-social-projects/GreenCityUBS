@@ -17,7 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @ToString
 @Builder
-public class OrderFondyClientDto {
+public class OrderWayForPayClientDto {
     private Long orderId;
     @NotNull
     @Min(0)

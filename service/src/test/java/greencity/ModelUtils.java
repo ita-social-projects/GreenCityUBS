@@ -81,7 +81,7 @@ import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderDto;
-import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
@@ -213,6 +213,7 @@ public class ModelUtils {
         Clock.fixed(LocalDateTime.now().toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
 
     public static final String TEST_EMAIL = "test@gmail.com";
+    public static final String TEST_UUID = "1ab2c3-d4e5f6";
     public static final Order TEST_ORDER = createOrder();
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
     public static final OrderAddressExportDetailsDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE =
@@ -1077,10 +1078,11 @@ public class ModelUtils {
             .build();
     }
 
-    public static Certificate getCertificate() {
+    public static Certificate getActiveCertificateWith10Points() {
         return Certificate.builder()
             .code("1111-1234")
             .certificateStatus(CertificateStatus.ACTIVE)
+            .order(getOrder())
             .points(10)
             .expirationDate(LocalDate.now().plusMonths(1))
             .creationDate(LocalDate.now())
@@ -1088,14 +1090,25 @@ public class ModelUtils {
             .build();
     }
 
-    public static Certificate getCertificate2() {
+    public static Certificate getActiveCertificateWith600Points() {
         return Certificate.builder()
             .code("1111-1234")
             .certificateStatus(CertificateStatus.ACTIVE)
+            .order(getOrder())
             .points(600)
             .expirationDate(LocalDate.now().plusMonths(1))
             .creationDate(LocalDate.now())
-            .order(null)
+            .build();
+    }
+
+    public static Certificate getUsedCertificateWith600Points() {
+        return Certificate.builder()
+            .code("1111-1234")
+            .certificateStatus(CertificateStatus.USED)
+            .order(getOrder())
+            .points(600)
+            .expirationDate(LocalDate.now().plusMonths(1))
+            .creationDate(LocalDate.now())
             .build();
     }
 
@@ -3363,8 +3376,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderFondyClientDto getOrderFondyClientDto() {
-        return OrderFondyClientDto.builder()
+    public static OrderWayForPayClientDto getOrderWayForPayClientDto() {
+        return OrderWayForPayClientDto.builder()
             .orderId(1L)
             .pointsToUse(100)
             .build();
@@ -3904,7 +3917,7 @@ public class ModelUtils {
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.ADJUSTMENT)
             .counterOrderPaymentId(1L)
-            .certificates(Set.of(getCertificate2()))
+            .certificates(Set.of(getActiveCertificateWith600Points()))
             .pointsToUse(100)
             .writeOffStationSum(50_00L)
             .build();
@@ -5342,6 +5355,15 @@ public class ModelUtils {
             .fee("2.50")
             .paymentSystem("TestPaymentSystem")
             .acquirerBankName("Test Acquirer")
+            .build();
+    }
+
+    public static Certificate getCertificate() {
+        return Certificate.builder()
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .points(100)
+            .code("7777-7777")
+            .creationDate(LocalDate.now().plusMonths(1))
             .build();
     }
 }

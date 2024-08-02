@@ -18,6 +18,7 @@ import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -87,7 +88,7 @@ public interface UBSClientService {
      * @return {@link CertificateDto} which contains status.
      * @author Oleh Bilonizhka
      */
-    CertificateDto checkCertificate(String code);
+    CertificateDto checkCertificate(String code, String userUuid);
 
     /**
      * Methods saves all entered by user data to database.
@@ -378,6 +379,14 @@ public interface UBSClientService {
      *
      * @return {@link DistrictDto}
      */
-
     List<DistrictDto> getAllDistricts(String region, String city);
+
+    /**
+     * Method to generate payment link.
+     *
+     * @param userUuid current {@link User} uuid.
+     * @param dto      order information.
+     * @return {@link WayForPayOrderResponse} payment link and order id.
+     */
+    WayForPayOrderResponse processOrder(String userUuid, OrderWayForPayClientDto dto);
 }
