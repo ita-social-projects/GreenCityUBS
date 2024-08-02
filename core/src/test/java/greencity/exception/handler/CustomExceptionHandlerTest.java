@@ -3,8 +3,6 @@ package greencity.exception.handler;
 import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
-import greencity.exceptions.http.AccessDeniedException;
-import greencity.exceptions.notification.TemplateDeleteException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,9 +56,6 @@ class CustomExceptionHandlerTest {
 
     @Mock
     FoundException foundException;
-
-    @Mock
-    TemplateDeleteException templateDeleteException;
 
     @Mock
     HttpStatus status;
