@@ -205,19 +205,6 @@ class ManagementEmployeeControllerTest {
     }
 
     @Test
-    void getEmployeeLoginPositionNamesTest() throws Exception {
-        Principal principal = mock(Principal.class);
-        when(principal.getName()).thenReturn("testmail@gmail.com");
-
-        mockMvc.perform(get(UBS_LINK + "/get-employee-login-positions" + "?email=" + principal.getName())
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService).getEmployeeLoginPositionNames(principal.getName());
-    }
-
-    @Test
     void editAuthorities() throws Exception {
         UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
         ObjectMapper objectMapper = new ObjectMapper();

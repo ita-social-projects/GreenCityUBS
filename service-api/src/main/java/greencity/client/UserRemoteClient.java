@@ -83,16 +83,6 @@ public interface UserRemoteClient {
     PositionAuthoritiesDto getPositionsAndRelatedAuthorities(@RequestParam String email);
 
     /**
-     * Gets information about login employee`s positions.
-     *
-     * @param email {@link String} - user's email.
-     * @return List of {@link String} - list of employee`s positions.
-     * @author Anton Bondar
-     */
-    @GetMapping("/user/get-employee-login-positions")
-    List<String> getEmployeeLoginPositionNames(@RequestParam String email);
-
-    /**
      * Changes userStatus to "DEACTIVATED" by UUID.
      *
      * @param uuid {@link User}'s uuid.

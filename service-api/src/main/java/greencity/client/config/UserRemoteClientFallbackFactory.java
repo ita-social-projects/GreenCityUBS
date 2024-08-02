@@ -76,12 +76,6 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public List<String> getEmployeeLoginPositionNames(String email) {
-                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email);
-                throw new RemoteServerUnavailableException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST, throwable);
-            }
-
-            @Override
             public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto) {
                 log.error(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
