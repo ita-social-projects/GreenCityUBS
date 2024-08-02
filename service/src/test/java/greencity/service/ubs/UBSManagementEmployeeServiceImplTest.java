@@ -4,6 +4,7 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.position.AddingPositionDto;
@@ -16,6 +17,7 @@ import greencity.enums.EmployeeStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.repository.EmployeeRepository;
@@ -44,6 +46,7 @@ import static greencity.ModelUtils.getEmployeeWithTariffsIdDto;
 import static greencity.ModelUtils.getPosition;
 import static greencity.ModelUtils.getPositionDto;
 import static greencity.ModelUtils.getTariffsInfo;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -510,5 +513,54 @@ class UBSManagementEmployeeServiceImplTest {
         assertEquals(1, dtos.size());
         verify(modelMapper, times(1)).map(any(), any());
         verify(tariffsInfoRepository).findAll();
+    }
+
+    @Test
+    void getEmployeesByTariffIdTest() {
+        Employee employee = new Employee();
+        employee.setEmail("test@example.com");
+        EmployeeWithTariffsDto employeeDto = new EmployeeWithTariffsDto();
+        Long tariffId = 1L;
+        List<Employee> employees = List.of(employee);
+
+        when(repository.selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId)).thenReturn(employees);
+        when(modelMapper.map(employee, EmployeeWithTariffsDto.class)).thenReturn(employeeDto);
+
+        List<EmployeeWithTariffsDto> result = employeeService.getEmployeesByTariffId(tariffId);
+
+        assertEquals(1, result.size());
+
+        verify(repository, times(1)).selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId);
+        verify(modelMapper, times(1)).map(employee, EmployeeWithTariffsDto.class);
+    }
+
+    @Test
+    void getEmployeeByEmailTest() {
+        Employee employee = new Employee();
+        employee.setEmail("test@example.com");
+        EmployeeWithTariffsDto employeeDto = new EmployeeWithTariffsDto();
+        String email = "test@example.com";
+
+        when(repository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(modelMapper.map(employee, EmployeeWithTariffsDto.class)).thenReturn(employeeDto);
+
+        EmployeeWithTariffsDto result = employeeService.getEmployeeByEmail(email);
+
+        assertNotNull(result);
+
+        verify(repository, times(1)).findByEmail(email);
+        verify(modelMapper, times(1)).map(employee, EmployeeWithTariffsDto.class);
+    }
+
+    @Test
+    void getEmployeeByEmailNotFoundTest() {
+        String email = "nonexistent@example.com";
+
+        when(repository.findByEmail(email)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> employeeService.getEmployeeByEmail(email));
+
+        verify(repository, times(1)).findByEmail(email);
+        verify(modelMapper, times(0)).map(any(Employee.class), eq(EmployeeWithTariffsDto.class));
     }
 }

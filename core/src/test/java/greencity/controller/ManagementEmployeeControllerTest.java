@@ -287,4 +287,20 @@ class ManagementEmployeeControllerTest {
 
         verify(service, times(1)).getEmployeesByTariffId(tariffId);
     }
+
+    @Test
+    void getEmployeesByUserIdTest() throws Exception {
+        String email = "example@email.com";
+        EmployeeWithTariffsDto employee = new EmployeeWithTariffsDto();
+        employee.setEmployeeDto(new EmployeeDto());
+
+        when(service.getEmployeeByEmail(email)).thenReturn(employee);
+
+        mockMvc.perform(get(UBS_LINK + "/" + email))
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8"))
+            .andReturn();
+
+        verify(service, times(1)).getEmployeeByEmail(email);
+    }
 }
