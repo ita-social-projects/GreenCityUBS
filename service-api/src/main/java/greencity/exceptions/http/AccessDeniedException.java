@@ -1,6 +1,6 @@
 package greencity.exceptions.http;
 
-public class AccessDeniedException extends org.springframework.security.access.AccessDeniedException {
+public class AccessDeniedException extends RuntimeException {
     /**
      * Constructor with message.
      *
