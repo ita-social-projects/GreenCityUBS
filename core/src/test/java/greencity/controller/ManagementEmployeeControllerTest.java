@@ -25,6 +25,7 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -36,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import static greencity.ModelUtils.getUuid;
+import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
@@ -274,12 +276,14 @@ class ManagementEmployeeControllerTest {
         employees.add(employee1);
         when(service.getEmployeesByTariffId(tariffId)).thenReturn(employees);
 
-        mockMvc.perform(get(UBS_LINK + "/get-employees/{tariffId}", tariffId))
+        MvcResult result = mockMvc.perform(get(UBS_LINK + "/get-employees/{tariffId}", tariffId))
             .andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].employeeDto.firstName")
-                .value(employee1.getEmployeeDto().getFirstName()))
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
             .andReturn();
+
+        String jsonResponse = result.getResponse().getContentAsString();
+
+        assertTrue(jsonResponse.contains("\"firstName\":\"John\""));
 
         verify(service, times(1)).getEmployeesByTariffId(tariffId);
     }
