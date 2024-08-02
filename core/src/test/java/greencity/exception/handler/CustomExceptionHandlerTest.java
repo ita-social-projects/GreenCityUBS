@@ -1,9 +1,10 @@
 package greencity.exception.handler;
 
-import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
-import greencity.exceptions.http.AccessDeniedException;
+import greencity.exceptions.WrongSignatureException;
+import greencity.exceptions.api.GoogleApiException;
+import greencity.exceptions.user.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,7 +57,13 @@ class CustomExceptionHandlerTest {
     NotFoundException notFoundException;
 
     @Mock
-    FoundException foundException;
+    GoogleApiException googleApiException;
+
+    @Mock
+    UserNotFoundException userNotFoundException;
+
+    @Mock
+    WrongSignatureException wrongSignatureException;
 
     @Mock
     HttpStatus status;
@@ -133,16 +140,6 @@ class CustomExceptionHandlerTest {
     }
 
     @Test
-    void handleFoundExceptionTest() {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
-        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
-            .thenReturn(objectMap);
-        assertEquals(customExceptionHandler.handleFoundException(foundException, webRequest),
-            ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponse));
-        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
-    }
-
-    @Test
     void handleAccessDeniedExceptionTest() {
         ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
         when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
@@ -189,6 +186,36 @@ class CustomExceptionHandlerTest {
             .thenReturn(objectMap);
         assertEquals(customExceptionHandler.handleEntityNotFoundException(webRequest),
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleGoogleApiExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleGoogleApiException(googleApiException, webRequest),
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleUserNotFoundExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleUserNotFoundException(userNotFoundException, webRequest),
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleWrongSignatureExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleWrongSignatureExceptionn(wrongSignatureException, webRequest),
+            ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
 }

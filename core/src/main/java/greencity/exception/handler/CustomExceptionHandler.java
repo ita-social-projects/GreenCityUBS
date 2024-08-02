@@ -218,7 +218,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler(UserNotFoundException.class)
-    public final ResponseEntity<Object> handleUBSUserNotFoundException(UserNotFoundException ex,
+    public final ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex,
         WebRequest webRequest) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
@@ -234,7 +234,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler(WrongSignatureException.class)
-    public final ResponseEntity<Object> handleUBSUserNotFoundException(WrongSignatureException ex,
+    public final ResponseEntity<Object> handleWrongSignatureExceptionn(WrongSignatureException ex,
         WebRequest webRequest) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
