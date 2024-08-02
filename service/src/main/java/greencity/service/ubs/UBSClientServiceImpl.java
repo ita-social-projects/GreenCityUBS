@@ -79,6 +79,7 @@ import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
+import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -191,6 +192,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final NotificationService notificationService;
     private final LiqPay liqPay;
     private final WayForPayClient wayForPayClient;
+    private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
 
     @Lazy
     @Autowired
@@ -1981,5 +1983,53 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (order.getCounterOrderPaymentId() == null) {
             order.setCounterOrderPaymentId(0L);
         }
+    }
+
+    /**
+     * Checks if a tariff exists by its ID.
+     *
+     * @param tariffInfoId The ID of the tariff to check.
+     * @return {@code true} if the tariff exists, {@code false} otherwise.
+     */
+    @Override
+    public boolean checkIfTariffExistsById(Long tariffInfoId) {
+        return tariffsInfoRepository.existsById(tariffInfoId);
+    }
+
+    /**
+     * Retrieves all active locations and converts them to DTOs.
+     *
+     * @return List of DTOs representing all active locations.
+     */
+    @Override
+    public List<LocationsDto> getAllLocations() {
+        List<Location> allActiveLocations = locationRepository.findAllActiveLocations();
+        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).collect(toList());
+    }
+
+    /**
+     * Retrieves the tariff ID associated with the specified location ID.
+     *
+     * @param locationId The ID of the location to retrieve the tariff ID for.
+     * @return The tariff ID if found.
+     * @throws NotFoundException if the tariff ID is not found for the given
+     *                           location ID.
+     */
+    @Override
+    public Long getTariffIdByLocationId(Long locationId) {
+        return tariffsInfoRepository.findTariffIdByLocationId(locationId)
+            .orElseThrow(() -> new NotFoundException(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationId)));
+    }
+
+    @Override
+    public List<LocationsDto> getAllLocationsByCourierId(Long courierId) {
+        List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
+        return locations.stream()
+            .map(locationToLocationsDtoMapper::convert)
+            .map(locationsDto -> locationsDto.setTariffsId(
+                tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
+                    .orElseThrow(() -> new NotFoundException(
+                        String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationsDto.getId())))))
+            .collect(toList());
     }
 }

@@ -20,4 +20,5 @@ public class GetTariffInfoForEmployeeDto {
     private List<LocationsDtos> locationsDtos;
     private List<GetReceivingStationDto> receivingStationDtos;
     private CourierTranslationDto courier;
+    private Boolean hasChat;
 }
