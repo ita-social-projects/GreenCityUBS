@@ -40,6 +40,7 @@ import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.user.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
@@ -109,6 +110,7 @@ import greencity.util.OrderUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
@@ -149,6 +151,7 @@ import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.joining;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -1232,8 +1235,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .serviceUrl(resultWayForPayUrl)
             .orderReference(OrderUtils.generateOrderIdForPayment(orderId, order))
             .orderDate(instant.getEpochSecond())
-            .amount(1)
-            // .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
+            .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
             .currency("UAH")
             .productName(order.getOrderBags().stream()
                 .filter(bag -> bag.getAmount() != 0)
@@ -1819,5 +1821,165 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
         return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
             .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public WayForPayOrderResponse processOrder(String userUuid, OrderWayForPayClientDto dto) {
+        Order order = orderRepository.findById(dto.getOrderId())
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
+        checkOrderIsPaid(order.getOrderPaymentStatus());
+        User currentUser = userRepository.findUserByUuid(userUuid)
+            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST + userUuid));
+        checkForNullCounter(order);
+        long sumToPayInCoins = calculateSumToPay(dto, order, currentUser);
+
+        transferUserPointsToOrder(order, dto.getPointsToUse());
+        paymentVerification(sumToPayInCoins, order);
+
+        if (sumToPayInCoins <= 0) {
+            return getPaymentRequestDto(order, null);
+        } else {
+            String link = formedLink(order, sumToPayInCoins);
+            return getPaymentRequestDto(order, link);
+        }
+    }
+
+    private String formedLink(Order order, long sumToPayInCoins) {
+        Order increment = incrementCounter(order);
+        PaymentRequestDto paymentRequestDto = formPaymentRequest(increment.getId(), sumToPayInCoins);
+        paymentRequestDto.setOrderReference(OrderUtils.generateOrderIdForPayment(increment.getId(), order));
+        return getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentRequestDto));
+    }
+
+    private Order incrementCounter(Order order) {
+        order.setCounterOrderPaymentId(order.getCounterOrderPaymentId() + 1);
+        orderRepository.save(order);
+        return order;
+    }
+
+    private void paymentVerification(long sumToPayInCoins, Order order) {
+        if (sumToPayInCoins <= 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+            order.setOrderStatus(OrderStatus.CONFIRMED);
+            orderRepository.save(order);
+            eventService.save(OrderHistory.ORDER_CONFIRMED, OrderHistory.SYSTEM, order);
+        }
+    }
+
+    private void transferUserPointsToOrder(Order order, Integer pointsToUse) {
+        if (pointsToUse <= 0) {
+            return;
+        }
+
+        User user = order.getUser();
+        checkIfUserHaveEnoughPoints(user.getCurrentPoints(), pointsToUse);
+
+        int maxPointsToTransfer = countAmountToPayForOrder(order);
+        if (pointsToUse > maxPointsToTransfer) {
+            throw new BadRequestException(TOO_MUCH_POINTS_FOR_ORDER + maxPointsToTransfer);
+        }
+
+        order.setPointsToUse(order.getPointsToUse() + pointsToUse);
+        user.setCurrentPoints(user.getCurrentPoints() - pointsToUse);
+        user.getChangeOfPointsList()
+            .add(ChangeOfPoints.builder()
+                .user(user)
+                .amount(-pointsToUse)
+                .date(LocalDateTime.now())
+                .order(order)
+                .build());
+
+        orderRepository.save(order);
+    }
+
+    private int countAmountToPayForOrder(Order order) {
+        int certificatesAmount = nonNull(order.getCertificates())
+            ? order.getCertificates().stream()
+                .map(Certificate::getPoints)
+                .reduce(0, Integer::sum)
+            : 0;
+        return -order.getPointsToUse() - certificatesAmount
+            + BigDecimal.valueOf(order.getSumTotalAmountWithoutDiscounts())
+                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(0, RoundingMode.UP).intValue();
+    }
+
+    private long calculateSumToPay(OrderWayForPayClientDto dto, Order order, User currentUser) {
+        List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
+        long sumToPayInCoins = bagForUserDtos.stream()
+            .map(b -> convertBillsIntoCoins(b.getTotalPrice()))
+            .reduce(0L, Long::sum);
+
+        List<CertificateDto> certificateDtos = order.getCertificates().stream()
+            .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
+            .collect(toList());
+
+        sumToPayInCoins = sumToPayInCoins - 100L * (order.getPointsToUse() + countCertificatesBonuses(certificateDtos));
+
+        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+        sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayInCoins, dto.getPointsToUse());
+        sumToPayInCoins = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, order, sumToPayInCoins);
+
+        return sumToPayInCoins - countPaidAmount(order.getPayment());
+    }
+
+    private long formCertificatesToBeSavedAndCalculateOrderSumClient(OrderWayForPayClientDto dto, Order order,
+        long sumToPayInCoins) {
+        if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
+            Set<Certificate> certificates =
+                certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+                    CertificateStatus.ACTIVE);
+            if (certificates.isEmpty()) {
+                throw new NotFoundException(CERTIFICATE_NOT_FOUND);
+            }
+            checkValidationCertificates(certificates, dto);
+            for (Certificate temp : certificates) {
+                Certificate certificate = getCertificateForClient(temp, order);
+                sumToPayInCoins -= certificate.getPoints() * 100L;
+
+                if (dontSendLinkToWFPIfClient(sumToPayInCoins)) {
+                    certificate.setCertificateStatus(CertificateStatus.USED);
+                    certificate.setPoints(certificate.getPoints()
+                        + BigDecimal.valueOf(sumToPayInCoins)
+                            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                            .setScale(0, RoundingMode.UP).intValue());
+                    sumToPayInCoins = 0L;
+                }
+            }
+        }
+        return sumToPayInCoins;
+    }
+
+    private boolean dontSendLinkToWFPIfClient(long sumToPayInCoins) {
+        return sumToPayInCoins <= 0;
+    }
+
+    private Certificate getCertificateForClient(Certificate certificate, Order order) {
+        certificate.setOrder(order);
+        certificate.setCertificateStatus(CertificateStatus.USED);
+        certificate.setDateOfUse(LocalDate.now());
+        return certificate;
+    }
+
+    private void checkValidationCertificates(Set<Certificate> certificates, OrderWayForPayClientDto dto) {
+        if (certificates.size() != dto.getCertificates().size()) {
+            String validCertification = certificates.stream().map(Certificate::getCode).collect(joining(", "));
+            throw new NotFoundException(SOME_CERTIFICATES_ARE_INVALID + validCertification);
+        }
+    }
+
+    private void checkOrderIsPaid(OrderPaymentStatus orderPaymentStatus) {
+        if (OrderPaymentStatus.PAID.equals(orderPaymentStatus)) {
+            throw new BadRequestException(ORDER_ALREADY_PAID);
+        }
+    }
+
+    private void checkForNullCounter(Order order) {
+        if (order.getCounterOrderPaymentId() == null) {
+            order.setCounterOrderPaymentId(0L);
+        }
     }
 }

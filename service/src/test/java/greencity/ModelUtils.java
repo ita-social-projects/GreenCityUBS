@@ -81,7 +81,7 @@ import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderDto;
-import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
@@ -3376,8 +3376,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderFondyClientDto getOrderFondyClientDto() {
-        return OrderFondyClientDto.builder()
+    public static OrderWayForPayClientDto getOrderWayForPayClientDto() {
+        return OrderWayForPayClientDto.builder()
             .orderId(1L)
             .pointsToUse(100)
             .build();
@@ -5355,6 +5355,15 @@ public class ModelUtils {
             .fee("2.50")
             .paymentSystem("TestPaymentSystem")
             .acquirerBankName("Test Acquirer")
+            .build();
+    }
+
+    public static Certificate getCertificate() {
+        return Certificate.builder()
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .points(100)
+            .code("7777-7777")
+            .creationDate(LocalDate.now().plusMonths(1))
             .build();
     }
 }
