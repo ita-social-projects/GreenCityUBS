@@ -1171,13 +1171,14 @@ public class ModelUtils {
                 .phoneNumber("+380935577455")
                 .email("test@gmail.com")
                 .image("path")
+                .employeeStatus(EmployeeStatus.ACTIVE)
                 .employeePositions(List.of(PositionDto.builder()
                     .id(1L)
                     .name("Водій")
                     .nameEn("Driver")
                     .build()))
                 .build())
-            .tariffs(List.of(getTariffInfoForEmployeeDto()))
+            .tariffs(List.of())
             .build();
     }
 
