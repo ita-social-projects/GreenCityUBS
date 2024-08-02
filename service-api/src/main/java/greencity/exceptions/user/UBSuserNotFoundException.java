@@ -3,7 +3,7 @@ package greencity.exceptions.user;
 /**
  * Exception is thrown when ubs_user doesn't exists.
  */
-public class UBSuserNotFoundException extends RuntimeException {
+public class UBSuserNotFoundException extends UserNotFoundException {
     /**
      * Constructor with message.
      *
