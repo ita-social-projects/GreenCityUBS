@@ -22,7 +22,7 @@ class CustomErrorControllerTest {
 
     @Test
     void testHandleError() {
-        when(request.getAttribute("javax.servlet.error.status_code")).thenReturn(404);
+        when(request.getAttribute("jakarta.servlet.error.status_code")).thenReturn(404);
         String result = customErrorController.handleError(request);
         assertNotNull(result);
     }
