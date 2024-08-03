@@ -188,7 +188,7 @@ class UBSManagementEmployeeServiceImplTest {
         verify(repository).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
     }
 
-    // @Test
+    @Test
     void findAllTest() {
         var employeePage = new EmployeePage();
         var employeeFilterCriteria = new EmployeeFilterCriteria();

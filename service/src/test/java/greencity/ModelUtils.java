@@ -105,11 +105,7 @@ import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.table.ColumnWidthDto;
-import greencity.dto.tariff.EditTariffDto;
-import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
-import greencity.dto.tariff.GetTariffLimitsDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.dto.tariff.*;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -120,6 +116,7 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationPlatform;
@@ -331,6 +328,7 @@ public class ModelUtils {
                 .tariffs(List.of())
                 .imagePath("path")
                 .tariffs(List.of(getTariffInfo()))
+                .tariffsInfoReceivingEmployees(new ArrayList<>())
                 .build());
     }
 
@@ -1178,7 +1176,29 @@ public class ModelUtils {
                     .nameEn("Driver")
                     .build()))
                 .build())
-            .tariffs(List.of())
+            .tariffs(List.of(GetTariffInfoForEmployeeDto.builder()
+                .id(1L)
+                .hasChat(true)
+                .region(RegionDto.builder()
+                    .regionId(1L)
+                    .nameUk("Київська область")
+                    .nameEn("Kyiv region")
+                    .build())
+                .locationsDtos(List.of(LocationsDtos.builder()
+                    .locationId(1L)
+                    .nameUk("Київ")
+                    .nameEn("Kyiv")
+                    .build()))
+                .receivingStationDtos(List.of(GetReceivingStationDto.builder()
+                    .stationId(1L)
+                    .name("Петрівка")
+                    .build()))
+                .courier(CourierTranslationDto.builder()
+                    .id(1L)
+                    .nameEn("Test")
+                    .nameUk("Тест")
+                    .build())
+                .build()))
             .build();
     }
 
@@ -1265,7 +1285,10 @@ public class ModelUtils {
                 .build()))
             .imagePath("path")
             .tariffs(List.of(getTariffInfo()))
-            .tariffsInfoReceivingEmployees(new ArrayList<>())
+            .tariffsInfoReceivingEmployees(List.of(TariffsInfoRecievingEmployee.builder()
+                .tariffsInfo(getTariffInfo())
+                .hasChat(true)
+                .build()))
             .build();
     }
 
