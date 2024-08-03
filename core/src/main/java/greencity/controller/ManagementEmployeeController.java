@@ -1,7 +1,6 @@
 package greencity.controller;
 
 import greencity.constants.HttpStatuses;
-import greencity.constants.SwaggerExampleModel;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
