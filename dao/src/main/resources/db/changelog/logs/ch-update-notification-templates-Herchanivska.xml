@@ -9,7 +9,7 @@
             <where>id=9</where>
         </update>
         <update tableName="notification_templates">
-            <column name="time" value="AT_6PM_EVERY_TWO_MONTH_AFTER_LAST_ORDER"/>
+            <column name="time" value="TWO_MONTHS_AFTER_LAST_ORDER"/>
             <where>id=9</where>
         </update>
     </changeSet>
