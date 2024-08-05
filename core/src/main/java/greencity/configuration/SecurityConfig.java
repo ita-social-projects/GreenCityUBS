@@ -104,6 +104,9 @@ public class SecurityConfig {
                     UBS_LINK + "/order-details-for-tariff",
                     UBS_LINK + "/tariffinfo/**")
                 .permitAll()
+                .requestMatchers(HttpMethod.POST,
+                    UBS_LINK + "/userProfile/user/create")
+                .permitAll()
                 .requestMatchers("/v2/api-docs/**",
                     "/v3/api-docs/**",
                     "/swagger.json",
@@ -251,7 +254,6 @@ public class SecurityConfig {
                     ADMIN_LINK + "/**")
                 .hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.POST,
-                    UBS_LINK + "/userProfile/**",
                     UBS_LINK + "/order/**",
                     UBS_LINK + "/processOrder",
                     UBS_LINK + "/processOrder/{id}",
