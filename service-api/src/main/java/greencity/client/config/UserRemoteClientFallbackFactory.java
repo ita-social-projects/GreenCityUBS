@@ -16,7 +16,6 @@ import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -72,12 +71,6 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             @Override
             public PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email) {
                 log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email, throwable);
-                throw new RemoteServerUnavailableException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST, throwable);
-            }
-
-            @Override
-            public List<String> getEmployeeLoginPositionNames(String email) {
-                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email);
                 throw new RemoteServerUnavailableException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST, throwable);
             }
 

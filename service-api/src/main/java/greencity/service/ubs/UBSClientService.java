@@ -346,15 +346,6 @@ public interface UBSClientService {
     PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email);
 
     /**
-     * Method that gets information about login employee`s positions.
-     *
-     * @param email {@link String} - employee email.
-     * @return List of {@link String} - list of employee`s positions.
-     * @author Anton Bondar
-     */
-    List<String> getEmployeeLoginPositionNames(String email);
-
-    /**
      * Method updates Authority for {@link User}.
      *
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
