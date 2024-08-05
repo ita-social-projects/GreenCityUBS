@@ -3657,25 +3657,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getEmployeeLoginPositionNamesTest() {
-        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.ofNullable(getEmployee()));
-        when(userRemoteClient.getEmployeeLoginPositionNames(TEST_EMAIL)).thenReturn(List.of("Admin"));
-
-        List<String> actual = ubsService.getEmployeeLoginPositionNames(TEST_EMAIL);
-        assertEquals(List.of("Admin"), actual);
-
-        verify(employeeRepository).findByEmail(TEST_EMAIL);
-        verify(userRemoteClient).getEmployeeLoginPositionNames(TEST_EMAIL);
-    }
-
-    @Test
-    void getEmployeeLoginPositionNamesThrowsNotFoundExceptionTest() {
-        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ubsService.getEmployeeLoginPositionNames(TEST_EMAIL));
-        verify(employeeRepository).findByEmail(TEST_EMAIL);
-    }
-
-    @Test
     void shouldExtractOrderIdFromDataSuccessfully() {
         String data = Base64.getEncoder().encodeToString("{\"order_id\":\"123\"}".getBytes());
         Long result = ubsClientService.extractOrderIdFromData(data);

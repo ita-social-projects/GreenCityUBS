@@ -239,27 +239,6 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller to get a list of login employee`s positions.
-     *
-     * @param email {@link String} - employee email.
-     * @return List of {@link String} - list of employee positions.
-     *
-     * @author Anton Bondar.
-     */
-    @Operation(summary = "Get information about login employee`s positions.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @GetMapping("/get-employee-login-positions")
-    public ResponseEntity<List<String>> getEmployeeLoginPositionNames(@RequestParam String email) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getEmployeeLoginPositionNames(email));
-    }
-
-    /**
      * Controller edit an employee`s authorities.
      *
      * @return {@link UserEmployeeAuthorityDto}

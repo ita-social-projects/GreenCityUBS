@@ -1768,13 +1768,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public List<String> getEmployeeLoginPositionNames(String email) {
-        Employee employee = employeeRepository.findByEmail(email)
-            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST + email));
-        return userRemoteClient.getEmployeeLoginPositionNames(employee.getEmail());
-    }
-
-    @Override
     public Set<String> getAllAuthorities(String email) {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST + email));
