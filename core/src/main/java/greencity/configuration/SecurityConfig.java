@@ -102,7 +102,10 @@ public class SecurityConfig {
                     UBS_LINK + "/getAllActiveCouriers",
                     UBS_LINK + "/locations/{courierId}",
                     UBS_LINK + "/order-details-for-tariff",
-                    UBS_LINK + "/tariffinfo/**")
+                    UBS_LINK + "/tariffinfo/**",
+                    ADMIN_EMPL_LINK + "/get-employees/{tariffId}",
+                    UBS_LINK + "/locationsByCourier/{courierId}",
+                    UBS_LINK + "/tariffs/{locationId}")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST,
                     UBS_LINK + "/userProfile/user/create")
@@ -129,7 +132,7 @@ public class SecurityConfig {
                     UBS_MANAG_LINK + "/get-not-taken-order-reason/{id}",
                     UBS_MANAG_LINK + "/orderTableColumnsWidth",
                     UBS_LINK + "/order_history/{orderId}",
-                    ADMIN_EMPL_LINK + "/**",
+                    // ADMIN_EMPL_LINK + "/**",
                     ADMIN_LINK + "/notification/get-all-templates",
                     ADMIN_LINK + "/notification/get-template/{id}",
                     SUPER_ADMIN_LINK + "/get-all-receiving-station",
@@ -270,7 +273,9 @@ public class SecurityConfig {
                     UBS_LINK + "/certificate/{responseCode}",
                     "/notifications",
                     "/notifications/**",
-                    "/notifications/quantityUnreadenNotifications")
+                    "/notifications/quantityUnreadenNotifications",
+                    UBS_LINK + "/check-if-tariff-exists/{id}",
+                    UBS_LINK + "/locations")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
                     UBS_LINK + "/userProfile/**",

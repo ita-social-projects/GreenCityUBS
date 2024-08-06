@@ -170,6 +170,7 @@ public final class ErrorMessage {
         "This template does not contain messages for all platforms: ";
     public static final String PREDEFINED_NOTIFICATION_CANNOT_BE_DELETED =
         "Predefined notification template cannot be deleted.";
+    public static final String TARIFF_NOT_FOUND_BY_LOCATION_ID = "Tariff with location id: %d not found";
 
     /**
      * Constructor.
