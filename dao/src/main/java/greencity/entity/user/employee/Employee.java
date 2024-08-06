@@ -1,5 +1,6 @@
 package greencity.entity.user.employee;
 
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.order.Service;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.enums.EmployeeStatus;
@@ -72,12 +73,8 @@ public class Employee {
         inverseJoinColumns = {@JoinColumn(name = "position_id")})
     private Set<Position> employeePosition;
 
-    @ManyToMany
-    @JoinTable(
-        name = "tariff_infos_receiving_employee_mapping",
-        joinColumns = {@JoinColumn(name = "employee_id")},
-        inverseJoinColumns = {@JoinColumn(name = "tariffs_info_id")})
-    private Set<TariffsInfo> tariffInfos;
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TariffsInfoRecievingEmployee> tariffsInfoReceivingEmployees;
 
     @OneToMany(mappedBy = "creator")
     private List<TariffsInfo> tariffs;

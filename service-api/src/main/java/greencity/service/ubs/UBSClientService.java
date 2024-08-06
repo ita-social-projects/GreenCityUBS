@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
@@ -370,6 +371,7 @@ public interface UBSClientService {
      *
      * @return {@link DistrictDto}
      */
+
     List<DistrictDto> getAllDistricts(String region, String city);
 
     /**
@@ -380,4 +382,36 @@ public interface UBSClientService {
      * @return {@link WayForPayOrderResponse} payment link and order id.
      */
     WayForPayOrderResponse processOrder(String userUuid, OrderWayForPayClientDto dto);
+
+    /**
+     * Checks if a tariff exists by its ID.
+     *
+     * @param tariffInfoId The ID of the tariff to check.
+     * @return {@code true} if the tariff exists, {@code false} otherwise.
+     */
+    boolean checkIfTariffExistsById(Long tariffInfoId);
+
+    /**
+     * Retrieves all locations.
+     *
+     * @return List of all locations.
+     */
+    List<LocationsDto> getAllLocations();
+
+    /**
+     * Retrieves the tariff ID associated with the specified location ID.
+     *
+     * @param locationId The ID of the location for which to retrieve the tariff ID.
+     * @return The tariff ID associated with the specified location ID.
+     */
+    Long getTariffIdByLocationId(Long locationId);
+
+    /**
+     * Retrieves all active locations by courier id.
+     *
+     * @param courierId The ID of the courier for which to retrieve all active the
+     *                  locations.
+     * @return List of all locations.
+     */
+    List<LocationsDto> getAllLocationsByCourierId(Long courierId);
 }
