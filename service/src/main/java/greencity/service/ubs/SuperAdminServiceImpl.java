@@ -23,6 +23,7 @@ import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
@@ -658,9 +659,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void setEmployeeTariffInfos(Employee employee, TariffsInfo tariffsInfo) {
-        Set<TariffsInfo> tariffsInfos = employee.getTariffInfos();
-        tariffsInfos.add(tariffsInfo);
-        employee.setTariffInfos(tariffsInfos);
+        if (employee.getTariffsInfoReceivingEmployees() == null) {
+            employee.setTariffsInfoReceivingEmployees(new ArrayList<>());
+        }
+        List<TariffsInfoRecievingEmployee> tariffsInfoRecievingEmployees = employee.getTariffsInfoReceivingEmployees();
+        tariffsInfoRecievingEmployees.add(TariffsInfoRecievingEmployee.builder()
+            .employee(employee)
+            .tariffsInfo(tariffsInfo)
+            .hasChat(false)
+            .build());
+        employee.setTariffsInfoReceivingEmployees(tariffsInfoRecievingEmployees);
     }
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {

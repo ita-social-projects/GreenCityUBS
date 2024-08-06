@@ -1,6 +1,7 @@
 package greencity.dto.employee;
 
 import greencity.ModelUtils;
+import greencity.dto.tariff.TariffWithChatAccess;
 import lombok.SneakyThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -30,7 +31,10 @@ class EmployeeWithTariffsIdDtoTest {
                 .email("mail@gmail.com")
                 .employeePositions(List.of(ModelUtils.getEmployeePosition()))
                 .build())
-            .tariffId(List.of(1L))
+            .tariffs(List.of(TariffWithChatAccess.builder()
+                .tariffId(1L)
+                .hasChat(true)
+                .build()))
             .build();
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -56,7 +60,7 @@ class EmployeeWithTariffsIdDtoTest {
                 .email(email)
                 .employeePositions(null)
                 .build())
-            .tariffId(List.of(1L))
+            .tariffs(List.of())
             .build();
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
