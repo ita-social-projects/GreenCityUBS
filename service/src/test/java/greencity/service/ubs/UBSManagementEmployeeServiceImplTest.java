@@ -10,6 +10,7 @@ import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.dto.tariff.TariffWithChatAccess;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
@@ -46,6 +47,7 @@ import static greencity.ModelUtils.getEmployeeWithTariffsIdDto;
 import static greencity.ModelUtils.getPosition;
 import static greencity.ModelUtils.getPositionDto;
 import static greencity.ModelUtils.getTariffsInfo;
+import static greencity.ModelUtils.getTariffInfo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -84,11 +86,13 @@ class UBSManagementEmployeeServiceImplTest {
     void saveEmployeeTest() {
         Employee employee = getEmployee();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        dto.setTariffs(List.of(TariffWithChatAccess.builder().tariffId(1L).hasChat(false).build()));
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
 
         when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(repository.save(any())).thenReturn(employee);
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         employeeService.save(dto, file);
 
@@ -223,6 +227,7 @@ class UBSManagementEmployeeServiceImplTest {
         Employee employee = getEmployeeForUpdateEmailCheck();
         Employee retrievedEmployee = getEmployeeForUpdateEmailCheck();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        dto.setTariffs(List.of(TariffWithChatAccess.builder().tariffId(1L).hasChat(false).build()));
         Position position = getPosition();
 
         MockMultipartFile file = new MockMultipartFile("employeeDto",
@@ -230,6 +235,7 @@ class UBSManagementEmployeeServiceImplTest {
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
         when(repository.save(any())).thenReturn(employee);
         doNothing().when(fileService).delete(retrievedEmployee.getImagePath());
         when(repository.findById(anyLong())).thenReturn(Optional.of(retrievedEmployee));
