@@ -233,5 +233,6 @@
     <include file="/db/changelog/logs/ch-insert-data-into-notification-platforms-Kizerov.xml"/>
     <include file="/db/changelog/logs/ch-update-values-in-notification-templates-title-Sotnik.xml"/>
     <include file="db/changelog/logs/ch-add-column-status-and-deleteDate-to-Violation-Chekhovska.xml"/>
+    <include file="/db/changelog/logs/ch-update-notification-templates-Herchanivska.xml"/>
     <include file="/db/changelog/logs/ch-add-column-tarriff-infos-mapping-Klopov.xml"/>
 </databaseChangeLog>
