@@ -6,21 +6,54 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.address.AddressExportDetailsDto;
-import greencity.dto.bag.*;
+import greencity.dto.bag.AdditionalBagInfoDto;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.bag.BagMappingDto;
+import greencity.dto.bag.BagTransDto;
+import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.courier.CourierInfoDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.order.*;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.CounterOrderDetailsDto;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.ExportDetailsDtoUpdate;
+import greencity.dto.order.GeneralOrderInfo;
+import greencity.dto.order.NotTakenOrderReasonDto;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
+import greencity.dto.order.OrderInfoDto;
+import greencity.dto.order.OrderPaymentStatusesTranslationDto;
+import greencity.dto.order.OrderStatusPageDto;
+import greencity.dto.order.OrderStatusesTranslationDto;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.Refund;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -28,10 +61,30 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.*;
+import greencity.enums.CancellationReason;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.*;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeOrderPositionRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderDetailRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.PositionRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.RefundRepository;
+import greencity.repository.ServiceRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
@@ -56,9 +109,27 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -108,6 +179,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Autowired
     private PaymentService paymentService;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page, String columnName,
         SortingOrder sortingOrder) {
@@ -117,6 +191,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return getAllCertificatesTranslationDto(certificates);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ViolationsInfoDto getAllUserViolations(String email) {
         String uuidId = userRemoteClient.findUuidByEmail(email);
@@ -190,7 +267,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public List<OrderInfoDto> getOrdersForUser(String uuid) {
         List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
@@ -458,7 +534,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public void setOrderDetail(Order order,
         Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String email) {
@@ -654,7 +729,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public CounterOrderDetailsDto getOrderSumDetails(Long orderId) {
         CounterOrderDetailsDto dto =
@@ -724,7 +798,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public OrderDetailStatusDto getOrderDetailStatus(Long id) {
         Order order = orderRepository.findById(id)
@@ -739,7 +812,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public OrderDetailStatusDto updateOrderDetailStatusById(Long id, OrderDetailStatusRequestDto dto, String email) {
         Order order = orderRepository.findById(id)
@@ -750,7 +822,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public OrderDetailStatusDto updateOrderDetailStatus(Order order, OrderDetailStatusRequestDto dto, String email) {
         List<Payment> payment = paymentRepository.findAllByOrderId(order.getId());
@@ -882,7 +953,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public List<DetailsOrderInfoDto> getOrderBagsDetails(Long orderId) {
         List<DetailsOrderInfoDto> detailsOrderInfoDtos = new ArrayList<>();

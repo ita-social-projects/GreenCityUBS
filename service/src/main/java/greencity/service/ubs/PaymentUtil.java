@@ -52,11 +52,11 @@ public final class PaymentUtil {
         return dto.getSumAmount();
     }
 
-    public static Boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
+    public static boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
         return dto.getSumConfirmed() != 0;
     }
 
-    public static Boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
+    public static boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
         return dto.getSumExported() != 0;
     }
 

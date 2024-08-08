@@ -45,7 +45,7 @@ import static org.mockito.Mockito.*;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceImplTest {
-    @Mock(lenient = true)
+    @Mock
     OrderAddressRepository orderAddressRepository;
     @Mock
     private FileService fileService;
@@ -59,7 +59,7 @@ class PaymentServiceImplTest {
     @Mock
     CertificateRepository certificateRepository;
 
-    @Mock(lenient = true)
+    @Mock
     private ModelMapper modelMapper;
 
     @Mock
@@ -83,7 +83,7 @@ class PaymentServiceImplTest {
     @Mock
     private UserRemoteClient userRemoteClient;
 
-    @Mock(lenient = true)
+    @Mock
     private NotificationServiceImpl notificationService;
     @Mock
     private ObjectMapper objectMapper;
