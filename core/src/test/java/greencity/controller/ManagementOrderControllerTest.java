@@ -17,6 +17,7 @@ import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
+import greencity.service.ubs.PaymentService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
@@ -88,6 +89,9 @@ class ManagementOrderControllerTest {
 
     @Mock
     BigOrderTableServiceView bigOrderTableServiceView;
+
+    @Mock
+    PaymentService paymentService;
 
     private final Principal principal = getUuid();
 
