@@ -98,7 +98,7 @@ import greencity.repository.RegionRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.TelegramBotRepository;
-import greencity.repository.UBSuserRepository;
+import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.DistanceCalculationUtils;
@@ -120,7 +120,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -162,7 +161,7 @@ import static java.util.stream.Collectors.joining;
 public class UBSClientServiceImpl implements UBSClientService {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
-    private final UBSuserRepository ubsUserRepository;
+    private final UBSUserRepository ubsUserRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
@@ -453,7 +452,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             ubsUser = Collections.singletonList(UBSuser.builder().id(null).build());
         }
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
-        dto.setUbsUserId(ubsUser.get(0).getId());
+        dto.setUbsUserId(ubsUser.getFirst().getId());
         if (currentUser.getAlternateEmail() != null
             && !currentUser.getAlternateEmail().isEmpty()) {
             dto.setEmail(currentUser.getAlternateEmail());
@@ -966,7 +965,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
         OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue())
-            .orElse(orderStatusTranslationRepository.getOne(1L));
+            .orElse(orderStatusTranslationRepository.getReferenceById(1L));
         OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
             .getById((long) order.getOrderPaymentStatus().getStatusValue());
 
@@ -1384,7 +1383,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         long totalSumToPayInCoins = 0L;
         long limitedSumToPayInCoins = 0L;
         int limitedBags = 0;
-        final List<Integer> bagIds = bags.stream().map(BagDto::getId).collect(toList());
+        final List<Integer> bagIds = bags.stream().map(BagDto::getId).toList();
         for (BagDto temp : bags) {
             Bag bag = findActiveBagById(temp.getId());
             if (Boolean.TRUE.equals(bag.getLimitIncluded())) {
@@ -1402,12 +1401,17 @@ public class UBSClientServiceImpl implements UBSClientService {
         totalSumToPayInCoins += limitedSumToPayInCoins;
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
             .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
-            .map(this::createOrderBag).collect(toList());
-        orderBagList.addAll(notOrderedBags.stream().map(orderBag -> {
-            orderBag.setAmount(0);
-            return orderBag;
-        }).collect(Collectors.toList()));
+            .map(this::createOrderBag)
+            .toList();
+        orderBagList.addAll(notOrderedBags.stream()
+            .map(this::setAmountToOrderBag)
+            .toList());
         return totalSumToPayInCoins;
+    }
+
+    private OrderBag setAmountToOrderBag(OrderBag orderBag) {
+        orderBag.setAmount(0);
+        return orderBag;
     }
 
     private OrderBag createOrderBag(Bag bag) {

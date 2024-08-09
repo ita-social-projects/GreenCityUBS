@@ -10,6 +10,7 @@ import greencity.filters.UserFilterCriteria;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
+import java.util.Comparator;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
         if (u.getRecipientName() != null) {
             name.append(u.getRecipientName());
         }
-        if (name.length() != 0) {
+        if (!name.isEmpty()) {
             name.append(" ");
         }
         if (u.getRecipientSurname() != null) {
@@ -82,13 +83,9 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
             allFieldsFromTableDto.setRegistrationDate("");
         }
         allFieldsFromTableDto.setUserBonuses(u.getCurrentPoints().toString());
-        Optional<Order> optional =
-            u.getOrders().stream().max((o1, o2) -> o1.getOrderDate().compareTo(o2.getOrderDate()));
-        if (optional.isPresent()) {
-            allFieldsFromTableDto
-                .setLastOrderDate(optional
-                    .get().getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
-        }
+        Optional<Order> optional = u.getOrders().stream().max(Comparator.comparing(Order::getOrderDate));
+        optional.ifPresent(order -> allFieldsFromTableDto
+            .setLastOrderDate(order.getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT))));
         return allFieldsFromTableDto;
     }
 }

@@ -12,7 +12,6 @@ import greencity.dto.LocationsDto;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
@@ -81,8 +80,6 @@ import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
@@ -94,7 +91,7 @@ class UBSClientServiceImplTest {
     private BagRepository bagRepository;
 
     @Mock
-    private UBSuserRepository ubsUserRepository;
+    private UBSUserRepository ubsUserRepository;
 
     @Mock
     private ModelMapper modelMapper;

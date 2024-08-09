@@ -1,8 +1,10 @@
 package greencity.constant;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum KyivTariffLocation {
     KYIV("Kyiv"),
     HATNE("Hatne"),
@@ -21,8 +23,4 @@ public enum KyivTariffLocation {
     SHCHASLUVE("Shchaslyve");
 
     private final String locationName;
-
-    KyivTariffLocation(String locationName) {
-        this.locationName = locationName;
-    }
 }

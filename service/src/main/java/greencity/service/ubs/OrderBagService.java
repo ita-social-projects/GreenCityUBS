@@ -4,7 +4,7 @@ import greencity.entity.order.Bag;
 import greencity.entity.order.OrderBag;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.OrderBagRepository;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 
 @Service
-@Data
+@RequiredArgsConstructor
 public class OrderBagService {
     private final OrderBagRepository orderBagRepository;
 

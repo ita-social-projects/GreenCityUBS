@@ -175,7 +175,7 @@ public class PaymentServiceImpl implements PaymentService {
         updatePayment.setAmount(requestDto.getAmount());
         updatePayment.setPaymentId(requestDto.getPaymentId());
         updatePayment.setReceiptLink(requestDto.getReceiptLink());
-        if (requestDto.getImagePath().isEmpty() && requestDto.getImagePath() != null) {
+        if (requestDto.getImagePath().isEmpty()) {
             if (updatePayment.getImagePath() != null) {
                 fileService.delete(updatePayment.getImagePath());
             }

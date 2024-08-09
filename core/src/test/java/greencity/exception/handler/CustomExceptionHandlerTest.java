@@ -1,9 +1,7 @@
 package greencity.exception.handler;
 
-import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
-import greencity.exceptions.http.AccessDeniedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,9 +52,6 @@ class CustomExceptionHandlerTest {
 
     @Mock
     NotFoundException notFoundException;
-
-    @Mock
-    FoundException foundException;
 
     @Mock
     HttpStatus status;
@@ -129,16 +124,6 @@ class CustomExceptionHandlerTest {
             .thenReturn(objectMap);
         assertEquals(customExceptionHandler.handleNotFoundException(notFoundException, webRequest),
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse));
-        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
-    }
-
-    @Test
-    void handleFoundExceptionTest() {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
-        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
-            .thenReturn(objectMap);
-        assertEquals(customExceptionHandler.handleFoundException(foundException, webRequest),
-            ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
 

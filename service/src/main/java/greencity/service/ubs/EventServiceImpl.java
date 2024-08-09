@@ -8,6 +8,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 
 @Service
-@Data
+@RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EmployeeRepository employeeRepository;

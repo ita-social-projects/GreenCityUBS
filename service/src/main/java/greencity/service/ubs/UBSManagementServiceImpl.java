@@ -73,7 +73,6 @@ import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
@@ -174,8 +173,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private UBSClientService ubsClientService;
     @Autowired
     private final OrderBagService orderBagService;
-    @Autowired
-    private final OrderBagRepository orderBagRepository;
     @Autowired
     private PaymentService paymentService;
 
@@ -1262,7 +1259,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void updateOrderPageFields(UpdateOrderPageAdminDto updateOrderPageDto, Order order, String email) {
-        long orderId = order.getId();
         if (nonNull(updateOrderPageDto.getUserInfoDto())) {
             ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
         }
@@ -1287,6 +1283,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
                 email);
         }
+        long orderId = order.getId();
         if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
             updateOrderPageDto.getUpdateResponsibleEmployeeDto()
                 .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),

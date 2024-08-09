@@ -808,7 +808,7 @@ class OrdersAdminsPageServiceImplTest {
         Optional<Order> order = Optional.of(ModelUtils.getOrder());
 
         when(orderRepository.findById(1L)).thenReturn(order);
-        when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
+        when(receivingStationRepository.getReferenceById(1L)).thenReturn(ModelUtils.getReceivingStation());
 
         ordersAdminsPageService.receivingStationForDevelopStage(List.of(1L), "1", 1L);
         verify(orderLockService).unlockOrder(order.get());

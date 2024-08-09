@@ -1,5 +1,8 @@
 package greencity.constant;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class ValidationConstant {
     public static final String CERTIFICATE_CODE_REGEXP = "\\d{4}-\\d{4}";
     public static final String CERTIFICATE_CODE_REGEXP_MESSAGE = "This certificate code is not valid";
@@ -25,11 +28,4 @@ public class ValidationConstant {
         "Use only English, or Ukrainian letters. Both English or Ukrainian letters valid, "
             + "for cases, when user inputs street address by yourself instead of using Google Api, "
             + "in that cases sets the same value for both localizations.";
-
-    /**
-     * Constructor.
-     */
-    private ValidationConstant() {
-        // Do nothing because needed.
-    }
 }

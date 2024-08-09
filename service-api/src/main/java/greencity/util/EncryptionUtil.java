@@ -43,14 +43,13 @@ public class EncryptionUtil {
      * @param dto      {@link PaymentResponseWayForPay} - response data from
      *                 WayForPay.
      * @param password The password used for the HMAC-MD5 encryption.
-     * @return {@String} - The HMAC-MD5 encrypted signature.
+     * @return {@link String} - The HMAC-MD5 encrypted signature.
      */
     public String formResponseSignature(PaymentResponseWayForPay dto, String password) {
         StringJoiner stringJoiner = new StringJoiner(";");
         stringJoiner.add(dto.getOrderReference())
             .add((dto.getStatus()))
             .add(dto.getTime());
-        String hmacMD5 = new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
-        return hmacMD5;
+        return new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
     }
 }

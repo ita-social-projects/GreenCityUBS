@@ -121,7 +121,7 @@ public final class PaymentUtil {
             return order.getUbsCourierSum();
         } else if (order.getWriteOffStationSum() != null && order.getUbsCourierSum() == null) {
             return order.getWriteOffStationSum();
-        } else if (order.getWriteOffStationSum() != null && order.getUbsCourierSum() != null) {
+        } else if (order.getWriteOffStationSum() != null) {
             return order.getWriteOffStationSum() + order.getUbsCourierSum();
         } else {
             return 0L;
@@ -147,9 +147,9 @@ public final class PaymentUtil {
             sumConfirmedInCoins = getSumInCoins(order.getConfirmedQuantity().entrySet(), bag);
             sumExportedInCoins = getSumInCoins(order.getExportedQuantity().entrySet(), bag);
 
-            if (order.getExportedQuantity().size() != 0) {
+            if (!order.getExportedQuantity().isEmpty()) {
                 sumExportedInCoins += PaymentUtil.getUbsCourierOrWriteOffStationSum(order);
-            } else if (order.getConfirmedQuantity().size() != 0) {
+            } else if (!order.getConfirmedQuantity().isEmpty()) {
                 sumConfirmedInCoins += PaymentUtil.getUbsCourierOrWriteOffStationSum(order);
             } else {
                 sumAmountInCoins += PaymentUtil.getUbsCourierOrWriteOffStationSum(order);
