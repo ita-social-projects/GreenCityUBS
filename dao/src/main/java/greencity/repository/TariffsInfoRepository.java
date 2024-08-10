@@ -171,7 +171,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
     @Query(nativeQuery = true,
         value = "SELECT tariffs_info_id FROM tariffs_locations "
             + "WHERE location_id = :locationId")
-    Optional<Long> findTariffIdByLocationId(Long locationId);
+    Optional<List<Long>> findTariffIdByLocationId(Long locationId);
 
     /**
      * Retrieves the tariff ID associated with the specified location ID and courier
