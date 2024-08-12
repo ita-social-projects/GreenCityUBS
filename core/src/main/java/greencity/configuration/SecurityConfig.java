@@ -132,7 +132,7 @@ public class SecurityConfig {
                     UBS_MANAG_LINK + "/get-not-taken-order-reason/{id}",
                     UBS_MANAG_LINK + "/orderTableColumnsWidth",
                     UBS_LINK + "/order_history/{orderId}",
-                    // ADMIN_EMPL_LINK + "/**",
+                    ADMIN_EMPL_LINK + "/**",
                     ADMIN_LINK + "/notification/get-all-templates",
                     ADMIN_LINK + "/notification/get-template/{id}",
                     SUPER_ADMIN_LINK + "/get-all-receiving-station",
