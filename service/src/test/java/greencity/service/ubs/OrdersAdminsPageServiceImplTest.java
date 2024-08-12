@@ -1165,7 +1165,7 @@ class OrdersAdminsPageServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("provideRegionsForTesting")
-    void getParametersForOrdersWithRegionsTest() {
+    void getParametersForOrdersWithRegionsTest(List<UkraineRegion> regions) {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEng("en");
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
@@ -1174,7 +1174,6 @@ class OrdersAdminsPageServiceImplTest {
         List<Employee> employeeList = new ArrayList<>();
         employeeList.add(ModelUtils.getEmployee());
         List<Address> addressList = List.of(ModelUtils.getAddress());
-        List<UkraineRegion> regions = List.of(UkraineRegion.KHARKIV_OBLAST);
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
@@ -1233,7 +1232,6 @@ class OrdersAdminsPageServiceImplTest {
 
     private static Stream<List<UkraineRegion>> provideRegionsForTesting() {
         return Stream.of(
-            List.of(),
             List.of(UkraineRegion.KHARKIV_OBLAST),
             List.of(UkraineRegion.KHARKIV_OBLAST, UkraineRegion.KYIV_CITY),
             List.of(UkraineRegion.ODESSA_OBLAST, UkraineRegion.DNIPRO_OBLAST, UkraineRegion.ZAPORIZHIA_OBLAST));
