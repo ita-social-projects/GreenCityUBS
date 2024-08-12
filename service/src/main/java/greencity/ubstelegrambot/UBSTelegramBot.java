@@ -63,7 +63,7 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
                 .user(user)
                 .isNotify(true)
                 .build();
-        } else if (!telegramBot.getIsNotify()) {
+        } else if (!telegramBot.getIsNotify().booleanValue()) {
             telegramBot.setIsNotify(true);
         }
         return telegramBotRepository.save(telegramBot);

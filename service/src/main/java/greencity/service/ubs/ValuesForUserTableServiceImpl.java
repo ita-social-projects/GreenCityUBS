@@ -10,7 +10,6 @@ import greencity.filters.UserFilterCriteria;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
-import java.util.Comparator;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -18,6 +17,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 
 @Service
@@ -39,9 +39,11 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
             usId.addAll(userRepository.getAllUsersByTariffsInfoId(id));
         }
         Page<User> users = userTableRepo.findAll(userFilterCriteria, columnName, sortingOrder, page, usId);
-        List<UserWithSomeOrderDetailDto> fields = users.stream()
-            .map(this::mapToDto)
-            .toList();
+        List<UserWithSomeOrderDetailDto> fields = new ArrayList<>();
+        for (User u : users) {
+            UserWithSomeOrderDetailDto allFieldsFromTableDto = mapToDto(u);
+            fields.add(allFieldsFromTableDto);
+        }
 
         return new PageableDto<>(fields, users.getTotalElements(),
             users.getPageable().getPageNumber(), users.getTotalPages());
@@ -54,7 +56,7 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
         if (u.getRecipientName() != null) {
             name.append(u.getRecipientName());
         }
-        if (!name.isEmpty()) {
+        if (name.length() != 0) {
             name.append(" ");
         }
         if (u.getRecipientSurname() != null) {
@@ -80,9 +82,13 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
             allFieldsFromTableDto.setRegistrationDate("");
         }
         allFieldsFromTableDto.setUserBonuses(u.getCurrentPoints().toString());
-        u.getOrders().stream().max(Comparator.comparing(Order::getOrderDate))
-            .ifPresent(order -> allFieldsFromTableDto
-                .setLastOrderDate(order.getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT))));
+        Optional<Order> optional =
+            u.getOrders().stream().max((o1, o2) -> o1.getOrderDate().compareTo(o2.getOrderDate()));
+        if (optional.isPresent()) {
+            allFieldsFromTableDto
+                .setLastOrderDate(optional
+                    .get().getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
+        }
         return allFieldsFromTableDto;
     }
 }
