@@ -11,6 +11,7 @@ import greencity.enums.PaymentStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.CertificateRepository;
 import greencity.repository.OrderRepository;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,10 +23,8 @@ import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 
 @Slf4j
-public final class PaymentUtil {
-    private PaymentUtil() {
-    }
-
+@UtilityClass
+public class PaymentUtil {
     public static Long convertBillsIntoCoins(Double bills) {
         return bills == null ? 0
             : BigDecimal.valueOf(bills)
@@ -121,7 +120,7 @@ public final class PaymentUtil {
             return order.getUbsCourierSum();
         } else if (order.getWriteOffStationSum() != null && order.getUbsCourierSum() == null) {
             return order.getWriteOffStationSum();
-        } else if (order.getWriteOffStationSum() != null) {
+        } else if (order.getWriteOffStationSum() != null && order.getUbsCourierSum() != null) {
             return order.getWriteOffStationSum() + order.getUbsCourierSum();
         } else {
             return 0L;
@@ -147,9 +146,9 @@ public final class PaymentUtil {
             sumConfirmedInCoins = getSumInCoins(order.getConfirmedQuantity().entrySet(), bag);
             sumExportedInCoins = getSumInCoins(order.getExportedQuantity().entrySet(), bag);
 
-            if (!order.getExportedQuantity().isEmpty()) {
+            if (order.getExportedQuantity().size() != 0) {
                 sumExportedInCoins += PaymentUtil.getUbsCourierOrWriteOffStationSum(order);
-            } else if (!order.getConfirmedQuantity().isEmpty()) {
+            } else if (order.getConfirmedQuantity().size() != 0) {
                 sumConfirmedInCoins += PaymentUtil.getUbsCourierOrWriteOffStationSum(order);
             } else {
                 sumAmountInCoins += PaymentUtil.getUbsCourierOrWriteOffStationSum(order);

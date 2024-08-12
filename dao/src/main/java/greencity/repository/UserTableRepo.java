@@ -98,7 +98,8 @@ public class UserTableRepo {
     }
 
     private Predicate getPredicateForWhereOr(Root<User> userRoot, List<Long> usId) {
-        List<Predicate> predicateList = new ArrayList<>(userTariffsInfoFiltering(usId, userRoot));
+        List<Predicate> predicateList = new ArrayList<>();
+        predicateList.addAll(userTariffsInfoFiltering(usId, userRoot));
         return criteriaBuilder.or(predicateList.toArray(new Predicate[0]));
     }
 

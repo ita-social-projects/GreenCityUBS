@@ -18,7 +18,6 @@ import jakarta.persistence.EntityNotFoundException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 
 @Service
@@ -40,11 +39,9 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
             usId.addAll(userRepository.getAllUsersByTariffsInfoId(id));
         }
         Page<User> users = userTableRepo.findAll(userFilterCriteria, columnName, sortingOrder, page, usId);
-        List<UserWithSomeOrderDetailDto> fields = new ArrayList<>();
-        for (User u : users) {
-            UserWithSomeOrderDetailDto allFieldsFromTableDto = mapToDto(u);
-            fields.add(allFieldsFromTableDto);
-        }
+        List<UserWithSomeOrderDetailDto> fields = users.stream()
+            .map(this::mapToDto)
+            .toList();
 
         return new PageableDto<>(fields, users.getTotalElements(),
             users.getPageable().getPageNumber(), users.getTotalPages());
@@ -83,9 +80,9 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
             allFieldsFromTableDto.setRegistrationDate("");
         }
         allFieldsFromTableDto.setUserBonuses(u.getCurrentPoints().toString());
-        Optional<Order> optional = u.getOrders().stream().max(Comparator.comparing(Order::getOrderDate));
-        optional.ifPresent(order -> allFieldsFromTableDto
-            .setLastOrderDate(order.getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT))));
+        u.getOrders().stream().max(Comparator.comparing(Order::getOrderDate))
+            .ifPresent(order -> allFieldsFromTableDto
+                .setLastOrderDate(order.getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT))));
         return allFieldsFromTableDto;
     }
 }
