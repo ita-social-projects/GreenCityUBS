@@ -35,6 +35,7 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.enums.BagStatus;
 import greencity.enums.CourierLimit;
 import greencity.enums.OrderPaymentStatus;
@@ -634,7 +635,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void setEmployeeTariffInfos(Employee employee, TariffsInfo tariffsInfo) {
-        // TODO: fix that
+        if (employee.getTariffsInfoReceivingEmployees() == null) {
+            employee.setTariffsInfoReceivingEmployees(new ArrayList<>());
+        }
+        List<TariffsInfoRecievingEmployee> tariffsInfoRecievingEmployees = employee.getTariffsInfoReceivingEmployees();
+        tariffsInfoRecievingEmployees.add(TariffsInfoRecievingEmployee.builder()
+            .employee(employee)
+            .tariffsInfo(tariffsInfo)
+            .hasChat(false)
+            .build());
+        employee.setTariffsInfoReceivingEmployees(tariffsInfoRecievingEmployees);
     }
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {

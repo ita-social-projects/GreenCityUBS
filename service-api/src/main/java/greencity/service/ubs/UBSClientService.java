@@ -429,7 +429,7 @@ public interface UBSClientService {
      * @param locationId The ID of the location for which to retrieve the tariff ID.
      * @return The tariff ID associated with the specified location ID.
      */
-    Long getTariffIdByLocationId(Long locationId);
+    List<Long> getTariffIdByLocationId(Long locationId);
 
     /**
      * Retrieves all active locations by courier id.
