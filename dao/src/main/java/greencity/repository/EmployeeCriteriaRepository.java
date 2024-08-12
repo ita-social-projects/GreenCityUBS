@@ -3,7 +3,6 @@ package greencity.repository;
 import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import jakarta.persistence.EntityManager;
@@ -22,12 +21,19 @@ import static greencity.enums.EmployeeStatus.employeeStatusExist;
 import static java.util.Arrays.stream;
 
 @Repository
-@RequiredArgsConstructor
 public class EmployeeCriteriaRepository {
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
     private static final String POSITION_ID = "positionId";
     private static final String EMPLOYEE_ID = "employeeId";
+
+    /**
+     * Constructor to initialize EntityManager and CriteriaBuilder.
+     */
+    public EmployeeCriteriaRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
+        this.criteriaBuilder = entityManager.getCriteriaBuilder();
+    }
 
     /**
      * {@inheritDoc}

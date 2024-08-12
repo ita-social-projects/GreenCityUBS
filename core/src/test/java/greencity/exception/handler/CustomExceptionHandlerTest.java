@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -61,7 +60,6 @@ class CustomExceptionHandlerTest {
 
     @BeforeEach
     void init() {
-        MockitoAnnotations.openMocks(this);
         objectMap = new HashMap<>();
         objectMap.put("path", "/ownSecurity/restorePassword");
         objectMap.put("message", "test");

@@ -278,7 +278,7 @@ public class LocationApiServiceImpl implements LocationApiService {
             };
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
 
-        if (response.getBody() == null) {
+        if (response == null || response.getBody() == null) {
             throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url);
         }
 

@@ -777,7 +777,7 @@ class OrdersAdminsPageServiceImplTest {
         RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
 
-        when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
+        when(receivingStationRepository.getReferenceById(1L)).thenReturn(ModelUtils.getReceivingStation());
         when(employeeRepository.findByEmail(email)).thenReturn(employee);
 
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
@@ -799,7 +799,7 @@ class OrdersAdminsPageServiceImplTest {
         dto.setColumnName("adminComment");
         dto.setNewValue("Admin Comment");
 
-        verify(receivingStationRepository, atLeast(1)).getOne(1L);
+        verify(receivingStationRepository, atLeast(1)).getReferenceById(1L);
         verify(employeeRepository, atLeast(1)).findByEmail(email);
     }
 

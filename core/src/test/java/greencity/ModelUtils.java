@@ -55,8 +55,6 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.user.ubs.Address;
-import greencity.enums.AddressStatus;
 import greencity.enums.CancellationReason;
 import greencity.enums.CourierLimit;
 import greencity.enums.NotificationReceiverType;
@@ -265,30 +263,6 @@ public class ModelUtils {
             .violationLevel(MAJOR)
             .description("violation1")
             .violationDate(localdatetime)
-            .build();
-    }
-
-    public static Address address() {
-        List<Long> id = addressDto().stream().map(AddressDto::getId).toList();
-        List<String> city = addressDto().stream().map(AddressDto::getCity).toList();
-        List<String> street = addressDto().stream().map(AddressDto::getStreet).toList();
-        List<String> district = addressDto().stream().map(AddressDto::getDistrict).toList();
-        List<String> houseNumber = addressDto().stream().map(AddressDto::getHouseNumber).toList();
-        List<String> entranceNumber =
-            addressDto().stream().map(AddressDto::getEntranceNumber).toList();
-        List<String> houseCorpus = addressDto().stream().map(AddressDto::getHouseCorpus).toList();
-        List<Boolean> actual = addressDto().stream().map(AddressDto::getActual).toList();
-        return Address.builder()
-            .id(id.getFirst())
-            .city(String.valueOf(city))
-            .district(String.valueOf(district))
-            .street(String.valueOf(street))
-            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
-            .entranceNumber(String.valueOf(entranceNumber))
-            .houseNumber(String.valueOf(houseNumber))
-            .houseCorpus(String.valueOf(houseCorpus))
-            .actual(Boolean.valueOf(String.valueOf(actual)))
-            .addressStatus(AddressStatus.DELETED)
             .build();
     }
 

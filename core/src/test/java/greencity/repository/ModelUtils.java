@@ -15,28 +15,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public class ModelUtils {
-    private final static DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyy-MM-d");
-
-    public static User getUser() {
-        return User.builder()
-            .uuid(UUID.randomUUID().toString())
-            .orders(getOrderList())
-            .currentPoints(0)
-            .recipientName("Ivan")
-            .recipientSurname("Ivanov")
-            .recipientEmail("ivan@gmail.com")
-            .recipientPhone("+380981099667")
-            .violations(0)
-            .build();
-    }
-
     public static List<Order> getOrderList() {
         List<Order> orderList = new ArrayList<>();
         orderList.add(Order.builder()
@@ -47,21 +30,6 @@ public class ModelUtils {
             .orderDate(LocalDateTime.now())
             .build());
         return orderList;
-    }
-
-    public static List<User> getUsers() {
-        List<User> users = new ArrayList<>();
-        users.add(User.builder()
-            .uuid(UUID.randomUUID().toString())
-            .orders(getOrderList())
-            .currentPoints(0)
-            .recipientName("Ivan")
-            .recipientSurname("Ivanov")
-            .recipientEmail("ivan@gmail.com")
-            .recipientPhone("+380981099667")
-            .violations(0)
-            .build());
-        return users;
     }
 
     public static Address getAddress() {

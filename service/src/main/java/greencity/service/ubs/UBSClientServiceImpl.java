@@ -3,8 +3,6 @@ package greencity.service.ubs;
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
-import com.liqpay.LiqPay;
-import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.client.WayForPayClient;
 import greencity.constant.AppConstant;
@@ -94,7 +92,6 @@ import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.OrdersForUserRepository;
 import greencity.repository.PaymentRepository;
-import greencity.repository.RegionRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.TelegramBotRepository;
@@ -112,13 +109,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -157,7 +152,7 @@ import static java.util.stream.Collectors.joining;
  * Implementation of {@link UBSClientService}.
  */
 @Service
-@Data
+@RequiredArgsConstructor
 public class UBSClientServiceImpl implements UBSClientService {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
@@ -170,7 +165,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final AddressRepository addressRepo;
     private final OrderAddressRepository orderAddressRepository;
     private final UserRemoteClient userRemoteClient;
-    private final FondyClient fondyClient;
     private final PaymentRepository paymentRepository;
     private final EncryptionUtil encryptionUtil;
     private final EventRepository eventRepository;
@@ -182,20 +176,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final TariffLocationRepository tariffLocationRepository;
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
-    private final RegionRepository regionRepository;
     private final TelegramBotRepository telegramBotRepository;
     private final ViberBotRepository viberBotRepository;
     private final LocationApiService locationApiService;
     private final OrderBagRepository orderBagRepository;
     private final OrderBagService orderBagService;
     private final NotificationService notificationService;
-    private final LiqPay liqPay;
     private final WayForPayClient wayForPayClient;
     private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
 
-    @Lazy
-    @Autowired
-    private UBSManagementService ubsManagementService;
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
@@ -222,15 +211,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String LANGUAGE_EN = "en";
     private static final Double KYIV_LATITUDE = 50.4546600;
     private static final Double KYIV_LONGITUDE = 30.5238000;
-    private static final Integer EARTH_RADIUS = 6371;
     private static final Double LOCATION_40_KM_ZONE_VALUE = 40.00;
     private static final String UKRAINE_EN = "Ukraine";
     private static final String LANG_EN = "en";
     private static final String ADDRESS_NOT_FOUND_BY_ID_MESSAGE = "Address not found with id: ";
     private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected "
         + "does not match, reselect correct data.";
-    private static final String USER_IS_NOT_ORDER_OWNER_MESSAGE = "Current user has no owner rights to process "
-        + "the order with id: ";
 
     /**
      * {@inheritDoc}
@@ -1733,7 +1719,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public List<CourierDto> getAllActiveCouriers() {
         return courierRepository.getAllActiveCouriers().stream()
             .map(courier -> modelMapper.map(courier, CourierDto.class))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private TariffsInfo findTariffsInfoByCourierAndLocationId(Long courierId, Long locationId) {

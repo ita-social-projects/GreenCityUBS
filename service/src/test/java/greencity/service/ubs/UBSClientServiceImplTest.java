@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 
@@ -103,9 +102,6 @@ class UBSClientServiceImplTest {
     private UserRemoteClient userRemoteClient;
 
     @Mock
-    private FondyClient fondyClient;
-
-    @Mock
     private AddressRepository addressRepository;
 
     @Mock
@@ -127,10 +123,10 @@ class UBSClientServiceImplTest {
     private EncryptionUtil encryptionUtil;
 
     @Mock
-    private PaymentRepository paymentRepository;
+    private EventRepository eventRepository;
 
     @Mock
-    private EventRepository eventRepository;
+    private PaymentRepository paymentRepository;
 
     @Mock
     private EventService eventService;
