@@ -123,8 +123,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
-        assertThrows(EntityNotFoundException.class,
-            () -> ordersAdminsPageService.getParametersForOrdersTable("1", List.of()));
+        assertThrowsEntityNotFoundException();
     }
 
     @Test
@@ -139,8 +138,7 @@ class OrdersAdminsPageServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
-        assertThrows(EntityNotFoundException.class,
-            () -> ordersAdminsPageService.getParametersForOrdersTable("1", List.of()));
+        assertThrowsEntityNotFoundException();
     }
 
     @Test
@@ -185,8 +183,13 @@ class OrdersAdminsPageServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8L)));
 
+        assertThrowsEntityNotFoundException();
+    }
+
+    void assertThrowsEntityNotFoundException() {
+        List<UkraineRegion> emptyList = new ArrayList<>();
         assertThrows(EntityNotFoundException.class,
-            () -> ordersAdminsPageService.getParametersForOrdersTable("1", List.of()));
+            () -> ordersAdminsPageService.getParametersForOrdersTable("1", emptyList));
     }
 
     @Test
