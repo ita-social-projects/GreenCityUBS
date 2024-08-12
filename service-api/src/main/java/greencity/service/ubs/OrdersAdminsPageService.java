@@ -6,16 +6,27 @@ import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.entity.user.employee.Employee;
+import greencity.enums.UkraineRegion;
 import java.util.List;
 
 public interface OrdersAdminsPageService {
     /**
-     * Method that return parameters for building table on admin's page.
+     * Retrieves parameters needed to build a table for displaying orders on the
+     * admin's page. This method provides a {@link TableParamsDto} that contains the
+     * necessary parameters for constructing the orders table. It takes into account
+     * the administrator's UUID and a list of Ukrainian regions.
      *
-     * @param userId of {@link String} administrator's uuId;
+     * @param userId  the UUID of the administrator, which identifies the admin
+     *                user. This value should be a valid UUID string.
+     * @param regions a list of {@link UkraineRegion} instances representing the
+     *                regions to be included in the table. This list helps filter or
+     *                categorize the orders based on specific Ukrainian regions.
+     * @return a {@link TableParamsDto} object containing the parameters required
+     *         for building the orders table. The returned object will be populated
+     *         based on the provided userId and regions.
      * @author Liubomyr Pater
      */
-    TableParamsDto getParametersForOrdersTable(String userId);
+    TableParamsDto getParametersForOrdersTable(String userId, List<UkraineRegion> regions);
 
     /**
      * Method that return.

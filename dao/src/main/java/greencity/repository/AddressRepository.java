@@ -113,4 +113,19 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
         value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) "
             + "FROM Address  ad WHERE ad.region = a.region)")
     List<Address> findDistinctRegions();
+
+    /**
+     * Retrieves a list of {@link Address} entities where the region is one of the
+     * specified regions. The method searches for matches in both the English
+     * (`regionEn`) and local (`region`) region fields.
+     *
+     * @param regions a list of region names to search for in both English and local
+     *                region fields. The list should contain valid region names. The
+     *                method will return addresses where either the `regionEn` or
+     *                `region` matches any of the specified regions.
+     * @return a list of {@link Address} entities that match the specified regions.
+     *         The list may be empty if no matching addresses are found.
+     */
+    @Query(value = "SELECT a FROM Address a WHERE a.regionEn IN :regions OR a.region IN :regions")
+    List<Address> findAllCitiesByRegion(List<String> regions);
 }

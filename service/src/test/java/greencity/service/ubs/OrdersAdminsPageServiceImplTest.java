@@ -120,7 +120,8 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
-        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
+        assertThrows(EntityNotFoundException.class,
+            () -> ordersAdminsPageService.getParametersForOrdersTable("1", List.of()));
     }
 
     @Test
@@ -135,7 +136,8 @@ class OrdersAdminsPageServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
-        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
+        assertThrows(EntityNotFoundException.class,
+            () -> ordersAdminsPageService.getParametersForOrdersTable("1", List.of()));
     }
 
     @Test
@@ -180,7 +182,8 @@ class OrdersAdminsPageServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8L)));
 
-        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
+        assertThrows(EntityNotFoundException.class,
+            () -> ordersAdminsPageService.getParametersForOrdersTable("1", List.of()));
     }
 
     @Test
@@ -247,7 +250,7 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(addressList);
         when(addressRepository.findDistinctRegions())
             .thenReturn(addressList);
-        assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
+        assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1", List.of()));
     }
 
     @Test
