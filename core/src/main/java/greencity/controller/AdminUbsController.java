@@ -9,6 +9,7 @@ import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.dto.violation.UserViolationsWithUserName;
 import greencity.enums.SortingOrder;
+import greencity.enums.UkraineRegion;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
@@ -81,8 +82,10 @@ public class AdminUbsController {
     })
     @GetMapping("/tableParams")
     public ResponseEntity<TableParamsDto> getTableParameters(
-        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getParametersForOrdersTable(userUuid));
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
+        @RequestParam(value = "region", required = false) List<UkraineRegion> regions) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ordersAdminsPageService.getParametersForOrdersTable(userUuid, regions));
     }
 
     /**
