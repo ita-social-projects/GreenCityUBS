@@ -20,6 +20,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
+import greencity.enums.UkraineRegion;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.AddressRepository;
@@ -34,10 +35,12 @@ import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -1158,5 +1161,81 @@ class OrdersAdminsPageServiceImplTest {
         verify(modelMapper).map(columnWidthDto, TableColumnWidthForEmployee.class);
         verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(1L);
         verify(tableColumnWidthForEmployeeRepository).save(any(TableColumnWidthForEmployee.class));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideRegionsForTesting")
+    void getParametersForOrdersWithRegionsTest() {
+        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
+        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEng("en");
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
+
+        List<ReceivingStationDto> receivingStations = new ArrayList<>();
+        List<Employee> employeeList = new ArrayList<>();
+        employeeList.add(ModelUtils.getEmployee());
+        List<Address> addressList = List.of(ModelUtils.getAddress());
+        List<UkraineRegion> regions = List.of(UkraineRegion.KHARKIV_OBLAST);
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(2L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(2L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(3L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(3L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(4L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(4L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(5L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(5L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(6L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(7L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(7L)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8L)));
+
+        when(orderPaymentStatusTranslationRepository.getOrderPaymentStatusTranslationById(anyLong()))
+            .thenReturn(Optional.ofNullable(orderPaymentStatusTranslation));
+
+        when(superAdminService.getAllReceivingStations())
+            .thenReturn(receivingStations);
+        when(employeeRepository.findAllByEmployeePositionId(2L))
+            .thenReturn(employeeList);
+        when(employeeRepository.findAllByEmployeePositionId(3L))
+            .thenReturn(employeeList);
+        when(employeeRepository.findAllByEmployeePositionId(5L))
+            .thenReturn(employeeList);
+        when(employeeRepository.findAllByEmployeePositionId(4L))
+            .thenReturn(employeeList);
+        when(addressRepository.findDistinctDistricts())
+            .thenReturn(addressList);
+        when(addressRepository.findDistinctRegions())
+            .thenReturn(addressList);
+        when(addressRepository.findAllCitiesByRegion(any())).thenReturn(List.of(ModelUtils.getAddress()));
+
+        assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1", regions));
+    }
+
+    private static Stream<List<UkraineRegion>> provideRegionsForTesting() {
+        return Stream.of(
+            List.of(),
+            List.of(UkraineRegion.KHARKIV_OBLAST),
+            List.of(UkraineRegion.KHARKIV_OBLAST, UkraineRegion.KYIV_CITY),
+            List.of(UkraineRegion.ODESSA_OBLAST, UkraineRegion.DNIPRO_OBLAST, UkraineRegion.ZAPORIZHIA_OBLAST));
     }
 }
