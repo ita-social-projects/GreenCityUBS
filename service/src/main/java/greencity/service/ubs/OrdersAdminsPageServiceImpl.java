@@ -134,7 +134,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
 
         ColumnDTO city;
-        if (regions.isEmpty()) {
+        if (regions == null || regions.isEmpty()) {
             city = new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
                 true, true, 36, EditType.READ_ONLY, cityList(), exportAddress);
