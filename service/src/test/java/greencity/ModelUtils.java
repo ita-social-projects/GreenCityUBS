@@ -110,7 +110,6 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -4183,15 +4182,6 @@ public class ModelUtils {
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>())
             .sumTotalAmountWithoutDiscounts(20000L)
-            .build();
-    }
-
-    public static AddBonusesToUserDto getAddBonusesToUserDto() {
-        return AddBonusesToUserDto.builder()
-            .paymentId("5")
-            .receiptLink("test")
-            .settlementdate("test")
-            .amount(1000L)
             .build();
     }
 

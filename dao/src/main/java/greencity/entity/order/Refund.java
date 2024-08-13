@@ -12,6 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -26,4 +28,12 @@ public class Refund {
     @Column(name = "order_id")
     @NotNull
     private Long orderId;
+
+    @Column(name = "date")
+    @NotNull
+    private LocalDateTime date;
+
+    @Column(name = "amount")
+    @NotNull
+    private Long amount;
 }

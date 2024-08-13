@@ -22,7 +22,6 @@ import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.order.Order;
@@ -254,17 +253,6 @@ public interface UBSManagementService {
     void updateAllOrderAdminPageInfo(UpdateAllOrderPageDto updateAllOrderPageDto, String email, String lang);
 
     /**
-     * Method that add bonuses to user.
-     *
-     * @param addBonusesToUserDto {@link AddBonusesToUserDto}.
-     * @param orderId             {@link Long}.
-     * @param email               {@link String}.
-     *
-     * @author Pavlo Hural.
-     */
-    AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId, String email);
-
-    /**
      * Method returns employee's access status to order.
      *
      * @param orderId {@link Long}.
@@ -302,12 +290,4 @@ public interface UBSManagementService {
      */
     NotTakenOrderReasonDto getNotTakenOrderReason(Long orderId);
 
-    /**
-     * Method saves order ID of order for which we need to make a refund.
-     *
-     * @param orderId {@link Long}.
-     *
-     * @author Anton Bondar.
-     */
-    void saveOrderIdForRefund(Long orderId);
 }

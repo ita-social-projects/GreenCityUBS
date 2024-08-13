@@ -31,7 +31,6 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.table.CustomTableViewDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
@@ -90,12 +89,10 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
-    private final UBSClientService ubsClientService;
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
     private final BigOrderTableServiceView bigOrderTableService;
-    private final OrderRepository orderRepository;
     private final PaymentService paymentService;
 
     /**
@@ -918,28 +915,6 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for adding bonuses to user.
-     *
-     * @param orderId             {@link Long}.
-     * @param addBonusesToUserDto {@link AddBonusesToUserDto}.
-     *
-     * @author Pavlo Hural.
-     */
-    @Operation(summary = "add bonuses to user")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
-    })
-    @PostMapping(value = "/add-bonuses-user/{id}")
-    public ResponseEntity<AddBonusesToUserDto> addBonusesToUser(@PathVariable(name = "id") Long orderId,
-        @RequestBody @Valid AddBonusesToUserDto addBonusesToUserDto, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId, principal.getName()));
-    }
-
-    /**
      * Controller for get order cancellation reason.
      *
      * @return {@link OrderCancellationReasonDto}.
@@ -983,28 +958,5 @@ public class ManagementOrderController {
         @Valid @PathVariable("id") Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getNotTakenOrderReason(orderId));
-    }
-
-    /**
-     * Controller saves order ID of order for which we need to make a refund.
-     *
-     * @param orderId {@link Long}.
-     * @return {@link HttpStatus} - http status.
-     *
-     * @author Anton Bondar
-     */
-    @Operation(summary = "saves order ID of order for which we need to make a refund")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/save-order-for-refund/{orderId}")
-    public ResponseEntity<HttpStatus> saveOrderIdForRefund(
-        @Valid @PathVariable("orderId") Long orderId) {
-        ubsManagementService.saveOrderIdForRefund(orderId);
-        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

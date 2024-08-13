@@ -80,6 +80,8 @@ public final class OrderHistory {
     public static final String UPDATE_DATE_EXPORT = "Змінено деталі вивезення. Дата вивезення:";
     public static final String SET_DATE_EXPORT = "Встановлено деталі вивезення. Дата вивезення:";
     public static final String UPDATE_MIX_WASTE = "Змінено деталі замовлення. Мікс відходів ";
+    public static final String CANCELED_ORDER_MONEY_REFUND = "Кошти за замовлення повернуто.";
+    public static final String CANCELED_ORDER_MONEY_REFUND_ENG = "The money for the order has been refunded.";
 
     /**
      * Constructor.

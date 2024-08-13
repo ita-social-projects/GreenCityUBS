@@ -10,13 +10,33 @@ import greencity.dto.bag.BagMappingDto;
 import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.order.*;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.CounterOrderDetailsDto;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.ExportDetailsDtoUpdate;
+import greencity.dto.order.NotTakenOrderReasonDto;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
+import greencity.dto.order.OrderInfoDto;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentInfoDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.order.*;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -28,7 +48,23 @@ import greencity.enums.OrderStatus;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.*;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeOrderPositionRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderDetailRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.PositionRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.RefundRepository;
+import greencity.repository.ServiceRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -44,7 +80,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,7 +93,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
@@ -1945,73 +1992,6 @@ class UBSManagementServiceImplTest {
 
     }
 
-    @Test
-    void addBonusesToUserTest() {
-        Order order = getOrderForGetOrderStatusData2Test();
-        User user = order.getUser();
-        Employee employee = getEmployee();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
-        ubsManagementService.addBonusesToUser(getAddBonusesToUserDto(), 1L, employee.getEmail());
-
-        verify(orderRepository).findById(1L);
-        verify(orderRepository).save(order);
-        verify(userRepository).save(user);
-        verify(notificationService).notifyBonuses(order, 900L);
-        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
-    }
-
-    @Test
-    void addBonusesToUserIfOrderStatusIsCanceled() {
-        Order order = getOrderForGetOrderStatusData2Test();
-        order.setOrderStatus(OrderStatus.CANCELED);
-        User user = order.getUser();
-        Employee employee = getEmployee();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-//        when(orderBagService.findAllBagsByOrderId(1L)).thenReturn(getBaglist());
-        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
-
-        ubsManagementService.addBonusesToUser(getAddBonusesToUserDto(), 1L, employee.getEmail());
-
-        verify(orderRepository).findById(1L);
-        verify(orderRepository).save(order);
-        verify(userRepository).save(user);
-        verify(notificationService).notifyBonuses(order, 200L);
-        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
-    }
-
-    @Test
-    void addBonusesToUserWithoutExportedBagsTest() {
-        Order order = ModelUtils.getOrderWithoutExportedBags();
-        User user = order.getUser();
-        Employee employee = getEmployee();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
-        ubsManagementService.addBonusesToUser(getAddBonusesToUserDto(), 1L, employee.getEmail());
-
-        verify(orderRepository).findById(1L);
-        verify(orderRepository).save(order);
-        verify(userRepository).save(user);
-        verify(notificationService).notifyBonuses(order, 300L);
-        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
-    }
-
-    @Test
-    void addBonusesToUserWithNoOverpaymentTest() {
-        Order order = getOrderForGetOrderStatusData2Test();
-        String email = getEmployee().getEmail();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
-        when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
-
-        AddBonusesToUserDto addBonusesToUserDto = getAddBonusesToUserDto();
-        assertThrows(BadRequestException.class,
-            () -> ubsManagementService.addBonusesToUser(addBonusesToUserDto, 1L, email));
-    }
 
     @Test
     void checkEmployeeForOrderTest() {
@@ -2167,17 +2147,6 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> ubsManagementService.getNotTakenOrderReason(1L));
         verify(orderRepository).findById(1L);
-    }
-
-    @Test
-    void saveOrderIdForRefundTest() {
-        Order order = getOrder();
-        Refund refund = getRefund(order.getId());
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(refundRepository.save(refund)).thenReturn(refund);
-        ubsManagementService.saveOrderIdForRefund(1L);
-        verify(orderRepository).findById(1L);
-        verify(refundRepository).save(refund);
     }
 
     @Test
