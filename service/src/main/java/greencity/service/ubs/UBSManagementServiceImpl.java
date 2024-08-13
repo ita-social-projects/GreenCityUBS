@@ -119,10 +119,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
 import static greencity.constant.AppConstant.PAYMENT_REFUND_ENG;
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
+import static greencity.constant.ErrorMessage.ORDER_PAYMENT_STATUS_MUST_BE_CANCELED;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -1472,41 +1481,43 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private void processRefundForOrder(Order order, UpdateOrderPageAdminDto updateOrderPageAdminDto, String employeeEmail) {
-        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
-            if (updateOrderPageAdminDto.isReturnBonuses()){
+    private void processRefundForOrder(Order order, UpdateOrderPageAdminDto updateOrderPageAdminDto,
+        String employeeEmail) {
+        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DONE
+            || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
+            if (updateOrderPageAdminDto.isReturnBonuses()) {
                 refundPaymentsInBonus(order, employeeEmail);
             }
-            if (updateOrderPageAdminDto.isReturnMoney()){
+            if (updateOrderPageAdminDto.isReturnMoney()) {
                 refundPaymentsInMoney(order, employeeEmail);
             }
-            if (order.getOrderStatus() != OrderStatus.BROUGHT_IT_HIMSELF){
+            if (order.getOrderStatus() != OrderStatus.BROUGHT_IT_HIMSELF) {
                 throw new BadRequestException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
             }
         }
     }
 
     private void refundPaymentsInMoney(Order order, String employeeEmail) {
-        if (order.getOrderStatus() != OrderStatus.CANCELED){
+        if (order.getOrderStatus() != OrderStatus.CANCELED) {
             throw new BadRequestException(ORDER_PAYMENT_STATUS_MUST_BE_CANCELED);
         }
         Long paidAmount = PaymentUtil.calculatePaidAmount(order);
-        if (paidAmount > 0){
+        if (paidAmount > 0) {
             order.getPayment().add(Payment.builder()
-                    .amount(-paidAmount)
-                    .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
-                    .receiptLink(PAYMENT_REFUND_ENG)
-                    .order(order)
-                    .currency("UAH")
-                    .orderStatus(String.valueOf(OrderStatus.FORMED))
-                    .paymentStatus(PaymentStatus.PAID)
-                    .build());
+                .amount(-paidAmount)
+                .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .receiptLink(PAYMENT_REFUND_ENG)
+                .order(order)
+                .currency("UAH")
+                .orderStatus(String.valueOf(OrderStatus.FORMED))
+                .paymentStatus(PaymentStatus.PAID)
+                .build());
             order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
             refundRepository.save(Refund.builder()
-                    .orderId(order.getId())
-                    .amount(paidAmount)
-                    .date(LocalDateTime.now(ZoneId.of("Europe/Kiev")))
-                    .build());
+                .orderId(order.getId())
+                .amount(paidAmount)
+                .date(LocalDateTime.now(ZoneId.of("Europe/Kiev")))
+                .build());
             order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
             orderRepository.save(order);
             eventService.saveEvent(OrderHistory.CANCELED_ORDER_MONEY_REFUND, employeeEmail, order);
@@ -1517,21 +1528,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void refundPaymentsInBonus(Order order, String email) {
         CounterOrderDetailsDto prices =
-                PaymentUtil.getPriceDetails(order.getId(), orderRepository, orderBagService, certificateRepository);
+            PaymentUtil.getPriceDetails(order.getId(), orderRepository, orderBagService, certificateRepository);
         Long overpaymentInCoins =
-                PaymentUtil.calculateOverpayment(order, PaymentUtil.convertBillsIntoCoins(setTotalPrice(prices)));
+            PaymentUtil.calculateOverpayment(order, PaymentUtil.convertBillsIntoCoins(setTotalPrice(prices)));
         checkOverpayment(overpaymentInCoins);
         User currentUser = order.getUser();
 
         order.getPayment().add(Payment.builder()
-                .amount(-overpaymentInCoins)
-                .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
-                .receiptLink(ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG)
-                .order(order)
-                .currency("UAH")
-                .orderStatus(String.valueOf(OrderStatus.FORMED))
-                .paymentStatus(PaymentStatus.PAID)
-                .build());
+            .amount(-overpaymentInCoins)
+            .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
+            .receiptLink(ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG)
+            .order(order)
+            .currency("UAH")
+            .orderStatus(String.valueOf(OrderStatus.FORMED))
+            .paymentStatus(PaymentStatus.PAID)
+            .build());
 
         transferPointsToUser(order, currentUser, overpaymentInCoins);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);

@@ -1992,7 +1992,6 @@ class UBSManagementServiceImplTest {
 
     }
 
-
     @Test
     void checkEmployeeForOrderTest() {
         User user = getTestUser();

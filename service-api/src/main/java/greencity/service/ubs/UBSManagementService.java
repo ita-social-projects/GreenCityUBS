@@ -289,5 +289,4 @@ public interface UBSManagementService {
      * @author Kharchenko Volodymyr.
      */
     NotTakenOrderReasonDto getNotTakenOrderReason(Long orderId);
-
 }
