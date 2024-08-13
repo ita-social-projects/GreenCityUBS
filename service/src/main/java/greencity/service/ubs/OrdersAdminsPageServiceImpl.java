@@ -142,11 +142,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             district = new ColumnDTO(new TitleDto("district", "Район", "District"), "district", 20, false,
                 true, true, 37, EditType.READ_ONLY, districtList(), exportAddress);
         } else {
+            List<Address> addresses = getAddresses(regions);
             city = new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
-                true, true, 36, EditType.READ_ONLY, cityList(regions), exportAddress);
+                true, true, 36, EditType.READ_ONLY, cityList(addresses), exportAddress);
             district = new ColumnDTO(new TitleDto("district", "Район", "District"), "district", 20, false,
-                true, true, 37, EditType.READ_ONLY, districtList(regions), exportAddress);
+                true, true, 37, EditType.READ_ONLY, districtList(addresses), exportAddress);
         }
 
         List<ColumnDTO> columnDTOS = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
@@ -442,9 +443,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .collect(Collectors.toList());
     }
 
-    private List<OptionForColumnDTO> districtList(List<UkraineRegion> regions) {
-        List<Address> addresses = getAddresses(regions);
-
+    private List<OptionForColumnDTO> districtList(List<Address> addresses) {
         return addresses.stream()
             .map(address -> OptionForColumnDTO
                 .builder()
@@ -467,9 +466,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .collect(Collectors.toList());
     }
 
-    private List<OptionForColumnDTO> cityList(List<UkraineRegion> regions) {
-        List<Address> addresses = getAddresses(regions);
-
+    private List<OptionForColumnDTO> cityList(List<Address> addresses) {
         return addresses.stream()
             .map(address -> OptionForColumnDTO
                 .builder()
