@@ -120,6 +120,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String WITHOUT_NAVIGATOR_UA = "Без штурмана";
     private static final String WITHOUT_DRIVER_EN = "Without driver";
     private static final String WITHOUT_DRIVER_UA = "Без водія";
+    private static final String DISTRICT = "district";
 
     @Override
     public TableParamsDto getParametersForOrdersTable(String uuid, List<UkraineRegion> regions) {
@@ -139,14 +140,14 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             city = new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
                 true, true, 36, EditType.READ_ONLY, cityList(), exportAddress);
-            district = new ColumnDTO(new TitleDto("district", "Район", "District"), "district", 20, false,
+            district = new ColumnDTO(new TitleDto(DISTRICT, "Район", "District"), DISTRICT, 20, false,
                 true, true, 37, EditType.READ_ONLY, districtList(), exportAddress);
         } else {
             List<Address> addresses = getAddresses(regions);
             city = new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
                 true, true, 36, EditType.READ_ONLY, cityList(addresses), exportAddress);
-            district = new ColumnDTO(new TitleDto("district", "Район", "District"), "district", 20, false,
+            district = new ColumnDTO(new TitleDto(DISTRICT, "Район", "District"), DISTRICT, 20, false,
                 true, true, 37, EditType.READ_ONLY, districtList(addresses), exportAddress);
         }
 
