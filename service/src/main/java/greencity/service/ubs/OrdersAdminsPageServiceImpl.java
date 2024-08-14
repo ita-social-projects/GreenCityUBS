@@ -446,6 +446,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<OptionForColumnDTO> districtList(List<Address> addresses) {
         return addresses.stream()
+            .collect(Collectors.toMap(
+                Address::getDistrict,
+                address -> address,
+                (existing, replacement) -> existing))
+            .values()
+            .stream()
             .map(address -> OptionForColumnDTO
                 .builder()
                 .key(address.getId().toString())
