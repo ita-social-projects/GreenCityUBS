@@ -8,7 +8,9 @@ import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
+import greencity.enums.UkraineRegion;
 import greencity.service.ubs.OrdersAdminsPageService;
+import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,10 +57,19 @@ class AdminUbsControllerTest {
     @Test
     void getTableParameters() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        mockMvc.perform(get(management + "/tableParams")
+        mockMvc.perform(get(management + "/tableParams" + "?region=")
             .principal(principal))
             .andExpect(status().isOk());
-        verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf");
+        verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf", Collections.emptyList());
+    }
+
+    @Test
+    void getTableParametersWithRegion() throws Exception {
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        mockMvc.perform(get(management + "/tableParams" + "?region=KHARKIV_OBLAST")
+                .principal(principal))
+            .andExpect(status().isOk());
+        verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf", List.of(UkraineRegion.KHARKIV_OBLAST));
     }
 
     @Test

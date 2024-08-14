@@ -16,10 +16,12 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.ubs.Address;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.UkraineRegion;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
@@ -60,6 +62,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER;
 import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
@@ -117,7 +120,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String WITHOUT_DRIVER_UA = "Без водія";
 
     @Override
-    public TableParamsDto getParametersForOrdersTable(String uuid) {
+    public TableParamsDto getParametersForOrdersTable(String uuid, List<UkraineRegion> regions) {
         String ordersInfo = "ORDERS_INFO";
         String customersInfo = "CUSTOMERS_INFO";
         String exportAddress = "EXPORT_ADDRESS";
@@ -127,6 +130,17 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
         OrderPage orderPage = new OrderPage();
         OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
+
+        ColumnDTO city;
+        if (regions == null || regions.isEmpty()) {
+            city = new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
+                false,
+                true, true, 36, EditType.READ_ONLY, cityList(), exportAddress);
+        } else {
+            city = new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
+                false,
+                true, true, 36, EditType.READ_ONLY, cityList(regions), exportAddress);
+        }
 
         List<ColumnDTO> columnDTOS = List.of(
             new ColumnDTO(new TitleDto("select", "Вибір", "Select"), "", 20, true, true, false, 0,
@@ -165,9 +179,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 "violationsAmount", 20, false, true, false, 12, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
             new ColumnDTO(new TitleDto("region", "Область", "Region"), "region", 20, false,
                 true, true, 35, EditType.READ_ONLY, regionsList(), exportAddress),
-            new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
-                false,
-                true, true, 36, EditType.READ_ONLY, cityList(), exportAddress),
+            city,
             new ColumnDTO(new TitleDto("district", "Район", "District"), "district", 20, false,
                 true, true, 37, EditType.READ_ONLY, districtList(), exportAddress),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "address", 20, false, true,
@@ -288,17 +300,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         }
     }
 
+    @RequiredArgsConstructor
     private enum ColumnNameToPosition {
         RESPONSIBLE_MANAGER("responsibleManager", 1L),
         RESPONSIBLE_CALLER(CALLER, 2L),
         RESPONSIBLE_LOGICMAN(LOGIC_MAN, 3L),
         RESPONSIBLE_NAVIGATOR(NAVIGATOR, 4L),
         RESPONSIBLE_DRIVER(DRIVER, 5L);
-
-        ColumnNameToPosition(String columnValue, Long positionId) {
-            this.columnValue = columnValue;
-            this.positionId = positionId;
-        }
 
         public static Long columnNameToEmployeePosition(String columnName) {
             return Arrays.stream(ColumnNameToPosition.values())
@@ -433,6 +441,32 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 .ua(address.getCity())
                 .build())
             .collect(Collectors.toList());
+    }
+
+    private List<OptionForColumnDTO> cityList(List<UkraineRegion> regions) {
+        List<String> regionsList = regions.stream()
+            .map(UkraineRegion::getDisplayName)
+            .toList();
+
+        List<Address> allCitiesByRegion = addressRepository.findAllCitiesByRegion(regionsList);
+
+        Map<String, Address> uniqueCityAddresses = allCitiesByRegion
+            .stream()
+            .collect(Collectors.toMap(
+                Address::getCity,
+                address -> address,
+                (existing, replacement) -> existing));
+
+        List<Address> addresses = uniqueCityAddresses.values().stream().toList();
+
+        return addresses.stream()
+            .map(address -> OptionForColumnDTO
+                .builder()
+                .key(address.getId().toString())
+                .en(address.getCityEn())
+                .ua(address.getCity())
+                .build())
+            .toList();
     }
 
     private List<OptionForColumnDTO> includeItemsWithoutResponsiblePerson(String nameUa, String nameEn) {

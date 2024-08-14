@@ -4048,10 +4048,10 @@ class UBSClientServiceImplTest {
     @Test
     void getTariffIdByLocationIdTest() {
         Long locationId = 1L;
-        Long tariffId = 2L;
+        List<Long> tariffId = List.of(2L);
         when(tariffsInfoRepository.findTariffIdByLocationId(locationId)).thenReturn(Optional.of(tariffId));
 
-        Long actualTariffId = ubsClientService.getTariffIdByLocationId(locationId);
+        List<Long> actualTariffId = ubsClientService.getTariffIdByLocationId(locationId);
 
         assertEquals(tariffId, actualTariffId);
 
