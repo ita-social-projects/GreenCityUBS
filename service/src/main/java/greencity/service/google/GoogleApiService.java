@@ -8,19 +8,19 @@ import com.google.maps.model.GeocodingResult;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.api.GoogleApiException;
-import lombok.extern.slf4j.Slf4j;
-import lombok.Data;
-import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Service
-@Data
 @Slf4j
+@RequiredArgsConstructor
 public class GoogleApiService {
+    private static final List<Locale> locales = List.of(Locale.of("uk"), Locale.of("en"));
     private final GeoApiContext context;
-    private static final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
 
     /**
      * Send request to the Google and receive response with geocoding.

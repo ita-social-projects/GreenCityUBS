@@ -58,7 +58,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -85,7 +84,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;
     private final CertificateRepository certificateRepository;
-    private final UBSManagementEmployeeService employeeService;
     private final ModelMapper modelMapper;
     private final ReceivingStationRepository receivingStationRepository;
     private final PositionRepository positionRepository;
@@ -144,7 +142,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, true, 36, EditType.READ_ONLY, cityList(regions), exportAddress);
         }
 
-        List<ColumnDTO> columnDTOS = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
+        List<ColumnDTO> columnDTOS = List.of(
             new ColumnDTO(new TitleDto("select", "Вибір", "Select"), "", 20, true, true, false, 0,
                 EditType.CHECKBOX,
                 new ArrayList<>(), ""),
@@ -234,8 +232,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, true, 32, EditType.SELECT, navigatorList(), responsible),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "blockedBy",
                 20, false, true, false, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
-                ordersInfo))));
-
+                ordersInfo));
         return new TableParamsDto(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
@@ -303,17 +300,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         }
     }
 
+    @RequiredArgsConstructor
     private enum ColumnNameToPosition {
         RESPONSIBLE_MANAGER("responsibleManager", 1L),
         RESPONSIBLE_CALLER(CALLER, 2L),
         RESPONSIBLE_LOGICMAN(LOGIC_MAN, 3L),
         RESPONSIBLE_NAVIGATOR(NAVIGATOR, 4L),
         RESPONSIBLE_DRIVER(DRIVER, 5L);
-
-        ColumnNameToPosition(String columnValue, Long positionId) {
-            this.columnValue = columnValue;
-            this.positionId = positionId;
-        }
 
         public static Long columnNameToEmployeePosition(String columnName) {
             return Arrays.stream(ColumnNameToPosition.values())
@@ -368,13 +361,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<TitleDto> columnBelongingListForDevelopStage() {
-        return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
+        return List.of(
             new TitleDto("ORDERS_INFO", "Інформація про замовлення", "order info"),
             new TitleDto("CUSTOMERS_INFO", "Інформація про клієнта", "customers info"),
             new TitleDto("EXPORT_ADDRESS", "Адреса вивезення", "export address"),
             new TitleDto("ORDERS_DETAILS", "Деталі замовлення", "orders details"),
             new TitleDto("EXPORT_DETAILS", "Деталі вивезення", "export details"),
-            new TitleDto("RESPONSIBLE", "Відповідальні особи", "responsible persons"))));
+            new TitleDto("RESPONSIBLE", "Відповідальні особи", "responsible persons"));
     }
 
     private List<OptionForColumnDTO> receivingStationList() {
@@ -698,7 +691,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
-        ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
+        ReceivingStation station = receivingStationRepository.getReferenceById(Long.parseLong(value));
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             try {

@@ -97,13 +97,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     void unblockAllOrders(@Param("employee_id") Long employeeId);
 
     /**
-     * Method gets user order by order id.
-     *
-     * @author Max Boiarchuk
-     */
-    Optional<Order> findUserById(@Param(value = "orderId") Long orderId);
-
-    /**
      * Method for getting last order of user by user's uuid if such order exists.
      *
      * @param usersUuid - user's uuid

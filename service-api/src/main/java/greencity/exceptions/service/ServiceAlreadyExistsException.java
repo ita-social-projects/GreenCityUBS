@@ -1,12 +1,7 @@
 package greencity.exceptions.service;
 
+import lombok.experimental.StandardException;
+
+@StandardException
 public class ServiceAlreadyExistsException extends RuntimeException {
-    /**
-     * Constructor with message.
-     *
-     * @param message message, that explains cause of the exception.
-     */
-    public ServiceAlreadyExistsException(String message) {
-        super(message);
-    }
 }

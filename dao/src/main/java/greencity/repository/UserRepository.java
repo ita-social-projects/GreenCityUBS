@@ -69,20 +69,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     Optional<User> findUserByOrderId(Long orderId);
 
     /**
-     * Finds list of User who have no orders after {@param localDate}.
-     *
-     * @param fromDate - date before which user have no orders.
-     * @param toDate   - date after which user have no orders.
-     * @return {@link List} of {@link User} - which have no orders after
-     *         {@param localDate}.
-     */
-    @Query(nativeQuery = true,
-        value = " SELECT u.* FROM users as u INNER JOIN orders as o ON u.id = o.users_id "
-            + "WHERE (SELECT COUNT(id) FROM orders WHERE CAST(o.order_date AS DATE) < :toDate "
-            + "AND CAST(o.order_date AS DATE) > :fromDate)!=0")
-    List<User> getAllInactiveUsers(LocalDate fromDate, LocalDate toDate);
-
-    /**
      * Method return all user's id depends on they tariffsInfo.
      *
      * @param tariffsInfoId {@link Integer}

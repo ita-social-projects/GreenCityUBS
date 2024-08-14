@@ -24,8 +24,8 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"orders", "address", "user",})
-@ToString(exclude = {"orders", "address", "user",})
+@EqualsAndHashCode(exclude = {"orders", "user",})
+@ToString(exclude = {"orders", "user",})
 @Getter
 @Setter
 @Builder

@@ -5,7 +5,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,15 +26,8 @@ import java.util.Date;
 @Component
 @Getter
 public class JwtTool {
-    private final String accessTokenKey;
-
-    /**
-     * Constructor.
-     */
-    @Autowired
-    public JwtTool(@Value("${greencity.authorization.token-key}") String accessTokenKey) {
-        this.accessTokenKey = accessTokenKey;
-    }
+    @Value("${greencity.authorization.token-key}")
+    private String accessTokenKey;
 
     /**
      * Method that get token from {@link HttpServletRequest}.

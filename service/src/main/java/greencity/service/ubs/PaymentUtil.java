@@ -11,6 +11,7 @@ import greencity.enums.PaymentStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.CertificateRepository;
 import greencity.repository.OrderRepository;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,10 +23,8 @@ import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 
 @Slf4j
-public final class PaymentUtil {
-    private PaymentUtil() {
-    }
-
+@UtilityClass
+public class PaymentUtil {
     public static Long convertBillsIntoCoins(Double bills) {
         return bills == null ? 0
             : BigDecimal.valueOf(bills)

@@ -8,7 +8,6 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.service.locations.LocationApiService;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,9 +46,6 @@ class AddressControllerTest {
 
     @Mock
     private UBSClientService ubsClientService;
-
-    @Mock
-    private LocationApiService locationApiService;
 
     @Mock
     private UserRemoteClient userRemoteClient;

@@ -27,15 +27,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Page<Employee> findAll(Pageable pageable);
 
     /**
-     * Method checks if employee with email already exists.
-     *
-     * @param email {@link String}
-     * @return {@link Boolean}
-     * @author Mykola Danylko
-     */
-    boolean existsByEmail(String email);
-
-    /**
      * Method that return list of Employee by an email except with current id.
      *
      * @param email {@link String}

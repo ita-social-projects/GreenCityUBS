@@ -43,7 +43,6 @@ public class UserTableRepo {
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
      */
-
     public UserTableRepo(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.criteriaBuilder = entityManager.getCriteriaBuilder();

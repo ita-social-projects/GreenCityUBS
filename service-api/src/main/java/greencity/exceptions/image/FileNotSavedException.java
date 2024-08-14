@@ -1,18 +1,7 @@
 package greencity.exceptions.image;
 
-public class FileNotSavedException extends RuntimeException {
-    /**
-     * Default constructor.
-     */
-    public FileNotSavedException() {
-    }
+import lombok.experimental.StandardException;
 
-    /**
-     * Constructor with message.
-     *
-     * @param message message, that explains cause of the exception.
-     */
-    public FileNotSavedException(String message) {
-        super(message);
-    }
+@StandardException
+public class FileNotSavedException extends RuntimeException {
 }

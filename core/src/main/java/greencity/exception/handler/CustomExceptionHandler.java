@@ -1,7 +1,6 @@
 package greencity.exception.handler;
 
 import greencity.exceptions.BadRequestException;
-import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
@@ -127,22 +126,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.trace(exception.getMessage(), exception);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
-    }
-
-    /**
-     * Method interceptor exception {@link FoundException}.
-     *
-     * @param ex         Exception which should be intercepted.
-     * @param webRequest contain detail about occur exception.
-     * @return ResponseEntity which contain http status and body with message of
-     *         exception.
-     */
-    @ExceptionHandler({FoundException.class})
-    public final ResponseEntity<Object> handleFoundException(FoundException ex,
-        WebRequest webRequest) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(webRequest));
-        log.trace(ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponse);
     }
 
     /**
