@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 
@@ -12,7 +11,6 @@ import greencity.dto.LocationsDto;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
@@ -81,8 +79,6 @@ import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
@@ -94,7 +90,7 @@ class UBSClientServiceImplTest {
     private BagRepository bagRepository;
 
     @Mock
-    private UBSuserRepository ubsUserRepository;
+    private UBSUserRepository ubsUserRepository;
 
     @Mock
     private ModelMapper modelMapper;
@@ -104,9 +100,6 @@ class UBSClientServiceImplTest {
 
     @Mock
     private UserRemoteClient userRemoteClient;
-
-    @Mock
-    private FondyClient fondyClient;
 
     @Mock
     private AddressRepository addressRepository;
@@ -130,10 +123,10 @@ class UBSClientServiceImplTest {
     private EncryptionUtil encryptionUtil;
 
     @Mock
-    private PaymentRepository paymentRepository;
+    private EventRepository eventRepository;
 
     @Mock
-    private EventRepository eventRepository;
+    private PaymentRepository paymentRepository;
 
     @Mock
     private EventService eventService;

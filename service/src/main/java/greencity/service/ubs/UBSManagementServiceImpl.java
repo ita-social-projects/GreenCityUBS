@@ -73,7 +73,6 @@ import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
@@ -88,14 +87,12 @@ import greencity.repository.UserRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -134,7 +131,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class UBSManagementServiceImpl implements UBSManagementService {
     private final TariffsInfoRepository tariffsInfoRepository;
@@ -162,6 +159,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final LocationApiService locationApiService;
     private final RefundRepository refundRepository;
     private final OrderLockService orderLockService;
+    private final OrderBagService orderBagService;
+    private final PaymentService paymentService;
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
     private static final List<String> ADMIN_POSITION_NAMES = List.of("Admin", "Super Admin");
     private final Set<OrderStatus> orderStatusesBeforeShipment =
@@ -169,15 +168,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
     static final String FORMAT_DATE = "dd-MM-yyyy";
-    @Lazy
-    @Autowired
-    private UBSClientService ubsClientService;
-    @Autowired
-    private final OrderBagService orderBagService;
-    @Autowired
-    private final OrderBagRepository orderBagRepository;
-    @Autowired
-    private PaymentService paymentService;
+    private final UBSClientService ubsClientService;
 
     /**
      * {@inheritDoc}
@@ -1262,7 +1253,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void updateOrderPageFields(UpdateOrderPageAdminDto updateOrderPageDto, Order order, String email) {
-        long orderId = order.getId();
         if (nonNull(updateOrderPageDto.getUserInfoDto())) {
             ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
         }
@@ -1287,6 +1277,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
                 email);
         }
+        long orderId = order.getId();
         if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
             updateOrderPageDto.getUpdateResponsibleEmployeeDto()
                 .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),

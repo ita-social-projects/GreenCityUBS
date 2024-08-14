@@ -66,12 +66,13 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementServiceImplTest {
-    @Mock(lenient = true)
+    @Mock(strictness = Mock.Strictness.LENIENT)
     OrderAddressRepository orderAddressRepository;
+
     @Mock
     private FileService fileService;
 
-    @Mock(lenient = true)
+    @Mock(strictness = Mock.Strictness.LENIENT)
     OrderRepository orderRepository;
 
     @Mock
@@ -80,7 +81,7 @@ class UBSManagementServiceImplTest {
     @Mock
     CertificateRepository certificateRepository;
 
-    @Mock(lenient = true)
+    @Mock(strictness = Mock.Strictness.LENIENT)
     private ModelMapper modelMapper;
 
     @Mock
@@ -104,7 +105,7 @@ class UBSManagementServiceImplTest {
     @Mock
     private UserRemoteClient userRemoteClient;
 
-    @Mock(lenient = true)
+    @Mock(strictness = Mock.Strictness.LENIENT)
     private NotificationServiceImpl notificationService;
     @Mock
     private ObjectMapper objectMapper;
@@ -128,9 +129,6 @@ class UBSManagementServiceImplTest {
     private UBSClientServiceImpl ubsClientService;
 
     @Mock
-    private UBSManagementServiceImpl ubsManagementServiceMock;
-
-    @Mock
     private ServiceRepository serviceRepository;
 
     @Mock
@@ -152,8 +150,6 @@ class UBSManagementServiceImplTest {
     private OrderLockService orderLockService;
     @Mock
     private PaymentService paymentService;
-    @Mock
-    private PaymentUtil paymentUtil;
 
     @Test
     void getAllCertificates() {

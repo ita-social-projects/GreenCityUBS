@@ -38,8 +38,8 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders", "employees", "creator"})
-@EqualsAndHashCode(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders", "employees",
+@ToString(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders", "creator"})
+@EqualsAndHashCode(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders",
     "courier", "creator"})
 
 public class TariffsInfo {

@@ -1,16 +1,11 @@
 package greencity.exceptions.api;
 
+import lombok.experimental.StandardException;
+
 /**
  * Exception could be thrown if application have issues to connecting to Google
  * servers.
  */
+@StandardException
 public class GoogleApiException extends RuntimeException {
-    /**
-     * Constructor with message.
-     *
-     * @param message message, that explains cause of the exception.
-     */
-    public GoogleApiException(String message) {
-        super(message);
-    }
 }

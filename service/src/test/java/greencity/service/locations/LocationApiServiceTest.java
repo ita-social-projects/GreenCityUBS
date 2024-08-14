@@ -158,7 +158,6 @@ class LocationApiServiceTest {
         respond(level4BuilderLviv2City, List.of(lviv2Result));
         respond(level5BuilderVillage, new ArrayList<>());
         respond(level5BuilderCity, Arrays.asList(halytskyiResult, zaliznychnyiResult));
-
     }
 
     private void initKyiv() {
@@ -269,7 +268,6 @@ class LocationApiServiceTest {
 
     @Test
     void testGetAllDistrictsInCityByNames_whenNoDistricts() {
-
         Map<String, Object> lvivskaResult =
             getApiResult("UA46000000000026241", null, "Львівська", "Lvivska");
         Map<String, Object> lvivDistrictResult =

@@ -14,8 +14,8 @@ import java.io.Serializable;
 @Builder
 @Embeddable
 public class Coordinates implements Serializable {
-    @Column(nullable = true)
+    @Column
     private double latitude;
-    @Column(nullable = true)
+    @Column
     private double longitude;
 }

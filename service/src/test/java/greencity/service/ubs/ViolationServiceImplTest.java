@@ -79,7 +79,7 @@ class ViolationServiceImplTest {
     @Test
     void getAllViolations() {
         when(violationRepository.getNumberOfViolationsByUser(anyLong())).thenReturn(5L);
-        when(userRepository.getOne(any())).thenReturn(ModelUtils.getUser());
+        when(userRepository.getReferenceById(any())).thenReturn(ModelUtils.getUser());
         when(userViolationsTableRepo.findAll(anyLong(), anyString(), any(), any())).thenReturn(
             new PageImpl<>(List.of(ModelUtils.getViolation()),
                 PageRequest.of(0, 5, Sort.by("id").descending()), 5));

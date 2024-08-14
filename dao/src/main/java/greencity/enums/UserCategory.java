@@ -1,8 +1,10 @@
 package greencity.enums;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum UserCategory {
     USERS_WITH_ORDERS_MADE_LESS_THAN_3_MONTHS(
                                               "Користувачі із замовленнями, зробленими менше 3 місяців тому.",
@@ -19,9 +21,4 @@ public enum UserCategory {
 
     private final String description;
     private final String descriptionEng;
-
-    UserCategory(String description, String descriptionEng) {
-        this.description = description;
-        this.descriptionEng = descriptionEng;
-    }
 }

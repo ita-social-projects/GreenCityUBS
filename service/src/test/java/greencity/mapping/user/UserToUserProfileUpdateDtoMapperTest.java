@@ -1,7 +1,6 @@
 package greencity.mapping.user;
 
 import greencity.ModelUtils;
-import greencity.dto.address.AddressDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -26,7 +24,6 @@ class UserToUserProfileUpdateDtoMapperTest {
 
     @Test
     void convert() {
-        MockitoAnnotations.initMocks(this);
         when(locationApiService.getAllDistrictsInCityByNames(anyString(), anyString()))
             .thenReturn(ModelUtils.getLocationApiDtoList());
         UserProfileUpdateDto userProfileUpdateDto = ModelUtils.updateUserProfileDto();
