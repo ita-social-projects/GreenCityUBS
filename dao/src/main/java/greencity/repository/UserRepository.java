@@ -104,12 +104,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * Return list of the inactive users depends on time limits.
      */
     @Query(nativeQuery = true,
-        value = "SELECT * FROM users "
+        value = "SELECT u.* FROM users u "
             + "INNER JOIN orders o "
-            + "ON users.id = o.users_id "
+            + "ON u.id = o.users_id "
             + "AND o.id = (SELECT o1.id FROM orders o1 "
             + "WHERE o1.users_id = o.users_id "
-            + "ORDER BY o1.order_date DESC limit 1) "
+            + "ORDER BY o1.order_date DESC LIMIT 1) "
             + "WHERE CAST(o.order_date AS DATE) = :dateOfLastOrder")
     List<User> getInactiveUsersByDateOfLastOrder(LocalDate dateOfLastOrder);
 
