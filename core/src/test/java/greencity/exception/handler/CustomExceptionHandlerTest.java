@@ -3,7 +3,6 @@ package greencity.exception.handler;
 import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
-import greencity.exceptions.http.AccessDeniedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -143,11 +142,11 @@ class CustomExceptionHandlerTest {
     }
 
     @Test
-    void handleAccessDeniedExceptionTest() {
+    void handleForbiddenExceptionsTest() {
         ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
         when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
             .thenReturn(objectMap);
-        assertEquals(customExceptionHandler.handleAccessDeniedException(webRequest),
+        assertEquals(customExceptionHandler.handleForbiddenExceptions(webRequest),
             ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }

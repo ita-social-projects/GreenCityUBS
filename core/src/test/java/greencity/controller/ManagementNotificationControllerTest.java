@@ -204,12 +204,12 @@ class ManagementNotificationControllerTest {
     }
 
     @Test
-    void removeNotificationTemplateBadRequestTest() throws Exception {
+    void removeNotificationTemplateForbiddenTest() throws Exception {
         doThrow(TemplateDeleteException.class).when(notificationTemplateService).removeNotificationTemplate(anyLong());
 
         mockMvc.perform(MockMvcRequestBuilders.delete(url + "/remove-custom-template/{id}", 1L)
             .principal(principal))
-            .andExpect(MockMvcResultMatchers.status().isBadRequest());
+            .andExpect(MockMvcResultMatchers.status().isForbidden());
 
         verify(notificationTemplateService).removeNotificationTemplate(any());
     }

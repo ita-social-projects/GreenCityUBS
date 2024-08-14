@@ -56,8 +56,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         MappingException.class,
         CourierAlreadyExists.class,
         ServiceAlreadyExistsException.class,
-        IncorrectTemplateException.class,
-        TemplateDeleteException.class
+        IncorrectTemplateException.class
     })
     public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
@@ -146,15 +145,20 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Method interceptor exception {@link AccessDeniedException}.
+     * Method intercepts exceptions of types {@link AccessDeniedException},
+     * {@link org.springframework.security.access.AccessDeniedException} and
+     * {@link TemplateDeleteException}.
      *
-     * @param request contain detail about occur exception.
-     * @return ResponseEntity which contain http status and body with message of
-     *         exception.
+     * @param request Contains details about the occurred exception.
+     * @return ResponseEntity which contains http status FORBIDDEN (403) and a body
+     *         with the message of the exception.
      */
-    @ExceptionHandler({AccessDeniedException.class,
-        org.springframework.security.access.AccessDeniedException.class})
-    public final ResponseEntity<Object> handleAccessDeniedException(WebRequest request) {
+    @ExceptionHandler({
+        TemplateDeleteException.class,
+        AccessDeniedException.class,
+        org.springframework.security.access.AccessDeniedException.class
+    })
+    public final ResponseEntity<Object> handleForbiddenExceptions(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.trace(exceptionResponse.getMessage(), exceptionResponse.getTrace());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
