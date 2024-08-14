@@ -127,5 +127,5 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      *         The list may be empty if no matching addresses are found.
      */
     @Query(value = "SELECT a FROM Address a WHERE a.regionEn IN :regions OR a.region IN :regions")
-    List<Address> findAllCitiesByRegion(List<String> regions);
+    List<Address> findAllAddressesByRegion(List<String> regions);
 }

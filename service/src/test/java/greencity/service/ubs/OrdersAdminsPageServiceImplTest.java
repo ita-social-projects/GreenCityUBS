@@ -1224,11 +1224,9 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(employeeList);
         when(employeeRepository.findAllByEmployeePositionId(4L))
             .thenReturn(employeeList);
-        when(addressRepository.findDistinctDistricts())
-            .thenReturn(addressList);
         when(addressRepository.findDistinctRegions())
             .thenReturn(addressList);
-        when(addressRepository.findAllCitiesByRegion(any())).thenReturn(List.of(ModelUtils.getAddress()));
+        when(addressRepository.findAllAddressesByRegion(any())).thenReturn(List.of(ModelUtils.getAddress()));
 
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1", regions));
     }
