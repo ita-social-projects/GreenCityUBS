@@ -47,6 +47,7 @@ public class ManagementNotificationController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_MESSAGES_PAGE', authentication)")
     @GetMapping("/get-all-templates")
     @ApiPageable
     public ResponseEntity<PageableDto<NotificationTemplateDto>> getAll(@Parameter(hidden = true) Pageable pageable) {
@@ -67,6 +68,7 @@ public class ManagementNotificationController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_MESSAGE', authentication)")
     @PutMapping("/update-template/{id}")
     public ResponseEntity<HttpStatuses> updateNotificationTemplate(
         @PathVariable(name = "id") Long id,
