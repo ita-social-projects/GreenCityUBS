@@ -85,11 +85,4 @@ public class OrderHistory {
     public static final String UPDATE_MIX_WASTE = "Змінено деталі замовлення. Мікс відходів ";
     public static final String CANCELED_ORDER_MONEY_REFUND = "Кошти за замовлення повернуто.";
     public static final String CANCELED_ORDER_MONEY_REFUND_ENG = "The money for the order has been refunded.";
-
-    /**
-     * Constructor.
-     */
-    private OrderHistory() {
-    }
-
 }
