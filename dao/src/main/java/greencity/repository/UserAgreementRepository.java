@@ -9,6 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface UserAgreementRepository extends JpaRepository<UserAgreement, Long> {
-    @Query("SELECT ua FROM UserAgreement ua ORDER BY ua.createdAt DESC")
+    @Query("SELECT ua FROM UserAgreement ua ORDER BY ua.createdAt DESC LIMIT 1")
     Optional<UserAgreement> findLatestAgreement();
 }
