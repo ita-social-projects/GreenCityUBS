@@ -5,18 +5,9 @@ import greencity.entity.user.ubs.UBSuser;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
-public interface UBSuserRepository extends CrudRepository<UBSuser, Long> {
-    /**
-     * Finds a UBSuser by email.
-     *
-     * @param email - UBSuser's email.
-     * @return a {@link Optional} of {@link UBSuser}.
-     */
-    Optional<UBSuser> findByEmail(String email);
-
+public interface UBSUserRepository extends CrudRepository<UBSuser, Long> {
     /**
      * Find UbsUser by current User.
      *

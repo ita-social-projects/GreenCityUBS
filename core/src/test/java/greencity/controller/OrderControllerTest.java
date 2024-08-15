@@ -18,7 +18,7 @@ import greencity.dto.user.UserInfoDto;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.repository.OrderRepository;
-import greencity.repository.UBSuserRepository;
+import greencity.repository.UBSUserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
@@ -90,7 +90,7 @@ class OrderControllerTest {
     RedirectionConfigProp prop;
 
     @Mock
-    private UBSuserRepository ubSuserRepository;
+    private UBSUserRepository ubSuserRepository;
 
     private final Principal principal = getPrincipal();
 

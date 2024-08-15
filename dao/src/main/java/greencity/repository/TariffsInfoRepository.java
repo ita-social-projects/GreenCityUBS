@@ -112,15 +112,6 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
     void deactivateTariffsByCourierAndRegionAndReceivingStations(Long regionId, List<Long> stationsIds, Long courierId);
 
     /**
-     * Method for getting set of tariffs.
-     *
-     * @param id - list of tariffIds.
-     * @return - set of tariffs.
-     * @author - Nikita Korzh.
-     */
-    Set<TariffsInfo> findTariffsInfosByIdIsIn(List<Long> id);
-
-    /**
      * Method, that returns {@link Set} of {@link TariffsInfo} by bag ids.
      *
      * @param bagIds {@link List} of {@link Integer} list of bag ids.

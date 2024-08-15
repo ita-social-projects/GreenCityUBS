@@ -4,6 +4,7 @@ import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
 import greencity.service.FeignClientCallAsync;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +42,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 @EnableGlobalAuthentication
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtTool jwtTool;
     private final FeignClientCallAsync userRemoteClient;
@@ -48,17 +50,6 @@ public class SecurityConfig {
 
     @Value("${spring.messaging.stomp.websocket.allowed-origins}")
     private String[] allowedOrigins;
-
-    /**
-     * Constructor.
-     */
-    @Autowired
-    public SecurityConfig(JwtTool jwtTool, FeignClientCallAsync userRemoteClient,
-        AuthenticationConfiguration authenticationConfiguration) {
-        this.jwtTool = jwtTool;
-        this.userRemoteClient = userRemoteClient;
-        this.authenticationConfiguration = authenticationConfiguration;
-    }
 
     /**
      * Bean {@link PasswordEncoder} that uses in coding password.

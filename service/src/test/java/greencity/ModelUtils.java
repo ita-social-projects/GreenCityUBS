@@ -15,7 +15,6 @@ import greencity.dto.OptionForColumnDTO;
 import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
-import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
@@ -63,7 +62,6 @@ import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
-import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
@@ -85,7 +83,6 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.SenderLocation;
@@ -4257,62 +4254,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrdersDataForUserDto getOrderStatusDto() {
-        SenderInfoDto senderInfoDto = SenderInfoDto.builder()
-            .senderName("TestName")
-            .senderSurname("TestSurName")
-            .senderPhone("38099884433")
-            .senderEmail("test@mail.com")
-            .build();
-
-        CertificateDto certificateDto = CertificateDto.builder()
-            .points(300)
-            .dateOfUse(LocalDate.now())
-            .expirationDate(LocalDate.now())
-            .code("200")
-            .certificateStatus("ACTIVE")
-            .build();
-
-        AddressInfoDto addressInfoDto = AddressInfoDto.builder()
-            .addressStreet("StreetTest")
-            .addressDistinct("AdressDistinctTest")
-            .addressRegion("TestRegion")
-            .addressComment("TestComment")
-            .addressCity("TestCity")
-            .addressStreetEng("StreetEng")
-            .addressDistinctEng("DisticntEng")
-            .addressCityEng("CityEng")
-            .addressRegionEng("RegionEng")
-            .build();
-
-        BagForUserDto bagForUserDto = new BagForUserDto();
-        bagForUserDto.setTotalPrice(900.);
-        bagForUserDto.setCount(3);
-        bagForUserDto.setCapacity(200);
-        bagForUserDto.setFullPrice(300.);
-        bagForUserDto.setService("Безпечні Відходи");
-        bagForUserDto.setServiceEng("Safe Waste");
-
-        return OrdersDataForUserDto.builder()
-            .id(1L)
-            .dateForm(LocalDateTime.of(22, 10, 12, 14, 55))
-            .datePaid(LocalDateTime.now())
-            .amountBeforePayment(500d)
-            .bonuses(100d)
-            .orderFullPrice(400d)
-            .orderComment("abc")
-            .paymentStatus(PaymentStatus.PAID.toString())
-            .sender(senderInfoDto)
-            .address(addressInfoDto)
-            .paymentStatusEng(PaymentStatus.PAID.toString())
-            .orderStatus(OrderStatus.FORMED.toString())
-            .orderStatusEng(OrderStatus.FORMED.toString())
-            .bags(List.of(bagForUserDto))
-            .certificate(List.of(certificateDto))
-            .additionalOrders(Collections.emptySet())
-            .build();
-    }
-
     public static TariffsInfo getTariffWithUknownRegionInfo() {
         return TariffsInfo.builder()
             .id(1L)
@@ -4471,16 +4412,6 @@ public class ModelUtils {
             .locationIds(List.of(1L, 2L))
             .receivingStationIds(List.of(1L))
             .build();
-    }
-
-    public static String getSuccessfulFondyResponse() {
-        return """
-            {
-              "response":{
-                "response_status":"success",
-                "checkout_url":"https://pay.fondy.eu/checkout?token=afcb21aef707b1fea2565b66bac7dc41d7833390"
-              }
-            }""";
     }
 
     public static List<GeocodingResult> getGeocodingResultWithKyivRegion() {

@@ -29,7 +29,6 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
      * @return List of {@link Region} if at least one region exists.
      * @author Maksym Lenets
      */
-
     @Query("SELECT r FROM Region r "
         + "LEFT JOIN FETCH r.locations l "
         + "WHERE l.isDeleted = false "

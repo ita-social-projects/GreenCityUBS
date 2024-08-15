@@ -4,7 +4,6 @@ import greencity.dto.notification.ScheduledNotificationDto;
 import greencity.enums.NotificationType;
 import greencity.notificator.*;
 import greencity.notificator.listener.NotificationPlanner;
-import greencity.notificator.ScheduledNotificator;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;

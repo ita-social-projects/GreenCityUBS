@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.configuration.SecurityConfig;
 import greencity.dto.notification.NotificationDto;
 import greencity.service.ubs.NotificationService;
-import greencity.service.ubs.NotificationTemplatesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,8 +33,6 @@ class NotificationControllerTest {
 
     @Mock
     NotificationService notificationService;
-    @Mock
-    NotificationTemplatesService notificationTemplatesService;
 
     @InjectMocks
     NotificationController notificationController;

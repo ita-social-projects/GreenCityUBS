@@ -4,6 +4,7 @@ import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
 import greencity.service.FeignClientCallAsync;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -25,20 +26,11 @@ import java.util.Optional;
  * @version 1.0
  */
 @Slf4j
+@RequiredArgsConstructor
 public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTool jwtTool;
     private final AuthenticationManager authenticationManager;
     private final FeignClientCallAsync userRemoteClient;
-
-    /**
-     * Constructor.
-     */
-    public AccessTokenAuthenticationFilter(JwtTool jwtTool, AuthenticationManager authenticationManager,
-        FeignClientCallAsync userRemoteClient) {
-        this.jwtTool = jwtTool;
-        this.authenticationManager = authenticationManager;
-        this.userRemoteClient = userRemoteClient;
-    }
 
     private String extractToken(HttpServletRequest request) {
         return jwtTool.getTokenFromHttpServletRequest(request);
@@ -73,12 +65,12 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (ExpiredJwtException e) {
-                log.info("Token has expired: " + token);
+                log.info("Token has expired: {}", token);
             } catch (InterruptedException e) {
-                log.info("Thread was interrupted: " + e.getMessage());
+                log.info("Thread was interrupted: {}", e.getMessage());
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                log.info("Access denied with token: " + e.getMessage());
+                log.info("Access denied with token: {}", e.getMessage());
             }
         }
         chain.doFilter(request, response);

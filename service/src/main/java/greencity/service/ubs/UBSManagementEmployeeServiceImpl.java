@@ -259,7 +259,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         }
 
         if (dto.getTariffs() != null) {
-            dto.getTariffs().stream().forEach(tariff -> {
+            dto.getTariffs().forEach(tariff -> {
                 TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
                 tariffsInfoReceivingEmployees.setEmployee(updatedEmployee);
                 tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());

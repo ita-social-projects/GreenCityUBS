@@ -1,6 +1,9 @@
 package greencity.constant;
 
-public final class OrderHistory {
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
+public class OrderHistory {
     public static final String ORDER_ON_THE_ROUTE = "Статус Замовлення - На маршруті";
     public static final String ORDER_ON_THE_ROUTE_ENG = "Order status - On the route";
     public static final String ORDER_DONE = "Статус Замовлення - Виконано";
@@ -88,4 +91,5 @@ public final class OrderHistory {
      */
     private OrderHistory() {
     }
+
 }

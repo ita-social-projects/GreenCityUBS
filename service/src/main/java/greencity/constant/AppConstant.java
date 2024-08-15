@@ -1,9 +1,9 @@
 package greencity.constant;
 
-public final class AppConstant {
-    private AppConstant() {
-    }
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
+public class AppConstant {
     public static final String ENROLLMENT_TO_THE_BONUS_ACCOUNT = "Зарахування на бонусний рахунок";
     public static final String ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG = "Enrollment to the bonus account";
     public static final String PAYMENT_REFUND = "Повернення коштів";

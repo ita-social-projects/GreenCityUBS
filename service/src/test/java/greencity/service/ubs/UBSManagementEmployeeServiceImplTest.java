@@ -48,7 +48,7 @@ import static greencity.ModelUtils.getPosition;
 import static greencity.ModelUtils.getPositionDto;
 import static greencity.ModelUtils.getTariffsInfo;
 import static greencity.ModelUtils.getTariffInfo;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;

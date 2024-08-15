@@ -314,7 +314,7 @@ class SuperAdminServiceImplTest {
 
         verify(orderBagRepository).findOrderBagsByBagId(any());
         verify(bagRepository).findActiveBagById(1);
-        verify(bagRepository).deleteBagById(any());
+        verify(bagRepository).deleteById(any());
 
     }
 

@@ -12,14 +12,12 @@ import greencity.filters.OrderSearchCriteria;
 import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CustomTableViewRepo;
 import greencity.repository.EmployeeRepository;
-import greencity.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,20 +26,15 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-
 class BigOrderTableServiceImplTest {
     @InjectMocks
     private BigOrderTableViewServiceImpl bigOrderTableService;
     @Mock
     private BigOrderTableRepository bigOrderTableRepository;
-    @Mock(lenient = true)
+    @Mock(strictness = Mock.Strictness.LENIENT)
     CustomTableViewRepo customTableViewRepo;
     @Mock
-    private ModelMapper modelMapper;
-    @Mock
     private EmployeeRepository employeeRepository;
-    @Mock
-    private UserRepository userRepository;
     @Mock
     private UserRemoteClient userRemoteClient;
 
