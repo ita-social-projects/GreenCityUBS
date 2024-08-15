@@ -10,11 +10,11 @@ public class UserAgreementDtoDetailMapper extends AbstractConverter<UserAgreemen
     @Override
     protected UserAgreementDetailDto convert(UserAgreement userAgreement) {
         return UserAgreementDetailDto.builder()
-                .id(userAgreement.getId())
-                .textUa(userAgreement.getTextUa())
-                .textEn(userAgreement.getTextEn())
-                .createdAt(userAgreement.getCreatedAt())
-                .updatedAt(userAgreement.getUpdatedAt())
-                .build();
+            .id(userAgreement.getId())
+            .textUa(userAgreement.getTextUa())
+            .textEn(userAgreement.getTextEn())
+            .createdAt(userAgreement.getCreatedAt())
+            .updatedAt(userAgreement.getUpdatedAt())
+            .build();
     }
 }

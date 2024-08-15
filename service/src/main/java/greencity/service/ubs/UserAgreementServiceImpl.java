@@ -14,33 +14,33 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static greencity.constant.ErrorMessage.USER_AGREEMENT_NOT_FOUND_BY_ID;
+
 @Service
 @AllArgsConstructor
 public class UserAgreementServiceImpl implements UserAgreementService {
     private final UserAgreementRepository repository;
     private final ModelMapper modelMapper;
 
-
     @Override
     public PageableDto<UserAgreementDetailDto> findAll(Pageable pageable) {
         Page<UserAgreement> page = repository.findAll(pageable);
 
         List<UserAgreementDetailDto> agreements = page.getContent().stream()
-                .map(userAgreement -> modelMapper.map(userAgreement, UserAgreementDetailDto.class))
-                .toList();
+            .map(userAgreement -> modelMapper.map(userAgreement, UserAgreementDetailDto.class))
+            .toList();
 
         return new PageableDto<>(
-                agreements,
-                page.getTotalElements(),
-                page.getNumber(),
-                page.getSize()
-        );
+            agreements,
+            page.getTotalElements(),
+            page.getNumber(),
+            page.getSize());
     }
 
     @Override
     public UserAgreementDto findLatest() {
         UserAgreement latest = repository.findLatestAgreement()
-                .orElseThrow(() -> new NotFoundException("No user agreement found"));
+            .orElseThrow(() -> new NotFoundException("No user agreement found"));
         return modelMapper.map(latest, UserAgreementDto.class);
     }
 
@@ -74,9 +74,9 @@ public class UserAgreementServiceImpl implements UserAgreementService {
         repository.deleteById(id);
     }
 
-    private UserAgreement findEntity(Long id){
+    private UserAgreement findEntity(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("User Agreement with ID %d not found", id)));
+            .orElseThrow(() -> new NotFoundException(String.format(USER_AGREEMENT_NOT_FOUND_BY_ID, id)));
     }
 
 }

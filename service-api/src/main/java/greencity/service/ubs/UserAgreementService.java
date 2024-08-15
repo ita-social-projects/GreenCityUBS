@@ -9,18 +9,21 @@ public interface UserAgreementService {
 
     /**
      * Finds all user agreements with pagination.
+     *
      * @return PageableDto containing a list of UserAgreementDetailDto
      */
     PageableDto<UserAgreementDetailDto> findAll(Pageable pageable);
 
     /**
      * Finds the latest user agreement.
+     *
      * @return UserAgreementDetailDto of the latest user agreement
      */
     UserAgreementDto findLatest();
 
     /**
      * Creates a new user agreement.
+     *
      * @param userAgreementDto DTO with user agreement details
      * @return UserAgreementDetailDto of the created user agreement
      */
@@ -28,6 +31,7 @@ public interface UserAgreementService {
 
     /**
      * Retrieves a user agreement by ID.
+     *
      * @param id ID of the user agreement
      * @return UserAgreementDetailDto with user agreement details
      */
@@ -35,7 +39,8 @@ public interface UserAgreementService {
 
     /**
      * Updates an existing user agreement.
-     * @param id ID of the user agreement to update
+     *
+     * @param id               ID of the user agreement to update
      * @param userAgreementDto DTO with updated user agreement details
      * @return UserAgreementDetailDto of the updated user agreement
      */
@@ -43,6 +48,7 @@ public interface UserAgreementService {
 
     /**
      * Deletes a user agreement by ID.
+     *
      * @param id ID of the user agreement to delete
      */
     void delete(Long id);

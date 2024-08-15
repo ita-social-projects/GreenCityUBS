@@ -10,8 +10,8 @@ public class UserAgreementMapper extends AbstractConverter<UserAgreementDto, Use
     @Override
     protected UserAgreement convert(UserAgreementDto userAgreementDto) {
         return UserAgreement.builder()
-                .textUa(userAgreementDto.getTextUa())
-                .textEn(userAgreementDto.getTextEn())
-                .build();
+            .textUa(userAgreementDto.getTextUa())
+            .textEn(userAgreementDto.getTextEn())
+            .build();
     }
 }
