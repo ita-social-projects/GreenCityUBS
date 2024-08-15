@@ -12,6 +12,7 @@ public class AppConstant {
     public static final String ADMIN_LINK = "/admin";
     public static final String ADMIN_EMPL_LINK = "/admin/ubs-employee";
     public static final String SUPER_ADMIN_LINK = "/ubs/superAdmin";
+    public static final String USER_AGREEMENT_LINK = "/user-agreement";
     public static final String ADMIN = "ADMIN";
     public static final String USER = "USER";
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";

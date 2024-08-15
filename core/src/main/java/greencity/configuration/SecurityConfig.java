@@ -26,14 +26,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import java.util.Arrays;
 import java.util.List;
-import static greencity.constant.AppConstant.ADMIN;
-import static greencity.constant.AppConstant.ADMIN_EMPL_LINK;
-import static greencity.constant.AppConstant.ADMIN_LINK;
-import static greencity.constant.AppConstant.SUPER_ADMIN_LINK;
-import static greencity.constant.AppConstant.UBS_EMPLOYEE;
-import static greencity.constant.AppConstant.UBS_LINK;
-import static greencity.constant.AppConstant.UBS_MANAG_LINK;
-import static greencity.constant.AppConstant.USER;
+
+import static greencity.constant.AppConstant.*;
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
@@ -96,7 +90,8 @@ public class SecurityConfig {
                     UBS_LINK + "/tariffinfo/**",
                     ADMIN_EMPL_LINK + "/get-employees/{tariffId}",
                     UBS_LINK + "/locationsByCourier/{courierId}",
-                    UBS_LINK + "/tariffs/{locationId}")
+                    UBS_LINK + "/tariffs/{locationId}",
+                    USER_AGREEMENT_LINK + "/latest")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST,
                     UBS_LINK + "/userProfile/user/create")
@@ -135,7 +130,9 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/{tariffId}/getTariffService",
                     SUPER_ADMIN_LINK + "/{tariffId}/getService",
                     SUPER_ADMIN_LINK + "/getTariffLimits/{tariffId}",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**",
+                    USER_AGREEMENT_LINK,
+                    USER_AGREEMENT_LINK + "/{id}")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     UBS_MANAG_LINK + "/addCertificate",
@@ -153,7 +150,8 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/{tariffId}/createTariffService",
                     SUPER_ADMIN_LINK + "/create-receiving-station",
                     SUPER_ADMIN_LINK + "/locations/edit",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**",
+                    USER_AGREEMENT_LINK + "/**")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
                     UBS_MANAG_LINK + "/changeOrdersTableView",
@@ -175,14 +173,16 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}",
                     SUPER_ADMIN_LINK + "/editTariffInfo/{id}",
                     SUPER_ADMIN_LINK + "/activate-employee/{id}",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**",
+                    USER_AGREEMENT_LINK + "/**")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ADMIN_EMPL_LINK + "/**",
                     UBS_MANAG_LINK + "/delete-violation-from-order/{id}",
                     UBS_MANAG_LINK + "/delete-manual-payment/{id}",
                     UBS_MANAG_LINK + "/deleteCertificate/{code}",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**",
+                    USER_AGREEMENT_LINK + "/**")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     SUPER_ADMIN_LINK + "/deactivateCourier/{id}",
