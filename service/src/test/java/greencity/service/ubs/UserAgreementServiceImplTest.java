@@ -135,9 +135,8 @@ public class UserAgreementServiceImplTest {
         detailDto.setTextEn(dto.getTextEn());
 
         when(repository.findById(anyLong())).thenReturn(Optional.of(existingAgreement));
-        when(repository.save(updatedAgreement)).thenReturn(updatedAgreement);
+        when(repository.save(any(UserAgreement.class))).thenReturn(updatedAgreement);
         when(modelMapper.map(updatedAgreement, UserAgreementDetailDto.class)).thenReturn(detailDto);
-
         UserAgreementDetailDto result = service.update(1L, dto);
 
         assertNotNull(result);
