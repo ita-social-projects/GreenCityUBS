@@ -16,12 +16,17 @@ import java.util.List;
 
 import static greencity.constant.ErrorMessage.USER_AGREEMENT_NOT_FOUND_BY_ID;
 
+/**
+ * Implementation of {@link UserAgreementService}.
+ */
 @Service
 @AllArgsConstructor
 public class UserAgreementServiceImpl implements UserAgreementService {
     private final UserAgreementRepository repository;
     private final ModelMapper modelMapper;
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<UserAgreementDetailDto> findAll(Pageable pageable) {
         Page<UserAgreement> page = repository.findAll(pageable);
@@ -37,6 +42,9 @@ public class UserAgreementServiceImpl implements UserAgreementService {
             page.getSize());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UserAgreementDto findLatest() {
         UserAgreement latest = repository.findLatestAgreement()
@@ -44,6 +52,9 @@ public class UserAgreementServiceImpl implements UserAgreementService {
         return modelMapper.map(latest, UserAgreementDto.class);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UserAgreementDetailDto create(UserAgreementDto userAgreementDto) {
         UserAgreement userAgreement = modelMapper.map(userAgreementDto, UserAgreement.class);
@@ -51,12 +62,18 @@ public class UserAgreementServiceImpl implements UserAgreementService {
         return modelMapper.map(saved, UserAgreementDetailDto.class);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UserAgreementDetailDto read(Long id) {
         UserAgreement userAgreement = findEntity(id);
         return modelMapper.map(userAgreement, UserAgreementDetailDto.class);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UserAgreementDetailDto update(Long id, UserAgreementDto userAgreementDto) {
         UserAgreement existingAgreement = findEntity(id);
@@ -68,6 +85,9 @@ public class UserAgreementServiceImpl implements UserAgreementService {
         return modelMapper.map(updatedAgreement, UserAgreementDetailDto.class);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void delete(Long id) {
         findEntity(id);

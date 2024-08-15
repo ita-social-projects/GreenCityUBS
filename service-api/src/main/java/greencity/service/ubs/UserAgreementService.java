@@ -5,6 +5,9 @@ import greencity.dto.user.UserAgreementDetailDto;
 import greencity.dto.user.UserAgreementDto;
 import org.springframework.data.domain.Pageable;
 
+/**
+ * Service interface for managing user agreements.
+ */
 public interface UserAgreementService {
 
     /**
