@@ -2,8 +2,8 @@ package greencity.controller;
 
 import greencity.constants.HttpStatuses;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.user.UserAgreementDetailDto;
-import greencity.dto.user.UserAgreementDto;
+import greencity.dto.useragreement.UserAgreementDetailDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import greencity.service.ubs.UserAgreementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
 
 @RestController

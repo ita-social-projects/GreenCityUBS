@@ -1,6 +1,6 @@
 package greencity.mapping.useragreement;
 
-import greencity.dto.user.UserAgreementDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import greencity.entity.user.UserAgreement;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,8 @@ public class UserAgreementDtoMapper extends AbstractConverter<UserAgreement, Use
      * Method to convert {@link UserAgreement} to {@link UserAgreementDto}.
      *
      * @param userAgreement The {@link UserAgreement} entity to be converted.
-     * @return {@link UserAgreementDto} representing the {@link UserAgreement} entity.
+     * @return {@link UserAgreementDto} representing the {@link UserAgreement}
+     *         entity.
      */
     @Override
     protected UserAgreementDto convert(UserAgreement userAgreement) {

@@ -47,14 +47,12 @@ import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.AddBonusesToUserDto;
-import greencity.dto.user.AddingPointsToUserDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserProfileCreateDto;
-import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.*;
+import greencity.dto.useragreement.UserAgreementDetailDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.user.UserAgreement;
 import greencity.enums.CancellationReason;
 import greencity.enums.CourierLimit;
 import greencity.enums.NotificationReceiverType;
@@ -624,4 +622,30 @@ public class ModelUtils {
         return dto;
     }
 
+    public static UserAgreement getUserAgreement() {
+        return UserAgreement.builder()
+            .id(1L)
+            .textUa("Текст угоди українською")
+            .textEn("Agreement text in English")
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .updatedAt(LocalDateTime.now())
+            .build();
+    }
+
+    public static UserAgreementDto getUserAgreementDto() {
+        return UserAgreementDto.builder()
+            .textUa("Текст угоди українською")
+            .textEn("Agreement text in English")
+            .build();
+    }
+
+    public static UserAgreementDetailDto getUserAgreementDetailDto() {
+        return UserAgreementDetailDto.builder()
+            .id(1L)
+            .textUa("Текст угоди українською")
+            .textEn("Agreement text in English")
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .updatedAt(LocalDateTime.now())
+            .build();
+    }
 }

@@ -1,4 +1,4 @@
-package greencity.dto.user;
+package greencity.dto.useragreement;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;

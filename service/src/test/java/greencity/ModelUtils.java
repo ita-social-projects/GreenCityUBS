@@ -107,13 +107,9 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.AddBonusesToUserDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserPointsAndAllBagsDto;
-import greencity.dto.user.UserProfileCreateDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.*;
+import greencity.dto.useragreement.UserAgreementDetailDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -141,10 +137,7 @@ import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.telegram.TelegramBot;
-import greencity.entity.user.Location;
-import greencity.entity.user.Region;
-import greencity.entity.user.User;
-import greencity.entity.user.Violation;
+import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -5319,6 +5312,33 @@ public class ModelUtils {
             .points(100)
             .code("7777-7777")
             .creationDate(LocalDate.now().plusMonths(1))
+            .build();
+    }
+
+    public static UserAgreement getUserAgreement() {
+        return UserAgreement.builder()
+            .id(1L)
+            .textUa("Текст угоди українською")
+            .textEn("Agreement text in English")
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .updatedAt(LocalDateTime.now())
+            .build();
+    }
+
+    public static UserAgreementDto getUserAgreementDto() {
+        return UserAgreementDto.builder()
+            .textUa("Текст угоди українською")
+            .textEn("Agreement text in English")
+            .build();
+    }
+
+    public static UserAgreementDetailDto getUserAgreementDetailDto() {
+        return UserAgreementDetailDto.builder()
+            .id(1L)
+            .textUa("Текст угоди українською")
+            .textEn("Agreement text in English")
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .updatedAt(LocalDateTime.now())
             .build();
     }
 }

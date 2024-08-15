@@ -1,15 +1,14 @@
 package greencity.service.ubs;
 
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.user.UserAgreementDetailDto;
-import greencity.dto.user.UserAgreementDto;
+import greencity.dto.useragreement.UserAgreementDetailDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import org.springframework.data.domain.Pageable;
 
 /**
  * Service interface for managing user agreements.
  */
 public interface UserAgreementService {
-
     /**
      * Finds all user agreements with pagination.
      *

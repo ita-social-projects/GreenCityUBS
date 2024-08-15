@@ -1,8 +1,8 @@
 package greencity.service.ubs;
 
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.user.UserAgreementDetailDto;
-import greencity.dto.user.UserAgreementDto;
+import greencity.dto.useragreement.UserAgreementDetailDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import greencity.entity.user.UserAgreement;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.UserAgreementRepository;
@@ -11,9 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-
 import static greencity.constant.ErrorMessage.USER_AGREEMENT_NOT_FOUND_BY_ID;
 
 /**
@@ -24,6 +22,7 @@ import static greencity.constant.ErrorMessage.USER_AGREEMENT_NOT_FOUND_BY_ID;
 public class UserAgreementServiceImpl implements UserAgreementService {
     private final UserAgreementRepository repository;
     private final ModelMapper modelMapper;
+
     /**
      * {@inheritDoc}
      */
@@ -98,5 +97,4 @@ public class UserAgreementServiceImpl implements UserAgreementService {
         return repository.findById(id)
             .orElseThrow(() -> new NotFoundException(String.format(USER_AGREEMENT_NOT_FOUND_BY_ID, id)));
     }
-
 }

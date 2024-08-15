@@ -2,7 +2,6 @@ package greencity.entity.user;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
