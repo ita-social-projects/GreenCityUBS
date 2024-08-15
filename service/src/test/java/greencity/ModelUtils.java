@@ -5280,10 +5280,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static Refund getRefund(Long id) {
-        return Refund.builder().orderId(id).build();
-    }
-
     public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoWithQuantity() {
         return new UserPointsAndAllBagsDto(
             List.of(

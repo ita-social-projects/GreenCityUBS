@@ -121,17 +121,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
 import static greencity.constant.AppConstant.PAYMENT_REFUND_ENG;
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
-import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
-import static greencity.constant.ErrorMessage.ORDER_PAYMENT_STATUS_MUST_BE_CANCELED;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
-import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
-import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -1332,18 +1322,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Transactional
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Order order, String lang,
         String email) {
-        processRefundForOrder(order, updateOrderPageDto, email);
-
         checkAvailableOrderForEmployee(order, email);
-
-        if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-            && nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
-            updateOrderDetailStatus(order, updateOrderPageDto.getGeneralOrderInfo(), email);
-        } else {
-            try {
-                updateOrderPageFields(updateOrderPageDto, order, email);
-            } catch (Exception e) {
-                throw new BadRequestException(e.getMessage());
+        if (!processRefundForOrder(order, updateOrderPageDto, email)) {
+            if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+                && nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
+                updateOrderDetailStatus(order, updateOrderPageDto.getGeneralOrderInfo(), email);
+            } else {
+                try {
+                    updateOrderPageFields(updateOrderPageDto, order, email);
+                } catch (Exception e) {
+                    throw new BadRequestException(e.getMessage());
+                }
             }
         }
     }
@@ -1433,12 +1422,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void checkOverpayment(long overpayment) {
-        if (overpayment == 0) {
-            throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
-        }
-    }
-
     private void transferPointsToUser(Order order, User user, long pointsInCoins) {
         int uahPoints = PaymentUtil.convertCoinsIntoBills(pointsInCoins).intValue();
         user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
@@ -1481,25 +1464,32 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private void processRefundForOrder(Order order, UpdateOrderPageAdminDto updateOrderPageAdminDto,
+    private void checkOverpayment(long overpayment) {
+        if (overpayment == 0) {
+            throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
+        }
+    }
+
+    private boolean processRefundForOrder(Order order, UpdateOrderPageAdminDto updateOrderPageAdminDto,
         String employeeEmail) {
         if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DONE
             || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
             if (updateOrderPageAdminDto.isReturnBonuses()) {
                 refundPaymentsInBonus(order, employeeEmail);
-            }
-            if (updateOrderPageAdminDto.isReturnMoney()) {
+                return true;
+            } else if (updateOrderPageAdminDto.isReturnMoney()) {
                 refundPaymentsInMoney(order, employeeEmail);
-            }
-            if (order.getOrderStatus() != OrderStatus.BROUGHT_IT_HIMSELF) {
+                return true;
+            } else if (order.getOrderStatus() != OrderStatus.BROUGHT_IT_HIMSELF) {
                 throw new BadRequestException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
             }
         }
+        return false;
     }
 
     private void refundPaymentsInMoney(Order order, String employeeEmail) {
         if (order.getOrderStatus() != OrderStatus.CANCELED) {
-            throw new BadRequestException(ORDER_PAYMENT_STATUS_MUST_BE_CANCELED);
+            throw new BadRequestException(INCOMPATIBLE_ORDER_STATUS_FOR_REFUND);
         }
         Long paidAmount = PaymentUtil.calculatePaidAmount(order);
         if (paidAmount > 0) {
@@ -1514,7 +1504,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .build());
             order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
             refundRepository.save(Refund.builder()
-                .orderId(order.getId())
+                .order(order)
                 .amount(paidAmount)
                 .date(LocalDateTime.now(ZoneId.of("Europe/Kiev")))
                 .build());

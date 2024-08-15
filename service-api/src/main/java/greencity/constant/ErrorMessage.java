@@ -38,7 +38,6 @@ public final class ErrorMessage {
     public static final String BAD_ORDER_STATUS_REQUEST = "Incorrect order status: ";
     public static final String ORDER_STATUS_NOT_FOUND = "Order status not found";
     public static final String ORDER_PAYMENT_STATUS_NOT_FOUND = "Order payment status not found";
-    public static final String ORDER_PAYMENT_STATUS_MUST_BE_CANCELED = "Order payment status must be canceled";
     public static final String FILE_NOT_SAVED = "File hasn't been saved";
     public static final String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
     public static final String EMPLOYEE_WITH_UUID_NOT_FOUND = "Employee with current uuid doesn't exist: ";
@@ -75,6 +74,8 @@ public final class ErrorMessage {
     public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
     public static final String INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION =
         "Cannot add a violation to order with this status: ";
+    public static final String INCOMPATIBLE_ORDER_STATUS_FOR_REFUND =
+        "Money refund cannot be processed for an order with status: ";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
     public static final String NOT_ENOUGH_BAGS_EXCEPTION = "Not enough bags, minimal amount is: ";
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";

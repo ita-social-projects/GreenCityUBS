@@ -36,6 +36,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
+import greencity.entity.order.Refund;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -87,7 +88,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -104,12 +104,24 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
-import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
+import static greencity.constant.ErrorMessage.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementServiceImplTest {
@@ -1263,12 +1275,14 @@ class UBSManagementServiceImplTest {
 
     @Test
     void updateOrderAdminPageInfoWithStatusCanceledTest() {
-        Order order = getOrder();
+        Order order = getOrderForGetOrderStatusData2Test();
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
         order.setOrderStatus(OrderStatus.CANCELED);
         UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDtoWithStatusCanceled();
-
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(getEmployee()));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
         BadRequestException exception = assertThrows(BadRequestException.class,
             () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en",
                 "test@gmail.com"));
@@ -1285,7 +1299,9 @@ class UBSManagementServiceImplTest {
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
         order.setOrderStatus(OrderStatus.DONE);
         UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDtoWithStatusCanceled();
-
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(getEmployee()));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
         BadRequestException exception = assertThrows(BadRequestException.class,
             () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en",
                 "test@gmail.com"));
@@ -2379,5 +2395,113 @@ class UBSManagementServiceImplTest {
         ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
 
         verify(orderLockService, times(0)).lockOrder(order, employee);
+    }
+
+    @Test
+    void processRefundForOrder_ShouldRefundBonuses_andThrowsBadRequestException() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        Employee employee = getEmployee();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
+        updateOrderPageAdminDto.setReturnBonuses(true);
+        order.getPayment().forEach(p -> p.setAmount(-300L));
+        order.setPointsToUse(1);
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en",
+                "test@gmail.com"));
+        assertEquals(USER_HAS_NO_OVERPAYMENT, exception.getMessage());
+    }
+
+    @Test
+    void processRefundForOrder_ShouldRefundBonuses_andSaveOrder() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        Employee employee = getEmployee();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
+        updateOrderPageAdminDto.setReturnBonuses(true);
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en",
+            "test@gmail.com");
+        verify(orderRepository).save(any(Order.class));
+        verify(userRepository).save(any(User.class));
+        verify(eventService).saveEvent(eq(OrderHistory.ADDED_BONUSES), eq("test@gmail.com"), any(Order.class));
+        assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
+    }
+
+    @Test
+    void processRefundForOrder_ShouldRefundMoney_andThrowsBadRequestException() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        Employee employee = getEmployee();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
+        updateOrderPageAdminDto.setReturnMoney(true);
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en",
+                "test@gmail.com"));
+        assertEquals(INCOMPATIBLE_ORDER_STATUS_FOR_REFUND, exception.getMessage());
+    }
+
+    @Test
+    void processRefundForOrder_ShouldRefundMoney_andThrowsBadRequestException2() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        Employee employee = getEmployee();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
+        updateOrderPageAdminDto.setReturnMoney(true);
+        order.setOrderStatus(OrderStatus.CANCELED);
+        order.getPayment().forEach(p -> p.setAmount(-300L));
+        order.setPointsToUse(1);
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en",
+                "test@gmail.com"));
+        assertEquals(USER_HAS_NO_OVERPAYMENT, exception.getMessage());
+    }
+
+    @Test
+    void processRefundForOrder_ShouldRefundMoney_andSaveRefund() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        Employee employee = getEmployee();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
+        updateOrderPageAdminDto.setReturnMoney(true);
+        order.setOrderStatus(OrderStatus.CANCELED);
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en",
+            "test@gmail.com");
+        verify(refundRepository).save(any(Refund.class));
+        verify(orderRepository).save(any(Order.class));
+        verify(eventService).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq("test@gmail.com"),
+            any(Order.class));
+        assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
     }
 }
