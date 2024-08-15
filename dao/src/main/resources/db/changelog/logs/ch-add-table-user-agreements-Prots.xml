@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="Prots-1" author="Nazar Prots">
+        <createTable tableName="user_agreements">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="text_ua" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text_en" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="Prots-2" author="Prots Nazar">
+        <insert tableName="user_agreements">
+            <column name="text_ua" value="Це приклад тексту угоди українською мовою."/>
+            <column name="text_en" value="This is a sample text of the agreement in English."/>
+            <column name="created_at" value="2024-08-15T10:00:00"/>
+            <column name="updated_at" value="2024-08-15T10:00:00"/>
+        </insert>
+        <insert tableName="user_agreements">
+            <column name="text_ua" value="Ще один приклад тексту угоди українською мовою."/>
+            <column name="text_en" value="Another sample text of the agreement in English."/>
+            <column name="created_at" value="2024-08-15T12:00:00"/>
+            <column name="updated_at" value="2024-08-15T12:00:00"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
