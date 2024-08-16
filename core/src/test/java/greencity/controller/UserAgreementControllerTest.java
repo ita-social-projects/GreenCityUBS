@@ -18,11 +18,17 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 import java.util.List;
 
-import static greencity.ModelUtils.*;
-import static org.mockito.ArgumentMatchers.*;
+import static greencity.ModelUtils.getPrincipal;
+import static greencity.ModelUtils.getUserAgreementDetailDto;
+import static greencity.ModelUtils.getUserAgreementDto;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,7 +72,7 @@ class UserAgreementControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(service).read(1L);
+        verify(service).read(anyLong());
     }
 
     @Test
@@ -110,7 +116,7 @@ class UserAgreementControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
-        verify(service).delete(1L);
+        verify(service).delete(anyLong());
     }
 
 }

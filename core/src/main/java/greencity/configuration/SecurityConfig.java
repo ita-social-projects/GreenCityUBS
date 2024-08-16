@@ -26,7 +26,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import java.util.Arrays;
 import java.util.List;
-import static greencity.constant.AppConstant.*;
+import static greencity.constant.AppConstant.ADMIN;
+import static greencity.constant.AppConstant.ADMIN_EMPL_LINK;
+import static greencity.constant.AppConstant.ADMIN_LINK;
+import static greencity.constant.AppConstant.SUPER_ADMIN_LINK;
+import static greencity.constant.AppConstant.UBS_EMPLOYEE;
+import static greencity.constant.AppConstant.UBS_LINK;
+import static greencity.constant.AppConstant.UBS_MANAG_LINK;
+import static greencity.constant.AppConstant.USER;
+import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;

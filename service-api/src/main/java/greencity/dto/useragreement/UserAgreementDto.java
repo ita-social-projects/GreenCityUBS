@@ -1,8 +1,10 @@
 package greencity.dto.useragreement;
 
 import jakarta.validation.constraints.NotEmpty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.experimental.SuperBuilder;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor

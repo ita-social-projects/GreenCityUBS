@@ -16,9 +16,16 @@ import org.modelmapper.ModelMapper;
 import java.util.List;
 import java.util.Optional;
 
-import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getUserAgreement;
+import static greencity.ModelUtils.getUserAgreementDetailDto;
+import static greencity.ModelUtils.getUserAgreementDto;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserAgreementServiceImplTest {
@@ -46,7 +53,8 @@ class UserAgreementServiceImplTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        verify(repository, times(1)).findAllSortedByAsc();
+
+        verify(repository).findAllSortedByAsc();
     }
 
     @Test
@@ -61,7 +69,9 @@ class UserAgreementServiceImplTest {
 
         assertNotNull(result);
         assertEquals(dto, result);
-        verify(repository, times(1)).findLatestAgreement();
+
+        verify(repository).findLatestAgreement();
+        verify(modelMapper).map(userAgreement, UserAgreementDto.class);
     }
 
     @Test
@@ -69,6 +79,7 @@ class UserAgreementServiceImplTest {
         when(repository.findLatestAgreement()).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> service.findLatest());
+        verify(repository).findLatestAgreement();
     }
 
     @Test
@@ -88,9 +99,11 @@ class UserAgreementServiceImplTest {
 
         assertNotNull(result);
         assertEquals(detailDto, result);
-        verify(modelMapper, times(1)).map(dto, UserAgreement.class);
-        verify(repository, times(1)).save(userAgreement);
-        verify(modelMapper, times(1)).map(saved, UserAgreementDetailDto.class);
+
+        verify(modelMapper).map(dto, UserAgreement.class);
+        verify(employeeRepository).findByEmail(authorEmail);
+        verify(repository).save(userAgreement);
+        verify(modelMapper).map(saved, UserAgreementDetailDto.class);
     }
 
     @Test
@@ -106,7 +119,9 @@ class UserAgreementServiceImplTest {
 
         assertNotNull(result);
         assertEquals(detailDto, result);
-        verify(repository, times(1)).findById(id);
+
+        verify(repository).findById(id);
+        verify(modelMapper).map(userAgreement, UserAgreementDetailDto.class);
     }
 
     @Test
@@ -115,6 +130,7 @@ class UserAgreementServiceImplTest {
         when(repository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> service.read(id));
+        verify(repository).findById(id);
     }
 
     @Test
@@ -123,11 +139,12 @@ class UserAgreementServiceImplTest {
         UserAgreement userAgreement = getUserAgreement();
 
         when(repository.findById(id)).thenReturn(Optional.of(userAgreement));
+        doNothing().when(repository).deleteById(id);
 
         service.delete(id);
 
-        verify(repository, times(1)).findById(id);
-        verify(repository, times(1)).deleteById(id);
+        verify(repository).findById(id);
+        verify(repository).deleteById(id);
     }
 
     @Test
@@ -137,5 +154,6 @@ class UserAgreementServiceImplTest {
         when(repository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> service.delete(id));
+        verify(repository).findById(id);
     }
 }
