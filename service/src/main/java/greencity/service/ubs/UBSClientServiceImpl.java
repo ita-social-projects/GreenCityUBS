@@ -275,6 +275,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String ADDRESS_NOT_FOUND_BY_ID_MESSAGE = "Address not found with id: ";
     private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected "
         + "does not match, reselect correct data.";
+    private static final byte CURRENCY_CONVERSION_RATE = 100;
 
     /**
      * {@inheritDoc}
@@ -1031,9 +1032,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             .map(payment -> payment.getAmount().doubleValue())
             .reduce(0.0, Double::sum);
 
-        refundedBonuses = refundedBonuses == 0.0 ? 0.0 : refundedBonuses / (-100);
+        refundedBonuses /= -CURRENCY_CONVERSION_RATE;
 
-        Double refundedMoney = order.getRefund() == null ? 0.0 : -order.getRefund().getAmount().doubleValue() / 100;
+        Double refundedMoney =
+            order.getRefund() == null ? 0.0 : -order.getRefund().getAmount().doubleValue() / CURRENCY_CONVERSION_RATE;
 
         return OrdersDataForUserDto.builder()
             .id(order.getId())
