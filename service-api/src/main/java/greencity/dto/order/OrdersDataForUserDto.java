@@ -30,6 +30,8 @@ public class OrdersDataForUserDto {
     private Double paidAmount;
     private Double orderFullPrice;
     private Double amountBeforePayment;
+    private Double refundedBonuses;
+    private Double refundedMoney;
     private List<BagForUserDto> bags;
     private String orderComment;
     private Double bonuses;
