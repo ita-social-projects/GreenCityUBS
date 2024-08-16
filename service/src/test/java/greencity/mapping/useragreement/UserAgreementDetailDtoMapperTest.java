@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class UserAgreementDetailDtoMapperTest {
+class UserAgreementDetailDtoMapperTest {
     @InjectMocks
     private UserAgreementDetailDtoMapper mapper;
 
@@ -24,7 +24,7 @@ public class UserAgreementDetailDtoMapperTest {
         Assertions.assertEquals(expected.getId(), actual.getId());
         Assertions.assertEquals(expected.getTextUa(), actual.getTextUa());
         Assertions.assertEquals(expected.getTextEn(), actual.getTextEn());
+        Assertions.assertEquals(expected.getAuthorEmail(), actual.getAuthorEmail());
         Assertions.assertNotNull(expected.getCreatedAt());
-        Assertions.assertNotNull(expected.getUpdatedAt());
     }
 }

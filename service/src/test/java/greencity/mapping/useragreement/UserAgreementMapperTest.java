@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class UserAgreementMapperTest {
+class UserAgreementMapperTest {
     @InjectMocks
     private UserAgreementMapper mapper;
 
@@ -24,6 +24,5 @@ public class UserAgreementMapperTest {
         Assertions.assertEquals(expected.getTextUa(), actual.getTextUa());
         Assertions.assertEquals(expected.getTextEn(), actual.getTextEn());
         Assertions.assertNull(actual.getCreatedAt());
-        Assertions.assertNull(actual.getUpdatedAt());
     }
 }

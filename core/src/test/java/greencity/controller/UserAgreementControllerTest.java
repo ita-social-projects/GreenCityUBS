@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
+import java.util.List;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-public class UserAgreementControllerTest {
+class UserAgreementControllerTest {
 
     private MockMvc mockMvc;
 
@@ -35,11 +36,24 @@ public class UserAgreementControllerTest {
     @InjectMocks
     private UserAgreementController controller;
 
+    @Mock
     private final Principal principal = getPrincipal();
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+    }
+
+    @Test
+    void getAllUserAgreementsIds() throws Exception {
+        when(service.findAllIdSortedByAsc()).thenReturn(List.of(1L, 2L));
+
+        mockMvc.perform(get(AppConstant.USER_AGREEMENT_LINK)
+                        .principal(principal)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(service).findAllIdSortedByAsc();
     }
 
     @Test
@@ -72,36 +86,21 @@ public class UserAgreementControllerTest {
     void createUserAgreement() throws Exception {
         UserAgreementDto agreementDto = getUserAgreementDto();
         UserAgreementDetailDto result = getUserAgreementDetailDto();
-        when(service.create(agreementDto)).thenReturn(result);
+        String authorEmail = "author@email.com";
+
+        when(principal.getName()).thenReturn(authorEmail);
+        when(service.create(agreementDto, authorEmail)).thenReturn(result);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        String JSON = objectMapper.writeValueAsString(agreementDto);
+        String json = objectMapper.writeValueAsString(agreementDto);
 
         mockMvc.perform(post(AppConstant.USER_AGREEMENT_LINK)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(JSON))
+            .content(json))
             .andExpect(status().isCreated());
 
-        verify(service).create(any(UserAgreementDto.class));
-    }
-
-    @Test
-    void updateUserAgreement() throws Exception {
-        UserAgreementDto agreementDto = getUserAgreementDto();
-        UserAgreementDetailDto result = getUserAgreementDetailDto();
-        when(service.update(1L, agreementDto)).thenReturn(result);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String JSON = objectMapper.writeValueAsString(agreementDto);
-
-        mockMvc.perform(put(AppConstant.USER_AGREEMENT_LINK + "/{id}", 1L)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(JSON))
-            .andExpect(status().isOk());
-
-        verify(service).update(anyLong(), any(UserAgreementDto.class));
+        verify(service).create(any(UserAgreementDto.class), anyString());
     }
 
     @Test

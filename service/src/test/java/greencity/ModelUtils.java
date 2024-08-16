@@ -5321,7 +5321,7 @@ public class ModelUtils {
             .textUa("Текст угоди українською")
             .textEn("Agreement text in English")
             .createdAt(LocalDateTime.now().minusDays(1))
-            .updatedAt(LocalDateTime.now())
+            .author(getEmployee())
             .build();
     }
 
@@ -5337,8 +5337,8 @@ public class ModelUtils {
             .id(1L)
             .textUa("Текст угоди українською")
             .textEn("Agreement text in English")
+            .authorEmail("test@gmail.com")
             .createdAt(LocalDateTime.now().minusDays(1))
-            .updatedAt(LocalDateTime.now())
             .build();
     }
 }

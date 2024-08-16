@@ -4,6 +4,7 @@ import greencity.entity.user.UserAgreement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,4 +23,13 @@ public interface UserAgreementRepository extends JpaRepository<UserAgreement, Lo
      */
     @Query("SELECT ua FROM UserAgreement ua ORDER BY ua.createdAt DESC LIMIT 1")
     Optional<UserAgreement> findLatestAgreement();
+
+    /**
+     * Retrieves all {@link UserAgreement} entities sorted by creation date in
+     * descending order.
+     *
+     * @return a list of {@link UserAgreement} entities sorted from oldest to newest
+     */
+    @Query("SELECT ua FROM UserAgreement ua ORDER BY ua.createdAt ASC")
+    List<UserAgreement> findAllSortedByAsc();
 }

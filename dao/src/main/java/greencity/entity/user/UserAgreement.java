@@ -1,5 +1,6 @@
 package greencity.entity.user;
 
+import greencity.entity.user.employee.Employee;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @Table(name = "user_agreements")
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = "author")
 @Entity
 public class UserAgreement {
     @Id
@@ -26,16 +27,12 @@ public class UserAgreement {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private Employee author;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }

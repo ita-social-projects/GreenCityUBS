@@ -1,20 +1,20 @@
 package greencity.service.ubs;
 
-import greencity.dto.pageble.PageableDto;
 import greencity.dto.useragreement.UserAgreementDetailDto;
 import greencity.dto.useragreement.UserAgreementDto;
-import org.springframework.data.domain.Pageable;
+import java.util.List;
 
 /**
  * Service interface for managing user agreements.
  */
 public interface UserAgreementService {
     /**
-     * Finds all user agreements with pagination.
+     * Retrieves the IDs of all {@link greencity.entity.user.UserAgreement} entities
+     * sorted by creation date in ascending order.
      *
-     * @return PageableDto containing a list of UserAgreementDetailDto
+     * @return a list of IDs for all entities, sorted from oldest to newest
      */
-    PageableDto<UserAgreementDetailDto> findAll(Pageable pageable);
+    List<Long> findAllIdSortedByAsc();
 
     /**
      * Finds the latest user agreement.
@@ -29,7 +29,7 @@ public interface UserAgreementService {
      * @param userAgreementDto DTO with user agreement details
      * @return UserAgreementDetailDto of the created user agreement
      */
-    UserAgreementDetailDto create(UserAgreementDto userAgreementDto);
+    UserAgreementDetailDto create(UserAgreementDto userAgreementDto, String authorEmail);
 
     /**
      * Retrieves a user agreement by ID.
@@ -38,15 +38,6 @@ public interface UserAgreementService {
      * @return UserAgreementDetailDto with user agreement details
      */
     UserAgreementDetailDto read(Long id);
-
-    /**
-     * Updates an existing user agreement.
-     *
-     * @param id               ID of the user agreement to update
-     * @param userAgreementDto DTO with updated user agreement details
-     * @return UserAgreementDetailDto of the updated user agreement
-     */
-    UserAgreementDetailDto update(Long id, UserAgreementDto userAgreementDto);
 
     /**
      * Deletes a user agreement by ID.

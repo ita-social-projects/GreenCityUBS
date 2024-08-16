@@ -1,21 +1,20 @@
 package greencity.controller;
 
 import greencity.constants.HttpStatuses;
-import greencity.dto.pageble.PageableDto;
 import greencity.dto.useragreement.UserAgreementDetailDto;
 import greencity.dto.useragreement.UserAgreementDto;
 import greencity.service.ubs.UserAgreementService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.security.Principal;
+import java.util.List;
 import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
 
 @RestController
@@ -25,23 +24,21 @@ public class UserAgreementController {
     private final UserAgreementService userAgreementService;
 
     /**
-     * Retrieves all user agreements with pagination.
+     * Retrieves all user agreement IDs sorted by creation date in ascending order.
      *
-     * @param page the pageable information.
-     * @return a pageable list of {@link UserAgreementDetailDto}.
+     * @return a {@link ResponseEntity} containing a list of user agreement IDs
+     *         sorted from oldest to newest, with an HTTP status of 200 (OK).
      */
-    @Operation(summary = "Get all user agreements with pagination")
+    @Operation(summary = "Get all user agreements ids sorted in ASC")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
     })
     @GetMapping
-    public ResponseEntity<PageableDto<UserAgreementDetailDto>> getAllUserAgreements(
-        @Parameter(hidden = true) Pageable page) {
-        PageableDto<UserAgreementDetailDto> userAgreements = userAgreementService.findAll(page);
-        return ResponseEntity.ok(userAgreements);
+    public ResponseEntity<List<Long>> getAllUserAgreements() {
+        List<Long> userAgreementsIds = userAgreementService.findAllIdSortedByAsc();
+        return ResponseEntity.status(HttpStatus.OK).body(userAgreementsIds);
     }
 
     /**
@@ -95,32 +92,9 @@ public class UserAgreementController {
     })
     @PostMapping
     public ResponseEntity<UserAgreementDetailDto> createUserAgreement(
-        @Valid @RequestBody UserAgreementDto userAgreementDto) {
-        UserAgreementDetailDto createdAgreement = userAgreementService.create(userAgreementDto);
+        @Valid @RequestBody UserAgreementDto userAgreementDto, Principal principal) {
+        UserAgreementDetailDto createdAgreement = userAgreementService.create(userAgreementDto, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAgreement);
-    }
-
-    /**
-     * Updates an existing user agreement by ID.
-     *
-     * @param id               the ID of the user agreement.
-     * @param userAgreementDto the updated user agreement.
-     * @return the updated {@link UserAgreementDetailDto}.
-     */
-    @Operation(summary = "Update a user agreement by ID")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @PutMapping("/{id}")
-    public ResponseEntity<UserAgreementDetailDto> updateUserAgreement(
-        @PathVariable Long id,
-        @Valid @RequestBody UserAgreementDto userAgreementDto) {
-        UserAgreementDetailDto updatedAgreement = userAgreementService.update(id, userAgreementDto);
-        return ResponseEntity.status(HttpStatus.OK).body(updatedAgreement);
     }
 
     /**

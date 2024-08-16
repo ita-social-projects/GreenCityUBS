@@ -628,7 +628,6 @@ public class ModelUtils {
             .textUa("Текст угоди українською")
             .textEn("Agreement text in English")
             .createdAt(LocalDateTime.now().minusDays(1))
-            .updatedAt(LocalDateTime.now())
             .build();
     }
 
@@ -645,7 +644,6 @@ public class ModelUtils {
             .textUa("Текст угоди українською")
             .textEn("Agreement text in English")
             .createdAt(LocalDateTime.now().minusDays(1))
-            .updatedAt(LocalDateTime.now())
             .build();
     }
 }

@@ -26,7 +26,7 @@ public class UserAgreementDetailDtoMapper extends AbstractConverter<UserAgreemen
             .textUa(userAgreement.getTextUa())
             .textEn(userAgreement.getTextEn())
             .createdAt(userAgreement.getCreatedAt())
-            .updatedAt(userAgreement.getUpdatedAt())
+            .authorEmail(userAgreement.getAuthor().getEmail())
             .build();
     }
 }

@@ -1,5 +1,6 @@
 package greencity.dto.useragreement;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -17,5 +18,6 @@ public class UserAgreementDetailDto extends UserAgreementDto {
     private Long id;
     @NotNull
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    @NotEmpty
+    private String authorEmail;
 }

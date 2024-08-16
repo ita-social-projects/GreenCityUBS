@@ -1,10 +1,10 @@
 package greencity.service.ubs;
 
-import greencity.dto.pageble.PageableDto;
 import greencity.dto.useragreement.UserAgreementDetailDto;
 import greencity.dto.useragreement.UserAgreementDto;
 import greencity.entity.user.UserAgreement;
 import greencity.exceptions.NotFoundException;
+import greencity.repository.EmployeeRepository;
 import greencity.repository.UserAgreementRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,9 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserAgreementServiceImplTest {
+class UserAgreementServiceImplTest {
 
     @Mock
     private UserAgreementRepository repository;
@@ -32,27 +29,24 @@ public class UserAgreementServiceImplTest {
     @Mock
     private ModelMapper modelMapper;
 
+    @Mock
+    private EmployeeRepository employeeRepository;
+
     @InjectMocks
     private UserAgreementServiceImpl service;
 
     @Test
-    void findAll_ShouldReturnPageableDto() {
+    void findAll_ShouldReturnListIds() {
         UserAgreement userAgreement = getUserAgreement();
-        UserAgreementDetailDto dto = getUserAgreementDetailDto();
-        Page<UserAgreement> page = new PageImpl<>(List.of(userAgreement));
+        List<UserAgreement> agreements = List.of(userAgreement);
 
-        when(repository.findAll(any(Pageable.class))).thenReturn(page);
-        when(modelMapper.map(userAgreement, UserAgreementDetailDto.class)).thenReturn(dto);
+        when(repository.findAllSortedByAsc()).thenReturn(agreements);
 
-        Pageable pageable = Pageable.ofSize(10);
-        PageableDto<UserAgreementDetailDto> result = service.findAll(pageable);
+        List<Long> result = service.findAllIdSortedByAsc();
 
         assertNotNull(result);
-        assertEquals(1, result.getPage().size());
-        assertEquals(1L, result.getTotalElements());
-        assertEquals(0, result.getCurrentPage());
-        assertEquals(1, result.getTotalPages());
-        verify(repository, times(1)).findAll(pageable);
+        assertEquals(1, result.size());
+        verify(repository, times(1)).findAllSortedByAsc();
     }
 
     @Test
@@ -83,12 +77,14 @@ public class UserAgreementServiceImplTest {
         UserAgreement userAgreement = getUserAgreement();
         UserAgreement saved = getUserAgreement();
         UserAgreementDetailDto detailDto = getUserAgreementDetailDto();
+        String authorEmail = "author@example.com";
 
         when(modelMapper.map(dto, UserAgreement.class)).thenReturn(userAgreement);
+        when(employeeRepository.findByEmail(authorEmail)).thenReturn(Optional.of(getEmployee()));
         when(repository.save(userAgreement)).thenReturn(saved);
         when(modelMapper.map(saved, UserAgreementDetailDto.class)).thenReturn(detailDto);
 
-        UserAgreementDetailDto result = service.create(dto);
+        UserAgreementDetailDto result = service.create(dto, authorEmail);
 
         assertNotNull(result);
         assertEquals(detailDto, result);
@@ -119,33 +115,6 @@ public class UserAgreementServiceImplTest {
         when(repository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> service.read(id));
-    }
-
-    @Test
-    void update_ShouldReturnUserAgreementDetailDto() {
-        UserAgreementDto dto = new UserAgreementDto("Тест текст", "Test text");
-        UserAgreement existingAgreement = getUserAgreement();
-
-        UserAgreement updatedAgreement = getUserAgreement();
-        updatedAgreement.setTextUa(dto.getTextUa());
-        updatedAgreement.setTextEn(dto.getTextEn());
-
-        UserAgreementDetailDto detailDto = getUserAgreementDetailDto();
-        detailDto.setTextUa(dto.getTextUa());
-        detailDto.setTextEn(dto.getTextEn());
-
-        when(repository.findById(anyLong())).thenReturn(Optional.of(existingAgreement));
-        when(repository.save(any(UserAgreement.class))).thenReturn(updatedAgreement);
-        when(modelMapper.map(updatedAgreement, UserAgreementDetailDto.class)).thenReturn(detailDto);
-        UserAgreementDetailDto result = service.update(1L, dto);
-
-        assertNotNull(result);
-        assertEquals(detailDto.getId(), result.getId());
-        assertEquals(detailDto.getTextUa(), result.getTextUa());
-        assertEquals(detailDto.getTextEn(), result.getTextEn());
-
-        assertEquals(result.getTextUa(), existingAgreement.getTextUa());
-        assertEquals(result.getTextEn(), existingAgreement.getTextEn());
     }
 
     @Test

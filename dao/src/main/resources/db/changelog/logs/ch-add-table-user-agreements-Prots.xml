@@ -18,22 +18,15 @@
             <column name="created_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
-    </changeSet>
-
-    <changeSet id="Prots-2" author="Prots Nazar">
-        <insert tableName="user_agreements">
-            <column name="text_ua" value="Це приклад тексту угоди українською мовою."/>
-            <column name="text_en" value="This is a sample text of the agreement in English."/>
-            <column name="created_at" value="2024-08-15T10:00:00"/>
-            <column name="updated_at" value="2024-08-15T10:00:00"/>
-        </insert>
-        <insert tableName="user_agreements">
-            <column name="text_ua" value="Ще один приклад тексту угоди українською мовою."/>
-            <column name="text_en" value="Another sample text of the agreement in English."/>
-            <column name="created_at" value="2024-08-15T12:00:00"/>
-            <column name="updated_at" value="2024-08-15T12:00:00"/>
-        </insert>
+        <addForeignKeyConstraint baseTableName="user_agreements"
+                                 baseColumnNames="author_id"
+                                 constraintName="fk_user_agreements_users"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE" onUpdate="NO ACTION"/>
     </changeSet>
 </databaseChangeLog>
