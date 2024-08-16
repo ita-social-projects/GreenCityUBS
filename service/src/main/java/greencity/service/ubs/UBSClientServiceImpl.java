@@ -1027,9 +1027,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         Double amountBeforePayment = convertCoinsIntoBills(amountWithDiscountInCoins - paidAmountInCoins);
 
         double refundedBonuses = order.getPayment().stream()
-                .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG.equals(payment.getReceiptLink()))
-                .map(payment -> payment.getAmount().doubleValue())
-                .reduce(0.0, Double::sum);
+            .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG.equals(payment.getReceiptLink()))
+            .map(payment -> payment.getAmount().doubleValue())
+            .reduce(0.0, Double::sum);
 
         refundedBonuses = refundedBonuses == 0.0 ? 0.0 : refundedBonuses / (-100);
 
