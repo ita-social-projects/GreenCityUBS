@@ -174,6 +174,8 @@ class AdminUbsControllerTest {
         assertEquals(2, Objects.requireNonNull(response.getBody()).size());
         assertEquals("Kyiv", response.getBody().get(0).getCityEn());
         assertEquals("Lviv", response.getBody().get(1).getCityEn());
+
+        verify(ordersAdminsPageService, times(2)).getAllCitiesByRegion(regions);
     }
 
     @Test
@@ -196,5 +198,7 @@ class AdminUbsControllerTest {
         assertEquals(2, Objects.requireNonNull(response.getBody()).size());
         assertEquals("District1", response.getBody().get(0).getDistrictEn());
         assertEquals("District2", response.getBody().get(1).getDistrictEn());
+
+        verify(ordersAdminsPageService, times(2)).getAllDistrictsByCities(cities);
     }
 }

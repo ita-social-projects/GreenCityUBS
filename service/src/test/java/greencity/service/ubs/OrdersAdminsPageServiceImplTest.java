@@ -1179,6 +1179,8 @@ class OrdersAdminsPageServiceImplTest {
         assertEquals(2, result.size());
         assertEquals("Kyiv", result.get(0).getCityEn());
         assertEquals("Lviv", result.get(1).getCityEn());
+
+        verify(addressRepository).findAllCitiesByRegions(regionNamesList);
     }
 
     @Test
@@ -1194,5 +1196,7 @@ class OrdersAdminsPageServiceImplTest {
         List<DistrictDto> result = ordersAdminsPageService.getAllDistrictsByCities(cities);
 
         assertEquals(3, result.size());
+
+        verify(addressRepository).findAllDistrictsByCities(Arrays.asList(cities));
     }
 }
