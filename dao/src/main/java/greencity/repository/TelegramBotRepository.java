@@ -28,5 +28,5 @@ public interface TelegramBotRepository extends CrudRepository<TelegramBot, Long>
      *
      * @author Julia Seti
      */
-    Optional<TelegramBot> findByUser(User user);
+    Optional<TelegramBot> findByUserAndIsNotifyIsTrue(User user);
 }

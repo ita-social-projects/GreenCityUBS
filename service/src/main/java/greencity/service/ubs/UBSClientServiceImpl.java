@@ -102,6 +102,7 @@ import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
+import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
@@ -118,6 +119,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -184,6 +186,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final NotificationService notificationService;
     private final WayForPayClient wayForPayClient;
     private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
+    private final UBSTelegramBot ubsTelegramBot;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
@@ -1505,6 +1508,23 @@ public class UBSClientServiceImpl implements UBSClientService {
         userProfileDto.setAddressDto(addressDto);
         userProfileDto.setBotList(botList);
         userProfileDto.setHasPassword(userRemoteClient.getPasswordStatus().isHasPassword());
+        return telegramIsNotifyCheck(userProfileDto, user);
+    }
+
+    private UserProfileDto telegramIsNotifyCheck (UserProfileDto userProfileDto, User user){
+        telegramBotRepository.findByUserAndIsNotifyIsTrue(user).ifPresent(telegramBot -> {
+            Boolean isChatAvailable = null;
+            try {
+                isChatAvailable = ubsTelegramBot.isChatAvailable(telegramBot.getChatId());
+            } catch (TelegramApiException e) {
+                isChatAvailable = false;
+            }
+            userProfileDto.setTelegramIsNotify(isChatAvailable);
+            if (!isChatAvailable.equals(telegramBot.getIsNotify())) {
+                telegramBot.setIsNotify(isChatAvailable);
+                telegramBotRepository.save(telegramBot);
+            }
+        });
         return userProfileDto;
     }
 
@@ -1517,7 +1537,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void setTelegramAndViberBots(User user, Boolean telegramIsNotify, Boolean viberIsNotify) {
-        TelegramBot telegramBot = telegramBotRepository.findByUser(user).orElse(null);
+        TelegramBot telegramBot = telegramBotRepository.findByUserAndIsNotifyIsTrue(user).orElse(null);
         ViberBot viberBot = viberBotRepository.findByUser(user).orElse(null);
         if (telegramBot != null) {
             telegramBot.setIsNotify(telegramIsNotify);
