@@ -1,5 +1,7 @@
 package greencity.repository;
 
+import greencity.dto.CityDto;
+import greencity.dto.DistrictDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
 import org.springframework.data.jpa.repository.Query;
@@ -126,6 +128,24 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      * @return a list of {@link Address} entities that match the specified regions.
      *         The list may be empty if no matching addresses are found.
      */
-    @Query(value = "SELECT a FROM Address a WHERE a.regionEn IN :regions OR a.region IN :regions")
-    List<Address> findAllAddressesByRegion(List<String> regions);
+    @Query(value = "SELECT new greencity.dto.CityDto(a.city, a.cityEn) FROM Address a "
+        + "WHERE a.regionEn IN :regions OR a.region IN :regions group by a.city, a.cityEn")
+    List<CityDto> findAllCitiesByRegions(List<String> regions);
+
+    /**
+     * Retrieves a list of districts corresponding to the given list of city names.
+     * This method executes a query to find all districts that are associated with
+     * the specified cities.
+     *
+     * @param cities a list of city names for which districts need to be retrieved.
+     *               The list should contain valid city names that match entries in
+     *               the database.
+     * @return a list of {@link DistrictDto} objects, each representing a district
+     *         associated with one of the specified cities. If no districts are
+     *         found for the given cities, an empty list is returned.
+     */
+    @Query(value = "select new greencity.dto.DistrictDto(a.district, a.districtEn) "
+        + "from Address a where a.city in :cities or a.cityEn in :cities "
+        + "group by a.district, a.districtEn")
+    List<DistrictDto> findAllDistrictsByCities(List<String> cities);
 }
