@@ -24,6 +24,7 @@ import static greencity.ModelUtils.getUserAgreementDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -111,6 +112,8 @@ class UserAgreementControllerTest {
 
     @Test
     void deleteUserAgreement() throws Exception {
+        doNothing().when(service).delete(anyLong());
+        
         mockMvc.perform(delete("/user-agreement/{id}", 1L)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
