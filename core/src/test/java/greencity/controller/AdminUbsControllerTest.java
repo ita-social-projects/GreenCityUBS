@@ -4,13 +4,16 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.CityDto;
+import greencity.dto.DistrictDto;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.enums.UkraineRegion;
 import greencity.service.ubs.OrdersAdminsPageService;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,17 +22,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import static greencity.ModelUtils.getUuid;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -49,7 +54,7 @@ class AdminUbsControllerTest {
 
     @BeforeEach
     void setup() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(adminUbsController)
+        this.mockMvc = standaloneSetup(adminUbsController)
             .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
             .build();
     }
@@ -60,7 +65,7 @@ class AdminUbsControllerTest {
         mockMvc.perform(get(management + "/tableParams" + "?region=")
             .principal(principal))
             .andExpect(status().isOk());
-        verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf", Collections.emptyList());
+        verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf");
     }
 
     @Test
@@ -69,7 +74,7 @@ class AdminUbsControllerTest {
         mockMvc.perform(get(management + "/tableParams" + "?region=KHARKIV_OBLAST")
                 .principal(principal))
             .andExpect(status().isOk());
-        verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf", List.of(UkraineRegion.KHARKIV_OBLAST));
+        verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf");
     }
 
     @Test
@@ -148,5 +153,48 @@ class AdminUbsControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(json))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void getCitiesControllerTest() throws Exception {
+        List<UkraineRegion> regions = Arrays.asList(UkraineRegion.KYIV_OBLAST, UkraineRegion.LVIV_OBLAST);
+        List<CityDto> cities = Arrays.asList(new CityDto("Київ", "Kyiv"), new CityDto("Львів", "Lviv"));
+
+        when(ordersAdminsPageService.getAllCitiesByRegion(regions)).thenReturn(cities);
+
+        mockMvc = standaloneSetup(adminUbsController).build();
+
+        mockMvc.perform(get(management + "/city-list")
+            .principal(principal)
+            .param("regions", "KYIV_OBLAST", "LVIV_OBLAST"))
+            .andExpect(status().isOk());
+
+        ResponseEntity<List<CityDto>> response = adminUbsController.getAllCitiesByRegions(regions);
+
+        assertEquals(2, Objects.requireNonNull(response.getBody()).size());
+        assertEquals("Kyiv", response.getBody().get(0).getCityEn());
+        assertEquals("Lviv", response.getBody().get(1).getCityEn());
+    }
+
+    @Test
+    void getDistrictsControllerTest() throws Exception {
+        String[] cities = {"Kyiv", "Lviv"};
+        List<DistrictDto> districts =
+            Arrays.asList(new DistrictDto("Район1", "District1"), new DistrictDto("Район2", "District2"));
+
+        when(ordersAdminsPageService.getAllDistrictsByCities(cities)).thenReturn(districts);
+
+        mockMvc = standaloneSetup(adminUbsController).build();
+
+        mockMvc.perform(get(management + "/districts-list")
+            .principal(principal)
+            .param("cities", "Kyiv", "Lviv"))
+            .andExpect(status().isOk());
+
+        ResponseEntity<List<DistrictDto>> response = adminUbsController.getAllDistrictsByCities(cities);
+
+        assertEquals(2, Objects.requireNonNull(response.getBody()).size());
+        assertEquals("District1", response.getBody().get(0).getDistrictEn());
+        assertEquals("District2", response.getBody().get(1).getDistrictEn());
     }
 }

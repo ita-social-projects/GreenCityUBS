@@ -4,6 +4,8 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
+import greencity.dto.CityDto;
+import greencity.dto.DistrictDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
@@ -35,12 +37,11 @@ import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
-import java.util.stream.Stream;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -187,9 +188,8 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     void assertThrowsEntityNotFoundException() {
-        List<UkraineRegion> emptyList = new ArrayList<>();
         assertThrows(EntityNotFoundException.class,
-            () -> ordersAdminsPageService.getParametersForOrdersTable("1", emptyList));
+            () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
     @Test
@@ -256,7 +256,7 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(addressList);
         when(addressRepository.findDistinctRegions())
             .thenReturn(addressList);
-        assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1", List.of()));
+        assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
     @Test
@@ -1166,75 +1166,33 @@ class OrdersAdminsPageServiceImplTest {
         verify(tableColumnWidthForEmployeeRepository).save(any(TableColumnWidthForEmployee.class));
     }
 
-    @ParameterizedTest
-    @MethodSource("provideRegionsForTesting")
-    void getParametersForOrdersWithRegionsTest(List<UkraineRegion> regions) {
-        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
-        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEng("en");
-        OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
+    @Test
+    void testGetAllCitiesByRegion() {
+        List<UkraineRegion> regions = Arrays.asList(UkraineRegion.KYIV_OBLAST, UkraineRegion.LVIV_OBLAST);
+        List<String> regionNamesList = Arrays.asList("Kyivs'ka oblast", "Lvivs'ka Oblast");
+        List<CityDto> cities = Arrays.asList(new CityDto("Київ", "Kyiv"), new CityDto("Львів", "Lviv"));
 
-        List<ReceivingStationDto> receivingStations = new ArrayList<>();
-        List<Employee> employeeList = new ArrayList<>();
-        employeeList.add(ModelUtils.getEmployee());
-        List<Address> addressList = List.of(ModelUtils.getAddress());
+        when(addressRepository.findAllCitiesByRegions(regionNamesList)).thenReturn(cities);
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation));
+        List<CityDto> result = ordersAdminsPageService.getAllCitiesByRegion(regions);
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation2));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(2L)));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(2L)));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(3L)));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(3L)));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(4L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(4L)));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(5L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(5L)));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(6L)));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(7L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(7L)));
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
-            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8L)));
-
-        when(orderPaymentStatusTranslationRepository.getOrderPaymentStatusTranslationById(anyLong()))
-            .thenReturn(Optional.ofNullable(orderPaymentStatusTranslation));
-
-        when(superAdminService.getAllReceivingStations())
-            .thenReturn(receivingStations);
-        when(employeeRepository.findAllByEmployeePositionId(2L))
-            .thenReturn(employeeList);
-        when(employeeRepository.findAllByEmployeePositionId(3L))
-            .thenReturn(employeeList);
-        when(employeeRepository.findAllByEmployeePositionId(5L))
-            .thenReturn(employeeList);
-        when(employeeRepository.findAllByEmployeePositionId(4L))
-            .thenReturn(employeeList);
-        when(addressRepository.findDistinctRegions())
-            .thenReturn(addressList);
-        when(addressRepository.findAllAddressesByRegion(any())).thenReturn(List.of(ModelUtils.getAddress()));
-
-        assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1", regions));
+        assertEquals(2, result.size());
+        assertEquals("Kyiv", result.get(0).getCityEn());
+        assertEquals("Lviv", result.get(1).getCityEn());
     }
 
-    private static Stream<List<UkraineRegion>> provideRegionsForTesting() {
-        return Stream.of(
-            List.of(UkraineRegion.KHARKIV_OBLAST),
-            List.of(UkraineRegion.KHARKIV_OBLAST, UkraineRegion.KYIV_CITY),
-            List.of(UkraineRegion.ODESSA_OBLAST, UkraineRegion.DNIPRO_OBLAST, UkraineRegion.ZAPORIZHIA_OBLAST));
+    @Test
+    void testGetAllDistrictsByCities() {
+        String[] cities = {"Kyiv", "Lviv"};
+        List<DistrictDto> districts = Arrays.asList(
+            new DistrictDto("Район1", "District1"),
+            new DistrictDto("Район2", "District2"),
+            new DistrictDto("Район3", "District3"));
+
+        when(addressRepository.findAllDistrictsByCities(Arrays.asList(cities))).thenReturn(districts);
+
+        List<DistrictDto> result = ordersAdminsPageService.getAllDistrictsByCities(cities);
+
+        assertEquals(3, result.size());
     }
 }
