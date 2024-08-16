@@ -113,7 +113,7 @@ class UserAgreementControllerTest {
     @Test
     void deleteUserAgreement() throws Exception {
         doNothing().when(service).delete(anyLong());
-        
+
         mockMvc.perform(delete("/user-agreement/{id}", 1L)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
