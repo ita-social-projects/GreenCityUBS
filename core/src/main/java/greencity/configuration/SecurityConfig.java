@@ -122,6 +122,8 @@ public class SecurityConfig {
                     UBS_MANAG_LINK + "/get-order-cancellation-reason/{id}",
                     UBS_MANAG_LINK + "/get-not-taken-order-reason/{id}",
                     UBS_MANAG_LINK + "/orderTableColumnsWidth",
+                    UBS_MANAG_LINK + "/city-list",
+                    UBS_MANAG_LINK + "/districts-list",
                     UBS_LINK + "/order_history/{orderId}",
                     ADMIN_EMPL_LINK + "/**",
                     ADMIN_LINK + "/notification/get-all-templates",
