@@ -12,9 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMemberCount;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 
 import java.util.Optional;
 
@@ -73,5 +76,17 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
             telegramBot.setIsNotify(true);
         }
         return telegramBotRepository.save(telegramBot);
+    }
+
+    public boolean isChatAvailable(Long chatId) throws TelegramApiException {
+        try {
+            Integer memberCount = execute(new GetChatMemberCount(chatId.toString()));
+            return memberCount != null;
+        } catch (TelegramApiRequestException e) {
+            if (e.getErrorCode() == 404 || e.getErrorCode() == 400 || e.getErrorCode() == 403) {
+                return false;
+            }
+            throw new RuntimeException("Error while checking chat availability", e);
+        }
     }
 }
