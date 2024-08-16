@@ -104,7 +104,9 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_REFUND;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
+import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyDouble;
