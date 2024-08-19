@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +42,7 @@ public class UserAgreementController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_ALL_AGREEMENTS', authentication)")
     @GetMapping
     public ResponseEntity<List<Long>> getAllUserAgreements() {
         List<Long> userAgreementsIds = userAgreementService.findAllIdSortedByAsc();
@@ -77,6 +79,7 @@ public class UserAgreementController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_ALL_AGREEMENTS', authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<UserAgreementDetailDto> getUserAgreementById(@PathVariable Long id) {
         UserAgreementDetailDto userAgreement = userAgreementService.read(id);
@@ -96,6 +99,7 @@ public class UserAgreementController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_AGREEMENT', authentication)")
     @PostMapping
     public ResponseEntity<UserAgreementDetailDto> createUserAgreement(
         @Valid @RequestBody UserAgreementDto userAgreementDto, Principal principal) {
@@ -117,6 +121,7 @@ public class UserAgreementController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('DELETE_AGREEMENT', authentication)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserAgreement(@PathVariable Long id) {
         userAgreementService.delete(id);
