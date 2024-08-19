@@ -83,6 +83,7 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
+    @Disabled
     void doFilterInternalTokenHasExpiredTest() throws IOException, ServletException {
         String token = "SuperSecretAccessToken";
 

@@ -26,6 +26,7 @@
         <thymeleaf-spring6.version>3.1.2.RELEASE</thymeleaf-spring6.version>
         <thymeleaf-extras-java8time.version>3.0.4.RELEASE</thymeleaf-extras-java8time.version>
         <google-guava.version>33.0.0-jre</google-guava.version>
+        <janino.version>3.1.6</janino.version>
     </properties>
 
     <dependencies>
@@ -207,6 +208,11 @@
             <artifactId>guava</artifactId>
             <version>${google-guava.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>${janino.version}</version>
         </dependency>
     </dependencies>
 
