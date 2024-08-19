@@ -10,7 +10,13 @@ import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.constant.TariffLocation;
 import greencity.constant.KyivTariffLocation;
-import greencity.dto.*;
+import greencity.dto.AllActiveLocationsDto;
+import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
+import greencity.dto.LocationsDtos;
+import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.RegionDto;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagDto;
@@ -39,7 +45,16 @@ import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.user.*;
+import greencity.dto.user.AllPointsUserDto;
+import greencity.dto.user.DeactivateUserRequestDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.PointsForUbsUserDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserPointDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserProfileCreateDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
@@ -141,8 +156,51 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
+import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
+import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
+import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
+import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
+import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
+import static greencity.constant.ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED;
+import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
+import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
+import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
+import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
+import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
+import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
+import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
+import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
+import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -217,6 +275,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String ADDRESS_NOT_FOUND_BY_ID_MESSAGE = "Address not found with id: ";
     private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected "
         + "does not match, reselect correct data.";
+    private static final byte CURRENCY_CONVERSION_RATE = 100;
 
     /**
      * {@inheritDoc}
@@ -920,9 +979,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             ? ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(page, uuid, statuses)
             : ordersForUserRepository.getAllByUserUuid(page, uuid);
         List<Order> orders = orderPages.getContent();
-
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
-
         orders.forEach(order -> dtos.add(getOrdersData(order)));
 
         return new PageableDto<>(
@@ -970,6 +1027,16 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Double amountBeforePayment = convertCoinsIntoBills(amountWithDiscountInCoins - paidAmountInCoins);
 
+        double refundedBonuses = order.getPayment().stream()
+            .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG.equals(payment.getReceiptLink()))
+            .map(payment -> payment.getAmount().doubleValue())
+            .reduce(0.0, Double::sum);
+
+        refundedBonuses /= -CURRENCY_CONVERSION_RATE;
+
+        Double refundedMoney =
+            order.getRefund() == null ? 0.0 : -order.getRefund().getAmount().doubleValue() / CURRENCY_CONVERSION_RATE;
+
         return OrdersDataForUserDto.builder()
             .id(order.getId())
             .dateForm(order.getOrderDate())
@@ -980,6 +1047,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .bags(bagForUserDtos)
             .additionalOrders(order.getAdditionalOrders())
             .amountBeforePayment(amountBeforePayment)
+            .refundedBonuses(refundedBonuses)
+            .refundedMoney(refundedMoney)
             .paidAmount(convertCoinsIntoBills(paidAmountInCoins))
             .orderFullPrice(convertCoinsIntoBills(fullPriceInCoins))
             .certificate(certificateDtos)

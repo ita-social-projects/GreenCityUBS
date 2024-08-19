@@ -107,7 +107,6 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -134,7 +133,6 @@ import greencity.entity.order.OrderBag;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
-import greencity.entity.order.Refund;
 import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
@@ -4183,15 +4181,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static AddBonusesToUserDto getAddBonusesToUserDto() {
-        return AddBonusesToUserDto.builder()
-            .paymentId("5")
-            .receiptLink("test")
-            .settlementdate("test")
-            .amount(1000L)
-            .build();
-    }
-
     public static GetTariffsInfoDto getAllTariffsInfoDto() {
         Location location = getLocation();
         return GetTariffsInfoDto.builder()
@@ -5219,10 +5208,6 @@ public class ModelUtils {
             .id(id)
             .name(nameTranslations)
             .build();
-    }
-
-    public static Refund getRefund(Long id) {
-        return Refund.builder().orderId(id).build();
     }
 
     public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoWithQuantity() {
