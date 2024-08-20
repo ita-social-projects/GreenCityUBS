@@ -294,6 +294,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public List<CityDto> getAllCitiesByRegion(List<UkraineRegion> regions) {
+        if (regions == null || regions.isEmpty()) {
+            return addressRepository.findDistinctCities().stream()
+                .map(address -> CityDto.builder()
+                    .cityEn(address.getCityEn())
+                    .city(address.getCity())
+                    .build())
+                .toList();
+        }
+
         List<String> regionNamesList = regions.stream()
             .map(UkraineRegion::getDisplayName)
             .toList();
@@ -302,6 +311,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public List<DistrictDto> getAllDistrictsByCities(String[] cities) {
+        if (cities == null || cities.length == 0) {
+            return addressRepository.findDistinctDistricts().stream()
+                .map(address -> DistrictDto.builder()
+                    .districtEn(address.getCityEn())
+                    .district(address.getCity())
+                    .build())
+                .toList();
+        }
+
         return new ArrayList<>(
             addressRepository.findAllDistrictsByCities(Arrays.asList(cities))
                 .stream()

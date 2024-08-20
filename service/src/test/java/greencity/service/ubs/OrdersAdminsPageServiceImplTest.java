@@ -1199,4 +1199,31 @@ class OrdersAdminsPageServiceImplTest {
 
         verify(addressRepository).findAllDistrictsByCities(Arrays.asList(cities));
     }
+
+    @Test
+    void testGetAllCitiesByRegionIfRegionIsEmpty() {
+        List<UkraineRegion> regions = Collections.emptyList();
+
+        when(addressRepository.findDistinctCities()).thenReturn(List.of(ModelUtils.getAddress()));
+
+        List<CityDto> result = ordersAdminsPageService.getAllCitiesByRegion(regions);
+
+        assertEquals(1, result.size());
+        assertEquals("Kyiv", result.getFirst().getCityEn());
+
+        verify(addressRepository).findDistinctCities();
+    }
+
+    @Test
+    void testGetAllDistrictsByCitiesIfCitiesIsEmpty() {
+        String[] cities = {};
+
+        when(addressRepository.findDistinctDistricts()).thenReturn(List.of(ModelUtils.getAddress()));
+
+        List<DistrictDto> result = ordersAdminsPageService.getAllDistrictsByCities(cities);
+
+        assertEquals(1, result.size());
+
+        verify(addressRepository).findDistinctDistricts();
+    }
 }
