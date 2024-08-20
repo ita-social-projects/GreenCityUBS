@@ -6,6 +6,7 @@ import greencity.dto.CityDto;
 import greencity.dto.DistrictDto;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
+import greencity.dto.CityAndDistrictDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
@@ -33,6 +34,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import greencity.optimization.MeasureExecutionTime;
 import greencity.repository.AddressRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
@@ -45,11 +47,13 @@ import greencity.repository.ReceivingStationRepository;
 import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
+import greencity.service.cache.CacheService;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
@@ -98,6 +102,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final NotificationServiceImpl notificationService;
     private final SuperAdminService superAdminService;
     private final OrderLockService orderLockService;
+    private final CacheService cacheService;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String DATE_OF_EXPORT = "dateOfExport";
     private static final String RECEIVING = "receivingStation";
@@ -121,6 +126,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String DISTRICT = "district";
 
     @Override
+    @MeasureExecutionTime
     public TableParamsDto getParametersForOrdersTable(String uuid) {
         String ordersInfo = "ORDERS_INFO";
         String customersInfo = "CUSTOMERS_INFO";
@@ -171,9 +177,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, true, 35, EditType.READ_ONLY, regionsList(), exportAddress),
             new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
-                true, true, 36, EditType.READ_ONLY, cityList(), exportAddress),
+                true, true, 36, EditType.READ_ONLY, cacheService.findAllCities(), exportAddress),
             new ColumnDTO(new TitleDto(DISTRICT, "Район", "District"), DISTRICT, 20, false,
-                true, true, 37, EditType.READ_ONLY, districtList(), exportAddress),
+                true, true, 37, EditType.READ_ONLY, cacheService.findAllDistricts(), exportAddress),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "address", 20, false, true,
                 false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), exportAddress),
@@ -294,6 +300,14 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public List<CityDto> getAllCitiesByRegion(List<UkraineRegion> regions) {
+        if (regions == null || regions.isEmpty()) {
+            return addressRepository.findDistinctCities().stream()
+                .map(address -> CityDto.builder()
+                    .cityEn(address.getCityEn())
+                    .city(address.getCity())
+                    .build())
+                .toList();
+        }
         List<String> regionNamesList = regions.stream()
             .map(UkraineRegion::getDisplayName)
             .toList();
@@ -302,6 +316,14 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public List<DistrictDto> getAllDistrictsByCities(String[] cities) {
+        if (cities == null || cities.length == 0) {
+            return addressRepository.findDistinctDistricts().stream()
+                .map(address -> DistrictDto.builder()
+                    .districtEn(address.getDistrictEn())
+                    .district(address.getDistrict())
+                    .build())
+                .toList();
+        }
         return new ArrayList<>(
             addressRepository.findAllDistrictsByCities(Arrays.asList(cities))
                 .stream()
@@ -431,28 +453,37 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return optionForColumnDTOS;
     }
 
-    private List<OptionForColumnDTO> districtList() {
-        return addressRepository.findDistinctDistricts()
+    private List<OptionForColumnDTO> districtList(List<CityAndDistrictDto> data) {
+        return data.stream()
+            .collect(Collectors.toMap(
+                CityAndDistrictDto::getDistrict,
+                district -> district,
+                (existing, replacement) -> existing
+            )).values()
             .stream()
-            .map(address -> OptionForColumnDTO
-                .builder()
-                .key(address.getId().toString())
-                .en(address.getDistrictEn())
-                .ua(address.getDistrict())
+            .map(source -> OptionForColumnDTO.builder()
+                .key(source.getId().toString())
+                .en(source.getDistrictEn())
+                .ua(source.getDistrict())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 
-    private List<OptionForColumnDTO> cityList() {
-        return addressRepository.findDistinctCities()
+    private List<OptionForColumnDTO> cityList(List<CityAndDistrictDto> data) {
+        return data.stream()
+            .collect(Collectors.toMap(
+                CityAndDistrictDto::getCity,
+                city -> city,
+                (existing, replacement) -> existing
+            ))
+            .values()
             .stream()
-            .map(address -> OptionForColumnDTO
-                .builder()
-                .key(address.getId().toString())
-                .en(address.getCityEn())
-                .ua(address.getCity())
+            .map(v -> OptionForColumnDTO.builder()
+                .key(v.getId().toString())
+                .en(v.getCityEn())
+                .ua(v.getCity())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<OptionForColumnDTO> includeItemsWithoutResponsiblePerson(String nameUa, String nameEn) {
@@ -801,6 +832,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 .en(address.getRegionEn())
                 .ua(address.getRegion())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 }
