@@ -129,6 +129,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -1822,6 +1823,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
+    @Cacheable(value = "positionsAndAuthorities", key = "#email")
     public PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email) {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST + email));

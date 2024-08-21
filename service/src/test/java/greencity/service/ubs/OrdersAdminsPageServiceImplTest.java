@@ -250,10 +250,6 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(employeeList);
         when(employeeRepository.findAllByEmployeePositionId(4L))
             .thenReturn(employeeList);
-        when(addressRepository.findDistinctDistricts())
-            .thenReturn(addressList);
-        when(addressRepository.findDistinctCities())
-            .thenReturn(addressList);
         when(addressRepository.findDistinctRegions())
             .thenReturn(addressList);
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
