@@ -35,7 +35,6 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     private final UserRemoteClient userRemoteClient;
 
     @Override
-    @Cacheable(value = "bigOrderTable", key = "{#searchCriteria, #email}")
     public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String email) {
         UserVO userVO = userRemoteClient.findNotDeactivatedByEmail(email).orElseThrow(() -> new UserNotFoundException(
             ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST));
@@ -63,6 +62,7 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     }
 
     @Override
+    @Cacheable(value = "OrdersViewParameters", key = "#uuid")
     public CustomTableViewDto getCustomTableParameters(String uuid) {
         if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
             return castTableViewToDto(customTableViewRepo.findByUuid(uuid).getTitles());
