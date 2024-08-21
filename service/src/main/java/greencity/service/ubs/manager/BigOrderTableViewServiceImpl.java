@@ -8,6 +8,7 @@ import greencity.dto.user.UserVO;
 import greencity.exceptions.user.UserNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,7 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     }
 
     @Override
+    @Cacheable(value = "OrdersViewParameters", key = "#uuid")
     public CustomTableViewDto getCustomTableParameters(String uuid) {
         if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
             return castTableViewToDto(customTableViewRepo.findByUuid(uuid).getTitles());
