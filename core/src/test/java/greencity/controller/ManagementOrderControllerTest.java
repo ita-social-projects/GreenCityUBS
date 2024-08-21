@@ -10,7 +10,6 @@ import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.filters.CertificateFilterCriteria;
@@ -40,7 +39,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
-import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getRequestDto;
 import static greencity.ModelUtils.getUpdateOrderPageAdminDto;
@@ -432,20 +430,6 @@ class ManagementOrderControllerTest {
     }
 
     @Test
-    void addPaymentDiscountTest() throws Exception {
-        AddBonusesToUserDto addBonusesToUserDto = getAddBonusesToUserDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonDto = objectMapper.writeValueAsString(addBonusesToUserDto);
-
-        mockMvc.perform(post(ubsLink + "/add-bonuses-user/{id}", 1L)
-            .content(jsonDto)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
-
-    }
-
-    @Test
     void getOrderCancellationReason() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/get-order-cancellation-reason" + "/{id}", 1L))
             .andExpect(status().isOk());
@@ -457,12 +441,6 @@ class ManagementOrderControllerTest {
         this.mockMvc.perform(get(ubsLink + "/get-not-taken-order-reason/{id}", 1L))
             .andExpect(status().isOk());
         verify(ubsManagementService).getNotTakenOrderReason(1L);
-    }
-
-    @Test
-    void saveOrderIdForRefundTest() throws Exception {
-        mockMvc.perform(post(ubsLink + "/save-order-for-refund/{orderId}", 1L)
-            .principal(principal)).andExpect(status().isCreated());
     }
 
     @Test

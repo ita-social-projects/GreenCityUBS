@@ -302,6 +302,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .build())
                 .toList();
         }
+      
         List<String> regionNamesList = regions.stream()
             .map(UkraineRegion::getDisplayName)
             .toList();
@@ -317,7 +318,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .district(address.getDistrict())
                     .build())
                 .toList();
-        }
+          
         return new ArrayList<>(
             addressRepository.findAllDistrictsByCities(Arrays.asList(cities))
                 .stream()
