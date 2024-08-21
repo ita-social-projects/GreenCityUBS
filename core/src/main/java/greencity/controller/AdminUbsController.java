@@ -250,7 +250,7 @@ public class AdminUbsController {
     })
     @GetMapping("/city-list")
     public ResponseEntity<List<CityDto>> getAllCitiesByRegions(
-        @RequestParam(value = "regions") List<UkraineRegion> regions) {
+        @RequestParam(value = "regions", required = false) List<UkraineRegion> regions) {
         return ResponseEntity.ok(ordersAdminsPageService.getAllCitiesByRegion(regions));
     }
 
@@ -261,7 +261,7 @@ public class AdminUbsController {
     })
     @GetMapping("/districts-list")
     public ResponseEntity<List<DistrictDto>> getAllDistrictsByCities(
-        @RequestParam(value = "cities") String[] cities) {
+        @RequestParam(value = "cities", required = false) String[] cities) {
         return ResponseEntity.ok(ordersAdminsPageService.getAllDistrictsByCities(cities));
     }
 }
