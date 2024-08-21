@@ -6,7 +6,6 @@ import greencity.dto.CityDto;
 import greencity.dto.DistrictDto;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
-import greencity.dto.CityAndDistrictDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
@@ -34,7 +33,6 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import greencity.optimization.MeasureExecutionTime;
 import greencity.repository.AddressRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
@@ -47,8 +45,8 @@ import greencity.repository.ReceivingStationRepository;
 import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
-import greencity.service.cache.CacheService;
 import greencity.service.notification.NotificationServiceImpl;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -61,12 +59,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER;
 import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
@@ -102,7 +94,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final NotificationServiceImpl notificationService;
     private final SuperAdminService superAdminService;
     private final OrderLockService orderLockService;
-    private final CacheService cacheService;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String DATE_OF_EXPORT = "dateOfExport";
     private static final String RECEIVING = "receivingStation";
@@ -126,7 +117,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String DISTRICT = "district";
 
     @Override
-    @MeasureExecutionTime
+    @Cacheable(value = "ordersTableParamsCache", key = "#uuid")
     public TableParamsDto getParametersForOrdersTable(String uuid) {
         String ordersInfo = "ORDERS_INFO";
         String customersInfo = "CUSTOMERS_INFO";
@@ -177,9 +168,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, true, 35, EditType.READ_ONLY, regionsList(), exportAddress),
             new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
-                true, true, 36, EditType.READ_ONLY, cacheService.findAllCities(), exportAddress),
+                true, true, 36, EditType.READ_ONLY, Collections.emptyList(), exportAddress),
             new ColumnDTO(new TitleDto(DISTRICT, "Район", "District"), DISTRICT, 20, false,
-                true, true, 37, EditType.READ_ONLY, cacheService.findAllDistricts(), exportAddress),
+                true, true, 37, EditType.READ_ONLY, Collections.emptyList(), exportAddress),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "address", 20, false, true,
                 false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), exportAddress),
@@ -299,6 +290,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
+    @Cacheable(value = "citiesByRegionCache", key = "#regions == null ? 'all' : #regions")
     public List<CityDto> getAllCitiesByRegion(List<UkraineRegion> regions) {
         if (regions == null || regions.isEmpty()) {
             return addressRepository.findDistinctCities().stream()
@@ -315,6 +307,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
+    @Cacheable(value = "districtsByCitiesCache", key = "#cities == null ? 'all' : #cities")
     public List<DistrictDto> getAllDistrictsByCities(String[] cities) {
         if (cities == null || cities.length == 0) {
             return addressRepository.findDistinctDistricts().stream()
@@ -451,39 +444,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
         return optionForColumnDTOS;
-    }
-
-    private List<OptionForColumnDTO> districtList(List<CityAndDistrictDto> data) {
-        return data.stream()
-            .collect(Collectors.toMap(
-                CityAndDistrictDto::getDistrict,
-                district -> district,
-                (existing, replacement) -> existing
-            )).values()
-            .stream()
-            .map(source -> OptionForColumnDTO.builder()
-                .key(source.getId().toString())
-                .en(source.getDistrictEn())
-                .ua(source.getDistrict())
-                .build())
-            .toList();
-    }
-
-    private List<OptionForColumnDTO> cityList(List<CityAndDistrictDto> data) {
-        return data.stream()
-            .collect(Collectors.toMap(
-                CityAndDistrictDto::getCity,
-                city -> city,
-                (existing, replacement) -> existing
-            ))
-            .values()
-            .stream()
-            .map(v -> OptionForColumnDTO.builder()
-                .key(v.getId().toString())
-                .en(v.getCityEn())
-                .ua(v.getCity())
-                .build())
-            .toList();
     }
 
     private List<OptionForColumnDTO> includeItemsWithoutResponsiblePerson(String nameUa, String nameEn) {

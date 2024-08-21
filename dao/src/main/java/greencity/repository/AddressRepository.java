@@ -1,6 +1,5 @@
 package greencity.repository;
 
-import greencity.dto.CityAndDistrictDto;
 import greencity.dto.CityDto;
 import greencity.dto.DistrictDto;
 import greencity.entity.coords.Coordinates;
@@ -149,17 +148,4 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
         + "from Address a where a.city in :cities or a.cityEn in :cities "
         + "group by a.district, a.districtEn")
     List<DistrictDto> findAllDistrictsByCities(List<String> cities);
-
-    /**
-     * Retrieves a list of all unique city and district combinations from the Address table.
-     * Each combination is represented by a {@link CityAndDistrictDto},
-     * which contains the city name, city name in English, district name, and district name in English.
-     *
-     * @return a list of {@link CityAndDistrictDto} objects, each representing
-     *         a unique combination of city and district, including both Ukrainian and English names.
-     */
-    @Query(value = "select new greencity.dto.CityAndDistrictDto(a.id, a.city, a.cityEn, a.district, a.districtEn)"
-                   + " from Address a"
-                   + " where a.id in (select min(b.id) from Address b group by b.city, b.cityEn, b.district, b.districtEn)")
-    List<CityAndDistrictDto> findAllCitiesAndDistricts();
 }
