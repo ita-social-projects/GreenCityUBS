@@ -544,7 +544,7 @@ class UBSManagementServiceImplTest {
         OrderAddress orderAddress = getOrderAddress();
         orderAddress.setId(1L);
         OrderAddressExportDetailsDtoUpdate dtoUpdate = ModelUtils.getOrderAddressExportDetailsDtoUpdate();
-        when(orderAddressRepository.findById(dtoUpdate.getAddressId())).thenReturn(Optional.of(orderAddress));
+        when(orderAddressRepository.findById(dtoUpdate.getId())).thenReturn(Optional.of(orderAddress));
 
         when(orderAddressRepository.save(orderAddress)).thenReturn(orderAddress);
         when(modelMapper.map(orderAddress, OrderAddressDtoResponse.class)).thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
@@ -552,7 +552,7 @@ class UBSManagementServiceImplTest {
             ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, order, "test@gmail.com");
         assertEquals(Optional.of(TEST_ORDER_ADDRESS_DTO_RESPONSE), actual);
 
-        verify(orderAddressRepository).findById(dtoUpdate.getAddressId());
+        verify(orderAddressRepository).findById(dtoUpdate.getId());
         verify(orderAddressRepository).save(orderAddress);
         verify(modelMapper).map(orderAddress, OrderAddressDtoResponse.class);
     }
