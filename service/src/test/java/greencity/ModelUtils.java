@@ -215,6 +215,8 @@ public class ModelUtils {
 
     public static final String TEST_EMAIL = "test@gmail.com";
     public static final String TEST_UUID = "1ab2c3-d4e5f6";
+    public static final String TEST_AGREEMENT_TEXT_UA = "Текст угоди українською";
+    public static final String TEST_AGREEMENT_TEXT_EN = "Agreement text in English";
     public static final Order TEST_ORDER = createOrder();
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
     public static final OrderAddressExportDetailsDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE =
@@ -5328,8 +5330,8 @@ public class ModelUtils {
     public static UserAgreement getUserAgreement() {
         return UserAgreement.builder()
             .id(1L)
-            .textUa("Текст угоди українською")
-            .textEn("Agreement text in English")
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
             .createdAt(LocalDateTime.now().minusDays(1))
             .author(getEmployee())
             .build();
@@ -5337,17 +5339,17 @@ public class ModelUtils {
 
     public static UserAgreementDto getUserAgreementDto() {
         return UserAgreementDto.builder()
-            .textUa("Текст угоди українською")
-            .textEn("Agreement text in English")
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
             .build();
     }
 
     public static UserAgreementDetailDto getUserAgreementDetailDto() {
         return UserAgreementDetailDto.builder()
             .id(1L)
-            .textUa("Текст угоди українською")
-            .textEn("Agreement text in English")
-            .authorEmail("test@gmail.com")
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .authorEmail(TEST_EMAIL)
             .createdAt(LocalDateTime.now().minusDays(1))
             .build();
     }

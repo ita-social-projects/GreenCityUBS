@@ -34,7 +34,7 @@ public class UserAgreementController {
      * Retrieves all user agreement IDs sorted by creation date in ascending order.
      *
      * @return a {@link ResponseEntity} containing a list of user agreement IDs
-     *         sorted from oldest to newest, with an HTTP status of 200 (OK).
+     *         sorted from oldest to newest.
      */
     @Operation(summary = "Get all user agreements ids sorted in ASC")
     @ApiResponses(value = {
