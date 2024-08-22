@@ -113,6 +113,8 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.useragreement.UserAgreementDetailDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -142,6 +144,7 @@ import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
+import greencity.entity.user.UserAgreement;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeFilterView;
@@ -210,6 +213,8 @@ public class ModelUtils {
 
     public static final String TEST_EMAIL = "test@gmail.com";
     public static final String TEST_UUID = "1ab2c3-d4e5f6";
+    public static final String TEST_AGREEMENT_TEXT_UA = "Текст угоди українською";
+    public static final String TEST_AGREEMENT_TEXT_EN = "Agreement text in English";
     public static final Order TEST_ORDER = createOrder();
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
     public static final OrderAddressExportDetailsDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE =
@@ -5304,6 +5309,33 @@ public class ModelUtils {
             .points(100)
             .code("7777-7777")
             .creationDate(LocalDate.now().plusMonths(1))
+            .build();
+    }
+
+    public static UserAgreement getUserAgreement() {
+        return UserAgreement.builder()
+            .id(1L)
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .author(getEmployee())
+            .build();
+    }
+
+    public static UserAgreementDto getUserAgreementDto() {
+        return UserAgreementDto.builder()
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .build();
+    }
+
+    public static UserAgreementDetailDto getUserAgreementDetailDto() {
+        return UserAgreementDetailDto.builder()
+            .id(1L)
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .authorEmail(TEST_EMAIL)
+            .createdAt(LocalDateTime.now().minusDays(1))
             .build();
     }
 }
