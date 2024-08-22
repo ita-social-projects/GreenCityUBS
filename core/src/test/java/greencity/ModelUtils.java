@@ -52,8 +52,11 @@ import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
+import greencity.dto.useragreement.UserAgreementDetailDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.user.UserAgreement;
 import greencity.enums.CancellationReason;
 import greencity.enums.CourierLimit;
 import greencity.enums.NotificationReceiverType;
@@ -614,4 +617,22 @@ public class ModelUtils {
         return dto;
     }
 
+    public static final String TEST_AGREEMENT_TEXT_UA = "Текст угоди українською";
+    public static final String TEST_AGREEMENT_TEXT_EN = "Agreement text in English";
+
+    public static UserAgreementDto getUserAgreementDto() {
+        return UserAgreementDto.builder()
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .build();
+    }
+
+    public static UserAgreementDetailDto getUserAgreementDetailDto() {
+        return UserAgreementDetailDto.builder()
+            .id(1L)
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .build();
+    }
 }
