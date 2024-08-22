@@ -47,7 +47,6 @@ import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -471,15 +470,6 @@ public class ModelUtils {
         return ChangeOrderResponseDTO.builder()
             .httpStatus(HttpStatus.OK)
             .unresolvedGoalsOrderId(List.of(1L))
-            .build();
-    }
-
-    public static AddBonusesToUserDto getAddBonusesToUserDto() {
-        return AddBonusesToUserDto.builder()
-            .paymentId("5")
-            .receiptLink("test")
-            .settlementdate("test")
-            .amount(500L)
             .build();
     }
 

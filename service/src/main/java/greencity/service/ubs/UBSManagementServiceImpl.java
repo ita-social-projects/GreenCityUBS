@@ -41,7 +41,6 @@ import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
@@ -117,16 +116,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
-import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
-import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
-import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
+import static greencity.constant.AppConstant.PAYMENT_REFUND_ENG;
+import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -245,13 +237,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
         String email) {
-        Optional<OrderAddress> addressForAdminPage = orderAddressRepository.findById(dtoUpdate.getAddressId());
+        Optional<OrderAddress> addressForAdminPage = orderAddressRepository.findById(dtoUpdate.getId());
         if (addressForAdminPage.isPresent()) {
             orderAddressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
             eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
             return addressForAdminPage.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
         } else {
-            throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getAddressId());
+            throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId());
         }
     }
 
@@ -373,18 +365,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private AddressExportDetailsDto getAddressDtoForAdminPage(OrderAddress address) {
         return AddressExportDetailsDto.builder()
-            .addressId(address.getId())
-            .addressCity(address.getCity())
-            .addressCityEng(address.getCityEn())
-            .addressStreet(address.getStreet())
-            .addressStreetEng(address.getStreetEn())
-            .addressDistrict(address.getDistrict())
-            .addressDistrictEng(address.getDistrictEn())
-            .addressEntranceNumber(address.getEntranceNumber())
-            .addressHouseCorpus(address.getHouseCorpus())
-            .addressHouseNumber(address.getHouseNumber())
-            .addressRegion(address.getRegion())
-            .addressRegionEng(address.getRegionEn())
+            .id(address.getId())
+            .city(address.getCity())
+            .cityEn(address.getCityEn())
+            .street(address.getStreet())
+            .streetEn(address.getStreetEn())
+            .district(address.getDistrict())
+            .districtEn(address.getDistrictEn())
+            .entranceNumber(address.getEntranceNumber())
+            .houseCorpus(address.getHouseCorpus())
+            .houseNumber(address.getHouseNumber())
+            .region(address.getRegion())
+            .regionEn(address.getRegionEn())
             .addressRegionDistrictList(
                 locationApiService.getAllDistrictsInCityByNames(address.getRegion(), address.getCity()).stream()
                     .map(p -> modelMapper.map(p, DistrictDto.class))
@@ -903,17 +895,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private OrderAddress updateAddressOrderInfo(OrderAddress address, OrderAddressExportDetailsDtoUpdate dto) {
-        Optional.ofNullable(dto.getAddressCity()).ifPresent(address::setCity);
-        Optional.ofNullable(dto.getAddressCityEng()).ifPresent(address::setCityEn);
-        Optional.ofNullable(dto.getAddressRegion()).ifPresent(address::setRegion);
-        Optional.ofNullable(dto.getAddressRegionEng()).ifPresent(address::setRegionEn);
-        Optional.ofNullable(dto.getAddressDistrict()).ifPresent(address::setDistrict);
-        Optional.ofNullable(dto.getAddressDistrictEng()).ifPresent(address::setDistrictEn);
-        Optional.ofNullable(dto.getAddressStreet()).ifPresent(address::setStreet);
-        Optional.ofNullable(dto.getAddressStreetEng()).ifPresent(address::setStreetEn);
-        Optional.ofNullable(dto.getAddressHouseNumber()).ifPresent(address::setHouseNumber);
-        Optional.ofNullable(dto.getAddressHouseCorpus()).ifPresent(address::setHouseCorpus);
-        Optional.ofNullable(dto.getAddressEntranceNumber()).ifPresent(address::setEntranceNumber);
+        Optional.ofNullable(dto.getCity()).ifPresent(address::setCity);
+        Optional.ofNullable(dto.getCityEn()).ifPresent(address::setCityEn);
+        Optional.ofNullable(dto.getRegion()).ifPresent(address::setRegion);
+        Optional.ofNullable(dto.getRegionEn()).ifPresent(address::setRegionEn);
+        Optional.ofNullable(dto.getDistrict()).ifPresent(address::setDistrict);
+        Optional.ofNullable(dto.getDistrictEn()).ifPresent(address::setDistrictEn);
+        Optional.ofNullable(dto.getStreet()).ifPresent(address::setStreet);
+        Optional.ofNullable(dto.getStreetEn()).ifPresent(address::setStreetEn);
+        Optional.ofNullable(dto.getHouseNumber()).ifPresent(address::setHouseNumber);
+        Optional.ofNullable(dto.getHouseCorpus()).ifPresent(address::setHouseCorpus);
+        Optional.ofNullable(dto.getEntranceNumber()).ifPresent(address::setEntranceNumber);
 
         return address;
     }
@@ -1246,12 +1238,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return String.format("%s: %s; ", orderHistory, String.join("; ", newEcoNumbers));
     }
 
-    private void isOrderStatusCanceledOrDone(Order order) {
-        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DONE) {
-            throw new BadRequestException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
-        }
-    }
-
     private void updateOrderPageFields(UpdateOrderPageAdminDto updateOrderPageDto, Order order, String email) {
         if (nonNull(updateOrderPageDto.getUserInfoDto())) {
             ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
@@ -1327,18 +1313,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Transactional
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Order order, String lang,
         String email) {
-        isOrderStatusCanceledOrDone(order);
-
         checkAvailableOrderForEmployee(order, email);
-
-        if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-            && nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
-            updateOrderDetailStatus(order, updateOrderPageDto.getGeneralOrderInfo(), email);
-        } else {
-            try {
-                updateOrderPageFields(updateOrderPageDto, order, email);
-            } catch (Exception e) {
-                throw new BadRequestException(e.getMessage());
+        if (!processRefundForOrder(order, updateOrderPageDto, email)) {
+            if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+                && nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
+                updateOrderDetailStatus(order, updateOrderPageDto.getGeneralOrderInfo(), email);
+            } else {
+                try {
+                    updateOrderPageFields(updateOrderPageDto, order, email);
+                } catch (Exception e) {
+                    throw new BadRequestException(e.getMessage());
+                }
             }
         }
     }
@@ -1428,50 +1413,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void checkOverpayment(long overpayment) {
-        if (overpayment == 0) {
-            throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
-        }
-    }
-
-    @Override
-    @Transactional
-    public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
-        Long orderId, String email) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        CounterOrderDetailsDto prices =
-            PaymentUtil.getPriceDetails(orderId, orderRepository, orderBagService, certificateRepository);
-        Long overpaymentInCoins =
-            PaymentUtil.calculateOverpayment(order, PaymentUtil.convertBillsIntoCoins(setTotalPrice(prices)));
-        checkOverpayment(overpaymentInCoins);
-        User currentUser = order.getUser();
-
-        order.getPayment().add(Payment.builder()
-            .amount(-overpaymentInCoins)
-            .settlementDate(addBonusesToUserDto.getSettlementdate())
-            .paymentId(addBonusesToUserDto.getPaymentId())
-            .receiptLink(addBonusesToUserDto.getReceiptLink())
-            .order(order)
-            .currency("UAH")
-            .orderStatus(String.valueOf(OrderStatus.FORMED))
-            .paymentStatus(PaymentStatus.PAID)
-            .build());
-
-        transferPointsToUser(order, currentUser, overpaymentInCoins);
-
-        orderRepository.save(order);
-        userRepository.save(currentUser);
-        eventService.saveEvent(OrderHistory.ADDED_BONUSES, email, order);
-
-        return AddBonusesToUserDto.builder()
-            .amount(addBonusesToUserDto.getAmount())
-            .settlementdate(addBonusesToUserDto.getSettlementdate())
-            .receiptLink(addBonusesToUserDto.getReceiptLink())
-            .paymentId(addBonusesToUserDto.getPaymentId())
-            .build();
-    }
-
     private void transferPointsToUser(Order order, User user, long pointsInCoins) {
         int uahPoints = PaymentUtil.convertCoinsIntoBills(pointsInCoins).intValue();
         user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
@@ -1514,10 +1455,80 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    @Override
-    public void saveOrderIdForRefund(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        refundRepository.save(Refund.builder().orderId(order.getId()).build());
+    private void checkOverpayment(long overpayment) {
+        if (overpayment == 0) {
+            throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
+        }
+    }
+
+    private boolean processRefundForOrder(Order order, UpdateOrderPageAdminDto updateOrderPageAdminDto,
+        String employeeEmail) {
+        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DONE
+            || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
+            if (updateOrderPageAdminDto.isReturnBonuses()) {
+                refundPaymentsInBonus(order, employeeEmail);
+                return true;
+            } else if (updateOrderPageAdminDto.isReturnMoney()) {
+                refundPaymentsInMoney(order, employeeEmail);
+                return true;
+            } else if (order.getOrderStatus() != OrderStatus.BROUGHT_IT_HIMSELF) {
+                throw new BadRequestException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
+            }
+        }
+        return false;
+    }
+
+    private void refundPaymentsInMoney(Order order, String employeeEmail) {
+        if (order.getOrderStatus() != OrderStatus.CANCELED) {
+            throw new BadRequestException(INCOMPATIBLE_ORDER_STATUS_FOR_REFUND);
+        }
+        Long paidAmount = PaymentUtil.calculatePaidAmount(order);
+        if (paidAmount > 0) {
+            order.getPayment().add(Payment.builder()
+                .amount(-paidAmount)
+                .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .receiptLink(PAYMENT_REFUND_ENG)
+                .order(order)
+                .currency("UAH")
+                .orderStatus(String.valueOf(OrderStatus.FORMED))
+                .paymentStatus(PaymentStatus.PAID)
+                .build());
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
+            refundRepository.save(Refund.builder()
+                .order(order)
+                .amount(paidAmount)
+                .date(LocalDateTime.now(ZoneId.of("Europe/Kiev")))
+                .build());
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
+            orderRepository.save(order);
+            eventService.saveEvent(OrderHistory.CANCELED_ORDER_MONEY_REFUND, employeeEmail, order);
+        } else {
+            throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
+        }
+    }
+
+    private void refundPaymentsInBonus(Order order, String email) {
+        CounterOrderDetailsDto prices =
+            PaymentUtil.getPriceDetails(order.getId(), orderRepository, orderBagService, certificateRepository);
+        Long overpaymentInCoins =
+            PaymentUtil.calculateOverpayment(order, PaymentUtil.convertBillsIntoCoins(setTotalPrice(prices)));
+        checkOverpayment(overpaymentInCoins);
+        User currentUser = order.getUser();
+
+        order.getPayment().add(Payment.builder()
+            .amount(-overpaymentInCoins)
+            .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
+            .receiptLink(ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG)
+            .order(order)
+            .currency("UAH")
+            .orderStatus(String.valueOf(OrderStatus.FORMED))
+            .paymentStatus(PaymentStatus.PAID)
+            .build());
+
+        transferPointsToUser(order, currentUser, overpaymentInCoins);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
+        orderRepository.save(order);
+        userRepository.save(currentUser);
+        eventService.saveEvent(OrderHistory.ADDED_BONUSES, email, order);
     }
 }

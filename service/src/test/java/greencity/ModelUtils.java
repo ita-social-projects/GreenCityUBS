@@ -107,7 +107,6 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -136,7 +135,6 @@ import greencity.entity.order.OrderBag;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
-import greencity.entity.order.Refund;
 import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
@@ -2305,18 +2303,18 @@ public class ModelUtils {
 
     private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
-            .addressId(1L)
-            .addressHouseNumber("1")
-            .addressEntranceNumber("3")
-            .addressDistrict("District")
-            .addressDistrictEng("DistrictEng")
-            .addressStreet("Street")
-            .addressStreetEng("StreetEng")
-            .addressHouseCorpus("2")
-            .addressCity("City")
-            .addressCityEng("CityEng")
-            .addressRegion("Region")
-            .addressRegionEng("RegionEng")
+            .id(1L)
+            .houseNumber("1")
+            .entranceNumber("3")
+            .district("District")
+            .districtEn("DistrictEng")
+            .street("Street")
+            .streetEn("StreetEng")
+            .houseCorpus("2")
+            .city("City")
+            .cityEn("CityEng")
+            .region("Region")
+            .regionEn("RegionEng")
             .build();
     }
 
@@ -3452,18 +3450,18 @@ public class ModelUtils {
                 .build())
             .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
                 .builder()
-                .addressId(1L)
-                .addressDistrict("District")
-                .addressDistrictEng("DistrictEng")
-                .addressStreet("Street")
-                .addressStreetEng("StreetEng")
-                .addressEntranceNumber("12")
-                .addressHouseCorpus("123")
-                .addressHouseNumber("121")
-                .addressCity("City")
-                .addressCityEng("CityEng")
-                .addressRegion("Region")
-                .addressRegionEng("RegionEng")
+                .id(1L)
+                .district("District")
+                .districtEn("DistrictEng")
+                .street("Street")
+                .streetEn("StreetEng")
+                .entranceNumber("12")
+                .houseCorpus("123")
+                .houseNumber("121")
+                .city("City")
+                .cityEn("CityEng")
+                .region("Region")
+                .regionEn("RegionEng")
                 .build())
             .ecoNumberFromShop(EcoNumberDto.builder()
                 .ecoNumber(Set.of("1111111111"))
@@ -4059,18 +4057,18 @@ public class ModelUtils {
 
     public static OrderAddressExportDetailsDtoUpdate getOrderAddressExportDetailsDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
-            .addressId(1L)
-            .addressStreet("Street")
-            .addressStreetEng("StreetEng")
-            .addressCity("City")
-            .addressCityEng("City")
-            .addressDistrict("District")
-            .addressDistrictEng("DistrictEng")
-            .addressHouseCorpus("12")
-            .addressEntranceNumber("2")
-            .addressRegion("Region")
-            .addressRegionEng("RegionEng")
-            .addressHouseNumber("123")
+            .id(1L)
+            .street("Street")
+            .streetEn("StreetEng")
+            .city("City")
+            .cityEn("City")
+            .district("District")
+            .districtEn("DistrictEng")
+            .houseCorpus("12")
+            .entranceNumber("2")
+            .region("Region")
+            .regionEn("RegionEng")
+            .houseNumber("123")
             .build();
 
     }
@@ -4185,15 +4183,6 @@ public class ModelUtils {
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>())
             .sumTotalAmountWithoutDiscounts(20000L)
-            .build();
-    }
-
-    public static AddBonusesToUserDto getAddBonusesToUserDto() {
-        return AddBonusesToUserDto.builder()
-            .paymentId("5")
-            .receiptLink("test")
-            .settlementdate("test")
-            .amount(1000L)
             .build();
     }
 
@@ -5224,10 +5213,6 @@ public class ModelUtils {
             .id(id)
             .name(nameTranslations)
             .build();
-    }
-
-    public static Refund getRefund(Long id) {
-        return Refund.builder().orderId(id).build();
     }
 
     public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoWithQuantity() {
