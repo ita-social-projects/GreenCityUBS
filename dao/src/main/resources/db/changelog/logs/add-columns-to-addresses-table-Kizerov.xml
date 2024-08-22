@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-region-city-district-ids-to-address" author="Kizerov Dmytro">
+        <addColumn tableName="address">
+            <column name="region_id" type="BIGINT"/>
+            <column name="city_id" type="BIGINT"/>
+            <column name="district_id" type="BIGINT"/>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseColumnNames="region_id"
+                baseTableName="address"
+                constraintName="fk_address_region"
+                referencedColumnNames="id"
+                referencedTableName="regions"/>
+
+        <addForeignKeyConstraint
+                baseColumnNames="city_id"
+                baseTableName="address"
+                constraintName="fk_address_city"
+                referencedColumnNames="id"
+                referencedTableName="cities"/>
+
+        <addForeignKeyConstraint
+                baseColumnNames="district_id"
+                baseTableName="address"
+                constraintName="fk_address_district"
+                referencedColumnNames="id"
+                referencedTableName="districts"/>
+    </changeSet>
+</databaseChangeLog>

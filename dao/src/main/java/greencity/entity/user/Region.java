@@ -1,13 +1,7 @@
 package greencity.entity.user;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.OneToMany;
+import greencity.entity.user.locations.City;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -24,7 +18,7 @@ import java.util.List;
 @Builder
 @Table(name = "regions")
 @EqualsAndHashCode(exclude = {"locations"})
-@ToString(exclude = {"locations"})
+@ToString(exclude = {"locations", "cities"})
 @Entity
 public class Region {
     @Id
@@ -39,4 +33,7 @@ public class Region {
 
     @Column(name = "name_en")
     private String enName;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "region", fetch = FetchType.LAZY)
+    private List<City> cities;
 }

@@ -54,4 +54,10 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
         + "LEFT JOIN FETCH r.locations l "
         + "WHERE l.isDeleted = false")
     List<Region> findAllWithNotDeletedLocations();
+
+    /**
+     * Retrieves all regions from the database.
+     * @return a list of {@link Region} entities, each representing a region from the database.
+     */
+    List<Region> findAll();
 }
