@@ -21,31 +21,31 @@ import java.io.Serializable;
 public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     @NotNull
     @Min(1)
-    private Long id;
+    private Long addressId;
     @NotBlank
     @Length(max = 30)
-    private String district;
+    private String addressDistrict;
     @NotBlank
     @Length(max = 30)
-    private String districtEn;
+    private String addressDistrictEng;
     @Length(min = 3, max = 40)
     @NotNull
-    private String street;
+    private String addressStreet;
     @Length(min = 3, max = 40)
     @NotNull
-    private String streetEn;
+    private String addressStreetEng;
     @Length(min = 1, max = 4)
-    private String houseCorpus;
+    private String addressHouseCorpus;
     @Length(min = 1, max = 4)
-    private String entranceNumber;
+    private String addressEntranceNumber;
     @Length(max = 10)
-    private String houseNumber;
+    private String addressHouseNumber;
     @Length(max = 15)
-    private String city;
+    private String addressCity;
     @Length(max = 15)
-    private String cityEn;
+    private String addressCityEng;
     @Length(max = 15)
-    private String region;
+    private String addressRegion;
     @Length(max = 15)
-    private String regionEn;
+    private String addressRegionEng;
 }
