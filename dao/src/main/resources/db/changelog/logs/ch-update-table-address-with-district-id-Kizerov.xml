@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="update-address-with-district-id" author="Kizerov Dmytro">
+        <sql>
+            UPDATE address a
+            SET district_id = d.id
+                FROM (
+                SELECT id, name_uk, city_id
+                FROM districts
+            ) d
+            WHERE d.name_uk = a.district AND a.city_id = d.city_id;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
