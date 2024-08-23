@@ -237,4 +237,5 @@
     <include file="/db/changelog/logs/ch-add-column-tarriff-infos-mapping-Klopov.xml"/>
     <include file="db/changelog/logs/ch-add-table-user-agreements-Prots.xml"/>
     <include file="/db/changelog/logs/ch-drop-and-create-refunds-table.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-user-agreement-Prots.xml"/>
 </databaseChangeLog>
