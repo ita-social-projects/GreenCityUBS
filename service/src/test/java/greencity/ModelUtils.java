@@ -113,6 +113,8 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.useragreement.UserAgreementDetailDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -142,6 +144,7 @@ import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
+import greencity.entity.user.UserAgreement;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeFilterView;
@@ -212,6 +215,8 @@ public class ModelUtils {
 
     public static final String TEST_EMAIL = "test@gmail.com";
     public static final String TEST_UUID = "1ab2c3-d4e5f6";
+    public static final String TEST_AGREEMENT_TEXT_UA = "Текст угоди українською";
+    public static final String TEST_AGREEMENT_TEXT_EN = "Agreement text in English";
     public static final Order TEST_ORDER = createOrder();
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
     public static final OrderAddressExportDetailsDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE =
@@ -2300,18 +2305,18 @@ public class ModelUtils {
 
     private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
-            .addressId(1L)
-            .addressHouseNumber("1")
-            .addressEntranceNumber("3")
-            .addressDistrict("District")
-            .addressDistrictEng("DistrictEng")
-            .addressStreet("Street")
-            .addressStreetEng("StreetEng")
-            .addressHouseCorpus("2")
-            .addressCity("City")
-            .addressCityEng("CityEng")
-            .addressRegion("Region")
-            .addressRegionEng("RegionEng")
+            .id(1L)
+            .houseNumber("1")
+            .entranceNumber("3")
+            .district("District")
+            .districtEn("DistrictEng")
+            .street("Street")
+            .streetEn("StreetEng")
+            .houseCorpus("2")
+            .city("City")
+            .cityEn("CityEng")
+            .region("Region")
+            .regionEn("RegionEng")
             .build();
     }
 
@@ -3447,18 +3452,18 @@ public class ModelUtils {
                 .build())
             .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
                 .builder()
-                .addressId(1L)
-                .addressDistrict("District")
-                .addressDistrictEng("DistrictEng")
-                .addressStreet("Street")
-                .addressStreetEng("StreetEng")
-                .addressEntranceNumber("12")
-                .addressHouseCorpus("123")
-                .addressHouseNumber("121")
-                .addressCity("City")
-                .addressCityEng("CityEng")
-                .addressRegion("Region")
-                .addressRegionEng("RegionEng")
+                .id(1L)
+                .district("District")
+                .districtEn("DistrictEng")
+                .street("Street")
+                .streetEn("StreetEng")
+                .entranceNumber("12")
+                .houseCorpus("123")
+                .houseNumber("121")
+                .city("City")
+                .cityEn("CityEng")
+                .region("Region")
+                .regionEn("RegionEng")
                 .build())
             .ecoNumberFromShop(EcoNumberDto.builder()
                 .ecoNumber(Set.of("1111111111"))
@@ -4054,18 +4059,18 @@ public class ModelUtils {
 
     public static OrderAddressExportDetailsDtoUpdate getOrderAddressExportDetailsDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
-            .addressId(1L)
-            .addressStreet("Street")
-            .addressStreetEng("StreetEng")
-            .addressCity("City")
-            .addressCityEng("City")
-            .addressDistrict("District")
-            .addressDistrictEng("DistrictEng")
-            .addressHouseCorpus("12")
-            .addressEntranceNumber("2")
-            .addressRegion("Region")
-            .addressRegionEng("RegionEng")
-            .addressHouseNumber("123")
+            .id(1L)
+            .street("Street")
+            .streetEn("StreetEng")
+            .city("City")
+            .cityEn("City")
+            .district("District")
+            .districtEn("DistrictEng")
+            .houseCorpus("12")
+            .entranceNumber("2")
+            .region("Region")
+            .regionEn("RegionEng")
+            .houseNumber("123")
             .build();
 
     }
@@ -5322,6 +5327,32 @@ public class ModelUtils {
             .id(1L)
             .district("Шевченківський")
             .districtEn("Shevchenkivskyi")
+    }
+  
+    public static UserAgreement getUserAgreement() {
+        return UserAgreement.builder()
+            .id(1L)
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .author(getEmployee())
+            .build();
+    }
+
+    public static UserAgreementDto getUserAgreementDto() {
+        return UserAgreementDto.builder()
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .build();
+    }
+
+    public static UserAgreementDetailDto getUserAgreementDetailDto() {
+        return UserAgreementDetailDto.builder()
+            .id(1L)
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .authorEmail(TEST_EMAIL)
+            .createdAt(LocalDateTime.now().minusDays(1))
             .build();
     }
 }

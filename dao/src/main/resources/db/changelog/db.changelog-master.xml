@@ -235,6 +235,7 @@
     <include file="db/changelog/logs/ch-add-column-status-and-deleteDate-to-Violation-Chekhovska.xml"/>
     <include file="/db/changelog/logs/ch-update-notification-templates-Herchanivska.xml"/>
     <include file="/db/changelog/logs/ch-add-column-tarriff-infos-mapping-Klopov.xml"/>
+    <include file="db/changelog/logs/ch-add-table-user-agreements-Prots.xml"/>
     <include file="/db/changelog/logs/ch-drop-and-create-refunds-table.xml"/>
     <include file="/db/changelog/logs/ch-create-table-cities-Kizerov.xml"/>
     <include file="db/changelog/logs/ch-create-table-districts-Kizerov.xml"/>
@@ -244,4 +245,5 @@
     <include file="db/changelog/logs/ch-insert-into-address-city-id-Kizerov.xml"/>
     <include file="/db/changelog/logs/ch-insert-data-into-table-districts-Kizerov.xml"/>
     <include file="db/changelog/logs/ch-update-table-address-with-district-id-Kizerov.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-user-agreement-Prots.xml"/>
 </databaseChangeLog>
