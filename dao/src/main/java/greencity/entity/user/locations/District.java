@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.Getter;
@@ -21,16 +22,17 @@ import lombok.Builder;
 @Builder
 @Table(name = "districts")
 public class District {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(name = "name_uk", nullable = false)
-	private String district;
+    @Column(name = "name_uk", nullable = false)
+    private String district;
 
-	@Column(name = "name_en", nullable = false)
-	private String districtEn;
+    @Column(name = "name_en", nullable = false)
+    private String districtEn;
 
-	@ManyToOne
-	private City city;
+    @ManyToOne
+    @JoinColumn(name = "city_id", nullable = false)
+    private City city;
 }

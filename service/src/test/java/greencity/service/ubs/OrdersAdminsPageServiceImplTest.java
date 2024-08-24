@@ -25,16 +25,7 @@ import greencity.entity.user.employee.Position;
 import greencity.enums.UkraineRegion;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.AddressRepository;
-import greencity.repository.EmployeeOrderPositionRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.TableColumnWidthForEmployeeRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
 import java.util.Arrays;
@@ -114,6 +105,12 @@ class OrdersAdminsPageServiceImplTest {
     private TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
     @Mock
     private OrderLockService orderLockService;
+    @Mock
+    private RegionRepository regionRepository;
+    @Mock
+    private CityRepository cityRepository;
+    @Mock
+    private DistrictRepository districtRepository;
     @InjectMocks
     private OrdersAdminsPageServiceImpl ordersAdminsPageService;
 
@@ -240,6 +237,15 @@ class OrdersAdminsPageServiceImplTest {
         when(orderPaymentStatusTranslationRepository.getOrderPaymentStatusTranslationById(anyLong()))
             .thenReturn(Optional.ofNullable(orderPaymentStatusTranslation));
 
+        when(regionRepository.findAll())
+            .thenReturn(List.of(ModelUtils.getRegion()));
+
+        when(cityRepository.findAll())
+            .thenReturn(List.of(ModelUtils.getCity()));
+
+        when(districtRepository.findAll())
+            .thenReturn(List.of(ModelUtils.getDistrict()));
+
         when(superAdminService.getAllReceivingStations())
             .thenReturn(receivingStations);
         when(employeeRepository.findAllByEmployeePositionId(2L))
@@ -250,8 +256,6 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(employeeList);
         when(employeeRepository.findAllByEmployeePositionId(4L))
             .thenReturn(employeeList);
-        when(addressRepository.findDistinctRegions())
-            .thenReturn(addressList);
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
@@ -1160,66 +1164,5 @@ class OrdersAdminsPageServiceImplTest {
         verify(modelMapper).map(columnWidthDto, TableColumnWidthForEmployee.class);
         verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(1L);
         verify(tableColumnWidthForEmployeeRepository).save(any(TableColumnWidthForEmployee.class));
-    }
-
-    @Test
-    void testGetAllCitiesByRegion() {
-        List<UkraineRegion> regions = Arrays.asList(UkraineRegion.KYIV_OBLAST, UkraineRegion.LVIV_OBLAST);
-        List<String> regionNamesList = Arrays.asList("Kyivs'ka oblast", "Lvivs'ka Oblast");
-        List<CityDto> cities = Arrays.asList(new CityDto("Київ", "Kyiv"), new CityDto("Львів", "Lviv"));
-
-        when(addressRepository.findAllCitiesByRegions(regionNamesList)).thenReturn(cities);
-
-        List<CityDto> result = ordersAdminsPageService.getAllCitiesByRegion(regions);
-
-        assertEquals(2, result.size());
-        assertEquals("Kyiv", result.get(0).getCityEn());
-        assertEquals("Lviv", result.get(1).getCityEn());
-
-        verify(addressRepository).findAllCitiesByRegions(regionNamesList);
-    }
-
-    @Test
-    void testGetAllDistrictsByCities() {
-        String[] cities = {"Kyiv", "Lviv"};
-        List<DistrictDto> districts = Arrays.asList(
-            new DistrictDto("Район1", "District1"),
-            new DistrictDto("Район2", "District2"),
-            new DistrictDto("Район3", "District3"));
-
-        when(addressRepository.findAllDistrictsByCities(Arrays.asList(cities))).thenReturn(districts);
-
-        List<DistrictDto> result = ordersAdminsPageService.getAllDistrictsByCities(cities);
-
-        assertEquals(3, result.size());
-
-        verify(addressRepository).findAllDistrictsByCities(Arrays.asList(cities));
-    }
-
-    @Test
-    void testGetAllCitiesByRegionIfRegionIsEmpty() {
-        List<UkraineRegion> regions = Collections.emptyList();
-
-        when(addressRepository.findDistinctCities()).thenReturn(List.of(ModelUtils.getAddress()));
-
-        List<CityDto> result = ordersAdminsPageService.getAllCitiesByRegion(regions);
-
-        assertEquals(1, result.size());
-        assertEquals("Kyiv", result.getFirst().getCityEn());
-
-        verify(addressRepository).findDistinctCities();
-    }
-
-    @Test
-    void testGetAllDistrictsByCitiesIfCitiesIsEmpty() {
-        String[] cities = {};
-
-        when(addressRepository.findDistinctDistricts()).thenReturn(List.of(ModelUtils.getAddress()));
-
-        List<DistrictDto> result = ordersAdminsPageService.getAllDistrictsByCities(cities);
-
-        assertEquals(1, result.size());
-
-        verify(addressRepository).findDistinctDistricts();
     }
 }

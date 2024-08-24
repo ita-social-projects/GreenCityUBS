@@ -242,26 +242,4 @@ public class AdminUbsController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(violationService.getAllViolations(page, userId, columnName, sortingOrder));
     }
-
-    @Operation(summary = "Get all cities by current regions")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-    })
-    @GetMapping("/city-list")
-    public ResponseEntity<List<CityDto>> getAllCitiesByRegions(
-        @RequestParam(value = "regions", required = false) List<UkraineRegion> regions) {
-        return ResponseEntity.ok(ordersAdminsPageService.getAllCitiesByRegion(regions));
-    }
-
-    @Operation(summary = "Get all districts by current cities")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-    })
-    @GetMapping("/districts-list")
-    public ResponseEntity<List<DistrictDto>> getAllDistrictsByCities(
-        @RequestParam(value = "cities", required = false) String[] cities) {
-        return ResponseEntity.ok(ordersAdminsPageService.getAllDistrictsByCities(cities));
-    }
 }

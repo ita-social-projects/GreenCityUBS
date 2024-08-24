@@ -21,19 +21,20 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(exclude = "districts")
 @Table(name = "cities")
 public class City {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(name = "name_uk", nullable = false)
-	private String city;
+    @Column(name = "name_uk", nullable = false)
+    private String city;
 
-	@Column(name = "name_en", nullable = false)
-	private String cityEn;
+    @Column(name = "name_en", nullable = false)
+    private String cityEn;
 
-	@ManyToOne
-	private Region region;
+    @ManyToOne
+    @JoinColumn(name = "region_id", nullable = false)
+    private Region region;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "city", fetch = FetchType.LAZY)
-	private List<District> districts;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "city", fetch = FetchType.LAZY)
+    private List<District> districts;
 }

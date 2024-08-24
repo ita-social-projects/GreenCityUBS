@@ -148,6 +148,8 @@ import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.locations.City;
+import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -5304,6 +5306,22 @@ public class ModelUtils {
             .points(100)
             .code("7777-7777")
             .creationDate(LocalDate.now().plusMonths(1))
+            .build();
+    }
+
+    public static City getCity() {
+        return City.builder()
+            .id(1L)
+            .city("Київ")
+            .cityEn("Kyiv")
+            .build();
+    }
+
+    public static District getDistrict() {
+        return District.builder()
+            .id(1L)
+            .district("Шевченківський")
+            .districtEn("Shevchenkivskyi")
             .build();
     }
 }

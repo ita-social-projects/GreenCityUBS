@@ -57,7 +57,35 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 
     /**
      * Retrieves all regions from the database.
-     * @return a list of {@link Region} entities, each representing a region from the database.
+     *
+     * @return a list of {@link Region} entities, each representing a region from
+     *         the database.
      */
     List<Region> findAll();
+
+    /**
+     * Retrieves all regions from the database, including their associated cities
+     * and districts. This method uses JPQL with multiple LEFT JOIN FETCH clauses to
+     * ensure that regions, cities, and districts are all fetched in a single query,
+     * avoiding the "N+1 selects" problem.
+     *
+     * @return a list of all regions, each with their associated cities and
+     *         districts fully initialized.
+     */
+    @Query("SELECT DISTINCT r FROM Region r "
+        + "LEFT JOIN FETCH r.cities c "
+        + "LEFT JOIN FETCH c.districts d")
+    List<Region> findAllRegionsWithCitiesAndDistricts();
+
+    /**
+     * Retrieves all regions from the database, including their associated cities.
+     * This method uses JPQL with a LEFT JOIN FETCH clause to ensure that regions
+     * and their cities are fetched in a single query, which helps to avoid the "N+1
+     * selects" problem.
+     *
+     * @return a list of all regions, each with their associated cities fully
+     *         initialized.
+     */
+    @Query("SELECT r from Region r left join fetch r.cities")
+    List<Region> findAllRegionsWithCities();
 }

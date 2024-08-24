@@ -44,6 +44,9 @@ import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
 import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.UserRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.CityRepository;
+import greencity.repository.DistrictRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
 import java.util.ArrayList;
@@ -100,6 +103,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final NotificationServiceImpl notificationService;
     private final SuperAdminService superAdminService;
     private final OrderLockService orderLockService;
+    private final RegionRepository regionRepository;
+    private final CityRepository cityRepository;
+    private final DistrictRepository districtRepository;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String DATE_OF_EXPORT = "dateOfExport";
     private static final String RECEIVING = "receivingStation";
@@ -174,9 +180,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, true, 35, EditType.READ_ONLY, regionsList(), exportAddress),
             new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
-                true, true, 36, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
+                true, true, 36, EditType.READ_ONLY, cityList(), exportAddress),
             new ColumnDTO(new TitleDto(DISTRICT, "Район", "District"), DISTRICT, 20, false,
-                true, true, 37, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
+                true, true, 37, EditType.READ_ONLY, districtList(), exportAddress),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "address", 20, false, true,
                 false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), exportAddress),
@@ -295,43 +301,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     tableColumnWidthForEmployeeRepository.save(tableColumnWidthForEmployee);
                 });
         }
-    }
-
-    @Override
-    public List<CityDto> getAllCitiesByRegion(List<UkraineRegion> regions) {
-        if (regions == null || regions.isEmpty()) {
-            return addressRepository.findDistinctCities().stream()
-                .map(address -> CityDto.builder()
-                    .cityEn(address.getCityEn())
-                    .city(address.getCity())
-                    .build())
-                .toList();
-        }
-
-        List<String> regionNamesList = regions.stream()
-            .map(UkraineRegion::getDisplayName)
-            .toList();
-        return addressRepository.findAllCitiesByRegions(regionNamesList);
-    }
-
-    @Override
-    public List<DistrictDto> getAllDistrictsByCities(String[] cities) {
-        if (cities == null || cities.length == 0) {
-            return addressRepository.findDistinctDistricts().stream()
-                .map(address -> DistrictDto.builder()
-                    .districtEn(address.getDistrictEn())
-                    .district(address.getDistrict())
-                    .build())
-                .toList();
-        }
-        return new ArrayList<>(
-            addressRepository.findAllDistrictsByCities(Arrays.asList(cities))
-                .stream()
-                .collect(Collectors.toMap(
-                    DistrictDto::getDistrict,
-                    district -> district,
-                    (existing, replacement) -> existing))
-                .values());
     }
 
     @RequiredArgsConstructor
@@ -791,13 +760,33 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<OptionForColumnDTO> regionsList() {
-        return addressRepository.findDistinctRegions()
+        return regionRepository.findAll()
             .stream()
-            .map(address -> OptionForColumnDTO
+            .map(region -> OptionForColumnDTO
                 .builder()
-                .key(address.getId().toString())
-                .en(address.getRegionEn())
-                .ua(address.getRegion())
+                .key(region.getId().toString())
+                .en(region.getEnName())
+                .ua(region.getUkrName())
+                .build())
+            .toList();
+    }
+
+    private List<OptionForColumnDTO> cityList() {
+        return cityRepository.findAll().stream()
+            .map(city -> OptionForColumnDTO.builder()
+                .key(city.getId().toString())
+                .ua(city.getCity())
+                .en(city.getCityEn())
+                .build())
+            .toList();
+    }
+
+    private List<OptionForColumnDTO> districtList() {
+        return districtRepository.findAll().stream()
+            .map(district -> OptionForColumnDTO.builder()
+                .key(district.getId().toString())
+                .ua(district.getDistrict())
+                .en(district.getDistrictEn())
                 .build())
             .toList();
     }
