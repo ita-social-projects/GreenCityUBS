@@ -1,7 +1,5 @@
 package greencity.repository;
 
-import greencity.dto.CityDto;
-import greencity.dto.DistrictDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
 import org.springframework.data.jpa.repository.Query;
@@ -68,23 +66,6 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     List<Address> findAllNonDeletedAddressesByUserId(Long userId);
 
     /**
-     * Method returns first address {@link Address} from each distinct district.
-     *
-     * @return list of {@link Address}
-     */
-    @Query(value = "SELECT a FROM Address a WHERE a.id IN "
-        + "(SELECT MIN(ad.id) FROM Address ad WHERE ad.district = a.district)")
-    List<Address> findDistinctDistricts();
-
-    /**
-     * Method returns first address {@link Address} from each distinct city.
-     *
-     * @return list of {@link Address}
-     */
-    @Query(value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) FROM Address  ad WHERE ad.city = a.city)")
-    List<Address> findDistinctCities();
-
-    /**
      * Finds the actual {@link Address} associated with the given user ID.
      *
      * @param userId the ID of the user whose address is being searched for
@@ -105,47 +86,4 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query(value = "SELECT * FROM address WHERE user_id =:userId AND status != 'DELETED' LIMIT 1", nativeQuery = true)
     Optional<Address> findAnyByUserIdAndAddressStatusNotDeleted(Long userId);
-
-    /**
-     * Method returns first address {@link Address} from each distinct region.
-     *
-     * @return list of {@link Address}
-     */
-    @Query(
-        value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) "
-            + "FROM Address  ad WHERE ad.region = a.region)")
-    List<Address> findDistinctRegions();
-
-    /**
-     * Retrieves a list of {@link Address} entities where the region is one of the
-     * specified regions. The method searches for matches in both the English
-     * (`regionEn`) and local (`region`) region fields.
-     *
-     * @param regions a list of region names to search for in both English and local
-     *                region fields. The list should contain valid region names. The
-     *                method will return addresses where either the `regionEn` or
-     *                `region` matches any of the specified regions.
-     * @return a list of {@link Address} entities that match the specified regions.
-     *         The list may be empty if no matching addresses are found.
-     */
-    @Query(value = "SELECT new greencity.dto.CityDto(a.city, a.cityEn) FROM Address a "
-        + "WHERE a.regionEn IN :regions OR a.region IN :regions group by a.city, a.cityEn")
-    List<CityDto> findAllCitiesByRegions(List<String> regions);
-
-    /**
-     * Retrieves a list of districts corresponding to the given list of city names.
-     * This method executes a query to find all districts that are associated with
-     * the specified cities.
-     *
-     * @param cities a list of city names for which districts need to be retrieved.
-     *               The list should contain valid city names that match entries in
-     *               the database.
-     * @return a list of {@link DistrictDto} objects, each representing a district
-     *         associated with one of the specified cities. If no districts are
-     *         found for the given cities, an empty list is returned.
-     */
-    @Query(value = "select new greencity.dto.DistrictDto(a.district, a.districtEn) "
-        + "from Address a where a.city in :cities or a.cityEn in :cities "
-        + "group by a.district, a.districtEn")
-    List<DistrictDto> findAllDistrictsByCities(List<String> cities);
 }

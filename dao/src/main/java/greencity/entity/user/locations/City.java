@@ -26,10 +26,10 @@ public class City {
     private Long id;
 
     @Column(name = "name_uk", nullable = false)
-    private String city;
+    private String nameUk;
 
     @Column(name = "name_en", nullable = false)
-    private String cityEn;
+    private String nameEn;
 
     @ManyToOne
     @JoinColumn(name = "region_id", nullable = false)

@@ -4,15 +4,12 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
-import greencity.dto.CityDto;
-import greencity.dto.DistrictDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.entity.order.Event;
 import greencity.entity.table.TableColumnWidthForEmployee;
-import greencity.entity.user.ubs.Address;
 import greencity.enums.CancellationReason;
 import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
@@ -22,13 +19,11 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
-import greencity.enums.UkraineRegion;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
-import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -199,7 +194,6 @@ class OrdersAdminsPageServiceImplTest {
         List<ReceivingStationDto> receivingStations = new ArrayList<>();
         List<Employee> employeeList = new ArrayList<>();
         employeeList.add(ModelUtils.getEmployee());
-        List<Address> addressList = List.of(ModelUtils.getAddress());
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));

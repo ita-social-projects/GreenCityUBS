@@ -2,8 +2,6 @@ package greencity.service.ubs;
 
 import greencity.client.UserRemoteClient;
 import greencity.constant.OrderHistory;
-import greencity.dto.CityDto;
-import greencity.dto.DistrictDto;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
 import greencity.dto.courier.ReceivingStationDto;
@@ -22,7 +20,6 @@ import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.UkraineRegion;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
@@ -68,7 +65,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER;
 import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
@@ -775,8 +771,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return cityRepository.findAll().stream()
             .map(city -> OptionForColumnDTO.builder()
                 .key(city.getId().toString())
-                .ua(city.getCity())
-                .en(city.getCityEn())
+                .ua(city.getNameUk())
+                .en(city.getNameEn())
                 .build())
             .toList();
     }
@@ -785,8 +781,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return districtRepository.findAll().stream()
             .map(district -> OptionForColumnDTO.builder()
                 .key(district.getId().toString())
-                .ua(district.getDistrict())
-                .en(district.getDistrictEn())
+                .ua(district.getNameUk())
+                .en(district.getNameEn())
                 .build())
             .toList();
     }

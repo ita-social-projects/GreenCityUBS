@@ -5317,16 +5317,16 @@ public class ModelUtils {
     public static City getCity() {
         return City.builder()
             .id(1L)
-            .city("Київ")
-            .cityEn("Kyiv")
+            .nameUk("Київ")
+            .nameEn("Kyiv")
             .build();
     }
 
     public static District getDistrict() {
         return District.builder()
             .id(1L)
-            .district("Шевченківський")
-            .districtEn("Shevchenkivskyi")
+            .nameUk("Шевченківський")
+            .nameEn("Shevchenkivskyi")
             .build();
     }
 

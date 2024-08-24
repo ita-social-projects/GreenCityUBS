@@ -27,10 +27,10 @@ public class District {
     private Long id;
 
     @Column(name = "name_uk", nullable = false)
-    private String district;
+    private String nameUk;
 
     @Column(name = "name_en", nullable = false)
-    private String districtEn;
+    private String nameEn;
 
     @ManyToOne
     @JoinColumn(name = "city_id", nullable = false)

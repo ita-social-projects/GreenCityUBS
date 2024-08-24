@@ -1,14 +1,11 @@
 package greencity.service.ubs;
 
-import greencity.dto.CityDto;
-import greencity.dto.DistrictDto;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.entity.user.employee.Employee;
-import greencity.enums.UkraineRegion;
 import java.util.List;
 
 public interface OrdersAdminsPageService {
