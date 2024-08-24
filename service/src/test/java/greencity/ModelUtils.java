@@ -5327,8 +5327,9 @@ public class ModelUtils {
             .id(1L)
             .district("Шевченківський")
             .districtEn("Shevchenkivskyi")
+            .build();
     }
-  
+
     public static UserAgreement getUserAgreement() {
         return UserAgreement.builder()
             .id(1L)
