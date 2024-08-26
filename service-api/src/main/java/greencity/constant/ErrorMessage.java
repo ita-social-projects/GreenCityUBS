@@ -74,7 +74,7 @@ public class ErrorMessage {
     public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
     public static final String INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION =
         "Cannot add a violation to order with this status: ";
-    public static final String INCOMPATIBLE_ORDER_STATUS_FOR_REFUND =
+    public static final String INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND =
         "Money refund cannot be processed for an order with status: ";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
     public static final String NOT_ENOUGH_BAGS_EXCEPTION = "Not enough bags, minimal amount is: ";
@@ -104,6 +104,9 @@ public class ErrorMessage {
     public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";
     public static final String CANNOT_ACCESS_PAYMENT_STATUS = "Cannot access another user's payment status";
     public static final String USER_HAS_NO_OVERPAYMENT = "This user has no overpayment";
+    public static final String INVALID_REQUESTED_REFUND_AMOUNT = "Invalid requested refund amount";
+    public static final String CANNOT_REFUND_MONEY =
+        "Money refund cannot be processed more than once for the same order";
     public static final String CANNOT_DELETE_ADDRESS = "Cannot delete another user's address";
     public static final String CANNOT_DELETE_ALREADY_DELETED_ADDRESS =
         "Cannot delete an address that has already been deleted.";

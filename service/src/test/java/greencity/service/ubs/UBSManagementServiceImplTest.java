@@ -29,6 +29,7 @@ import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentInfoDto;
+import greencity.dto.refund.RefundDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.order.Certificate;
@@ -104,7 +105,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
-import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_REFUND;
+import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND;
 import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1297,6 +1298,7 @@ class UBSManagementServiceImplTest {
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
         order.setOrderStatus(OrderStatus.DONE);
         UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDtoWithStatusCanceled();
+        updateOrderPageAdminDto.setRefundDto(new RefundDto());
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(getEmployee()));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
@@ -2402,7 +2404,8 @@ class UBSManagementServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
-        updateOrderPageAdminDto.setReturnBonuses(true);
+        updateOrderPageAdminDto.setRefundDto(RefundDto.builder()
+            .isReturnBonuses(true).build());
         order.getPayment().forEach(p -> p.setAmount(-300L));
         order.setPointsToUse(1);
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
@@ -2424,7 +2427,8 @@ class UBSManagementServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
-        updateOrderPageAdminDto.setReturnBonuses(true);
+        updateOrderPageAdminDto.setRefundDto(RefundDto.builder()
+            .isReturnBonuses(true).build());
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
@@ -2446,7 +2450,8 @@ class UBSManagementServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
-        updateOrderPageAdminDto.setReturnMoney(true);
+        updateOrderPageAdminDto.setRefundDto(RefundDto.builder()
+            .isReturnMoney(true).build());
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
@@ -2455,7 +2460,7 @@ class UBSManagementServiceImplTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
             () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en",
                 "test@gmail.com"));
-        assertEquals(INCOMPATIBLE_ORDER_STATUS_FOR_REFUND, exception.getMessage());
+        assertEquals(INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND, exception.getMessage());
     }
 
     @Test
@@ -2465,7 +2470,8 @@ class UBSManagementServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
-        updateOrderPageAdminDto.setReturnMoney(true);
+        updateOrderPageAdminDto.setRefundDto(RefundDto.builder()
+            .isReturnMoney(true).build());
         order.setOrderStatus(OrderStatus.CANCELED);
         order.getPayment().forEach(p -> p.setAmount(-300L));
         order.setPointsToUse(1);
@@ -2487,7 +2493,8 @@ class UBSManagementServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
-        updateOrderPageAdminDto.setReturnMoney(true);
+        updateOrderPageAdminDto.setRefundDto(RefundDto.builder()
+            .isReturnMoney(true).build());
         order.setOrderStatus(OrderStatus.CANCELED);
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
