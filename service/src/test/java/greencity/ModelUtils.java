@@ -3609,8 +3609,8 @@ public class ModelUtils {
     public static List<Region> getAllRegion() {
         return List.of(Region.builder()
             .id(1L)
-            .ukrName("Київська область")
-            .enName("Kyiv region")
+            .nameUk("Київська область")
+            .nameEn("Kyiv region")
             .locations(getLocationList())
             .build());
     }
@@ -3639,8 +3639,8 @@ public class ModelUtils {
     public static Region getRegion() {
         return Region.builder()
             .id(1L)
-            .ukrName("Київська область")
-            .enName("Kyiv region")
+            .nameUk("Київська область")
+            .nameEn("Kyiv region")
             .locations(List.of(getLocation()))
             .build();
     }
@@ -3648,8 +3648,8 @@ public class ModelUtils {
     public static Region getUnknownRegion() {
         return Region.builder()
             .id(0L)
-            .ukrName(AppConstant.UNKNOWN_UA)
-            .enName(AppConstant.UNKNOWN_ENG)
+            .nameUk(AppConstant.UNKNOWN_UA)
+            .nameEn(AppConstant.UNKNOWN_ENG)
             .locations(List.of(getLocation()))
             .build();
     }
@@ -3657,8 +3657,8 @@ public class ModelUtils {
     public static Region getRegionForMapper() {
         return Region.builder()
             .id(1L)
-            .ukrName("Київська область")
-            .enName("Kyiv region")
+            .nameUk("Київська область")
+            .nameEn("Kyiv region")
             .build();
     }
 
@@ -3704,7 +3704,7 @@ public class ModelUtils {
             .coordinates(Coordinates.builder()
                 .longitude(3.34d)
                 .latitude(1.32d).build())
-            .region(Region.builder().id(1L).enName("Kyiv region").ukrName("Київська область").build())
+            .region(Region.builder().id(1L).nameEn("Kyiv region").nameUk("Київська область").build())
             .build();
     }
 

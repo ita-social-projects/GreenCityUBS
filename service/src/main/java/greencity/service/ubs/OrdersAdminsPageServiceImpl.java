@@ -761,8 +761,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .map(region -> OptionForColumnDTO
                 .builder()
                 .key(region.getId().toString())
-                .en(region.getEnName())
-                .ua(region.getUkrName())
+                .en(region.getNameEn())
+                .ua(region.getNameUk())
                 .build())
             .toList();
     }

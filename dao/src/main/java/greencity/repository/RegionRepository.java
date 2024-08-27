@@ -18,8 +18,8 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
      * @author Vadym Makitra
      * @author Yurii Fedorko
      */
-    Optional<Region> findRegionByEnNameAndUkrName(@Param("EnName") String nameEn,
-        @Param("UkrName") String nameUk);
+    Optional<Region> findRegionByNameEnAndNameUk(@Param("nameEn") String nameEn,
+        @Param("nameUk") String nameUk);
 
     /**
      * Method that retrieves regions with locations specified by LocationStatus

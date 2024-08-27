@@ -20,8 +20,8 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
         Region region = source.getTariffLocations() != null
             ? source.getTariffLocations().iterator().next().getLocation().getRegion()
             : null;
-        RegionDto regionDto = region != null ? RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName())
-            .nameUk(region.getUkrName()).build() : null;
+        RegionDto regionDto = region != null ? RegionDto.builder().regionId(region.getId()).nameEn(region.getNameEn())
+            .nameUk(region.getNameUk()).build() : null;
         return GetTariffsInfoDto.builder()
             .cardId(source.getId())
             .courierLimit(source.getCourierLimit())

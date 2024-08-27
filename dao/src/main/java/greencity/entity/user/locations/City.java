@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Column;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
@@ -17,29 +16,23 @@ import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Builder;
 import lombok.ToString;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @ToString(exclude = "districts")
 @EqualsAndHashCode(exclude = "districts")
 @Table(name = "cities")
-public class City {
+public class City extends BaseEntityForEnAndUkNames {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "name_uk", nullable = false)
-    private String nameUk;
-
-    @Column(name = "name_en", nullable = false)
-    private String nameEn;
 
     @ManyToOne
     @JoinColumn(name = "region_id", nullable = false)
