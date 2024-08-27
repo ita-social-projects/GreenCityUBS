@@ -36,6 +36,6 @@ public class Region extends BaseEntityForEnAndUkNames {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "region")
     private List<Location> locations;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "region", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "region", fetch = FetchType.LAZY)
     private List<City> cities;
 }

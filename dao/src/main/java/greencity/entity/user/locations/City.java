@@ -38,6 +38,6 @@ public class City extends BaseEntityForEnAndUkNames {
     @JoinColumn(name = "region_id", nullable = false)
     private Region region;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "city", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "city", fetch = FetchType.LAZY)
     private List<District> districts;
 }
