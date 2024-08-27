@@ -1,14 +1,11 @@
 package greencity.service.ubs;
 
-import greencity.dto.CityDto;
-import greencity.dto.DistrictDto;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.entity.user.employee.Employee;
-import greencity.enums.UkraineRegion;
 import java.util.List;
 
 public interface OrdersAdminsPageService {
@@ -123,32 +120,4 @@ public interface OrdersAdminsPageService {
      * @author Oleh Kulbaba
      */
     void saveColumnWidthForEmployee(ColumnWidthDto columnWidthDto, String userUuid);
-
-    /**
-     * Retrieves a list of cities that belong to the specified Ukrainian regions.
-     * This method takes a list of {@link UkraineRegion} instances and returns a
-     * list of city names that are associated with those regions.
-     *
-     * @param regions a list of {@link UkraineRegion} instances representing the
-     *                regions for which cities are to be retrieved. This list should
-     *                not be null or empty.
-     * @return a list of city names as {@link CityDto} that belong to the provided
-     *         regions. The list will be empty if no cities are found for the given
-     *         regions.
-     */
-    List<CityDto> getAllCitiesByRegion(List<UkraineRegion> regions);
-
-    /**
-     * Retrieves a list of districts that correspond to the specified cities. This
-     * method takes a list of city names and returns a list of district names that
-     * are associated with those cities.
-     *
-     * @param cities a list of {@link String} representing the names of the cities
-     *               for which districts are to be retrieved. This list should not
-     *               be null or empty.
-     * @return a list of district names as {@link String} that correspond to the
-     *         provided cities. The list will be empty if no districts are found for
-     *         the given cities.
-     */
-    List<DistrictDto> getAllDistrictsByCities(String[] cities);
 }
