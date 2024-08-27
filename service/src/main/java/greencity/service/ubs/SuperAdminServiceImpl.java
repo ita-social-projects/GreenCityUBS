@@ -425,7 +425,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
 
-        Region region = regionRepository.findRegionByEnNameAndUkrName(enName, ukName).orElse(null);
+        Region region = regionRepository.findRegionByNameEnAndNameUk(enName, ukName).orElse(null);
 
         if (null == region) {
             region = createRegionWithTranslation(dto);
@@ -514,8 +514,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         String enName = getRegionTranslation(dto, "en");
         String uaName = getRegionTranslation(dto, "ua");
         return Region.builder()
-            .enName(enName)
-            .ukrName(uaName)
+            .nameEn(enName)
+            .nameUk(uaName)
             .build();
     }
 

@@ -32,8 +32,8 @@ public class FindAllInfoAboutLocationDtoMapper extends AbstractConverter<Region,
             .collect(Collectors.toList());
 
         List<RegionTranslationDto> regionTranslationDtoList = List.of(
-            RegionTranslationDto.builder().regionName(source.getUkrName()).languageCode(UALangCode).build(),
-            RegionTranslationDto.builder().regionName(source.getEnName()).languageCode(ENLangCode).build());
+            RegionTranslationDto.builder().regionName(source.getNameUk()).languageCode(UALangCode).build(),
+            RegionTranslationDto.builder().regionName(source.getNameEn()).languageCode(ENLangCode).build());
 
         return LocationInfoDto.builder()
             .regionId(source.getId())
