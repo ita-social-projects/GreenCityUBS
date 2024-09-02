@@ -20,8 +20,8 @@ public class LocationCreateDtoMapper extends AbstractConverter<Location, Locatio
             AddLocationTranslationDto.builder().languageCode(ENLangCode).locationName(source.getNameEn()).build());
 
         List<RegionTranslationDto> regionTranslationDtoList = List.of(
-            RegionTranslationDto.builder().languageCode(UALangCode).regionName(source.getRegion().getUkrName()).build(),
-            RegionTranslationDto.builder().languageCode(ENLangCode).regionName(source.getRegion().getEnName()).build());
+            RegionTranslationDto.builder().languageCode(UALangCode).regionName(source.getRegion().getNameUk()).build(),
+            RegionTranslationDto.builder().languageCode(ENLangCode).regionName(source.getRegion().getNameEn()).build());
 
         return LocationCreateDto.builder()
             .addLocationDtoList(locationTranslationDtoList)

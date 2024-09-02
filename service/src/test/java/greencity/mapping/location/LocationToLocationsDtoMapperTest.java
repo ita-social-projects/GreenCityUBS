@@ -27,7 +27,7 @@ class LocationToLocationsDtoMapperTest {
         assertEquals(expected.getNameUk(), actual.getNameUk());
         assertEquals(expected.getCoordinates().getLatitude(), actual.getLatitude());
         assertEquals(expected.getCoordinates().getLongitude(), actual.getLongitude());
-        assertEquals(expected.getRegion().getEnName(), actual.getRegionNameEn());
-        assertEquals(expected.getRegion().getUkrName(), actual.getRegionNameUk());
+        assertEquals(expected.getRegion().getNameEn(), actual.getRegionNameEn());
+        assertEquals(expected.getRegion().getNameUk(), actual.getRegionNameUk());
     }
 }
