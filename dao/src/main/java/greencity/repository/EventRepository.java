@@ -19,4 +19,22 @@ public interface EventRepository extends JpaRepository<Event, Long> {
         + "ON o.id = e.order.id "
         + "WHERE o.id = :OrderId")
     List<Event> findAllEventsByOrderId(@Param(value = "OrderId") Long id);
+
+    /**
+     * Checks if the status of the order was changed from {@code FORMED} to
+     * {@code CANCELLED}.
+     *
+     * @param orderId {@link Long} the ID of the order to check.
+     * @return {@code true} if the order status was changed from {@code FORMED} to
+     *         {@code CANCELLED}; {@code false} otherwise.
+     */
+    @Query("SELECT EXISTS ( "
+        + "SELECT 1 "
+        + "FROM Event e1 "
+        + "JOIN Event e2 ON e1.order.id = e2.order.id "
+        + "WHERE e1.order.id = :orderId "
+        + "AND e1.eventName = 'Статус Замовлення - Сформовано' "
+        + "AND e2.eventName = 'Статус Замовлення - Скасовано' "
+        + "AND e1.eventDate < e2.eventDate)")
+    Boolean wasOrderStatusChangedFromFormedToCanceled(@Param("orderId") Long orderId);
 }
