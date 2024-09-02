@@ -55,6 +55,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -468,5 +469,16 @@ class ManagementOrderControllerTest {
                 .principal(principal)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void checkIfOrderStatusIsFormedToCanceledTest() throws Exception {
+        Long orderId = 1L;
+        when(ubsManagementService.checkIfOrderStatusIsFormedToCanceled(orderId)).thenReturn(true);
+        mockMvc.perform(get(ubsLink + "/check-status-transition/formed-to-canceled/{id}", orderId)
+            .contentType(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk())
+            .andExpect(content().string("<Boolean>true</Boolean>"));
+        verify(ubsManagementService).checkIfOrderStatusIsFormedToCanceled(orderId);
     }
 }

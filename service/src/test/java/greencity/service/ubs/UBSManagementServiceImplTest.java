@@ -49,23 +49,7 @@ import greencity.enums.OrderStatus;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeOrderPositionRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderBagRepository;
-import greencity.repository.OrderDetailRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RefundRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -107,8 +91,7 @@ import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_REFUND;
 import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
@@ -211,6 +194,8 @@ class UBSManagementServiceImplTest {
     private OrderLockService orderLockService;
     @Mock
     private PaymentService paymentService;
+    @Mock
+    private EventRepository eventRepository;
 
     @Test
     void getAllCertificates() {
@@ -2501,5 +2486,12 @@ class UBSManagementServiceImplTest {
         verify(eventService).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq("test@gmail.com"),
             any(Order.class));
         assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
+    }
+
+    @Test
+    void checkIfOrderStatusIsFormedToCanceledTest() {
+        Long orderId = 1L;
+        when(eventRepository.wasOrderStatusChangedFromFormedToCanceled(orderId)).thenReturn(true);
+        assertTrue(ubsManagementService.checkIfOrderStatusIsFormedToCanceled(orderId));
     }
 }

@@ -289,4 +289,15 @@ public interface UBSManagementService {
      * @author Kharchenko Volodymyr.
      */
     NotTakenOrderReasonDto getNotTakenOrderReason(Long orderId);
+
+    /**
+     * Method returns {@code true} if the order status was changed from
+     * {@code FORMED} to {@code CANCELED}.
+     *
+     * @param orderId {@link Long} the ID of the order.
+     * @return {@link Boolean}
+     *
+     * @author Volodymyr Lukovskyi
+     */
+    Boolean checkIfOrderStatusIsFormedToCanceled(Long orderId);
 }

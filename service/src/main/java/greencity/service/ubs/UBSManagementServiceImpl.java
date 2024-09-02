@@ -67,22 +67,7 @@ import greencity.enums.PaymentStatus;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeOrderPositionRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderDetailRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RefundRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
@@ -153,6 +138,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderLockService orderLockService;
     private final OrderBagService orderBagService;
     private final PaymentService paymentService;
+    private final EventRepository eventRepository;
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
     private static final List<String> ADMIN_POSITION_NAMES = List.of("Admin", "Super Admin");
     private final Set<OrderStatus> orderStatusesBeforeShipment =
@@ -849,6 +835,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         return buildStatuses(order, payment.getFirst());
+    }
+
+    @Override
+    public Boolean checkIfOrderStatusIsFormedToCanceled(Long orderId) {
+        return eventRepository.wasOrderStatusChangedFromFormedToCanceled(orderId);
     }
 
     private void verifyPaidWithBonuses(Order order, String email) {
