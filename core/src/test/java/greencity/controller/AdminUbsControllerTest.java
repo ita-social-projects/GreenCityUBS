@@ -147,4 +147,11 @@ class AdminUbsControllerTest {
             .content(json))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void getAllLocations() throws Exception {
+        mockMvc.perform(get(management + "/locations-details")
+            .principal(principal))
+            .andExpect(status().isOk());
+    }
 }

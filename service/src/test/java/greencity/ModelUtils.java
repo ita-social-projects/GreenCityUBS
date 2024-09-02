@@ -5327,6 +5327,7 @@ public class ModelUtils {
             .id(1L)
             .nameUk("Шевченківський")
             .nameEn("Shevchenkivskyi")
+            .city(getCity())
             .build();
     }
 
@@ -5354,6 +5355,21 @@ public class ModelUtils {
             .textEn(TEST_AGREEMENT_TEXT_EN)
             .authorEmail(TEST_EMAIL)
             .createdAt(LocalDateTime.now().minusDays(1))
+            .build();
+    }
+
+    public static Region getRegionForAllLocationsTest() {
+        return Region.builder()
+            .id(1L)
+            .nameUk("Київська область")
+            .nameEn("Kyivs'ka oblast")
+            .cities(List.of(City.builder()
+                .id(1L)
+                .region(getRegion())
+                .nameUk("Київ")
+                .nameEn("Kyiv")
+                .districts(Set.of(getDistrict()))
+                .build()))
             .build();
     }
 }

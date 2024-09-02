@@ -11,7 +11,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
-import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.Getter;
@@ -39,5 +39,5 @@ public class City extends BaseEntityForEnAndUkNames {
     private Region region;
 
     @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "city", fetch = FetchType.LAZY)
-    private List<District> districts;
+    private Set<District> districts;
 }
