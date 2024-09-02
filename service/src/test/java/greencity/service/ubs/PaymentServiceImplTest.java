@@ -757,8 +757,9 @@ class PaymentServiceImplTest {
     @Test
     void processRefundForDoneOrder_ShouldRefundMoney_andThrowsBadRequestException() {
         Order order = getOrderForGetOrderStatusData2Test();
+        RefundDto refundDto = getRefundDto_ReturnMoney();
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, getRefundDto_ReturnMoney(),
+            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
                 TEST_EMAIL));
         assertEquals(INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND, exception.getMessage());
     }
@@ -781,10 +782,11 @@ class PaymentServiceImplTest {
         Order order = getOrderForGetOrderStatusData2Test();
         order.getPayment().forEach(p -> p.setAmount(-300L));
         order.setPointsToUse(1);
+        RefundDto refundDto = getRefundDto_ReturnBonuses();
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, getRefundDto_ReturnBonuses(),
+            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
                 TEST_EMAIL));
         assertEquals(ORDER_HAS_NO_OVERPAYMENT, exception.getMessage());
     }
@@ -815,8 +817,9 @@ class PaymentServiceImplTest {
     void processRefundForBroughtItHimselfOrder_refundMoney_shouldThrowsBadRequestException1() {
         Order order = getOrderForGetOrderStatusData2Test();
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        RefundDto refundDto = getRefundDto_ReturnMoney();
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, getRefundDto_ReturnMoney(),
+            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
                 TEST_EMAIL));
         assertEquals(INVALID_REQUESTED_REFUND_AMOUNT, exception.getMessage());
     }
