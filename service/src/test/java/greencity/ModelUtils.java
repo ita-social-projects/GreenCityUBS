@@ -5390,7 +5390,7 @@ public class ModelUtils {
             .isReturnBonuses(true)
             .build();
     }
-  
+
     public static Region getRegionForAllLocationsTest() {
         return Region.builder()
             .id(1L)
