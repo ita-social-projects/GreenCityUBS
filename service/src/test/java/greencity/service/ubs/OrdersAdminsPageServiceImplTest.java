@@ -5,6 +5,7 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.location.api.RegionInfoDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
@@ -242,15 +243,6 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderPaymentStatusTranslationRepository.getOrderPaymentStatusTranslationById(anyLong()))
             .thenReturn(Optional.ofNullable(orderPaymentStatusTranslation));
-
-        when(regionRepository.findAll())
-            .thenReturn(List.of(ModelUtils.getRegion()));
-
-        when(cityRepository.findAll())
-            .thenReturn(List.of(ModelUtils.getCity()));
-
-        when(districtRepository.findAll())
-            .thenReturn(List.of(ModelUtils.getDistrict()));
 
         when(superAdminService.getAllReceivingStations())
             .thenReturn(receivingStations);
@@ -1170,5 +1162,16 @@ class OrdersAdminsPageServiceImplTest {
         verify(modelMapper).map(columnWidthDto, TableColumnWidthForEmployee.class);
         verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(1L);
         verify(tableColumnWidthForEmployeeRepository).save(any(TableColumnWidthForEmployee.class));
+    }
+
+    @Test
+    void getAllLocationsInfoTest() {
+        when(regionRepository.findAllRegionsWithCitiesAndDistricts())
+            .thenReturn(List.of(ModelUtils.getRegionForAllLocationsTest()));
+
+        List<RegionInfoDto> result = ordersAdminsPageService.getAllLocationsInfo();
+
+        assertNotNull(result);
+        verify(regionRepository).findAllRegionsWithCitiesAndDistricts();
     }
 }

@@ -5328,6 +5328,7 @@ public class ModelUtils {
             .id(1L)
             .nameUk("Шевченківський")
             .nameEn("Shevchenkivskyi")
+            .city(getCity())
             .build();
     }
 
@@ -5387,6 +5388,21 @@ public class ModelUtils {
             .amount(0L)
             .isReturnMoney(true)
             .isReturnBonuses(true)
+            .build();
+    }
+  
+    public static Region getRegionForAllLocationsTest() {
+        return Region.builder()
+            .id(1L)
+            .nameUk("Київська область")
+            .nameEn("Kyivs'ka oblast")
+            .cities(List.of(City.builder()
+                .id(1L)
+                .region(getRegion())
+                .nameUk("Київ")
+                .nameEn("Kyiv")
+                .districts(Set.of(getDistrict()))
+                .build()))
             .build();
     }
 }
