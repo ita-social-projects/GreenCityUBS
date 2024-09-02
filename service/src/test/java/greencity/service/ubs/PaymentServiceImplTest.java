@@ -6,8 +6,10 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.OrderHistory;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
+import greencity.dto.refund.RefundDto;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
+import greencity.entity.order.Refund;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -15,7 +17,23 @@ import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.*;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeOrderPositionRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderDetailRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.PositionRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.RefundRepository;
+import greencity.repository.ServiceRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,12 +53,47 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 import java.util.stream.Stream;
-import static greencity.ModelUtils.*;
+import static greencity.ModelUtils.TEST_EMAIL;
+import static greencity.ModelUtils.getCertificateList;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getFormedOrder;
+import static greencity.ModelUtils.getInfoPayment;
+import static greencity.ModelUtils.getManualPayment;
+import static greencity.ModelUtils.getManualPaymentRequestDto;
+import static greencity.ModelUtils.getOrder;
+import static greencity.ModelUtils.getOrderForGetOrderStatusData2Test;
+import static greencity.ModelUtils.getOrderUserFirst;
+import static greencity.ModelUtils.getOrderWithoutPayment;
+import static greencity.ModelUtils.getPayment;
+import static greencity.ModelUtils.getRefundDto_NothingToRefund;
+import static greencity.ModelUtils.getRefundDto_ReturnBonuses;
+import static greencity.ModelUtils.getRefundDto_ReturnMoney;
+import static greencity.ModelUtils.getRefundDto_ReturnMoneyAndBonuses;
+import static greencity.ModelUtils.getTariffsInfo;
+import static greencity.ModelUtils.getTestUser;
+import static greencity.constant.ErrorMessage.CANNOT_REFUND_MONEY;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND;
+import static greencity.constant.ErrorMessage.INVALID_REQUESTED_REFUND_AMOUNT;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
+import static greencity.constant.ErrorMessage.ORDER_HAS_NO_OVERPAYMENT;
+import static greencity.constant.ErrorMessage.REFUND_CONFLICT_MONEY_AND_BONUSES;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -377,14 +430,14 @@ class PaymentServiceImplTest {
         Payment payment = getManualPayment();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any())).thenReturn(payment);
         doNothing().when(eventService).save(anyString(), anyString(), any(Order.class));
 
-        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, image, "test@gmail.com");
+        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, image, TEST_EMAIL);
 
         verify(eventService, times(1))
             .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
@@ -418,14 +471,14 @@ class PaymentServiceImplTest {
             .settlementdate("02-08-2021").amount(0L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(any(), any(), any());
-        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
             "Петро  Петренко", order);
@@ -451,7 +504,7 @@ class PaymentServiceImplTest {
             .settlementdate("02-08-2021").amount(50_00L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
@@ -460,7 +513,7 @@ class PaymentServiceImplTest {
         doNothing().when(eventService).save(any(), any(), any());
         when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
 
-        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
 
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
@@ -488,14 +541,14 @@ class PaymentServiceImplTest {
             .settlementdate("02-08-2021").amount(500_00L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(any(), any(), any());
-        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
             "Петро  Петренко", order);
@@ -520,14 +573,14 @@ class PaymentServiceImplTest {
             .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
-        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
         verify(paymentRepository, times(1)).save(any());
@@ -549,14 +602,14 @@ class PaymentServiceImplTest {
             .settlementdate("02-08-2021").amount(200L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
-        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
         verify(paymentRepository, times(1)).save(any());
@@ -578,14 +631,14 @@ class PaymentServiceImplTest {
             .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
-        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
         verify(paymentRepository, times(1)).save(any());
@@ -607,14 +660,14 @@ class PaymentServiceImplTest {
             .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
-        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
         verify(paymentRepository, times(1)).save(any());
@@ -636,7 +689,7 @@ class PaymentServiceImplTest {
             .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
@@ -644,7 +697,7 @@ class PaymentServiceImplTest {
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, Mockito.mock(MultipartFile.class),
-            "test@gmail.com");
+            TEST_EMAIL);
 
         verify(eventService, times(1))
             .save("Замовлення Оплачено", "Система", order);
@@ -658,6 +711,170 @@ class PaymentServiceImplTest {
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
             .settlementdate("02-08-2021").amount(500L).paymentId("1").build();
         assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com"));
+            () -> paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL));
+    }
+
+    @Test
+    void processRefundForBroughtItHimselfOrder_ShouldRefundMoney_andSaveRefund() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        RefundDto refundDto = getRefundDto_ReturnMoney();
+        refundDto.setAmount(100L);
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL);
+        verify(refundRepository).save(any(Refund.class));
+        verify(orderRepository).save(any(Order.class));
+        verify(eventService).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq(TEST_EMAIL),
+            any(Order.class));
+        assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
+    }
+
+    @Test
+    void processRefundForCanceledOrder_ShouldRefundMoney_andSaveRefund() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        RefundDto refundDto = getRefundDto_ReturnMoney();
+        order.setOrderStatus(OrderStatus.CANCELED);
+        assertTrue(paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL));
+        verify(refundRepository).save(any(Refund.class));
+        verify(orderRepository).save(any(Order.class));
+        verify(eventService).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq(TEST_EMAIL),
+            any(Order.class));
+        assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
+    }
+
+    @Test
+    void processRefundForOrder_ShouldRefundMoney_andThrows_ORDER_HAS_NO_OVERPAYMENT() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        RefundDto refundDto = getRefundDto_ReturnMoney();
+        order.setOrderStatus(OrderStatus.CANCELED);
+        order.getPayment().forEach(p -> p.setAmount(-300L));
+        order.setPointsToUse(1);
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
+                TEST_EMAIL));
+        assertEquals(ORDER_HAS_NO_OVERPAYMENT, exception.getMessage());
+    }
+
+    @Test
+    void processRefundForDoneOrder_ShouldRefundMoney_andThrowsBadRequestException() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> paymentServiceImpl.processRefundForOrder(order, getRefundDto_ReturnMoney(),
+                TEST_EMAIL));
+        assertEquals(INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND, exception.getMessage());
+    }
+
+    @Test
+    void processRefundForDoneOrder_ShouldRefundBonuses_andSaveOrder() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+        assertTrue(paymentServiceImpl.processRefundForOrder(order, getRefundDto_ReturnBonuses(),
+            TEST_EMAIL));
+        verify(orderRepository).save(any(Order.class));
+        verify(userRepository).save(any(User.class));
+        verify(eventService).saveEvent(eq(OrderHistory.ADDED_BONUSES), eq(TEST_EMAIL), any(Order.class));
+        assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
+    }
+
+    @Test
+    void processRefundForDoneOrder_ShouldRefundBonuses_andThrowsBadRequestException() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        order.getPayment().forEach(p -> p.setAmount(-300L));
+        order.setPointsToUse(1);
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> paymentServiceImpl.processRefundForOrder(order, getRefundDto_ReturnBonuses(),
+                TEST_EMAIL));
+        assertEquals(ORDER_HAS_NO_OVERPAYMENT, exception.getMessage());
+    }
+
+    @Test
+    void processRefundForCanceledOrder_ShouldThrowsBadRequestException() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        RefundDto refundDto = getRefundDto_ReturnMoneyAndBonuses();
+        order.setOrderStatus(OrderStatus.CANCELED);
+        order.getPayment().forEach(p -> p.setAmount(-300L));
+        order.setPointsToUse(1);
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
+                TEST_EMAIL));
+        assertEquals(REFUND_CONFLICT_MONEY_AND_BONUSES, exception.getMessage());
+    }
+
+    @Test
+    void processRefundForDoneOrder_ShouldThrowsBadRequestException() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> paymentServiceImpl.processRefundForOrder(order, null,
+                TEST_EMAIL));
+        assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()), exception.getMessage());
+    }
+
+    @Test
+    void processRefundForBroughtItHimselfOrder_refundMoney_shouldThrowsBadRequestException1() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> paymentServiceImpl.processRefundForOrder(order, getRefundDto_ReturnMoney(),
+                TEST_EMAIL));
+        assertEquals(INVALID_REQUESTED_REFUND_AMOUNT, exception.getMessage());
+    }
+
+    @Test
+    void processRefundForBroughtItHimselfOrder_ShouldRefundBonuses() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        RefundDto refundDto = getRefundDto_ReturnBonuses();
+        refundDto.setAmount(100L);
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        assertFalse(paymentServiceImpl.processRefundForOrder(order, refundDto,
+            TEST_EMAIL));
+        verify(userRepository).save(any(User.class));
+        verify(orderRepository).save(any(Order.class));
+        verify(eventService).saveEvent(eq(OrderHistory.ADDED_BONUSES), eq(TEST_EMAIL),
+            any(Order.class));
+        assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
+    }
+
+    @Test
+    void processRefundForBroughtItHimselfOrder_refundBonuses_shouldThrowsBadRequestException() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        RefundDto refundDto = getRefundDto_ReturnMoney().setAmount(100L);
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        when(refundRepository.save(any(Refund.class))).thenThrow(new BadRequestException(CANNOT_REFUND_MONEY));
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
+                TEST_EMAIL));
+        assertEquals(CANNOT_REFUND_MONEY, exception.getMessage());
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq(TEST_EMAIL),
+            any(Order.class));
+    }
+
+    @Test
+    void processRefundForBroughtItHimselfOrder_nothingToRefund_shouldReturnFalse() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        assertFalse(paymentServiceImpl.processRefundForOrder(order, null,
+            TEST_EMAIL));
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq(TEST_EMAIL),
+            any(Order.class));
+        verify(userRepository, never()).save(any());
+        verify(refundRepository, never()).save(any());
+    }
+
+    @Test
+    void processRefundForBroughtItHimselfOrder_nothingToRefund_shouldReturnFalse2() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        RefundDto refundDto = getRefundDto_NothingToRefund();
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        assertFalse(paymentServiceImpl.processRefundForOrder(order, refundDto,
+            TEST_EMAIL));
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq(TEST_EMAIL),
+            any(Order.class));
+        verify(userRepository, never()).save(any());
+        verify(refundRepository, never()).save(any());
     }
 }

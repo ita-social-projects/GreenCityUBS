@@ -3,6 +3,9 @@ package greencity.service.ubs;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
+import greencity.dto.refund.RefundDto;
+import greencity.entity.order.Order;
+import greencity.exceptions.BadRequestException;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface PaymentService {
@@ -52,4 +55,22 @@ public interface PaymentService {
      */
     ManualPaymentResponseDto updateManualPayment(Long paymentId, ManualPaymentRequestDto paymentRequestDto,
         MultipartFile image, String uuid);
+
+    /**
+     * Processes a refund for an order.
+     *
+     * @param order         {@link Order} the order to process.
+     * @param refundDto     {@link RefundDto} the details of the refund request.
+     * @param employeeEmail {@link String} the email of the employee processing the
+     *                      order.
+     * @return {@code true} if the refund was successfully processed for orders with
+     *         status {@code CANCELED} or {@code DONE}; {@code false} if the order
+     *         status is {@code BROUGHT_IT_HIMSELF} and the refund wasn't processed.
+     * @throws BadRequestException if the refund request is invalid or cannot be
+     *                             processed due to the current order state or
+     *                             refund details.
+     * @author Volodymyr Lukovskyi
+     */
+    boolean processRefundForOrder(Order order, RefundDto refundDto,
+        String employeeEmail);
 }

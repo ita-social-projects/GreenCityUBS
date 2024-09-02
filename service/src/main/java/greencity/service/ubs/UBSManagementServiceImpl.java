@@ -41,7 +41,6 @@ import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.refund.RefundDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
@@ -52,7 +51,6 @@ import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
-import greencity.entity.order.Refund;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -80,7 +78,6 @@ import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RefundRepository;
 import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
@@ -90,7 +87,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
@@ -117,20 +113,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
-import static greencity.constant.AppConstant.PAYMENT_REFUND_ENG;
-import static greencity.constant.ErrorMessage.CANNOT_REFUND_MONEY;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND;
 import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
-import static greencity.constant.ErrorMessage.INVALID_REQUESTED_REFUND_AMOUNT;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
-import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.USER_HAS_NO_OVERPAYMENT;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -162,7 +151,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final ServiceRepository serviceRepository;
     private final OrdersAdminsPageService ordersAdminsPageService;
     private final LocationApiService locationApiService;
-    private final RefundRepository refundRepository;
     private final OrderLockService orderLockService;
     private final OrderBagService orderBagService;
     private final PaymentService paymentService;
@@ -1327,7 +1315,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Order order, String lang,
         String email) {
         checkAvailableOrderForEmployee(order, email);
-        if (!processRefundForOrder(order, updateOrderPageDto.getRefundDto(), email)) {
+        if (!paymentService.processRefundForOrder(order, updateOrderPageDto.getRefundDto(), email)) {
             if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
                 && nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
                 updateOrderDetailStatus(order, updateOrderPageDto.getGeneralOrderInfo(), email);
@@ -1426,21 +1414,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void transferPointsToUser(Order order, User user, long pointsInCoins) {
-        int uahPoints = PaymentUtil.convertCoinsIntoBills(pointsInCoins).intValue();
-        user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
-
-        user.setChangeOfPointsList(ListUtils.defaultIfNull(user.getChangeOfPointsList(), new ArrayList<>()));
-        user.getChangeOfPointsList()
-            .add(ChangeOfPoints.builder()
-                .user(user)
-                .amount(uahPoints)
-                .date(LocalDateTime.now())
-                .order(order)
-                .build());
-        notificationService.notifyBonuses(order, (long) uahPoints);
-    }
-
     @Override
     public void updateOrderStatusToExpected() {
         orderRepository.updateOrderStatusToExpected(OrderStatus.CONFIRMED.name(),
@@ -1465,126 +1438,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return NotTakenOrderReasonDto.builder()
             .description(order.getReasonNotTakingBagDescription())
             .images(order.getImageReasonNotTakingBags())
-            .build();
-    }
-
-    /**
-     * Processes a refund for a given order based on the provided refund details and
-     * the current order status. The method handles refunds based on the following
-     * conditions: - If the order status is BROUGHT_IT_HIMSELF, it processes the
-     * refund accordingly and returns {@code false}. - If the order status is
-     * {@code CANCELED} or {@code DONE}, it processes either a bonus refund or a
-     * money refund based on the {@code RefundDto} details and returns
-     * {@code boolean}.
-     *
-     * @param order         {@link Order}.
-     * @param refundDto     {@link RefundDto}
-     * @param employeeEmail {@link String}
-     * @return {@code true} if the refund was successfully processed (for
-     *         {@code CANCELED} or {@code DONE} orders); {@code false} otherwise
-     *         (for {@code BROUGHT_IT_HIMSELF} orders).
-     * @throws BadRequestException if the refund request cannot be processed due to
-     *                             invalid conditions.
-     */
-    private boolean processRefundForOrder(Order order, RefundDto refundDto,
-        String employeeEmail) {
-        if (OrderStatus.BROUGHT_IT_HIMSELF == order.getOrderStatus()) {
-            if (refundDto != null) {
-                processRefundForBroughtItHimselfOrder(order, refundDto, employeeEmail);
-            }
-            return false;
-        } else if (OrderStatus.CANCELED == order.getOrderStatus() || OrderStatus.DONE == order.getOrderStatus()) {
-            if (refundDto == null) {
-                throw new BadRequestException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
-            }
-            if (refundDto.isReturnBonuses()) {
-                refundPaymentsInBonus(order, employeeEmail);
-                return true;
-            } else if (refundDto.isReturnMoney()) {
-                Long paidAmount = PaymentUtil.calculatePaidAmount(order);
-                refundPaymentsInMoney(order, employeeEmail, paidAmount);
-                return true;
-            } else {
-                throw new BadRequestException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
-            }
-        }
-        return false;
-    }
-
-    private void processRefundForBroughtItHimselfOrder(Order order, RefundDto refundDto, String employeeEmail) {
-        if (refundDto.isReturnBonuses()) {
-            validateRefundAmount(refundDto.getAmount(), Long.valueOf(order.getPointsToUse()));
-            refundPaymentsInBonus(order, employeeEmail, refundDto.getAmount());
-        } else if (refundDto.isReturnMoney()) {
-            validateRefundAmount(refundDto.getAmount(), PaymentUtil.calculatePaidAmount(order));
-            refundPaymentsInMoney(order, employeeEmail, refundDto.getAmount());
-        }
-    }
-
-    private void refundPaymentsInMoney(Order order, String employeeEmail, Long amount) {
-        if (OrderStatus.CANCELED != order.getOrderStatus()
-            && OrderStatus.BROUGHT_IT_HIMSELF != order.getOrderStatus()) {
-            throw new BadRequestException(INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND);
-        }
-        checkOverpayment(amount);
-        order.getPayment().add(
-            buildPaymentForRefund(-amount, PAYMENT_REFUND_ENG, order));
-        order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
-        try {
-            refundRepository.save(Refund.builder()
-                .order(order)
-                .amount(amount)
-                .date(LocalDateTime.now(ZoneId.of("Europe/Kiev")))
-                .build());
-        } catch (RuntimeException e) {
-            throw new BadRequestException(CANNOT_REFUND_MONEY);
-        }
-        order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
-        orderRepository.save(order);
-        eventService.saveEvent(OrderHistory.CANCELED_ORDER_MONEY_REFUND, employeeEmail, order);
-    }
-
-    private void refundPaymentsInBonus(Order order, String email) {
-        CounterOrderDetailsDto prices =
-            PaymentUtil.getPriceDetails(order.getId(), orderRepository, orderBagService, certificateRepository);
-        Long overpaymentInCoins =
-            PaymentUtil.calculateOverpayment(order, PaymentUtil.convertBillsIntoCoins(setTotalPrice(prices)));
-        refundPaymentsInBonus(order, email, overpaymentInCoins);
-    }
-
-    private void refundPaymentsInBonus(Order order, String email, Long amount) {
-        checkOverpayment(amount);
-        User currentUser = order.getUser();
-        order.getPayment().add(
-            buildPaymentForRefund(-amount, ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG, order));
-        transferPointsToUser(order, currentUser, amount);
-        order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
-        orderRepository.save(order);
-        userRepository.save(currentUser);
-        eventService.saveEvent(OrderHistory.ADDED_BONUSES, email, order);
-    }
-
-    private void checkOverpayment(long overpayment) {
-        if (overpayment <= 0) {
-            throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
-        }
-    }
-
-    private void validateRefundAmount(Long refundAmount, Long limit) {
-        if (refundAmount > limit) {
-            throw new BadRequestException(INVALID_REQUESTED_REFUND_AMOUNT);
-        }
-    }
-
-    private Payment buildPaymentForRefund(Long amount, String receiptLink, Order order) {
-        return Payment.builder()
-            .amount(amount)
-            .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
-            .receiptLink(receiptLink)
-            .order(order)
-            .currency("UAH")
-            .orderStatus(String.valueOf(OrderStatus.FORMED))
-            .paymentStatus(PaymentStatus.PAID)
             .build();
     }
 }

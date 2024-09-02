@@ -75,7 +75,7 @@ public class ErrorMessage {
     public static final String INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION =
         "Cannot add a violation to order with this status: ";
     public static final String INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND =
-        "Money refund cannot be processed for an order with status: ";
+        "Money refund cannot be processed";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
     public static final String NOT_ENOUGH_BAGS_EXCEPTION = "Not enough bags, minimal amount is: ";
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
@@ -103,7 +103,7 @@ public class ErrorMessage {
     public static final String INCORRECT_ECO_NUMBER = "Incorrect format of Eco number";
     public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";
     public static final String CANNOT_ACCESS_PAYMENT_STATUS = "Cannot access another user's payment status";
-    public static final String USER_HAS_NO_OVERPAYMENT = "This user has no overpayment";
+    public static final String ORDER_HAS_NO_OVERPAYMENT = "This order has no overpayment";
     public static final String INVALID_REQUESTED_REFUND_AMOUNT = "Invalid requested refund amount";
     public static final String CANNOT_REFUND_MONEY =
         "Money refund cannot be processed more than once for the same order";
@@ -174,4 +174,6 @@ public class ErrorMessage {
         "Predefined notification template cannot be deleted.";
     public static final String TARIFF_NOT_FOUND_BY_LOCATION_ID = "Tariff with location id: %d not found";
     public static final String USER_AGREEMENT_NOT_FOUND_BY_ID = "User Agreement with ID %d not found";
+    public static final String REFUND_CONFLICT_MONEY_AND_BONUSES =
+        "A refund cannot be processed with both money and bonuses at the same time";
 }

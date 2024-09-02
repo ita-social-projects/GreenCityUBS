@@ -97,6 +97,7 @@ import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.position.PositionWithTranslateDto;
+import greencity.dto.refund.RefundDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
@@ -5336,6 +5337,38 @@ public class ModelUtils {
             .textEn(TEST_AGREEMENT_TEXT_EN)
             .authorEmail(TEST_EMAIL)
             .createdAt(LocalDateTime.now().minusDays(1))
+            .build();
+    }
+
+    public static RefundDto getRefundDto_NothingToRefund() {
+        return RefundDto.builder()
+            .amount(0L)
+            .isReturnMoney(false)
+            .isReturnBonuses(false)
+            .build();
+    }
+
+    public static RefundDto getRefundDto_ReturnMoney() {
+        return RefundDto.builder()
+            .amount(0L)
+            .isReturnMoney(true)
+            .isReturnBonuses(false)
+            .build();
+    }
+
+    public static RefundDto getRefundDto_ReturnBonuses() {
+        return RefundDto.builder()
+            .amount(0L)
+            .isReturnMoney(false)
+            .isReturnBonuses(true)
+            .build();
+    }
+
+    public static RefundDto getRefundDto_ReturnMoneyAndBonuses() {
+        return RefundDto.builder()
+            .amount(0L)
+            .isReturnMoney(true)
+            .isReturnBonuses(true)
             .build();
     }
 }
