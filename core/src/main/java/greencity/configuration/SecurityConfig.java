@@ -123,6 +123,7 @@ public class SecurityConfig {
                     UBS_MANAG_LINK + "/{id}/ordersAll",
                     UBS_MANAG_LINK + "/get-order-cancellation-reason/{id}",
                     UBS_MANAG_LINK + "/get-not-taken-order-reason/{id}",
+                    UBS_MANAG_LINK + "/check-status-transition/formed-to-canceled/{id}",
                     UBS_MANAG_LINK + "/orderTableColumnsWidth",
                     UBS_MANAG_LINK + "/city-list",
                     UBS_MANAG_LINK + "/districts-list",

@@ -957,4 +957,26 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getNotTakenOrderReason(orderId));
     }
+
+    /**
+     * Controller for checking if an order status was changed from FORMED to
+     * CANCELED.
+     *
+     * @param id {@link Long} the ID of the order to check.
+     * @return {@link Boolean} {@code true} if the order status was changed from
+     *         {@code FORMED} to {@code CANCELED}, {@code false} otherwise.
+     *
+     * @author Volodymyr Lukovskyi
+     */
+    @Operation(summary = "Check if the order status transitioned from FORMED to CANCELED")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+    })
+    @GetMapping("/check-status-transition/formed-to-canceled/{id}")
+    public ResponseEntity<Boolean> checkIfOrderStatusIsFormedToCanceled(@Valid @PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.checkIfOrderStatusIsFormedToCanceled(id));
+    }
 }
