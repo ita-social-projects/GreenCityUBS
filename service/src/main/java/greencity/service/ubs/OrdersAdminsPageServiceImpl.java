@@ -5,6 +5,9 @@ import greencity.constant.OrderHistory;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
 import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.location.api.CityInfoDto;
+import greencity.dto.location.api.DistrictInfoDto;
+import greencity.dto.location.api.RegionInfoDto;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
@@ -12,10 +15,13 @@ import greencity.dto.table.ColumnDTO;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.entity.table.TableColumnWidthForEmployee;
+import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.locations.City;
+import greencity.entity.user.locations.District;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -52,6 +58,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -173,12 +180,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("violationsAmount", "Кількість порушень клієнта", "Violations"),
                 "violationsAmount", 20, false, true, false, 12, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
             new ColumnDTO(new TitleDto("region", "Область", "Region"), "region", 20, false,
-                true, true, 35, EditType.READ_ONLY, regionsList(), exportAddress),
+                true, true, 35, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
-                true, true, 36, EditType.READ_ONLY, cityList(), exportAddress),
+                true, true, 36, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(new TitleDto(DISTRICT, "Район", "District"), DISTRICT, 20, false,
-                true, true, 37, EditType.READ_ONLY, districtList(), exportAddress),
+                true, true, 37, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "address", 20, false, true,
                 false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), exportAddress),
@@ -297,6 +304,59 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     tableColumnWidthForEmployeeRepository.save(tableColumnWidthForEmployee);
                 });
         }
+    }
+
+    @Override
+    @Cacheable("allLocationsInfo")
+    public List<RegionInfoDto> getAllLocationsInfo() {
+        return regionRepository.findAllRegionsWithCitiesAndDistricts().stream()
+            .map(this::toRegionInfoDto)
+            .toList();
+    }
+
+    private RegionInfoDto toRegionInfoDto(Region region) {
+        return RegionInfoDto.builder()
+            .id(region.getId())
+            .nameEn(region.getNameEn())
+            .nameUk(region.getNameUk())
+            .cities(toCityInfoDto(region.getCities()))
+            .build();
+    }
+
+    private List<CityInfoDto> toCityInfoDto(List<City> cities) {
+        return cities.stream()
+            .map(this::toCityInfoDto)
+            .toList();
+    }
+
+    private CityInfoDto toCityInfoDto(City city) {
+        return CityInfoDto.builder()
+            .id(city.getId())
+            .nameUk(city.getNameUk())
+            .nameEn(city.getNameEn())
+            .regionId(city.getRegion().getId())
+            .districts(toDistrictInfoDto(city.getDistricts()))
+            .build();
+    }
+
+    private List<DistrictInfoDto> toDistrictInfoDto(Set<District> districts) {
+        return districts.stream()
+            .collect(Collectors.toMap(
+                District::getNameUk,
+                this::toDistrictInfoDto,
+                (existing, replacement) -> existing))
+            .values()
+            .stream()
+            .toList();
+    }
+
+    private DistrictInfoDto toDistrictInfoDto(District district) {
+        return DistrictInfoDto.builder()
+            .id(district.getId())
+            .nameEn(district.getNameEn())
+            .nameUk(district.getNameUk())
+            .cityId(district.getCity().getId())
+            .build();
     }
 
     @RequiredArgsConstructor
@@ -753,37 +813,5 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private boolean isOrderBlockedByAnotherEmployee(Order order, Long employeeId) {
         return order.getBlockedByEmployee() != null
             && !Objects.equals(employeeId, order.getBlockedByEmployee().getId());
-    }
-
-    private List<OptionForColumnDTO> regionsList() {
-        return regionRepository.findAll()
-            .stream()
-            .map(region -> OptionForColumnDTO
-                .builder()
-                .key(region.getId().toString())
-                .en(region.getNameEn())
-                .ua(region.getNameUk())
-                .build())
-            .toList();
-    }
-
-    private List<OptionForColumnDTO> cityList() {
-        return cityRepository.findAll().stream()
-            .map(city -> OptionForColumnDTO.builder()
-                .key(city.getId().toString())
-                .ua(city.getNameUk())
-                .en(city.getNameEn())
-                .build())
-            .toList();
-    }
-
-    private List<OptionForColumnDTO> districtList() {
-        return districtRepository.findAll().stream()
-            .map(district -> OptionForColumnDTO.builder()
-                .key(district.getId().toString())
-                .ua(district.getNameUk())
-                .en(district.getNameEn())
-                .build())
-            .toList();
     }
 }
