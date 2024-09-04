@@ -2,6 +2,9 @@ package greencity.exception.handler;
 
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.WrongSignatureException;
+import greencity.exceptions.api.GoogleApiException;
+import greencity.exceptions.user.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +48,15 @@ class CustomExceptionHandlerTest {
 
     @Mock
     UnprocessableEntityException unprocessableEntityException;
+
+    @Mock
+    WrongSignatureException wrongSignatureException;
+
+    @Mock
+    GoogleApiException googleApiException;
+
+    @Mock
+    UserNotFoundException userNotFoundException;
 
     @Mock
     HttpMessageNotReadableException notReadableException;
