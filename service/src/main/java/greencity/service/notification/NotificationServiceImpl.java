@@ -110,7 +110,6 @@ public class NotificationServiceImpl implements NotificationService {
     private static final int MIN_NOTIFICATION_ORDER_AGE_DAYS = 3;
     private static final int MAX_NOTIFICATIONS_PER_WEEK = 1;
 
-    @Autowired
     private final OrderBagService orderBagService;
 
     /**

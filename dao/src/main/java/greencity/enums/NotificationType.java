@@ -17,5 +17,5 @@ public enum NotificationType {
     DONE_OR_CANCELED_UNPAID_ORDER,
     CUSTOM,
     TARIFF_PRICE_WAS_CHANGED,
-    CREATE_NEW_ORDER;
+    CREATE_NEW_ORDER
 }

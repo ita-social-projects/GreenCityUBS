@@ -5,12 +5,12 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.location.api.RegionInfoDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.entity.order.Event;
 import greencity.entity.table.TableColumnWidthForEmployee;
-import greencity.entity.user.ubs.Address;
 import greencity.enums.CancellationReason;
 import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
@@ -22,16 +22,19 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.AddressRepository;
-import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
-import greencity.repository.TableColumnWidthForEmployeeRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.UserRepository;
+import greencity.repository.AddressRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.CityRepository;
+import greencity.repository.DistrictRepository;
+import greencity.repository.EmployeeOrderPositionRepository;
+import greencity.repository.TableColumnWidthForEmployeeRepository;
+import greencity.repository.OrderStatusTranslationRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -110,6 +113,12 @@ class OrdersAdminsPageServiceImplTest {
     private TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
     @Mock
     private OrderLockService orderLockService;
+    @Mock
+    private RegionRepository regionRepository;
+    @Mock
+    private CityRepository cityRepository;
+    @Mock
+    private DistrictRepository districtRepository;
     @InjectMocks
     private OrdersAdminsPageServiceImpl ordersAdminsPageService;
 
@@ -120,7 +129,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
-        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
+        assertThrowsEntityNotFoundException();
     }
 
     @Test
@@ -135,7 +144,7 @@ class OrdersAdminsPageServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
-        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
+        assertThrowsEntityNotFoundException();
     }
 
     @Test
@@ -180,7 +189,12 @@ class OrdersAdminsPageServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8L)));
 
-        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
+        assertThrowsEntityNotFoundException();
+    }
+
+    void assertThrowsEntityNotFoundException() {
+        assertThrows(EntityNotFoundException.class,
+            () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
     @Test
@@ -193,7 +207,6 @@ class OrdersAdminsPageServiceImplTest {
         List<ReceivingStationDto> receivingStations = new ArrayList<>();
         List<Employee> employeeList = new ArrayList<>();
         employeeList.add(ModelUtils.getEmployee());
-        List<Address> addressList = List.of(ModelUtils.getAddress());
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
@@ -241,12 +254,6 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(employeeList);
         when(employeeRepository.findAllByEmployeePositionId(4L))
             .thenReturn(employeeList);
-        when(addressRepository.findDistinctDistricts())
-            .thenReturn(addressList);
-        when(addressRepository.findDistinctCities())
-            .thenReturn(addressList);
-        when(addressRepository.findDistinctRegions())
-            .thenReturn(addressList);
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
@@ -777,7 +784,7 @@ class OrdersAdminsPageServiceImplTest {
         RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
 
-        when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
+        when(receivingStationRepository.getReferenceById(1L)).thenReturn(ModelUtils.getReceivingStation());
         when(employeeRepository.findByEmail(email)).thenReturn(employee);
 
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
@@ -799,7 +806,7 @@ class OrdersAdminsPageServiceImplTest {
         dto.setColumnName("adminComment");
         dto.setNewValue("Admin Comment");
 
-        verify(receivingStationRepository, atLeast(1)).getOne(1L);
+        verify(receivingStationRepository, atLeast(1)).getReferenceById(1L);
         verify(employeeRepository, atLeast(1)).findByEmail(email);
     }
 
@@ -808,7 +815,7 @@ class OrdersAdminsPageServiceImplTest {
         Optional<Order> order = Optional.of(ModelUtils.getOrder());
 
         when(orderRepository.findById(1L)).thenReturn(order);
-        when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
+        when(receivingStationRepository.getReferenceById(1L)).thenReturn(ModelUtils.getReceivingStation());
 
         ordersAdminsPageService.receivingStationForDevelopStage(List.of(1L), "1", 1L);
         verify(orderLockService).unlockOrder(order.get());
@@ -1155,5 +1162,16 @@ class OrdersAdminsPageServiceImplTest {
         verify(modelMapper).map(columnWidthDto, TableColumnWidthForEmployee.class);
         verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(1L);
         verify(tableColumnWidthForEmployeeRepository).save(any(TableColumnWidthForEmployee.class));
+    }
+
+    @Test
+    void getAllLocationsInfoTest() {
+        when(regionRepository.findAllRegionsWithCitiesAndDistricts())
+            .thenReturn(List.of(ModelUtils.getRegionForAllLocationsTest()));
+
+        List<RegionInfoDto> result = ordersAdminsPageService.getAllLocationsInfo();
+
+        assertNotNull(result);
+        verify(regionRepository).findAllRegionsWithCitiesAndDistricts();
     }
 }

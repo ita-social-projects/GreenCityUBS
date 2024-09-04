@@ -1,17 +1,16 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 
 import greencity.client.WayForPayClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
@@ -33,6 +32,7 @@ import greencity.dto.user.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.*;
 import greencity.entity.telegram.TelegramBot;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
@@ -47,6 +47,7 @@ import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
+import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.*;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
@@ -78,8 +79,6 @@ import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
@@ -91,7 +90,7 @@ class UBSClientServiceImplTest {
     private BagRepository bagRepository;
 
     @Mock
-    private UBSuserRepository ubsUserRepository;
+    private UBSUserRepository ubsUserRepository;
 
     @Mock
     private ModelMapper modelMapper;
@@ -101,9 +100,6 @@ class UBSClientServiceImplTest {
 
     @Mock
     private UserRemoteClient userRemoteClient;
-
-    @Mock
-    private FondyClient fondyClient;
 
     @Mock
     private AddressRepository addressRepository;
@@ -127,10 +123,10 @@ class UBSClientServiceImplTest {
     private EncryptionUtil encryptionUtil;
 
     @Mock
-    private PaymentRepository paymentRepository;
+    private EventRepository eventRepository;
 
     @Mock
-    private EventRepository eventRepository;
+    private PaymentRepository paymentRepository;
 
     @Mock
     private EventService eventService;
@@ -183,6 +179,9 @@ class UBSClientServiceImplTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private LocationToLocationsDtoMapper locationToLocationsDtoMapper;
 
     @Value("${greencity.wayforpay.secret}")
     private String wayForPaySecret;
@@ -3657,25 +3656,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getEmployeeLoginPositionNamesTest() {
-        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.ofNullable(getEmployee()));
-        when(userRemoteClient.getEmployeeLoginPositionNames(TEST_EMAIL)).thenReturn(List.of("Admin"));
-
-        List<String> actual = ubsService.getEmployeeLoginPositionNames(TEST_EMAIL);
-        assertEquals(List.of("Admin"), actual);
-
-        verify(employeeRepository).findByEmail(TEST_EMAIL);
-        verify(userRemoteClient).getEmployeeLoginPositionNames(TEST_EMAIL);
-    }
-
-    @Test
-    void getEmployeeLoginPositionNamesThrowsNotFoundExceptionTest() {
-        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ubsService.getEmployeeLoginPositionNames(TEST_EMAIL));
-        verify(employeeRepository).findByEmail(TEST_EMAIL);
-    }
-
-    @Test
     void shouldExtractOrderIdFromDataSuccessfully() {
         String data = Base64.getEncoder().encodeToString("{\"order_id\":\"123\"}".getBytes());
         Long result = ubsClientService.extractOrderIdFromData(data);
@@ -4032,5 +4012,113 @@ class UBSClientServiceImplTest {
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         byte[] messageDigest = md.digest(message.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(messageDigest);
+    }
+
+    @Test
+    void checkIfTariffExistsByIdTest() {
+        Long tariffId = 1L;
+        when(tariffsInfoRepository.existsById(tariffId)).thenReturn(true);
+
+        Assertions.assertTrue(ubsClientService.checkIfTariffExistsById(tariffId));
+    }
+
+    @Test
+    void checkIfTariffExistsByIdTest_DoesNotExist() {
+        Long tariffInfoId = 1L;
+        when(tariffsInfoRepository.existsById(tariffInfoId)).thenReturn(false);
+
+        assertFalse(ubsClientService.checkIfTariffExistsById(tariffInfoId));
+    }
+
+    @Test
+    void getAllLocationsTest() {
+        LocationsDto locationsDto = new LocationsDto();
+        List<LocationsDto> expectedLocations = Collections.singletonList(locationsDto);
+        when(locationRepository.findAllActiveLocations()).thenReturn(Collections.singletonList(new Location()));
+        when(locationToLocationsDtoMapper.convert(any(Location.class))).thenReturn(locationsDto);
+
+        List<LocationsDto> actualLocations = ubsClientService.getAllLocations();
+
+        assertEquals(expectedLocations, actualLocations);
+
+        verify(locationRepository).findAllActiveLocations();
+        verify(locationToLocationsDtoMapper, times(expectedLocations.size())).convert(any(Location.class));
+    }
+
+    @Test
+    void getTariffIdByLocationIdTest() {
+        Long locationId = 1L;
+        List<Long> tariffId = List.of(2L);
+        when(tariffsInfoRepository.findTariffIdByLocationId(locationId)).thenReturn(Optional.of(tariffId));
+
+        List<Long> actualTariffId = ubsClientService.getTariffIdByLocationId(locationId);
+
+        assertEquals(tariffId, actualTariffId);
+
+        verify(tariffsInfoRepository).findTariffIdByLocationId(locationId);
+    }
+
+    @Test
+    void getTariffIdByLocationIdNotFoundTest() {
+        Long locationId = 1L;
+        when(tariffsInfoRepository.findTariffIdByLocationId(locationId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> ubsClientService.getTariffIdByLocationId(locationId));
+
+        verify(tariffsInfoRepository).findTariffIdByLocationId(locationId);
+    }
+
+    @Test
+    void testGetAllLocationsByCourierId() {
+        Long tariffId = 10L;
+        Long id = 1L;
+        Location location = new Location();
+        location.setId(id);
+        LocationsDto locationsDto = new LocationsDto();
+        locationsDto.setId(id);
+
+        when(locationRepository.findAllActiveLocationsByCourierId(id)).thenReturn(List.of(location));
+        when(locationToLocationsDtoMapper.convert(location)).thenReturn(locationsDto);
+        when(tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(id, id)).thenReturn(Optional.of(tariffId));
+
+        List<LocationsDto> result = ubsClientService.getAllLocationsByCourierId(id);
+
+        assertEquals(1, result.size());
+        assertEquals(tariffId, result.get(0).getTariffsId());
+        verify(locationRepository).findAllActiveLocationsByCourierId(id);
+        verify(locationToLocationsDtoMapper).convert(location);
+        verify(tariffsInfoRepository).findTariffIdByLocationIdAndCourierId(id, id);
+    }
+
+    @Test
+    void testGetAllLocationsByCourierIdNotFound() {
+        Long id = 1L;
+        Location location = new Location();
+        location.setId(id);
+        LocationsDto locationsDto = new LocationsDto();
+        locationsDto.setId(id);
+
+        when(locationRepository.findAllActiveLocationsByCourierId(id)).thenReturn(List.of(location));
+        when(locationToLocationsDtoMapper.convert(location)).thenReturn(locationsDto);
+        when(tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(id, id)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            ubsClientService.getAllLocationsByCourierId(id);
+        });
+
+        assertEquals(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, id), exception.getMessage());
+        verify(locationRepository).findAllActiveLocationsByCourierId(id);
+        verify(locationToLocationsDtoMapper).convert(location);
+        verify(tariffsInfoRepository).findTariffIdByLocationIdAndCourierId(id, id);
+    }
+
+    @Test
+    void getAllLocationsByCourierId_ShouldReturnEmptyList_WhenNoLocationsExist() {
+        Long id = 1L;
+        when(locationRepository.findAllActiveLocationsByCourierId(id)).thenReturn(Arrays.asList());
+
+        List<LocationsDto> result = ubsClientService.getAllLocationsByCourierId(id);
+
+        assertTrue(result.isEmpty());
     }
 }

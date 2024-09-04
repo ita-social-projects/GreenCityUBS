@@ -15,7 +15,7 @@ public class OrderUtils {
      *
      * @param orderId - order id user
      * @param order   {@link Order} - get order user
-     * @return {@String} - orderId.
+     * @return {@link String} - orderId.
      */
     public static String generateOrderIdForPayment(Long orderId, Order order) {
         int lastNumber = order.getPayment().size() - 1;

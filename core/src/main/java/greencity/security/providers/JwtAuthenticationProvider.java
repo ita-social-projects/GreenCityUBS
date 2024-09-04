@@ -4,6 +4,7 @@ import greencity.security.JwtTool;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,17 +20,9 @@ import java.util.stream.Collectors;
  * @author Yurii Koval
  * @version 1.1
  */
+@RequiredArgsConstructor
 public class JwtAuthenticationProvider implements AuthenticationProvider {
     private final JwtTool jwtTool;
-
-    /**
-     * Constructor.
-     *
-     * @param jwtTool {@link JwtTool}
-     */
-    public JwtAuthenticationProvider(JwtTool jwtTool) {
-        this.jwtTool = jwtTool;
-    }
 
     /**
      * Method that provide authentication.

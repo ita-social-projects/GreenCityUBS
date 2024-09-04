@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -81,16 +80,6 @@ public interface UserRemoteClient {
      */
     @GetMapping("/user/get-positions-authorities")
     PositionAuthoritiesDto getPositionsAndRelatedAuthorities(@RequestParam String email);
-
-    /**
-     * Gets information about login employee`s positions.
-     *
-     * @param email {@link String} - user's email.
-     * @return List of {@link String} - list of employee`s positions.
-     * @author Anton Bondar
-     */
-    @GetMapping("/user/get-employee-login-positions")
-    List<String> getEmployeeLoginPositionNames(@RequestParam String email);
 
     /**
      * Changes userStatus to "DEACTIVATED" by UUID.

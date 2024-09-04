@@ -47,16 +47,16 @@ import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
+import greencity.dto.useragreement.UserAgreementDetailDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.user.ubs.Address;
-import greencity.enums.AddressStatus;
+import greencity.entity.user.UserAgreement;
 import greencity.enums.CancellationReason;
 import greencity.enums.CourierLimit;
 import greencity.enums.NotificationReceiverType;
@@ -268,30 +268,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static Address address() {
-        List<Long> id = addressDto().stream().map(AddressDto::getId).toList();
-        List<String> city = addressDto().stream().map(AddressDto::getCity).toList();
-        List<String> street = addressDto().stream().map(AddressDto::getStreet).toList();
-        List<String> district = addressDto().stream().map(AddressDto::getDistrict).toList();
-        List<String> houseNumber = addressDto().stream().map(AddressDto::getHouseNumber).toList();
-        List<String> entranceNumber =
-            addressDto().stream().map(AddressDto::getEntranceNumber).toList();
-        List<String> houseCorpus = addressDto().stream().map(AddressDto::getHouseCorpus).toList();
-        List<Boolean> actual = addressDto().stream().map(AddressDto::getActual).toList();
-        return Address.builder()
-            .id(id.getFirst())
-            .city(String.valueOf(city))
-            .district(String.valueOf(district))
-            .street(String.valueOf(street))
-            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
-            .entranceNumber(String.valueOf(entranceNumber))
-            .houseNumber(String.valueOf(houseNumber))
-            .houseCorpus(String.valueOf(houseCorpus))
-            .actual(Boolean.valueOf(String.valueOf(actual)))
-            .addressStatus(AddressStatus.DELETED)
-            .build();
-    }
-
     public static ManualPaymentRequestDto getRequestDto() {
         return ManualPaymentRequestDto.builder()
             .amount(500L)
@@ -497,15 +473,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static AddBonusesToUserDto getAddBonusesToUserDto() {
-        return AddBonusesToUserDto.builder()
-            .paymentId("5")
-            .receiptLink("test")
-            .settlementdate("test")
-            .amount(500L)
-            .build();
-    }
-
     public static GetTariffsInfoDto getAllTariffsInfoDto() {
         return GetTariffsInfoDto.builder()
             .cardId(1L)
@@ -650,4 +617,22 @@ public class ModelUtils {
         return dto;
     }
 
+    public static final String TEST_AGREEMENT_TEXT_UA = "Текст угоди українською";
+    public static final String TEST_AGREEMENT_TEXT_EN = "Agreement text in English";
+
+    public static UserAgreementDto getUserAgreementDto() {
+        return UserAgreementDto.builder()
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .build();
+    }
+
+    public static UserAgreementDetailDto getUserAgreementDetailDto() {
+        return UserAgreementDetailDto.builder()
+            .id(1L)
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .build();
+    }
 }

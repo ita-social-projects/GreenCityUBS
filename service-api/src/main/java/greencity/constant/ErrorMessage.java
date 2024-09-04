@@ -1,6 +1,9 @@
 package greencity.constant;
 
-public final class ErrorMessage {
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
+public class ErrorMessage {
     public static final String CERTIFICATE_EXIST = "Certificate with this code is already exist";
     public static final String CERTIFICATE_NOT_FOUND_BY_CODE = "Certificate does not exist by this code: ";
     public static final String CERTIFICATE_EXPIRED = "Certificate expired by this code: ";
@@ -9,8 +12,6 @@ public final class ErrorMessage {
         + " Certificate code: ";
     public static final String CERTIFICATE_IS_NOT_ACTIVATED = "The certificate is not activated yet:";
     public static final String BAG_NOT_FOUND = "Bag does not exist by id: ";
-    public static final String BAGS_QUANTITY_NOT_FOUND_MESSAGE = "Bags quantity not found by current orderId "
-        + "and bagId.";
     public static final String USER_DONT_HAVE_ENOUGH_POINTS = "User doesn't have enough bonus points.";
     public static final String TOO_MANY_CERTIFICATES = "Too many certificates was entered.";
     public static final String THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST =
@@ -35,7 +36,6 @@ public final class ErrorMessage {
     public static final String RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST = "Recipient with current id does not exist.";
     public static final String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
     public static final String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Address not found for order by id: ";
-    public static final String BAD_ORDER_STATUS_REQUEST = "Incorrect order status: ";
     public static final String ORDER_STATUS_NOT_FOUND = "Order status not found";
     public static final String ORDER_PAYMENT_STATUS_NOT_FOUND = "Order payment status not found";
     public static final String FILE_NOT_SAVED = "File hasn't been saved";
@@ -74,6 +74,8 @@ public final class ErrorMessage {
     public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
     public static final String INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION =
         "Cannot add a violation to order with this status: ";
+    public static final String INCOMPATIBLE_ORDER_STATUS_FOR_REFUND =
+        "Money refund cannot be processed for an order with status: ";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
     public static final String NOT_ENOUGH_BAGS_EXCEPTION = "Not enough bags, minimal amount is: ";
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
@@ -129,9 +131,6 @@ public final class ErrorMessage {
     public static final String EMPLOYEE_WAS_NOT_UPDATED = "Employee was not updated";
     public static final String TOO_MUCH_POINTS_FOR_ORDER = "Too much points for order, maximum amount: ";
     public static final String TARIFF_FOR_ORDER_NOT_EXIST = "Could not find tariff for order with id: ";
-    public static final String USE_ONLY_ENGLISH_LETTERS = "use only English letters";
-    public static final String USE_ONLY_UKRAINIAN_LETTERS = "use only Ukrainian letters";
-    public static final String CITY_NAME_CHARACTER_LIMIT = "A minimum of 3 to a maximum of 40 characters are allowed";
     public static final String CANNOT_ACCESS_ORDER_FOR_EMPLOYEE = "Cannot access order with id: ";
     public static final String NUMBER_OF_ADDRESSES_EXCEEDED = "Number of addresses reached maximum";
     public static final String TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY =
@@ -170,10 +169,6 @@ public final class ErrorMessage {
         "This template does not contain messages for all platforms: ";
     public static final String PREDEFINED_NOTIFICATION_CANNOT_BE_DELETED =
         "Predefined notification template cannot be deleted.";
-
-    /**
-     * Constructor.
-     */
-    private ErrorMessage() {
-    }
+    public static final String TARIFF_NOT_FOUND_BY_LOCATION_ID = "Tariff with location id: %d not found";
+    public static final String USER_AGREEMENT_NOT_FOUND_BY_ID = "User Agreement with ID %d not found";
 }

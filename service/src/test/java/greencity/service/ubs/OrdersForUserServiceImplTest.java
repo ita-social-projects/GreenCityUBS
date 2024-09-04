@@ -40,7 +40,7 @@ class OrdersForUserServiceImplTest {
         Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), column);
         when(ordersForUserRepository.getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L))
             .thenReturn(Page.empty());
-        when(userRepository.getOne(anyLong())).thenReturn(ModelUtils.getUser());
+        when(userRepository.getReferenceById(anyLong())).thenReturn(ModelUtils.getUser());
         ordersForUserService.getAllOrders(PageRequest.of(1, 1), 1L, sortingOrder, column);
 
         verify(ordersForUserRepository).getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L);
@@ -63,13 +63,13 @@ class OrdersForUserServiceImplTest {
 
         when(ordersForUserRepository.getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L))
             .thenReturn(page);
-        when(userRepository.getOne(anyLong())).thenReturn(ModelUtils.getUser());
+        when(userRepository.getReferenceById(anyLong())).thenReturn(ModelUtils.getUser());
 
         ordersForUserService.getAllOrders(PageRequest.of(1, 1),
             1L, SortingOrder.DESC, "payment_amount");
 
         verify(ordersForUserRepository).getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L);
-        verify(userRepository).getOne(anyLong());
+        verify(userRepository).getReferenceById(anyLong());
     }
 
     @Test
@@ -82,12 +82,12 @@ class OrdersForUserServiceImplTest {
 
         when(ordersForUserRepository.getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L))
             .thenReturn(page);
-        when(userRepository.getOne(anyLong())).thenReturn(ModelUtils.getUser());
+        when(userRepository.getReferenceById(anyLong())).thenReturn(ModelUtils.getUser());
 
         ordersForUserService.getAllOrders(PageRequest.of(1, 1),
             1L, SortingOrder.DESC, "payment_amount");
 
         verify(ordersForUserRepository).getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L);
-        verify(userRepository).getOne(anyLong());
+        verify(userRepository).getReferenceById(anyLong());
     }
 }

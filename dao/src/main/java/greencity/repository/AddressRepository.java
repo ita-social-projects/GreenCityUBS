@@ -66,23 +66,6 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     List<Address> findAllNonDeletedAddressesByUserId(Long userId);
 
     /**
-     * Method returns first address {@link Address} from each distinct district.
-     *
-     * @return list of {@link Address}
-     */
-    @Query(value = "SELECT a FROM Address a WHERE a.id IN "
-        + "(SELECT MIN(ad.id) FROM Address ad WHERE ad.district = a.district)")
-    List<Address> findDistinctDistricts();
-
-    /**
-     * Method returns first address {@link Address} from each distinct city.
-     *
-     * @return list of {@link Address}
-     */
-    @Query(value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) FROM Address  ad WHERE ad.city = a.city)")
-    List<Address> findDistinctCities();
-
-    /**
      * Finds the actual {@link Address} associated with the given user ID.
      *
      * @param userId the ID of the user whose address is being searched for
@@ -103,14 +86,4 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query(value = "SELECT * FROM address WHERE user_id =:userId AND status != 'DELETED' LIMIT 1", nativeQuery = true)
     Optional<Address> findAnyByUserIdAndAddressStatusNotDeleted(Long userId);
-
-    /**
-     * Method returns first address {@link Address} from each distinct region.
-     *
-     * @return list of {@link Address}
-     */
-    @Query(
-        value = "SELECT a FROM Address  a WHERE a.id IN (SELECT MIN(ad.id) "
-            + "FROM Address  ad WHERE ad.region = a.region)")
-    List<Address> findDistinctRegions();
 }

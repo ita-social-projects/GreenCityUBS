@@ -67,12 +67,6 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
-    void getPositionsOfLoginEmployee() {
-        assertThrows(RemoteServerUnavailableException.class,
-            () -> client.getEmployeeLoginPositionNames(USER_EMAIL));
-    }
-
-    @Test
     void getPasswordStatus() {
         assertThrows(RemoteServerUnavailableException.class, () -> client.getPasswordStatus());
     }

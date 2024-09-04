@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class JwtToolTest {
@@ -30,7 +31,8 @@ class JwtToolTest {
 
     @BeforeEach
     public void setup() {
-        jwtTool = new JwtTool("secret-refresh-token-key-bigger-key");
+        jwtTool = new JwtTool();
+        ReflectionTestUtils.setField(jwtTool, "accessTokenKey", "secret-refresh-token-key-bigger-key");
     }
 
     @Test

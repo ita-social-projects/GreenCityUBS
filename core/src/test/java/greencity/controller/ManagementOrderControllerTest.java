@@ -10,13 +10,13 @@ import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
+import greencity.service.ubs.PaymentService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
@@ -39,7 +39,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
-import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getRequestDto;
 import static greencity.ModelUtils.getUpdateOrderPageAdminDto;
@@ -56,6 +55,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,6 +88,9 @@ class ManagementOrderControllerTest {
 
     @Mock
     BigOrderTableServiceView bigOrderTableServiceView;
+
+    @Mock
+    PaymentService paymentService;
 
     private final Principal principal = getUuid();
 
@@ -428,20 +431,6 @@ class ManagementOrderControllerTest {
     }
 
     @Test
-    void addPaymentDiscountTest() throws Exception {
-        AddBonusesToUserDto addBonusesToUserDto = getAddBonusesToUserDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonDto = objectMapper.writeValueAsString(addBonusesToUserDto);
-
-        mockMvc.perform(post(ubsLink + "/add-bonuses-user/{id}", 1L)
-            .content(jsonDto)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
-
-    }
-
-    @Test
     void getOrderCancellationReason() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/get-order-cancellation-reason" + "/{id}", 1L))
             .andExpect(status().isOk());
@@ -453,12 +442,6 @@ class ManagementOrderControllerTest {
         this.mockMvc.perform(get(ubsLink + "/get-not-taken-order-reason/{id}", 1L))
             .andExpect(status().isOk());
         verify(ubsManagementService).getNotTakenOrderReason(1L);
-    }
-
-    @Test
-    void saveOrderIdForRefundTest() throws Exception {
-        mockMvc.perform(post(ubsLink + "/save-order-for-refund/{orderId}", 1L)
-            .principal(principal)).andExpect(status().isCreated());
     }
 
     @Test
@@ -486,5 +469,16 @@ class ManagementOrderControllerTest {
                 .principal(principal)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void checkIfOrderStatusIsFormedToCanceledTest() throws Exception {
+        Long orderId = 1L;
+        when(ubsManagementService.checkIfOrderStatusIsFormedToCanceled(orderId)).thenReturn(true);
+        mockMvc.perform(get(ubsLink + "/check-status-transition/formed-to-canceled/{id}", orderId)
+            .contentType(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk())
+            .andExpect(content().string("<Boolean>true</Boolean>"));
+        verify(ubsManagementService).checkIfOrderStatusIsFormedToCanceled(orderId);
     }
 }

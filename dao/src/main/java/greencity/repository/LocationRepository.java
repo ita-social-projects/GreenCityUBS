@@ -114,4 +114,12 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             + "GROUP BY a.city_en")
     Optional<String> findAddressAndLocationNamesMatch(@Param("locationId") Long locationId,
         @Param("addressId") Long addressId);
+
+    /**
+     * Method for getting all active locations.
+     *
+     * @return list of {@link Location} - list of active locations
+     */
+    @Query("SELECT l FROM Location l WHERE l.locationStatus = 'ACTIVE'")
+    List<Location> findAllActiveLocations();
 }

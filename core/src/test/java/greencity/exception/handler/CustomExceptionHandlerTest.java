@@ -2,15 +2,11 @@ package greencity.exception.handler;
 
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
-import greencity.exceptions.WrongSignatureException;
-import greencity.exceptions.api.GoogleApiException;
-import greencity.exceptions.user.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -57,15 +53,6 @@ class CustomExceptionHandlerTest {
     NotFoundException notFoundException;
 
     @Mock
-    GoogleApiException googleApiException;
-
-    @Mock
-    UserNotFoundException userNotFoundException;
-
-    @Mock
-    WrongSignatureException wrongSignatureException;
-
-    @Mock
     HttpStatus status;
 
     @InjectMocks
@@ -73,7 +60,6 @@ class CustomExceptionHandlerTest {
 
     @BeforeEach
     void init() {
-        MockitoAnnotations.openMocks(this);
         objectMap = new HashMap<>();
         objectMap.put("path", "/ownSecurity/restorePassword");
         objectMap.put("message", "test");

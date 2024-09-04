@@ -1,7 +1,6 @@
 package greencity.controller;
 
 import greencity.constants.HttpStatuses;
-import greencity.constants.SwaggerExampleModel;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
@@ -40,11 +39,11 @@ public class ManagementEmployeeController {
     private final UBSClientService ubsClientService;
 
     /**
-     * Controller saves employee.
+     * Controller method to save an employee.
      *
-     * @param employeeWithTariffsIdDto {@link EmployeeWithTariffsIdDto}
-     * @return {@link EmployeeWithTariffsDto} saved employee.
-     * @author Mykola Danylko.
+     * @param employeeWithTariffsIdDto DTO for {@link EmployeeWithTariffsIdDto}.
+     * @param image                    Image of the employee (optional).
+     * @return ResponseEntity with {@link EmployeeWithTariffsDto} instance.
      */
     @Operation(summary = "Save employee")
     @ApiResponses(value = {
@@ -59,9 +58,8 @@ public class ManagementEmployeeController {
     @PostMapping(value = "/save-employee",
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
-        @Parameter(description = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
-            required = true) @Valid @RequestPart EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @Parameter(description = "Employee image") @RequestPart(required = false) MultipartFile image) {
+        @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
+        @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 
@@ -106,8 +104,7 @@ public class ManagementEmployeeController {
     @PutMapping(value = "/update-employee",
         consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> update(
-        @Parameter(description = SwaggerExampleModel.EMPLOYEE_DTO,
-            required = true) @RequestPart @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
+        @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
         @Parameter(description = "Employee image") @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeWithTariffsIdDto, image));
     }
@@ -239,27 +236,6 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller to get a list of login employee`s positions.
-     *
-     * @param email {@link String} - employee email.
-     * @return List of {@link String} - list of employee positions.
-     *
-     * @author Anton Bondar.
-     */
-    @Operation(summary = "Get information about login employee`s positions.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @GetMapping("/get-employee-login-positions")
-    public ResponseEntity<List<String>> getEmployeeLoginPositionNames(@RequestParam String email) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getEmployeeLoginPositionNames(email));
-    }
-
-    /**
      * Controller edit an employee`s authorities.
      *
      * @return {@link UserEmployeeAuthorityDto}
@@ -297,5 +273,32 @@ public class ManagementEmployeeController {
     @GetMapping("/getTariffs")
     public ResponseEntity<List<GetTariffInfoForEmployeeDto>> getTariffInfoForEmployee() {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.getTariffsForEmployee());
+    }
+
+    /**
+     * Retrieves all employees associated with a specific tariff ID.
+     *
+     * @param tariffId The ID of the tariff.
+     * @return ResponseEntity containing a list of GetEmployeeDto objects
+     *         representing the employees, with HttpStatus OK if successful.
+     */
+    @Operation(summary = "Get all employees with enabled chat by tariff id")
+    @GetMapping(value = "/get-employees/{tariffId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<EmployeeWithTariffsDto>> getEmployeesByTariffId(@PathVariable Long tariffId) {
+        return ResponseEntity.ok().body(employeeService.getEmployeesByTariffId(tariffId));
+    }
+
+    /**
+     * Endpoint to fetch an employee along with their tariffs by their email.
+     *
+     * @param email The email of the employee to be fetched.
+     * @return Containing an EmployeeWithTariffsDto object representing the employee
+     *         with the given email. This object includes details of the employee
+     *         and the tariffs associated with them.
+     */
+    @Operation(summary = "Get employee with tariffs by email")
+    @GetMapping("/{email}")
+    public ResponseEntity<EmployeeWithTariffsDto> getEmployeesByUserId(@PathVariable String email) {
+        return ResponseEntity.ok().body(employeeService.getEmployeeByEmail(email));
     }
 }

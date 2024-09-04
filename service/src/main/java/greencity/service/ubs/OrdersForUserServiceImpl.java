@@ -49,7 +49,7 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
     }
 
     private String getUsername(Long userID) {
-        User currentUser = userRepository.getOne(userID);
+        User currentUser = userRepository.getReferenceById(userID);
         return currentUser.getRecipientName() + " " + currentUser.getRecipientSurname();
     }
 }

@@ -15,7 +15,6 @@ import greencity.dto.OptionForColumnDTO;
 import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
-import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
@@ -63,7 +62,6 @@ import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
-import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
@@ -85,7 +83,6 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.SenderLocation;
@@ -110,16 +107,18 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.useragreement.UserAgreementDetailDto;
+import greencity.dto.useragreement.UserAgreementDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationPlatform;
@@ -136,7 +135,6 @@ import greencity.entity.order.OrderBag;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
-import greencity.entity.order.Refund;
 import greencity.entity.order.Service;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
@@ -146,12 +144,15 @@ import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
+import greencity.entity.user.UserAgreement;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.locations.City;
+import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -214,6 +215,8 @@ public class ModelUtils {
 
     public static final String TEST_EMAIL = "test@gmail.com";
     public static final String TEST_UUID = "1ab2c3-d4e5f6";
+    public static final String TEST_AGREEMENT_TEXT_UA = "Текст угоди українською";
+    public static final String TEST_AGREEMENT_TEXT_EN = "Agreement text in English";
     public static final Order TEST_ORDER = createOrder();
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
     public static final OrderAddressExportDetailsDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE =
@@ -328,9 +331,10 @@ public class ModelUtils {
                 .email("employee@gmail.com")
                 .employeeStatus(EmployeeStatus.ACTIVE)
                 .employeePosition(new HashSet<>())
-                .tariffInfos(new HashSet<>())
+                .tariffs(List.of())
                 .imagePath("path")
                 .tariffs(List.of(getTariffInfo()))
+                .tariffsInfoReceivingEmployees(new ArrayList<>())
                 .build());
     }
 
@@ -1171,13 +1175,36 @@ public class ModelUtils {
                 .phoneNumber("+380935577455")
                 .email("test@gmail.com")
                 .image("path")
+                .employeeStatus(EmployeeStatus.ACTIVE)
                 .employeePositions(List.of(PositionDto.builder()
                     .id(1L)
                     .name("Водій")
                     .nameEn("Driver")
                     .build()))
                 .build())
-            .tariffs(List.of(getTariffInfoForEmployeeDto()))
+            .tariffs(List.of(GetTariffInfoForEmployeeDto.builder()
+                .id(1L)
+                .hasChat(true)
+                .region(RegionDto.builder()
+                    .regionId(1L)
+                    .nameUk("Київська область")
+                    .nameEn("Kyiv region")
+                    .build())
+                .locationsDtos(List.of(LocationsDtos.builder()
+                    .locationId(1L)
+                    .nameUk("Київ")
+                    .nameEn("Kyiv")
+                    .build()))
+                .receivingStationDtos(List.of(GetReceivingStationDto.builder()
+                    .stationId(1L)
+                    .name("Петрівка")
+                    .build()))
+                .courier(CourierTranslationDto.builder()
+                    .id(1L)
+                    .nameEn("Test")
+                    .nameUk("Тест")
+                    .build())
+                .build()))
             .build();
     }
 
@@ -1241,7 +1268,7 @@ public class ModelUtils {
                 .name("Водій")
                 .nameEn("Driver")
                 .build()))
-            .tariffInfos(Set.of(TariffsInfo.builder()
+            .tariffs(List.of(TariffsInfo.builder()
                 .id(1L)
                 .service(new Service())
                 .build()))
@@ -1262,9 +1289,12 @@ public class ModelUtils {
                 .name("Водій")
                 .nameEn("Driver")
                 .build()))
-            .tariffInfos(Set.of(getTariffsInfo()))
             .imagePath("path")
             .tariffs(List.of(getTariffInfo()))
+            .tariffsInfoReceivingEmployees(List.of(TariffsInfoRecievingEmployee.builder()
+                .tariffsInfo(getTariffInfo())
+                .hasChat(true)
+                .build()))
             .build();
     }
 
@@ -1282,7 +1312,7 @@ public class ModelUtils {
                     .name("Супер адмін")
                     .nameEn("Super admin")
                     .build()))
-                .tariffInfos(new HashSet<>())
+                .tariffs(List.of())
                 .imagePath("path")
                 .tariffs(List.of(getTariffInfo()))
                 .build());
@@ -1300,10 +1330,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .nameEn("Driver")
-                .build()))
-            .tariffInfos(Set.of(TariffsInfo.builder()
-                .id(1L)
-                .service(new Service())
                 .build()))
             .imagePath("path")
             .build();
@@ -1323,7 +1349,7 @@ public class ModelUtils {
                 .name("Водій")
                 .nameEn("Driver")
                 .build()))
-            .tariffInfos(Set.of(TariffsInfo.builder()
+            .tariffs(List.of(TariffsInfo.builder()
                 .id(1L)
                 .service(getService())
                 .courier(getCourier())
@@ -1387,7 +1413,7 @@ public class ModelUtils {
                     .nameEn("Driver")
                     .build()))
                 .build())
-            .tariffId(List.of(1L))
+            .tariffs(null)
             .build();
     }
 
@@ -2279,18 +2305,18 @@ public class ModelUtils {
 
     private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
-            .addressId(1L)
-            .addressHouseNumber("1")
-            .addressEntranceNumber("3")
-            .addressDistrict("District")
-            .addressDistrictEng("DistrictEng")
-            .addressStreet("Street")
-            .addressStreetEng("StreetEng")
-            .addressHouseCorpus("2")
-            .addressCity("City")
-            .addressCityEng("CityEng")
-            .addressRegion("Region")
-            .addressRegionEng("RegionEng")
+            .id(1L)
+            .houseNumber("1")
+            .entranceNumber("3")
+            .district("District")
+            .districtEn("DistrictEng")
+            .street("Street")
+            .streetEn("StreetEng")
+            .houseCorpus("2")
+            .city("City")
+            .cityEn("CityEng")
+            .region("Region")
+            .regionEn("RegionEng")
             .build();
     }
 
@@ -3426,18 +3452,18 @@ public class ModelUtils {
                 .build())
             .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
                 .builder()
-                .addressId(1L)
-                .addressDistrict("District")
-                .addressDistrictEng("DistrictEng")
-                .addressStreet("Street")
-                .addressStreetEng("StreetEng")
-                .addressEntranceNumber("12")
-                .addressHouseCorpus("123")
-                .addressHouseNumber("121")
-                .addressCity("City")
-                .addressCityEng("CityEng")
-                .addressRegion("Region")
-                .addressRegionEng("RegionEng")
+                .id(1L)
+                .district("District")
+                .districtEn("DistrictEng")
+                .street("Street")
+                .streetEn("StreetEng")
+                .entranceNumber("12")
+                .houseCorpus("123")
+                .houseNumber("121")
+                .city("City")
+                .cityEn("CityEng")
+                .region("Region")
+                .regionEn("RegionEng")
                 .build())
             .ecoNumberFromShop(EcoNumberDto.builder()
                 .ecoNumber(Set.of("1111111111"))
@@ -3583,8 +3609,8 @@ public class ModelUtils {
     public static List<Region> getAllRegion() {
         return List.of(Region.builder()
             .id(1L)
-            .ukrName("Київська область")
-            .enName("Kyiv region")
+            .nameUk("Київська область")
+            .nameEn("Kyiv region")
             .locations(getLocationList())
             .build());
     }
@@ -3613,8 +3639,8 @@ public class ModelUtils {
     public static Region getRegion() {
         return Region.builder()
             .id(1L)
-            .ukrName("Київська область")
-            .enName("Kyiv region")
+            .nameUk("Київська область")
+            .nameEn("Kyiv region")
             .locations(List.of(getLocation()))
             .build();
     }
@@ -3622,8 +3648,8 @@ public class ModelUtils {
     public static Region getUnknownRegion() {
         return Region.builder()
             .id(0L)
-            .ukrName(AppConstant.UNKNOWN_UA)
-            .enName(AppConstant.UNKNOWN_ENG)
+            .nameUk(AppConstant.UNKNOWN_UA)
+            .nameEn(AppConstant.UNKNOWN_ENG)
             .locations(List.of(getLocation()))
             .build();
     }
@@ -3631,8 +3657,8 @@ public class ModelUtils {
     public static Region getRegionForMapper() {
         return Region.builder()
             .id(1L)
-            .ukrName("Київська область")
-            .enName("Kyiv region")
+            .nameUk("Київська область")
+            .nameEn("Kyiv region")
             .build();
     }
 
@@ -3678,7 +3704,7 @@ public class ModelUtils {
             .coordinates(Coordinates.builder()
                 .longitude(3.34d)
                 .latitude(1.32d).build())
-            .region(Region.builder().id(1L).enName("Kyiv region").ukrName("Київська область").build())
+            .region(Region.builder().id(1L).nameEn("Kyiv region").nameUk("Київська область").build())
             .build();
     }
 
@@ -4033,18 +4059,18 @@ public class ModelUtils {
 
     public static OrderAddressExportDetailsDtoUpdate getOrderAddressExportDetailsDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
-            .addressId(1L)
-            .addressStreet("Street")
-            .addressStreetEng("StreetEng")
-            .addressCity("City")
-            .addressCityEng("City")
-            .addressDistrict("District")
-            .addressDistrictEng("DistrictEng")
-            .addressHouseCorpus("12")
-            .addressEntranceNumber("2")
-            .addressRegion("Region")
-            .addressRegionEng("RegionEng")
-            .addressHouseNumber("123")
+            .id(1L)
+            .street("Street")
+            .streetEn("StreetEng")
+            .city("City")
+            .cityEn("City")
+            .district("District")
+            .districtEn("DistrictEng")
+            .houseCorpus("12")
+            .entranceNumber("2")
+            .region("Region")
+            .regionEn("RegionEng")
+            .houseNumber("123")
             .build();
 
     }
@@ -4162,15 +4188,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static AddBonusesToUserDto getAddBonusesToUserDto() {
-        return AddBonusesToUserDto.builder()
-            .paymentId("5")
-            .receiptLink("test")
-            .settlementdate("test")
-            .amount(1000L)
-            .build();
-    }
-
     public static GetTariffsInfoDto getAllTariffsInfoDto() {
         Location location = getLocation();
         return GetTariffsInfoDto.builder()
@@ -4240,62 +4257,6 @@ public class ModelUtils {
             .courier(getCourier())
             .service(getService())
             .bags(getBag4list())
-            .build();
-    }
-
-    public static OrdersDataForUserDto getOrderStatusDto() {
-        SenderInfoDto senderInfoDto = SenderInfoDto.builder()
-            .senderName("TestName")
-            .senderSurname("TestSurName")
-            .senderPhone("38099884433")
-            .senderEmail("test@mail.com")
-            .build();
-
-        CertificateDto certificateDto = CertificateDto.builder()
-            .points(300)
-            .dateOfUse(LocalDate.now())
-            .expirationDate(LocalDate.now())
-            .code("200")
-            .certificateStatus("ACTIVE")
-            .build();
-
-        AddressInfoDto addressInfoDto = AddressInfoDto.builder()
-            .addressStreet("StreetTest")
-            .addressDistinct("AdressDistinctTest")
-            .addressRegion("TestRegion")
-            .addressComment("TestComment")
-            .addressCity("TestCity")
-            .addressStreetEng("StreetEng")
-            .addressDistinctEng("DisticntEng")
-            .addressCityEng("CityEng")
-            .addressRegionEng("RegionEng")
-            .build();
-
-        BagForUserDto bagForUserDto = new BagForUserDto();
-        bagForUserDto.setTotalPrice(900.);
-        bagForUserDto.setCount(3);
-        bagForUserDto.setCapacity(200);
-        bagForUserDto.setFullPrice(300.);
-        bagForUserDto.setService("Безпечні Відходи");
-        bagForUserDto.setServiceEng("Safe Waste");
-
-        return OrdersDataForUserDto.builder()
-            .id(1L)
-            .dateForm(LocalDateTime.of(22, 10, 12, 14, 55))
-            .datePaid(LocalDateTime.now())
-            .amountBeforePayment(500d)
-            .bonuses(100d)
-            .orderFullPrice(400d)
-            .orderComment("abc")
-            .paymentStatus(PaymentStatus.PAID.toString())
-            .sender(senderInfoDto)
-            .address(addressInfoDto)
-            .paymentStatusEng(PaymentStatus.PAID.toString())
-            .orderStatus(OrderStatus.FORMED.toString())
-            .orderStatusEng(OrderStatus.FORMED.toString())
-            .bags(List.of(bagForUserDto))
-            .certificate(List.of(certificateDto))
-            .additionalOrders(Collections.emptySet())
             .build();
     }
 
@@ -4457,16 +4418,6 @@ public class ModelUtils {
             .locationIds(List.of(1L, 2L))
             .receivingStationIds(List.of(1L))
             .build();
-    }
-
-    public static String getSuccessfulFondyResponse() {
-        return """
-            {
-              "response":{
-                "response_status":"success",
-                "checkout_url":"https://pay.fondy.eu/checkout?token=afcb21aef707b1fea2565b66bac7dc41d7833390"
-              }
-            }""";
     }
 
     public static List<GeocodingResult> getGeocodingResultWithKyivRegion() {
@@ -5266,10 +5217,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static Refund getRefund(Long id) {
-        return Refund.builder().orderId(id).build();
-    }
-
     public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoWithQuantity() {
         return new UserPointsAndAllBagsDto(
             List.of(
@@ -5324,7 +5271,7 @@ public class ModelUtils {
                 .name("Адмін")
                 .nameEn("Admin")
                 .build()))
-            .tariffInfos(Set.of(TariffsInfo.builder()
+            .tariffs(List.of(TariffsInfo.builder()
                 .id(1L)
                 .service(new Service())
                 .build()))
@@ -5364,6 +5311,65 @@ public class ModelUtils {
             .points(100)
             .code("7777-7777")
             .creationDate(LocalDate.now().plusMonths(1))
+            .build();
+    }
+
+    public static City getCity() {
+        return City.builder()
+            .id(1L)
+            .nameUk("Київ")
+            .nameEn("Kyiv")
+            .build();
+    }
+
+    public static District getDistrict() {
+        return District.builder()
+            .id(1L)
+            .nameUk("Шевченківський")
+            .nameEn("Shevchenkivskyi")
+            .city(getCity())
+            .build();
+    }
+
+    public static UserAgreement getUserAgreement() {
+        return UserAgreement.builder()
+            .id(1L)
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .author(getEmployee())
+            .build();
+    }
+
+    public static UserAgreementDto getUserAgreementDto() {
+        return UserAgreementDto.builder()
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .build();
+    }
+
+    public static UserAgreementDetailDto getUserAgreementDetailDto() {
+        return UserAgreementDetailDto.builder()
+            .id(1L)
+            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textEn(TEST_AGREEMENT_TEXT_EN)
+            .authorEmail(TEST_EMAIL)
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .build();
+    }
+
+    public static Region getRegionForAllLocationsTest() {
+        return Region.builder()
+            .id(1L)
+            .nameUk("Київська область")
+            .nameEn("Kyivs'ka oblast")
+            .cities(List.of(City.builder()
+                .id(1L)
+                .region(getRegion())
+                .nameUk("Київ")
+                .nameEn("Kyiv")
+                .districts(Set.of(getDistrict()))
+                .build()))
             .build();
     }
 }

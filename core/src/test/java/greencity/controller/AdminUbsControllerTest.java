@@ -18,18 +18,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import static greencity.ModelUtils.getUuid;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -49,7 +47,7 @@ class AdminUbsControllerTest {
 
     @BeforeEach
     void setup() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(adminUbsController)
+        this.mockMvc = standaloneSetup(adminUbsController)
             .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
             .build();
     }
@@ -57,8 +55,17 @@ class AdminUbsControllerTest {
     @Test
     void getTableParameters() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        mockMvc.perform(get(management + "/tableParams")
+        mockMvc.perform(get(management + "/tableParams" + "?region=")
             .principal(principal))
+            .andExpect(status().isOk());
+        verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf");
+    }
+
+    @Test
+    void getTableParametersWithRegion() throws Exception {
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        mockMvc.perform(get(management + "/tableParams" + "?region=KHARKIV_OBLAST")
+                .principal(principal))
             .andExpect(status().isOk());
         verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf");
     }
@@ -138,6 +145,13 @@ class AdminUbsControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)
             .content(json))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void getAllLocations() throws Exception {
+        mockMvc.perform(get(management + "/locations-details")
+            .principal(principal))
             .andExpect(status().isOk());
     }
 }

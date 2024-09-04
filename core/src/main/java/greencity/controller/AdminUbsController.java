@@ -3,6 +3,7 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
+import greencity.dto.location.api.RegionInfoDto;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.table.ColumnWidthDto;
@@ -82,7 +83,8 @@ public class AdminUbsController {
     @GetMapping("/tableParams")
     public ResponseEntity<TableParamsDto> getTableParameters(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getParametersForOrdersTable(userUuid));
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ordersAdminsPageService.getParametersForOrdersTable(userUuid));
     }
 
     /**
@@ -237,5 +239,15 @@ public class AdminUbsController {
         @RequestParam SortingOrder sortingOrder) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(violationService.getAllViolations(page, userId, columnName, sortingOrder));
+    }
+
+    @Operation(summary = "Get all information about regions, his cities and districts")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content)
+    })
+    @GetMapping("/locations-details")
+    public ResponseEntity<List<RegionInfoDto>> getAllInformationForLocations() {
+        return ResponseEntity.ok(ordersAdminsPageService.getAllLocationsInfo());
     }
 }

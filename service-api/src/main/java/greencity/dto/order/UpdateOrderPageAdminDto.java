@@ -27,4 +27,6 @@ public class UpdateOrderPageAdminDto {
     private Double writeOffStationSum;
     private Double ubsCourierSum;
     private String notTakenOutReason;
+    private boolean isReturnMoney;
+    private boolean isReturnBonuses;
 }

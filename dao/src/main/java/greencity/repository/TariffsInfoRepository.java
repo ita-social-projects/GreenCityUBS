@@ -112,15 +112,6 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
     void deactivateTariffsByCourierAndRegionAndReceivingStations(Long regionId, List<Long> stationsIds, Long courierId);
 
     /**
-     * Method for getting set of tariffs.
-     *
-     * @param id - list of tariffIds.
-     * @return - set of tariffs.
-     * @author - Nikita Korzh.
-     */
-    Set<TariffsInfo> findTariffsInfosByIdIsIn(List<Long> id);
-
-    /**
      * Method, that returns {@link Set} of {@link TariffsInfo} by bag ids.
      *
      * @param bagIds {@link List} of {@link Integer} list of bag ids.
@@ -160,4 +151,36 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
             + "LEFT JOIN employees e ON te.employee_id = e.id "
             + "WHERE ti.id = :tariffId AND e.id = :employeeId")
     Optional<TariffsInfo> findTariffsInfoByIdForEmployee(Long tariffId, Long employeeId);
+
+    /**
+     * Retrieves the tariff ID associated with the specified location ID.
+     *
+     * @param locationId The ID of the location to retrieve the tariff ID for.
+     * @return An Optional containing the tariff ID if found, otherwise an empty
+     *         Optional.
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT tariffs_info_id FROM tariffs_locations "
+            + "WHERE location_id = :locationId")
+    Optional<List<Long>> findTariffIdByLocationId(Long locationId);
+
+    /**
+     * Retrieves the tariff ID associated with the specified location ID and courier
+     * ID.
+     *
+     * @param locationId The ID of the location to retrieve the tariff ID for.
+     * @param courierId  The ID of the courier to retrieve the tariff ID for.
+     * @return An Optional containing the tariff ID if found, otherwise an empty
+     *         Optional.
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT tariffs_info_id FROM tariffs_locations AS tl "
+            + "INNER JOIN tariffs_info AS ti ON ti.id = tl.tariffs_info_id  "
+            + "JOIN courier AS c ON c.id = ti.courier_id "
+            + "WHERE tl.location_id = :locationId "
+            + "AND tl.location_status = 'ACTIVE' "
+            + "AND ti.tariff_status = 'ACTIVE'"
+            + "AND c.courier_status = 'ACTIVE' "
+            + "AND c.id = :courierId ")
+    Optional<Long> findTariffIdByLocationIdAndCourierId(Long locationId, Long courierId);
 }

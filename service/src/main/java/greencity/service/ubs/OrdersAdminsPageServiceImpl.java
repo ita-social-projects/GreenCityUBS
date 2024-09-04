@@ -5,6 +5,9 @@ import greencity.constant.OrderHistory;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
 import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.location.api.CityInfoDto;
+import greencity.dto.location.api.DistrictInfoDto;
+import greencity.dto.location.api.RegionInfoDto;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
@@ -12,10 +15,13 @@ import greencity.dto.table.ColumnDTO;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.entity.table.TableColumnWidthForEmployee;
+import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.locations.City;
+import greencity.entity.user.locations.District;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -41,12 +47,24 @@ import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
 import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.UserRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.CityRepository;
+import greencity.repository.DistrictRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
@@ -54,14 +72,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER;
 import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
@@ -82,7 +92,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;
     private final CertificateRepository certificateRepository;
-    private final UBSManagementEmployeeService employeeService;
     private final ModelMapper modelMapper;
     private final ReceivingStationRepository receivingStationRepository;
     private final PositionRepository positionRepository;
@@ -97,6 +106,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final NotificationServiceImpl notificationService;
     private final SuperAdminService superAdminService;
     private final OrderLockService orderLockService;
+    private final RegionRepository regionRepository;
+    private final CityRepository cityRepository;
+    private final DistrictRepository districtRepository;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String DATE_OF_EXPORT = "dateOfExport";
     private static final String RECEIVING = "receivingStation";
@@ -117,8 +129,10 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String WITHOUT_NAVIGATOR_UA = "Без штурмана";
     private static final String WITHOUT_DRIVER_EN = "Without driver";
     private static final String WITHOUT_DRIVER_UA = "Без водія";
+    private static final String DISTRICT = "district";
 
     @Override
+    @Cacheable(value = "TableParams", key = "#uuid")
     public TableParamsDto getParametersForOrdersTable(String uuid) {
         String ordersInfo = "ORDERS_INFO";
         String customersInfo = "CUSTOMERS_INFO";
@@ -130,7 +144,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderPage orderPage = new OrderPage();
         OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
 
-        List<ColumnDTO> columnDTOS = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
+        List<ColumnDTO> columnDTOS = List.of(
             new ColumnDTO(new TitleDto("select", "Вибір", "Select"), "", 20, true, true, false, 0,
                 EditType.CHECKBOX,
                 new ArrayList<>(), ""),
@@ -166,12 +180,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("violationsAmount", "Кількість порушень клієнта", "Violations"),
                 "violationsAmount", 20, false, true, false, 12, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
             new ColumnDTO(new TitleDto("region", "Область", "Region"), "region", 20, false,
-                true, true, 35, EditType.READ_ONLY, regionsList(), exportAddress),
+                true, true, 35, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(new TitleDto("city", "Місто", "City"), "city", 20,
                 false,
-                true, true, 36, EditType.READ_ONLY, cityList(), exportAddress),
-            new ColumnDTO(new TitleDto("district", "Район", "District"), "district", 20, false,
-                true, true, 37, EditType.READ_ONLY, districtList(), exportAddress),
+                true, true, 36, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
+            new ColumnDTO(new TitleDto(DISTRICT, "Район", "District"), DISTRICT, 20, false,
+                true, true, 37, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "address", 20, false, true,
                 false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), exportAddress),
@@ -222,7 +236,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, true, 32, EditType.SELECT, navigatorList(), responsible),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "blockedBy",
                 20, false, true, false, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
-                ordersInfo))));
+                ordersInfo));
         return new TableParamsDto(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
@@ -260,6 +274,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
+    @Cacheable(value = "ColumnWidth", key = "#userUuid")
     public ColumnWidthDto getColumnWidthForEmployee(String userUuid) {
         Employee employee = employeeRepository.findByUuid(userUuid)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND));
@@ -270,6 +285,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
+    @CacheEvict(value = "ColumnWidth", key = "#userUuid")
     public void saveColumnWidthForEmployee(ColumnWidthDto columnWidthDto, String userUuid) {
         Employee employee = employeeRepository.findByUuid(userUuid)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND));
@@ -290,17 +306,66 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         }
     }
 
+    @Override
+    @Cacheable("allLocationsInfo")
+    public List<RegionInfoDto> getAllLocationsInfo() {
+        return regionRepository.findAllRegionsWithCitiesAndDistricts().stream()
+            .map(this::toRegionInfoDto)
+            .toList();
+    }
+
+    private RegionInfoDto toRegionInfoDto(Region region) {
+        return RegionInfoDto.builder()
+            .id(region.getId())
+            .nameEn(region.getNameEn())
+            .nameUk(region.getNameUk())
+            .cities(toCityInfoDto(region.getCities()))
+            .build();
+    }
+
+    private List<CityInfoDto> toCityInfoDto(List<City> cities) {
+        return cities.stream()
+            .map(this::toCityInfoDto)
+            .toList();
+    }
+
+    private CityInfoDto toCityInfoDto(City city) {
+        return CityInfoDto.builder()
+            .id(city.getId())
+            .nameUk(city.getNameUk())
+            .nameEn(city.getNameEn())
+            .regionId(city.getRegion().getId())
+            .districts(toDistrictInfoDto(city.getDistricts()))
+            .build();
+    }
+
+    private List<DistrictInfoDto> toDistrictInfoDto(Set<District> districts) {
+        return districts.stream()
+            .collect(Collectors.toMap(
+                District::getNameUk,
+                this::toDistrictInfoDto,
+                (existing, replacement) -> existing))
+            .values()
+            .stream()
+            .toList();
+    }
+
+    private DistrictInfoDto toDistrictInfoDto(District district) {
+        return DistrictInfoDto.builder()
+            .id(district.getId())
+            .nameEn(district.getNameEn())
+            .nameUk(district.getNameUk())
+            .cityId(district.getCity().getId())
+            .build();
+    }
+
+    @RequiredArgsConstructor
     private enum ColumnNameToPosition {
         RESPONSIBLE_MANAGER("responsibleManager", 1L),
         RESPONSIBLE_CALLER(CALLER, 2L),
         RESPONSIBLE_LOGICMAN(LOGIC_MAN, 3L),
         RESPONSIBLE_NAVIGATOR(NAVIGATOR, 4L),
         RESPONSIBLE_DRIVER(DRIVER, 5L);
-
-        ColumnNameToPosition(String columnValue, Long positionId) {
-            this.columnValue = columnValue;
-            this.positionId = positionId;
-        }
 
         public static Long columnNameToEmployeePosition(String columnName) {
             return Arrays.stream(ColumnNameToPosition.values())
@@ -355,13 +420,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<TitleDto> columnBelongingListForDevelopStage() {
-        return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
+        return List.of(
             new TitleDto("ORDERS_INFO", "Інформація про замовлення", "order info"),
             new TitleDto("CUSTOMERS_INFO", "Інформація про клієнта", "customers info"),
             new TitleDto("EXPORT_ADDRESS", "Адреса вивезення", "export address"),
             new TitleDto("ORDERS_DETAILS", "Деталі замовлення", "orders details"),
             new TitleDto("EXPORT_DETAILS", "Деталі вивезення", "export details"),
-            new TitleDto("RESPONSIBLE", "Відповідальні особи", "responsible persons"))));
+            new TitleDto("RESPONSIBLE", "Відповідальні особи", "responsible persons"));
     }
 
     private List<OptionForColumnDTO> receivingStationList() {
@@ -411,30 +476,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
         return optionForColumnDTOS;
-    }
-
-    private List<OptionForColumnDTO> districtList() {
-        return addressRepository.findDistinctDistricts()
-            .stream()
-            .map(address -> OptionForColumnDTO
-                .builder()
-                .key(address.getId().toString())
-                .en(address.getDistrictEn())
-                .ua(address.getDistrict())
-                .build())
-            .collect(Collectors.toList());
-    }
-
-    private List<OptionForColumnDTO> cityList() {
-        return addressRepository.findDistinctCities()
-            .stream()
-            .map(address -> OptionForColumnDTO
-                .builder()
-                .key(address.getId().toString())
-                .en(address.getCityEn())
-                .ua(address.getCity())
-                .build())
-            .collect(Collectors.toList());
     }
 
     private List<OptionForColumnDTO> includeItemsWithoutResponsiblePerson(String nameUa, String nameEn) {
@@ -659,7 +700,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
-        ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
+        ReceivingStation station = receivingStationRepository.getReferenceById(Long.parseLong(value));
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             try {
@@ -772,17 +813,5 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private boolean isOrderBlockedByAnotherEmployee(Order order, Long employeeId) {
         return order.getBlockedByEmployee() != null
             && !Objects.equals(employeeId, order.getBlockedByEmployee().getId());
-    }
-
-    private List<OptionForColumnDTO> regionsList() {
-        return addressRepository.findDistinctRegions()
-            .stream()
-            .map(address -> OptionForColumnDTO
-                .builder()
-                .key(address.getId().toString())
-                .en(address.getRegionEn())
-                .ua(address.getRegion())
-                .build())
-            .collect(Collectors.toList());
     }
 }

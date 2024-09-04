@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
@@ -346,15 +347,6 @@ public interface UBSClientService {
     PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email);
 
     /**
-     * Method that gets information about login employee`s positions.
-     *
-     * @param email {@link String} - employee email.
-     * @return List of {@link String} - list of employee`s positions.
-     * @author Anton Bondar
-     */
-    List<String> getEmployeeLoginPositionNames(String email);
-
-    /**
      * Method updates Authority for {@link User}.
      *
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
@@ -379,6 +371,7 @@ public interface UBSClientService {
      *
      * @return {@link DistrictDto}
      */
+
     List<DistrictDto> getAllDistricts(String region, String city);
 
     /**
@@ -389,4 +382,36 @@ public interface UBSClientService {
      * @return {@link WayForPayOrderResponse} payment link and order id.
      */
     WayForPayOrderResponse processOrder(String userUuid, OrderWayForPayClientDto dto);
+
+    /**
+     * Checks if a tariff exists by its ID.
+     *
+     * @param tariffInfoId The ID of the tariff to check.
+     * @return {@code true} if the tariff exists, {@code false} otherwise.
+     */
+    boolean checkIfTariffExistsById(Long tariffInfoId);
+
+    /**
+     * Retrieves all locations.
+     *
+     * @return List of all locations.
+     */
+    List<LocationsDto> getAllLocations();
+
+    /**
+     * Retrieves the tariff ID associated with the specified location ID.
+     *
+     * @param locationId The ID of the location for which to retrieve the tariff ID.
+     * @return The tariff ID associated with the specified location ID.
+     */
+    List<Long> getTariffIdByLocationId(Long locationId);
+
+    /**
+     * Retrieves all active locations by courier id.
+     *
+     * @param courierId The ID of the courier for which to retrieve all active the
+     *                  locations.
+     * @return List of all locations.
+     */
+    List<LocationsDto> getAllLocationsByCourierId(Long courierId);
 }

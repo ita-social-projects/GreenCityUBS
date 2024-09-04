@@ -31,7 +31,6 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.table.CustomTableViewDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
@@ -42,10 +41,9 @@ import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import greencity.repository.OrderRepository;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
-import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.PaymentService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
@@ -89,12 +87,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
-    private final UBSClientService ubsClientService;
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
     private final BigOrderTableServiceView bigOrderTableService;
-    private final OrderRepository orderRepository;
+    private final PaymentService paymentService;
 
     /**
      * Controller getting all certificates with sorting possibility.
@@ -396,7 +393,7 @@ public class ManagementOrderController {
     public ResponseEntity<PaymentTableInfoDto> paymentInfo(@RequestParam long orderId,
         @RequestParam Double sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getPaymentInfo(orderId, sumToPay));
+            .body(paymentService.getPaymentInfo(orderId, sumToPay));
     }
 
     /**
@@ -714,7 +711,7 @@ public class ManagementOrderController {
         @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.saveNewManualPayment(orderId, manualPaymentDto, image, principal.getName()));
+            .body(paymentService.saveNewManualPayment(orderId, manualPaymentDto, image, principal.getName()));
     }
 
     /**
@@ -735,7 +732,7 @@ public class ManagementOrderController {
     @DeleteMapping("/delete-manual-payment/{id}")
     public ResponseEntity<ResponseStatus> deleteManualPayment(@PathVariable(name = "id") Long paymentId,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        ubsManagementService.deleteManualPayment(paymentId, uuid);
+        paymentService.deleteManualPayment(paymentId, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -762,7 +759,7 @@ public class ManagementOrderController {
         @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image, @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));
+            .body(paymentService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));
     }
 
     /**
@@ -916,28 +913,6 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for adding bonuses to user.
-     *
-     * @param orderId             {@link Long}.
-     * @param addBonusesToUserDto {@link AddBonusesToUserDto}.
-     *
-     * @author Pavlo Hural.
-     */
-    @Operation(summary = "add bonuses to user")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
-    })
-    @PostMapping(value = "/add-bonuses-user/{id}")
-    public ResponseEntity<AddBonusesToUserDto> addBonusesToUser(@PathVariable(name = "id") Long orderId,
-        @RequestBody @Valid AddBonusesToUserDto addBonusesToUserDto, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId, principal.getName()));
-    }
-
-    /**
      * Controller for get order cancellation reason.
      *
      * @return {@link OrderCancellationReasonDto}.
@@ -984,25 +959,24 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller saves order ID of order for which we need to make a refund.
+     * Controller for checking if an order status was changed from FORMED to
+     * CANCELED.
      *
-     * @param orderId {@link Long}.
-     * @return {@link HttpStatus} - http status.
+     * @param id {@link Long} the ID of the order to check.
+     * @return {@link Boolean} {@code true} if the order status was changed from
+     *         {@code FORMED} to {@code CANCELED}, {@code false} otherwise.
      *
-     * @author Anton Bondar
+     * @author Volodymyr Lukovskyi
      */
-    @Operation(summary = "saves order ID of order for which we need to make a refund")
+    @Operation(summary = "Check if the order status transitioned from FORMED to CANCELED")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
     })
-    @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("/save-order-for-refund/{orderId}")
-    public ResponseEntity<HttpStatus> saveOrderIdForRefund(
-        @Valid @PathVariable("orderId") Long orderId) {
-        ubsManagementService.saveOrderIdForRefund(orderId);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    @GetMapping("/check-status-transition/formed-to-canceled/{id}")
+    public ResponseEntity<Boolean> checkIfOrderStatusIsFormedToCanceled(@Valid @PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.checkIfOrderStatusIsFormedToCanceled(id));
     }
 }

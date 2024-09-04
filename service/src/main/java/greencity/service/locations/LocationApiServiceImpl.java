@@ -4,8 +4,8 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.location.api.LocationDto;
 import greencity.enums.LocationDivision;
 import greencity.exceptions.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -27,6 +27,7 @@ import org.springframework.cache.annotation.Cacheable;
 
 @Service
 @EnableCaching
+@RequiredArgsConstructor
 public class LocationApiServiceImpl implements LocationApiService {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
     private static final int DEFAULT_PAGE_SIZE = 125;
@@ -46,16 +47,6 @@ public class LocationApiServiceImpl implements LocationApiService {
         .locationNameMap(Map.of(NAME, NAME_KYIV_UA, NAME_EN, NAME_KYIV_EN))
         .build();
     private final RestTemplate restTemplate;
-
-    /**
-     * Constructor for the LocationApiService class.
-     *
-     * @param restTemplate An instance of RestTemplate for making HTTP requests.
-     */
-    @Autowired
-    public LocationApiServiceImpl(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
 
     /**
      * {@inheritDoc}

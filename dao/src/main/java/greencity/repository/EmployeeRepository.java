@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -24,15 +25,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * @author Mykola Danylko
      */
     Page<Employee> findAll(Pageable pageable);
-
-    /**
-     * Method checks if employee with email already exists.
-     *
-     * @param email {@link String}
-     * @return {@link Boolean}
-     * @author Mykola Danylko
-     */
-    boolean existsByEmail(String email);
 
     /**
      * Method that return list of Employee by an email except with current id.
@@ -113,4 +105,16 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
         + "WHERE e.email = ?1 "
         + "AND e.employeeStatus = 'ACTIVE'")
     boolean existsByEmailAndActiveStatus(String email);
+
+    /**
+     * Retrieves a list of employees who are subscribed to a tariff with the
+     * specified ID and have chat access.
+     *
+     * @param tariffId The ID of the tariff.
+     * @return A list of employees subscribed to the tariff with chat access.
+     */
+    @Query(
+        value = "SELECT e FROM Employee e JOIN e.tariffsInfoReceivingEmployees t"
+            + " WHERE t.tariffsInfo.id = :tariffId AND t.hasChat = true")
+    List<Employee> selectAllEmployeesByTariffIdAndChatEqualsTrue(@Param("tariffId") Long tariffId);
 }

@@ -5,23 +5,17 @@ import greencity.dto.payment.PaymentResponseWayForPay;
 import java.util.Arrays;
 import java.util.StringJoiner;
 import org.apache.commons.codec.digest.HmacUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockitoAnnotations;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class EncryptionUtilTest {
+    @InjectMocks
     private EncryptionUtil encryptionUtil;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        encryptionUtil = new EncryptionUtil();
-    }
 
     @Test
     void testFormRequestSignature() {

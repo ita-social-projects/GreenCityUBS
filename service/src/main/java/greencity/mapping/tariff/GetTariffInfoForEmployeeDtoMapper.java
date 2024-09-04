@@ -18,8 +18,8 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
         RegionDto regionDto = source.getTariffLocations().stream().map(
             tariffLocation -> RegionDto.builder()
                 .regionId(tariffLocation.getLocation().getRegion().getId())
-                .nameUk(tariffLocation.getLocation().getRegion().getUkrName())
-                .nameEn(tariffLocation.getLocation().getRegion().getEnName())
+                .nameUk(tariffLocation.getLocation().getRegion().getNameUk())
+                .nameEn(tariffLocation.getLocation().getRegion().getNameEn())
                 .build())
             .findFirst().orElse(getDefaultRegionDto());
 

@@ -4,6 +4,7 @@ import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
 import greencity.service.FeignClientCallAsync;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,7 @@ import static greencity.constant.AppConstant.UBS_EMPLOYEE;
 import static greencity.constant.AppConstant.UBS_LINK;
 import static greencity.constant.AppConstant.UBS_MANAG_LINK;
 import static greencity.constant.AppConstant.USER;
+import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
@@ -41,6 +43,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 @EnableGlobalAuthentication
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtTool jwtTool;
     private final FeignClientCallAsync userRemoteClient;
@@ -48,17 +51,6 @@ public class SecurityConfig {
 
     @Value("${spring.messaging.stomp.websocket.allowed-origins}")
     private String[] allowedOrigins;
-
-    /**
-     * Constructor.
-     */
-    @Autowired
-    public SecurityConfig(JwtTool jwtTool, FeignClientCallAsync userRemoteClient,
-        AuthenticationConfiguration authenticationConfiguration) {
-        this.jwtTool = jwtTool;
-        this.userRemoteClient = userRemoteClient;
-        this.authenticationConfiguration = authenticationConfiguration;
-    }
 
     /**
      * Bean {@link PasswordEncoder} that uses in coding password.
@@ -102,7 +94,14 @@ public class SecurityConfig {
                     UBS_LINK + "/getAllActiveCouriers",
                     UBS_LINK + "/locations/{courierId}",
                     UBS_LINK + "/order-details-for-tariff",
-                    UBS_LINK + "/tariffinfo/**")
+                    UBS_LINK + "/tariffinfo/**",
+                    ADMIN_EMPL_LINK + "/get-employees/{tariffId}",
+                    UBS_LINK + "/locationsByCourier/{courierId}",
+                    UBS_LINK + "/tariffs/{locationId}",
+                    USER_AGREEMENT_LINK + "/latest")
+                .permitAll()
+                .requestMatchers(HttpMethod.POST,
+                    UBS_LINK + "/userProfile/user/create")
                 .permitAll()
                 .requestMatchers("/v2/api-docs/**",
                     "/v3/api-docs/**",
@@ -124,7 +123,10 @@ public class SecurityConfig {
                     UBS_MANAG_LINK + "/{id}/ordersAll",
                     UBS_MANAG_LINK + "/get-order-cancellation-reason/{id}",
                     UBS_MANAG_LINK + "/get-not-taken-order-reason/{id}",
+                    UBS_MANAG_LINK + "/check-status-transition/formed-to-canceled/{id}",
                     UBS_MANAG_LINK + "/orderTableColumnsWidth",
+                    UBS_MANAG_LINK + "/city-list",
+                    UBS_MANAG_LINK + "/districts-list",
                     UBS_LINK + "/order_history/{orderId}",
                     ADMIN_EMPL_LINK + "/**",
                     ADMIN_LINK + "/notification/get-all-templates",
@@ -138,15 +140,16 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/{tariffId}/getTariffService",
                     SUPER_ADMIN_LINK + "/{tariffId}/getService",
                     SUPER_ADMIN_LINK + "/getTariffLimits/{tariffId}",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**",
+                    USER_AGREEMENT_LINK,
+                    USER_AGREEMENT_LINK + "/{id}",
+                    UBS_MANAG_LINK + "/locations-details")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     UBS_MANAG_LINK + "/addCertificate",
                     UBS_MANAG_LINK + "/addViolationToUser",
                     UBS_MANAG_LINK + "/add-manual-payment/{id}",
-                    UBS_MANAG_LINK + "/add-bonuses-user/{id}",
                     UBS_MANAG_LINK + "/order/{id}/cancellation",
-                    UBS_MANAG_LINK + "/save-order-for-refund/{orderId}",
                     ADMIN_EMPL_LINK + "/**",
                     SUPER_ADMIN_LINK + "/add-new-tariff",
                     SUPER_ADMIN_LINK + "/check-if-tariff-exists",
@@ -156,7 +159,8 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/{tariffId}/createTariffService",
                     SUPER_ADMIN_LINK + "/create-receiving-station",
                     SUPER_ADMIN_LINK + "/locations/edit",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**",
+                    USER_AGREEMENT_LINK + "/**")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
                     UBS_MANAG_LINK + "/changeOrdersTableView",
@@ -185,7 +189,8 @@ public class SecurityConfig {
                     UBS_MANAG_LINK + "/delete-violation-from-order/{id}",
                     UBS_MANAG_LINK + "/delete-manual-payment/{id}",
                     UBS_MANAG_LINK + "/deleteCertificate/{code}",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**",
+                    USER_AGREEMENT_LINK + "/**")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     SUPER_ADMIN_LINK + "/deactivateCourier/{id}",
@@ -251,7 +256,6 @@ public class SecurityConfig {
                     ADMIN_LINK + "/**")
                 .hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.POST,
-                    UBS_LINK + "/userProfile/**",
                     UBS_LINK + "/order/**",
                     UBS_LINK + "/processOrder",
                     UBS_LINK + "/processOrder/{id}",
@@ -268,7 +272,9 @@ public class SecurityConfig {
                     UBS_LINK + "/certificate/{responseCode}",
                     "/notifications",
                     "/notifications/**",
-                    "/notifications/quantityUnreadenNotifications")
+                    "/notifications/quantityUnreadenNotifications",
+                    UBS_LINK + "/check-if-tariff-exists/{id}",
+                    UBS_LINK + "/locations")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
                     UBS_LINK + "/userProfile/**",

@@ -1,6 +1,9 @@
 package greencity.constant;
 
-public final class OrderHistory {
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
+public class OrderHistory {
     public static final String ORDER_ON_THE_ROUTE = "Статус Замовлення - На маршруті";
     public static final String ORDER_ON_THE_ROUTE_ENG = "Order status - On the route";
     public static final String ORDER_DONE = "Статус Замовлення - Виконано";
@@ -80,10 +83,6 @@ public final class OrderHistory {
     public static final String UPDATE_DATE_EXPORT = "Змінено деталі вивезення. Дата вивезення:";
     public static final String SET_DATE_EXPORT = "Встановлено деталі вивезення. Дата вивезення:";
     public static final String UPDATE_MIX_WASTE = "Змінено деталі замовлення. Мікс відходів ";
-
-    /**
-     * Constructor.
-     */
-    private OrderHistory() {
-    }
+    public static final String CANCELED_ORDER_MONEY_REFUND = "Кошти за замовлення повернуто.";
+    public static final String CANCELED_ORDER_MONEY_REFUND_ENG = "The money for the order has been refunded.";
 }

@@ -13,6 +13,8 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.dto.tariff.TariffWithChatAccess;
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeFilterView;
@@ -21,14 +23,16 @@ import greencity.enums.EmployeeStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
-import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
@@ -54,8 +58,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final UserRemoteClient userRemoteClient;
     private final FileService fileService;
     private final ModelMapper modelMapper;
-    private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EmployeeCriteriaRepository employeeCriteriaRepository;
+    private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
+    private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
 
     /**
      * {@inheritDoc}
@@ -86,12 +91,22 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
         Employee employee = buildEmployeeFromEmployeeWithTariffsIdDto(dto);
         employee.setUuid(UUID.randomUUID().toString());
-        employee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
-        if (image != null) {
-            employee.setImagePath(fileService.upload(image));
-        } else {
-            employee.setImagePath(defaultImagePath);
+        employee.setImagePath(image != null ? fileService.upload(image) : defaultImagePath);
+        if (employee.getTariffsInfoReceivingEmployees() == null) {
+            employee.setTariffsInfoReceivingEmployees(new ArrayList<>());
+        }
+
+        List<TariffWithChatAccess> tariffs = dto.getTariffs();
+        if (tariffs != null) {
+            tariffs.forEach(tariff -> {
+                TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
+                tariffsInfoReceivingEmployees.setEmployee(employee);
+                tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
+                tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
+                    .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
+                employee.getTariffsInfoReceivingEmployees().add(tariffsInfoReceivingEmployees);
+            });
         }
         signUpEmployee(employee);
         return modelMapper.map(employeeRepository.save(employee), EmployeeWithTariffsDto.class);
@@ -152,6 +167,12 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         for (var employeeFilterView : employeeFilterViews) {
             var getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(employeeFilterView.getEmployeeId(),
                 id -> modelMapper.map(employeeFilterView, GetEmployeeDto.class));
+            getEmployeeDto.setTariffs(employees.stream()
+                .filter(employee -> employee.getId().equals(employeeFilterView.getEmployeeId()))
+                .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()
+                    .map(tariffsInfoRecievingEmployee -> modelMapper.map(tariffsInfoRecievingEmployee.getTariffsInfo(),
+                        GetTariffInfoForEmployeeDto.class)))
+                .collect(Collectors.toList()));
             initializeGetEmployeeDtoCollections(getEmployeeDto);
             fillGetEmployeeDto(employeeFilterView, getEmployeeDto, employees);
         }
@@ -181,13 +202,19 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
     private void fillGetTariffInfoForEmployeeDto(
         EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
-        List<GetTariffInfoForEmployeeDto> tariffsInfoDtos = employees.stream()
+        List<GetTariffInfoForEmployeeDto> tariffs = employees.stream()
             .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
-            .flatMap(employee -> employee.getTariffInfos().stream()
-                .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class)))
-            .toList();
+            .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()
+                .map(tariffsInfoRecievingEmployee -> {
+                    GetTariffInfoForEmployeeDto tariffDto =
+                        modelMapper.map(tariffsInfoRecievingEmployee.getTariffsInfo(),
+                            GetTariffInfoForEmployeeDto.class);
+                    tariffDto.setHasChat(tariffsInfoRecievingEmployee.getHasChat());
+                    return tariffDto;
+                }))
+            .collect(Collectors.toList());
 
-        getEmployeeDto.getTariffs().addAll(tariffsInfoDtos);
+        getEmployeeDto.setTariffs(tariffs);
     }
 
     private void initializeGetEmployeeDtoCollections(GetEmployeeDto getEmployeeDto) {
@@ -225,9 +252,22 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         updateEmployeeAuthoritiesToRelatedPositions(dto);
 
         Employee updatedEmployee = modelMapper.map(dto, Employee.class);
-        updatedEmployee.setTariffInfos(tariffsInfoRepository.findTariffsInfosByIdIsIn(dto.getTariffId()));
         updatedEmployee.setUuid(upEmployee.getUuid());
         updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
+        if (updatedEmployee.getTariffsInfoReceivingEmployees() == null) {
+            updatedEmployee.setTariffsInfoReceivingEmployees(new ArrayList<>());
+        }
+
+        if (dto.getTariffs() != null) {
+            dto.getTariffs().forEach(tariff -> {
+                TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
+                tariffsInfoReceivingEmployees.setEmployee(updatedEmployee);
+                tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
+                tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
+                    .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND)));
+                updatedEmployee.getTariffsInfoReceivingEmployees().add(tariffsInfoReceivingEmployees);
+            });
+        }
 
         if (image != null) {
             String imageUrlToDelete = upEmployee.getImagePath();
@@ -396,5 +436,30 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class))
             .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<EmployeeWithTariffsDto> getEmployeesByTariffId(Long tariffId) {
+        List<Employee> employeeWithEnabledChat =
+            employeeRepository.selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId);
+
+        return employeeWithEnabledChat
+            .stream()
+            .map(employee -> modelMapper.map(employee, EmployeeWithTariffsDto.class))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public EmployeeWithTariffsDto getEmployeeByEmail(String email) {
+        Employee employee = employeeRepository.findByEmail(email).orElseThrow(
+            () -> new UserNotFoundException(String.format("Employee not found with email %s", email)));
+
+        return modelMapper.map(employee, EmployeeWithTariffsDto.class);
     }
 }
