@@ -18,7 +18,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
      * @author Vadym Makitra
      * @author Yurii Fedorko
      */
-    Optional<Region> findRegionByNameEnAndNameUk(@Param("nameEn") String nameEn,
+    Optional<Region> findRegionByNameEnOrNameUk(@Param("nameEn") String nameEn,
         @Param("nameUk") String nameUk);
 
     /**
