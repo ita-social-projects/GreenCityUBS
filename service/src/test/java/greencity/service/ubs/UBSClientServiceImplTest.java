@@ -186,6 +186,15 @@ class UBSClientServiceImplTest {
     @Value("${greencity.wayforpay.secret}")
     private String wayForPaySecret;
 
+    @Mock
+    private RegionRepository regionRepository;
+
+    @Mock
+    private CityRepository cityRepository;
+
+    @Mock
+    private DistrictRepository districtRepository;
+
     @Test
     void testGetAllDistricts() {
 
@@ -1842,7 +1851,7 @@ class UBSClientServiceImplTest {
         OrderAddressDtoRequest dtoRequest = getTestOrderAddressLocationDto();
         CreateAddressRequestDto createAddressRequestDto = getAddressRequestDto();
         CreateAddressRequestDto createAddressRequestToSaveDto = getAddressRequestToSaveDto();
-        Address addressToSave = new Address();
+        Address addressToSave = getAddress();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
@@ -1850,8 +1859,13 @@ class UBSClientServiceImplTest {
             .thenReturn(getGeocodingResult().getFirst());
 
         when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
         when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
+        when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
+        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getCity()));
+        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getDistrict()));
+
         var addressDto = addressDto();
         addressDto.setDistrict("Район");
         addressDto.setDistrictEn("District");
@@ -1870,55 +1884,13 @@ class UBSClientServiceImplTest {
 
         verify(userRepository, times(2)).findByUuid(user.getUuid());
         verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
-        verify(googleApiService, times(2)).getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt());
+        verify(googleApiService, times(1)).getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt());
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
+        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
 
         verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
-        verify(modelMapper, times(2)).map(any(), eq(OrderAddressDtoRequest.class));
-        verify(modelMapper).map(any(), eq(Address.class));
-        verify(modelMapper).map(addresses.getFirst(), AddressDto.class);
-    }
-
-    @Test
-    void testSaveCurrentAddressForOrder_WithoutDistricts() {
-        User user = getUserForCreate();
-        List<Address> addresses = user.getAddresses();
-        addresses.getFirst().setActual(false);
-        addresses.getFirst().setAddressStatus(AddressStatus.NEW);
-
-        String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = getTestOrderAddressLocationDto();
-        CreateAddressRequestDto createAddressRequestDto = getAddressRequestDto();
-        CreateAddressRequestDto createAddressRequestToSaveDto = getAddressRequestToSaveDto_WithoutDistricts();
-        Address addressToSave = new Address();
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt()))
-            .thenReturn(getGeocodingResult().getFirst());
-
-        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
-        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
-        var addressDto = addressDto();
-        addressDto.setDistrict(null);
-        addressDto.setDistrictEn(null);
-        when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressDto);
-
-        OrderWithAddressesResponseDto actualWithSearchAddress =
-            ubsService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
-
-        assertEquals(createAddressRequestToSaveDto.getDistrict(),
-            actualWithSearchAddress.getAddressList().getFirst().getDistrict());
-        assertEquals(createAddressRequestToSaveDto.getDistrictEn(),
-            actualWithSearchAddress.getAddressList().getFirst().getDistrictEn());
-
-        verify(addressRepository).save(addressToSave);
-
-        verify(userRepository, times(2)).findByUuid(user.getUuid());
-        verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
-        verify(googleApiService, times(2)).getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt());
-
-        verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
-        verify(modelMapper, times(2)).map(any(), eq(OrderAddressDtoRequest.class));
+        verify(modelMapper, times(1)).map(any(), eq(Address.class));
         verify(modelMapper).map(any(), eq(Address.class));
         verify(modelMapper).map(addresses.getFirst(), AddressDto.class);
     }
@@ -1933,7 +1905,7 @@ class UBSClientServiceImplTest {
         String uuid = user.getUuid();
         CreateAddressRequestDto createAddressRequestDto = getAddressRequestWithEmptyPlaceIdDto();
         CreateAddressRequestDto createAddressRequestToSaveDto = getAddressRequestWithEmptyPlaceIdToSaveDto();
-        Address addressToSave = new Address();
+        Address addressToSave = getAddress();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
@@ -1941,6 +1913,11 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
         when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
         when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithEmptyPlaceIdDto());
+        when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
+        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getCity()));
+        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getDistrict()));
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
@@ -1954,6 +1931,9 @@ class UBSClientServiceImplTest {
         verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
         verify(modelMapper).map(any(), eq(Address.class));
         verify(modelMapper).map(addresses.getFirst(), AddressDto.class);
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
+        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
     }
 
     @Test
@@ -1967,15 +1947,19 @@ class UBSClientServiceImplTest {
         OrderAddressDtoRequest dtoRequest = getTestOrderAddressLocationDto();
         CreateAddressRequestDto createAddressRequestDto = getAddressWithKyivRegionRequestDto();
         CreateAddressRequestDto createAddressRequestToSaveDto = getAddressWithKyivRegionToSaveRequestDto();
-        Address addressToSave = new Address();
+        Address addressToSave = getAddress();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
         when(googleApiService.getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt()))
             .thenReturn(getGeocodingResultWithKyivRegion().getFirst());
+        when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
+        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getCity()));
+        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getDistrict()));
 
         when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
         when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
         when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithKyivRegionDto());
 
@@ -1986,13 +1970,15 @@ class UBSClientServiceImplTest {
 
         verify(userRepository, times(2)).findByUuid(user.getUuid());
         verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
-        verify(googleApiService, times(2)).getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt());
+        verify(googleApiService, times(1)).getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt());
 
         verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
-        verify(modelMapper, times(2)).map(any(), eq(OrderAddressDtoRequest.class));
+        verify(modelMapper, times(1)).map(any(), eq(Address.class));
         verify(modelMapper).map(any(), eq(Address.class));
         verify(modelMapper).map(addresses.getFirst(), AddressDto.class);
-
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
+        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
         verify(addressRepository).save(addressToSave);
     }
 
@@ -2007,15 +1993,18 @@ class UBSClientServiceImplTest {
         OrderAddressDtoRequest dtoRequest = getTestOrderAddressLocationDto();
         CreateAddressRequestDto createAddressRequestDto = getAddressWithKyivRegionRequestDto();
         CreateAddressRequestDto createAddressRequestToSaveDto = getAddressWithKyivRegionToSaveRequestDto();
-        Address addressToSave = new Address();
+        Address addressToSave = getAddress();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
         when(googleApiService.getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt()))
             .thenReturn(getGeocodingResultWithKyivRegion().get(1));
-
+        when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
+        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getCity()));
+        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getDistrict()));
         when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
         when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
         when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithKyivRegionDto());
 
@@ -2026,13 +2015,15 @@ class UBSClientServiceImplTest {
 
         verify(userRepository, times(2)).findByUuid(user.getUuid());
         verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
-        verify(googleApiService, times(2)).getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt());
+        verify(googleApiService, times(1)).getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt());
 
         verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
-        verify(modelMapper, times(2)).map(any(), eq(OrderAddressDtoRequest.class));
+        verify(modelMapper, times(1)).map(any(), eq(Address.class));
         verify(modelMapper).map(any(), eq(Address.class));
         verify(modelMapper).map(addresses.getFirst(), AddressDto.class);
-
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
+        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
         verify(addressRepository).save(addressToSave);
     }
 
@@ -2050,13 +2041,9 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt()))
-            .thenReturn(getGeocodingResult().getFirst());
+        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
 
         dtoRequest.setPlaceId(null);
-
-        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(dtoRequest);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
             () -> ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
@@ -2068,7 +2055,6 @@ class UBSClientServiceImplTest {
         verify(googleApiService, times(0)).getResultFromGeoCode(eq(dtoRequest.getPlaceId()), anyInt());
 
         verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
-        verify(modelMapper).map(any(), eq(OrderAddressDtoRequest.class));
     }
 
     @Test

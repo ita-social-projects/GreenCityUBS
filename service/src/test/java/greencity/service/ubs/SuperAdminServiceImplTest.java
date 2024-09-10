@@ -775,12 +775,12 @@ class SuperAdminServiceImplTest {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Region region = ModelUtils.getRegion();
 
-        when(regionRepository.findRegionByNameEnAndNameUk("Kyiv region", "Київська область"))
+        when(regionRepository.findRegionByNameEnOrNameUk("Kyiv region", "Київська область"))
             .thenReturn(Optional.of(region));
 
         superAdminService.addLocation(locationCreateDtoList);
 
-        verify(regionRepository).findRegionByNameEnAndNameUk("Kyiv region", "Київська область");
+        verify(regionRepository).findRegionByNameEnOrNameUk("Kyiv region", "Київська область");
         verify(locationRepository).findLocationByNameAndRegionId(anyString(), anyString(), anyLong());
         verify(locationRepository).save(any(Location.class));
     }
@@ -789,12 +789,12 @@ class SuperAdminServiceImplTest {
     void addLocationCreateNewRegionTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Location location = ModelUtils.getLocationForCreateRegion();
-        when(regionRepository.findRegionByNameEnAndNameUk("Kyiv region", "Київська область"))
+        when(regionRepository.findRegionByNameEnOrNameUk("Kyiv region", "Київська область"))
             .thenReturn(Optional.empty());
         when(regionRepository.save(any())).thenReturn(ModelUtils.getRegion());
         superAdminService.addLocation(locationCreateDtoList);
         verify(locationRepository).findLocationByNameAndRegionId("Київ", "Kyiv", 1L);
-        verify(regionRepository).findRegionByNameEnAndNameUk("Kyiv region", "Київська область");
+        verify(regionRepository).findRegionByNameEnOrNameUk("Kyiv region", "Київська область");
         verify(locationRepository).save(location);
     }
 
@@ -843,7 +843,7 @@ class SuperAdminServiceImplTest {
     void addLocationThrowLocationAlreadyCreatedExceptionTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Location location = ModelUtils.getLocation();
-        when(regionRepository.findRegionByNameEnAndNameUk("Kyiv region", "Київська область"))
+        when(regionRepository.findRegionByNameEnOrNameUk("Kyiv region", "Київська область"))
             .thenReturn(Optional.of(ModelUtils.getRegion()));
         when(locationRepository.findLocationByNameAndRegionId("Київ", "Kyiv", 1L)).thenReturn(Optional.of(location));
         assertThrows(NotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
