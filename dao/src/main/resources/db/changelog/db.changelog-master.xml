@@ -246,4 +246,5 @@
     <include file="/db/changelog/logs/ch-insert-data-into-table-districts-Kizerov.xml"/>
     <include file="db/changelog/logs/ch-update-table-address-with-district-id-Kizerov.xml"/>
     <include file="db/changelog/logs/ch-insert-into-user-agreement-Prots.xml"/>
+    <include file="db/changelog/logs/ch-update-refunds-table-Lukovskyi.xml"/>
 </databaseChangeLog>
