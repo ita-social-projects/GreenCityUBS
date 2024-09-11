@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.user.locations.City;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -35,4 +36,17 @@ public interface CityRepository extends JpaRepository<City, Long> {
      */
     @Query("SELECT c from City c left join fetch c.districts")
     List<City> findAllCitiesWithDistricts();
+
+    /**
+     * Finds a city by its region ID, Ukrainian name, and English name.
+     *
+     * @param regionId the ID of the region to which the city belongs
+     * @param nameUk   the Ukrainian name of the city
+     * @param nameEn   the English name of the city
+     * @return an {@code Optional<City>} containing the found city if it exists, or
+     *         an empty {@code Optional} if not found
+     * @author Kizerov Dmytro
+     */
+    @Query("select c from City c where c.region.id = :regionId and (c.nameUk = :nameUk or c.nameEn = :nameEn)")
+    Optional<City> findCityByRegionIdAndNameUkAndNameEn(Long regionId, String nameUk, String nameEn);
 }

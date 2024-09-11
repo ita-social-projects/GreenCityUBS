@@ -70,6 +70,7 @@ import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
+import greencity.repository.EventRepository;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
@@ -154,6 +155,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderLockService orderLockService;
     private final OrderBagService orderBagService;
     private final PaymentService paymentService;
+    private final EventRepository eventRepository;
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
     private static final List<String> ADMIN_POSITION_NAMES = List.of("Admin", "Super Admin");
     private final Set<OrderStatus> orderStatusesBeforeShipment =
@@ -850,6 +852,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         return buildStatuses(order, payment.getFirst());
+    }
+
+    @Override
+    public Boolean checkIfOrderStatusIsFormedToCanceled(Long orderId) {
+        return eventRepository.wasOrderStatusChangedFromFormedToCanceled(orderId);
     }
 
     private void verifyPaidWithBonuses(Order order, String email) {

@@ -1743,6 +1743,7 @@ public class ModelUtils {
         return Address.builder()
             .id(1L)
             .region("Region")
+            .regionId(getRegion())
             .city("City")
             .street("Street")
             .district("Distinct")

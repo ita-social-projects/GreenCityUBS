@@ -68,8 +68,11 @@ import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
+import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.locations.City;
+import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -113,6 +116,9 @@ import greencity.repository.TelegramBotRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.CityRepository;
+import greencity.repository.DistrictRepository;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
@@ -243,6 +249,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final NotificationService notificationService;
     private final WayForPayClient wayForPayClient;
     private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
+    private final RegionRepository regionRepository;
+    private final CityRepository cityRepository;
+    private final DistrictRepository districtRepository;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
@@ -721,6 +730,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto addressRequestDto,
         String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
@@ -736,29 +746,31 @@ public class UBSClientServiceImpl implements UBSClientService {
             return findAllAddressesForCurrentOrder(uuid);
         }
 
-        OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
-        dtoRequest.setHouseNumber(addressRequestDto.getHouseNumber());
-
-        OrderAddressDtoRequest addressRequestDtoForNullCheck =
-            modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
-        addressRequestDtoForNullCheck.setId(0L);
-        checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDtoForNullCheck);
-
         checkIfAddressExistIgnorePlaceId(addresses, addressRequestDto);
-        checkIfAddressExist(addresses, dtoRequest);
 
-        Address address = modelMapper.map(dtoRequest, Address.class);
+        Address address = modelMapper.map(addressRequestDto, Address.class);
+        address.setHouseNumber(addressRequestDto.getHouseNumber());
+        address.setHouseCorpus(addressRequestDto.getHouseCorpus());
 
+        setLocations(addressRequestDto, address);
+
+        address.setCoordinates(setCoordinates(addressRequestDto.getPlaceId()));
+        address.setAddressStatus(AddressStatus.NEW);
         address.setUser(currentUser);
         address.setActual(addresses.isEmpty());
-        address.setAddressStatus(AddressStatus.NEW);
-
-        address.setDistrict(addressRequestDto.getDistrict());
-        address.setDistrictEn(addressRequestDto.getDistrictEn());
+        address.setAddressComment(addressRequestDto.getAddressComment());
 
         addressRepo.save(address);
 
         return findAllAddressesForCurrentOrder(uuid);
+    }
+
+    private Coordinates setCoordinates(String placeId) {
+        GeocodingResult result = googleApiService.getResultFromGeoCode(placeId, 1);
+        return Coordinates.builder()
+            .latitude(result.geometry.location.lat)
+            .longitude(result.geometry.location.lng)
+            .build();
     }
 
     /**
@@ -813,14 +825,56 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser) {
         Address address = modelMapper.map(addressRequestDto, Address.class);
 
-        address.setCoordinates(Coordinates.builder().latitude(0.0).build());
-        address.setCoordinates(Coordinates.builder().longitude(0.0).build());
+        setLocations(addressRequestDto, address);
+
+        address.setCoordinates(Coordinates.builder().latitude(0.0).longitude(0.0).build());
 
         address.setUser(currentUser);
         address.setActual(addresses.isEmpty());
         address.setAddressStatus(AddressStatus.NEW);
 
         addressRepo.save(address);
+    }
+
+    private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
+        Optional<Region> optionalRegion =
+            regionRepository.findRegionByNameEnOrNameUk(address.getRegionEn(), address.getRegion());
+
+        if (optionalRegion.isPresent()) {
+            address.setRegionId(optionalRegion.get());
+
+            checkIfAddressBelongToKyiv(optionalRegion.get(), address);
+
+            Optional<City> optionalCity = cityRepository
+                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getCity(),
+                    address.getCityEn());
+
+            City city;
+            if (optionalCity.isPresent()) {
+                city = optionalCity.get();
+            } else {
+                city = modelMapper.map(addressRequestDto, City.class);
+                city.setRegion(optionalRegion.get());
+                checkIfAddressBelongToKyiv(optionalRegion.get(), address);
+                city = cityRepository.save(city);
+            }
+
+            address.setCityId(city);
+
+            Optional<District> optionalDistrict = districtRepository
+                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getDistrictEn(), address.getDistrict());
+
+            if (optionalDistrict.isPresent()) {
+                address.setDistrictId(optionalDistrict.get());
+            } else {
+                District district = modelMapper.map(addressRequestDto, District.class);
+                district.setCity(city);
+                District savedDistrict = districtRepository.save(district);
+                address.setDistrictId(savedDistrict);
+            }
+        } else {
+            throw new BadRequestException(ErrorMessage.REGION_NOT_FOUND);
+        }
     }
 
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
@@ -904,6 +958,18 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         if (request.getRegionEn().equalsIgnoreCase(KYIV_EN)) {
             request.setRegionEn(KYIV_REGION_EN);
+        }
+    }
+
+    private void checkIfAddressBelongToKyiv(Region region, Address address) {
+        if (region.getNameUk().equalsIgnoreCase(KYIV_UA)) {
+            address.setRegion(KYIV_REGION_UA);
+            // todo: set Kyiv oblast region id
+        }
+
+        if (region.getNameEn().equalsIgnoreCase(KYIV_EN)) {
+            address.setRegionEn(KYIV_REGION_EN);
+            // todo: set Kyiv oblast region id
         }
     }
 

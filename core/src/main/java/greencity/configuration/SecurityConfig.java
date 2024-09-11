@@ -89,6 +89,7 @@ public class SecurityConfig {
                 .sendError(SC_UNAUTHORIZED, "Authorize first."))
                 .accessDeniedHandler((req, resp, exc) -> resp.sendError(SC_FORBIDDEN, "You don't have authorities.")))
             .authorizeHttpRequests(req -> req
+                .requestMatchers("/error").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK + "/getAllActiveCouriers",
@@ -123,6 +124,7 @@ public class SecurityConfig {
                     UBS_MANAG_LINK + "/{id}/ordersAll",
                     UBS_MANAG_LINK + "/get-order-cancellation-reason/{id}",
                     UBS_MANAG_LINK + "/get-not-taken-order-reason/{id}",
+                    UBS_MANAG_LINK + "/check-status-transition/formed-to-canceled/{id}",
                     UBS_MANAG_LINK + "/orderTableColumnsWidth",
                     UBS_MANAG_LINK + "/city-list",
                     UBS_MANAG_LINK + "/districts-list",
