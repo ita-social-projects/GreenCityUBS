@@ -1102,7 +1102,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         refundedBonuses /= -CURRENCY_CONVERSION_RATE;
 
         Double refundedMoney =
-            order.getRefund() == null ? 0.0 : -order.getRefund().getAmount().doubleValue() / CURRENCY_CONVERSION_RATE;
+            order.getRefund() == null ? 0.0 : order.getRefund().getAmount().doubleValue() / CURRENCY_CONVERSION_RATE;
 
         return OrdersDataForUserDto.builder()
             .id(order.getId())

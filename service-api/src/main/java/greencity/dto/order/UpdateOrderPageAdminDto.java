@@ -2,6 +2,7 @@ package greencity.dto.order;
 
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
+import greencity.dto.refund.RefundDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +28,5 @@ public class UpdateOrderPageAdminDto {
     private Double writeOffStationSum;
     private Double ubsCourierSum;
     private String notTakenOutReason;
-    private boolean isReturnMoney;
-    private boolean isReturnBonuses;
+    private RefundDto refundDto;
 }
