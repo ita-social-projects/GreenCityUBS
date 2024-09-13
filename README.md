@@ -109,7 +109,7 @@ greencity.server.address = ${GREENCITY_SERVER_ADDRESS}
 
    Insert the given token into input field. The scheme should be like this `<given_token>`. Press **Authorize** button.
 
-   ![Bearer-example](./auth.png)
+   ![Bearer-example](./docs-photos/auth.png)
 
 7. Now you can use swagger UI to test REST API. Some controllers require *ADMIN* role. By default, new registered users have role *USER*. To overcome this you need to update record that corresponds to your user in the local database. For example, `UPDATE users SET role = 1 WHERE id = <your_user_id>`.
 
