@@ -4,13 +4,19 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
 import com.google.maps.errors.InvalidRequestException;
+import com.google.maps.model.AddressComponent;
+import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.LatLng;
 import greencity.constant.ErrorMessage;
+import greencity.dto.google.AddressResponseFromGoogleAPI;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.api.GoogleApiException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +27,7 @@ import org.springframework.stereotype.Service;
 public class GoogleApiService {
     private static final List<Locale> locales = List.of(Locale.of("uk"), Locale.of("en"));
     private final GeoApiContext context;
+    private static final Locale UKRAINIAN = Locale.of("uk");
 
     /**
      * Send request to the Google and receive response with geocoding.
@@ -67,5 +74,66 @@ public class GoogleApiService {
             }
             throw new GoogleApiException(e.getMessage());
         }
+    }
+
+    /**
+     * Retrieves the address details from Google API based on the given geographical
+     * coordinates. This method sends a request to the Google Geocoding API with the
+     * provided latitude and longitude. It processes the response to extract address
+     * components such as city and region. If the API call fails or no results are
+     * found, it returns {@code null}.
+     *
+     * @param coordinates the {@link LatLng} object containing the latitude and
+     *                    longitude.
+     * @return an {@link AddressResponseFromGoogleAPI} containing city, region, and
+     *         district details, or {@code null} if the API call fails or no results
+     *         are returned.
+     */
+    public AddressResponseFromGoogleAPI getResultFromGoogleByCoordinates(LatLng coordinates) {
+        try {
+            GeocodingResult[] results = GeocodingApi.newRequest(context)
+                .latlng(coordinates)
+                .language(UKRAINIAN.getLanguage())
+                .await();
+
+            return Optional.ofNullable(results)
+                .filter(r -> r.length > 0)
+                .map(r -> getAddressResponse(r[0].addressComponents))
+                .orElse(null);
+        } catch (IOException | InterruptedException | ApiException e) {
+            log.error("Error during the call to Google API, reason: {}", e.getMessage());
+            Thread.currentThread().interrupt();
+            return null;
+        }
+    }
+
+    private AddressResponseFromGoogleAPI getAddressResponse(AddressComponent[] addressComponents) {
+        AddressResponseFromGoogleAPI response = new AddressResponseFromGoogleAPI();
+
+        Arrays.stream(addressComponents).forEach(component -> {
+            List<AddressComponentType> componentTypes = Arrays.asList(component.types);
+
+            if (isRegion(componentTypes)) {
+                response.setRegion(component.longName);
+            } else if (isCity(componentTypes)) {
+                response.setCity(component.longName);
+            } else if (isDistrict(componentTypes)) {
+                response.setDistrict(component.longName);
+            }
+        });
+
+        return response;
+    }
+
+    private boolean isRegion(List<AddressComponentType> componentTypes) {
+        return componentTypes.contains(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1);
+    }
+
+    private boolean isCity(List<AddressComponentType> componentTypes) {
+        return componentTypes.contains(AddressComponentType.LOCALITY);
+    }
+
+    private boolean isDistrict(List<AddressComponentType> componentTypes) {
+        return componentTypes.contains(AddressComponentType.SUBLOCALITY);
     }
 }

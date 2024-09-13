@@ -1,5 +1,6 @@
 package greencity.dto;
 
+import greencity.dto.location.CoordinatesDto;
 import lombok.SneakyThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,6 +25,11 @@ class CreateAddressRequestDtoTest {
             .district("district")
             .districtEn("districtEn")
             .houseNumber("1")
+            .placeId("test")
+            .coordinates(CoordinatesDto.builder()
+                .latitude(1D)
+                .longitude(1D)
+                .build())
             .city("city")
             .cityEn("cityEn")
             .street(street)
@@ -49,6 +55,11 @@ class CreateAddressRequestDtoTest {
             .district("district")
             .districtEn("districtEn")
             .houseNumber("1")
+            .placeId("test")
+            .coordinates(CoordinatesDto.builder()
+                .latitude(1D)
+                .longitude(1D)
+                .build())
             .city("city")
             .cityEn("cityEn")
             .street(street)

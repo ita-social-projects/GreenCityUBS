@@ -1,7 +1,5 @@
 package greencity.service.ubs;
 
-import com.google.maps.model.AddressComponentType;
-import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 import greencity.client.UserRemoteClient;
 import greencity.client.WayForPayClient;
@@ -159,7 +157,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -722,7 +719,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .sorted(Comparator.comparing(Address::getId))
             .map(u -> modelMapper.map(u, AddressDto.class))
-            .collect(toList());
+            .toList();
         return new OrderWithAddressesResponseDto(addressDtoList);
     }
 
@@ -740,43 +737,29 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadRequestException(NUMBER_OF_ADDRESSES_EXCEEDED);
         }
 
-        if (addressRequestDto.getPlaceId().isEmpty()) {
-            checkIfAddressExistIgnorePlaceId(addresses, addressRequestDto);
-            saveAddressWithoutPlaceId(addresses, addressRequestDto, currentUser);
-            return findAllAddressesForCurrentOrder(uuid);
+        Address addressIfExist = checkIfAddressExist(currentUser.getId(), addressRequestDto);
+
+        if (addressIfExist == null) {
+            Address address = modelMapper.map(addressRequestDto, Address.class);
+
+            setLocations(addressRequestDto, address);
+
+            address.setAddressStatus(AddressStatus.NEW);
+            address.setUser(currentUser);
+            address.setActual(addresses.isEmpty());
+            addressRepo.save(address);
+        } else {
+            addressIfExist.setAddressStatus(AddressStatus.NEW);
+            addressRepo.save(addressIfExist);
         }
-
-        checkIfAddressExistIgnorePlaceId(addresses, addressRequestDto);
-
-        Address address = modelMapper.map(addressRequestDto, Address.class);
-        address.setHouseNumber(addressRequestDto.getHouseNumber());
-        address.setHouseCorpus(addressRequestDto.getHouseCorpus());
-
-        setLocations(addressRequestDto, address);
-
-        address.setCoordinates(setCoordinates(addressRequestDto.getPlaceId()));
-        address.setAddressStatus(AddressStatus.NEW);
-        address.setUser(currentUser);
-        address.setActual(addresses.isEmpty());
-        address.setAddressComment(addressRequestDto.getAddressComment());
-
-        addressRepo.save(address);
-
         return findAllAddressesForCurrentOrder(uuid);
-    }
-
-    private Coordinates setCoordinates(String placeId) {
-        GeocodingResult result = googleApiService.getResultFromGeoCode(placeId, 1);
-        return Coordinates.builder()
-            .latitude(result.geometry.location.lat)
-            .longitude(result.geometry.location.lng)
-            .build();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest addressRequestDto,
         String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
@@ -792,48 +775,24 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
 
-        List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
+        Address addressIfExist = checkIfAddressExist(currentUser.getId(), addressRequestDto);
 
-        if (addressRequestDto.getPlaceId() == null) {
-            Address addressWithNullPlaceId = modelMapper.map(addressRequestDto, Address.class);
-            addressWithNullPlaceId.setUser(currentUser);
-            addressWithNullPlaceId.setAddressStatus(address.getAddressStatus());
-            addressRepo.save(addressWithNullPlaceId);
-            return findAllAddressesForCurrentOrder(uuid);
+        if (addressIfExist == null) {
+            Address newAddress = modelMapper.map(addressRequestDto, Address.class);
+
+            setLocations(addressRequestDto, newAddress);
+
+            newAddress.setId(addressRequestDto.getId());
+            newAddress.setUser(address.getUser());
+            newAddress.setAddressStatus(address.getAddressStatus());
+            newAddress.setActual(address.getActual());
+
+            addressRepo.save(newAddress);
+        } else {
+            addressIfExist.setAddressStatus(AddressStatus.NEW);
+            addressRepo.save(addressIfExist);
         }
-
-        OrderAddressDtoRequest dtoRequest = getLocationDto(addressRequestDto.getPlaceId());
-        checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
-
-        checkIfAddressExist(addresses, dtoRequest);
-
-        Address newAddress = modelMapper.map(dtoRequest, Address.class);
-
-        newAddress.setUser(address.getUser());
-        newAddress.setAddressStatus(address.getAddressStatus());
-        newAddress.setActual(address.getActual());
-
-        newAddress.setDistrict(addressRequestDto.getDistrict());
-        newAddress.setDistrictEn(addressRequestDto.getDistrictEn());
-
-        addressRepo.save(newAddress);
-
         return findAllAddressesForCurrentOrder(uuid);
-    }
-
-    private void saveAddressWithoutPlaceId(List<Address> addresses, CreateAddressRequestDto addressRequestDto,
-        User currentUser) {
-        Address address = modelMapper.map(addressRequestDto, Address.class);
-
-        setLocations(addressRequestDto, address);
-
-        address.setCoordinates(Coordinates.builder().latitude(0.0).longitude(0.0).build());
-
-        address.setUser(currentUser);
-        address.setActual(addresses.isEmpty());
-        address.setAddressStatus(AddressStatus.NEW);
-
-        addressRepo.save(address);
     }
 
     private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
@@ -877,125 +836,48 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
-        boolean exist = addresses.stream()
-            .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
-            .anyMatch(addressDto -> addressDto.equals(dtoRequest));
+    private <T extends CreateAddressRequestDto> Address checkIfAddressExist(Long userId, T addressRequestDto) {
+        List<Address> addresses = addressRepo.findAllByUserId(userId);
 
-        if (exist) {
-            throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
-        }
-    }
-
-    private void checkIfAddressExistIgnorePlaceId(List<Address> addresses,
-        CreateAddressRequestDto addressRequestDto) {
         boolean exist = addresses.stream()
+            .filter(address -> !address.getAddressStatus().equals(AddressStatus.DELETED))
             .map(address -> modelMapper.map(address, CreateAddressRequestDto.class))
-            .anyMatch(addressDto -> addressDto.equals(addressRequestDto));
+            .anyMatch(
+                addressDto -> addressDto.equals(modelMapper.map(addressRequestDto, CreateAddressRequestDto.class)));
 
         if (exist) {
             throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
         }
-    }
 
-    private Map<AddressComponentType, Consumer<String>> initializeUkrainianGeoCodingResult(
-        OrderAddressDtoRequest dtoRequest) {
-        return Map.of(
-            AddressComponentType.LOCALITY, dtoRequest::setCity,
-            AddressComponentType.ROUTE, dtoRequest::setStreet,
-            AddressComponentType.STREET_NUMBER, dtoRequest::setHouseNumber,
-            AddressComponentType.SUBLOCALITY, dtoRequest::setDistrict,
-            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegion);
-    }
+        Optional<Address> deletedAddress = addresses.stream()
+            .filter(address -> address.getAddressStatus().equals(AddressStatus.DELETED))
+            .filter(address -> modelMapper.map(address, CreateAddressRequestDto.class).equals(addressRequestDto))
+            .findFirst();
 
-    private Map<AddressComponentType, Consumer<String>> initializeEnglishGeoCodingResult(
-        OrderAddressDtoRequest dtoRequest) {
-        return Map.of(
-            AddressComponentType.LOCALITY, dtoRequest::setCityEn,
-            AddressComponentType.ROUTE, dtoRequest::setStreetEn,
-            AddressComponentType.SUBLOCALITY, dtoRequest::setDistrictEn,
-            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegionEn);
-    }
-
-    private void initializeGeoCodingResults(Map<AddressComponentType, Consumer<String>> initializedMap,
-        GeocodingResult geocodingResult) {
-        initializedMap
-            .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents)
-                .forEach(addressComponent -> Arrays.stream(addressComponent.types)
-                    .filter(componentType -> componentType.equals(key))
-                    .forEach(componentType -> value.accept(addressComponent.longName))));
-    }
-
-    private OrderAddressDtoRequest getLocationDto(String placeId) {
-        GeocodingResult resultsUa = googleApiService.getResultFromGeoCode(placeId, 0);
-        GeocodingResult resultsEn = googleApiService.getResultFromGeoCode(placeId, 1);
-
-        OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
-        initializeGeoCodingResults(initializeUkrainianGeoCodingResult(orderAddressDtoRequest), resultsUa);
-        initializeGeoCodingResults(initializeEnglishGeoCodingResult(orderAddressDtoRequest), resultsEn);
-
-        double latitude = resultsEn.geometry.location.lat;
-        double longitude = resultsEn.geometry.location.lng;
-        orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
-
-        checkIfAddressBelongToKyiv(orderAddressDtoRequest);
-
-        return orderAddressDtoRequest;
+        return deletedAddress.orElse(null);
     }
 
     /**
-     * When Google API sets region name, there's a special case for Kyiv, the
-     * capital of Ukraine. Google API sets the 'Kyiv' as the name of region for
-     * addresses from Kyiv instead of Kyiv Region. Therefore, a separate logic is
-     * implemented to set 'Kyiv Region' name for such addresses instead of 'Kyiv'.
+     * Adjusts the region name for addresses in Kyiv to correctly reflect the 'Kyiv
+     * Region' instead of just 'Kyiv'. This is necessary because the Google API sets
+     * 'Kyiv' as the region name for addresses in Kyiv rather than 'Kyiv Region'.
+     * This method updates the region name for such addresses to 'Kyiv Region' to
+     * ensure consistency.
      *
-     * @param request OrderAddressDtoRequest.
+     * @param region  the {@link Region} object containing the name of the region
+     * @param address the {@link Address} object to be updated with the correct
+     *                region name
      */
-    private void checkIfAddressBelongToKyiv(OrderAddressDtoRequest request) {
-        if (request.getRegion().equalsIgnoreCase(KYIV_UA)) {
-            request.setRegion(KYIV_REGION_UA);
-        }
-
-        if (request.getRegionEn().equalsIgnoreCase(KYIV_EN)) {
-            request.setRegionEn(KYIV_REGION_EN);
-        }
-    }
-
     private void checkIfAddressBelongToKyiv(Region region, Address address) {
         if (region.getNameUk().equalsIgnoreCase(KYIV_UA)) {
             address.setRegion(KYIV_REGION_UA);
-            // todo: set Kyiv oblast region id
+            address.setRegionId(region);
         }
 
         if (region.getNameEn().equalsIgnoreCase(KYIV_EN)) {
             address.setRegionEn(KYIV_REGION_EN);
-            // todo: set Kyiv oblast region id
+            address.setRegionId(region);
         }
-    }
-
-    private void checkNullFieldsOnGoogleResponse(OrderAddressDtoRequest dtoRequest,
-        OrderAddressDtoRequest addressRequestDto) {
-        dtoRequest.setRegion(
-            Objects.isNull(dtoRequest.getRegion()) ? addressRequestDto.getRegion() : dtoRequest.getRegion());
-
-        dtoRequest.setRegionEn(
-            Objects.isNull(dtoRequest.getRegionEn()) ? addressRequestDto.getRegionEn() : dtoRequest.getRegionEn());
-
-        dtoRequest.setDistrict(
-            Objects.isNull(dtoRequest.getDistrict()) ? addressRequestDto.getDistrict() : dtoRequest.getDistrict());
-
-        dtoRequest.setDistrictEn(
-            Objects.isNull(dtoRequest.getDistrictEn()) ? addressRequestDto.getDistrictEn()
-                : dtoRequest.getDistrictEn());
-
-        dtoRequest.setHouseNumber(
-            Objects.isNull(dtoRequest.getHouseNumber()) ? addressRequestDto.getHouseNumber()
-                : dtoRequest.getHouseNumber());
-
-        dtoRequest.setEntranceNumber(addressRequestDto.getEntranceNumber());
-        dtoRequest.setHouseCorpus(addressRequestDto.getHouseCorpus());
-        dtoRequest.setAddressComment(addressRequestDto.getAddressComment());
-        dtoRequest.setId(addressRequestDto.getId());
     }
 
     /**

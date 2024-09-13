@@ -1,31 +1,31 @@
 package greencity.dto;
 
+import greencity.dto.location.CoordinatesDto;
+import jakarta.validation.constraints.NotNull;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import lombok.experimental.SuperBuilder;
 import static greencity.constant.ValidationConstant.STREET_REGEXP;
 import static greencity.constant.ValidationConstant.STREET_VALIDATION_MESSAGE;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"placeId", "searchAddress", "addressComment"})
 @ToString
-@Builder
+@SuperBuilder
 public class CreateAddressRequestDto {
     // CHECKSTYLE:OFF
     private static final String validationMessage = "Use only English, or Ukrainian letter";
     private static final String notEmptyValidationMessage = "Name must not be empty";
     private static final String houseNumberNotValid = "House number is invalid";
-
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ’—/\"\\s]*", message = validationMessage)
-    private String searchAddress;
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
@@ -54,7 +54,11 @@ public class CreateAddressRequestDto {
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ!?’]*", message = validationMessage)
     private String addressComment;
 
+    @NotBlank(message = notEmptyValidationMessage)
     private String placeId;
+
+    @NotNull
+    private CoordinatesDto coordinates;
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
@@ -71,4 +75,31 @@ public class CreateAddressRequestDto {
     @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
     @NotEmpty(message = notEmptyValidationMessage)
     private String streetEn;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        CreateAddressRequestDto that = (CreateAddressRequestDto) o;
+        return Objects.equals(districtEn.trim().toLowerCase(), that.districtEn.trim().toLowerCase()) &&
+            Objects.equals(district.trim().toLowerCase(), that.district.trim().toLowerCase()) &&
+            Objects.equals(regionEn.trim().toLowerCase(), that.regionEn.trim().toLowerCase()) &&
+            Objects.equals(region.trim().toLowerCase(), that.region.trim().toLowerCase()) &&
+            Objects.equals(houseNumber, that.houseNumber) &&
+            Objects.equals(entranceNumber, that.entranceNumber) &&
+            Objects.equals(houseCorpus, that.houseCorpus) &&
+            Objects.equals(coordinates, that.coordinates) &&
+            Objects.equals(city.trim().toLowerCase(), that.city.trim().toLowerCase()) &&
+            Objects.equals(cityEn.trim().toLowerCase(), that.cityEn.trim().toLowerCase()) &&
+            Objects.equals(street.trim().toLowerCase(), that.street.trim().toLowerCase()) &&
+            Objects.equals(streetEn.trim().toLowerCase(), that.streetEn.trim().toLowerCase());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(districtEn, district, regionEn, region, houseNumber, entranceNumber,
+            houseCorpus, coordinates, city, cityEn, street, streetEn);
+    }
 }

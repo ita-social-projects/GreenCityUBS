@@ -14,6 +14,7 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
+import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.notification.AddNotificationPlatformDto;
@@ -56,7 +57,6 @@ import greencity.dto.useragreement.UserAgreementDetailDto;
 import greencity.dto.useragreement.UserAgreementDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.user.UserAgreement;
 import greencity.enums.CancellationReason;
 import greencity.enums.CourierLimit;
 import greencity.enums.NotificationReceiverType;
@@ -120,16 +120,21 @@ public class ModelUtils {
     public static OrderAddressDtoRequest getOrderAddressDtoRequest() {
         return OrderAddressDtoRequest.builder()
             .id(0L)
-            .entranceNumber("7a")
-            .houseCorpus("2")
-            .houseNumber("7")
-            .street("Городоцька")
-            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
-            .district("Zaliznuchnuy")
-            .city("Lviv")
-            .region("Lvivskiy")
             .actual(false)
-            .placeId("place_id")
+            .districtEn("Shevchenkivskyi")
+            .district("Шевченківський")
+            .regionEn("Kyiv Oblast")
+            .region("Київська область")
+            .houseNumber("25B")
+            .entranceNumber("3")
+            .houseCorpus("2A")
+            .addressComment("Next to the park")
+            .placeId("ChIJp0lN2HIRkEARuJ1pl_yMcc0")
+            .coordinates(new CoordinatesDto(50.4501, 30.5234))
+            .city("Київ")
+            .cityEn("Kyiv")
+            .street("Хрещатик")
+            .streetEn("Khreshchatyk")
             .build();
     }
 
@@ -513,20 +518,20 @@ public class ModelUtils {
 
     public static CreateAddressRequestDto getAddressRequestDto() {
         return CreateAddressRequestDto.builder()
-            .addressComment("fdsfs")
-            .searchAddress("fake address")
-            .district("fdsfds")
-            .districtEn("dsadsad")
-            .region("regdsad")
-            .regionEn("regdsaden")
-            .houseNumber("1")
-            .houseCorpus("2")
+            .districtEn("Shevchenkivskyi")
+            .district("Шевченківський")
+            .regionEn("Kyiv Oblast")
+            .region("Київська область")
+            .houseNumber("25B")
             .entranceNumber("3")
-            .placeId("place_id")
-            .city("city")
-            .cityEn("cityEn")
-            .street("street")
-            .streetEn("streetEn")
+            .houseCorpus("2A")
+            .addressComment("Next to the park")
+            .placeId("ChIJp0lN2HIRkEARuJ1pl_yMcc0")
+            .coordinates(new CoordinatesDto(50.4501, 30.5234))
+            .city("Київ")
+            .cityEn("Kyiv")
+            .street("Хрещатик")
+            .streetEn("Khreshchatyk")
             .build();
     }
 
