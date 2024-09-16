@@ -210,6 +210,10 @@ class GoogleApiServiceTest {
             assertEquals("Kyiv", response.getCity());
             assertEquals("Kyiv", response.getRegion());
             assertEquals("Pechersk", response.getDistrict());
+
+            verify(geocodingApiRequest).latlng(coordinates);
+            verify(geocodingApiRequest).language("uk");
+            verify(geocodingApiRequest).await();
         }
     }
 }
