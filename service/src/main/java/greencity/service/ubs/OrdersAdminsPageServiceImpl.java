@@ -325,7 +325,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<CityInfoDto> toCityInfoDto(List<City> cities) {
         return cities.stream()
-            .map(this::toCityInfoDto)
+            .collect(Collectors.toMap(
+                City::getId,
+                this::toCityInfoDto,
+                (existing, replacement) -> existing))
+            .values()
+            .stream()
             .toList();
     }
 
@@ -342,7 +347,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<DistrictInfoDto> toDistrictInfoDto(Set<District> districts) {
         return districts.stream()
             .collect(Collectors.toMap(
-                District::getNameUk,
+                District::getId,
                 this::toDistrictInfoDto,
                 (existing, replacement) -> existing))
             .values()
