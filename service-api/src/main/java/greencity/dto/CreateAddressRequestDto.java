@@ -83,23 +83,26 @@ public class CreateAddressRequestDto {
         if (o == null || getClass() != o.getClass())
             return false;
         CreateAddressRequestDto that = (CreateAddressRequestDto) o;
-        return Objects.equals(districtEn.trim().toLowerCase(), that.districtEn.trim().toLowerCase()) &&
-            Objects.equals(district.trim().toLowerCase(), that.district.trim().toLowerCase()) &&
-            Objects.equals(regionEn.trim().toLowerCase(), that.regionEn.trim().toLowerCase()) &&
-            Objects.equals(region.trim().toLowerCase(), that.region.trim().toLowerCase()) &&
-            Objects.equals(houseNumber, that.houseNumber) &&
-            Objects.equals(entranceNumber, that.entranceNumber) &&
-            Objects.equals(houseCorpus, that.houseCorpus) &&
-            Objects.equals(coordinates, that.coordinates) &&
-            Objects.equals(city.trim().toLowerCase(), that.city.trim().toLowerCase()) &&
-            Objects.equals(cityEn.trim().toLowerCase(), that.cityEn.trim().toLowerCase()) &&
-            Objects.equals(street.trim().toLowerCase(), that.street.trim().toLowerCase()) &&
-            Objects.equals(streetEn.trim().toLowerCase(), that.streetEn.trim().toLowerCase());
+        return Objects.equals(this.districtEn.trim().toLowerCase(), that.districtEn.trim().toLowerCase()) &&
+            Objects.equals(this.district.trim().toLowerCase(), that.district.trim().toLowerCase()) &&
+            Objects.equals(this.regionEn.trim().toLowerCase(), that.regionEn.trim().toLowerCase()) &&
+            Objects.equals(this.region.trim().toLowerCase(), that.region.trim().toLowerCase()) &&
+            Objects.equals(this.houseNumber, that.houseNumber) &&
+            Objects.equals(this.entranceNumber, that.entranceNumber) &&
+            Objects.equals(this.houseCorpus, that.houseCorpus) &&
+            Objects.equals(this.coordinates, that.coordinates) &&
+            Objects.equals(this.city.trim().toLowerCase(), that.city.trim().toLowerCase()) &&
+            Objects.equals(this.cityEn.trim().toLowerCase(), that.cityEn.trim().toLowerCase()) &&
+            Objects.equals(this.street.trim().toLowerCase(), that.street.trim().toLowerCase()) &&
+            Objects.equals(this.streetEn.trim().toLowerCase(), that.streetEn.trim().toLowerCase());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(districtEn, district, regionEn, region, houseNumber, entranceNumber,
-            houseCorpus, coordinates, city, cityEn, street, streetEn);
+        return Objects.hash(this.districtEn.trim().toLowerCase(), this.district.trim().toLowerCase(),
+            this.regionEn.trim().toLowerCase(), this.region.trim().toLowerCase(), this.houseNumber.trim().toLowerCase(),
+            this.entranceNumber.trim().toLowerCase(), this.houseCorpus.trim().toLowerCase(), this.coordinates,
+            this.city.trim().toLowerCase(), this.cityEn.trim().toLowerCase(), this.street.trim().toLowerCase(),
+            this.streetEn.trim().toLowerCase());
     }
 }

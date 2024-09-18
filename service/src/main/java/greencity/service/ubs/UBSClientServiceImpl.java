@@ -269,10 +269,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
-    private static final String KYIV_REGION_EN = "Kyiv Oblast";
-    private static final String KYIV_REGION_UA = "Київська область";
-    private static final String KYIV_EN = "Kyiv";
-    private static final String KYIV_UA = "місто Київ";
     private static final String LANGUAGE_EN = "en";
     private static final Double KYIV_LATITUDE = 50.4546600;
     private static final Double KYIV_LONGITUDE = 30.5238000;
@@ -802,8 +798,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (optionalRegion.isPresent()) {
             address.setRegionId(optionalRegion.get());
 
-            checkIfAddressBelongToKyiv(optionalRegion.get(), address);
-
             Optional<City> optionalCity = cityRepository
                 .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getCity(),
                     address.getCityEn());
@@ -814,7 +808,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             } else {
                 city = modelMapper.map(addressRequestDto, City.class);
                 city.setRegion(optionalRegion.get());
-                checkIfAddressBelongToKyiv(optionalRegion.get(), address);
                 city = cityRepository.save(city);
             }
 
@@ -855,29 +848,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .findFirst();
 
         return deletedAddress.orElse(null);
-    }
-
-    /**
-     * Adjusts the region name for addresses in Kyiv to correctly reflect the 'Kyiv
-     * Region' instead of just 'Kyiv'. This is necessary because the Google API sets
-     * 'Kyiv' as the region name for addresses in Kyiv rather than 'Kyiv Region'.
-     * This method updates the region name for such addresses to 'Kyiv Region' to
-     * ensure consistency.
-     *
-     * @param region  the {@link Region} object containing the name of the region
-     * @param address the {@link Address} object to be updated with the correct
-     *                region name
-     */
-    private void checkIfAddressBelongToKyiv(Region region, Address address) {
-        if (region.getNameUk().equalsIgnoreCase(KYIV_UA)) {
-            address.setRegion(KYIV_REGION_UA);
-            address.setRegionId(region);
-        }
-
-        if (region.getNameEn().equalsIgnoreCase(KYIV_EN)) {
-            address.setRegionEn(KYIV_REGION_EN);
-            address.setRegionId(region);
-        }
     }
 
     /**

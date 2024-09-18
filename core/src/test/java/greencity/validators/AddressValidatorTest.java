@@ -8,6 +8,7 @@ import com.google.maps.model.LatLng;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.google.AddressResponseFromGoogleAPI;
 import greencity.dto.location.CoordinatesDto;
+import greencity.exceptions.address.InvalidAddressException;
 import greencity.service.google.GoogleApiService;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -86,9 +87,8 @@ class AddressValidatorTest {
         when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class)))
             .thenReturn(addressResponseFromGoogleAPI);
 
-        boolean isValid = addressValidator.isValid(addressRequestDto, context);
-
-        assertFalse(isValid);
+        assertThrows(InvalidAddressException.class,
+            () -> addressValidator.isValid(addressRequestDto, context));
     }
 
     @Test
@@ -102,9 +102,8 @@ class AddressValidatorTest {
         when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class)))
             .thenReturn(addressResponseFromGoogleAPI);
 
-        boolean isValid = addressValidator.isValid(addressRequestDto, context);
-
-        assertFalse(isValid);
+        assertThrows(InvalidAddressException.class,
+            () -> addressValidator.isValid(addressRequestDto, context));
     }
 
     @Test
@@ -112,8 +111,7 @@ class AddressValidatorTest {
 		when(googleApiService.getResultFromGeoCode(anyString(), anyInt())).thenReturn(geoResult);
 		when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class))).thenReturn(null);
 
-		boolean isValid = addressValidator.isValid(addressRequestDto, context);
-
-		assertFalse(isValid);
+		assertThrows(InvalidAddressException.class,
+			() -> addressValidator.isValid(addressRequestDto,context));
 	}
 }

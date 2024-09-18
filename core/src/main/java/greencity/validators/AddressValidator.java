@@ -8,6 +8,8 @@ import greencity.annotations.ValidAddress;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.google.AddressResponseFromGoogleAPI;
 import greencity.dto.location.CoordinatesDto;
+import greencity.exceptions.address.InvalidAddressException;
+import greencity.exceptions.api.GoogleApiException;
 import greencity.service.google.GoogleApiService;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -21,23 +23,30 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
     private static final int LANGUAGE_CODE_FOR_UA = 0;
 
     @Override
-    public void initialize(ValidAddress constraintAnnotation) {
-        //
-    }
-
-    @Override
     public boolean isValid(CreateAddressRequestDto createAddressRequestDto, ConstraintValidatorContext context) {
         String placeId = createAddressRequestDto.getPlaceId();
         CoordinatesDto coordinates = createAddressRequestDto.getCoordinates();
         LatLng latLng = new LatLng(coordinates.getLatitude(), coordinates.getLongitude());
 
-        GeocodingResult geoResult = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_UA);
-        AddressResponseFromGoogleAPI resultFromCoordinates = googleApiService.getResultFromGoogleByCoordinates(latLng);
+        GeocodingResult geoResult;
+        AddressResponseFromGoogleAPI resultFromCoordinates;
+
+        try {
+            geoResult = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_UA);
+            resultFromCoordinates = googleApiService.getResultFromGoogleByCoordinates(latLng);
+        } catch (GoogleApiException e) {
+            throw new InvalidAddressException("Google API error: " + e.getMessage());
+        }
 
         if (resultFromCoordinates == null || !isCoordinatesValid(geoResult, coordinates)) {
-            return false;
+            throw new InvalidAddressException("Invalid coordinates or address.");
         }
-        return areCityAndRegionValid(geoResult, resultFromCoordinates, createAddressRequestDto);
+
+        if (!areCityAndRegionValid(geoResult, resultFromCoordinates, createAddressRequestDto)) {
+            throw new InvalidAddressException("City and region do not match the provided address.");
+        }
+
+        return true;
     }
 
     private boolean isCoordinatesValid(GeocodingResult geoResult, CoordinatesDto coordinates) {

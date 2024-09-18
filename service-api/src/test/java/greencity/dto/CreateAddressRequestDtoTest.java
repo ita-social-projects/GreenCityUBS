@@ -126,6 +126,62 @@ class CreateAddressRequestDtoTest {
         assertNotEquals(address1.hashCode(), address2.hashCode());
     }
 
+    @Test
+    void testEqualsForAllFields() {
+        CreateAddressRequestDto dto1 = createDefaultAddress();
+        CreateAddressRequestDto dto2 = createDefaultAddress();
+
+        assertThat(dto1).isEqualTo(dto2);
+
+        dto2.setDistrictEn("Different District En");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setDistrictEn(dto1.getDistrictEn());
+
+        dto2.setDistrict("Different District");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setDistrict(dto1.getDistrict());
+
+        dto2.setRegionEn("Different Region En");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setRegionEn(dto1.getRegionEn());
+
+        dto2.setRegion("Different Region");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setRegion(dto1.getRegion());
+
+        dto2.setHouseNumber("999");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setHouseNumber(dto1.getHouseNumber());
+
+        dto2.setEntranceNumber("Different Entrance Number");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setEntranceNumber(dto1.getEntranceNumber());
+
+        dto2.setHouseCorpus("Different Corpus");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setHouseCorpus(dto1.getHouseCorpus());
+
+        dto2.setCoordinates(new CoordinatesDto(48.8584, 2.2945));
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setCoordinates(dto1.getCoordinates());
+
+        dto2.setCity("Different City");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setCity(dto1.getCity());
+
+        dto2.setCityEn("Different City En");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setCityEn(dto1.getCityEn());
+
+        dto2.setStreet("Different Street");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setStreet(dto1.getStreet());
+
+        dto2.setStreetEn("Different Street En");
+        assertThat(dto1).isNotEqualTo(dto2);
+        dto2.setStreetEn(dto1.getStreetEn());
+    }
+
     private static Stream<Arguments> provideFieldsAndValidValues() {
         return Stream.of(
             Arguments.of("Shevchenka"),

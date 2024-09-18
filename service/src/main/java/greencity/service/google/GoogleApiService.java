@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,16 +36,21 @@ public class GoogleApiService {
      * @param placeId - place id
      * @return GeocodingResults - return result from geocoding service
      */
+    @Cacheable(value = "geoCodeCache", key = "#placeId + '-' + #langCode")
     public GeocodingResult getResultFromGeoCode(String placeId, Integer langCode) {
         try {
             GeocodingResult[] results = GeocodingApi.newRequest(context)
                 .place(placeId).language(locales.get(langCode).getLanguage()).await();
             return results[0];
-        } catch (IOException | InterruptedException | ApiException e) {
-            Thread.currentThread().interrupt();
+        } catch (IOException | ApiException e) {
+            log.error("Error during the call to Google API,"
+                + " in method getResultFromGeoCode reason: {}", e.getMessage());
             if (e instanceof InvalidRequestException) {
                 throw new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_BY_PLACE_ID + placeId);
             }
+            throw new GoogleApiException(e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new GoogleApiException(e.getMessage());
         }
     }
@@ -64,14 +70,16 @@ public class GoogleApiService {
                 .language(lang)
                 .await();
             return results[0];
-        } catch (IOException | InterruptedException | ApiException e) {
-            Thread.currentThread().interrupt();
+        } catch (IOException | ApiException e) {
             log.error("Occurred error during the call on google API, "
                 + "in method getCoordinatesByGoogleMapsGeocoding, reason: {}", e.getMessage());
             if (e instanceof InvalidRequestException) {
                 throw new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_BY_CITY_AND_COUNTRY
                     + cityName + ", " + countryName);
             }
+            throw new GoogleApiException(e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new GoogleApiException(e.getMessage());
         }
     }
@@ -89,19 +97,21 @@ public class GoogleApiService {
      *         district details, or {@code null} if the API call fails or no results
      *         are returned.
      */
+    @Cacheable(value = "coordinatesCache", key = "#coordinates.lat + '-' + #coordinates.lng")
     public AddressResponseFromGoogleAPI getResultFromGoogleByCoordinates(LatLng coordinates) {
         try {
             GeocodingResult[] results = GeocodingApi.newRequest(context)
                 .latlng(coordinates)
                 .language(UKRAINIAN.getLanguage())
                 .await();
-
             return Optional.ofNullable(results)
                 .filter(r -> r.length > 0)
                 .map(r -> getAddressResponse(r[0].addressComponents))
                 .orElse(null);
-        } catch (IOException | InterruptedException | ApiException e) {
+        } catch (IOException | ApiException e) {
             log.error("Error during the call to Google API, reason: {}", e.getMessage());
+            return null;
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return null;
         }
