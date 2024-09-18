@@ -294,6 +294,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (serviceRepository.findServiceByTariffsInfoId(tariffId).isEmpty()) {
             Employee employee = tryToFindEmployeeByUuid(employeeUuid);
             Service service = modelMapper.map(dto, Service.class);
+            Long amountInCoins = PaymentUtil.convertBillsIntoCoins(dto.getPrice());
+            service.setPrice(amountInCoins);
             service.setCreatedBy(employee);
             service.setCreatedAt(LocalDate.now());
             service.setTariffsInfo(tariffsInfo);
