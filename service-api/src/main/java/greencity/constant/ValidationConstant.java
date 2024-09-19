@@ -28,4 +28,5 @@ public class ValidationConstant {
         "Use only English, or Ukrainian letters. Both English or Ukrainian letters valid, "
             + "for cases, when user inputs street address by yourself instead of using Google Api, "
             + "in that cases sets the same value for both localizations.";
+    public static final String ADDRESS_VALIDATION_ERROR_MESSAGE = "Invalid data for address";
 }

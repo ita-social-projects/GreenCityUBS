@@ -3,6 +3,7 @@ package greencity.exception.handler;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.address.InvalidAddressException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
@@ -168,12 +169,18 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Exception handler for {@link AddressNotWithinLocationAreaException}.
+     * Exception handler for {@link AddressNotWithinLocationAreaException} and
+     * {@link InvalidAddressException}. This method handles exceptions related to an
+     * address not being within a valid location area or an invalid address. It
+     * captures the error details from the {@link WebRequest}, wraps them in an
+     * {@link ExceptionResponse}, and returns a {@code 400 Bad Request} HTTP status
+     * along with the error message.
      *
-     * @param request {@link WebRequest} with error details.
-     * @return {@link ResponseEntity} with http status and exception message.
+     * @param request {@link WebRequest} containing the details of the error.
+     * @return {@link ResponseEntity} containing the {@link ExceptionResponse} with
+     *         the error attributes and a {@code 400 Bad Request} status.
      */
-    @ExceptionHandler(AddressNotWithinLocationAreaException.class)
+    @ExceptionHandler({AddressNotWithinLocationAreaException.class, InvalidAddressException.class})
     public final ResponseEntity<Object> handleAddressNotWithinLocationAreaException(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
