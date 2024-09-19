@@ -843,7 +843,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         Optional<Address> deletedAddress = addresses.stream()
-            .filter(address -> address.getAddressStatus().equals(AddressStatus.DELETED))
+            .filter(address -> AddressStatus.DELETED.equals(address.getAddressStatus()))
             .filter(address -> modelMapper.map(address, CreateAddressRequestDto.class).equals(addressRequestDto))
             .findFirst();
 
