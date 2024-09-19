@@ -2438,7 +2438,7 @@ public class ModelUtils {
         return OrderAddressDtoRequest.builder()
             .id(13L).city("Kyiv").district("Svyatoshyn")
             .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
-            .actual(true).coordinates(new Coordinates(12.5, 34.5))
+            .actual(true).coordinates(new CoordinatesDto(12.5, 34.5))
             .build();
     }
 
@@ -4580,7 +4580,6 @@ public class ModelUtils {
     public static CreateAddressRequestDto getAddressRequestDto() {
         return CreateAddressRequestDto.builder()
             .addressComment("fdsfs")
-            .searchAddress("fake street name, 13, fake street, 02000")
             .district("fdsfds")
             .districtEn("dsadsad")
             .region("regdsad")
@@ -4595,7 +4594,6 @@ public class ModelUtils {
     public static CreateAddressRequestDto getAddressRequestToSaveDto() {
         return CreateAddressRequestDto.builder()
             .addressComment("fdsfs2")
-            .searchAddress("fake street name2, 132, fake street2, 020002")
             .district("Район")
             .districtEn("District")
             .region("regdsad2")
@@ -4610,7 +4608,6 @@ public class ModelUtils {
     public static CreateAddressRequestDto getAddressRequestToSaveDto_WithoutDistricts() {
         return CreateAddressRequestDto.builder()
             .addressComment("fdsfs2")
-            .searchAddress("fake street name2, 132, fake street2, 020002")
             .region("regdsad2")
             .regionEn("regdsaden2")
             .houseNumber("12")
@@ -4623,7 +4620,6 @@ public class ModelUtils {
     public static CreateAddressRequestDto getAddressRequestWithEmptyPlaceIdDto() {
         return CreateAddressRequestDto.builder()
             .addressComment("fdsfs")
-            .searchAddress("fake street name, 13, fake street, 02000")
             .district("fdsfds")
             .districtEn("dsadsad")
             .region("regdsad")
@@ -4642,7 +4638,6 @@ public class ModelUtils {
     public static CreateAddressRequestDto getAddressRequestWithEmptyPlaceIdToSaveDto() {
         return CreateAddressRequestDto.builder()
             .addressComment("fdsfs1")
-            .searchAddress("fake street name, 13, fake street, 02000")
             .district("fdsfds1")
             .districtEn("dsadsad1")
             .region("regdsad1")
@@ -4661,7 +4656,6 @@ public class ModelUtils {
     public static CreateAddressRequestDto getAddressWithKyivRegionRequestDto() {
         return CreateAddressRequestDto.builder()
             .addressComment("fdsfs")
-            .searchAddress("fake street name, 13, fake street, 02000")
             .district("fdsfds")
             .districtEn("dsadsad")
             .regionEn(KYIV_REGION_EN)
@@ -4676,7 +4670,6 @@ public class ModelUtils {
     public static CreateAddressRequestDto getAddressWithKyivRegionToSaveRequestDto() {
         return CreateAddressRequestDto.builder()
             .addressComment("fdsfs1")
-            .searchAddress("fake street name, 13, fake street, 02000")
             .district("fdsfds1")
             .districtEn("dsadsad1")
             .regionEn(KYIV_REGION_EN)
@@ -4692,7 +4685,6 @@ public class ModelUtils {
         return OrderAddressDtoRequest.builder()
             .id(0L)
             .region("fake region")
-            .searchAddress("fake street name, 13, fake street, 02000")
             .city("fake street")
             .district("Район")
             .districtEn("District")
@@ -4701,7 +4693,7 @@ public class ModelUtils {
             .houseCorpus("1")
             .street("fake street name")
             .streetEn("fake street name")
-            .coordinates(new Coordinates(50.5555555d, 50.5555555d))
+            .coordinates(new CoordinatesDto(50.5555555d, 50.5555555d))
             .cityEn("fake street")
             .regionEn("fake region")
             .placeId("place_id")
@@ -4712,7 +4704,6 @@ public class ModelUtils {
         return OrderAddressDtoRequest.builder()
             .id(0L)
             .region("fake region")
-            .searchAddress("fake street name, 13, fake street, 02000")
             .city("fake street")
             .district("Район")
             .districtEn("District")
@@ -4721,7 +4712,7 @@ public class ModelUtils {
             .houseCorpus("1")
             .street("fake street name")
             .streetEn("fake street name")
-            .coordinates(new Coordinates(50.5555555d, 50.5555555d))
+            .coordinates(new CoordinatesDto(50.5555555d, 50.5555555d))
             .cityEn("fake street")
             .regionEn("fake region")
             .build();
@@ -4742,7 +4733,7 @@ public class ModelUtils {
             .houseCorpus("1")
             .street("fake street name")
             .streetEn("fake street name")
-            .coordinates(new Coordinates(50.5555555d, 50.5555555d))
+            .coordinates(new CoordinatesDto(50.5555555d, 50.5555555d))
             .cityEn("fake street")
             .districtEn(withDistrictRegionHouse ? "fake district" : null)
             .regionEn(withDistrictRegionHouse ? "fake region" : null)
