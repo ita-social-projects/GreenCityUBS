@@ -48,8 +48,8 @@ public interface CityRepository extends JpaRepository<City, Long> {
      * @author Kizerov Dmytro
      */
     @Query(
-        value = "select c.* from City c where c.region.id = :regionId"
-            + " and (c.nameUk = :nameUk or c.nameEn = :nameEn) limit 1",
+        value = "SELECT c.* FROM cities c WHERE c.region_id = :regionId"
+            + " AND (c.name_uk = :nameUk OR c.name_en = :nameEn) LIMIT 1",
         nativeQuery = true)
     Optional<City> findCityByRegionIdAndNameUkAndNameEn(Long regionId, String nameUk, String nameEn);
 }
