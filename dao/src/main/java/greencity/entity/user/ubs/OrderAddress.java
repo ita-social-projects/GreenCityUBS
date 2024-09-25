@@ -2,6 +2,9 @@ package greencity.entity.user.ubs;
 
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.Location;
+import greencity.entity.user.Region;
+import greencity.entity.user.locations.City;
+import greencity.entity.user.locations.District;
 import greencity.enums.AddressStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -94,4 +97,13 @@ public class OrderAddress {
 
     @Column(nullable = false)
     private String districtEn;
+
+    @Column(name = "region_id", nullable = false)
+    private Long regionId;
+
+    @Column(name = "city_id", nullable = false)
+    private Long cityId;
+
+    @Column(name = "district_id", nullable = false)
+    private Long districtId;
 }

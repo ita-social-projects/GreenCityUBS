@@ -28,7 +28,10 @@ public class OrderFilterDataProvider {
         "responsibleCallerId", OrderSearchCriteria::getResponsibleCallerId,
         "responsibleLogicManId", OrderSearchCriteria::getResponsibleLogicManId,
         "responsibleNavigatorId", OrderSearchCriteria::getResponsibleNavigatorId,
-        "responsibleDriverId", OrderSearchCriteria::getResponsibleDriverId);
+        "responsibleDriverId", OrderSearchCriteria::getResponsibleDriverId,
+        "regionId", OrderSearchCriteria::getRegionId,
+        "cityId", OrderSearchCriteria::getCitiesId,
+        "districtId", OrderSearchCriteria::getDistrictsId);
 
     Map<String, Function<OrderSearchCriteria, Enum<?>[]>> getFiltersEnum() {
         return FILTERS_ENUM_MAP;

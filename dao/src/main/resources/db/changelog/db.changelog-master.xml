@@ -247,4 +247,6 @@
     <include file="db/changelog/logs/ch-update-table-address-with-district-id-Kizerov.xml"/>
     <include file="db/changelog/logs/ch-insert-into-user-agreement-Prots.xml"/>
     <include file="db/changelog/logs/ch-update-refunds-table-Lukovskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-regionId-cityId-districtId-into-order_address-table-Lukovskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-to-big_order_table_view-Lukovskyi.xml"/>
 </databaseChangeLog>

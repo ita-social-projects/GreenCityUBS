@@ -37,6 +37,9 @@ public class BigOrderTableViews {
     private String cityEn;
     private String districtEn;
     private String addressEn;
+    private Long regionId;
+    private Long cityId;
+    private Long districtId;
     private String commentToAddressForClient;
     private String bagAmount;
     private Long totalOrderSum;

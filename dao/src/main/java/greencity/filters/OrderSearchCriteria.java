@@ -23,4 +23,7 @@ public class OrderSearchCriteria {
     private String[] citiesEn;
     private String[] districtsEn;
     private String[] search;
+    private Long[] regionId;
+    private Long[] citiesId;
+    private Long[] districtsId;
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Lukovskyi-4" author="Volodymyr Lukovskyi">
+        <addColumn tableName="order_address">
+            <column name="city_id" type="bigint"/>
+            <column name="region_id" type="bigint"/>
+            <column name="district_id" type="bigint"/>
+        </addColumn>
+
+        <sql>
+            UPDATE order_address oa
+            SET city_id = ci.id
+                FROM cities ci
+            WHERE oa.city = ci.name_uk
+              AND oa.city_en = ci.name_en;
+        </sql>
+
+        <sql>
+            UPDATE order_address oa
+            SET region_id = r.id
+                FROM regions r
+            WHERE oa.region = r.name_uk
+              AND oa.region_en = r.name_en;
+        </sql>
+
+        <sql>
+            UPDATE order_address oa
+            SET district_id = d.id
+                FROM districts d
+            WHERE oa.district = d.name_uk
+              AND oa.district_en = d.name_en;
+        </sql>
+
+        <addNotNullConstraint tableName="order_address" columnName="city_id" defaultNullValue="1"/>
+        <addNotNullConstraint tableName="order_address" columnName="region_id" defaultNullValue="1"/>
+        <addNotNullConstraint tableName="order_address" columnName="district_id" defaultNullValue="1"/>
+    </changeSet>
+</databaseChangeLog>
