@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
@@ -14,7 +15,7 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.WayForPayOrderResponse;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderPaymentDetailDto;
@@ -24,7 +25,7 @@ import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
-import greencity.dto.payment.PaymentRequestDto;
+import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
@@ -97,10 +98,11 @@ public interface UBSClientService {
      * @param dto     {@link OrderResponseDto} user entered data;
      * @param uuid    current {@link User}'s uuid;
      * @param orderId {@link Long} order id;
-     * @return {@link PaymentRequestDto} which contains data to pay order out.
+     * @return {@link PaymentWayForPayRequestDto} which contains data to pay order
+     *         out.
      * @author Oleh Bilonizhka
      */
-    WayForPayOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
+    PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
      * Method get status of order from db by id.
@@ -379,9 +381,9 @@ public interface UBSClientService {
      *
      * @param userUuid current {@link User} uuid.
      * @param dto      order information.
-     * @return {@link WayForPayOrderResponse} payment link and order id.
+     * @return {@link PaymentSystemResponse} payment link and order id.
      */
-    WayForPayOrderResponse processOrder(String userUuid, OrderWayForPayClientDto dto);
+    PaymentSystemResponse processOrder(String userUuid, OrderWayForPayClientDto dto);
 
     /**
      * Checks if a tariff exists by its ID.
@@ -414,4 +416,14 @@ public interface UBSClientService {
      * @return List of all locations.
      */
     List<LocationsDto> getAllLocationsByCourierId(Long courierId);
+
+    /**
+     * Validates the payment response received from MonoBank. This method checks the
+     * integrity and validity of the payment details contained in the response to
+     * ensure it meets the required criteria for processing.
+     *
+     * @param response the response object received from MonoBank containing payment
+     *                 details such as transaction ID, status, and amount.
+     */
+    void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response);
 }

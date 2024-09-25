@@ -14,13 +14,14 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.WayForPayOrderResponse;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
+import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -184,7 +185,7 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @PostMapping(value = {"/processOrder", "/processOrder/{id}"})
-    public ResponseEntity<WayForPayOrderResponse> processOrder(
+    public ResponseEntity<PaymentSystemResponse> processOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
         @Valid @PathVariable("id") Optional<Long> id) {
@@ -529,5 +530,26 @@ public class OrderController {
         @PathVariable("courierId") Long courierId) {
         List<LocationsDto> locations = ubsClientService.getAllLocationsByCourierId(courierId);
         return ResponseEntity.status(HttpStatus.OK).body(locations);
+    }
+
+    /**
+     * Receives and processes payment information from the Monobank API. This method
+     * handles the incoming payment response and validates the payment details
+     * provided by Monobank. The payment details are logged and then passed to the
+     * {@code validatePaymentFromMonoBank} method for further validation and
+     * processing.
+     *
+     * @param response the payment response received from Monobank, containing
+     *                 details such as transaction ID, status, and amount.
+     */
+    @Operation(summary = "Receive payment information from Monobank API")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping("/monobank/payments")
+    public void receivePaymentFromMonoBank(@RequestBody MonoBankPaymentResponseDto response) {
+        log.info("Response from MONOBANK API: {}", response);
+        ubsClientService.validatePaymentFromMonoBank(response);
     }
 }

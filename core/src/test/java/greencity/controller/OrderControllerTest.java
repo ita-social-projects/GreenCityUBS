@@ -9,7 +9,7 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.LocationsDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.WayForPayOrderResponse;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
@@ -178,7 +178,7 @@ class OrderControllerTest {
         OrderDetailStatusDto orderDetailStatusDto = getUnpaidOrderDetailStatusDto();
         orderDetailStatusDto.setOrderStatus(OrderStatus.FORMED.name());
 
-        WayForPayOrderResponse resultObject = WayForPayOrderResponse.builder()
+        PaymentSystemResponse resultObject = PaymentSystemResponse.builder()
             .orderId(orderId)
             .link("Link")
             .build();

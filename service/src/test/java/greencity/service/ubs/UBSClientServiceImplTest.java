@@ -8,7 +8,7 @@ import greencity.client.WayForPayClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDto;
-import greencity.dto.payment.PaymentRequestDto;
+import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.OrderCourierPopUpDto;
@@ -593,9 +593,10 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
         String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
-        when(wayForPayClient.getCheckOutResponse(any(PaymentRequestDto.class))).thenReturn(mockWayForPayResponse);
+        when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
+            .thenReturn(mockWayForPayResponse);
 
-        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
         Assertions.assertEquals("http://example.com/invoice", result.getLink());
     }
@@ -826,9 +827,10 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
         String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
-        when(wayForPayClient.getCheckOutResponse(any(PaymentRequestDto.class))).thenReturn(mockWayForPayResponse);
+        when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
+            .thenReturn(mockWayForPayResponse);
 
-        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
 
     }
@@ -882,9 +884,10 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
         String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
-        when(wayForPayClient.getCheckOutResponse(any(PaymentRequestDto.class))).thenReturn(mockWayForPayResponse);
+        when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
+            .thenReturn(mockWayForPayResponse);
 
-        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
     }
 
@@ -938,7 +941,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
 
-        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
 
     }
@@ -991,9 +994,10 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
         String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
-        when(wayForPayClient.getCheckOutResponse(any(PaymentRequestDto.class))).thenReturn(mockWayForPayResponse);
+        when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
+            .thenReturn(mockWayForPayResponse);
 
-        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
 
     }
@@ -1229,7 +1233,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
-        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
+        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
         Assertions.assertNotNull(result);
 
         verify(userRepository, times(1)).findByUuid("35467585763t4sfgchjfuyetf");
@@ -2690,9 +2694,10 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
         String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
-        when(wayForPayClient.getCheckOutResponse(any(PaymentRequestDto.class))).thenReturn(mockWayForPayResponse);
+        when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
+            .thenReturn(mockWayForPayResponse);
 
-        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
     }
 
@@ -2750,7 +2755,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(modelMapper.map(address, OrderAddress.class)).thenReturn(orderAddress);
 
-        WayForPayOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
     }
 
