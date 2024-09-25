@@ -37,6 +37,9 @@ public interface DistrictRepository extends JpaRepository<District, Long> {
      *         exists, or an empty {@code Optional} if no match is found
      * @author Kizerov Dmytro
      */
-    @Query("select d from District d where d.city.id = :cityId and (d.nameEn = :nameEn or d.nameUk = :nameUk)")
+    @Query(
+        value = "SELECT d.* FROM districts d WHERE d.city_id = :cityId"
+            + " AND (d.name_en = :nameEn OR d.name_uk = :nameUk) LIMIT 1",
+        nativeQuery = true)
     Optional<District> findDistrictByCityIdAndNameEnOrNameUk(Long cityId, String nameEn, String nameUk);
 }
