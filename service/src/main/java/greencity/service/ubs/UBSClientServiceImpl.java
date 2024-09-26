@@ -87,10 +87,11 @@ import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
 import greencity.enums.LocationStatus;
+import greencity.enums.MonoBankStatuses;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.PaymentSystem;
+import greencity.enums.PaymentType;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -282,7 +283,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String monoBankPaymentRedirectUrl;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "Approved";
-    private static final String SUCCESS = "success";
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
     private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
     private static final String VIBER_PART_3_OF_LINK = "&context=";
@@ -328,7 +328,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .substring(response.getOrderReference().lastIndexOf("_") + 1)))
             .currency(response.getCurrency())
             .amount(Long.parseLong(response.getAmount()) * 100)
-            .orderStatus(response.getTransactionStatus())
+            .orderStatus(OrderStatus.FORMED)
             .senderCellPhone(response.getPhone())
             .maskedCard(response.getCardPan())
             .cardType(response.getCardType())
@@ -602,8 +602,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             return getPaymentRequestDto(order, "");
         }
 
-        PaymentSystemResponse paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
-        return paymentSystemResponse;
+        return processPayment(dto, order, sumToPayInCoins, currentUser);
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,
@@ -625,32 +624,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             formPaymentRequestForMonoBank(order.getId(), sumToPayInCoins, currentUser);
         CheckoutResponseFromMonoBank checkoutResponse = monoBankClient.getCheckoutResponse(requestDto, token);
 
-        createPayment(currentUser, checkoutResponse, order, sumToPayInCoins);
-
         return getPaymentRequestDto(order, checkoutResponse.getPageUrl());
-    }
-
-    private void createPayment(User currentUser, CheckoutResponseFromMonoBank response, Order order, Long amount) {
-        Payment newPayment = Payment.builder()
-            .currency("UAH")
-            .amount(amount * 100)
-            .senderCellPhone(currentUser.getRecipientPhone())
-            .orderTime(setCreationDate())
-            .paymentSystem(PaymentSystem.MONOBANK.name())
-            .senderEmail(currentUser.getRecipientEmail())
-            .paymentStatus(PaymentStatus.UNPAID)
-            .paymentId(response.getInvoiceId())
-            .order(order)
-            .build();
-
-        Payment createdPayment = paymentRepository.save(newPayment);
-        log.info("Payment with ID: {} for Order ID: {} was successfully created for user: {}",
-            createdPayment.getId(), order.getId(), currentUser.getId());
-    }
-
-    private String setCreationDate() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-        return LocalDateTime.now().format(formatter);
     }
 
     private MonoBankPaymentRequestDto formPaymentRequestForMonoBank(Long orderId, long sumToPayInCoins, User user) {
@@ -661,7 +635,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .amount(1)
             // .amount((int) sumToPayInCoins)
             .merchantPaymentInfo(MerchantPaymentInfo.builder()
-                .orderId(String.valueOf(orderId))
+                .orderReference(OrderUtils.generateOrderIdForPayment(orderId, order))
                 .emails(Set.of(user.getRecipientEmail()))
                 .orderList(getBasketOrders(order))
                 .build())
@@ -1009,7 +983,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public OrdersDataForUserDto getOrderForUser(String uuid, Long id) {
         Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
@@ -1272,7 +1245,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Payment payment = Payment.builder()
             .amount(sumToPayInCoins)
-            .orderStatus("created")
+            .orderStatus(OrderStatus.FORMED)
             .currency("UAH")
             .paymentStatus(PaymentStatus.UNPAID)
             .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
@@ -1709,15 +1682,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void checkResponseStatusFailure(MonoBankPaymentResponseDto response, Payment orderPayment, Order order) {
-        if (response.getStatus().equals(FAILED_STATUS)) {
-            orderPayment.setPaymentStatus(PaymentStatus.UNPAID);
-            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-            paymentRepository.save(orderPayment);
-            orderRepository.save(order);
-        }
-    }
-
     protected void checkOrderStatusApproved(PaymentResponseDto dto, Payment orderPayment, Order order) {
         if (dto.getTransactionStatus().equals(APPROVED_STATUS)) {
             orderPayment.setPaymentId(String.valueOf(dto.getOrderReference().split("_")[1]));
@@ -2119,26 +2083,40 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response) {
-        Order order = orderRepository.findById(Long.valueOf(response.getOrderId()))
+        String[] ids = response.getOrderReference().split("_");
+        Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
-        Payment payment = order.getPayment().stream()
-            .filter(p -> response.getInvoiceId().equals(p.getPaymentId()))
-            .findFirst()
-            .orElseThrow(() -> new BadRequestException(PAYMENT_NOT_FOUND));
-        addPaymentInformation(response, payment);
-        checkResponseStatusFailure(response, payment, order);
-        checkPaymentStatusSuccess(response, payment, order);
+        Payment payment = createPayment(response, order);
+        checkPaymentStatus(response, payment, order);
     }
 
-    private void addPaymentInformation(MonoBankPaymentResponseDto response, Payment payment) {
-        payment.setCardType(response.getPaymentInfo().getCardNumber());
-        payment.setFee(Long.valueOf(response.getPaymentInfo().getFee()));
-        payment.setPaymentSystem(response.getPaymentInfo().getPaymentSystem());
-        payment.setSettlementDate(convertToDateOnly(response.getModifiedDate()));
+    private Payment createPayment(MonoBankPaymentResponseDto response, Order order) {
+        return Payment.builder()
+            .id(Long.valueOf(response.getOrderReference()
+                .substring(response.getOrderReference().lastIndexOf("_") + 1)))
+            .currency("UAH")
+            .amount((long) (response.getAmount() * 100))
+            .orderStatus(OrderStatus.FORMED)
+            .responseStatus(response.getStatus())
+            .senderCellPhone(order.getUser().getRecipientPhone())
+            .maskedCard(response.getPaymentInfo().getCardNumber())
+            .cardType(response.getPaymentInfo().getPaymentSystem())
+            .responseCode(Integer.valueOf(response.getErrorCode()))
+            .responseDescription(response.getFailureReason())
+            .orderTime(response.getCreatedDate())
+            .settlementDate(convertToDateOnly(response.getModifiedDate()))
+            .fee(Long.valueOf(response.getPaymentInfo().getFee()))
+            .paymentSystem(response.getPaymentInfo().getPaymentSystem())
+            .senderEmail(order.getUser().getRecipientEmail())
+            .paymentId(response.getInvoiceId())
+            .order(order)
+            .paymentType(PaymentType.AUTO)
+            .paymentStatus(PaymentStatus.UNPAID)
+            .build();
     }
 
-    private void checkPaymentStatusSuccess(MonoBankPaymentResponseDto response, Payment payment, Order order) {
-        if (response.getStatus().equals(SUCCESS)) {
+    private void checkPaymentStatus(MonoBankPaymentResponseDto response, Payment payment, Order order) {
+        if (MonoBankStatuses.SUCCESS.getName().equalsIgnoreCase(response.getStatus())) {
             payment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             paymentRepository.save(payment);
@@ -2146,6 +2124,13 @@ public class UBSClientServiceImpl implements UBSClientService {
             eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + payment.getPaymentId(),
                 OrderHistory.SYSTEM, order);
+        }
+        if (MonoBankStatuses.FAILURE.getName().equalsIgnoreCase(response.getStatus())
+            || MonoBankStatuses.REVERSED.getName().equalsIgnoreCase(response.getStatus())) {
+            payment.setPaymentStatus(PaymentStatus.UNPAID);
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+            paymentRepository.save(payment);
+            orderRepository.save(order);
         }
     }
 

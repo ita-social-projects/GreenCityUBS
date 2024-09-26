@@ -2,7 +2,6 @@ package greencity.dto.payment.monobank;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,10 +20,9 @@ public class MonoBankPaymentResponseDto {
     private Integer amount;
     @JsonProperty("ccy")
     private Integer currency;
-    private Integer finalAmount;
     private String createdDate;
     private String modifiedDate;
     @JsonProperty("reference")
-    private String orderId;
+    private String orderReference;
     private PaymentInfo paymentInfo;
 }

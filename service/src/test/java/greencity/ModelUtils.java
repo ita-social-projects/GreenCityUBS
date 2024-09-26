@@ -1984,7 +1984,7 @@ public class ModelUtils {
             .paymentStatus(PaymentStatus.PAID)
             .amount(95000L)
             .currency("UAH")
-            .orderStatus("approved")
+            .orderStatus(OrderStatus.CONFIRMED)
             .responseStatus("approved")
             .order(getOrder())
             .paymentId("1")

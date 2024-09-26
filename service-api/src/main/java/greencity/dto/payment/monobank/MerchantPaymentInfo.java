@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class MerchantPaymentInfo {
     @JsonProperty("reference")
-    private String orderId;
+    private String orderReference;
     @JsonProperty("customerEmails")
     private Set<String> emails;
     @JsonProperty("basketOrder")

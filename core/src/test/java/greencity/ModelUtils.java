@@ -66,6 +66,7 @@ import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.PaymentSystem;
 import greencity.enums.UserCategory;
 import org.springframework.http.HttpStatus;
 import java.security.Principal;
@@ -114,6 +115,7 @@ public class ModelUtils {
                 .build())
             .addressId(1L)
             .locationId(1L)
+            .paymentSystem(PaymentSystem.WAY_FOR_PAY)
             .build();
     }
 

@@ -568,6 +568,7 @@ class UBSClientServiceImplTest {
         dto.getBags().getFirst().setAmount(15);
         dto.setAddressId(1L);
         dto.setLocationId(15L);
+        dto.setPaymentSystem(PaymentSystem.WAY_FOR_PAY);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field field : fields) {
@@ -779,6 +780,7 @@ class UBSClientServiceImplTest {
         dto.setLocationId(2L);
         dto.getBags().getFirst().setAmount(15);
         dto.setBags(List.of(BagDto.builder().id(1).amount(1).build(), BagDto.builder().id(3).amount(15).build()));
+        dto.setPaymentSystem(PaymentSystem.WAY_FOR_PAY);
 
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
@@ -844,6 +846,7 @@ class UBSClientServiceImplTest {
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().getFirst().setAmount(15);
         dto.setCertificates(Set.of("4444-4444"));
+        dto.setPaymentSystem(PaymentSystem.WAY_FOR_PAY);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -955,6 +958,7 @@ class UBSClientServiceImplTest {
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().getFirst().setAmount(2);
         dto.setPointsToUse(2_000);
+        dto.setPaymentSystem(PaymentSystem.WAY_FOR_PAY);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -2648,6 +2652,7 @@ class UBSClientServiceImplTest {
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().getFirst().setAmount(15);
         dto.setCertificates(Set.of(getActiveCertificateWith10Points().getCode()));
+        dto.setPaymentSystem(PaymentSystem.WAY_FOR_PAY);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -3273,6 +3278,7 @@ class UBSClientServiceImplTest {
 
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().getFirst().setAmount(15);
+        dto.setPaymentSystem(PaymentSystem.WAY_FOR_PAY);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -3318,6 +3324,7 @@ class UBSClientServiceImplTest {
 
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().getFirst().setAmount(15);
+        dto.setPaymentSystem(PaymentSystem.WAY_FOR_PAY);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -3625,7 +3632,7 @@ class UBSClientServiceImplTest {
         assertEquals(2L, result.getId());
         assertEquals("USD", result.getCurrency());
         assertEquals(15000L, result.getAmount());
-        assertEquals("Approved", result.getOrderStatus());
+        assertEquals(OrderStatus.FORMED, result.getOrderStatus());
         assertEquals("+1234567890", result.getSenderCellPhone());
         assertEquals("**** **** **** 1234", result.getMaskedCard());
         assertEquals("Visa", result.getCardType());
