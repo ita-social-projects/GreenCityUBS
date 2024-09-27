@@ -5,6 +5,7 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
+import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressExportDetailsDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
@@ -242,7 +243,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String email) {
         Optional<OrderAddress> addressForAdminPage = orderAddressRepository.findById(dtoUpdate.getId());
         if (addressForAdminPage.isPresent()) {
-            orderAddressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
+            ubsClientService.updateOrderAddressFields(dtoUpdate, addressForAdminPage.get());
+            orderAddressRepository
+                .save(ubsClientService.updateOrderAddressFields(dtoUpdate, addressForAdminPage.get()));
             eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
             return addressForAdminPage.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
         } else {

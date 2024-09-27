@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDto;
+import greencity.dto.order.*;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
@@ -13,15 +14,6 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.WayForPayOrderResponse;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
@@ -36,6 +28,7 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.user.User;
+import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.OrderStatus;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
@@ -414,4 +407,20 @@ public interface UBSClientService {
      * @return List of all locations.
      */
     List<LocationsDto> getAllLocationsByCourierId(Long courierId);
+
+    /**
+     * Updates the fields of the given order address using the information from the
+     * provided DTO. This method parses the correct IDs from the cities, regions,
+     * and districts tables based on the data in the DTO.
+     *
+     * @param orderAddressExportDetailsDto The DTO containing the new address data
+     *                                     to save.
+     * @param orderAddress                 The current order address stored in the
+     *                                     database, which will be updated.
+     *
+     * @return The updated order address, containing the necessary IDs and updated
+     *         fields.
+     */
+    OrderAddress updateOrderAddressFields(OrderAddressExportDetailsDtoUpdate orderAddressExportDetailsDto,
+        OrderAddress orderAddress);
 }

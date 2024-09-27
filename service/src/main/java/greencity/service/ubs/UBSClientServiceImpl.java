@@ -28,21 +28,13 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.WayForPayOrderResponse;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.position.PositionAuthoritiesDto;
-import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PersonalDataDto;
@@ -789,6 +781,20 @@ public class UBSClientServiceImpl implements UBSClientService {
             addressRepo.save(addressIfExist);
         }
         return findAllAddressesForCurrentOrder(uuid);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public OrderAddress updateOrderAddressFields(OrderAddressExportDetailsDtoUpdate addressExportDetails,
+        OrderAddress orderAddress) {
+        CreateAddressRequestDto createAddressRequestDto =
+            modelMapper.map(addressExportDetails, CreateAddressRequestDto.class);
+        Address address = modelMapper.map(orderAddress, Address.class);
+        setLocations(createAddressRequestDto, address);
+        return modelMapper.map(address, OrderAddress.class);
     }
 
     private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
