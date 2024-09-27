@@ -107,6 +107,7 @@ import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
+import greencity.util.OrderUtils;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -387,6 +388,9 @@ class UBSClientServiceImplTest {
 
     @Mock
     private MonoBankClient monoBankClient;
+
+    @Mock
+    private OrderUtils orderUtils;
 
     @Value("${greencity.monobank.token}")
     private String token;
@@ -3794,23 +3798,22 @@ class UBSClientServiceImplTest {
     @Test
     void testValidatePaymentOrderNotFound() {
         PaymentResponseDto response = getPaymentResponseDto();
-        response.setOrderReference("2_001");
 
-        when(orderRepository.findById(2L)).thenReturn(Optional.empty());
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         BadRequestException exception = assertThrows(
             BadRequestException.class,
             () -> ubsClientService.validatePayment(response));
 
         assertEquals(PAYMENT_VALIDATION_ERROR, exception.getMessage());
-        verify(orderRepository).findById(2L);
+        verify(orderRepository).findById(1L);
         verifyNoInteractions(encryptionUtil);
     }
 
     @Test
     void testMapPayment() {
         PaymentResponseDto response = PaymentResponseDto.builder()
-            .orderReference("1_002")
+            .orderReference("MV8xXzE=")
             .currency("USD")
             .amount("150")
             .transactionStatus("Approved")
@@ -3825,7 +3828,7 @@ class UBSClientServiceImplTest {
         Payment result = invokeMapPayment(response);
 
         assertNotNull(result);
-        assertEquals(2L, result.getId());
+        assertEquals(1L, result.getId());
         assertEquals("USD", result.getCurrency());
         assertEquals(15000L, result.getAmount());
         assertEquals(OrderStatus.FORMED, result.getOrderStatus());
@@ -3841,9 +3844,10 @@ class UBSClientServiceImplTest {
 
     private Payment invokeMapPayment(PaymentResponseDto response) {
         try {
-            var method = UBSClientServiceImpl.class.getDeclaredMethod("mapPayment", PaymentResponseDto.class);
+            var method = UBSClientServiceImpl.class
+                .getDeclaredMethod("mapPayment", PaymentResponseDto.class, String.class);
             method.setAccessible(true);
-            return (Payment) method.invoke(ubsClientService, response);
+            return (Payment) method.invoke(ubsClientService, response, "1_1_1");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -4282,6 +4286,7 @@ class UBSClientServiceImplTest {
     @Test
     void validatePaymentFromMonoBankThrowExceptionTest() {
         MonoBankPaymentResponseDto response = getMonoBankPaymentResponseDto(null);
+
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(BadRequestException.class,

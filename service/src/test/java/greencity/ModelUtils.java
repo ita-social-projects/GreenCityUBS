@@ -5284,7 +5284,7 @@ public class ModelUtils {
     public static PaymentResponseDto getPaymentResponseDto() {
         return PaymentResponseDto.builder()
             .merchantAccount("TestMerchant123")
-            .orderReference("1_001")
+            .orderReference("MV8xXzE=")
             .merchantSignature("signature123")
             .amount("150")
             .currency("USD")
@@ -5424,7 +5424,7 @@ public class ModelUtils {
             .currency(980)
             .createdDate("2019-08-24T14:15:22Z")
             .modifiedDate("2019-08-24T14:17:22Z")
-            .orderReference("1_1_1")
+            .orderReference("MV8xXzE=")
             .paymentInfo(PaymentInfo.builder()
                 .cardNumber("444403******1902")
                 .terminal("MI001088")

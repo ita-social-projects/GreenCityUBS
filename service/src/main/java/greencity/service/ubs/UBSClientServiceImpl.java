@@ -305,12 +305,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public PaymentResponseWayForPay validatePayment(PaymentResponseDto response) {
-        Payment orderPayment = mapPayment(response);
-        String[] ids = response.getOrderReference().split("_");
+        String decodedOrderReference = OrderUtils.decodeOrderReference(response.getOrderReference());
+        Payment orderPayment = mapPayment(response, decodedOrderReference);
+        String[] ids = decodedOrderReference.split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
         checkResponseStatusFailure(response, orderPayment, order);
-        checkOrderStatusApproved(response, orderPayment, order);
+        checkOrderStatusApproved(response, orderPayment, order, decodedOrderReference);
         PaymentResponseWayForPay accept = PaymentResponseWayForPay.builder()
             .orderReference(response.getOrderReference())
             .status("accept")
@@ -319,13 +320,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         return accept;
     }
 
-    private Payment mapPayment(PaymentResponseDto response) {
+    private Payment mapPayment(PaymentResponseDto response, String decodedOrderReference) {
         if (response.getFee() == null) {
             response.setFee("0");
         }
         return Payment.builder()
-            .id(Long.valueOf(response.getOrderReference()
-                .substring(response.getOrderReference().lastIndexOf("_") + 1)))
+            .id(Long.valueOf(decodedOrderReference
+                .substring(decodedOrderReference.lastIndexOf("_") + 1)))
             .currency(response.getCurrency())
             .amount(Long.parseLong(response.getAmount()) * 100)
             .orderStatus(OrderStatus.FORMED)
@@ -635,7 +636,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .amount(1)
             // .amount((int) sumToPayInCoins)
             .merchantPaymentInfo(MerchantPaymentInfo.builder()
-                .orderReference(OrderUtils.generateOrderIdForPayment(orderId, order))
+                .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
                 .emails(Set.of(user.getRecipientEmail()))
                 .orderList(getBasketOrders(order))
                 .build())
@@ -1279,7 +1280,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .merchantDomainName(merchantDomainName)
             .apiVersion(1)
             .serviceUrl(resultWayForPayUrl)
-            .orderReference(OrderUtils.generateOrderIdForPayment(orderId, order))
+            .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
             .orderDate(instant.getEpochSecond())
             .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
             .currency("UAH")
@@ -1682,9 +1683,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    protected void checkOrderStatusApproved(PaymentResponseDto dto, Payment orderPayment, Order order) {
+    protected void checkOrderStatusApproved(PaymentResponseDto dto,
+        Payment orderPayment,
+        Order order,
+        String decodedOrderReference) {
         if (dto.getTransactionStatus().equals(APPROVED_STATUS)) {
-            orderPayment.setPaymentId(String.valueOf(dto.getOrderReference().split("_")[1]));
+            orderPayment.setPaymentId(decodedOrderReference.split("_")[1]);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderPayment.setOrder(order);
@@ -1896,7 +1900,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order increment = incrementCounter(order);
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
             formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
-        paymentWayForPayRequestDto.setOrderReference(OrderUtils.generateOrderIdForPayment(increment.getId(), order));
+        paymentWayForPayRequestDto
+            .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
         return getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
     }
 
@@ -2083,17 +2088,20 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response) {
-        String[] ids = response.getOrderReference().split("_");
+        String decodedOrderReference = OrderUtils.decodeOrderReference(response.getOrderReference());
+        String[] ids = decodedOrderReference.split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
-        Payment payment = createPayment(response, order);
+        Payment payment = createPayment(response, order, decodedOrderReference);
         checkPaymentStatus(response, payment, order);
     }
 
-    private Payment createPayment(MonoBankPaymentResponseDto response, Order order) {
+    private Payment createPayment(MonoBankPaymentResponseDto response,
+        Order order,
+        String decodedOrderReference) {
         return Payment.builder()
-            .id(Long.valueOf(response.getOrderReference()
-                .substring(response.getOrderReference().lastIndexOf("_") + 1)))
+            .id(Long.valueOf(decodedOrderReference
+                .substring(decodedOrderReference.lastIndexOf("_") + 1)))
             .currency("UAH")
             .amount((long) (response.getAmount() * 100))
             .orderStatus(OrderStatus.FORMED)
