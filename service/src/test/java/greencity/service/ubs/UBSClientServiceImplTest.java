@@ -1,16 +1,12 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
+import greencity.client.MonoBankClient;
 import greencity.client.UserRemoteClient;
-import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-
 import greencity.client.WayForPayClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDto;
-import greencity.dto.payment.PaymentWayForPayRequestDto;
-import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
@@ -24,13 +20,41 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
-import greencity.dto.order.*;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWayForPayClientDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseWayForPay;
+import greencity.dto.payment.PaymentWayForPayRequestDto;
+import greencity.dto.payment.monobank.MonoBankPaymentRequestDto;
+import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.position.PositionAuthoritiesDto;
-import greencity.dto.user.*;
+import greencity.dto.user.AllPointsUserDto;
+import greencity.dto.user.DeactivateUserRequestDto;
+import greencity.dto.user.PasswordStatusDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserProfileCreateDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderBag;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
@@ -39,47 +63,213 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
-import greencity.enums.*;
+import greencity.enums.AddressStatus;
+import greencity.enums.CertificateStatus;
+import greencity.enums.CourierLimit;
+import greencity.enums.LocationStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.PaymentSystem;
+import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.WrongSignatureException;
+import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
-import greencity.repository.*;
+import greencity.repository.AddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.CityRepository;
+import greencity.repository.CourierRepository;
+import greencity.repository.DistrictRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.EventRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.TariffLocationRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.TelegramBotRepository;
+import greencity.repository.UBSUserRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import jakarta.persistence.EntityNotFoundException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import static greencity.ModelUtils.*;
-import static greencity.constant.ErrorMessage.*;
+
+import static greencity.ModelUtils.KYIV_REGION_EN;
+import static greencity.ModelUtils.KYIV_REGION_UA;
+import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
+import static greencity.ModelUtils.TEST_EMAIL;
+import static greencity.ModelUtils.TEST_PAYMENT_LIST;
+import static greencity.ModelUtils.TEST_UUID;
+import static greencity.ModelUtils.addressDto;
+import static greencity.ModelUtils.addressDtoList;
+import static greencity.ModelUtils.addressDtoListWithNullPlaceId;
+import static greencity.ModelUtils.addressList;
+import static greencity.ModelUtils.addressWithKyivRegionDto;
+import static greencity.ModelUtils.bagDto;
+import static greencity.ModelUtils.botList;
+import static greencity.ModelUtils.createCertificateDto;
+import static greencity.ModelUtils.getActiveCertificateWith10Points;
+import static greencity.ModelUtils.getAddress;
+import static greencity.ModelUtils.getAddressDtoResponse;
+import static greencity.ModelUtils.getAddressRequestDto;
+import static greencity.ModelUtils.getAddressRequestToSaveDto;
+import static greencity.ModelUtils.getAddressWithKyivRegionToSaveRequestDto;
+import static greencity.ModelUtils.getBag;
+import static greencity.ModelUtils.getBag1list;
+import static greencity.ModelUtils.getBagForOrder;
+import static greencity.ModelUtils.getBagTranslationDto;
+import static greencity.ModelUtils.getCancellationDto;
+import static greencity.ModelUtils.getCheckoutResponseFromMonoBank;
+import static greencity.ModelUtils.getCity;
+import static greencity.ModelUtils.getCourier;
+import static greencity.ModelUtils.getCourierDto;
+import static greencity.ModelUtils.getCourierDtoList;
+import static greencity.ModelUtils.getDistrict;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getGeocodingResultWithKyivRegion;
+import static greencity.ModelUtils.getListOfEvents;
+import static greencity.ModelUtils.getLocation;
+import static greencity.ModelUtils.getMaximumAmountOfAddresses;
+import static greencity.ModelUtils.getMonoBankPaymentResponseDto;
+import static greencity.ModelUtils.getOrder;
+import static greencity.ModelUtils.getOrder2;
+import static greencity.ModelUtils.getOrderCount;
+import static greencity.ModelUtils.getOrderCountWithPaymentStatusPaid;
+import static greencity.ModelUtils.getOrderDetails;
+import static greencity.ModelUtils.getOrderDetailsWithoutSender;
+import static greencity.ModelUtils.getOrderPaymentDetailDto;
+import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
+import static greencity.ModelUtils.getOrderResponseDto;
+import static greencity.ModelUtils.getOrderStatusTranslation;
+import static greencity.ModelUtils.getOrderTest;
+import static greencity.ModelUtils.getOrderWayForPayClientDto;
+import static greencity.ModelUtils.getOrderWithEvents;
+import static greencity.ModelUtils.getOrderWithTariffAndLocation;
+import static greencity.ModelUtils.getOrderWithoutPayment;
+import static greencity.ModelUtils.getPayment;
+import static greencity.ModelUtils.getPaymentResponseDto;
+import static greencity.ModelUtils.getRegion;
+import static greencity.ModelUtils.getTariffInfo;
+import static greencity.ModelUtils.getTariffInfoWithLimitOfBags;
+import static greencity.ModelUtils.getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag;
+import static greencity.ModelUtils.getTariffLocation;
+import static greencity.ModelUtils.getTariffsForLocationDto;
+import static greencity.ModelUtils.getTariffsInfo;
+import static greencity.ModelUtils.getTelegramBotNotifyTrue;
+import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
+import static greencity.ModelUtils.getTestOrderAddressDtoRequestWithNullPlaceId;
+import static greencity.ModelUtils.getTestOrderAddressLocationDto;
+import static greencity.ModelUtils.getTestUser;
+import static greencity.ModelUtils.getUBSuser;
+import static greencity.ModelUtils.getUBSuserWithoutSender;
+import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
+import static greencity.ModelUtils.getUbsUsers;
+import static greencity.ModelUtils.getUsedCertificateWith600Points;
+import static greencity.ModelUtils.getUser;
+import static greencity.ModelUtils.getUserForCreate;
+import static greencity.ModelUtils.getUserInfoDto;
+import static greencity.ModelUtils.getUserPointsAndAllBagsDto;
+import static greencity.ModelUtils.getUserProfileCreateDto;
+import static greencity.ModelUtils.getUserProfileUpdateDto;
+import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
+import static greencity.ModelUtils.getUserWithBotNotifyTrue;
+import static greencity.ModelUtils.getUserWithLastLocation;
+import static greencity.ModelUtils.getViberBotNotifyTrue;
+import static greencity.constant.AppConstant.USER_WITH_PREFIX;
+import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
+import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
+import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
+import static greencity.constant.ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
+import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -194,6 +384,12 @@ class UBSClientServiceImplTest {
 
     @Mock
     private DistrictRepository districtRepository;
+
+    @Mock
+    private MonoBankClient monoBankClient;
+
+    @Value("${greencity.monobank.token}")
+    private String token;
 
     @Test
     void testGetAllDistricts() {
@@ -4016,5 +4212,79 @@ class UBSClientServiceImplTest {
         List<LocationsDto> result = ubsClientService.getAllLocationsByCourierId(id);
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void processOrderWithMonoBankPaymentSystemTest() {
+        Order order = getOrder();
+        User user = getUserWithLastLocation();
+        String uuid = user.getUuid();
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.setBags(Collections.singletonList(new BagDto(3, 10)));
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        UBSuser ubSuser = getUBSuser();
+
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(getAddress()));
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(ubsUserRepository.findById(anyLong())).thenReturn(Optional.of(ubSuser));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(getBag()));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
+            .thenReturn(getCheckoutResponseFromMonoBank());
+
+        PaymentSystemResponse paymentSystemResponse = ubsClientService.saveFullOrderToDB(dto, uuid, 1L);
+
+        verify(userRepository).findByUuid(uuid);
+        verify(addressRepository).findById(anyLong());
+        verify(tariffsInfoRepository).findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
+        verify(ubsUserRepository).findById(anyLong());
+        verify(bagRepository).findActiveBagById(anyInt());
+        verify(orderRepository, times(2)).findById(anyLong());
+        verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
+        verify(monoBankClient).getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token));
+
+        assertEquals("https://www.monobank/api", paymentSystemResponse.getLink());
+        assertEquals(1L, paymentSystemResponse.getOrderId());
+    }
+
+    @Test
+    void validatePaymentFromMonoBankWithSuccessStatusTest() {
+        MonoBankPaymentResponseDto response = getMonoBankPaymentResponseDto("success");
+        Order order = getOrder();
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        ubsClientService.validatePaymentFromMonoBank(response);
+
+        verify(orderRepository).findById(order.getId());
+        verify(paymentRepository).save(any());
+        verify(orderRepository).save(any());
+        verify(eventService, times(2)).save(anyString(), anyString(), any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"failure", "reversed"})
+    void validatePaymentFromMonoBankWithErrorsTest(String status) {
+        MonoBankPaymentResponseDto response = getMonoBankPaymentResponseDto(status);
+        Order order = getOrder();
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        ubsClientService.validatePaymentFromMonoBank(response);
+
+        verify(orderRepository).findById(order.getId());
+        verify(paymentRepository).save(any());
+    }
+
+    @Test
+    void validatePaymentFromMonoBankThrowExceptionTest() {
+        MonoBankPaymentResponseDto response = getMonoBankPaymentResponseDto(null);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class,
+            () -> ubsClientService.validatePaymentFromMonoBank(response));
     }
 }

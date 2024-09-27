@@ -41,6 +41,8 @@ import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
+import greencity.dto.payment.monobank.PaymentInfo;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
@@ -59,6 +61,7 @@ import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.enums.CancellationReason;
 import greencity.enums.CourierLimit;
+import greencity.enums.MonoBankStatuses;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationTime;
@@ -640,6 +643,27 @@ public class ModelUtils {
             .textUa(TEST_AGREEMENT_TEXT_UA)
             .textEn(TEST_AGREEMENT_TEXT_EN)
             .createdAt(LocalDateTime.now().minusDays(1))
+            .build();
+    }
+
+    public static MonoBankPaymentResponseDto getMonoBankPaymentResponseDto() {
+        return MonoBankPaymentResponseDto.builder()
+            .invoiceId("testInvoice")
+            .status(MonoBankStatuses.CREATED.getName())
+            .failureReason("")
+            .errorCode("8")
+            .amount(1000)
+            .currency(980)
+            .createdDate(LocalDateTime.now().toString())
+            .modifiedDate(LocalDateTime.now().plusHours(1).toString())
+            .orderReference("11_11_11")
+            .paymentInfo(PaymentInfo.builder()
+                .cardNumber("4490XXXXXXXX4456")
+                .terminal("")
+                .paymentSystem(PaymentSystem.MONOBANK.name())
+                .paymentMethod("VISA")
+                .fee(0)
+                .build())
             .build();
     }
 }

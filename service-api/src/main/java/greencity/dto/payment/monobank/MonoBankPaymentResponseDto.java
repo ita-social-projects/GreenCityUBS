@@ -3,12 +3,14 @@ package greencity.dto.payment.monobank;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
+@Data
+@Builder
 public class MonoBankPaymentResponseDto {
     @NotBlank
     private String invoiceId;
