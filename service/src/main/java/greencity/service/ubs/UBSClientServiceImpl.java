@@ -2093,7 +2093,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
         Payment payment = createPayment(response, order, decodedOrderReference);
-        checkPaymentStatus(response, payment, order);
+        checkPaymentResponseStatus(response, payment, order);
     }
 
     private Payment createPayment(MonoBankPaymentResponseDto response,
@@ -2112,7 +2112,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .responseCode(Integer.valueOf(response.getErrorCode()))
             .responseDescription(response.getFailureReason())
             .orderTime(response.getCreatedDate())
-            .settlementDate(convertToDateOnly(response.getModifiedDate()))
+            .settlementDate(OffsetDateTime.parse(response.getModifiedDate()).format(DateTimeFormatter.ISO_LOCAL_DATE))
             .fee(Long.valueOf(response.getPaymentInfo().getFee()))
             .paymentSystem(response.getPaymentInfo().getPaymentSystem())
             .senderEmail(order.getUser().getRecipientEmail())
@@ -2123,7 +2123,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
-    private void checkPaymentStatus(MonoBankPaymentResponseDto response, Payment payment, Order order) {
+    private void checkPaymentResponseStatus(MonoBankPaymentResponseDto response, Payment payment, Order order) {
         if (MonoBankStatuses.SUCCESS.getName().equalsIgnoreCase(response.getStatus())) {
             payment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
@@ -2132,21 +2132,11 @@ public class UBSClientServiceImpl implements UBSClientService {
             eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + payment.getPaymentId(),
                 OrderHistory.SYSTEM, order);
-        }
-        if (MonoBankStatuses.FAILURE.getName().equalsIgnoreCase(response.getStatus())
-            || MonoBankStatuses.REVERSED.getName().equalsIgnoreCase(response.getStatus())) {
+        } else {
             payment.setPaymentStatus(PaymentStatus.UNPAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
             paymentRepository.save(payment);
             orderRepository.save(order);
         }
-    }
-
-    private String convertToDateOnly(String isoDateString) {
-        OffsetDateTime dateTime = OffsetDateTime.parse(isoDateString);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        return dateTime.format(formatter);
     }
 }
