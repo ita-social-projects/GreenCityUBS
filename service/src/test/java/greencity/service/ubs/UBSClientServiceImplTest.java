@@ -4270,7 +4270,7 @@ class UBSClientServiceImplTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"failure", "reversed"})
+    @ValueSource(strings = {"failure", "reversed", "created", "processing", "hold", "expired"})
     void validatePaymentFromMonoBankWithErrorsTest(String status) {
         MonoBankPaymentResponseDto response = getMonoBankPaymentResponseDto(status);
         Order order = getOrder();
