@@ -799,7 +799,7 @@ class UBSClientServiceImplTest {
 
         PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("http://example.com/invoice", result.getLink());
+        Assertions.assertEquals("http://example.com/invoice", result.link());
     }
 
     @Test
@@ -4250,8 +4250,8 @@ class UBSClientServiceImplTest {
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
         verify(monoBankClient).getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token));
 
-        assertEquals("https://www.monobank/api", paymentSystemResponse.getLink());
-        assertEquals(1L, paymentSystemResponse.getOrderId());
+        assertEquals("https://www.monobank/api", paymentSystemResponse.link());
+        assertEquals(1L, paymentSystemResponse.orderId());
     }
 
     @Test

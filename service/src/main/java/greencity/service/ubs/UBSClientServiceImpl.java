@@ -625,7 +625,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             formPaymentRequestForMonoBank(order.getId(), sumToPayInCoins, currentUser);
         CheckoutResponseFromMonoBank checkoutResponse = monoBankClient.getCheckoutResponse(requestDto, token);
 
-        return getPaymentRequestDto(order, checkoutResponse.getPageUrl());
+        return getPaymentRequestDto(order, checkoutResponse.pageUrl());
     }
 
     private MonoBankPaymentRequestDto formPaymentRequestForMonoBank(Long orderId, long sumToPayInCoins, User user) {
@@ -2107,14 +2107,14 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderStatus(OrderStatus.FORMED)
             .responseStatus(response.getStatus())
             .senderCellPhone(order.getUser().getRecipientPhone())
-            .maskedCard(response.getPaymentInfo().getCardNumber())
-            .cardType(response.getPaymentInfo().getPaymentSystem())
+            .maskedCard(response.getPaymentInfo().cardNumber())
+            .cardType(response.getPaymentInfo().paymentSystem())
             .responseCode(Integer.valueOf(response.getErrorCode()))
             .responseDescription(response.getFailureReason())
             .orderTime(response.getCreatedDate())
             .settlementDate(OffsetDateTime.parse(response.getModifiedDate()).format(DateTimeFormatter.ISO_LOCAL_DATE))
-            .fee(Long.valueOf(response.getPaymentInfo().getFee()))
-            .paymentSystem(response.getPaymentInfo().getPaymentSystem())
+            .fee(Long.valueOf(response.getPaymentInfo().fee()))
+            .paymentSystem(response.getPaymentInfo().paymentSystem())
             .senderEmail(order.getUser().getRecipientEmail())
             .paymentId(response.getInvoiceId())
             .order(order)
