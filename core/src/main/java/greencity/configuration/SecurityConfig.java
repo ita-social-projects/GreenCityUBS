@@ -332,6 +332,8 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers(UBS_LINK + "/receivePayment");
+        return web -> web.ignoring()
+            .requestMatchers(UBS_LINK + "/receivePayment")
+            .requestMatchers(UBS_LINK + "/monobank/payments");
     }
 }

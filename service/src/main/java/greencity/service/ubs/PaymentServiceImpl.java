@@ -294,7 +294,7 @@ public class PaymentServiceImpl implements PaymentService {
             .receiptLink(receiptLink)
             .order(order)
             .currency("UAH")
-            .orderStatus(String.valueOf(OrderStatus.FORMED))
+            .orderStatus(OrderStatus.FORMED)
             .paymentStatus(PaymentStatus.PAID)
             .build();
     }
@@ -391,7 +391,7 @@ public class PaymentServiceImpl implements PaymentService {
             .currency("UAH")
             .paymentType(PaymentType.MANUAL)
             .order(order)
-            .orderStatus(order.getOrderStatus().toString())
+            .orderStatus(order.getOrderStatus())
             .build();
         if (image != null) {
             payment.setImagePath(fileService.upload(image));

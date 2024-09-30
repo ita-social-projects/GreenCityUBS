@@ -2,6 +2,7 @@ package greencity.dto.order;
 
 import greencity.dto.bag.BagDto;
 import greencity.dto.user.PersonalDataDto;
+import greencity.enums.PaymentSystem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,4 +53,7 @@ public class OrderResponseDto implements Serializable {
 
     @NotNull
     private Long locationId;
+
+    @NotNull
+    private PaymentSystem paymentSystem;
 }

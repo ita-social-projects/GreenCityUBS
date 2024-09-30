@@ -53,10 +53,10 @@ import java.util.Set;
 @Builder
 @Table(name = "orders")
 @EqualsAndHashCode(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
-    "changeOfPointsList", "blockedByEmployee", "certificates", "payment", "employeeOrderPositions",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "payment",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 @ToString(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
-    "changeOfPointsList", "blockedByEmployee", "certificates", "payment", "employeeOrderPositions",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "payment",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 public class Order {
     @Id

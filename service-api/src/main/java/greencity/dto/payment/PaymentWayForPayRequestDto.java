@@ -15,7 +15,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @ToString
-public class PaymentRequestDto {
+public class PaymentWayForPayRequestDto {
     @JsonProperty("transactionType")
     private String transactionType;
     @JsonProperty("merchantAccount")
