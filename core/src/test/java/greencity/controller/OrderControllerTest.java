@@ -9,11 +9,12 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.LocationsDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.WayForPayOrderResponse;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.user.UBSuserNotFoundException;
@@ -178,7 +179,7 @@ class OrderControllerTest {
         OrderDetailStatusDto orderDetailStatusDto = getUnpaidOrderDetailStatusDto();
         orderDetailStatusDto.setOrderStatus(OrderStatus.FORMED.name());
 
-        WayForPayOrderResponse resultObject = WayForPayOrderResponse.builder()
+        PaymentSystemResponse resultObject = PaymentSystemResponse.builder()
             .orderId(orderId)
             .link("Link")
             .build();
@@ -420,6 +421,17 @@ class OrderControllerTest {
             .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
 
         verify(ubsClientService).getAllLocationsByCourierId(id);
+    }
+
+    @Test
+    void receivePaymentFromMonoBankTest() throws Exception {
+        MonoBankPaymentResponseDto responseDto = ModelUtils.getMonoBankPaymentResponseDto();
+
+        mockMvc.perform(post(ubsLink + "/monobank/payments")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(new ObjectMapper().writeValueAsString(responseDto)));
+
+        verify(ubsClientService).validatePaymentFromMonoBank(responseDto);
     }
 
     private void setRedirectionConfigProp() {
