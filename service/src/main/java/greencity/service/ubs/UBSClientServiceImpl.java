@@ -635,8 +635,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
         return MonoBankPaymentRequestDto.builder()
-            .amount(1)
-            // .amount((int) sumToPayInCoins)
+            .amount((int) sumToPayInCoins)
             .merchantPaymentInfo(MerchantPaymentInfo.builder()
                 .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
                 .emails(Set.of(user.getRecipientEmail()))
@@ -1116,7 +1115,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private Long countPaidAmount(List<Payment> payments) {
         return payments.stream()
             .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
-            .map(Payment::getAmount)
+            .map(v -> (v.getAmount() / 100))
             .reduce(0L, Long::sum);
     }
 
