@@ -97,7 +97,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee employee = modelMapper.map(dto, Employee.class);
         employee.setUuid(UUID.randomUUID().toString());
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
-        employee.setImagePath(image != null ? defaultImagePath : defaultImagePath);
+        employee.setImagePath(image != null ? fileService.upload(image) : defaultImagePath);
 
         List<TariffWithChatAccess> tariffs = dto.getTariffs();
         if (tariffs != null) {
