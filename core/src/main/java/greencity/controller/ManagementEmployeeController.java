@@ -67,11 +67,7 @@ public class ManagementEmployeeController {
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Object> saveEmployee(
         @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @RequestPart(value = "image", required = false) MultipartFile image,
-        BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildErrorResponse(bindingResult));
-        }
+        @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 
@@ -329,15 +325,5 @@ public class ManagementEmployeeController {
     @GetMapping(value = "/{email}")
     public ResponseEntity<EmployeeWithTariffsDto> getEmployeesByUserId(@PathVariable String email) {
         return ResponseEntity.ok().body(employeeService.getEmployeeByEmail(email));
-    }
-
-    private Map<String, String> buildErrorResponse(BindingResult bindingResult) {
-        Map<String, String> errors = new HashMap<>();
-
-        bindingResult.getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
-        });
-
-        return errors;
     }
 }
