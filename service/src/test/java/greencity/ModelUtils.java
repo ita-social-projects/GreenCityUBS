@@ -94,6 +94,9 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
+import greencity.dto.payment.monobank.CheckoutResponseFromMonoBank;
+import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
+import greencity.dto.payment.monobank.PaymentInfo;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.position.PositionWithTranslateDto;
@@ -173,6 +176,7 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.PaymentSystem;
 import greencity.enums.TariffStatus;
 import greencity.enums.UserCategory;
 import greencity.util.Bot;
@@ -463,6 +467,7 @@ public class ModelUtils {
                 .phoneNumber("067894522")
                 .ubsUserId(1L)
                 .build())
+            .paymentSystem(PaymentSystem.MONOBANK)
             .build();
     }
 
@@ -1984,7 +1989,7 @@ public class ModelUtils {
             .paymentStatus(PaymentStatus.PAID)
             .amount(95000L)
             .currency("UAH")
-            .orderStatus("approved")
+            .orderStatus(OrderStatus.CONFIRMED)
             .responseStatus("approved")
             .order(getOrder())
             .paymentId("1")
@@ -2453,6 +2458,9 @@ public class ModelUtils {
             .recipientSurname("Ivanov")
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
+            .currentPoints(700)
+            .orders(new ArrayList<>())
+            .changeOfPointsList(new ArrayList<>())
             .build();
     }
 
@@ -4225,6 +4233,7 @@ public class ModelUtils {
             .receivingStationList(Set.of(getReceivingStation()))
             .courier(getCourier())
             .service(getService())
+            .bags(getBaglist())
             .build();
     }
 
@@ -5275,7 +5284,7 @@ public class ModelUtils {
     public static PaymentResponseDto getPaymentResponseDto() {
         return PaymentResponseDto.builder()
             .merchantAccount("TestMerchant123")
-            .orderReference("1_001")
+            .orderReference("MV8xXzE=")
             .merchantSignature("signature123")
             .amount("150")
             .currency("USD")
@@ -5395,6 +5404,34 @@ public class ModelUtils {
                 .nameEn("Kyiv")
                 .districts(Set.of(getDistrict()))
                 .build()))
+            .build();
+    }
+
+    public static CheckoutResponseFromMonoBank getCheckoutResponseFromMonoBank() {
+        return CheckoutResponseFromMonoBank.builder()
+            .invoiceId("invoiceID")
+            .pageUrl("https://www.monobank/api")
+            .build();
+    }
+
+    public static MonoBankPaymentResponseDto getMonoBankPaymentResponseDto(String status) {
+        return MonoBankPaymentResponseDto.builder()
+            .invoiceId("testInvoiceId")
+            .status(status)
+            .failureReason("reason")
+            .errorCode("81")
+            .amount(1000)
+            .currency(980)
+            .createdDate("2019-08-24T14:15:22Z")
+            .modifiedDate("2019-08-24T14:17:22Z")
+            .orderReference("MV8xXzE=")
+            .paymentInfo(PaymentInfo.builder()
+                .cardNumber("444403******1902")
+                .terminal("MI001088")
+                .paymentSystem("visa")
+                .paymentMethod("pan")
+                .fee(0)
+                .build())
             .build();
     }
 }

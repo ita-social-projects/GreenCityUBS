@@ -85,4 +85,7 @@ public class OrderHistory {
     public static final String UPDATE_MIX_WASTE = "Змінено деталі замовлення. Мікс відходів ";
     public static final String CANCELED_ORDER_MONEY_REFUND = "Кошти за замовлення повернуто.";
     public static final String CANCELED_ORDER_MONEY_REFUND_ENG = "The money for the order has been refunded.";
+    public static final String PAYMENT_REVERSED = "Оплата повернена після успіху";
+    public static final String PAYMENT_PENDING = "Платіж обробляється";
+    public static final String PAYMENT_FAILURE = "Неуспішна оплата";
 }

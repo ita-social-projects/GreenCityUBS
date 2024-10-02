@@ -1,7 +1,7 @@
 package greencity.client.config;
 
-import greencity.client.WayForPayClient;
-import greencity.dto.payment.PaymentWayForPayRequestDto;
+import greencity.client.MonoBankClient;
+import greencity.dto.payment.monobank.MonoBankPaymentRequestDto;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,21 +13,23 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-class WayForPayClientFallbackFactoryTest {
+class MonoBankClientFallbackFactoryTest {
     @InjectMocks
-    private WayForPayClientFallbackFactory fallbackFactory;
+    private MonoBankClientFallbackFactory fallbackFactory;
     @Mock
-    private WayForPayClient client;
+    private MonoBankClient client;
+    private String token;
 
     @BeforeEach
     void setUp() {
         Throwable throwable = new RuntimeException();
         client = fallbackFactory.create(throwable);
+        token = "testToken";
     }
 
     @Test
     void getCheckoutResponse() {
-        PaymentWayForPayRequestDto dto = PaymentWayForPayRequestDto.builder().build();
-        assertThrows(RemoteServerUnavailableException.class, () -> client.getCheckOutResponse(dto));
+        MonoBankPaymentRequestDto dto = MonoBankPaymentRequestDto.builder().build();
+        assertThrows(RemoteServerUnavailableException.class, () -> client.getCheckoutResponse(dto, token));
     }
 }
