@@ -65,7 +65,7 @@ public class ManagementEmployeeController {
     @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
     @PostMapping(value = "/save-employee",
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Object> saveEmployee(
+    public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
         @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
         @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
