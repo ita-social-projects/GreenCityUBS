@@ -74,31 +74,48 @@ class EmployeeWithTariffsIdDtoTest {
 
     private static Stream<Arguments> provideFieldsAndValidValues() {
         return Stream.of(
-            Arguments.of("FirstName", "LastName"),
-            Arguments.of("firstName", "lastName"),
+            Arguments.of("Олександр", "Петро"),
+            Arguments.of("Іван", "Єгор"),
             Arguments.of("Лук'ян", "Їгор"),
-            Arguments.of("Петро1", "ІЄгор1"),
-            Arguments.of("Лук'ян+", "Єгор+"),
-            Arguments.of("Лук'ян-", "Єгор-"),
-            Arguments.of("Лук'ян ", "Єгор "),
+            Arguments.of("Петро", "І Єгор"),
+            Arguments.of("Лук'ян+", "Єгор"),
+            Arguments.of("Лук'ян-", "Єгор"),
+            Arguments.of("Лук'ян ", "Єгор"),
             Arguments.of("Лук'ян.н", "Єгор.р"),
             Arguments.of("Петро", "Ґгор"),
-            Arguments.of("лук'ян", "їєґгор"));
+            Arguments.of("лук'ян", "їєґгор"),
+            Arguments.of("Олександра", "Петрівна"),
+            Arguments.of("Іванна", "Єгорівна"),
+            Arguments.of("Лук'яна", "Їгорівна"),
+            Arguments.of("Петра", "І Єгорівна"),
+            Arguments.of("Лук'яна+", "Єгорівна"),
+            Arguments.of("Лук'яна-", "Єгорівна"),
+            Arguments.of("Лук'яна ", "Єгорівна"),
+            Arguments.of("Лук'яна.н", "Єгорівна.р"));
     }
 
     private static Stream<Arguments> provideFieldsAndInvalidValues() {
         return Stream.of(
-            Arguments.of("", "", ""),
-            Arguments.of(null, null, "mail.com"),
+            Arguments.of("ъван", "ъегор", "mail.com"),
+            Arguments.of("ыван", "ыегор", "mail.com"),
+            Arguments.of("ёван", "ёегор", "mail.com"),
+            Arguments.of("эван", "эегор", "mail.com"),
+            Arguments.of("ъванъ", "ъегоръ", "mail.com"),
+            Arguments.of("ываны", "ыегоры", "mail.com"),
+            Arguments.of("ёванё", "ёегорё", "mail.com"),
+            Arguments.of("эванэ", "эегорэ", "mail.com"),
+            Arguments.of("ъванъы", "ъегоръы", "mail.com"),
+            Arguments.of("ываныё", "ыегорыё", "mail.com"),
+            Arguments.of("ёванёэ", "ёегорёэ", "mail.com"),
+            Arguments.of("эванэъ", "эегорэъ", "mail.com"),
+            Arguments.of("ivan", "egor", "invalid_email"),
+            Arguments.of("ivan", "egor", "mail@.com"),
+            Arguments.of("ivan", "egor", "mail.com@"),
+            Arguments.of("ivan", "egor", "mail..com"),
+            Arguments.of("ivan", "egor", "mail.com."),
+            Arguments.of("ivan", "egor", "mail@com"),
+            Arguments.of("ivan", "egor", "mail@.com.au"),
             Arguments.of(null, null, null),
-            Arguments.of(" ", " ", ""),
-            Arguments.of(".", ".", "."),
-            Arguments.of("T.", "T.", "T."),
-            Arguments.of("T..", "T..", "T.."),
-            Arguments.of("T...", "T...", "T..."),
-            Arguments.of("T--", "T--", "T--"),
-            Arguments.of("T---", "T---", "T---"),
-            Arguments.of("''", "''", "''"),
-            Arguments.of("Ttttttttttttttttttttttttttttttt", "Ttttttttttttttttttttttttttttttt", "mail@"));
+            Arguments.of("ivan", "egor", "mail@.au"));
     }
 }

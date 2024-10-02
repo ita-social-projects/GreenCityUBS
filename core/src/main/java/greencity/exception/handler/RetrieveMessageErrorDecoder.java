@@ -17,9 +17,9 @@ import java.nio.charset.StandardCharsets;
 public class RetrieveMessageErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String methodKey, Response response) {
-        ExceptionResponce exception;
+        ExceptionResponse exception;
         try (InputStream body = response.body().asInputStream()) {
-            exception = ExceptionResponce
+            exception = ExceptionResponse
                 .builder()
                 .message(IOUtils.toString(body, StandardCharsets.UTF_8)).build();
         } catch (IOException e) {

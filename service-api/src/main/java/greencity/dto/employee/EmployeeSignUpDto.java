@@ -3,7 +3,6 @@ package greencity.dto.employee;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import greencity.dto.position.PositionDto;
-import greencity.enums.EmployeeStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

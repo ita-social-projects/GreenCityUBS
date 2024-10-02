@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +36,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -62,9 +65,13 @@ public class ManagementEmployeeController {
     @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
     @PostMapping(value = "/save-employee",
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
+    public ResponseEntity<Object> saveEmployee(
         @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @RequestPart(value = "image", required = false) MultipartFile image) {
+        @RequestPart(value = "image", required = false) MultipartFile image,
+        BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildErrorResponse(bindingResult));
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 
@@ -322,5 +329,15 @@ public class ManagementEmployeeController {
     @GetMapping(value = "/{email}")
     public ResponseEntity<EmployeeWithTariffsDto> getEmployeesByUserId(@PathVariable String email) {
         return ResponseEntity.ok().body(employeeService.getEmployeeByEmail(email));
+    }
+
+    private Map<String, String> buildErrorResponse(BindingResult bindingResult) {
+        Map<String, String> errors = new HashMap<>();
+
+        bindingResult.getFieldErrors().forEach(error -> {
+            errors.put(error.getField(), error.getDefaultMessage());
+        });
+
+        return errors;
     }
 }

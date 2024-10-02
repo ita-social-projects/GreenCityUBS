@@ -30,7 +30,9 @@ public class EmployeeDto {
     @NotNull
     @ValidPhoneNumber
     private String phoneNumber;
-    @Email
+    @Email(
+        regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$",
+        message = ValidationConstant.INVALID_EMAIL)
     @NotBlank
     private String email;
     private EmployeeStatus employeeStatus;

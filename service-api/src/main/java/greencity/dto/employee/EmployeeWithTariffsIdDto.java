@@ -17,6 +17,6 @@ import java.util.List;
 public class EmployeeWithTariffsIdDto {
     @Valid
     private EmployeeDto employeeDto;
-    @NotEmpty
+    @NotEmpty(message = "Tariffs must not be empty")
     private List<TariffWithChatAccess> tariffs;
 }
