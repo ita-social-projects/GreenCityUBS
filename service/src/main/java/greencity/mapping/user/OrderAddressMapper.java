@@ -21,14 +21,19 @@ public class OrderAddressMapper extends AbstractConverter<Address, OrderAddress>
             .addressComment(address.getAddressComment())
             .actual(address.getActual())
             .addressStatus(address.getAddressStatus())
-            .coordinates(Coordinates.builder()
-                .latitude(address.getCoordinates().getLatitude())
-                .longitude(address.getCoordinates().getLongitude())
-                .build())
+            .coordinates(address.getCoordinates() != null
+                ? Coordinates.builder()
+                    .latitude(address.getCoordinates().getLatitude())
+                    .longitude(address.getCoordinates().getLongitude())
+                    .build()
+                : null)
             .regionEn(address.getRegionEn())
             .cityEn(address.getCityEn())
             .streetEn(address.getStreetEn())
             .districtEn(address.getDistrictEn())
+            .districtId(address.getDistrictId())
+            .cityId(address.getCityId())
+            .regionId(address.getRegionId())
             .build();
     }
 }

@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDto;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.DeactivateUserRequestDto;
@@ -37,6 +38,7 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.user.User;
+import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.OrderStatus;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
@@ -426,4 +428,13 @@ public interface UBSClientService {
      *                 details such as transaction ID, status, and amount.
      */
     void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response);
+
+    /**
+     * Method updates order address fields.
+     *
+     * @param orderAddressDtoUpdate the DTO that contains required data for address
+     *                              update.
+     * @return {@link OrderAddress} updated order's address.
+     */
+    OrderAddress updateOrderAddress(OrderAddressExportDetailsDtoUpdate orderAddressDtoUpdate);
 }

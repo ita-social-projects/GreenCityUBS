@@ -1,6 +1,9 @@
 package greencity.repository;
 
 import greencity.entity.coords.Coordinates;
+import greencity.entity.user.Region;
+import greencity.entity.user.locations.City;
+import greencity.entity.user.locations.District;
 import greencity.enums.AddressStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -20,6 +23,93 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ModelUtils {
+    public static Region getKyivRegion() {
+        return Region.builder()
+            .id(100L)
+            .nameEn("Kyiv Oblast")
+            .nameUk("Київська область")
+            .build();
+    }
+
+    public static Region getLvivRegion() {
+        return Region.builder()
+            .id(101L)
+            .nameUk("Львівська область")
+            .nameEn("Lviv Oblast")
+            .build();
+    }
+
+    public static Region getOdesaRegion() {
+        return Region.builder()
+            .id(102L)
+            .nameUk("Одеська область")
+            .nameEn("Odessa Oblast")
+            .build();
+    }
+
+    public static City getKyivCity() {
+        return City.builder()
+            .id(100L)
+            .nameUk("Київ")
+            .nameEn("Kyiv")
+            .region(getKyivRegion())
+            .build();
+    }
+
+    public static City getLvivCity() {
+        return City.builder()
+            .id(101L)
+            .nameUk("Львів")
+            .nameEn("Lviv")
+            .region(getLvivRegion())
+            .build();
+    }
+
+    public static City getOdesaCity() {
+        return City.builder()
+            .id(102L)
+            .nameUk("Одеса")
+            .nameEn("Odessa")
+            .region(getOdesaRegion())
+            .build();
+    }
+
+    public static District getShevchenkivskyiDistrict() {
+        return District.builder()
+            .id(100L)
+            .nameUk("Шевченківський")
+            .nameEn("Shevchenkivskyi")
+            .city(getKyivCity())
+            .build();
+    }
+
+    public static District getPrimorskyiDistrict() {
+        return District.builder()
+            .id(101L)
+            .nameUk("Приморський")
+            .nameEn("Primorskyi")
+            .city(getOdesaCity())
+            .build();
+    }
+
+    public static District getHalychskyiDistrict() {
+        return District.builder()
+            .id(102L)
+            .nameUk("Галицький")
+            .nameEn("Halychskyi")
+            .city(getLvivCity())
+            .build();
+    }
+
+    public static District getPodilskyiDistrict() {
+        return District.builder()
+            .id(103L)
+            .nameUk("Подільський")
+            .nameEn("Podilskyi")
+            .city(getKyivCity())
+            .build();
+    }
+
     public static List<Order> getOrderList() {
         List<Order> orderList = new ArrayList<>();
         orderList.add(Order.builder()
@@ -52,6 +142,9 @@ public class ModelUtils {
             .regionEn("Kyiv region")
             .streetEn("Bohdana Khmelnytskoho Street")
             .districtEn("Shevchenkivskyi")
+            .regionId(getKyivRegion())
+            .cityId(getKyivCity())
+            .districtId(getShevchenkivskyiDistrict())
             .build();
     }
 
@@ -102,6 +195,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(102L)
+            .cityId(102L)
+            .districtId(101L)
             .build();
     }
 
@@ -152,6 +248,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(100L)
             .build();
     }
 
@@ -202,6 +301,9 @@ public class ModelUtils {
             .isBlocked(true)
             .blockedBy("Abu, Dabi")
             .tariffsInfoId(1L)
+            .regionId(101L)
+            .cityId(101L)
+            .districtId(102L)
             .build();
     }
 
@@ -252,6 +354,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 
@@ -302,6 +407,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(100L)
             .build();
     }
 
@@ -352,6 +460,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(101L)
+            .cityId(101L)
+            .districtId(104L)
             .build();
     }
 
@@ -402,6 +513,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 
@@ -452,6 +566,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(101L)
+            .cityId(101L)
+            .districtId(104L)
             .build();
     }
 
@@ -502,6 +619,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 
@@ -552,6 +672,9 @@ public class ModelUtils {
             .isBlocked(true)
             .blockedBy("Abu, Dabi")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 
@@ -602,6 +725,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 
@@ -652,6 +778,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 

@@ -44,6 +44,7 @@ import greencity.dto.position.PositionDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
+import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
@@ -238,16 +239,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
         String email) {
-        Optional<OrderAddress> addressForAdminPage = orderAddressRepository.findById(dtoUpdate.getId());
-        if (addressForAdminPage.isPresent()) {
-            orderAddressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
-            eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
-            return addressForAdminPage.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
-        } else {
-            throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId());
-        }
+        OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId()));
+        OrderAddress updatedOrderAddress = ubsClientService.updateOrderAddress(dtoUpdate);
+        mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress);
+        orderAddressRepository.save(updatedOrderAddress);
+        eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
+        return Optional.of(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class));
     }
 
     /**
@@ -1446,5 +1447,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .description(order.getReasonNotTakingBagDescription())
             .images(order.getImageReasonNotTakingBags())
             .build();
+    }
+
+    private void mapUpdatedOrderAddressFields(OrderAddress orderAddress, OrderAddress updatedOrderAddress) {
+        updatedOrderAddress.setLocation(orderAddress.getLocation());
+        updatedOrderAddress.setId(orderAddress.getId());
+        updatedOrderAddress.setActual(orderAddress.getActual());
+        updatedOrderAddress.setAddressComment(orderAddress.getAddressComment());
+        updatedOrderAddress.setCoordinates(orderAddress.getCoordinates());
+        updatedOrderAddress.setAddressStatus(orderAddress.getAddressStatus());
     }
 }

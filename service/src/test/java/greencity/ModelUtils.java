@@ -226,6 +226,7 @@ public class ModelUtils {
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
     public static final OrderAddressExportDetailsDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE =
         createOrderAddressDtoUpdate();
+    public static final CreateAddressRequestDto TEST_CREATE_ADDRESS_DTO = getCreateAddressRequestDto();
     public static final List<Payment> TEST_PAYMENT_LIST = createPaymentList();
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
@@ -1861,6 +1862,32 @@ public class ModelUtils {
             .build();
     }
 
+    public static Region getKyivRegion() {
+        return Region.builder()
+            .id(1L)
+            .nameEn("Kyiv Oblast")
+            .nameUk("Київська область")
+            .build();
+    }
+
+    public static City getKyivCity() {
+        return City.builder()
+            .id(1L)
+            .nameUk("Київ")
+            .nameEn("Kyiv")
+            .region(getKyivRegion())
+            .build();
+    }
+
+    public static District getShevchenkivskyiDistrict() {
+        return District.builder()
+            .id(1L)
+            .nameUk("Шевченківський")
+            .nameEn("Shevchenkivskyi")
+            .city(getKyivCity())
+            .build();
+    }
+
     public static OrderAddress getOrderAddress() {
         return OrderAddress.builder()
             .region("Region")
@@ -1881,6 +1908,9 @@ public class ModelUtils {
             .cityEn("CityEng")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
+            .districtId(getShevchenkivskyiDistrict())
+            .cityId(getKyivCity())
+            .regionId(getKyivRegion())
             .build();
     }
 
@@ -2313,6 +2343,22 @@ public class ModelUtils {
     private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
             .id(1L)
+            .houseNumber("1")
+            .entranceNumber("3")
+            .district("District")
+            .districtEn("DistrictEng")
+            .street("Street")
+            .streetEn("StreetEng")
+            .houseCorpus("2")
+            .city("City")
+            .cityEn("CityEng")
+            .region("Region")
+            .regionEn("RegionEng")
+            .build();
+    }
+
+    private static CreateAddressRequestDto getCreateAddressRequestDto() {
+        return CreateAddressRequestDto.builder()
             .houseNumber("1")
             .entranceNumber("3")
             .district("District")

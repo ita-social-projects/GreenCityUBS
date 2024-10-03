@@ -129,6 +129,7 @@ import static greencity.ModelUtils.getExportDetailsRequest;
 import static greencity.ModelUtils.getExportDetailsRequestToday;
 import static greencity.ModelUtils.getFormedOrder;
 import static greencity.ModelUtils.getInfoPayment;
+import static greencity.ModelUtils.getLocation;
 import static greencity.ModelUtils.getOrder;
 import static greencity.ModelUtils.getOrderAddress;
 import static greencity.ModelUtils.getOrderDoneByUser;
@@ -602,18 +603,26 @@ class UBSManagementServiceImplTest {
         Order order = getOrder();
         OrderAddress orderAddress = getOrderAddress();
         orderAddress.setId(1L);
+        orderAddress.setLocation(getLocation());
         OrderAddressExportDetailsDtoUpdate dtoUpdate = ModelUtils.getOrderAddressExportDetailsDtoUpdate();
-        when(orderAddressRepository.findById(dtoUpdate.getId())).thenReturn(Optional.of(orderAddress));
+        OrderAddress updatedOrderAddress = getOrderAddress();
+        updatedOrderAddress.setCity("Updated");
 
-        when(orderAddressRepository.save(orderAddress)).thenReturn(orderAddress);
-        when(modelMapper.map(orderAddress, OrderAddressDtoResponse.class)).thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
+        when(orderAddressRepository.findById(dtoUpdate.getId())).thenReturn(Optional.of(orderAddress));
+        when(ubsClientService.updateOrderAddress(any())).thenReturn(updatedOrderAddress);
+        when(orderAddressRepository.save(orderAddress)).thenReturn(updatedOrderAddress);
+        when(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class))
+            .thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
         Optional<OrderAddressDtoResponse> actual =
             ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, order, "test@gmail.com");
         assertEquals(Optional.of(TEST_ORDER_ADDRESS_DTO_RESPONSE), actual);
 
         verify(orderAddressRepository).findById(dtoUpdate.getId());
-        verify(orderAddressRepository).save(orderAddress);
-        verify(modelMapper).map(orderAddress, OrderAddressDtoResponse.class);
+        verify(orderAddressRepository).save(updatedOrderAddress);
+        verify(eventService).saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, "test@gmail.com", order);
+        verify(modelMapper).map(updatedOrderAddress, OrderAddressDtoResponse.class);
+        assertEquals(updatedOrderAddress.getLocation().getId(), 1L);
+        assertEquals(updatedOrderAddress.getId(), 1L);
     }
 
     @Test
@@ -1230,8 +1239,8 @@ class UBSManagementServiceImplTest {
         when(ubsClientService.updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(),
             "test@gmail.com")).thenReturn(ModelUtils.getUbsCustomersDto());
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        updateOrderPageAdminDto.setAddressExportDetailsDto(null);
         updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
-        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -1253,7 +1262,6 @@ class UBSManagementServiceImplTest {
 
         verify(ubsClientService).updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "test@gmail.com");
 
-        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
         verify(receivingStationRepository).findById(1L);
         verify(orderRepository).getOrderDetails(1L);
@@ -1276,8 +1284,8 @@ class UBSManagementServiceImplTest {
         updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
         updateOrderPageAdminDto.setUbsCourierSum(50.);
         updateOrderPageAdminDto.setWriteOffStationSum(100.);
+        updateOrderPageAdminDto.setAddressExportDetailsDto(null);
 
-        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -1297,7 +1305,6 @@ class UBSManagementServiceImplTest {
 
         verify(ubsClientService).updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "test@gmail.com");
 
-        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
         verify(receivingStationRepository).findById(1L);
         verify(orderRepository).getOrderDetails(1L);
@@ -2194,6 +2201,7 @@ class UBSManagementServiceImplTest {
     @Test
     void updateOrderAdminPageInfoAndSaveReasonTest() {
         var dto = updateOrderPageAdminDto();
+        dto.setAddressExportDetailsDto(null);
         MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
 
         Order order = getOrder();
@@ -2209,7 +2217,6 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
 
-        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -2223,7 +2230,6 @@ class UBSManagementServiceImplTest {
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
         verify(paymentRepository).findAllByOrderId(1L);
 
-        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
 
         verify(receivingStationRepository).findById(1L);
@@ -2233,7 +2239,7 @@ class UBSManagementServiceImplTest {
     void updateOrderAdminPageInfoAndSaveReasonTest_OrderPaid() {
         var dto = updateOrderPageAdminDto();
         MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
-
+        dto.setAddressExportDetailsDto(null);
         Order order = getOrder();
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
@@ -2246,7 +2252,6 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
 
-        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -2260,7 +2265,6 @@ class UBSManagementServiceImplTest {
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
         verify(paymentRepository).findAllByOrderId(1L);
 
-        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
 
         verify(receivingStationRepository).findById(1L);
@@ -2270,7 +2274,7 @@ class UBSManagementServiceImplTest {
     void updateOrderAdminPageInfoAndSaveReasonTest_OrderPaidAndUpdate() {
         var dto = updateOrderPageAdminDto();
         MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
-
+        dto.setAddressExportDetailsDto(null);
         Order order = getOrder();
         order.setPointsToUse(-10000);
         TariffsInfo tariffsInfo = getTariffsInfo();
@@ -2284,7 +2288,6 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
 
-        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -2298,7 +2301,6 @@ class UBSManagementServiceImplTest {
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
         verify(paymentRepository).findAllByOrderId(1L);
 
-        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
 
         verify(receivingStationRepository).findById(1L);
@@ -2308,7 +2310,7 @@ class UBSManagementServiceImplTest {
     void updateOrderAdminPageInfoAndSaveReasonTest_OrderUnPaidAndUpdate() {
         var dto = updateOrderPageAdminDto();
         MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
-
+        dto.setAddressExportDetailsDto(null);
         Order order = getOrder();
         order.setPointsToUse(-10000);
         TariffsInfo tariffsInfo = getTariffsInfo();
@@ -2322,7 +2324,6 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
 
-        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -2336,7 +2337,6 @@ class UBSManagementServiceImplTest {
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
         verify(paymentRepository).findAllByOrderId(1L);
 
-        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
 
         verify(receivingStationRepository).findById(1L);
