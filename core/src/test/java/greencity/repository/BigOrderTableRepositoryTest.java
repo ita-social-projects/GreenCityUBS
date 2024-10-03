@@ -478,7 +478,6 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             .filter(a -> Arrays.asList(filter.getCityId()).contains(a.getCityId()))
             .filter(a -> Arrays.asList(filter.getDistrictId()).contains(a.getDistrictId()))
             .filter(a -> Arrays.asList(filter.getRegionId()).contains(a.getRegionId()))
-            .filter(a -> a.getOrderStatus().equals(OrderStatus.CONFIRMED.name()))
             .collect(Collectors.toList());
         var actualValue =
             bigOrderTableRepository.findAll(DEFAULT_ORDER_PAGE_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
