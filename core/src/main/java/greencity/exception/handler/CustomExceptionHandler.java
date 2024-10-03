@@ -52,7 +52,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ServiceAlreadyExistsException.class
     })
     public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
-        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.trace(exceptionResponse.getMessage(), exceptionResponse.getTrace());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
@@ -70,9 +70,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
         HttpHeaders headers, HttpStatus status,
         WebRequest request) {
-        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(request));
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 
     @Override
@@ -102,9 +102,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({UnprocessableEntityException.class})
     public final ResponseEntity<Object> handleUnprocessableEntityException(UnprocessableEntityException ex,
         WebRequest webRequest) {
-        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponce);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponse);
     }
 
     /**
@@ -116,8 +116,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler({NotFoundException.class})
-    public final ResponseEntity<Object> handleNotFoundExeption(NotFoundException exception, WebRequest request) {
-        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+    public final ResponseEntity<Object> handleNotFoundException(NotFoundException exception, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.trace(exception.getMessage(), exception);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
@@ -131,11 +131,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler({FoundException.class})
-    public final ResponseEntity<Object> handleFoundExeption(FoundException ex,
+    public final ResponseEntity<Object> handleFoundException(FoundException ex,
         WebRequest webRequest) {
-        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponce);
+        return ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponse);
     }
 
     /**
@@ -149,7 +149,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public final ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex,
         WebRequest request) {
-        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
     }
@@ -162,7 +162,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(RemoteServerUnavailableException.class)
     public final ResponseEntity<Object> handleRemoteServerUnavailableException(WebRequest request) {
-        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse);
     }
 
@@ -174,7 +174,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(TariffAlreadyExistsException.class)
     public final ResponseEntity<Object> handleTariffAlreadyExistsException(WebRequest request) {
-        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
     }
 }
