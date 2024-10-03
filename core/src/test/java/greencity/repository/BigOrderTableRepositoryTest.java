@@ -23,6 +23,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -466,6 +467,22 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         boolean isListCorrectlySorted =
             Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(true));
         Assertions.assertTrue(isListCorrectlySorted);
+    }
+
+    @Test
+    void get_All_Orders_Filter_By_RegionId_And_CityId_And_DistrictId() {
+        var filter =
+            new OrderSearchCriteria().setCityId(new Long[] {100L}).setDistrictId(new Long[] {100L})
+                .setRegionId(new Long[] {100L});
+        var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
+            .filter(a -> Arrays.asList(filter.getCityId()).contains(a.getCityId()))
+            .filter(a -> Arrays.asList(filter.getDistrictId()).contains(a.getDistrictId()))
+            .filter(a -> Arrays.asList(filter.getRegionId()).contains(a.getRegionId()))
+            .collect(Collectors.toList());
+        var actualValue =
+            bigOrderTableRepository.findAll(DEFAULT_ORDER_PAGE_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
+                .getContent();
+        Assertions.assertEquals(expectedValue, actualValue);
     }
 
     private Comparator<BigOrderTableViews> orderStatusTranslationComparator(boolean descending) {

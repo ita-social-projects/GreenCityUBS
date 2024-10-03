@@ -151,7 +151,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import static greencity.ModelUtils.KYIV_REGION_EN;
 import static greencity.ModelUtils.KYIV_REGION_UA;
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
+import static greencity.ModelUtils.TEST_CREATE_ADDRESS_DTO;
 import static greencity.ModelUtils.TEST_EMAIL;
+import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_UPDATE;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
 import static greencity.ModelUtils.TEST_UUID;
 import static greencity.ModelUtils.addressDto;
@@ -4291,5 +4293,25 @@ class UBSClientServiceImplTest {
 
         assertThrows(BadRequestException.class,
             () -> ubsClientService.validatePaymentFromMonoBank(response));
+    }
+
+    @Test
+    void testUpdateOrderAddress() {
+        Address addressToSave = getAddress();
+
+        when(modelMapper.map(TEST_ORDER_ADDRESS_DTO_UPDATE, CreateAddressRequestDto.class))
+            .thenReturn(TEST_CREATE_ADDRESS_DTO);
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
+        when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
+        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getCity()));
+        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getDistrict()));
+
+        ubsService.updateOrderAddress(TEST_ORDER_ADDRESS_DTO_UPDATE);
+
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
+        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
     }
 }

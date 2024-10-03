@@ -30,6 +30,7 @@ import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
@@ -2095,6 +2096,18 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
         Payment payment = createPayment(response, order, decodedOrderReference);
         checkPaymentResponseStatus(response, payment, order);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderAddress updateOrderAddress(OrderAddressExportDetailsDtoUpdate orderAddressDtoUpdate) {
+        CreateAddressRequestDto createAddressRequestDto =
+            modelMapper.map(orderAddressDtoUpdate, CreateAddressRequestDto.class);
+        Address address = modelMapper.map(orderAddressDtoUpdate, Address.class);
+        setLocations(createAddressRequestDto, address);
+        return modelMapper.map(address, OrderAddress.class);
     }
 
     private Payment createPayment(MonoBankPaymentResponseDto response, Order order, String decodedOrderReference) {

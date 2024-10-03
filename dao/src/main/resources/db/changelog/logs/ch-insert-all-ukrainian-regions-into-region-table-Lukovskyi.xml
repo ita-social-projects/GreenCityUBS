@@ -1,0 +1,106 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="Lukovskyi-5" author="Volodymyr Lukovskyi">
+        <sql>
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Київська область', 'Kyiv Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Київська область' AND name_en = 'Kyiv Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Донецька область', 'Donetsk Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Донецька область' AND name_en = 'Donetsk Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Львівська область', 'Lviv Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Львівська область' AND name_en = 'Lviv Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Полтавська область', 'Poltava Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Полтавська область' AND name_en = 'Poltava Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Запорізька область', 'Zaporizhia Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Запорізька область' AND name_en = 'Zaporizhia Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Івано-Франківська область', 'Ivano-Frankivsk Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Івано-Франківська область' AND name_en = 'Ivano-Frankivsk Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Харківська область', 'Kharkiv Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Харківська область' AND name_en = 'Kharkiv Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'місто Київ', 'Kyiv city'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'місто Київ' AND name_en = 'Kyiv city');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Дніпропетровська область', 'Dnipropetrovsk Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Дніпропетровська область' AND name_en = 'Dnipropetrovsk Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Одеська область', 'Odessa Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Одеська область' AND name_en = 'Odessa Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Вінницька область', 'Vinnytsia Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Вінницька область' AND name_en = 'Vinnytsia Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Чернівецька область', 'Chernivtsi Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Чернівецька область' AND name_en = 'Chernivtsi Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Крим', 'Crimea'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Крим' AND name_en = 'Crimea');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Сумська область', 'Sumy Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Сумська область' AND name_en = 'Sumy Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Херсонська область', 'Kherson Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Херсонська область' AND name_en = 'Kherson Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Рівненська область', 'Rivne Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Рівненська область' AND name_en = 'Rivne Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Закарпатська область', 'Zakarpattia Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Закарпатська область' AND name_en = 'Zakarpattia Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Житомирська область', 'Zhytomyr Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Житомирська область' AND name_en = 'Zhytomyr Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Волинська область', 'Volyn Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Волинська область' AND name_en = 'Volyn Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Черкаська область', 'Cherkasy Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Черкаська область' AND name_en = 'Cherkasy Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Кіровоградська область', 'Kirovohrad Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Кіровоградська область' AND name_en = 'Kirovohrad Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Чернігівська область', 'Chernihiv Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Чернігівська область' AND name_en = 'Chernihiv Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Тернопільська область', 'Ternopil Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Тернопільська область' AND name_en = 'Ternopil Oblast');
+
+            INSERT INTO regions (name_uk, name_en)
+            SELECT 'Миколаївська область', 'Mykolaiv Oblast'
+                WHERE NOT EXISTS (SELECT 1 FROM regions WHERE name_uk = 'Миколаївська область' AND name_en = 'Mykolaiv Oblast');
+        </sql>
+    </changeSet>
+</databaseChangeLog>

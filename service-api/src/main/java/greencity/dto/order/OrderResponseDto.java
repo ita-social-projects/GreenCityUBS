@@ -54,6 +54,5 @@ public class OrderResponseDto implements Serializable {
     @NotNull
     private Long locationId;
 
-    @NotNull
     private PaymentSystem paymentSystem;
 }
