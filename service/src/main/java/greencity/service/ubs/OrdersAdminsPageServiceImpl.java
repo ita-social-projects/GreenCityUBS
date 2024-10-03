@@ -178,7 +178,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(
-                new TitleDto("commentToAddressForClient", "Коментар до адреси від клієнта",
+                new TitleDto("commentToAddressForClient", "Коментар до адреси",
                     "Comment to address from the client"),
                 "commentToAddressForClient", 20, false, true, false, 16, EditType.READ_ONLY, new ArrayList<>(),
                 exportAddress),
@@ -196,7 +196,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("amountDue", "Сума до оплати", "Amount due"), "amountDue", 20,
                 false, true, false, 21, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(
-                new TitleDto("commentForOrderByClient", "Коментар до замовлення від клієнта",
+                new TitleDto("commentForOrderByClient", "Коментар до замовлення",
                     "Comment to the order from the client"),
                 "commentForOrderByClient", 20, false, true, false, 22, EditType.READ_ONLY, new ArrayList<>(),
                 ordersInfo),
