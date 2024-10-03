@@ -238,16 +238,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
         String email) {
-        Optional<OrderAddress> addressForAdminPage = orderAddressRepository.findById(dtoUpdate.getId());
-        if (addressForAdminPage.isPresent()) {
-            orderAddressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
-            eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
-            return addressForAdminPage.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
-        } else {
-            throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId());
-        }
+        OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId()));
+        OrderAddress updatedOrderAddress = ubsClientService.updateOrderAddress(dtoUpdate);
+        mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress);
+        orderAddressRepository.save(updatedOrderAddress);
+        eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
+        return Optional.of(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class));
     }
 
     /**
@@ -902,22 +902,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setOrderId(order.getId());
     }
 
-    private OrderAddress updateAddressOrderInfo(OrderAddress address, OrderAddressExportDetailsDtoUpdate dto) {
-        Optional.ofNullable(dto.getCity()).ifPresent(address::setCity);
-        Optional.ofNullable(dto.getCityEn()).ifPresent(address::setCityEn);
-        Optional.ofNullable(dto.getRegion()).ifPresent(address::setRegion);
-        Optional.ofNullable(dto.getRegionEn()).ifPresent(address::setRegionEn);
-        Optional.ofNullable(dto.getDistrict()).ifPresent(address::setDistrict);
-        Optional.ofNullable(dto.getDistrictEn()).ifPresent(address::setDistrictEn);
-        Optional.ofNullable(dto.getStreet()).ifPresent(address::setStreet);
-        Optional.ofNullable(dto.getStreetEn()).ifPresent(address::setStreetEn);
-        Optional.ofNullable(dto.getHouseNumber()).ifPresent(address::setHouseNumber);
-        Optional.ofNullable(dto.getHouseCorpus()).ifPresent(address::setHouseCorpus);
-        Optional.ofNullable(dto.getEntranceNumber()).ifPresent(address::setEntranceNumber);
-
-        return address;
-    }
-
     private void returnAllPointsFromOrder(Order order) {
         Integer pointsToReturn = order.getPointsToUse();
         if (isNull(pointsToReturn) || pointsToReturn == 0) {
@@ -1446,5 +1430,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .description(order.getReasonNotTakingBagDescription())
             .images(order.getImageReasonNotTakingBags())
             .build();
+    }
+
+    private void mapUpdatedOrderAddressFields(OrderAddress orderAddress, OrderAddress updatedOrderAddress) {
+        updatedOrderAddress.setLocation(orderAddress.getLocation());
+        updatedOrderAddress.setId(orderAddress.getId());
+        updatedOrderAddress.setActual(orderAddress.getActual());
+        updatedOrderAddress.setAddressComment(orderAddress.getAddressComment());
+        updatedOrderAddress.setCoordinates(orderAddress.getCoordinates());
+        updatedOrderAddress.setAddressStatus(orderAddress.getAddressStatus());
     }
 }

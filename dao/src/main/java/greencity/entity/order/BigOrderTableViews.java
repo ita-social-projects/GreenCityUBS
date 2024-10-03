@@ -62,4 +62,7 @@ public class BigOrderTableViews {
     private Boolean isBlocked;
     private String blockedBy;
     private Long tariffsInfoId;
+    private Long regionId;
+    private Long cityId;
+    private Long districtId;
 }
