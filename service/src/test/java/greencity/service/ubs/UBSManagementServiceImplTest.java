@@ -621,8 +621,8 @@ class UBSManagementServiceImplTest {
         verify(orderAddressRepository).save(updatedOrderAddress);
         verify(eventService).saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, "test@gmail.com", order);
         verify(modelMapper).map(updatedOrderAddress, OrderAddressDtoResponse.class);
-        assertEquals(updatedOrderAddress.getLocation().getId(), 1L);
-        assertEquals(updatedOrderAddress.getId(), 1L);
+        assertEquals(1L, updatedOrderAddress.getLocation().getId());
+        assertEquals(1L, updatedOrderAddress.getId());
     }
 
     @Test

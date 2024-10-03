@@ -44,7 +44,6 @@ import greencity.dto.position.PositionDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
@@ -901,22 +900,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .collect(Collectors.toList()));
 
         dto.setOrderId(order.getId());
-    }
-
-    private OrderAddress updateAddressOrderInfo(OrderAddress address, OrderAddressExportDetailsDtoUpdate dto) {
-        Optional.ofNullable(dto.getCity()).ifPresent(address::setCity);
-        Optional.ofNullable(dto.getCityEn()).ifPresent(address::setCityEn);
-        Optional.ofNullable(dto.getRegion()).ifPresent(address::setRegion);
-        Optional.ofNullable(dto.getRegionEn()).ifPresent(address::setRegionEn);
-        Optional.ofNullable(dto.getDistrict()).ifPresent(address::setDistrict);
-        Optional.ofNullable(dto.getDistrictEn()).ifPresent(address::setDistrictEn);
-        Optional.ofNullable(dto.getStreet()).ifPresent(address::setStreet);
-        Optional.ofNullable(dto.getStreetEn()).ifPresent(address::setStreetEn);
-        Optional.ofNullable(dto.getHouseNumber()).ifPresent(address::setHouseNumber);
-        Optional.ofNullable(dto.getHouseCorpus()).ifPresent(address::setHouseCorpus);
-        Optional.ofNullable(dto.getEntranceNumber()).ifPresent(address::setEntranceNumber);
-
-        return address;
     }
 
     private void returnAllPointsFromOrder(Order order) {

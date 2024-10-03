@@ -22,7 +22,6 @@ import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
@@ -4308,10 +4307,8 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(getCity()));
         when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.of(getDistrict()));
-        CreateAddressRequestDto createAddressRequestToSaveDto = getAddressRequestToSaveDto();
 
-        OrderAddress actualWithSearchAddress =
-            ubsService.updateOrderAddress(TEST_ORDER_ADDRESS_DTO_UPDATE);
+        ubsService.updateOrderAddress(TEST_ORDER_ADDRESS_DTO_UPDATE);
 
         verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
         verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
