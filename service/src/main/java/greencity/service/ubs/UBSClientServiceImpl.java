@@ -1999,7 +1999,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      *                           location ID.
      */
     @Override
-    public Long getTariffIdByLocationId(Long locationId) {
+    public List<Long> getTariffIdByLocationId(Long locationId) {
         return tariffsInfoRepository.findTariffIdByLocationId(locationId)
             .orElseThrow(() -> new NotFoundException(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationId)));
     }

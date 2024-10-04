@@ -387,7 +387,7 @@ class OrderControllerTest {
     @Test
     void getTariffIdByLocationIdTest() throws Exception {
         Long locationId = 1L;
-        Long tariffId = 2L;
+        List<Long> tariffId = List.of(2L);
         when(ubsClientService.getTariffIdByLocationId(locationId)).thenReturn(tariffId);
 
         mockMvc.perform(get(ubsLink + "/tariffs/{locationId}", locationId)

@@ -517,8 +517,8 @@ public class OrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping(value = "/tariffs/{locationId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Long> getTariffIdByLocationId(@PathVariable("locationId") Long locationId) {
-        Long tariffId = ubsClientService.getTariffIdByLocationId(locationId);
+    public ResponseEntity<List<Long>> getTariffIdByLocationId(@PathVariable("locationId") Long locationId) {
+        List<Long> tariffId = ubsClientService.getTariffIdByLocationId(locationId);
         return ResponseEntity.status(HttpStatus.OK).body(tariffId);
     }
 
