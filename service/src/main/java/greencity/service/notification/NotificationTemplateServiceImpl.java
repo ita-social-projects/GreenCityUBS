@@ -11,6 +11,7 @@ import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationTemplateSortType;
 import greencity.enums.NotificationType;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -104,10 +105,12 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
      * {@inheritDoc}
      */
     @Override
-    public PageableDto<NotificationTemplateDto> findAll(Pageable pageable) {
+    public PageableDto<NotificationTemplateDto> findAll(Pageable pageable,
+        NotificationTemplateSortType notificationTemplateSortType) {
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("id")
             .descending());
-        Page<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findAll(pageRequest);
+        Page<NotificationTemplate> notificationTemplates =
+            getSortedNotificationsTemplates(pageable, pageRequest, notificationTemplateSortType);
         List<NotificationTemplateDto> templateDtoList = notificationTemplates.stream()
             .map(notificationTemplate -> modelMapper.map(notificationTemplate, NotificationTemplateDto.class))
             .collect(Collectors.toList());
@@ -116,6 +119,29 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
             notificationTemplates.getTotalElements(),
             notificationTemplates.getPageable().getPageNumber(),
             notificationTemplates.getTotalPages());
+    }
+
+    private Page<NotificationTemplate> getSortedNotificationsTemplates(Pageable pageable, PageRequest pageRequest,
+        NotificationTemplateSortType notificationTemplateSortType) {
+        if (notificationTemplateSortType == NotificationTemplateSortType.TITLE) {
+            pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Direction.ASC, "titleEng"));
+            return notificationTemplateRepository.findAll(pageRequest);
+        } else if (notificationTemplateSortType == NotificationTemplateSortType.TRIGGER) {
+            pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Direction.ASC, "trigger"));
+            return notificationTemplateRepository.findAll(pageRequest);
+        } else if (notificationTemplateSortType == NotificationTemplateSortType.STATUS_ACTIVE) {
+            pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Direction.ASC, "notificationStatus"));
+            return notificationTemplateRepository.findAll(pageRequest);
+        } else if (notificationTemplateSortType == NotificationTemplateSortType.STATUS_INACTIVE) {
+            pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "notificationStatus"));
+            return notificationTemplateRepository.findAll(pageRequest);
+        } else {
+            return notificationTemplateRepository.findAll(pageRequest);
+        }
     }
 
     /**

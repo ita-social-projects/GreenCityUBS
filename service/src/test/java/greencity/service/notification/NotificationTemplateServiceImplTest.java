@@ -6,6 +6,7 @@ import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationTemplateSortType;
 import greencity.enums.NotificationType;
 import greencity.enums.UserCategory;
 import greencity.exceptions.BadRequestException;
@@ -27,6 +28,16 @@ import java.util.Optional;
 
 import static greencity.ModelUtils.createNotificationTemplate;
 import static greencity.ModelUtils.createNotificationTemplateWithPlatformsUpdateDto;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_PAGEABLE;
+import static greencity.ModelUtils.TEMPLATE_PAGE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_SORTED_PAGEABLE_BY_TITLE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_SORTED_PAGEABLE_BY_TRIGGER;
+import static greencity.ModelUtils.TEST_NOTIFICATION_SORTED_PAGEABLE_BY_STATUS_INACTIVE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_SORTED_PAGEABLE_BY_STATUS_ACTIVE;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -36,12 +47,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.any;
-import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
-import static greencity.ModelUtils.TEST_NOTIFICATION_PAGEABLE;
-import static greencity.ModelUtils.TEMPLATE_PAGE;
-import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO;
-import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
-import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
 import static greencity.constant.ErrorMessage.NOTIFICATION_STATUS_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID;
 import static greencity.enums.NotificationStatus.INACTIVE;
@@ -72,7 +77,87 @@ class NotificationTemplateServiceImplTest {
         when(templateRepository.findAll(pageable)).thenReturn(page);
         when(modelMapper.map(notification, NotificationTemplateDto.class)).thenReturn(notificationDto);
 
-        var result = notificationService.findAll(pageable);
+        var result = notificationService.findAll(pageable, null);
+
+        assertEquals(result.getPage(), List.of(notificationDto));
+        assertEquals(result.getTotalElements(), page.getTotalElements());
+        assertEquals(result.getTotalPages(), page.getTotalPages());
+
+        verify(templateRepository).findAll(pageable);
+        verify(modelMapper).map(notification, NotificationTemplateDto.class);
+    }
+
+    @Test
+    void findAllWithTitleSortTypeTest() {
+        Pageable pageable = TEST_NOTIFICATION_SORTED_PAGEABLE_BY_TITLE;
+        Page<NotificationTemplate> page = TEMPLATE_PAGE;
+        var notification = TEST_NOTIFICATION_TEMPLATE;
+        var notificationDto = TEST_NOTIFICATION_TEMPLATE_DTO;
+
+        when(templateRepository.findAll(pageable)).thenReturn(page);
+        when(modelMapper.map(notification, NotificationTemplateDto.class)).thenReturn(notificationDto);
+
+        var result = notificationService.findAll(pageable, NotificationTemplateSortType.TITLE);
+
+        assertEquals(result.getPage(), List.of(notificationDto));
+        assertEquals(result.getTotalElements(), page.getTotalElements());
+        assertEquals(result.getTotalPages(), page.getTotalPages());
+
+        verify(templateRepository).findAll(pageable);
+        verify(modelMapper).map(notification, NotificationTemplateDto.class);
+    }
+
+    @Test
+    void findAllWithTriggerSortTypeTest() {
+        Pageable pageable = TEST_NOTIFICATION_SORTED_PAGEABLE_BY_TRIGGER;
+        Page<NotificationTemplate> page = TEMPLATE_PAGE;
+        var notification = TEST_NOTIFICATION_TEMPLATE;
+        var notificationDto = TEST_NOTIFICATION_TEMPLATE_DTO;
+
+        when(templateRepository.findAll(pageable)).thenReturn(page);
+        when(modelMapper.map(notification, NotificationTemplateDto.class)).thenReturn(notificationDto);
+
+        var result = notificationService.findAll(pageable, NotificationTemplateSortType.TRIGGER);
+
+        assertEquals(result.getPage(), List.of(notificationDto));
+        assertEquals(result.getTotalElements(), page.getTotalElements());
+        assertEquals(result.getTotalPages(), page.getTotalPages());
+
+        verify(templateRepository).findAll(pageable);
+        verify(modelMapper).map(notification, NotificationTemplateDto.class);
+    }
+
+    @Test
+    void findAllWithStatusActiveSortTypeTest() {
+        Pageable pageable = TEST_NOTIFICATION_SORTED_PAGEABLE_BY_STATUS_ACTIVE;
+        Page<NotificationTemplate> page = TEMPLATE_PAGE;
+        var notification = TEST_NOTIFICATION_TEMPLATE;
+        var notificationDto = TEST_NOTIFICATION_TEMPLATE_DTO;
+
+        when(templateRepository.findAll(pageable)).thenReturn(page);
+        when(modelMapper.map(notification, NotificationTemplateDto.class)).thenReturn(notificationDto);
+
+        var result = notificationService.findAll(pageable, NotificationTemplateSortType.STATUS_ACTIVE);
+
+        assertEquals(result.getPage(), List.of(notificationDto));
+        assertEquals(result.getTotalElements(), page.getTotalElements());
+        assertEquals(result.getTotalPages(), page.getTotalPages());
+
+        verify(templateRepository).findAll(pageable);
+        verify(modelMapper).map(notification, NotificationTemplateDto.class);
+    }
+
+    @Test
+    void findAllWithStatusInactiveSortTypeTest() {
+        Pageable pageable = TEST_NOTIFICATION_SORTED_PAGEABLE_BY_STATUS_INACTIVE;
+        Page<NotificationTemplate> page = TEMPLATE_PAGE;
+        var notification = TEST_NOTIFICATION_TEMPLATE;
+        var notificationDto = TEST_NOTIFICATION_TEMPLATE_DTO;
+
+        when(templateRepository.findAll(pageable)).thenReturn(page);
+        when(modelMapper.map(notification, NotificationTemplateDto.class)).thenReturn(notificationDto);
+
+        var result = notificationService.findAll(pageable, NotificationTemplateSortType.STATUS_INACTIVE);
 
         assertEquals(result.getPage(), List.of(notificationDto));
         assertEquals(result.getTotalElements(), page.getTotalElements());
