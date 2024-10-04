@@ -2122,7 +2122,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return Payment.builder()
             .id(extractIdFromReference(decodedOrderReference))
             .currency("UAH")
-            .amount(calculateAmount(response.getAmount()))
+            .amount((long) response.getAmount())
             .orderStatus(OrderStatus.FORMED)
             .responseStatus(response.getStatus())
             .senderCellPhone(order.getUser().getRecipientPhone())
@@ -2144,10 +2144,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private Long extractIdFromReference(String decodedOrderReference) {
         return Long.valueOf(decodedOrderReference.substring(decodedOrderReference.lastIndexOf("_") + 1));
-    }
-
-    private long calculateAmount(double amount) {
-        return (long) (amount * 100);
     }
 
     private int parseErrorCode(String errorCode) {
