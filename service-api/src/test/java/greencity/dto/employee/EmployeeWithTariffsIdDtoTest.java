@@ -110,7 +110,7 @@ class EmployeeWithTariffsIdDtoTest {
             Arguments.of("ываныё", "ыегорыё", "mail.com"),
             Arguments.of("ёванёэ", "ёегорёэ", "mail.com"),
             Arguments.of("эванэъ", "эегорэъ", "mail.com"),
-            Arguments.of(null , null, "invalid_email"),
+            Arguments.of(null, null, "invalid_email"),
             Arguments.of("Олексій--", "ъгорович", "mail@.com"),
             Arguments.of("І.в.ан..", "!Іван", "mail.com@"),
             Arguments.of("Іван--Івано", "..", "mail..com"),
