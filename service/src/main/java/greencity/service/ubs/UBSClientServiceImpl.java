@@ -1116,7 +1116,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private Long countPaidAmount(List<Payment> payments) {
         return payments.stream()
             .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
-            .map(v -> (v.getAmount() / 100))
+            .map(Payment::getAmount)
             .reduce(0L, Long::sum);
     }
 
