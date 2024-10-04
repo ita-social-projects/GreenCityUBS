@@ -35,24 +35,37 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
-        String uuId = message.getText().replace("/start", "").trim();
+        String uuId = message.getText().split(" ")[1];
         User user = userRepository.findUserByUuid(uuId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         Optional<TelegramBot> telegramBotOptional =
             telegramBotRepository.findByUserAndChatIdAndIsNotify(user, message.getChatId(), true);
         if (telegramBotOptional.isEmpty() && message.getText().startsWith("/start")) {
-            user.setTelegramBot(getTelegramBot(user, message.getChatId()));
-            userRepository.save(user);
-            SendMessage sendMessage =
-                new SendMessage(message.getChatId().toString(), "Вітаємо!\nВи підписались на UbsBot");
-            try {
-                execute(sendMessage);
-            } catch (Exception e) {
-                throw new MessageWasNotSent(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT);
-            }
+            executeStartUpdate(user, message);
+        } else if (message.getText().startsWith("/stop")) {
+            executeStopUpdate(user);
         } else {
             throw new TelegramBotAlreadyConnected(ErrorMessage.THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT);
         }
+    }
+
+    void executeStartUpdate(User user, Message message) {
+        user.setTelegramBot(getTelegramBot(user, message.getChatId()));
+        userRepository.save(user);
+        SendMessage sendMessage =
+            new SendMessage(message.getChatId().toString(), "Вітаємо!\nВи підписались на UbsBot");
+        try {
+            execute(sendMessage);
+        } catch (Exception e) {
+            throw new MessageWasNotSent(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT);
+        }
+    }
+
+    void executeStopUpdate(User user) {
+        user.getTelegramBot().setIsNotify(false);
+        telegramBotRepository.save(user.getTelegramBot());
+        user.setTelegramBot(null);
+        userRepository.save(user);
     }
 
     private TelegramBot getTelegramBot(User user, Long chatId) {
