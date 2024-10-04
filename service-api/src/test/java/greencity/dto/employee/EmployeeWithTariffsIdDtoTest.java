@@ -91,7 +91,9 @@ class EmployeeWithTariffsIdDtoTest {
             Arguments.of("Лук'яна+", "Єгорівна"),
             Arguments.of("Лук'яна-", "Єгорівна"),
             Arguments.of("Лук'яна ", "Єгорівна"),
-            Arguments.of("Лук'яна.н", "Єгорівна.р"));
+            Arguments.of("Ivan", "ABC.р"),
+            Arguments.of("Ivan", "Ivanov"),
+            Arguments.of("Ivan", "Doe"));
     }
 
     private static Stream<Arguments> provideFieldsAndInvalidValues() {
@@ -108,14 +110,14 @@ class EmployeeWithTariffsIdDtoTest {
             Arguments.of("ываныё", "ыегорыё", "mail.com"),
             Arguments.of("ёванёэ", "ёегорёэ", "mail.com"),
             Arguments.of("эванэъ", "эегорэъ", "mail.com"),
-            Arguments.of("ivan", "egor", "invalid_email"),
-            Arguments.of("ivan", "egor", "mail@.com"),
-            Arguments.of("ivan", "egor", "mail.com@"),
-            Arguments.of("ivan", "egor", "mail..com"),
-            Arguments.of("ivan", "egor", "mail.com."),
-            Arguments.of("ivan", "egor", "mail@com"),
-            Arguments.of("ivan", "egor", "mail@.com.au"),
+            Arguments.of(null, null, "invalid_email"),
+            Arguments.of("Олексій--", "ъгорович", "mail@.com"),
+            Arguments.of("І.в.ан..", "!Іван", "mail.com@"),
+            Arguments.of("Іван--Івано", "..", "mail..com"),
+            Arguments.of("Коп''ютер", "@Петрович", "mail.com."),
+            Arguments.of("", "", "mail@com"),
+            Arguments.of("1234ван", "і!!", "mail@.com.au"),
             Arguments.of(null, null, null),
-            Arguments.of("ivan", "egor", "mail@.au"));
+            Arguments.of("iv!an", "Иван''", "mail@.au"));
     }
 }
