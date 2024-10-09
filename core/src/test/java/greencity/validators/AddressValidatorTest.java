@@ -8,6 +8,8 @@ import com.google.maps.model.LatLng;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.google.AddressResponseFromGoogleAPI;
 import greencity.dto.location.CoordinatesDto;
+import greencity.exceptions.NotFoundException;
+import greencity.exceptions.api.GoogleApiException;
 import greencity.service.google.GoogleApiService;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -156,5 +159,37 @@ class AddressValidatorTest {
 
         assertFalse(isValid);
         verify(violationBuilder).addConstraintViolation();
+    }
+
+    @Test
+    void testIsValidWhenNotFoundExceptionOccursShouldReturnFalse() {
+        doThrow(new NotFoundException("Location not found")).when(googleApiService)
+            .getResultFromGeoCode(any(), any());
+
+        ConstraintValidatorContext.ConstraintViolationBuilder violationBuilder =
+            mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
+        when(context.buildConstraintViolationWithTemplate(any())).thenReturn(violationBuilder);
+
+        boolean isValid = addressValidator.isValid(addressRequestDto, context);
+
+        assertFalse(isValid);
+        verify(violationBuilder).addConstraintViolation();
+        verify(context).disableDefaultConstraintViolation();
+    }
+
+    @Test
+    void testIsValidWhenGoogleApiExceptionOccursShouldReturnFalse() {
+        doThrow(new GoogleApiException("Google API error")).when(googleApiService)
+            .getResultFromGeoCode(any(), any());
+
+        ConstraintValidatorContext.ConstraintViolationBuilder violationBuilder =
+            mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
+        when(context.buildConstraintViolationWithTemplate(any())).thenReturn(violationBuilder);
+
+        boolean isValid = addressValidator.isValid(addressRequestDto, context);
+
+        assertFalse(isValid);
+        verify(violationBuilder).addConstraintViolation();
+        verify(context).disableDefaultConstraintViolation();
     }
 }
