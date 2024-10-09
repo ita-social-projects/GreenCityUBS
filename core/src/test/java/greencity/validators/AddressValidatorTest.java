@@ -8,20 +8,22 @@ import com.google.maps.model.LatLng;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.google.AddressResponseFromGoogleAPI;
 import greencity.dto.location.CoordinatesDto;
-import greencity.exceptions.address.InvalidAddressException;
 import greencity.service.google.GoogleApiService;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,38 +82,79 @@ class AddressValidatorTest {
 	}
 
     @Test
-    void testIsValidWhenCoordinatesMismatchShouldReturnFalse() {
-        geoResult.geometry.location = new LatLng(51.0, 31.0);
-
-        when(googleApiService.getResultFromGeoCode(anyString(), anyInt())).thenReturn(geoResult);
-        when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class)))
-            .thenReturn(addressResponseFromGoogleAPI);
-
-        assertThrows(InvalidAddressException.class,
-            () -> addressValidator.isValid(addressRequestDto, context));
-    }
-
-    @Test
-    void testIsValidWhenCityAndRegionMismatchShouldReturnFalse() {
-        geoResult.addressComponents[0].longName = "Lviv";
-        geoResult.addressComponents[1].longName = "Lviv Oblast";
-        addressResponseFromGoogleAPI.setCity("Lviv");
-        addressResponseFromGoogleAPI.setRegion("Lviv Oblast");
-
-        when(googleApiService.getResultFromGeoCode(anyString(), anyInt())).thenReturn(geoResult);
-        when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class)))
-            .thenReturn(addressResponseFromGoogleAPI);
-
-        assertThrows(InvalidAddressException.class,
-            () -> addressValidator.isValid(addressRequestDto, context));
-    }
-
-    @Test
 	void testIsValidWhenGoogleServiceReturnsNullShouldReturnFalse() {
 		when(googleApiService.getResultFromGeoCode(anyString(), anyInt())).thenReturn(geoResult);
 		when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class))).thenReturn(null);
 
-		assertThrows(InvalidAddressException.class,
-			() -> addressValidator.isValid(addressRequestDto,context));
+		ConstraintValidatorContext.ConstraintViolationBuilder violationBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
+		when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
+
+		boolean isValid = addressValidator.isValid(addressRequestDto, context);
+
+		assertFalse(isValid);
+		verify(violationBuilder).addConstraintViolation();
 	}
+
+    @Test
+    void testIsValidWhenCoordinatesDoNotMatchShouldReturnFalse() {
+        CoordinatesDto invalidCoordinatesDto = new CoordinatesDto(0.0, 0.0);
+        addressRequestDto.setCoordinates(invalidCoordinatesDto);
+
+        when(googleApiService.getResultFromGeoCode(anyString(), anyInt())).thenReturn(geoResult);
+        when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class)))
+            .thenReturn(addressResponseFromGoogleAPI);
+
+        ConstraintValidatorContext.ConstraintViolationBuilder violationBuilder =
+            mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
+        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
+
+        boolean isValid = addressValidator.isValid(addressRequestDto, context);
+
+        assertFalse(isValid);
+        verify(violationBuilder).addConstraintViolation();
+    }
+
+    @Test
+    void testIsValidWhenCityDoesNotMatchShouldReturnFalse() {
+        AddressComponent cityComponent = new AddressComponent();
+        cityComponent.longName = "Lviv";
+        cityComponent.types = new AddressComponentType[] {AddressComponentType.LOCALITY};
+
+        geoResult.addressComponents[0] = cityComponent;
+
+        when(googleApiService.getResultFromGeoCode(anyString(), anyInt())).thenReturn(geoResult);
+        when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class)))
+            .thenReturn(addressResponseFromGoogleAPI);
+
+        ConstraintValidatorContext.ConstraintViolationBuilder violationBuilder =
+            mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
+        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
+
+        boolean isValid = addressValidator.isValid(addressRequestDto, context);
+
+        assertFalse(isValid);
+        verify(violationBuilder).addConstraintViolation();
+    }
+
+    @Test
+    void testIsValidWhenRegionDoesNotMatchShouldReturnFalse() {
+        AddressComponent regionComponent = new AddressComponent();
+        regionComponent.longName = "Lviv";
+        regionComponent.types = new AddressComponentType[] {AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
+
+        geoResult.addressComponents[1] = regionComponent;
+
+        when(googleApiService.getResultFromGeoCode(anyString(), anyInt())).thenReturn(geoResult);
+        when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class)))
+            .thenReturn(addressResponseFromGoogleAPI);
+
+        ConstraintValidatorContext.ConstraintViolationBuilder violationBuilder =
+            mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
+        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
+
+        boolean isValid = addressValidator.isValid(addressRequestDto, context);
+
+        assertFalse(isValid);
+        verify(violationBuilder).addConstraintViolation();
+    }
 }

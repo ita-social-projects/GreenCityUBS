@@ -2118,7 +2118,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .fee(0)
             .terminal(DEFAULT_VALUE_FOR_PAYMENT)
             .build());
-
+        // TODO: check response amount
         return Payment.builder()
             .id(extractIdFromReference(decodedOrderReference))
             .currency("UAH")
