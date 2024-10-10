@@ -259,7 +259,8 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/getUsersViolations")
-    public ResponseEntity<ViolationsInfoDto> getUserViolations(@Valid @Email(regexp = ValidationConstant.EMAIL_REGEXP) @RequestParam String email) {
+    public ResponseEntity<ViolationsInfoDto> getUserViolations(
+        @Valid @Email(regexp = ValidationConstant.EMAIL_REGEXP) @RequestParam String email) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getAllUserViolations(email));
     }

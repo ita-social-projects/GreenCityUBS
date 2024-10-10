@@ -30,7 +30,7 @@ public class PersonalDataDto implements Serializable {
     private String email;
 
     @NotBlank
-    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ0-9\\s-ʼ'`ʹ]{1,30}")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String firstName;
 
     @Min(1)
@@ -38,7 +38,7 @@ public class PersonalDataDto implements Serializable {
     private Long id;
 
     @NotBlank
-    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ0-9\\s-ʼ'`ʹ]{1,30}")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String lastName;
 
     @NotBlank

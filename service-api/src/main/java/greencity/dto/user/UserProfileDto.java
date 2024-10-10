@@ -26,10 +26,10 @@ import java.util.List;
 @EqualsAndHashCode
 public class UserProfileDto {
     @NotBlank
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String recipientName;
     @NotBlank
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z\\s-'.]{1,30}")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String recipientSurname;
     @NotBlank
     @Email(regexp = ValidationConstant.EMAIL_REGEXP)
