@@ -8,7 +8,7 @@ import greencity.annotations.ValidAddress;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.google.AddressResponseFromGoogleAPI;
 import greencity.dto.location.CoordinatesDto;
-import greencity.exceptions.address.InvalidAddressException;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.api.GoogleApiException;
 import greencity.service.google.GoogleApiService;
 import jakarta.validation.ConstraintValidator;
@@ -21,6 +21,8 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
     private final GoogleApiService googleApiService;
     private static final double DELTA = 0.007;
     private static final int LANGUAGE_CODE_FOR_UA = 0;
+    private static final String KYIV_CITY = "місто Київ";
+    private static final String KYIV_OBLAST = "Київська область";
 
     @Override
     public boolean isValid(CreateAddressRequestDto createAddressRequestDto, ConstraintValidatorContext context) {
@@ -34,16 +36,25 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
         try {
             geoResult = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_UA);
             resultFromCoordinates = googleApiService.getResultFromGoogleByCoordinates(latLng);
-        } catch (GoogleApiException e) {
-            throw new InvalidAddressException("Google API error: " + e.getMessage());
+        } catch (NotFoundException | GoogleApiException e) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Google API error: " + e.getMessage())
+                .addConstraintViolation();
+            return false;
         }
 
         if (resultFromCoordinates == null || !isCoordinatesValid(geoResult, coordinates)) {
-            throw new InvalidAddressException("Invalid coordinates or address.");
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Invalid coordinates or address.")
+                .addConstraintViolation();
+            return false;
         }
 
         if (!areCityAndRegionValid(geoResult, resultFromCoordinates, createAddressRequestDto)) {
-            throw new InvalidAddressException("City and region do not match the provided address.");
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate("City and region do not match the provided address.")
+                .addConstraintViolation();
+            return false;
         }
 
         return true;
@@ -75,10 +86,14 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
     }
 
     private String getLongName(AddressComponent[] addressComponents, AddressComponentType type) {
-        return Arrays.stream(addressComponents)
+        String longName = Arrays.stream(addressComponents)
             .filter(component -> Arrays.asList(component.types).contains(type))
             .map(component -> component.longName)
             .findFirst()
             .orElse(null);
+        if (KYIV_CITY.equalsIgnoreCase(longName)) {
+            longName = KYIV_OBLAST;
+        }
+        return longName;
     }
 }

@@ -2118,7 +2118,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .fee(0)
             .terminal(DEFAULT_VALUE_FOR_PAYMENT)
             .build());
-
         return Payment.builder()
             .id(extractIdFromReference(decodedOrderReference))
             .currency("UAH")
