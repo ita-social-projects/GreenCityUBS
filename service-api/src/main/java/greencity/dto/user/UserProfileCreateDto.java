@@ -1,5 +1,6 @@
 package greencity.dto.user;
 
+import greencity.constant.ValidationConstant;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,7 @@ import jakarta.validation.constraints.Size;
 public class UserProfileCreateDto {
     @NotBlank
     private String uuid;
-    @Email
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String email;
     @Size(min = 1, max = 30, message = "name must have no less than 1 and no more than 30 symbols")
     @Pattern(regexp = "^(?!\\.)(?!.*\\.$)(?!.*?\\.\\.)(?!.*?\\-\\-)(?!.*?\\'\\')[-'ʼ ґҐіІєЄїЇА-Яа-я+\\w.]{1,30}$",

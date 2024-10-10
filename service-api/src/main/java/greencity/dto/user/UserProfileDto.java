@@ -1,6 +1,7 @@
 package greencity.dto.user;
 
 import greencity.annotations.ValidPhoneNumber;
+import greencity.constant.ValidationConstant;
 import greencity.dto.address.AddressDto;
 import greencity.util.Bot;
 import lombok.AllArgsConstructor;
@@ -31,10 +32,10 @@ public class UserProfileDto {
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z\\s-'.]{1,30}")
     private String recipientSurname;
     @NotBlank
-    @Email
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String recipientEmail;
     @NotBlank
-    @Email
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String alternateEmail;
     @NotBlank
     @ValidPhoneNumber

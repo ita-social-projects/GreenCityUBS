@@ -30,7 +30,7 @@ public class EmployeeDto {
     @NotNull
     @ValidPhoneNumber
     private String phoneNumber;
-    @Email
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     @NotBlank
     private String email;
     private EmployeeStatus employeeStatus;

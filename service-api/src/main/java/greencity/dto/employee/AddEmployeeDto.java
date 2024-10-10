@@ -1,6 +1,7 @@
 package greencity.dto.employee;
 
 import greencity.annotations.ValidPhoneNumber;
+import greencity.constant.ValidationConstant;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.position.PositionDto;
 import lombok.AllArgsConstructor;
@@ -29,7 +30,7 @@ public class AddEmployeeDto {
     @NotNull
     @ValidPhoneNumber
     private String phoneNumber;
-    @Email
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String email;
     @NotEmpty
     private List<PositionDto> employeePositions;

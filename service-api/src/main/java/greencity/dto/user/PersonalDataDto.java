@@ -1,6 +1,8 @@
 package greencity.dto.user;
 
 import greencity.annotations.ValidPhoneNumber;
+import greencity.constant.ValidationConstant;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
@@ -24,7 +26,7 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @ToString
 public class PersonalDataDto implements Serializable {
-    @Email
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String email;
 
     @NotBlank

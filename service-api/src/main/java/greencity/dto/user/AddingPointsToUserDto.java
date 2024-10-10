@@ -1,5 +1,7 @@
 package greencity.dto.user;
 
+import greencity.constant.ValidationConstant;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -19,7 +21,7 @@ import lombok.ToString;
 @ToString
 public class AddingPointsToUserDto {
     @NotNull
-    @Email
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String email;
     @NotNull
     @Min(1)
