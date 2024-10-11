@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
+import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
@@ -258,7 +259,8 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/getUsersViolations")
-    public ResponseEntity<ViolationsInfoDto> getUserViolations(@Valid @Email @RequestParam String email) {
+    public ResponseEntity<ViolationsInfoDto> getUserViolations(
+        @Valid @Email(regexp = ValidationConstant.EMAIL_REGEXP) @RequestParam String email) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getAllUserViolations(email));
     }

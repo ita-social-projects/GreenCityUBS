@@ -1,6 +1,7 @@
 package greencity.dto.user;
 
 import greencity.annotations.ValidPhoneNumber;
+import greencity.constant.ValidationConstant;
 import greencity.dto.address.AddressDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,13 +27,12 @@ import java.util.List;
 @EqualsAndHashCode
 public class UserProfileUpdateDto implements Serializable {
     @NotBlank
-    @Pattern(regexp = "^(?!\\s*$)[ЁёІіЇїҐґЄєА-Яа-яA-Za-z0-9ʼ'`ʹ\\s-]{1,30}$")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String recipientName;
     @NotBlank
-    @Pattern(regexp = "^(?!\\s*$)[ЁёІіЇїҐґЄєА-Яа-яA-Za-z0-9ʼ'`ʹ\\s-]{1,30}$")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String recipientSurname;
-    @Email
-    @Pattern(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String alternateEmail;
     @NotBlank
     @ValidPhoneNumber
