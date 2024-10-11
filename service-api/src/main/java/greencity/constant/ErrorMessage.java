@@ -176,4 +176,6 @@ public class ErrorMessage {
     public static final String USER_AGREEMENT_NOT_FOUND_BY_ID = "User Agreement with ID %d not found";
     public static final String REFUND_CONFLICT_MONEY_AND_BONUSES =
         "A refund cannot be processed with both money and bonuses at the same time";
+    public static final String TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST =
+        "Could not find tariff information for bags with IDs %s at location with id: %d";
 }
