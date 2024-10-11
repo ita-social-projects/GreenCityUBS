@@ -2071,6 +2071,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public List<Long> getTariffIdByLocationId(Long locationId) {
         return tariffsInfoRepository.findTariffIdByLocationId(locationId)
+            .filter(list -> !list.isEmpty())
             .orElseThrow(() -> new NotFoundException(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationId)));
     }
 
