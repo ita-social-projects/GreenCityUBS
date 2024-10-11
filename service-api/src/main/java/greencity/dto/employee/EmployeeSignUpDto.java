@@ -2,6 +2,7 @@ package greencity.dto.employee;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import greencity.constant.ValidationConstant;
 import greencity.dto.position.PositionDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +21,7 @@ public class EmployeeSignUpDto {
     private String name;
 
     @NotBlank
-    @Email(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String email;
 
     @JsonIgnore
