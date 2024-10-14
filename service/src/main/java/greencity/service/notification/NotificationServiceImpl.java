@@ -720,7 +720,7 @@ public class NotificationServiceImpl implements NotificationService {
         Page<UserNotification> notifications = userNotificationRepository.findAllByUser(user, pageRequest);
 
         List<NotificationShortDto> notificationShortDtoList = notifications.stream()
-            .map(n -> createNotificationShortDto(n, language))
+            .map(n -> createNotificationShortDto(n, language, 0L))
             .collect(Collectors.toCollection(LinkedList::new));
 
         return new PageableDto<>(
@@ -797,11 +797,22 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationDto;
     }
 
-    private NotificationShortDto createNotificationShortDto(UserNotification notification, String language) {
+    private NotificationShortDto createNotificationShortDto(UserNotification notification, String language,
+        Long monthsOfAccountInactivity) {
         NotificationTemplate template = templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), SITE)
             .orElseThrow(() -> new NotFoundException("Template not found"));
+
+        String templateBody = resolveTemplateBody(language, SITE, template);
+        if (notification.getParameters() == null) {
+            notification.setParameters(Collections.emptySet());
+        }
+        Map<String, String> valuesMap = notification.getParameters().stream()
+            .collect(toMap(NotificationParameter::getKey, NotificationParameter::getValue));
+
+        StringSubstitutor sub = new StringSubstitutor(valuesMap);
+        String resultBody = sub.replace(String.format(templateBody, monthsOfAccountInactivity));
 
         Long orderId = Objects.nonNull(notification.getOrder()) ? notification.getOrder().getId() : null;
 
@@ -813,6 +824,7 @@ public class NotificationServiceImpl implements NotificationService {
             .notificationTime(notification.getNotificationTime())
             .read(notification.isRead())
             .orderId(orderId)
+            .body(resultBody)
             .build();
     }
 

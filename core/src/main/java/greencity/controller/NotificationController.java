@@ -46,7 +46,7 @@ public class NotificationController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
-    @PostMapping(value = "/{id}")
+    @GetMapping(value = "/{id}")
     @ApiLocale
     public ResponseEntity<NotificationDto> getNotification(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
