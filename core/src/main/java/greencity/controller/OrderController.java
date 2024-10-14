@@ -143,7 +143,7 @@ public class OrderController {
     public ResponseEntity<CertificateDto> checkIfCertificateAvailable(
         @PathVariable @Pattern(regexp = ValidationConstant.CERTIFICATE_CODE_REGEXP,
             message = ValidationConstant.CERTIFICATE_CODE_REGEXP_MESSAGE) String responseCode,
-        @CurrentUserUuid String userUuid) {
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.checkCertificate(responseCode, userUuid));
     }
