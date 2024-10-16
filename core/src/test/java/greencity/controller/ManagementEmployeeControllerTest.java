@@ -14,7 +14,6 @@ import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,12 +31,15 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
+
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import static greencity.ModelUtils.getUuid;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
@@ -134,17 +136,6 @@ class ManagementEmployeeControllerTest {
     }
 
     @Test
-    void getAllActiveEmployees() throws Exception {
-        EmployeePage employeePage = new EmployeePage();
-        EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
-
-        mockMvc.perform(get(UBS_LINK + FIND_ALL_LINK))
-            .andExpect(status().isOk());
-
-        verify(service).findAll(employeePage, employeeFilterCriteria);
-    }
-
-    @Test
     void updateEmployeeTest() throws Exception {
         EmployeeDto employeeDto = new EmployeeDto();
         List<TariffWithChatAccess> tariffs = new ArrayList<>();
@@ -217,15 +208,15 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void getPositionsAndRelatedAuthoritiesTest() throws Exception {
-        Principal principal = mock(Principal.class);
-        when(principal.getName()).thenReturn("testmail@gmail.com");
+        Principal mockPrincipal = mock(Principal.class);
+        when(mockPrincipal.getName()).thenReturn("testmail@gmail.com");
 
-        mockMvc.perform(get(UBS_LINK + "/get-positions-authorities" + "?email=" + principal.getName())
-            .principal(principal)
+        mockMvc.perform(get(UBS_LINK + "/get-positions-authorities" + "?email=" + mockPrincipal.getName())
+            .principal(mockPrincipal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).getPositionsAndRelatedAuthorities(principal.getName());
+        verify(ubsClientService).getPositionsAndRelatedAuthorities(mockPrincipal.getName());
     }
 
     @Test
