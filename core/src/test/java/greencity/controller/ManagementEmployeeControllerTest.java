@@ -55,15 +55,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class ManagementEmployeeControllerTest {
-    private final String UBS_LINK = "/admin/ubs-employee";
-    private final String SAVE_LINK = "/save-employee";
-    private final String UPDATE_LINK = "/update-employee";
-    private final String FIND_ALL_LINK = "/getAll-employees";
-    private final String DELETE_LINK = "/deactivate-employee";
-    private final String ACTIVATE_LINK = "/activate-employee";
-    private final String GET_ALL_POSITIONS_LINK = "/get-all-positions";
-    private final String DELETE_IMAGE_LINK = "/delete-employee-image/";
-    private final String GET_ALL_TARIFFS = "/getTariffs";
+    private final static String UBS_LINK = "/admin/ubs-employee";
+    private final static String SAVE_LINK = "/save-employee";
+    private final static String UPDATE_LINK = "/update-employee";
+    private final static String FIND_ALL_LINK = "/getAll-employees";
+    private final static String DELETE_LINK = "/deactivate-employee";
+    private final static String ACTIVATE_LINK = "/activate-employee";
+    private final static String GET_ALL_POSITIONS_LINK = "/get-all-positions";
+    private final static String DELETE_IMAGE_LINK = "/delete-employee-image/";
+    private final static String GET_ALL_TARIFFS = "/getTariffs";
 
     private MockMvc mockMvc;
     @Mock
