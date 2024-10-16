@@ -2584,6 +2584,7 @@ public class ModelUtils {
             .id(1L)
             .orderId(1L)
             .title("Title")
+            .body("Body")
             .notificationTime(LocalDateTime.of(2021, 9, 17, 20, 26, 10))
             .read(false)
             .build();

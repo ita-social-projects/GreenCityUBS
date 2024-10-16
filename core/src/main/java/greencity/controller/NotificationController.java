@@ -21,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Locale;
@@ -46,7 +45,7 @@ public class NotificationController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
-    @PostMapping(value = "/{id}")
+    @GetMapping(value = "/{id}")
     @ApiLocale
     public ResponseEntity<NotificationDto> getNotification(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
