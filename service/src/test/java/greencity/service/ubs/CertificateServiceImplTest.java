@@ -40,7 +40,7 @@ class CertificateServiceImplTest {
     @Mock
     CertificateRepository certificateRepository;
 
-    @Mock(lenient = true)
+    @Mock
     private ModelMapper modelMapper;
 
     @Test
