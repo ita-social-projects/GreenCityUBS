@@ -63,7 +63,7 @@ class ViolationServiceImplTest {
     ViolationRepository violationRepository;
     @InjectMocks
     ViolationServiceImpl violationService;
-    @Mock(lenient = true)
+    @Mock
     OrderRepository orderRepository;
     @Mock
     UserRepository userRepository;
