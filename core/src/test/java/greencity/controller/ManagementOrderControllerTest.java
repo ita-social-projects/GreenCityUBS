@@ -420,10 +420,10 @@ class ManagementOrderControllerTest {
     void getUpdateAllOrderPageAdminInfoTest() throws Exception {
         UpdateAllOrderPageDto dto = ModelUtils.getUpdateAllOrderPageDto();
         ObjectMapper objectMapper = new ObjectMapper();
-        String JsonDto = objectMapper.writeValueAsString(dto);
+        String jsonDto = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(ubsLink + "/all-order-page-admin-info")
-            .content(JsonDto)
+            .content(jsonDto)
             .principal(principal)
             .param("lang", "ua")
             .contentType(MediaType.APPLICATION_JSON))
