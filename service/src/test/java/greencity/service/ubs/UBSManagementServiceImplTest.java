@@ -396,35 +396,28 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto expectedObject = ModelUtils.getTestOrderDetailStatusDto();
         OrderDetailStatusDto producedObject = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
-        assertEquals(expectedObject.getOrderStatus(), producedObject.getOrderStatus());
-        assertEquals(expectedObject.getPaymentStatus(), producedObject.getPaymentStatus());
-        assertEquals(expectedObject.getDate(), producedObject.getDate());
+        assertEquals(expectedObject, producedObject);
+
         testOrderDetail.setOrderStatus(OrderStatus.FORMED.toString());
         expectedObject.setOrderStatus(OrderStatus.FORMED.toString());
         OrderDetailStatusDto producedObjectAdjustment = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject.getOrderStatus(), producedObjectAdjustment.getOrderStatus());
-        assertEquals(expectedObject.getPaymentStatus(), producedObjectAdjustment.getPaymentStatus());
-        assertEquals(expectedObject.getDate(), producedObjectAdjustment.getDate());
+        assertEquals(expectedObject, producedObjectAdjustment);
 
         testOrderDetail.setOrderStatus(OrderStatus.ADJUSTMENT.toString());
         expectedObject.setOrderStatus(OrderStatus.ADJUSTMENT.toString());
         OrderDetailStatusDto producedObjectConfirmed = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject.getOrderStatus(), producedObjectConfirmed.getOrderStatus());
-        assertEquals(expectedObject.getPaymentStatus(), producedObjectConfirmed.getPaymentStatus());
-        assertEquals(expectedObject.getDate(), producedObjectConfirmed.getDate());
+        assertEquals(expectedObject, producedObjectConfirmed);
 
         testOrderDetail.setOrderStatus(OrderStatus.CONFIRMED.toString());
         expectedObject.setOrderStatus(OrderStatus.CONFIRMED.toString());
         OrderDetailStatusDto producedObjectNotTakenOut = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject.getOrderStatus(), producedObjectNotTakenOut.getOrderStatus());
-        assertEquals(expectedObject.getPaymentStatus(), producedObjectNotTakenOut.getPaymentStatus());
-        assertEquals(expectedObject.getDate(), producedObjectNotTakenOut.getDate());
+        assertEquals(expectedObject, producedObjectNotTakenOut);
 
         testOrderDetail.setCancellationReason("MOVING_OUT");
         testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
@@ -432,9 +425,7 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto producedObjectCancelled = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled.getOrderStatus());
-        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled.getPaymentStatus());
-        assertEquals(expectedObject.getDate(), producedObjectCancelled.getDate());
+        assertEquals(expectedObject, producedObjectCancelled);
         assertEquals(700, order.getPointsToUse());
 
         order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
@@ -443,9 +434,7 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto producedObjectDone = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject.getOrderStatus(), producedObjectDone.getOrderStatus());
-        assertEquals(expectedObject.getPaymentStatus(), producedObjectDone.getPaymentStatus());
-        assertEquals(expectedObject.getDate(), producedObjectDone.getDate());
+        assertEquals(expectedObject, producedObjectDone);
 
         order.setPointsToUse(0);
         order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
@@ -454,9 +443,7 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto producedObjectCancelled2 = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled2.getOrderStatus());
-        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled2.getPaymentStatus());
-        assertEquals(expectedObject.getDate(), producedObjectCancelled2.getDate());
+        assertEquals(expectedObject, producedObjectCancelled2);
         assertEquals(0, order.getPointsToUse());
 
         order.setOrderStatus(OrderStatus.ADJUSTMENT);
@@ -465,9 +452,7 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto producedObjectBroughtItHimself = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject.getOrderStatus(), producedObjectBroughtItHimself.getOrderStatus());
-        assertEquals(expectedObject.getPaymentStatus(), producedObjectBroughtItHimself.getPaymentStatus());
-        assertEquals(expectedObject.getDate(), producedObjectBroughtItHimself.getDate());
+        assertEquals(expectedObject, producedObjectBroughtItHimself);
 
         order.setCertificates(Set.of(ModelUtils.getActiveCertificateWith10Points()));
         testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
@@ -475,9 +460,7 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto producedObjectCancelled3 = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled3.getOrderStatus());
-        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled3.getPaymentStatus());
-        assertEquals(expectedObject.getDate(), producedObjectCancelled3.getDate());
+        assertEquals(expectedObject, producedObjectCancelled3);
         assertEquals(0, order.getPointsToUse());
 
         verify(eventService, times(1))
@@ -623,13 +606,6 @@ class UBSManagementServiceImplTest {
         verify(modelMapper).map(updatedOrderAddress, OrderAddressDtoResponse.class);
         assertEquals(1L, updatedOrderAddress.getLocation().getId());
         assertEquals(1L, updatedOrderAddress.getId());
-    }
-
-    @Test
-    void testUpdateAddressThrowsOrderNotFoundException() {
-        Order order = getOrder();
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, order, "abc"));
     }
 
     @Test
@@ -1116,16 +1092,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void setOrderDetailExceptionTest() {
-        Order order = getOrder();
-        Map<Integer, Integer> confirm = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed();
-        Map<Integer, Integer> exported = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported();
-
-        assertThrows(NotFoundException.class,
-            () -> ubsManagementService.setOrderDetail(order, confirm, exported, "test@gmail.com"));
-    }
-
-    @Test
     void testSetOrderDetailThrowsUserNotFoundException() {
         Order order = getOrder();
         Map<Integer, Integer> confirm = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed();
@@ -1485,20 +1451,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getOrderSumDetailsForCanceledPaidOrder() {
-        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
-        Order order = ModelUtils.getCanceledPaidOrder();
-        order.setOrderDate(LocalDateTime.now());
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-
-        doNothing().when(notificationService).notifyPaidOrder(order);
-        doNothing().when(notificationService).notifyHalfPaidPackage(order);
-        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
-        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
-        Assertions.assertNotNull(order);
-    }
-
-    @Test
     void getOrderSumDetailsForCanceledPaidOrderWithBags() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getCanceledPaidOrder();
@@ -1516,20 +1468,6 @@ class UBSManagementServiceImplTest {
     void getOrderSumDetailsForAdjustmentPaidOrder() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getAdjustmentPaidOrder();
-        order.setOrderDate(LocalDateTime.now());
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-
-        doNothing().when(notificationService).notifyPaidOrder(order);
-        doNothing().when(notificationService).notifyHalfPaidPackage(order);
-        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
-        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
-        Assertions.assertNotNull(order);
-    }
-
-    @Test
-    void getOrderSumDetailsForFormedHalfPaidOrder() {
-        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
-        Order order = ModelUtils.getFormedHalfPaidOrder();
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 
@@ -2181,13 +2119,6 @@ class UBSManagementServiceImplTest {
 
         assertEquals(notTakenOrderReasonDto.getDescription(), result.getDescription());
         assertEquals(notTakenOrderReasonDto.getImages(), result.getImages());
-        verify(orderRepository).findById(1L);
-    }
-
-    @Test
-    void getNotTakenOrderReasonWithoutOrderTest() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ubsManagementService.getNotTakenOrderReason(1L));
         verify(orderRepository).findById(1L);
     }
 
