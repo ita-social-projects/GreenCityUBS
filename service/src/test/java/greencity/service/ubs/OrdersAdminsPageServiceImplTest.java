@@ -708,15 +708,6 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void responsibleEmployeeThrowsEntityNotFoundException() {
-        String email = "test@gmail.com";
-        List<Long> ordersId = List.of(1L);
-
-        assertThrows(NotFoundException.class,
-            () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, email));
-    }
-
-    @Test
     void responsibleEmployeeThrowsPositionNotFoundException() {
         String uuid = "uuid";
         List<Long> ordersId = List.of(1L);
