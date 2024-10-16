@@ -1819,7 +1819,9 @@ class SuperAdminServiceImplTest {
 
         Throwable t = assertThrows(BadRequestException.class,
             () -> superAdminService.switchTariffStatus(1L, "Active"));
-        assertEquals(String.format(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER +
+        assertEquals(String.format(
+            "%s%s",
+            ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER,
             tariffInfo.getCourier().getId()),
             t.getMessage());
 
