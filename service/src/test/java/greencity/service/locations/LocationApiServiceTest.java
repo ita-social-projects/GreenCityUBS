@@ -47,10 +47,10 @@ class LocationApiServiceTest {
     @Mock
     RestTemplate restTemplate;
 
-    static Map<String, Object> getApiResult(String code, String parent_id, String name, String nameEn) {
+    static Map<String, Object> getApiResult(String code, String parentId, String name, String nameEn) {
         Map<String, Object> apiResult = new HashMap<>();
         apiResult.put(CODE, code);
-        apiResult.put(PARENT_ID, parent_id);
+        apiResult.put(PARENT_ID, parentId);
         apiResult.put(NAME, name);
         apiResult.put(NAME_EN, nameEn);
         return apiResult;
