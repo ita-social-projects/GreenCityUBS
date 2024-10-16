@@ -14,14 +14,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 import java.util.List;
 import static greencity.ModelUtils.getNotificationDto;
 import static greencity.ModelUtils.getUuid;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +51,7 @@ class NotificationControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(List.of(dto));
 
-        mockMvc.perform(post(notificationLink + "/" + 1L + "?lang=ua")
+        mockMvc.perform(get(notificationLink + "/" + 1L + "?lang=ua")
             .principal(principal)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
@@ -62,7 +61,7 @@ class NotificationControllerTest {
 
     @Test
     void getNotificationsForCurrentUser() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink)
+        mockMvc.perform(get(notificationLink)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
@@ -70,7 +69,7 @@ class NotificationControllerTest {
 
     @Test
     void getUnreadenNotificationsTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink + "/quantityUnreadenNotifications")
+        mockMvc.perform(get(notificationLink + "/quantityUnreadenNotifications")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
