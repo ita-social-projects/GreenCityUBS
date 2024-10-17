@@ -87,16 +87,16 @@ class TelegramServiceTest {
     void isEnabled() {
         assertFalse(telegramService.isEnabled(null));
 
-        User user = new User();
-        assertFalse(telegramService.isEnabled(user));
+        User newUser = new User();
+        assertFalse(telegramService.isEnabled(newUser));
 
-        user.setTelegramBot(new TelegramBot());
-        assertFalse(telegramService.isEnabled(user));
+        newUser.setTelegramBot(new TelegramBot());
+        assertFalse(telegramService.isEnabled(newUser));
 
-        user.setTelegramBot(new TelegramBot(1L, 123L, true, user));
-        assertTrue(telegramService.isEnabled(user));
+        newUser.setTelegramBot(new TelegramBot(1L, 123L, true, newUser));
+        assertTrue(telegramService.isEnabled(newUser));
 
-        user.setTelegramBot(new TelegramBot(1L, 123L, false, user));
-        assertFalse(telegramService.isEnabled(user));
+        newUser.setTelegramBot(new TelegramBot(1L, 123L, false, newUser));
+        assertFalse(telegramService.isEnabled(newUser));
     }
 }
