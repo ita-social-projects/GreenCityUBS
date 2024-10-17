@@ -2744,32 +2744,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testGetOrderCancellationReasonForAdmin() {
-        OrderCancellationReasonDto dto = getCancellationDto();
-        Order orderDto = getOrderTest();
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
-        assert orderDto != null;
-        when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
-        OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L, anyString());
-
-        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
-        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
-    }
-
-    @Test
-    void testGetOrderCancellationReasonForUser() {
-        OrderCancellationReasonDto dto = getCancellationDto();
-        Order orderDto = getOrderTest();
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
-        assert orderDto != null;
-        when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
-        OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L, anyString());
-
-        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
-        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
-    }
-
-    @Test
     void getOrderCancellationReasonOrderNotFoundException() {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,

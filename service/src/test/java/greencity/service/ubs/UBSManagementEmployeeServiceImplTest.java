@@ -243,7 +243,7 @@ class UBSManagementEmployeeServiceImplTest {
 
         verify(modelMapper, times(2)).map(any(), any());
         verify(repository).save(any());
-        verify(fileService).delete(eq(retrievedEmployee.getImagePath()));
+        verify(fileService).delete(retrievedEmployee.getImagePath());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
         verify(repository, times(2)).findById(anyLong());
     }
