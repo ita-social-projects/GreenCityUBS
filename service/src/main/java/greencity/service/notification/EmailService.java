@@ -42,7 +42,7 @@ public class EmailService extends AbstractNotificationProvider {
      * {@inheritDoc}
      */
     @Override
-    public void sendNotification(UserNotification notification, NotificationDto notificationDto) {
+    protected void sendNotification(UserNotification notification, NotificationDto notificationDto) {
         String userLanguage = userRemoteClient.findUserLanguageByUuid(notification.getUser().getUuid());
         ScheduledEmailMessage emailNotification = ScheduledEmailMessage.builder()
             .username(notification.getUser().getRecipientName())
