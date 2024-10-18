@@ -21,8 +21,6 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
     private final GoogleApiService googleApiService;
     private static final double DELTA = 0.007;
     private static final int LANGUAGE_CODE_FOR_UA = 0;
-    private static final String KYIV_CITY = "місто Київ";
-    private static final String KYIV_OBLAST = "Київська область";
 
     @Override
     public boolean isValid(CreateAddressRequestDto createAddressRequestDto, ConstraintValidatorContext context) {
@@ -73,27 +71,20 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
     private boolean areCityAndRegionValid(GeocodingResult geoResult, AddressResponseFromGoogleAPI resultFromCoordinates,
         CreateAddressRequestDto dto) {
         String apiCity = getLongName(geoResult.addressComponents, AddressComponentType.LOCALITY);
-        String apiRegion = getLongName(geoResult.addressComponents, AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1);
 
-        if (apiRegion == null || apiCity == null) {
+        if (apiCity == null) {
             return false;
         }
 
         return dto.getCity().equalsIgnoreCase(apiCity)
-            && dto.getRegion().equalsIgnoreCase(apiRegion)
-            && apiCity.equalsIgnoreCase(resultFromCoordinates.getCity())
-            && apiRegion.equalsIgnoreCase(resultFromCoordinates.getRegion());
+            && apiCity.equalsIgnoreCase(resultFromCoordinates.getCity());
     }
 
     private String getLongName(AddressComponent[] addressComponents, AddressComponentType type) {
-        String longName = Arrays.stream(addressComponents)
+        return Arrays.stream(addressComponents)
             .filter(component -> Arrays.asList(component.types).contains(type))
             .map(component -> component.longName)
             .findFirst()
             .orElse(null);
-        if (KYIV_CITY.equalsIgnoreCase(longName)) {
-            longName = KYIV_OBLAST;
-        }
-        return longName;
     }
 }

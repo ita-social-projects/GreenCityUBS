@@ -231,6 +231,8 @@ import static java.util.stream.Collectors.toMap;
 @RequiredArgsConstructor
 public class UBSClientServiceImpl implements UBSClientService {
     private static final Logger log = LoggerFactory.getLogger(UBSClientServiceImpl.class);
+    private static final Long CITY_ID_KIEV = 3L;
+    private static final String KYIV_CITY = "Kyiv City";
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSUserRepository ubsUserRepository;
@@ -2111,6 +2113,17 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address = modelMapper.map(orderAddressDtoUpdate, Address.class);
         setLocations(createAddressRequestDto, address);
         return modelMapper.map(address, OrderAddress.class);
+    }
+
+    @Override
+    public List<DistrictDto> getAllDistrictsForKyiv() {
+        return districtRepository.findAllByCityId(CITY_ID_KIEV).stream()
+            .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn()))
+            .map(district -> DistrictDto.builder()
+                .nameEn(district.getNameEn())
+                .nameUa(district.getNameUk())
+                .build())
+            .toList();
     }
 
     private Payment createPayment(MonoBankPaymentResponseDto response, Order order, String decodedOrderReference) {
