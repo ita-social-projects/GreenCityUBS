@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static greencity.ModelUtils.getLanguageVO;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
@@ -48,11 +47,11 @@ class EmailServiceTest {
             .email(notification.getUser().getRecipientEmail())
             .subject(notificationDto.getTitle())
             .body(notificationDto.getBody())
-            .language(getLanguageVO().getCode())
+            .language("en")
+            .isUbs(true)
             .build();
 
-        when(userRemoteClient.findUserLanguageByUuid(notification.getUser().getUuid()))
-            .thenReturn(getLanguageVO().getCode());
+        when(userRemoteClient.findUserLanguageByUuid(notification.getUser().getUuid())).thenReturn("en");
         doNothing().when(userRemoteClient).sendScheduledEmailNotification(emailNotificationDto);
 
         emailService.sendNotification(notification, notificationDto);

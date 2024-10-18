@@ -43,7 +43,6 @@ import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.language.LanguageVO;
 import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.LocationCreateDto;
@@ -5481,9 +5480,5 @@ public class ModelUtils {
                 .fee(0)
                 .build())
             .build();
-    }
-
-    public static LanguageVO getLanguageVO() {
-        return new LanguageVO(2L, "en");
     }
 }
