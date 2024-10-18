@@ -145,4 +145,11 @@ class AddressControllerTest {
 
         verify(ubsClientService).getAllDistricts(region, city);
     }
+
+    @Test
+    void getAllDistrictsForKyiv() throws Exception {
+        mockMvc.perform(get(ubsLink + "/districts-for-kyiv")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
 }

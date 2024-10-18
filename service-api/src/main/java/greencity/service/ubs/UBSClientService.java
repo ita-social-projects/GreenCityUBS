@@ -437,4 +437,11 @@ public interface UBSClientService {
      * @return {@link OrderAddress} updated order's address.
      */
     OrderAddress updateOrderAddress(OrderAddressExportDetailsDtoUpdate orderAddressDtoUpdate);
+
+    /**
+     * Retrieves all districts in Kyiv.
+     *
+     * @return List of all districts in Kyiv.
+     */
+    List<DistrictDto> getAllDistrictsForKyiv();
 }

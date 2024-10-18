@@ -99,7 +99,8 @@ public class SecurityConfig {
                     ADMIN_EMPL_LINK + "/get-employees/{tariffId}",
                     UBS_LINK + "/locationsByCourier/{courierId}",
                     UBS_LINK + "/tariffs/{locationId}",
-                    USER_AGREEMENT_LINK + "/latest")
+                    USER_AGREEMENT_LINK + "/latest",
+                    UBS_LINK + "/districts-for-kyiv")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST,
                     UBS_LINK + "/userProfile/user/create")

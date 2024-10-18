@@ -4288,4 +4288,13 @@ class UBSClientServiceImplTest {
         verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
         verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
     }
+
+    @Test
+    void getAllDistrictsForKyivTest() {
+        when(districtRepository.findAllByCityId(anyLong())).thenReturn(List.of(getDistrict()));
+
+        ubsClientService.getAllDistrictsForKyiv();
+
+        verify(districtRepository).findAllByCityId(anyLong());
+    }
 }
