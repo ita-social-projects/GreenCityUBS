@@ -2842,7 +2842,7 @@ public class ModelUtils {
     }
 
     private static Order createTestOrder2() {
-        return Order.builder().id(43L).user(User.builder().id(42L).build())
+        return Order.builder().id(43L).user(User.builder().id(42L).uuid("1234").build())
             .orderPaymentStatus(OrderPaymentStatus.PAID).orderDate(LocalDateTime.now()).build();
     }
 

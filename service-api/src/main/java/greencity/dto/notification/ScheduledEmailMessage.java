@@ -2,19 +2,19 @@ package greencity.dto.notification;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
-@Getter
-@ToString
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode
-public class EmailNotificationDto {
+public class ScheduledEmailMessage {
+    private String username;
     private String email;
+    private String baseLink;
     private String subject;
-    private String message;
+    private String body;
+    private String language;
+    private boolean isUbs;
 }

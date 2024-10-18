@@ -1,11 +1,11 @@
 package greencity.client.config;
 
 import greencity.client.UserRemoteClient;
+import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.notification.EmailNotificationDto;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,9 +72,14 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
-    void sendEmailNotification() {
-        EmailNotificationDto dto = EmailNotificationDto.builder().email(USER_EMAIL).build();
-        assertDoesNotThrow(() -> client.sendEmailNotification(dto));
+    void sendScheduledEmailNotification() {
+        ScheduledEmailMessage dto = ScheduledEmailMessage.builder().email(USER_EMAIL).build();
+        assertDoesNotThrow(() -> client.sendScheduledEmailNotification(dto));
+    }
+
+    @Test
+    void findUserLanguageByUuid() {
+        assertDoesNotThrow(() -> client.findUserLanguageByUuid(USER_UUID));
     }
 
     @Test
