@@ -179,4 +179,19 @@ public class AddressController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getAllDistricts(region, city));
     }
+
+    /**
+     * Returns a list of all districts for Kyiv.
+     *
+     * @return A list of DistrictDtos containing all districts for Kyiv.
+     */
+    @Operation(summary = "Get all districts for Kyiv")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = DistrictDto.class)))),
+    })
+    @GetMapping("/districts-for-kyiv")
+    public ResponseEntity<List<DistrictDto>> getAllDistrictsForKyiv() {
+        return ResponseEntity.ok(ubsClientService.getAllDistrictsForKyiv());
+    }
 }

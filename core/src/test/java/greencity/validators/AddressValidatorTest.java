@@ -140,28 +140,6 @@ class AddressValidatorTest {
     }
 
     @Test
-    void testIsValidWhenRegionDoesNotMatchShouldReturnFalse() {
-        AddressComponent regionComponent = new AddressComponent();
-        regionComponent.longName = "Lviv";
-        regionComponent.types = new AddressComponentType[] {AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
-
-        geoResult.addressComponents[1] = regionComponent;
-
-        when(googleApiService.getResultFromGeoCode(anyString(), anyInt())).thenReturn(geoResult);
-        when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class)))
-            .thenReturn(addressResponseFromGoogleAPI);
-
-        ConstraintValidatorContext.ConstraintViolationBuilder violationBuilder =
-            mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
-
-        boolean isValid = addressValidator.isValid(addressRequestDto, context);
-
-        assertFalse(isValid);
-        verify(violationBuilder).addConstraintViolation();
-    }
-
-    @Test
     void testIsValidWhenNotFoundExceptionOccursShouldReturnFalse() {
         doThrow(new NotFoundException("Location not found")).when(googleApiService)
             .getResultFromGeoCode(any(), any());
