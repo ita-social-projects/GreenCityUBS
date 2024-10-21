@@ -231,4 +231,5 @@
     <include file="/db/changelog/logs/ch-update-values-in-notification-templates-title-Sotnik.xml"/>
     <include file="/db/changelog/logs/ch-add-column-status-and-deleteDate-to-Violation-Chekhovska.xml"/>
     <include file="/db/changelog/logs/ch-update-notification-templates-Herchanivska.xml"/>
+    <include file="db/changelog/logs/ch-update-text-for-notifications-Rozhko.xml"/>
 </databaseChangeLog>
