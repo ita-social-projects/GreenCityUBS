@@ -1,15 +1,15 @@
 package greencity.service.notification;
 
 import greencity.client.UserRemoteClient;
-import greencity.dto.notification.EmailNotificationDto;
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
 import greencity.repository.NotificationTemplateRepository;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.Objects;
 import static greencity.enums.NotificationReceiverType.EMAIL;
 
 @Service
@@ -43,12 +43,16 @@ public class EmailService extends AbstractNotificationProvider {
      */
     @Override
     protected void sendNotification(UserNotification notification, NotificationDto notificationDto) {
-        var emailNotification = EmailNotificationDto.builder()
+        String userLanguage = userRemoteClient.findUserLanguageByUuid(notification.getUser().getUuid());
+        ScheduledEmailMessage emailNotification = ScheduledEmailMessage.builder()
+            .username(notification.getUser().getRecipientName())
             .email(notification.getUser().getRecipientEmail())
             .subject(notificationDto.getTitle())
-            .message(notificationDto.getBody())
+            .body(notificationDto.getBody())
+            .language(userLanguage)
+            .isUbs(true)
             .build();
 
-        userRemoteClient.sendEmailNotification(emailNotification);
+        userRemoteClient.sendScheduledEmailNotification(emailNotification);
     }
 }
