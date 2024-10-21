@@ -15,8 +15,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.Cascade;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,7 +29,10 @@ import java.util.Set;
 
 @Data
 @EqualsAndHashCode(exclude = {"order", "user", "parameters", "notificationTime"})
+@ToString(exclude = {"order", "user", "parameters", "notificationTime"})
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "user_notifications")
 public class UserNotification {
     @Id

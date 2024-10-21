@@ -2,8 +2,8 @@ package greencity.service.notification;
 
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
-import greencity.dto.notification.EmailNotificationDto;
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import org.junit.jupiter.api.Test;
@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EmailServiceTest {
@@ -42,17 +43,19 @@ class EmailServiceTest {
         UserNotification notification = ModelUtils.TEST_USER_NOTIFICATION;
         NotificationDto notificationDto = ModelUtils.TEST_NOTIFICATION_DTO;
 
-        EmailNotificationDto emailNotificationDto = EmailNotificationDto.builder()
+        ScheduledEmailMessage emailNotificationDto = ScheduledEmailMessage.builder()
             .email(notification.getUser().getRecipientEmail())
             .subject(notificationDto.getTitle())
-            .message(notificationDto.getBody())
+            .body(notificationDto.getBody())
+            .language("en")
+            .isUbs(true)
             .build();
 
-        doNothing().when(userRemoteClient)
-            .sendEmailNotification(emailNotificationDto);
+        when(userRemoteClient.findUserLanguageByUuid(notification.getUser().getUuid())).thenReturn("en");
+        doNothing().when(userRemoteClient).sendScheduledEmailNotification(emailNotificationDto);
 
         emailService.sendNotification(notification, notificationDto);
 
-        verify(userRemoteClient).sendEmailNotification(emailNotificationDto);
+        verify(userRemoteClient).sendScheduledEmailNotification(emailNotificationDto);
     }
 }

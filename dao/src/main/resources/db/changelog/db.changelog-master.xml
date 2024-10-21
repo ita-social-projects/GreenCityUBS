@@ -251,4 +251,5 @@
     <include file="db/changelog/logs/ch-insert-all-ukrainian-regions-into-region-table-Lukovskyi.xml"/>
     <include file="db/changelog/logs/ch-add-columns-into-big_order_table-Lukovskyi.xml"/>
     <include file="db/changelog/logs/2024-10-04-ch-delete-values-from-notifications_platforms-and-notification_templates-Kizerov.xml"/>
+    <include file="db/changelog/logs/ch-update-text-for-notifications-Rozhko.xml"/>
 </databaseChangeLog>

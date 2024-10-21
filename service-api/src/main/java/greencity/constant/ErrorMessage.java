@@ -178,4 +178,5 @@ public class ErrorMessage {
         "A refund cannot be processed with both money and bonuses at the same time";
     public static final String TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST =
         "Could not find tariff information for bags with IDs %s at location with id: %d";
+    public static final String COULD_NOT_RETRIEVE_USER_LANGUAGE = "Could not retrieve user language";
 }
