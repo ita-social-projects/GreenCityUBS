@@ -2112,13 +2112,22 @@ public class UBSClientServiceImpl implements UBSClientService {
         return modelMapper.map(address, OrderAddress.class);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<DistrictDto> getAllDistrictsForKyiv() {
         return districtRepository.findAllByCityId(CITY_ID_KIEV).stream()
             .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn()))
+            .collect(Collectors.toMap(
+                District::getNameUk,
+                district -> district,
+                (existing, replacement) -> existing))
+            .values()
+            .stream()
             .map(district -> DistrictDto.builder()
-                .nameEn(district.getNameEn())
                 .nameUa(district.getNameUk())
+                .nameEn(district.getNameEn())
                 .build())
             .toList();
     }
