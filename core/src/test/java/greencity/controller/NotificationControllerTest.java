@@ -80,19 +80,23 @@ class NotificationControllerTest {
     @Test
     void viewNotificationTest() throws Exception {
         mockMvc.perform(patch(notificationLink + "/{notificationId}/viewNotification", 1L)
-            .principal(principal))
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
     @Test
     void unreadNotificationTest() throws Exception {
-        mockMvc.perform(patch(notificationLink + "/{notificationId}/unreadNotification", 1L))
+        mockMvc.perform(patch(notificationLink + "/{notificationId}/unreadNotification", 1L)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
     @Test
     void deleteNotificationTest() throws Exception {
         mockMvc.perform(delete(notificationLink + "/{notificationId}", 1L)
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
