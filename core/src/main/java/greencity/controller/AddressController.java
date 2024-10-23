@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidAddress;
+import greencity.annotations.ValidUpdateAddress;
 import greencity.constants.HttpStatuses;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
@@ -102,7 +103,7 @@ public class AddressController {
     })
     @PutMapping("/update-order-address")
     public ResponseEntity<OrderWithAddressesResponseDto> updateAddressForOrder(
-        @Valid @ValidAddress @RequestBody OrderAddressDtoRequest dtoRequest,
+        @Valid @ValidUpdateAddress @RequestBody OrderAddressDtoRequest dtoRequest,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.updateCurrentAddressForOrder(dtoRequest, uuid));
