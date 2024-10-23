@@ -20,7 +20,9 @@ import java.security.Principal;
 import java.util.List;
 import static greencity.ModelUtils.getNotificationDto;
 import static greencity.ModelUtils.getUuid;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,5 +75,25 @@ class NotificationControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    void viewNotificationTest() throws Exception {
+        mockMvc.perform(patch(notificationLink + "/{notificationId}/viewNotification", 1L)
+            .principal(principal))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void unreadNotificationTest() throws Exception {
+        mockMvc.perform(patch(notificationLink + "/{notificationId}/unreadNotification", 1L))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteNotificationTest() throws Exception {
+        mockMvc.perform(delete(notificationLink + "/{notificationId}", 1L)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 }
