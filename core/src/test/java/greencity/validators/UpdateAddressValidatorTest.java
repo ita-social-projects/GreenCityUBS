@@ -59,6 +59,7 @@ class UpdateAddressValidatorTest {
 		boolean isValid = addressValidator.isValid(orderAddressDtoRequest, context);
 
 		assertTrue(isValid);
+		verify(googleApiService).getResultFromGoogleByCoordinates(any());
 	}
 
     @Test
@@ -77,6 +78,7 @@ class UpdateAddressValidatorTest {
 
         assertFalse(isValid);
         verify(violationBuilder).addConstraintViolation();
+        verify(googleApiService).getResultFromGoogleByCoordinates(any());
     }
 
     @Test
@@ -90,6 +92,7 @@ class UpdateAddressValidatorTest {
 
 		assertFalse(isValid);
 		verify(violationBuilder).addConstraintViolation();
+		verify(googleApiService).getResultFromGoogleByCoordinates(any());
 	}
 
     @Test
@@ -106,6 +109,7 @@ class UpdateAddressValidatorTest {
         assertFalse(isValid);
         verify(violationBuilder).addConstraintViolation();
         verify(context).disableDefaultConstraintViolation();
+        verify(googleApiService).getResultFromGoogleByCoordinates(any());
     }
 
     @Test
@@ -122,5 +126,6 @@ class UpdateAddressValidatorTest {
         assertFalse(isValid);
         verify(violationBuilder).addConstraintViolation();
         verify(context).disableDefaultConstraintViolation();
+        verify(googleApiService).getResultFromGoogleByCoordinates(any());
     }
 }
