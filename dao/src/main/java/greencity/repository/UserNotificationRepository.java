@@ -6,8 +6,10 @@ import greencity.entity.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -46,4 +48,42 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
         + "WHERE CAST(notification_time AS DATE) > :dateOfLastNotification AND "
         + "notification_type = :type")
     List<Long> getUserIdByDateOfLastNotificationAndNotificationType(LocalDate dateOfLastNotification, String type);
+
+    /**
+     * Changes {@link UserNotification} `read` as true.
+     *
+     * @param notificationId to change
+     */
+    @Transactional
+    @Modifying
+    @Query("UPDATE UserNotification n SET n.read = true WHERE n.id = :notificationId")
+    void markNotificationAsViewed(Long notificationId);
+
+    /**
+     * Changes {@link UserNotification} `viewed` as false.
+     *
+     * @param notificationId to change
+     */
+    @Transactional
+    @Modifying
+    @Query("UPDATE UserNotification n SET n.read = false WHERE n.id = :notificationId")
+    void markNotificationAsNotViewed(Long notificationId);
+
+    /**
+     * Method to delete specific Notification.
+     *
+     * @param notificationId id of searched Notification
+     * @param userId         id of user
+     */
+    void deleteUserNotificationByIdAndUserId(Long notificationId, Long userId);
+
+    /**
+     * Checks if a notification with the specified ID exists for the specified user.
+     *
+     * @param notificationId the ID of the notification to check
+     * @param userId         the ID of the user for whom the notification belongs
+     * @return true if the notification with the specified ID exists for the user,
+     *         false otherwise
+     */
+    boolean existsByIdAndUserId(Long notificationId, Long userId);
 }

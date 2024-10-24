@@ -19,7 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -91,5 +93,63 @@ public class NotificationController {
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationService.getUnreadenNotifications(userUuid));
+    }
+
+    /**
+     * Method to mark Notification as viewed.
+     *
+     * @param notificationId id of notification, that should be marked as viewed
+     */
+    @Operation(summary = "Read single Notification.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PatchMapping("/{notificationId}/viewNotification")
+    public ResponseEntity<Object> viewNotification(@PathVariable Long notificationId,
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
+        notificationService.viewNotification(notificationId, userUuid);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Method to mark specific Notification as not viewed.
+     *
+     * @param notificationId id of notification, that should be marked as not viewed
+     */
+    @Operation(summary = "Unread single Notification.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PatchMapping("/{notificationId}/unreadNotification")
+    public ResponseEntity<Object> unreadNotification(@PathVariable Long notificationId,
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
+        notificationService.unreadNotification(notificationId, userUuid);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Method to delete specific Notification.
+     *
+     * @param userUuid       User
+     * @param notificationId id of notification, that should be deleted
+     */
+    @Operation(summary = "Delete single Notification.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/{notificationId}")
+    public ResponseEntity<Object> deleteNotification(@PathVariable Long notificationId,
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
+        notificationService.deleteNotification(notificationId, userUuid);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

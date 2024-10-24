@@ -2,6 +2,7 @@ package greencity.service.notification;
 
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
@@ -747,6 +748,42 @@ public class NotificationServiceImpl implements NotificationService {
             getNotificationParametersForNewOrder(order),
             order,
             NotificationType.CREATE_NEW_ORDER);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void viewNotification(Long notificationId, String userUuid) {
+        Long userId = userRepository.findByUuid(userUuid).getId();
+        if (!userNotificationRepository.existsByIdAndUserId(notificationId, userId)) {
+            throw new NotFoundException(ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+        }
+        userNotificationRepository.markNotificationAsViewed(notificationId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void unreadNotification(Long notificationId, String userUuid) {
+        Long userId = userRepository.findByUuid(userUuid).getId();
+        if (!userNotificationRepository.existsByIdAndUserId(notificationId, userId)) {
+            throw new NotFoundException(ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+        }
+        userNotificationRepository.markNotificationAsNotViewed(notificationId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteNotification(Long notificationId, String userUuid) {
+        Long userId = userRepository.findByUuid(userUuid).getId();
+        if (!userNotificationRepository.existsByIdAndUserId(notificationId, userId)) {
+            throw new NotFoundException(ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+        }
+        userNotificationRepository.deleteUserNotificationByIdAndUserId(notificationId, userId);
     }
 
     private Set<NotificationParameter> getNotificationParametersForNewOrder(Order order) {

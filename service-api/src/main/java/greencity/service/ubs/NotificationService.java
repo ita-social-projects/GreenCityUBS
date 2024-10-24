@@ -206,4 +206,31 @@ public interface NotificationService {
      * @author Kizerov Dmytro
      */
     void notifyCreatedOrder(Order order);
+
+    /**
+     * Method to mark specific UserNotification as read.
+     *
+     * @param notificationId id of userNotification, that should be marked
+     *
+     * @author Roman Kasarab
+     */
+    void viewNotification(Long notificationId, String userUuid);
+
+    /**
+     * Method to mark specific UserNotification as unread.
+     *
+     * @param notificationId id of userNotification, that should be marked
+     *
+     * @author Roman Kasarab
+     */
+    void unreadNotification(Long notificationId, String userUuid);
+
+    /**
+     * Method to delete specific Notification.
+     *
+     * @param notificationId id of notification, that should be deleted
+     * @param userUuid       user
+     * @author Roman Kasarab
+     */
+    void deleteNotification(Long notificationId, String userUuid);
 }
