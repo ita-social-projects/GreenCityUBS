@@ -55,7 +55,6 @@ public class CreateAddressRequestDto {
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ!?’]*", message = validationMessage)
     private String addressComment;
 
-    @NotBlank(message = notEmptyValidationMessage)
     private String placeId;
 
     @NotNull
