@@ -14,6 +14,7 @@ import greencity.service.google.GoogleApiService;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.Arrays;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -25,6 +26,11 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
     @Override
     public boolean isValid(CreateAddressRequestDto createAddressRequestDto, ConstraintValidatorContext context) {
         String placeId = createAddressRequestDto.getPlaceId();
+
+        if (Objects.isNull(placeId)) {
+            return false;
+        }
+
         CoordinatesDto coordinates = createAddressRequestDto.getCoordinates();
         LatLng latLng = new LatLng(coordinates.getLatitude(), coordinates.getLongitude());
 

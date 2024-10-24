@@ -170,4 +170,13 @@ class AddressValidatorTest {
         verify(violationBuilder).addConstraintViolation();
         verify(context).disableDefaultConstraintViolation();
     }
+
+    @Test
+    void testWhenPlaceIdIsNullShouldReturnFalse() {
+        addressRequestDto.setPlaceId(null);
+
+        boolean isValid = addressValidator.isValid(addressRequestDto, context);
+
+        assertFalse(isValid);
+    }
 }
