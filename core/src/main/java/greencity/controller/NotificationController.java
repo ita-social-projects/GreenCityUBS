@@ -100,7 +100,7 @@ public class NotificationController {
      *
      * @param notificationId id of notification, that should be marked as viewed
      */
-    @Operation(summary = "Get single Notification.")
+    @Operation(summary = "Read single Notification.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
