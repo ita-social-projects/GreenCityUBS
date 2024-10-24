@@ -8,6 +8,7 @@ import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
 import greencity.dto.LocationsDto;
 import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.courier.CourierDto;
@@ -415,18 +416,17 @@ public class OrderController {
      *
      * @param courierId  - id of courier
      * @param locationId - id of location
-     * @return {@link OrderCourierPopUpDto}
+     * @return {@link TariffInfoByLocationDto}
      * @author Anton Bondar
      */
     @Operation(summary = "Get tariff for courier and location")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/tariffinfo/{locationId}")
-    public ResponseEntity<OrderCourierPopUpDto> getInfoAboutTariff(
+    public ResponseEntity<TariffInfoByLocationDto> getInfoAboutTariff(
         @RequestParam Long courierId,
         @PathVariable Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)

@@ -15,6 +15,7 @@ import greencity.dto.LocationsDto;
 import greencity.dto.LocationsDtos;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.RegionDto;
+import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
@@ -1796,12 +1797,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public OrderCourierPopUpDto getTariffInfoForLocation(Long courierId, Long locationId) {
+    public TariffInfoByLocationDto getTariffInfoForLocation(Long courierId, Long locationId) {
         if (!courierRepository.existsCourierById(courierId)) {
             throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
         }
 
-        return OrderCourierPopUpDto.builder()
+        return TariffInfoByLocationDto.builder()
             .orderIsPresent(true)
             .tariffsForLocationDto(modelMapper.map(
                 findTariffsInfoByCourierAndLocationId(courierId, locationId), TariffsForLocationDto.class))

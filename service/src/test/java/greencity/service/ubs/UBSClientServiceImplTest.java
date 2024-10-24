@@ -8,6 +8,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDto;
 import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
@@ -3357,7 +3358,7 @@ class UBSClientServiceImplTest {
         when(courierRepository.existsCourierById(1L)).thenReturn(true);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariff));
-        OrderCourierPopUpDto dto = ubsService.getTariffInfoForLocation(1L, 1L);
+        TariffInfoByLocationDto dto = ubsService.getTariffInfoForLocation(1L, 1L);
         Assertions.assertTrue(dto.getOrderIsPresent());
         verify(courierRepository).existsCourierById(1L);
         verify(modelMapper).map(tariff, TariffsForLocationDto.class);
