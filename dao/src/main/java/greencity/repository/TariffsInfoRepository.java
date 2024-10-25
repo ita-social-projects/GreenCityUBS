@@ -183,4 +183,24 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
             + "AND c.courier_status = 'ACTIVE' "
             + "AND c.id = :courierId ")
     Optional<Long> findTariffIdByLocationIdAndCourierId(Long locationId, Long courierId);
+
+    /**
+     * Retrieves the tariff associated with the specified location ID and courier
+     * ID.
+     *
+     * @param locationId The ID of the location to retrieve the tariff ID for.
+     * @param courierId  The ID of the courier to retrieve the tariff ID for.
+     * @return An Optional containing the tariff ID if found, otherwise an empty
+     *         Optional.
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT ti.* FROM tariffs_info ti "
+            + "JOIN tariffs_locations tl ON ti.id = tl.tariffs_info_id "
+            + "JOIN courier c ON c.id = ti.courier_id "
+            + "WHERE tl.location_id = :locationId "
+            + "AND tl.location_status = 'ACTIVE' "
+            + "AND ti.tariff_status = 'ACTIVE'"
+            + "AND c.courier_status = 'ACTIVE' "
+            + "AND c.id = :courierId ")
+    Optional<TariffsInfo> findTariffInfoByLocationIdAndCourierId(Long locationId, Long courierId);
 }

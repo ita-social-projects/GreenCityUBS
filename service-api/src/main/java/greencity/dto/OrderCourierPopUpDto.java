@@ -14,6 +14,5 @@ import java.util.List;
 @Builder
 public class OrderCourierPopUpDto {
     private List<AllActiveLocationsDto> allActiveLocationsDtos;
-    private TariffsForLocationDto tariffsForLocationDto;
     private Boolean orderIsPresent;
 }
