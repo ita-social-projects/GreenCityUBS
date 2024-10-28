@@ -25,6 +25,9 @@ public class TariffInfoDtoMapper extends AbstractConverter<TariffsInfo, TariffIn
     }
 
     private CourierDto convertCourierToDto(Courier source) {
+        if (source == null) {
+            return null;
+        }
         return CourierDto.builder()
             .courierId(source.getId())
             .courierStatus(source.getCourierStatus().toString())
