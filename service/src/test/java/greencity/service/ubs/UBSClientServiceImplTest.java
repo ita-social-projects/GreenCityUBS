@@ -8,6 +8,9 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDto;
 import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.RegionDto;
+import greencity.dto.TariffInfoByLocationDto;
+import greencity.dto.TariffInfoDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
@@ -205,7 +208,9 @@ import static greencity.ModelUtils.getOrderWithoutPayment;
 import static greencity.ModelUtils.getPayment;
 import static greencity.ModelUtils.getPaymentResponseDto;
 import static greencity.ModelUtils.getRegion;
+import static greencity.ModelUtils.getRegionDto;
 import static greencity.ModelUtils.getTariffInfo;
+import static greencity.ModelUtils.getTariffInfoDto;
 import static greencity.ModelUtils.getTariffInfoWithLimitOfBags;
 import static greencity.ModelUtils.getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag;
 import static greencity.ModelUtils.getTariffLocation;
@@ -3357,7 +3362,7 @@ class UBSClientServiceImplTest {
         when(courierRepository.existsCourierById(1L)).thenReturn(true);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariff));
-        OrderCourierPopUpDto dto = ubsService.getTariffInfoForLocation(1L, 1L);
+        TariffInfoByLocationDto dto = ubsService.getTariffInfoForLocation(1L, 1L);
         Assertions.assertTrue(dto.getOrderIsPresent());
         verify(courierRepository).existsCourierById(1L);
         verify(modelMapper).map(tariff, TariffsForLocationDto.class);
@@ -3385,21 +3390,29 @@ class UBSClientServiceImplTest {
 
     @Test
     void getInfoForCourierOrderingByCourierIdTest() {
-        var tariff = getTariffInfo();
+        TariffsInfo tariff = getTariffInfo();
+        Location location = getLocation();
+        RegionDto regionDto = getRegionDto();
 
         when(courierRepository.existsCourierById(1L)).thenReturn(true);
         when(orderRepository.getLastOrderOfUserByUUIDIfExists(anyString()))
             .thenReturn(Optional.of(getOrder()));
-        when(tariffsInfoRepository.findTariffsInfoByOrdersId(anyLong())).thenReturn(tariff);
+        when(locationRepository.findAllActiveLocationsByCourierId(1L)).thenReturn(List.of(location));
+        when(modelMapper.map(location, RegionDto.class)).thenReturn(regionDto);
+        when(tariffsInfoRepository.findTariffInfoByLocationIdAndCourierId(location.getId(), 1L))
+            .thenReturn(Optional.of(tariff));
+        when(modelMapper.map(tariff, TariffInfoDto.class)).thenReturn(getTariffInfoDto());
 
         OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrderingByCourierId("35467585763t4sfgchjfuyetf",
             Optional.empty(), 1L);
         Assertions.assertTrue(dto.getOrderIsPresent());
 
         verify(courierRepository).existsCourierById(1L);
-        verify(modelMapper).map(tariff, TariffsForLocationDto.class);
         verify(orderRepository).getLastOrderOfUserByUUIDIfExists(anyString());
-        verify(tariffsInfoRepository).findTariffsInfoByOrdersId(anyLong());
+        verify(locationRepository).findAllActiveLocationsByCourierId(1L);
+        verify(modelMapper).map(location, RegionDto.class);
+        verify(tariffsInfoRepository).findTariffInfoByLocationIdAndCourierId(location.getId(), 1L);
+        verify(modelMapper).map(tariff, TariffInfoDto.class);
     }
 
     @Test
@@ -3413,25 +3426,49 @@ class UBSClientServiceImplTest {
 
     @Test
     void getInfoForCourierOrderingByCourierIdWhenOrderIsEmptyTest() {
+        TariffsInfo tariff = getTariffInfo();
+        Location location = getLocation();
+        RegionDto regionDto = getRegionDto();
         when(courierRepository.existsCourierById(1L)).thenReturn(true);
         when(orderRepository.getLastOrderOfUserByUUIDIfExists(anyString()))
             .thenReturn(Optional.empty());
-
+        when(locationRepository.findAllActiveLocationsByCourierId(1L)).thenReturn(List.of(location));
+        when(modelMapper.map(location, RegionDto.class)).thenReturn(regionDto);
+        when(tariffsInfoRepository.findTariffInfoByLocationIdAndCourierId(location.getId(), 1L))
+            .thenReturn(Optional.of(tariff));
+        when(modelMapper.map(tariff, TariffInfoDto.class)).thenReturn(getTariffInfoDto());
         OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrderingByCourierId("35467585763t4sfgchjfuyetf",
             Optional.empty(), 1L);
         assertFalse(dto.getOrderIsPresent());
 
         verify(courierRepository).existsCourierById(1L);
         verify(orderRepository).getLastOrderOfUserByUUIDIfExists(anyString());
+        verify(locationRepository).findAllActiveLocationsByCourierId(1L);
+        verify(modelMapper).map(location, RegionDto.class);
+        verify(tariffsInfoRepository).findTariffInfoByLocationIdAndCourierId(location.getId(), 1L);
+        verify(modelMapper).map(tariff, TariffInfoDto.class);
     }
 
     @Test
     void getInfoForCourierOrderingByCourierIdWhenChangeLocIsPresentTest() {
+        TariffsInfo tariff = getTariffInfo();
+        Location location = getLocation();
+        RegionDto regionDto = getRegionDto();
         when(courierRepository.existsCourierById(1L)).thenReturn(true);
+        when(locationRepository.findAllActiveLocationsByCourierId(1L)).thenReturn(List.of(location));
+        when(modelMapper.map(location, RegionDto.class)).thenReturn(regionDto);
+        when(tariffsInfoRepository.findTariffInfoByLocationIdAndCourierId(location.getId(), 1L))
+            .thenReturn(Optional.of(tariff));
+        when(modelMapper.map(tariff, TariffInfoDto.class)).thenReturn(getTariffInfoDto());
         var dto = ubsService.getInfoForCourierOrderingByCourierId(
             "35467585763t4sfgchjfuyetf", Optional.of("w"), 1L);
-        assertEquals(0, dto.getAllActiveLocationsDtos().size());
+        assertEquals(1, dto.getAllActiveLocationsDtos().size());
+        assertFalse(dto.getOrderIsPresent());
         verify(courierRepository).existsCourierById(1L);
+        verify(locationRepository).findAllActiveLocationsByCourierId(1L);
+        verify(modelMapper).map(location, RegionDto.class);
+        verify(tariffsInfoRepository).findTariffInfoByLocationIdAndCourierId(location.getId(), 1L);
+        verify(modelMapper).map(tariff, TariffInfoDto.class);
     }
 
     @Test

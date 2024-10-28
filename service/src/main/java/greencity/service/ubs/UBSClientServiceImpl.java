@@ -11,10 +11,13 @@ import greencity.constant.OrderHistory;
 import greencity.constant.TariffLocation;
 import greencity.dto.AllActiveLocationsDto;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationWithTariffInfoDto;
 import greencity.dto.LocationsDto;
 import greencity.dto.LocationsDtos;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.RegionDto;
+import greencity.dto.TariffInfoByLocationDto;
+import greencity.dto.TariffInfoDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
@@ -1733,13 +1736,22 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private List<AllActiveLocationsDto> getAllActiveLocationsByCourierId(Long courierId) {
         List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
-        return getAllActiveLocationsDtos(locations);
+        return getAllActiveLocationsDtos(locations, courierId);
     }
 
-    private List<AllActiveLocationsDto> getAllActiveLocationsDtos(List<Location> locations) {
-        Map<RegionDto, List<LocationsDtos>> map = locations.stream()
+    private List<AllActiveLocationsDto> getAllActiveLocationsDtos(List<Location> locations, Long courierId) {
+        Map<RegionDto, List<LocationWithTariffInfoDto>> map = locations.stream()
             .collect(toMap(x -> modelMapper.map(x, RegionDto.class),
-                x -> new ArrayList<>(List.of(modelMapper.map(x, LocationsDtos.class))),
+                x -> new ArrayList<>(List.of(LocationWithTariffInfoDto.builder()
+                    .locationId(x.getId())
+                    .nameUk(x.getNameUk())
+                    .nameEn(x.getNameEn())
+                    .tariffInfoDto(modelMapper.map(
+                        tariffsInfoRepository
+                            .findTariffInfoByLocationIdAndCourierId(x.getId(), courierId)
+                            .orElse(null),
+                        TariffInfoDto.class))
+                    .build())),
                 (x, y) -> {
                     x.addAll(y);
                     return new ArrayList<>(x).stream().distinct().collect(toList());
@@ -1769,15 +1781,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             return orderCourierPopUpDto;
         }
         Optional<Order> lastOrder = orderRepository.getLastOrderOfUserByUUIDIfExists(uuid);
-        if (lastOrder.isPresent()) {
-            orderCourierPopUpDto.setOrderIsPresent(true);
-            orderCourierPopUpDto.setTariffsForLocationDto(
-                modelMapper.map(tariffsInfoRepository.findTariffsInfoByOrdersId(lastOrder.get().getId()),
-                    TariffsForLocationDto.class));
-        } else {
-            orderCourierPopUpDto.setOrderIsPresent(false);
-            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocationsByCourierId(courierId));
-        }
+        orderCourierPopUpDto.setOrderIsPresent(lastOrder.isPresent());
+        orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocationsByCourierId(courierId));
         return orderCourierPopUpDto;
     }
 
@@ -1796,12 +1801,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public OrderCourierPopUpDto getTariffInfoForLocation(Long courierId, Long locationId) {
+    public TariffInfoByLocationDto getTariffInfoForLocation(Long courierId, Long locationId) {
         if (!courierRepository.existsCourierById(courierId)) {
             throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
         }
 
-        return OrderCourierPopUpDto.builder()
+        return TariffInfoByLocationDto.builder()
             .orderIsPresent(true)
             .tariffsForLocationDto(modelMapper.map(
                 findTariffsInfoByCourierAndLocationId(courierId, locationId), TariffsForLocationDto.class))
