@@ -13,6 +13,7 @@ import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.LocationsDtos;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.RegionDto;
+import greencity.dto.TariffInfoDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
@@ -1424,7 +1425,7 @@ public class ModelUtils {
             .build();
     }
 
-    private static RegionDto getRegionDto() {
+    public static RegionDto getRegionDto() {
         return RegionDto.builder()
             .regionId(15L)
             .nameEn("Kyiv region")
@@ -4444,6 +4445,17 @@ public class ModelUtils {
                 .name("Петрівка")
                 .createdBy(ModelUtils.createEmployee())
                 .build()))
+            .build();
+    }
+
+    public static TariffInfoDto getTariffInfoDto() {
+        return TariffInfoDto.builder()
+            .tariffInfoId(1L)
+            .courierDto(ModelUtils.getCourierDto())
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .max(6000L)
+            .min(500L)
+            .limitDescription("description")
             .build();
     }
 

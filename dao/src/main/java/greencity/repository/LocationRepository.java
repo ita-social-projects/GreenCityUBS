@@ -122,4 +122,11 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      */
     @Query("SELECT l FROM Location l WHERE l.locationStatus = 'ACTIVE'")
     List<Location> findAllActiveLocations();
+
+    @Query(nativeQuery = true,
+        value = "SELECT l.* FROM locations l "
+            + "JOIN tariffs_locations tl ON l.id = tl.location_id "
+            + "JOIN tariffs_info ti ON ti.id = tl.tariffs_info_id "
+            + "WHERE ti.id = :tariffInfoId")
+    Optional<Location> findLocationByTariffInfoId(Long tariffInfoId);
 }

@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import java.util.List;
 
 @Getter
 @Setter
@@ -16,9 +15,9 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 @Builder
-public class AllActiveLocationsDto {
-    private Long regionId;
-    private String nameUk;
+public class LocationWithTariffInfoDto {
+    private Long locationId;
     private String nameEn;
-    private List<LocationWithTariffInfoDto> locations;
+    private String nameUk;
+    private TariffInfoDto tariffInfoDto;
 }
