@@ -249,4 +249,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("UPDATE Order o SET o.blocked = false, o.blockedByEmployee = NULL,"
         + "o.blockedAt = NULL WHERE o.blockedAt < :expirationTime")
     void unlockExpiredOrders(@Param("expirationTime") LocalDateTime expirationTime);
+
+    List<Order> findAllByOrderStatusNotAndOrderPaymentStatus(OrderStatus orderStatus,
+        OrderPaymentStatus orderPaymentStatus);
 }
