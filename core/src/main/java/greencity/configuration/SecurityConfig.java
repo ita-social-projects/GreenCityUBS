@@ -278,6 +278,10 @@ public class SecurityConfig {
                     UBS_LINK + "/check-if-tariff-exists/{id}",
                     UBS_LINK + "/locations")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.PATCH,
+                    "/notifications/{notificationId}/viewNotification",
+                    "/notifications/{notificationId}/unreadNotification")
+                .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
                     UBS_LINK + "/userProfile/**",
                     UBS_LINK + "/update-order-address")
@@ -299,6 +303,9 @@ public class SecurityConfig {
                     UBS_LINK + "/order-addresses/**",
                     UBS_LINK + "/client/delete-order/{id}")
                 .hasAnyRole(USER, ADMIN)
+                .requestMatchers(HttpMethod.DELETE,
+                    "/notifications/{notificationId}")
+                .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.TRACE,
                     UBS_LINK + "/userProfile/**")
                 .hasAnyRole(USER, ADMIN)

@@ -21,7 +21,7 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      *
      * @return list of {@link UserNotification}.
      */
-    Page<UserNotification> findAllByUser(User user, Pageable pageable);
+    Page<UserNotification> findAllByUserAndIsDeletedFalse(User user, Pageable pageable);
 
     /**
      * The method returns last notification by {@link NotificationType} and orderId.
@@ -75,7 +75,10 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      * @param notificationId id of searched Notification
      * @param userId         id of user
      */
-    void deleteUserNotificationByIdAndUserId(Long notificationId, Long userId);
+    @Transactional
+    @Modifying
+    @Query("UPDATE UserNotification n SET n.isDeleted = true WHERE n.id = :notificationId and n.user.id = :userId")
+    void markAsDeletedUserNotificationByIdAndUserId(Long notificationId, Long userId);
 
     /**
      * Checks if a notification with the specified ID exists for the specified user.
