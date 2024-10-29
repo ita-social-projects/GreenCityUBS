@@ -921,7 +921,7 @@ class NotificationServiceImplTest {
     @Test
     void testGetAllNotificationForUser() {
         when(userRepository.findByUuid("Test")).thenReturn(TEST_USER);
-        when(userNotificationRepository.findAllByUser(TEST_USER, TEST_PAGEABLE))
+        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(TEST_USER, TEST_PAGEABLE))
             .thenReturn(TEST_PAGE);
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             NotificationType.UNPAID_ORDER,
@@ -1069,7 +1069,7 @@ class NotificationServiceImplTest {
 
         verify(userRepository).findByUuid(any());
         verify(userNotificationRepository).existsByIdAndUserId(notificationId, userId);
-        verify(userNotificationRepository).deleteUserNotificationByIdAndUserId(notificationId, userId);
+        verify(userNotificationRepository).markAsDeletedUserNotificationByIdAndUserId(notificationId, userId);
     }
 
     @Test
@@ -1087,7 +1087,7 @@ class NotificationServiceImplTest {
 
         verify(userRepository).findByUuid(TEST_UUID);
         verify(userNotificationRepository).existsByIdAndUserId(notificationId, userId);
-        verify(userNotificationRepository, never()).deleteUserNotificationByIdAndUserId(notificationId, userId);
+        verify(userNotificationRepository, never()).markAsDeletedUserNotificationByIdAndUserId(notificationId, userId);
 
     }
 
