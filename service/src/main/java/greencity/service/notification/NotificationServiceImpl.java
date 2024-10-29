@@ -119,7 +119,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyUnpaidOrders() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
-            if (checkIfOrderNeedsNewNotification(order, NotificationType.UNPAID_ORDER)) {
+            if (checkIfOrderNeedsNewNotification(order, NotificationType.UNPAID_ORDER)
+                && !order.getOrderStatus().equals(OrderStatus.CANCELED)) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
                 Double amountToPay = getAmountToPay(order);
