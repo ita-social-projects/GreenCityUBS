@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -63,6 +64,9 @@ public class UserNotification {
 
     @Column(name = "notification_time")
     private LocalDateTime notificationTime = getCurrentLocalTime();
+
+    @Column(name = "is_deleted", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isDeleted = false;
 
     private static LocalDateTime getCurrentLocalTime() {
         return ZonedDateTime.now(ZoneId.of("Europe/Kiev")).toLocalDateTime();
