@@ -718,7 +718,8 @@ public class NotificationServiceImpl implements NotificationService {
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
             Sort.by("notificationTime").descending());
 
-        Page<UserNotification> notifications = userNotificationRepository.findAllByUser(user, pageRequest);
+        Page<UserNotification> notifications =
+            userNotificationRepository.findAllByUserAndIsDeletedFalse(user, pageRequest);
 
         List<NotificationShortDto> notificationShortDtoList = notifications.stream()
             .map(n -> createNotificationShortDto(n, language, 0L))
@@ -783,7 +784,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (!userNotificationRepository.existsByIdAndUserId(notificationId, userId)) {
             throw new NotFoundException(ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER);
         }
-        userNotificationRepository.deleteUserNotificationByIdAndUserId(notificationId, userId);
+        userNotificationRepository.markAsDeletedUserNotificationByIdAndUserId(notificationId, userId);
     }
 
     private Set<NotificationParameter> getNotificationParametersForNewOrder(Order order) {
