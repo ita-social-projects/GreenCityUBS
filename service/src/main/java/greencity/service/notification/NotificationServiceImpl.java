@@ -2,7 +2,6 @@ package greencity.service.notification;
 
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
-import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;

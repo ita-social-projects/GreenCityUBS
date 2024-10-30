@@ -77,7 +77,8 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      */
     @Transactional
     @Modifying
-    @Query("UPDATE UserNotification n SET n.isDeleted = true, n.read = true WHERE n.id = :notificationId and n.user.id = :userId")
+    @Query("UPDATE UserNotification n SET n.isDeleted = true, n.read = true "
+        + "WHERE n.id = :notificationId and n.user.id = :userId")
     void markAsDeletedUserNotificationByIdAndUserId(Long notificationId, Long userId);
 
     /**
