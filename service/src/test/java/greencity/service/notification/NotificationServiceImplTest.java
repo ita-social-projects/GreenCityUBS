@@ -197,7 +197,8 @@ class NotificationServiceImplTest {
                     .amountOfBagsOrdered(new HashMap<>())
                     .build());
 
-            when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID))
+            when(orderRepository.findAllByOrderStatusNotAndOrderPaymentStatus(OrderStatus.CANCELED,
+                OrderPaymentStatus.UNPAID))
                 .thenReturn(orders);
 
             doReturn(Optional.empty()).when(userNotificationRepository)
