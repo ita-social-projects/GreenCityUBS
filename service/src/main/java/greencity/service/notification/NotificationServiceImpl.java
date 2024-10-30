@@ -757,8 +757,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void viewNotification(Long notificationId, String userUuid) {
         Long userId = userRepository.findByUuid(userUuid).getId();
-        if (!userNotificationRepository.existsByIdAndUserId(notificationId, userId)) {
-            throw new NotFoundException(ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+        if (!userNotificationRepository.existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId)) {
+            throw new NotFoundException(NOTIFICATION_DOES_NOT_EXIST);
         }
         userNotificationRepository.markNotificationAsViewed(notificationId);
     }
@@ -769,8 +769,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void unreadNotification(Long notificationId, String userUuid) {
         Long userId = userRepository.findByUuid(userUuid).getId();
-        if (!userNotificationRepository.existsByIdAndUserId(notificationId, userId)) {
-            throw new NotFoundException(ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+        if (!userNotificationRepository.existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId)) {
+            throw new NotFoundException(NOTIFICATION_DOES_NOT_EXIST);
         }
         userNotificationRepository.markNotificationAsNotViewed(notificationId);
     }
@@ -781,8 +781,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void deleteNotification(Long notificationId, String userUuid) {
         Long userId = userRepository.findByUuid(userUuid).getId();
-        if (!userNotificationRepository.existsByIdAndUserId(notificationId, userId)) {
-            throw new NotFoundException(ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+        if (!userNotificationRepository.existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId)) {
+            throw new NotFoundException(NOTIFICATION_DOES_NOT_EXIST);
         }
         userNotificationRepository.markAsDeletedUserNotificationByIdAndUserId(notificationId, userId);
     }
