@@ -77,7 +77,8 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      */
     @Transactional
     @Modifying
-    @Query("UPDATE UserNotification n SET n.isDeleted = true WHERE n.id = :notificationId and n.user.id = :userId")
+    @Query("UPDATE UserNotification n SET n.isDeleted = true, n.read = true "
+        + "WHERE n.id = :notificationId and n.user.id = :userId")
     void markAsDeletedUserNotificationByIdAndUserId(Long notificationId, Long userId);
 
     /**
@@ -88,5 +89,5 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      * @return true if the notification with the specified ID exists for the user,
      *         false otherwise
      */
-    boolean existsByIdAndUserId(Long notificationId, Long userId);
+    boolean existsByIdAndUserIdAndIsDeletedFalse(Long notificationId, Long userId);
 }

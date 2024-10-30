@@ -996,12 +996,12 @@ class NotificationServiceImplTest {
         Long userId = TEST_USER.getId();
 
         when(userRepository.findByUuid(any())).thenReturn(TEST_USER);
-        when(userNotificationRepository.existsByIdAndUserId(notificationId, userId)).thenReturn(true);
+        when(userNotificationRepository.existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId)).thenReturn(true);
 
         notificationService.viewNotification(notificationId, TEST_UUID);
 
         verify(userRepository).findByUuid(any());
-        verify(userNotificationRepository).existsByIdAndUserId(notificationId, userId);
+        verify(userNotificationRepository).existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId);
         verify(userNotificationRepository).markNotificationAsViewed(notificationId);
     }
 
@@ -1011,15 +1011,15 @@ class NotificationServiceImplTest {
         Long userId = TEST_USER.getId();
 
         when(userRepository.findByUuid(TEST_UUID)).thenReturn(TEST_USER);
-        when(userNotificationRepository.existsByIdAndUserId(notificationId, userId)).thenReturn(false);
+        when(userNotificationRepository.existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId)).thenReturn(false);
 
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> notificationService.viewNotification(notificationId, TEST_UUID));
 
-        assertEquals(ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER, exception.getMessage());
+        assertEquals(ErrorMessage.NOTIFICATION_DOES_NOT_EXIST, exception.getMessage());
 
         verify(userRepository).findByUuid(TEST_UUID);
-        verify(userNotificationRepository).existsByIdAndUserId(notificationId, userId);
+        verify(userNotificationRepository).existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId);
         verify(userNotificationRepository, never()).markNotificationAsViewed(notificationId);
 
     }
@@ -1030,12 +1030,12 @@ class NotificationServiceImplTest {
         Long userId = TEST_USER.getId();
 
         when(userRepository.findByUuid(any())).thenReturn(TEST_USER);
-        when(userNotificationRepository.existsByIdAndUserId(notificationId, userId)).thenReturn(true);
+        when(userNotificationRepository.existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId)).thenReturn(true);
 
         notificationService.unreadNotification(notificationId, TEST_UUID);
 
         verify(userRepository).findByUuid(any());
-        verify(userNotificationRepository).existsByIdAndUserId(notificationId, userId);
+        verify(userNotificationRepository).existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId);
         verify(userNotificationRepository).markNotificationAsNotViewed(notificationId);
     }
 
@@ -1045,15 +1045,15 @@ class NotificationServiceImplTest {
         Long userId = TEST_USER.getId();
 
         when(userRepository.findByUuid(TEST_UUID)).thenReturn(TEST_USER);
-        when(userNotificationRepository.existsByIdAndUserId(notificationId, userId)).thenReturn(false);
+        when(userNotificationRepository.existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId)).thenReturn(false);
 
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> notificationService.unreadNotification(notificationId, TEST_UUID));
 
-        assertEquals(ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER, exception.getMessage());
+        assertEquals(ErrorMessage.NOTIFICATION_DOES_NOT_EXIST, exception.getMessage());
 
         verify(userRepository).findByUuid(TEST_UUID);
-        verify(userNotificationRepository).existsByIdAndUserId(notificationId, userId);
+        verify(userNotificationRepository).existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId);
         verify(userNotificationRepository, never()).markNotificationAsNotViewed(notificationId);
 
     }
@@ -1064,12 +1064,12 @@ class NotificationServiceImplTest {
         Long userId = TEST_USER.getId();
 
         when(userRepository.findByUuid(any())).thenReturn(TEST_USER);
-        when(userNotificationRepository.existsByIdAndUserId(notificationId, userId)).thenReturn(true);
+        when(userNotificationRepository.existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId)).thenReturn(true);
 
         notificationService.deleteNotification(notificationId, TEST_UUID);
 
         verify(userRepository).findByUuid(any());
-        verify(userNotificationRepository).existsByIdAndUserId(notificationId, userId);
+        verify(userNotificationRepository).existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId);
         verify(userNotificationRepository).markAsDeletedUserNotificationByIdAndUserId(notificationId, userId);
     }
 
@@ -1079,15 +1079,15 @@ class NotificationServiceImplTest {
         Long userId = TEST_USER.getId();
 
         when(userRepository.findByUuid(TEST_UUID)).thenReturn(TEST_USER);
-        when(userNotificationRepository.existsByIdAndUserId(notificationId, userId)).thenReturn(false);
+        when(userNotificationRepository.existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId)).thenReturn(false);
 
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> notificationService.deleteNotification(notificationId, TEST_UUID));
 
-        assertEquals(ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER, exception.getMessage());
+        assertEquals(ErrorMessage.NOTIFICATION_DOES_NOT_EXIST, exception.getMessage());
 
         verify(userRepository).findByUuid(TEST_UUID);
-        verify(userNotificationRepository).existsByIdAndUserId(notificationId, userId);
+        verify(userNotificationRepository).existsByIdAndUserIdAndIsDeletedFalse(notificationId, userId);
         verify(userNotificationRepository, never()).markAsDeletedUserNotificationByIdAndUserId(notificationId, userId);
 
     }
