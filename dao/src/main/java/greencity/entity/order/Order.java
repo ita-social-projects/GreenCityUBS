@@ -36,7 +36,6 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.AccessLevel;
-import org.hibernate.annotations.Cascade;
 import org.springframework.util.CollectionUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -63,7 +62,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<UserNotification> userNotifications;
 
     @ManyToOne
@@ -77,7 +76,7 @@ public class Order {
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;
 
     private boolean blocked;
@@ -121,7 +120,7 @@ public class Order {
     @Column(name = "points_to_use", columnDefinition = "int default 0")
     private Integer pointsToUse;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<Certificate> certificates;
 
     @Column(nullable = false, name = "order_status", length = 15)
@@ -151,13 +150,13 @@ public class Order {
     @Column(name = "additional_order")
     private Set<String> additionalOrders;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<Payment> payment;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     private List<Event> events;
 
     @Column(name = "reason_not_taking_bag_description")
@@ -187,8 +186,7 @@ public class Order {
 
     @OneToMany(
         mappedBy = "order",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true)
+        cascade = CascadeType.ALL)
     @Setter(AccessLevel.PRIVATE)
     @Builder.Default
     private List<OrderBag> orderBags = new ArrayList<>();
