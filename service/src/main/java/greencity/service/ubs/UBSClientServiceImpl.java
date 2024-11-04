@@ -1649,14 +1649,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
+    @Transactional
     public void deleteOrder(String uuid, Long id) {
         Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
         if (order == null) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
-        order.updateWithNewOrderBags(Collections.emptyList());
-        order.setOrderStatus(OrderStatus.CANCELED);
+        order.getOrderBags().clear();
         orderRepository.save(order);
+        orderRepository.delete(order);
     }
 
     private Long convertBillsIntoCoins(Double bills) {
