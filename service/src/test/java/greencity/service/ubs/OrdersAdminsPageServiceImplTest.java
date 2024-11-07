@@ -41,6 +41,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -66,6 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.when;
@@ -1162,5 +1166,70 @@ class OrdersAdminsPageServiceImplTest {
 
         assertNotNull(result);
         verify(regionRepository).findAllRegionsWithCitiesAndDistricts();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = "0")
+    @NullSource
+    void ignoreSetResponsibleEmployeeTest(String employee) {
+        List<Long> unResolvedGoals =
+            ordersAdminsPageService.responsibleEmployee(List.of(1L), employee, 1L, "test@gmail.com");
+
+        assertTrue(unResolvedGoals.isEmpty());
+    }
+
+    @Test
+    void removeResponsibleEmployeeTest() {
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
+        when(positionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getPosition()));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getOrder()));
+        when(employeeOrderPositionRepository.existsByOrderAndPosition(any(Order.class), any(Position.class)))
+            .thenReturn(Boolean.TRUE);
+        doNothing().when(employeeOrderPositionRepository).delete(any(Order.class), any(Position.class));
+        when(eventService.changesWithResponsibleEmployee(anyLong(), eq(Boolean.TRUE))).thenReturn("some changes");
+        doNothing().when(orderLockService).unlockOrder(any(Order.class));
+        doNothing().when(eventService).saveEvent(anyString(), anyString(), any(Order.class));
+
+        ordersAdminsPageService.responsibleEmployee(List.of(1L), "-1", 1L, "test@gmail.com");
+
+        verify(employeeRepository).findByEmail("test@gmail.com");
+        verify(positionRepository).findById(1L);
+        verify(orderRepository).findById(1L);
+        verify(employeeOrderPositionRepository).existsByOrderAndPosition(any(Order.class), any(Position.class));
+        verify(employeeOrderPositionRepository).delete(any(Order.class), any(Position.class));
+        verify(eventService).changesWithResponsibleEmployee(1L, true);
+        verify(orderLockService).unlockOrder(any(Order.class));
+        verify(eventService).saveEvent(anyString(), anyString(), any(Order.class));
+    }
+
+    @Test
+    void removeResponsibleEmployeeWithErrorsTest() {
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
+        when(positionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getPosition()));
+        when(orderRepository.findById(anyLong())).thenThrow(NotFoundException.class);
+
+        List<Long> unresolvedGoals = ordersAdminsPageService.responsibleEmployee(List.of(1L), "-1", 1L, "test@gmail.com");
+
+        verify(employeeRepository).findByEmail("test@gmail.com");
+        verify(positionRepository).findById(1L);
+        verify(orderRepository).findById(1L);
+
+        assertEquals(1, unresolvedGoals.size());
+    }
+
+    @Test
+    void remove() {
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
+        when(positionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getPosition()));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getOrder()));
+        when(employeeOrderPositionRepository.existsByOrderAndPosition(any(Order.class), any(Position.class)))
+            .thenReturn(Boolean.FALSE);
+
+        ordersAdminsPageService.responsibleEmployee(List.of(1L), "-1", 1L, "test@gmail.com");
+
+        verify(employeeRepository).findByEmail("test@gmail.com");
+        verify(positionRepository).findById(1L);
+        verify(orderRepository).findById(1L);
+        verify(employeeOrderPositionRepository).existsByOrderAndPosition(any(Order.class), any(Position.class));
     }
 }
