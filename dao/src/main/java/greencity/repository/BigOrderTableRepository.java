@@ -33,6 +33,7 @@ public class BigOrderTableRepository {
     private static final String ORDER_STATUS = "orderStatus";
     private static final String ORDER_PAYMENT_STATUS = "orderPaymentStatus";
     private static final String UKRAINIAN_LANGUAGE = "ua";
+    private static final int NULL_SORT_ORDER = 99;
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -198,6 +199,8 @@ public class BigOrderTableRepository {
         sortOrderList.forEach(status -> selectCase.when(
             criteriaBuilder.equal(root.get(orderPage.getSortBy()), status.name()),
             status.getSortOrder()));
+
+        selectCase.when(criteriaBuilder.isNull(root.get(orderPage.getSortBy())), NULL_SORT_ORDER);
 
         Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
         applySortingCriteria(orderPage, cq, sortOrder);
