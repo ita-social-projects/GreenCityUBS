@@ -1395,7 +1395,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (nonNull(updateAllOrderPageDto.getUpdateResponsibleEmployeeDto())) {
             updateAllOrderPageDto.getUpdateResponsibleEmployeeDto()
                 .forEach(dto -> {
-                    if (nonNull(dto.getEmployeeId()) && dto.getEmployeeId() > 0 && nonNull(dto.getPositionId())) {
+                    if (nonNull(dto.getEmployeeId()) && nonNull(dto.getPositionId())) {
                         ordersAdminsPageService.responsibleEmployee(List.of(order.getId()),
                             dto.getEmployeeId().toString(),
                             dto.getPositionId(),

@@ -33,8 +33,8 @@ public class OrderHistory {
     public static final String ASSIGN_DRIVER_ENG = "Pinned driver";
     public static final String ASSIGN_LOGIEST = "Закріплено логіста";
     public static final String ASSIGN_LOGIEST_ENG = "Pinned logistician";
-    public static final String ASSIGN_CALL_MANAGER = "Закріплено менеджера обдзвону";
-    public static final String ASSIGN_CALL_MANAGER_ENG = "Pinned callback manager";
+    public static final String ASSIGN_CALL_MANAGER = "Закріплено менеджера";
+    public static final String ASSIGN_CALL_MANAGER_ENG = "Pinned manager";
     public static final String ASSIGN_CALL_PILOT = "Закріплено штурмана";
     public static final String ASSIGN_CALL_PILOT_ENG = "Pinned navigator";
     public static final String UPDATE_MANAGER_CALL = "Змінено менеджера обдзвону";
