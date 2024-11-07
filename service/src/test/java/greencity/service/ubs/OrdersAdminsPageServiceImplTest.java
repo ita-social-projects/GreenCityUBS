@@ -711,10 +711,8 @@ class OrdersAdminsPageServiceImplTest {
     void responsibleEmployeeThrowsPositionNotFoundException() {
         String uuid = "uuid";
         List<Long> ordersId = List.of(1L);
-        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<Employee> currentEmployee = Optional.of(Employee.builder().id(2L).build());
 
-        when(employeeRepository.findById(1L)).thenReturn(employee);
         when(employeeRepository.findByEmail(anyString())).thenReturn(currentEmployee);
 
         assertThrows(NotFoundException.class,
