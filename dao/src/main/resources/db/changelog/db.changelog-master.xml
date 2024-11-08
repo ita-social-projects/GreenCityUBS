@@ -254,4 +254,5 @@
     <include file="db/changelog/logs/ch-update-text-for-notifications-Rozhko.xml"/>
     <include file="db/changelog/logs/ch-add-column-isDeleted-to-UserNotifications-Kasarab.xml"/>
     <include file="/db/changelog/logs/2024-11-07-rename-positions-Kizerov.xml"/>
+    <include file="db/changelog/logs/2024-11-08-rename-position-kizerov.xml"/>
 </databaseChangeLog>

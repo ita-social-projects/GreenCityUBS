@@ -13,7 +13,6 @@ import greencity.dto.AllActiveLocationsDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationWithTariffInfoDto;
 import greencity.dto.LocationsDto;
-import greencity.dto.LocationsDtos;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.RegionDto;
 import greencity.dto.TariffInfoByLocationDto;
@@ -294,6 +293,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
     private static final String LANGUAGE_EN = "en";
+    private static final String LANGUAGE_UA = "ua";
     private static final Double KYIV_LATITUDE = 50.4546600;
     private static final Double KYIV_LONGITUDE = 30.5238000;
     private static final Double LOCATION_40_KM_ZONE_VALUE = 40.00;
@@ -709,7 +709,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private List<Integer> getBagIds(List<BagDto> dto) {
         return dto.stream()
             .map(BagDto::getId)
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     private Bag findActiveBagById(Integer id) {
@@ -1175,7 +1175,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         checkUserHasAccessToUpdateData(ubsUser, userUuid);
 
         ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
-        eventService.save(OrderHistory.CHANGED_SENDER, ubsUser.getUser().getRecipientEmail(),
+        eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.CLIENT,
             ubsUser.getOrders().getFirst());
 
         return UbsCustomersDto.builder()
@@ -1206,7 +1206,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public Long createUserProfile(UserProfileCreateDto userProfileCreateDto) {
         if (!userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())) {
-            throw new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
+            throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
         }
         User user = userRepository.findByUuid(userProfileCreateDto.getUuid());
         if (user == null) {
@@ -1515,28 +1515,37 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public List<EventDto> getAllEventsForOrder(Long orderId, String email, String language) {
-        Optional<Order> order = orderRepository.findById(orderId);
-        if (order.isEmpty()) {
-            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
-        }
+        orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
         List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
         if (orderEvents.isEmpty()) {
             throw new NotFoundException(EVENTS_NOT_FOUND_EXCEPTION + orderId);
         }
-        if (LANGUAGE_EN.equals(language)) {
-            return orderEvents
-                .stream()
-                .peek(event -> {
-                    event.setEventName(event.getEventNameEng());
-                    event.setAuthorName(event.getAuthorNameEng());
-                })
-                .map(event -> modelMapper.map(event, EventDto.class))
-                .collect(toList());
-        }
-        return orderEvents
-            .stream()
+
+        localizeEventNames(orderEvents, language);
+        return orderEvents.stream()
             .map(event -> modelMapper.map(event, EventDto.class))
-            .collect(toList());
+            .sorted(Comparator.comparing(EventDto::getEventDate).reversed())
+            .toList();
+    }
+
+    /**
+     * Method that takes a list of events and a language and localizes the event
+     * names and author names in the list of events.
+     *
+     * @param events   a list of events
+     * @param language a language
+     */
+    private void localizeEventNames(List<Event> events, String language) {
+        if (LANGUAGE_EN.equals(language)) {
+            events.forEach(event -> {
+                event.setEventName(event.getEventNameEng());
+                event.setAuthorName(event.getAuthorNameEng());
+            });
+        } else if (!LANGUAGE_UA.equals(language)) {
+            throw new BadRequestException("Unexpected value: " + language);
+        }
     }
 
     /**
@@ -1878,7 +1887,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public List<DistrictDto> getAllDistricts(String region, String city) {
         List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
         return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     /**
@@ -2125,7 +2134,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public List<DistrictDto> getAllDistrictsForKyiv() {
         return districtRepository.findAllByCityId(CITY_ID_KIEV).stream()
             .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn()))
-            .collect(Collectors.toMap(
+            .collect(toMap(
                 District::getNameUk,
                 district -> district,
                 (existing, replacement) -> existing))
