@@ -117,7 +117,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -184,7 +183,10 @@ import static greencity.ModelUtils.getCourier;
 import static greencity.ModelUtils.getCourierDto;
 import static greencity.ModelUtils.getCourierDtoList;
 import static greencity.ModelUtils.getDistrict;
+import static greencity.ModelUtils.getDtoWithLanguage;
 import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getEvent1;
+import static greencity.ModelUtils.getEvent2;
 import static greencity.ModelUtils.getGeocodingResultWithKyivRegion;
 import static greencity.ModelUtils.getLocation;
 import static greencity.ModelUtils.getMaximumAmountOfAddresses;
@@ -2764,30 +2766,11 @@ class UBSClientServiceImplTest {
     @Test
     void testGelAllEventsFromOrderByOrderIdWithUA() {
         Long orderId = 1L;
-        Event event1 = Event.builder()
-            .eventDate(LocalDateTime.now().minusDays(1))
-            .eventNameEng("Event 1")
-            .eventName("Івент 1")
-            .authorNameEng("Author 1")
-            .authorName("Автор 1")
-            .build();
-        Event event2 = Event.builder()
-            .eventDate(LocalDateTime.now())
-            .eventNameEng("Event 2")
-            .eventName("Івент 2")
-            .authorNameEng("Author 2")
-            .authorName("Автор 2")
-            .build();
-        EventDto eventDto1 = EventDto.builder()
-            .eventDate(event1.getEventDate())
-            .eventName(event1.getEventName())
-            .authorName(event1.getAuthorName())
-            .build();
-        EventDto eventDto2 = EventDto.builder()
-            .eventDate(event2.getEventDate())
-            .eventName(event2.getEventName())
-            .authorName(event2.getAuthorName())
-            .build();
+        String language = "ua";
+        Event event1 = getEvent1();
+        Event event2 = getEvent2();
+        EventDto eventDto1 = getDtoWithLanguage(language, event1);
+        EventDto eventDto2 = getDtoWithLanguage(language, event2);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(new Order()));
         when(eventRepository.findAllEventsByOrderId(anyLong())).thenReturn(List.of(event1, event2));
@@ -2809,30 +2792,11 @@ class UBSClientServiceImplTest {
     @Test
     void testGelAllEventsFromOrderByOrderIdWithEng() {
         Long orderId = 1L;
-        Event event1 = Event.builder()
-            .eventDate(LocalDateTime.now().minusDays(1))
-            .eventNameEng("Event 1")
-            .eventName("Івент 1")
-            .authorNameEng("Author 1")
-            .authorName("Автор 1")
-            .build();
-        Event event2 = Event.builder()
-            .eventDate(LocalDateTime.now())
-            .eventNameEng("Event 2")
-            .eventName("Івент 2")
-            .authorNameEng("Author 2")
-            .authorName("Автор 2")
-            .build();
-        EventDto eventDto1 = EventDto.builder()
-            .eventDate(event1.getEventDate())
-            .eventName(event1.getEventNameEng())
-            .authorName(event1.getAuthorNameEng())
-            .build();
-        EventDto eventDto2 = EventDto.builder()
-            .eventDate(event2.getEventDate())
-            .eventName(event2.getEventNameEng())
-            .authorName(event2.getAuthorNameEng())
-            .build();
+        String language = "en";
+        Event event1 = getEvent1();
+        Event event2 = getEvent2();
+        EventDto eventDto1 = getDtoWithLanguage(language, event1);
+        EventDto eventDto2 = getDtoWithLanguage(language, event2);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(new Order()));
         when(eventRepository.findAllEventsByOrderId(anyLong())).thenReturn(List.of(event1, event2));
