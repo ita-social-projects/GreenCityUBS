@@ -228,7 +228,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto(RECEIVING, "Станція приймання", "Receiving station"),
                 RECEIVING, 20, false, true, true, 27, EditType.SELECT, receivingStationList(),
                 exportDetails),
-            new ColumnDTO(new TitleDto(CALLER, "Менеджер обдзвону", "Call manager"), CALLER, 20,
+            new ColumnDTO(new TitleDto(CALLER, "Менеджер", "Manager"), CALLER, 20,
                 false, true, true, 29, EditType.SELECT, callerList(), responsible),
             new ColumnDTO(new TitleDto(LOGIC_MAN, "Логіст", "Logistician"), LOGIC_MAN, 20, false,
                 true, true, 30, EditType.SELECT, logicManList(), responsible),

@@ -37,8 +37,8 @@ public class OrderHistory {
     public static final String ASSIGN_CALL_MANAGER_ENG = "Pinned manager";
     public static final String ASSIGN_CALL_PILOT = "Закріплено штурмана";
     public static final String ASSIGN_CALL_PILOT_ENG = "Pinned navigator";
-    public static final String UPDATE_MANAGER_CALL = "Змінено менеджера обдзвону";
-    public static final String UPDATE_MANAGER_CALL_ENG = "Changed callback manager";
+    public static final String UPDATE_MANAGER_CALL = "Змінено менеджера";
+    public static final String UPDATE_MANAGER_CALL_ENG = "Changed manager";
     public static final String UPDATE_MANAGER_LOGIEST = "Змінено логіста";
     public static final String UPDATE_MANAGER_LOGIEST_ENG = "Changed logistician";
     public static final String UPDATE_MANAGER_CALL_PILOT = "Змінено штурмана";
@@ -70,13 +70,14 @@ public class OrderHistory {
     public static final String UPDATE_ORDER_EXPORT_ENG = " Waste mix: %s.";
     public static final String RETURN_BONUSES_TO_CLIENT = "Невикористані бонуси повернено на бонусний рахунок клієнта";
     public static final String WASTE_REMOVAL_ADDRESS_CHANGE = "Змінено адресу вивезення відходів";
+    public static final String WASTE_REMOVAL_ADDRESS_CHANGE_ENG = "The address of waste removal has been changed";
     public static final String ADD_ADMIN_COMMENT = "Додано коментар";
     public static final String ADD_ADMIN_COMMENT_ENG = "Comment added";
     public static final String ADD_NEW_ECO_NUMBER = "Додано номер замовлення з магазину";
     public static final String ADD_NEW_ECO_NUMBER_ENG = "Add number order from the store";
     public static final String DELETED_ECO_NUMBER = "Видалено номер замовлення з магазину";
     public static final String DELETED_ECO_NUMBER_ENG = "Removed number order from the store";
-    public static final String CHANGED_SENDER = "Змінено дані Відправника";
+    public static final String CHANGED_SENDER = "Змінено дані відправника";
     public static final String CHANGED_SENDER_ENG = "Data of the sender changed";
     public static final String ADDED_BONUSES = "Зараховано кошти на бонусний рахунок клієнта";
     public static final String ADDED_BONUSES_ENG = "Funds have been credited to the client's bonus account";
