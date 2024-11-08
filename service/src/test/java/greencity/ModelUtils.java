@@ -68,6 +68,7 @@ import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.EventDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.GroupedOrderDto;
@@ -5492,5 +5493,41 @@ public class ModelUtils {
                 .fee(0)
                 .build())
             .build();
+    }
+
+    public static Event getEvent1() {
+        return Event.builder()
+            .eventDate(LocalDateTime.now().minusDays(1))
+            .eventNameEng("Event 1")
+            .eventName("Івент 1")
+            .authorNameEng("Author 1")
+            .authorName("Автор 1")
+            .build();
+    }
+
+    public static Event getEvent2() {
+        return Event.builder()
+            .eventDate(LocalDateTime.now())
+            .eventNameEng("Event 2")
+            .eventName("Івент 2")
+            .authorNameEng("Author 2")
+            .authorName("Автор 2")
+            .build();
+    }
+
+    public static EventDto getDtoWithLanguage(String language, Event event) {
+        return switch (language) {
+            case "ua" -> EventDto.builder()
+                .eventDate(event.getEventDate())
+                .eventName(event.getEventName())
+                .authorName(event.getAuthorName())
+                .build();
+            case "en" -> EventDto.builder()
+                .eventDate(event.getEventDate())
+                .eventName(event.getEventNameEng())
+                .authorName(event.getAuthorNameEng())
+                .build();
+            default -> new EventDto();
+        };
     }
 }

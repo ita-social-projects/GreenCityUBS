@@ -129,7 +129,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -184,9 +183,11 @@ import static greencity.ModelUtils.getCourier;
 import static greencity.ModelUtils.getCourierDto;
 import static greencity.ModelUtils.getCourierDtoList;
 import static greencity.ModelUtils.getDistrict;
+import static greencity.ModelUtils.getDtoWithLanguage;
 import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getEvent1;
+import static greencity.ModelUtils.getEvent2;
 import static greencity.ModelUtils.getGeocodingResultWithKyivRegion;
-import static greencity.ModelUtils.getListOfEvents;
 import static greencity.ModelUtils.getLocation;
 import static greencity.ModelUtils.getMaximumAmountOfAddresses;
 import static greencity.ModelUtils.getMonoBankPaymentResponseDto;
@@ -255,7 +256,6 @@ import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -2764,29 +2764,67 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testGelAllEventsFromOrderByOrderId() {
-        List<Event> orderEvents = getListOfEvents();
-        when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
-        when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(orderEvents);
-        List<EventDto> eventDTOS = orderEvents.stream()
-            .map(event -> modelMapper.map(event, EventDto.class))
-            .collect(Collectors.toList());
-        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), "ua"));
+    void testGelAllEventsFromOrderByOrderIdWithUA() {
+        Long orderId = 1L;
+        String language = "ua";
+        Event event1 = getEvent1();
+        Event event2 = getEvent2();
+        EventDto eventDto1 = getDtoWithLanguage(language, event1);
+        EventDto eventDto2 = getDtoWithLanguage(language, event2);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(new Order()));
+        when(eventRepository.findAllEventsByOrderId(anyLong())).thenReturn(List.of(event1, event2));
+        when(modelMapper.map(event1, EventDto.class)).thenReturn(eventDto1);
+        when(modelMapper.map(event2, EventDto.class)).thenReturn(eventDto2);
+
+        List<EventDto> result = ubsService.getAllEventsForOrder(orderId, anyString(), "ua");
+
+        assertEquals(2, result.size());
+        assertEquals(eventDto2, result.get(0));
+        assertEquals(eventDto1, result.get(1));
+
+        verify(orderRepository).findById(orderId);
+        verify(eventRepository).findAllEventsByOrderId(orderId);
+        verify(modelMapper).map(event1, EventDto.class);
+        verify(modelMapper).map(event2, EventDto.class);
     }
 
     @Test
     void testGelAllEventsFromOrderByOrderIdWithEng() {
-        List<Event> orderEvents = getListOfEvents();
-        when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
-        when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(orderEvents);
-        List<EventDto> eventDTOS = orderEvents.stream()
-            .peek(event -> {
-                event.setEventName(event.getEventNameEng());
-                event.setAuthorName(event.getAuthorNameEng());
-            })
-            .map(event -> modelMapper.map(event, EventDto.class))
-            .collect(toList());
-        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString(), "en"));
+        Long orderId = 1L;
+        String language = "en";
+        Event event1 = getEvent1();
+        Event event2 = getEvent2();
+        EventDto eventDto1 = getDtoWithLanguage(language, event1);
+        EventDto eventDto2 = getDtoWithLanguage(language, event2);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(new Order()));
+        when(eventRepository.findAllEventsByOrderId(anyLong())).thenReturn(List.of(event1, event2));
+        when(modelMapper.map(event1, EventDto.class)).thenReturn(eventDto1);
+        when(modelMapper.map(event2, EventDto.class)).thenReturn(eventDto2);
+
+        List<EventDto> result = ubsService.getAllEventsForOrder(orderId, anyString(), "en");
+
+        assertEquals(2, result.size());
+        assertEquals(eventDto2, result.get(0));
+        assertEquals(eventDto1, result.get(1));
+
+        verify(orderRepository).findById(orderId);
+        verify(eventRepository).findAllEventsByOrderId(orderId);
+        verify(modelMapper).map(event1, EventDto.class);
+        verify(modelMapper).map(event2, EventDto.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"bg", "it", "ru"})
+    void testGelAllEventsFromOrderByOrderIdWithOtherLanguage(String language) {
+        Long orderId = 1L;
+        String email = "test@gmail.com";
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(new Order()));
+        when(eventRepository.findAllEventsByOrderId(anyLong())).thenReturn(List.of(new Event()));
+
+        assertThrows(BadRequestException.class,
+            () -> ubsService.getAllEventsForOrder(orderId, email, language));
     }
 
     @Test
