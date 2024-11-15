@@ -49,6 +49,7 @@ import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.BagRepository;
+import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
@@ -271,6 +272,8 @@ class UBSManagementServiceImplTest {
     private PaymentService paymentService;
     @Mock
     private EventRepository eventRepository;
+    @Mock
+    private BigOrderTableRepository bigOrderTableRepository;
 
     @Test
     void getAllCertificates() {
