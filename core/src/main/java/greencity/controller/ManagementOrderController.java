@@ -880,14 +880,16 @@ public class ManagementOrderController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PatchMapping(value = "/update-order-page-admin-info/{id}",
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<HttpStatus> updatePageAdminInfo(@PathVariable(name = "id") Long orderId,
+    public ResponseEntity<BigOrderTableDTO> updatePageAdminInfo(@PathVariable(name = "id") Long orderId,
         @Valid @RequestPart UpdateOrderPageAdminDto updateOrderPageAdminDto,
         @RequestParam String language,
         @Parameter(hidden = true) Principal principal,
         @RequestPart(required = false) @Nullable MultipartFile[] images) {
-        ubsManagementService.updateOrderAdminPageInfoAndSaveReason(orderId, updateOrderPageAdminDto, language,
-            principal.getName(), images);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        BigOrderTableDTO bigOrderTableDTO =
+            ubsManagementService.updateOrderAdminPageInfoAndSaveReason(orderId, updateOrderPageAdminDto, language,
+                principal.getName(), images);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(bigOrderTableDTO);
     }
 
     /**
