@@ -76,6 +76,21 @@ public class BigOrderTableRepository {
         return new PageImpl<>(resultList, pageable, ordersCount);
     }
 
+    public BigOrderTableViews findSingleOrderById(Long orderId) {
+        var criteriaQuery = criteriaBuilder.createQuery(BigOrderTableViews.class);
+        var orderRoot = criteriaQuery.from(BigOrderTableViews.class);
+
+        var predicate = criteriaBuilder.equal(orderRoot.get("id"), orderId);
+        criteriaQuery.select(orderRoot).where(predicate);
+
+        var typedQuery = entityManager.createQuery(criteriaQuery);
+        typedQuery.setMaxResults(1);
+
+        return typedQuery.getResultStream()
+            .findFirst()
+            .orElse(null);
+    }
+
     private Predicate getPredicate(OrderSearchCriteria sc, Root<BigOrderTableViews> orderRoot,
         List<Long> tariffsInfoIds) {
         var predicates = new ArrayList<Predicate>();

@@ -18,6 +18,7 @@ import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
@@ -45,6 +46,7 @@ import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.order.Bag;
+import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
@@ -67,6 +69,7 @@ import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.BagRepository;
+import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
@@ -156,6 +159,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderBagService orderBagService;
     private final PaymentService paymentService;
     private final EventRepository eventRepository;
+    private final BigOrderTableRepository bigOrderTableRepository;
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
     private static final List<String> ADMIN_POSITION_NAMES = List.of("Admin", "Super Admin");
     private final Set<OrderStatus> orderStatusesBeforeShipment =
@@ -473,8 +477,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         OrderStatusesTranslationDto orderStatusesTranslationDto) {
         orderStatusesTranslationDto
             .setAbleActualChange(OrderStatus.NOT_TAKEN_OUT.getNumValue() == orderStatusTranslation.getStatusId()
-                || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId()
-                || OrderStatus.CANCELED.getNumValue() == orderStatusTranslation.getStatusId());
+                || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId());
     }
 
     /**
@@ -1286,12 +1289,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     @Transactional
-    public void updateOrderAdminPageInfoAndSaveReason(Long orderId, UpdateOrderPageAdminDto updateOrderPageAdminDto,
+    public BigOrderTableDTO updateOrderAdminPageInfoAndSaveReason(Long orderId,
+        UpdateOrderPageAdminDto updateOrderPageAdminDto,
         String language, String email, MultipartFile[] images) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         updateOrderAdminPageInfo(updateOrderPageAdminDto, order, language, email);
         saveReason(order, updateOrderPageAdminDto.getNotTakenOutReason(), images);
+
+        BigOrderTableViews singleOrderById = bigOrderTableRepository.findSingleOrderById(orderId);
+        return modelMapper.map(singleOrderById, BigOrderTableDTO.class);
     }
 
     /**
