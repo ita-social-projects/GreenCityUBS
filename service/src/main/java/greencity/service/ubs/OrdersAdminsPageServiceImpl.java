@@ -72,6 +72,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import org.springframework.transaction.annotation.Transactional;
 import static greencity.constant.ErrorMessage.DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER;
 import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
@@ -243,6 +244,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
+    @Transactional
     public ChangeOrderResponseDTO chooseOrdersDataSwitcher(String email,
         RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO) {
         String columnName = requestToChangeOrdersDataDTO.getColumnName();
@@ -576,6 +578,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             order.setReceivingStation(null);
             employeeOrderPositionRepository.deleteAll(order.getEmployeeOrderPositions());
             order.setEmployeeOrderPositions(null);
+            orderRepository.save(order);
         }
     }
 
