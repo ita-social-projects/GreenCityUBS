@@ -83,4 +83,14 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
         + "AND obm.bag_id = :bagId", nativeQuery = true)
     Optional<Integer> getAmountOfOrderBagsByOrderIdAndBagId(@Param("orderId") Long orderId,
         @Param("bagId") Integer bagId);
+
+    /**
+     * Deletes all order bags associated with the given order ID from the
+     * ORDER_BAG_MAPPING table.
+     *
+     * @param orderId The ID of the order for which all associated order bags should
+     *                be deleted.
+     */
+    @Modifying
+    void deleteAllByOrderId(Long orderId);
 }
