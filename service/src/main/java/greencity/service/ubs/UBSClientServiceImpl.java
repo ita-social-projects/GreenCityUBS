@@ -1241,6 +1241,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
         List<OrderBag> bagsOrdered, UBSuser userData,
         User currentUser, long sumToPayInCoins) {
+        orderBagRepository.deleteAllByOrderId(order.getId());
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
         order.updateWithNewOrderBags(bagsOrdered);
