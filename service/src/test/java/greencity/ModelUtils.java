@@ -5530,4 +5530,76 @@ public class ModelUtils {
             default -> new EventDto();
         };
     }
+
+    public static Order getOrderWithPaymentStatus(OrderPaymentStatus paymentStatus) {
+        Map<Integer, Integer> hashMap = new HashMap<>();
+        hashMap.put(1, 1);
+        hashMap.put(2, 1);
+
+        return Order.builder()
+            .orderBags(Arrays.asList(getOrderBag(), getOrderBag2()))
+            .id(1L)
+            .amountOfBagsOrdered(hashMap)
+            .confirmedQuantity(hashMap)
+            .exportedQuantity(hashMap)
+            .pointsToUse(100)
+            .orderStatus(OrderStatus.DONE)
+            .payment(Lists.newArrayList(Payment.builder()
+                .paymentId("1L")
+                .amount(200_00L)
+                .currency("UAH")
+                .settlementDate("20.02.1990")
+                .comment("avb")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .ubsUser(UBSuser.builder()
+                .firstName("oleh")
+                .lastName("ivanov")
+                .email("mail@mail.ua")
+                .id(1L)
+                .phoneNumber("067894522")
+                .orderAddress(OrderAddress.builder()
+                    .id(1L)
+                    .city("Lviv")
+                    .street("Levaya")
+                    .district("frankivskiy")
+                    .entranceNumber("5")
+                    .addressComment("near mall")
+                    .houseCorpus("1")
+                    .houseNumber("4")
+                    .coordinates(Coordinates.builder()
+                        .latitude(49.83)
+                        .longitude(23.88)
+                        .build())
+                    .build())
+                .build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").currentPoints(100).build())
+            .certificates(Collections.emptySet())
+            .pointsToUse(700)
+            .adminComment("Admin")
+            .cancellationComment("cancelled")
+            .receivingStation(ReceivingStation.builder()
+                .id(1L)
+                .name("Саперно-Слобідська")
+                .build())
+            .orderPaymentStatus(paymentStatus)
+            .cancellationReason(CancellationReason.OUT_OF_CITY)
+            .writeOffStationSum(50_00L)
+            .imageReasonNotTakingBags(List.of("foto"))
+
+            .tariffsInfo(TariffsInfo.builder()
+                .courier(Courier.builder()
+                    .id(1L)
+                    .build())
+                .id(1L)
+                .tariffLocations(Set.of(TariffLocation.builder()
+                    .id(1L)
+                    .build()))
+                .max(99L)
+                .min(2L)
+                .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+                .build())
+
+            .build();
+    }
 }
