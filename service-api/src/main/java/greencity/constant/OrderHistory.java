@@ -30,12 +30,12 @@ public final class OrderHistory {
     public static final String ASSIGN_DRIVER_ENG = "Pinned driver";
     public static final String ASSIGN_LOGIEST = "Закріплено логіста";
     public static final String ASSIGN_LOGIEST_ENG = "Pinned logistician";
-    public static final String ASSIGN_CALL_MANAGER = "Закріплено менеджера обдзвону";
-    public static final String ASSIGN_CALL_MANAGER_ENG = "Pinned callback manager";
+    public static final String ASSIGN_CALL_MANAGER = "Закріплено менеджера";
+    public static final String ASSIGN_CALL_MANAGER_ENG = "Pinned callback";
     public static final String ASSIGN_CALL_PILOT = "Закріплено штурмана";
     public static final String ASSIGN_CALL_PILOT_ENG = "Pinned navigator";
-    public static final String UPDATE_MANAGER_CALL = "Змінено менеджера обдзвону";
-    public static final String UPDATE_MANAGER_CALL_ENG = "Changed callback manager";
+    public static final String UPDATE_MANAGER_CALL = "Змінено менеджера";
+    public static final String UPDATE_MANAGER_CALL_ENG = "Changed callback";
     public static final String UPDATE_MANAGER_LOGIEST = "Змінено логіста";
     public static final String UPDATE_MANAGER_LOGIEST_ENG = "Changed logistician";
     public static final String UPDATE_MANAGER_CALL_PILOT = "Змінено штурмана";
