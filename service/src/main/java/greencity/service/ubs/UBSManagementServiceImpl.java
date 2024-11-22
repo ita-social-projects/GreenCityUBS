@@ -75,6 +75,7 @@ import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
@@ -168,6 +169,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
     static final String FORMAT_DATE = "dd-MM-yyyy";
     private final UBSClientService ubsClientService;
+    private final OrderBagRepository orderBagRepository;
 
     /**
      * {@inheritDoc}
@@ -282,9 +284,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         CounterOrderDetailsDto prices =
             PaymentUtil.getPriceDetails(orderId, orderRepository, orderBagService, certificateRepository);
 
-        var bagInfoDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(order.getTariffsInfo().getId()).stream()
-            .map(bag -> modelMapper.map(bag, BagInfoDto.class))
-            .collect(Collectors.toList());
+        var bagInfoDtoList = createBagInfoDtos(orderId, order);
 
         Long servicePriceInCoins = serviceRepository.findServiceByTariffsInfoId(order.getTariffsInfo().getId())
             .map(it -> it.getPrice())
@@ -327,6 +327,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
             .writeOffStationSum(PaymentUtil.convertCoinsIntoBills(order.getWriteOffStationSum()))
             .build();
+    }
+
+    private List<BagInfoDto> createBagInfoDtos(Long orderId, Order order) {
+        if (OrderPaymentStatus.PAID.equals(order.getOrderPaymentStatus())) {
+            return orderBagRepository.findAllByOrderId(orderId).stream()
+                .map(orderBag -> modelMapper.map(orderBag, BagInfoDto.class))
+                .toList();
+        }
+        return bagRepository.findAllActiveBagsByTariffsInfoId(order.getTariffsInfo().getId()).stream()
+            .map(bag -> modelMapper.map(bag, BagInfoDto.class))
+            .toList();
     }
 
     /**
