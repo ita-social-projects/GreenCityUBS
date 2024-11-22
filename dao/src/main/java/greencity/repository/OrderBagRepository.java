@@ -93,4 +93,13 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      */
     @Modifying
     void deleteAllByOrderId(Long orderId);
+
+    /**
+     * Finds all order bags associated with the given order ID.
+     *
+     * @param orderId The ID of the order for which all associated order bags should
+     *                be returned.
+     * @return A list of order bags associated with the given order ID.
+     */
+    List<OrderBag> findAllByOrderId(Long orderId);
 }
