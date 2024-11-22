@@ -60,4 +60,16 @@ public interface EmployeeOrderPositionRepository extends CrudRepository<Employee
      * @author Sikhovskiy Rostyslav
      */
     Boolean existsByOrderAndPosition(Order order, Position position);
+
+    /**
+     * Method delete OrderEmployeePosition by Order and Position.
+     *
+     * @param order    {@link Order}
+     * @param position {@link Position}
+     * @author Kizerov Dmytro
+     */
+    @Transactional
+    @Modifying
+    @Query("delete EmployeeOrderPosition e where e.order=:order and e.position=:position")
+    void delete(Order order, Position position);
 }

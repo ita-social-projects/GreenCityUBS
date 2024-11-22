@@ -119,6 +119,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String WITHOUT_NAVIGATOR_UA = "Без штурмана";
     private static final String WITHOUT_DRIVER_EN = "Without driver";
     private static final String WITHOUT_DRIVER_UA = "Без водія";
+    private static final String WITHOUT_EMPLOYEE = "-1";
+    private static final String IGNORE_VALUE_FOR_EMPLOYEE = "0";
 
     @Override
     public TableParamsDto getParametersForOrdersTable(String uuid) {
@@ -698,49 +700,165 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     @Override
     public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position,
         String email) {
-        Employee currentEmployee =
-            employeeRepository.findByEmail(email).orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
-        Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
+        List<Long> unresolvedGoals = new ArrayList<>();
+        if (employee == null || IGNORE_VALUE_FOR_EMPLOYEE.equalsIgnoreCase(employee)) {
+            return unresolvedGoals;
+        }
+
+        Employee currentEmployee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
             .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND_BY_ID));
-        List<Long> unresolvedGoals = new ArrayList<>();
 
+        if (WITHOUT_EMPLOYEE.equalsIgnoreCase(employee)) {
+            return removeEmployeeFromOrders(ordersId, existedPosition, currentEmployee, unresolvedGoals);
+        } else {
+            return assignResponsibleEmployee(ordersId, existedPosition, employee, currentEmployee, unresolvedGoals);
+        }
+    }
+
+    /**
+     * Removes the given employee from the given orders. If an order is blocked by
+     * another employee, it will not be processed and will be added to the list of
+     * unresolved goals.
+     *
+     * @param ordersId        the IDs of the orders to remove the employee from
+     * @param position        the position of the employee
+     * @param currentEmployee the employee performing the removal
+     * @param unresolvedGoals the list of unresolved goals
+     * @return the list of unresolved goals
+     */
+    private List<Long> removeEmployeeFromOrders(List<Long> ordersId, Position position, Employee currentEmployee,
+        List<Long> unresolvedGoals) {
         for (Long orderId : ordersId) {
-            try {
-                Order existedOrder = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                if (isOrderBlockedByAnotherEmployee(existedOrder, currentEmployee.getId())) {
-                    throw new IllegalArgumentException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
-                }
-                Boolean existedBefore =
-                    employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
-                final String historyChanges;
-
-                if (existedBefore.equals(Boolean.TRUE)) {
-                    employeeOrderPositionRepository.update(existedOrder, existedEmployee, existedPosition);
-                    historyChanges = eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.TRUE);
-                } else {
-                    List<EmployeeOrderPosition> employeeOrderPositions =
-                        employeeOrderPositionRepository.findAllByOrderId(orderId);
-                    EmployeeOrderPosition newEmployeeOrderPosition = EmployeeOrderPosition.builder()
-                        .employee(existedEmployee).position(existedPosition)
-                        .order(existedOrder).build();
-                    employeeOrderPositions.add(newEmployeeOrderPosition);
-                    Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
-                    existedOrder.setEmployeeOrderPositions(positionSet);
-                    historyChanges =
-                        eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.FALSE);
-                }
-                existedOrder.setBlocked(false);
-                existedOrder.setBlockedByEmployee(null);
-                orderRepository.save(existedOrder);
-                eventService.saveEvent(historyChanges, email, existedOrder);
-            } catch (Exception e) {
-                unresolvedGoals.add(orderId);
-            }
+            processOrderRemoval(orderId, position, currentEmployee, unresolvedGoals);
         }
         return unresolvedGoals;
+    }
+
+    /**
+     * Processes a single order removal operation. Tries to remove the given
+     * employee from the given order, but only if the order is not blocked by
+     * another employee. If the order is blocked, an exception will be thrown.
+     *
+     * @param orderId         the order ID
+     * @param position        the position to remove from the order
+     * @param currentEmployee the employee performing the removal
+     * @param unresolvedGoals the list of unresolved orders
+     */
+    private void processOrderRemoval(Long orderId, Position position, Employee currentEmployee,
+        List<Long> unresolvedGoals) {
+        try {
+            Order order = fetchOrderIfExists(orderId);
+            validateOrderNotBlocked(order, currentEmployee.getId());
+
+            if (Boolean.TRUE.equals(employeeOrderPositionRepository.existsByOrderAndPosition(order, position))) {
+                employeeOrderPositionRepository.delete(order, position);
+                String historyChanges = eventService.changesWithResponsibleEmployee(position.getId(), Boolean.TRUE);
+                order.setBlocked(false);
+                order.setBlockedByEmployee(null);
+                eventService.saveEvent(historyChanges, currentEmployee.getEmail(), order);
+            }
+        } catch (Exception e) {
+            unresolvedGoals.add(orderId);
+        }
+    }
+
+    /**
+     * Assigns a responsible employee to each order in the given list of orders.
+     *
+     * @param ordersId        the list of order IDs
+     * @param position        the position the employee is responsible for
+     * @param employeeId      the ID of the target employee
+     * @param currentEmployee the employee making the changes
+     * @param unresolvedGoals the list of unresolved goals
+     * @return the list of unresolved goals
+     */
+    private List<Long> assignResponsibleEmployee(List<Long> ordersId, Position position, String employeeId,
+        Employee currentEmployee, List<Long> unresolvedGoals) {
+        Employee targetEmployee = employeeRepository.findById(Long.parseLong(employeeId))
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
+
+        for (Long orderId : ordersId) {
+            processOrderAssignment(orderId, position, targetEmployee, currentEmployee, unresolvedGoals);
+        }
+        return unresolvedGoals;
+    }
+
+    /**
+     * Assigns a responsible employee to an order. If the employee is already
+     * assigned, updates the assignment, otherwise adds a new assignment.
+     *
+     * @param orderId         the order ID
+     * @param position        the position the employee is responsible for
+     * @param targetEmployee  the employee to assign
+     * @param currentEmployee the employee performing the assignment
+     * @param unresolvedGoals the list of unresolved orders
+     */
+    private void processOrderAssignment(Long orderId, Position position, Employee targetEmployee,
+        Employee currentEmployee, List<Long> unresolvedGoals) {
+        try {
+            Order order = fetchOrderIfExists(orderId);
+            validateOrderNotBlocked(order, currentEmployee.getId());
+
+            String historyChanges;
+            if (Boolean.TRUE.equals(employeeOrderPositionRepository.existsByOrderAndPosition(order, position))) {
+                employeeOrderPositionRepository.update(order, targetEmployee, position);
+                historyChanges = eventService.changesWithResponsibleEmployee(position.getId(), Boolean.TRUE);
+            } else {
+                addEmployeeToOrder(order, targetEmployee, position);
+                historyChanges = eventService.changesWithResponsibleEmployee(position.getId(), Boolean.FALSE);
+            }
+
+            order.setBlocked(false);
+            order.setBlockedByEmployee(null);
+            eventService.saveEvent(historyChanges, currentEmployee.getEmail(), order);
+        } catch (Exception e) {
+            unresolvedGoals.add(orderId);
+        }
+    }
+
+    /**
+     * Retrieves an order by its id if it exists.
+     *
+     * @param orderId the id of the order
+     * @return the order
+     * @throws NotFoundException if an order with the given id does not exist
+     */
+    private Order fetchOrderIfExists(Long orderId) {
+        return orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+    }
+
+    /**
+     * Validates that the order is not blocked by another employee.
+     *
+     * @param order      the order
+     * @param employeeId the id of the employee
+     * @throws BadRequestException if the order is blocked by another employee
+     */
+    private void validateOrderNotBlocked(Order order, Long employeeId) {
+        if (isOrderBlockedByAnotherEmployee(order, employeeId)) {
+            throw new BadRequestException(ORDER_IS_BLOCKED + order.getBlockedByEmployee().getId());
+        }
+    }
+
+    /**
+     * Add employee to order.
+     *
+     * @param order    the order
+     * @param employee the employee
+     * @param position the position
+     */
+    private void addEmployeeToOrder(Order order, Employee employee, Position position) {
+        List<EmployeeOrderPosition> orderPositions = employeeOrderPositionRepository.findAllByOrderId(order.getId());
+        EmployeeOrderPosition newPosition = EmployeeOrderPosition.builder()
+            .employee(employee)
+            .position(position)
+            .order(order)
+            .build();
+        orderPositions.add(newPosition);
+        order.setEmployeeOrderPositions(new HashSet<>(orderPositions));
     }
 
     @Override
