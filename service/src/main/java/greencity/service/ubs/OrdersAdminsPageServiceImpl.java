@@ -758,6 +758,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 order.setBlocked(false);
                 order.setBlockedByEmployee(null);
                 eventService.saveEvent(historyChanges, currentEmployee.getEmail(), order);
+                orderRepository.save(order);
             }
         } catch (Exception e) {
             unresolvedGoals.add(orderId);
@@ -813,6 +814,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             order.setBlocked(false);
             order.setBlockedByEmployee(null);
             eventService.saveEvent(historyChanges, currentEmployee.getEmail(), order);
+            orderRepository.save(order);
         } catch (Exception e) {
             unresolvedGoals.add(orderId);
         }
