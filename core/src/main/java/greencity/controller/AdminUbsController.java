@@ -100,6 +100,7 @@ public class AdminUbsController {
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
     })
+
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @GetMapping("/orderTableColumnsWidth")
     public ResponseEntity<ColumnWidthDto> getTableColumnWidthForCurrentUser(
