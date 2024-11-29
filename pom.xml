@@ -98,19 +98,19 @@
                 <groupId>com.greencity</groupId>
                 <artifactId>service-api</artifactId>
                 <version>${project.version}</version>
-                <scope>provided</scope>
+                <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>com.greencity</groupId>
                 <artifactId>service</artifactId>
                 <version>${project.version}</version>
-                <scope>provided</scope>
+                <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>com.greencity</groupId>
                 <artifactId>dao</artifactId>
                 <version>${project.version}</version>
-                <scope>provided</scope>
+                <scope>compile</scope>
             </dependency>
 
             <!-- swagger -->
