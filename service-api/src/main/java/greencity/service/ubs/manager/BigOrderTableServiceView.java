@@ -30,4 +30,6 @@ public interface BigOrderTableServiceView {
      * @author Sikhovskiy Rostyslav
      */
     CustomTableViewDto getCustomTableParameters(String uuid);
+
+    void changeIsFreezeStatus(String uuid, boolean value);
 }

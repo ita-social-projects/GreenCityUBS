@@ -16,6 +16,7 @@ import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersForUserService;
 import greencity.service.ubs.ValuesForUserTableService;
 import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.manager.BigOrderTableServiceView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -26,6 +27,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +44,8 @@ public class AdminUbsController {
     private final ValuesForUserTableService valuesForUserTable;
     private final OrdersForUserService ordersForUserService;
     private final ViolationService violationService;
+    private final BigOrderTableServiceView bigOrderTableServiceView;
+    private final DataSourceTransactionManagerAutoConfiguration dataSourceTransactionManagerAutoConfiguration;
 
     /**
      * Controller for obtaining all users that made at least one order.
@@ -250,5 +254,18 @@ public class AdminUbsController {
     @GetMapping("/locations-details")
     public ResponseEntity<List<RegionInfoDto>> getAllInformationForLocations() {
         return ResponseEntity.ok(ordersAdminsPageService.getAllLocationsInfo());
+    }
+
+    // todo endpoint to save boolean isfreeze for currentser uuid
+    @Operation(summary = "sets a isTableFreeze value for tableColumnWidthForEmployee entity")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "isTableFreeze is successfully updated",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
+    })
+    @PutMapping("/saveOrderTableColumnsWidthIsFreeze")
+    public ResponseEntity<HttpStatus> saveIsFreeze(@CurrentUserUuid String uuid,
+                                                   @RequestBody Boolean value) {
+        bigOrderTableServiceView.changeIsFreezeStatus(uuid, value);
+        return ResponseEntity.status(HttpStatus.OK).body(HttpStatus.OK);
     }
 }

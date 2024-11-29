@@ -174,6 +174,8 @@ public class SecurityConfig {
                     UBS_MANAG_LINK + "/unblockOrders",
                     UBS_MANAG_LINK + "/save-reason/{id}",
                     UBS_MANAG_LINK + "/orderTableColumnsWidth",
+                    // TODO: added new endpoint to config
+                    UBS_MANAG_LINK + "/saveOrderTableColumnsWidthIsFreeze",
                     ADMIN_EMPL_LINK + "/**",
                     ADMIN_LINK + "/notification/update-template/{id}",
                     ADMIN_LINK + "/notification/change-template-status/{id}",
@@ -184,7 +186,8 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}",
                     SUPER_ADMIN_LINK + "/editTariffInfo/{id}",
                     SUPER_ADMIN_LINK + "/activate-employee/{id}",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**"
+                )
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ADMIN_EMPL_LINK + "/**",
