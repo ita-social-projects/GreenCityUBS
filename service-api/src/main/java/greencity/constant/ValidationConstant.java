@@ -28,6 +28,7 @@ public class ValidationConstant {
             + "in that cases sets the same value for both localizations.";
 
     public static final String INVALID_EMAIL = "Invalid email format";
+    public static final String DELIVERY_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}$";
 
     /**
      * Constructor.

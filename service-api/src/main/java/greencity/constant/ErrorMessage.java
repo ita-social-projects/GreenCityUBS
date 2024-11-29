@@ -171,6 +171,8 @@ public final class ErrorMessage {
     public static final String BAGS_QUANTITY_NOT_FOUND_MESSAGE = "Bags quantity not found by current orderId "
         + "and bagId.";
     public static final String TARIFF_NOT_FOUND_BY_LOCATION_ID = "Tariff with location id: %d not found";
+    public static final String INVALID_DELIVERY_TIME_FORMAT =
+        "Invalid time format. Expected format is yyyy-MM-dd'T'HH:mm:ss.SSS";
 
     /**
      * Constructor.
