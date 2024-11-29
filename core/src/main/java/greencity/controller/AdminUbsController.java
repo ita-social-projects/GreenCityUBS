@@ -264,7 +264,7 @@ public class AdminUbsController {
     })
     @PutMapping("/saveOrderTableColumnsWidthIsFreeze")
     public ResponseEntity<HttpStatus> saveIsFreeze(@CurrentUserUuid String uuid,
-                                                   @RequestBody Boolean value) {
+                                                   @RequestParam boolean value) {
         bigOrderTableServiceView.changeIsFreezeStatus(uuid, value);
         return ResponseEntity.status(HttpStatus.OK).body(HttpStatus.OK);
     }
