@@ -259,12 +259,12 @@ public class AdminUbsController {
     // todo endpoint to save boolean isfreeze for currentser uuid
     @Operation(summary = "sets a isTableFreeze value for tableColumnWidthForEmployee entity")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "isTableFreeze is successfully updated",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
+        @ApiResponse(responseCode = "200", description = "isTableFreeze is successfully updated",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
     })
     @PutMapping("/saveOrderTableColumnsWidthIsFreeze")
     public ResponseEntity<HttpStatus> saveIsFreeze(@CurrentUserUuid String uuid,
-                                                   @RequestParam boolean value) {
+        @RequestParam boolean value) {
         bigOrderTableServiceView.changeIsFreezeStatus(uuid, value);
         return ResponseEntity.status(HttpStatus.OK).body(HttpStatus.OK);
     }
