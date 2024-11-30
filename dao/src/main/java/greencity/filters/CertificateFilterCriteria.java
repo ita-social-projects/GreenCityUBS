@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CertificateFilterCriteria {
-
     private CertificateStatus[] certificateStatus;
     private String expirationDateFrom;
     private String expirationDateTo;
