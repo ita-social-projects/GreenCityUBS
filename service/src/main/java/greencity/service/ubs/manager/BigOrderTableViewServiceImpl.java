@@ -2,8 +2,6 @@ package greencity.service.ubs.manager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.user.UserVO;
@@ -53,7 +51,6 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
 
     @Override
     public void changeOrderTableView(String uuid, String titles) {
-
         Employee employeeByUuid = employeeRepository.findByUuid(uuid).orElse(null);
         if (nonNull(employeeByUuid)) {
             TableColumnWidthForEmployee tableByEmployeeId =
