@@ -5,7 +5,10 @@ import java.util.List;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.user.UserVO;
+import greencity.entity.table.TableColumnWidthForEmployee;
+import greencity.entity.user.employee.Employee;
 import greencity.exceptions.user.UserNotFoundException;
+import greencity.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.Cacheable;
@@ -17,12 +20,9 @@ import greencity.dto.table.CustomTableViewDto;
 import greencity.entity.parameters.CustomTableView;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import greencity.repository.BigOrderTableRepository;
-import greencity.repository.CustomTableViewRepo;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static java.util.Objects.nonNull;
 
 @Service
 @AllArgsConstructor
@@ -33,6 +33,7 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
     private final UserRemoteClient userRemoteClient;
+    private final TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
 
     @Override
     public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String email) {
@@ -50,6 +51,15 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
 
     @Override
     public void changeOrderTableView(String uuid, String titles) {
+        Employee employeeByUuid = employeeRepository.findByUuid(uuid).orElse(null);
+        if (nonNull(employeeByUuid)) {
+            TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository
+                    .findByEmployeeId(employeeByUuid.getId()).orElse(null);
+            if (nonNull(tableByEmployeeId) && tableByEmployeeId.getIsTableFreeze()) {
+                return;
+            }
+        }
+
         if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
             customTableViewRepo.update(uuid, titles);
         } else {
@@ -70,6 +80,21 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
             return CustomTableViewDto.builder()
                 .titles(" ")
                 .build();
+        }
+    }
+
+    @Override
+    public void changeIsFreezeStatus(String uuid, Boolean value) {
+        Employee employeeByUuid = employeeRepository.findByUuid(uuid).orElse(null);
+
+        if (nonNull(employeeByUuid)) {
+            TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository
+                    .findByEmployeeId(employeeByUuid.getId()).orElse(null);
+
+            if (nonNull(tableByEmployeeId)) {
+                tableByEmployeeId.setIsTableFreeze(value);
+                tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
+            }
         }
     }
 
