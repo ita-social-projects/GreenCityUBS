@@ -56,14 +56,15 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
 
         Employee employeeByUuid = employeeRepository.findByUuid(uuid).orElse(null);
         if (nonNull(employeeByUuid)) {
-            TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository.findByEmployeeId(employeeByUuid.getId()).orElse(null);
-            if(nonNull(tableByEmployeeId) && tableByEmployeeId.getIsTableFreeze()) {
+            TableColumnWidthForEmployee tableByEmployeeId =
+                tableColumnWidthForEmployeeRepository.findByEmployeeId(employeeByUuid.getId()).orElse(null);
+            if (nonNull(tableByEmployeeId) && tableByEmployeeId.getIsTableFreeze()) {
                 // do not change
                 return;
             }
         }
 
-            if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
+        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
             customTableViewRepo.update(uuid, titles);
         } else {
             CustomTableView customTableView = CustomTableView.builder()
@@ -80,7 +81,8 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
         System.out.println("check if employee exists");
         if (nonNull(employeeByUuid)) {
             System.out.println("employee exists");
-            TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository.findByEmployeeId(employeeByUuid.getId()).orElse(null);
+            TableColumnWidthForEmployee tableByEmployeeId =
+                tableColumnWidthForEmployeeRepository.findByEmployeeId(employeeByUuid.getId()).orElse(null);
 
             if (nonNull(tableByEmployeeId)) {
                 tableByEmployeeId.setIsTableFreeze(value);
