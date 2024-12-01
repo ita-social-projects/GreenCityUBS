@@ -50,7 +50,7 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @param code is list Certificate
      * @return set of {@link Certificate}
      */
-    Set<Certificate> findAllByCodeAndCertificateStatus(List<String> code, CertificateStatus status);
+    Set<Certificate> findAllByCodeInAndCertificateStatus(List<String> code, CertificateStatus status);
 
     /**
      * Method to check if certificate is already exist by code.
