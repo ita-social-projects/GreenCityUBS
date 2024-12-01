@@ -280,7 +280,7 @@ class ManagementEmployeeControllerTest {
 
         mockMvc.perform(get(UBS_LINK + "/get-employees/{tariffId}", tariffId))
             .andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].employeeDto.firstName")
                 .value(employee1.getEmployeeDto().getFirstName()))
             .andReturn();

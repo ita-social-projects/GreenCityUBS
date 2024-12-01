@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
@@ -90,6 +91,8 @@ class SuperAdminControllerTest {
     @InjectMocks
     SuperAdminController superAdminController;
 
+    private static final ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
+
     private static final String ubsLink = "/ubs/superAdmin";
 
     private Principal principal = getUuid();
@@ -111,7 +114,7 @@ class SuperAdminControllerTest {
     void createTariffServiceTest() throws Exception {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto responseDto = ModelUtils.getGetTariffServiceDto();
-        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestDtoJSON = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
@@ -133,7 +136,7 @@ class SuperAdminControllerTest {
     @Test
     void createTariffServiceNotFoundException() throws Exception {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
-        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestDtoJSON = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
@@ -212,7 +215,7 @@ class SuperAdminControllerTest {
     void editTariffService() throws Exception {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto responseDto = ModelUtils.getGetTariffServiceDto();
-        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestDtoJSON = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
@@ -234,7 +237,7 @@ class SuperAdminControllerTest {
     @Test
     void editTariffServiceNotFoundException() throws Exception {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
-        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestDtoJSON = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
@@ -259,7 +262,7 @@ class SuperAdminControllerTest {
     @Test
     void createService() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
@@ -279,7 +282,7 @@ class SuperAdminControllerTest {
     @Test
     void createServiceIfServiceAlreadyExistsException() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
@@ -305,7 +308,7 @@ class SuperAdminControllerTest {
     @Test
     void createServiceIfEmployeeNotFoundException() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
@@ -331,7 +334,7 @@ class SuperAdminControllerTest {
     @Test
     void createServiceIfTariffNotFoundException() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
@@ -405,7 +408,6 @@ class SuperAdminControllerTest {
     @Test
     void editService() throws Exception {
         GetServiceDto dto = ModelUtils.getGetServiceDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
@@ -426,7 +428,7 @@ class SuperAdminControllerTest {
     @Test
     void editServiceIfServiceNotFoundException() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
         long id = 1L;
 
@@ -453,7 +455,7 @@ class SuperAdminControllerTest {
     @Test
     void editServiceIfEmployeeNotFoundException() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
@@ -575,7 +577,6 @@ class SuperAdminControllerTest {
     @Test
     void addLocation() throws Exception {
         List<LocationCreateDto> dto = ModelUtils.getLocationCreateDtoList();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestJson = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/addLocations").principal(principal)
@@ -592,7 +593,6 @@ class SuperAdminControllerTest {
     @Test
     void addLocationInterceptLocationAlreadyCreatedException() throws Exception {
         List<LocationCreateDto> dto = ModelUtils.getLocationCreateDtoList();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestJson = objectMapper.writeValueAsString(dto);
 
         Mockito.doThrow(BadRequestException.class).when(superAdminService).addLocation(dto);
@@ -611,7 +611,6 @@ class SuperAdminControllerTest {
     @Test
     void createCourierTest() throws Exception {
         CreateCourierDto dto = ModelUtils.getCreateCourierDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/createCourier")
@@ -624,7 +623,6 @@ class SuperAdminControllerTest {
     @Test
     void createCourierIfCourierAlreadyExistsException() throws Exception {
         CreateCourierDto dto = ModelUtils.getCreateCourierDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
@@ -649,7 +647,6 @@ class SuperAdminControllerTest {
     @Test
     void addNewTariffIfTariffAlreadyExistsException() throws Exception {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
@@ -674,7 +671,6 @@ class SuperAdminControllerTest {
     @Test
     void createReceivingStation() throws Exception {
         AddingReceivingStationDto dto = AddingReceivingStationDto.builder().name("Qqq-qqq").build();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
         mockMvc.perform(post(ubsLink + "/create-receiving-station")
             .principal(principal)
@@ -686,7 +682,6 @@ class SuperAdminControllerTest {
     @Test
     void updateReceivingStation() throws Exception {
         ReceivingStationDto dto = getReceivingStationDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(ubsLink + "/update-receiving-station")
@@ -711,7 +706,6 @@ class SuperAdminControllerTest {
             .nameEn("Тест")
             .build();
 
-        ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(ubsLink + "/update-courier")
@@ -741,7 +735,6 @@ class SuperAdminControllerTest {
     void getAllTariffsInfoTest() throws Exception {
         GetTariffsInfoDto getTariffsInfoDto = ModelUtils.getAllTariffsInfoDto();
 
-        ObjectMapper objectMapper = new ObjectMapper();
         String result = objectMapper.writeValueAsString(getTariffsInfoDto);
 
         Mockito.when(superAdminService.getAllTariffsInfo(TariffsInfoFilterCriteria.builder().build()))
@@ -757,7 +750,6 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void addNewTariffTest() {
         var dto = ModelUtils.getAddNewTariffDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(post(ubsLink + "/add-new-tariff")
             .content(objectMapper.writeValueAsString(dto))
             .contentType(MediaType.APPLICATION_JSON)
@@ -769,7 +761,7 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void editTariffTest() {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
-        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        String requestDto = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(ubsLink + "/editTariffInfo/{id}", 1L)
             .content(requestDto)
@@ -785,7 +777,7 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void editTariffThrowBadRequestException() {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
-        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        String requestDto = objectMapper.writeValueAsString(dto);
         doThrow(new BadRequestException(ErrorMessage.LOCATIONS_BELONG_TO_DIFFERENT_REGIONS))
             .when(superAdminService).editTariff(1L, dto);
 
@@ -805,7 +797,7 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void editTariffThrowNotFoundException() {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
-        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        String requestDto = objectMapper.writeValueAsString(dto);
         doThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND))
             .when(superAdminService).editTariff(1L, dto);
 
@@ -825,7 +817,7 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void editTariffThrowTariffAlreadyExistsException() {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
-        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        String requestDto = objectMapper.writeValueAsString(dto);
         doThrow(new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS))
             .when(superAdminService).editTariff(1L, dto);
 
@@ -844,7 +836,6 @@ class SuperAdminControllerTest {
     @Test
     void checkIfTariffExistsTest() throws Exception {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(post(ubsLink + "/check-if-tariff-exists")
             .content(objectMapper.writeValueAsString(dto))
             .contentType(MediaType.APPLICATION_JSON)
@@ -856,7 +847,7 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void setLimitsForTariffTest() {
         SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();
-        String requestJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestJSON = objectMapper.writeValueAsString(dto);
         mockMvc.perform(put(ubsLink + "/setTariffLimits/{tariffId}", 1L)
             .principal(principal)
             .content(requestJSON)
@@ -871,7 +862,7 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void setLimitsForTariffThrowBadRequestException() {
         SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();
-        String requestJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestJSON = objectMapper.writeValueAsString(dto);
 
         doThrow(new BadRequestException(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY))
             .when(superAdminService).setTariffLimits(anyLong(), any(SetTariffLimitsDto.class));
@@ -893,7 +884,7 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void setLimitsForTariffThrowNotFoundException() {
         SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();
-        String requestJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestJSON = objectMapper.writeValueAsString(dto);
 
         doThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L))
             .when(superAdminService).setTariffLimits(anyLong(), any(SetTariffLimitsDto.class));
