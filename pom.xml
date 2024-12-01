@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.7.RELEASE</version>
+        <version>3.2.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.greencity</groupId>
@@ -23,39 +23,42 @@
 
     <properties>
         <!-- SYSTEM -->
-        <java.version>11</java.version>
+        <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- DEPENDENCIES -->
-        <junit-jupiter.version>5.7.0</junit-jupiter.version>
-        <mockito-junit-jupiter.version>4.0.0</mockito-junit-jupiter.version>
-        <mockito-core.version>4.0.0</mockito-core.version>
-        <modelmapper.version>2.3.5</modelmapper.version>
-        <spring-cloud-openfeign.version>2.1.5.RELEASE</spring-cloud-openfeign.version>
-        <checkstyle-maven-plugin.version>3.1.0</checkstyle-maven-plugin.version>
-        <telegram.version>5.0.1</telegram.version>
-        <test.containers.version>1.15.1</test.containers.version>
-        <swagger.version>2.9.2</swagger.version>
-        <jjwt.version>0.9.1</jjwt.version>
-        <liquibase.version>3.8.4</liquibase.version>
+
+        <!-- testing -->
+        <junit-jupiter.version>5.11.3</junit-jupiter.version>
+        <mockito-core.version>5.14.2</mockito-core.version>
+        <mockito-junit-jupiter.version>${mockito-core.version}</mockito-junit-jupiter.version>
+        <test.containers.version>1.20.4</test.containers.version>
+        <assertj.core.version>3.26.3</assertj.core.version>
+
+        <modelmapper.version>3.2.1</modelmapper.version>
+        <spring.cloud.release.train>2023.0.4</spring.cloud.release.train>
+<!--        <telegram.version>5.0.1</telegram.version>-->
+        <jjwt.version>0.12.6</jjwt.version>
         <google-guava.version>33.0.0-jre</google-guava.version>
-        <springfox.bean.validators.version>2.9.2</springfox.bean.validators.version>
+        <springdoc.openapi.version>2.5.0</springdoc.openapi.version>
+        <spring.plugin.core.version>3.0.0</spring.plugin.core.version>
         <libphonenumber.version>8.12.24</libphonenumber.version>
         <!-- check actual version on git account google-maps api for java -->
         <google.maps.version>2.0.0</google.maps.version>
-        <slf4.version>1.7.25</slf4.version>
-        <telegrambot.version>5.4.0.1</telegrambot.version>
+        <slf4j.version>2.0.16</slf4j.version>
+        <telegrambot.version>6.9.7.1</telegrambot.version>
         <feign-core.version>11.8</feign-core.version>
-        <postgresql.version>42.6.0</postgresql.version>
-        <json.version>20180813</json.version>
-        <assertj.core.version>3.13.2</assertj.core.version>
-        <telegrambot.version>5.4.0.1</telegrambot.version>
+        <postgresql.version>42.7.4</postgresql.version>
+        <json.version>20240303</json.version>
         <viberbot.version>1.0.11</viberbot.version>
         <jna.version>4.5.2</jna.version>
         <jsoup.version>1.13.1</jsoup.version>
-        <azure.storage.blob.version>12.7.0</azure.storage.blob.version>
+        <azure.storage.blob.version>12.29.0</azure.storage.blob.version>
         <liqpay-sdk.version>0.8-SNAPSHOT</liqpay-sdk.version>
+        <lombok.version>1.18.36</lombok.version>
+        <jackson.version>2.18.2</jackson.version>
+        <spring.cloud.netflix.hystrix.version>2.2.10.RELEASE</spring.cloud.netflix.hystrix.version>
 
         <apache.commons.version>3.10</apache.commons.version>
         <commons-fileupload.version>1.3</commons-fileupload.version>
@@ -65,11 +68,14 @@
         <commons-codec.version>1.15</commons-codec.version>
 
         <!-- PLUGINS -->
-        <maven.formatter.version>2.13.0</maven.formatter.version>
-        <maven.surefire.version>2.22.2</maven.surefire.version>
-        <jacoco.version>0.8.6</jacoco.version>
-        <spring.boot.plugin.version>2.3.3.RELEASE</spring.boot.plugin.version>
+        <maven.formatter.version>2.24.1</maven.formatter.version>
+        <maven.surefire.version>3.5.2</maven.surefire.version>
+        <maven.checkstyle.version>3.1.0</maven.checkstyle.version>
+        <maven.compiler.version>3.13.0</maven.compiler.version>
+        <jacoco.version>0.8.12</jacoco.version>
+        <spring.boot.plugin.version>3.4.0</spring.boot.plugin.version>
         <azure.webapp.plugin.version>1.9.0</azure.webapp.plugin.version>
+        <liquibase.plugin.version>4.30.0</liquibase.plugin.version>
 
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
@@ -80,17 +86,13 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- liquibase -->
+            <!-- spring cloud BOM -->
             <dependency>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <version>${liquibase.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>junit</groupId>
-                        <artifactId>junit</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud.release.train}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- other modules -->
@@ -115,19 +117,14 @@
 
             <!-- swagger -->
             <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${swagger.version}</version>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.openapi.version}</version>
             </dependency>
+
             <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-bean-validators</artifactId>
-                <version>${springfox.bean.validators.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
             </dependency>
 
             <!-- jwt -->
@@ -144,13 +141,44 @@
                 <version>${json.version}</version>
                 <scope>compile</scope>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- XML -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
 
             <!-- mapper -->
             <dependency>
                 <groupId>org.modelmapper</groupId>
                 <artifactId>modelmapper</artifactId>
                 <version>${modelmapper.version}</version>
-                <scope>compile</scope>
             </dependency>
 
             <!-- tests -->
@@ -190,6 +218,12 @@
                 <groupId>org.telegram</groupId>
                 <artifactId>telegrambots-spring-boot-starter</artifactId>
                 <version>${telegrambot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.module</groupId>
+                        <artifactId>jackson-module-jaxb-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.viber</groupId>
@@ -291,35 +325,23 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>${slf4.version}</version>
+                <version>${slf4j.version}</version>
             </dependency>
 
-            <!-- feign -->
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-openfeign-core</artifactId>
-                <version>${spring-cloud-openfeign.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-starter-openfeign</artifactId>
-                <version>${spring-cloud-openfeign.version}</version>
-            </dependency>
+            <!-- netflix-hystrix -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
-                <version>${spring-cloud-openfeign.version}</version>
+                <version>${spring.cloud.netflix.hystrix.version}</version>
             </dependency>
+
             <dependency>
-                <groupId>io.github.openfeign</groupId>
-                <artifactId>feign-core</artifactId>
-                <version>${feign-core.version}</version>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>compile</scope>
             </dependency>
-            <dependency>
-                <groupId>io.github.openfeign</groupId>
-                <artifactId>feign-hystrix</artifactId>
-                <version>${feign-core.version}</version>
-            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -358,6 +380,12 @@
                             </resources>
                         </deployment>
                     </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.liquibase</groupId>
+                    <artifactId>liquibase-maven-plugin</artifactId>
+                    <version>${liquibase.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -398,6 +426,7 @@
                 <version>${maven.formatter.version}</version>
                 <executions>
                     <execution>
+                        <phase>validate</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>
@@ -410,7 +439,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${checkstyle-maven-plugin.version}</version>
+                <version>${maven.checkstyle.version}</version>
                 <executions>
                     <execution>
                         <id>check</id>
@@ -422,6 +451,20 @@
                 </executions>
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.version}</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>
