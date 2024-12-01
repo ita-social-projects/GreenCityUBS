@@ -3,7 +3,7 @@ package greencity.entity.telegram;
 import greencity.entity.user.User;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Data

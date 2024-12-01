@@ -9,7 +9,7 @@ import greencity.entity.order.TariffsInfo;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 import java.util.Set;
 

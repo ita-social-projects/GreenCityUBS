@@ -39,6 +39,7 @@ import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -63,9 +64,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final OrderRepository orderRepository;
     private final ViolationRepository violationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
-    @Autowired
-    @Qualifier("kyivZonedClock")
-    private Clock clock;
+    private final Clock clock;
     private final List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
     @Autowired

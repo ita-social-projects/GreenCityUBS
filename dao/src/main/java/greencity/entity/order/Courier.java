@@ -4,7 +4,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.enums.CourierStatus;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 

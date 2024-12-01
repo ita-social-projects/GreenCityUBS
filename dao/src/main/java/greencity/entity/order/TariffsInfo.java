@@ -7,7 +7,7 @@ import greencity.enums.CourierLimit;
 import greencity.enums.TariffStatus;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;

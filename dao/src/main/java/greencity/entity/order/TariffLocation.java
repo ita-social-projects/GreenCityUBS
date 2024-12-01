@@ -4,7 +4,7 @@ import greencity.enums.LocationStatus;
 import greencity.entity.user.Location;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Builder
 @Entity

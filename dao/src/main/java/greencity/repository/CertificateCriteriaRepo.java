@@ -8,12 +8,12 @@ import lombok.ToString;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,7 +31,7 @@ public class CertificateCriteriaRepo {
 
     /**
      * Constructor.
-     * 
+     *
      * @author Sikhovskiy Rostyslav
      */
     public CertificateCriteriaRepo(EntityManager entityManager) {
@@ -41,7 +41,7 @@ public class CertificateCriteriaRepo {
 
     /**
      * Method for finding certificates with some criteria.
-     * 
+     *
      * @author Sikhovskiy Rostyslav
      * @return Pages of certificates with filtering and sorting data
      */

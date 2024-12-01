@@ -5,8 +5,8 @@ import greencity.entity.user.Location;
 import greencity.enums.AddressStatus;
 import lombok.*;
 
-import javax.persistence.*;
-import javax.validation.constraints.Size;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @NoArgsConstructor

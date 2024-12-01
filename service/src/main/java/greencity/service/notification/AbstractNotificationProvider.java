@@ -12,7 +12,7 @@ import greencity.repository.NotificationTemplateRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 @RequiredArgsConstructor
 @Getter
@@ -30,7 +30,7 @@ public abstract class AbstractNotificationProvider {
 
     /**
      * Checks whether the user has this notification provider enabled.
-     * 
+     *
      * @param user {@link User}
      * @return {@code true} if the user has this notification provider enabled,
      *         {@code false} otherwise

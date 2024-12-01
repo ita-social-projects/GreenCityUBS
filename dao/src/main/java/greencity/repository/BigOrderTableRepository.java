@@ -13,8 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +46,7 @@ public class BigOrderTableRepository {
     /**
      * Method returns Page of BigOrderTableViews with orders and additional info
      * related to order.
-     * 
+     *
      * @return Page
      * @author Kuzbyt Maksym
      */

@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AddingPositionDtoTest {
     void nameRegex(String name, boolean validates) throws NoSuchFieldException {
         Field field = AddingPositionDto.class.getDeclaredField("name");
-        javax.validation.constraints.Pattern[] annotations =
-            field.getAnnotationsByType(javax.validation.constraints.Pattern.class);
+        jakarta.validation.constraints.Pattern[] annotations =
+            field.getAnnotationsByType(jakarta.validation.constraints.Pattern.class);
         assertEquals(name.matches(annotations[0].regexp()), validates);
     }
 
@@ -32,8 +32,8 @@ class AddingPositionDtoTest {
 
     void nameEnRegex(String nameEn, boolean validates) throws NoSuchFieldException {
         Field field = AddingPositionDto.class.getDeclaredField("nameEn");
-        javax.validation.constraints.Pattern[] annotations =
-            field.getAnnotationsByType(javax.validation.constraints.Pattern.class);
+        jakarta.validation.constraints.Pattern[] annotations =
+            field.getAnnotationsByType(jakarta.validation.constraints.Pattern.class);
         assertEquals(nameEn.matches(annotations[0].regexp()), validates);
     }
 

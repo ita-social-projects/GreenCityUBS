@@ -2,8 +2,8 @@ package greencity.entity.parameters;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.*;
 
 @Entity
 @Data

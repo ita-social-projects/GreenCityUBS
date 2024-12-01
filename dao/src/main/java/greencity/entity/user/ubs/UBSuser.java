@@ -4,7 +4,7 @@ import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 
 @NoArgsConstructor

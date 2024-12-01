@@ -3,7 +3,7 @@ package greencity.entity.notifications;
 import greencity.enums.*;
 import lombok.*;
 import lombok.experimental.Accessors;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 

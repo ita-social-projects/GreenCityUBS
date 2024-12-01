@@ -12,6 +12,7 @@ import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @param request the current request.
      * @return a {@code ResponseEntity} message.
      */
-    @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
         HttpHeaders headers, HttpStatus status,
         WebRequest request) {
@@ -75,7 +75,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 
-    @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
         HttpHeaders headers, HttpStatus status,
         WebRequest request) {
@@ -88,7 +87,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private Map<String, Object> getErrorAttributes(WebRequest webRequest) {
-        return new HashMap<>(errorAttributes.getErrorAttributes(webRequest, true));
+        return new HashMap<>(errorAttributes.getErrorAttributes(webRequest, ErrorAttributeOptions.defaults()));
     }
 
     /**

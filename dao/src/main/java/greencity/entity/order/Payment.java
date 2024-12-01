@@ -4,7 +4,7 @@ import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentType;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Data

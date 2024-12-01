@@ -5,9 +5,9 @@ import greencity.entity.user.Violation;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import java.util.List;
 
 import static java.util.Objects.nonNull;

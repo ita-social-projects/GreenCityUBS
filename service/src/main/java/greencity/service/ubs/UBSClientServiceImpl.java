@@ -127,8 +127,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import javax.persistence.EntityNotFoundException;
-import javax.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -1673,7 +1673,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order, long sumToPayInCoins) {
         if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
             Set<Certificate> certificates =
-                certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+                certificateRepository.findAllByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
                     CertificateStatus.ACTIVE);
             if (certificates.isEmpty()) {
                 throw new NotFoundException(CERTIFICATE_NOT_FOUND);

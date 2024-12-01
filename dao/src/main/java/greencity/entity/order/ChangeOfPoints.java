@@ -3,7 +3,7 @@ package greencity.entity.order;
 import greencity.entity.user.User;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
