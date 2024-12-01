@@ -48,12 +48,14 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) {
         String email = Jwts.parser()
             .setSigningKey(jwtTool.getAccessTokenKey())
+            .build()
             .parseClaimsJws(authentication.getName())
             .getBody()
             .getSubject();
         @SuppressWarnings({"unchecked, rawtype"})
         List<String> role = (List<String>) Jwts.parser()
             .setSigningKey(jwtTool.getAccessTokenKey())
+            .build()
             .parseClaimsJws(authentication.getName())
             .getBody()
             .get("role");

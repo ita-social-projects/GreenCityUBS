@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,7 +60,8 @@ class JwtToolTest {
         String accessToken = jwtTool.createAccessToken(email, ttl);
         assertNotNull(accessToken);
 
-        Claims claims = Jwts.parser().setSigningKey(jwtTool.getAccessTokenKey()).parseClaimsJws(accessToken).getBody();
+        Claims claims =
+            Jwts.parser().setSigningKey(jwtTool.getAccessTokenKey()).build().parseClaimsJws(accessToken).getPayload();
 
         // Verify the subject (email) claim
         assertEquals(email, claims.getSubject());

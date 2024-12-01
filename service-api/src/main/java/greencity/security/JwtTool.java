@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -60,16 +60,15 @@ public class JwtTool {
      * @param ttl   is token time to live.
      */
     public String createAccessToken(String email, int ttl) {
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("role", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
         Date now = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
         calendar.add(Calendar.MINUTE, ttl);
         return Jwts.builder()
-            .setClaims(claims)
-            .setIssuedAt(now)
-            .setExpiration(calendar.getTime())
+            .subject(email)
+            .claim("role", Arrays.asList("ROLE_USER", "ROLE_ADMIN"))
+            .issuedAt(now)
+            .expiration(calendar.getTime())
             .signWith(SignatureAlgorithm.HS256, accessTokenKey)
             .compact();
     }
@@ -78,11 +77,12 @@ public class JwtTool {
      * Method for getting employee authorities from access token.
      *
      */
+    @SuppressWarnings("unchecked")
     public List<String> getAuthoritiesFromToken(String accessToken) {
         return (List<String>) Jwts.parser()
-            .setSigningKey(getAccessTokenKey())
-            .parseClaimsJws(accessToken)
-            .getBody()
+            .setSigningKey(getAccessTokenKey()).build()
+            .parseSignedClaims(accessToken)
+            .getPayload()
             .get("employee_authorities");
     }
 }
