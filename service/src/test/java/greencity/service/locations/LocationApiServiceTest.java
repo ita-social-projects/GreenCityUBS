@@ -96,7 +96,7 @@ class LocationApiServiceTest {
     private void respond(UriComponentsBuilder builder, List<Map<String, Object>> list) {
         when(restTemplate.exchange(eq(builder.build().encode().toUri()), eq(HttpMethod.GET), eq(null),
             any(ParameterizedTypeReference.class)))
-                .thenReturn(prepareResponseEntity(list));
+            .thenReturn(prepareResponseEntity(list));
     }
 
     ResponseEntity<Map> prepareResponseEntity(List<Map<String, Object>> results) {

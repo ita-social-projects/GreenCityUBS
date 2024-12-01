@@ -335,7 +335,7 @@ class NotificationServiceImplTest {
 
             when(userNotificationRepository.getUserIdByDateOfLastNotificationAndNotificationType(
                 LocalDate.now(clock).minusMonths(2L), NotificationType.LETS_STAY_CONNECTED.toString()))
-                    .thenReturn(List.of(11L, 22L));
+                .thenReturn(List.of(11L, 22L));
             when(userRepository.getInactiveUsersByDateOfLastOrder(LocalDate.now(clock).minusMonths(2L)))
                 .thenReturn(List.of(user, user1));
             when(userNotificationRepository.save(any())).thenReturn(notification);

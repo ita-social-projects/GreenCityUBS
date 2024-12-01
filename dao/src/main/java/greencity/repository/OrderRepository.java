@@ -212,7 +212,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method sets admin comment for order by order id.
-     * 
+     *
      * @param orderId      - order's ID
      * @param adminComment - admin comment to set
      */

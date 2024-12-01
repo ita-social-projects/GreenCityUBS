@@ -261,7 +261,7 @@ class SuperAdminServiceImplTest {
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService
             .getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag2())))
-                .thenReturn(ModelUtils.getAmount());
+            .thenReturn(ModelUtils.getAmount());
         when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
 
         superAdminService.deleteTariffService(1);
@@ -409,7 +409,7 @@ class SuperAdminServiceImplTest {
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
         when(orderBagService
             .getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag().setConfirmedQuantity(2))))
-                .thenReturn(ModelUtils.getAmount());
+            .thenReturn(ModelUtils.getAmount());
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 
@@ -445,7 +445,7 @@ class SuperAdminServiceImplTest {
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
         when(orderBagService.getActualBagsAmountForOrder(
             Arrays.asList(ModelUtils.getOrderBag().setExportedQuantity(2).setConfirmedQuantity(2))))
-                .thenReturn(ModelUtils.getAmount());
+            .thenReturn(ModelUtils.getAmount());
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 

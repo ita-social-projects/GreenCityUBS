@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 public interface BigOrderTableServiceView {
     /**
      * Method returns all order's data from big order table .
-     * 
+     *
      * @author Kuzbyt Maksym
      * @param orderPage      used to formed paging
      * @param searchCriteria used to formed filtering and searching

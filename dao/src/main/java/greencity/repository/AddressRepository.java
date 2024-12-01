@@ -95,7 +95,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
 
     /**
      * Finds first non-deleted {@link Address} associated with the given user ID.
-     * 
+     *
      * @param userId the ID of the user whose address is being searched for
      * @return an {@link Optional} containing the first {@link Address} record that
      *         matches the provided userId and has an address status other than

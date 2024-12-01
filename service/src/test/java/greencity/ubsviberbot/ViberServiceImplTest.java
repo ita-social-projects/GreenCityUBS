@@ -124,7 +124,7 @@ class ViberServiceImplTest {
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
-                    .thenReturn(Optional.of(template));
+            .thenReturn(Optional.of(template));
         when(viberClient.sendMessage(sendMessageToUserDto)).thenReturn(null);
 
         viberService.sendNotification(notification, MOBILE, 0L);
@@ -141,7 +141,7 @@ class ViberServiceImplTest {
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
-                    .thenReturn(Optional.of(template));
+            .thenReturn(Optional.of(template));
 
         viberService.sendNotification(notification, MOBILE, 0L);
 
@@ -162,7 +162,7 @@ class ViberServiceImplTest {
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
-                    .thenReturn(Optional.of(template));
+            .thenReturn(Optional.of(template));
         when(viberClient.sendMessage(any())).thenThrow(new RuntimeException());
 
         assertThrows(MessageWasNotSent.class, () -> viberService.sendNotification(notification, MOBILE, 0L));

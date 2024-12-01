@@ -281,7 +281,7 @@ public interface UBSManagementService {
 
     /**
      * This is method which is updates admin page info for order.
-     * 
+     *
      * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
      * @param order                   {@link Order}.
      * @param email                   {@link String}.
