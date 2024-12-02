@@ -2479,14 +2479,14 @@ class UBSClientServiceImplTest {
             .thenReturn(ModelUtils.getAmount());
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
-        when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+        when(certificateRepository.findAllByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
             CertificateStatus.ACTIVE)).thenReturn(Collections.emptySet());
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         assertThrows(NotFoundException.class, () -> ubsService.processOrderFondyClient(dto, "uuid"));
         verify(orderRepository).findById(1L);
         verify(userRepository).findUserByUuid("uuid");
-        verify(certificateRepository).findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+        verify(certificateRepository).findAllByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
             CertificateStatus.ACTIVE);
         verify(modelMapper).map(certificate, CertificateDto.class);
         verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
@@ -2526,7 +2526,7 @@ class UBSClientServiceImplTest {
         order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
-        when(certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+        when(certificateRepository.findAllByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
             CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
@@ -2537,7 +2537,7 @@ class UBSClientServiceImplTest {
 
         verify(orderRepository).findById(1L);
         verify(userRepository).findUserByUuid("uuid");
-        verify(certificateRepository).findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+        verify(certificateRepository).findAllByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
             CertificateStatus.ACTIVE);
         verify(modelMapper).map(certificate, CertificateDto.class);
         verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
