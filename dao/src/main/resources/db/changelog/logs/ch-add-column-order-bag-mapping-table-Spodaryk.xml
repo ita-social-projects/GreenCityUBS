@@ -10,7 +10,7 @@
         <dropPrimaryKey tableName="order_bag_mapping" constraintName="order_bag_mapping_pkey"/>
 
         <addColumn tableName="order_bag_mapping">
-            <column name="id" position="1" autoIncrement="true" type="bigint"/>
+            <column name="id" autoIncrement="true" type="bigint"/>
         </addColumn>
         <addColumn tableName="order_bag_mapping">
             <column name="capacity" type="int"/>
