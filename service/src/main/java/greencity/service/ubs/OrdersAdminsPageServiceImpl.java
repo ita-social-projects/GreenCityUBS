@@ -639,7 +639,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
                     throw new BadRequestException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
-
                 existedOrder.getEvents().add(Event.builder()
                     .order(existedOrder)
                     .eventDate(LocalDateTime.now())
