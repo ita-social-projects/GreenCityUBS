@@ -1,26 +1,30 @@
 package greencity.service.ubs.manager;
 
-import java.util.ArrayList;
-import java.util.List;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
+import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.table.CustomTableViewDto;
 import greencity.dto.user.UserVO;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.*;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
+import greencity.repository.BigOrderTableRepository;
+import greencity.repository.CustomTableViewRepo;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.TableColumnWidthForEmployeeRepository;
+import greencity.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
-import greencity.dto.order.BigOrderTableDTO;
-import greencity.dto.table.CustomTableViewDto;
-import greencity.entity.parameters.CustomTableView;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
-import lombok.AllArgsConstructor;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static java.util.Objects.nonNull;
 
@@ -86,11 +90,9 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     @Override
     public void changeIsFreezeStatus(String uuid, Boolean value) {
         Employee employeeByUuid = employeeRepository.findByUuid(uuid).orElse(null);
-
         if (nonNull(employeeByUuid)) {
             TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository
                 .findByEmployeeId(employeeByUuid.getId()).orElse(null);
-
             if (nonNull(tableByEmployeeId)) {
                 tableByEmployeeId.setIsTableFreeze(value);
                 tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
