@@ -3,6 +3,7 @@ package greencity.security.providers;
 import greencity.security.JwtTool;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.Assertions;
@@ -24,31 +25,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Yurii Koval
  */
 class JwtAuthenticationProviderTest {
-
-    enum Role {
+    private enum Role {
         ROLE_ADMIN
     }
 
-    private final Role expectedRole = Role.ROLE_ADMIN;
-
-    @Mock
-    JwtTool jwtTool;
+    private static final Role expectedRole = Role.ROLE_ADMIN;
 
     private JwtAuthenticationProvider jwtAuthenticationProvider;
     private static final String expectedEmail = "qqq@email.com";
-    private static final SecretKey secretKey = Jwts.SIG.HS256.key().build();
+    private static final SecretKey secretKey = Jwts.SIG.HS512.key().build();
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        JwtTool jwtTool = mock(JwtTool.class);
         jwtAuthenticationProvider = new JwtAuthenticationProvider(jwtTool);
 
         final String keyString = Encoders.BASE64.encode(secretKey.getEncoded());
@@ -67,6 +64,7 @@ class JwtAuthenticationProviderTest {
             accessToken,
             null);
         Authentication actual = jwtAuthenticationProvider.authenticate(authentication);
+
         assertEquals(expectedEmail, actual.getPrincipal());
         assertEquals(
             Stream.of(expectedRole)
@@ -86,9 +84,9 @@ class JwtAuthenticationProviderTest {
             .expiration(Date.from(Instant.now().minus(24, ChronoUnit.DAYS)))
             .claim("role", List.of(expectedRole)).compact();
         Authentication authentication = new UsernamePasswordAuthenticationToken(accessToken, null);
-        Assertions
-            .assertThrows(ExpiredJwtException.class,
-                () -> jwtAuthenticationProvider.authenticate(authentication));
+
+        assertThrows(ExpiredJwtException.class,
+            () -> jwtAuthenticationProvider.authenticate(authentication));
     }
 
     @Test
@@ -99,9 +97,9 @@ class JwtAuthenticationProviderTest {
                 + "U4Mzk3OTMsImV4cCI6MTU3NTg0MDY5M30"
                 + ".DYna1ycZd7eaUBrXKGzYvEMwcybe7l5YiliOR-LfyRw",
             null);
-        Assertions
-            .assertThrows(Exception.class,
-                () -> jwtAuthenticationProvider.authenticate(authentication));
+
+        assertThrows(MalformedJwtException.class,
+            () -> jwtAuthenticationProvider.authenticate(authentication));
     }
 
     @Test

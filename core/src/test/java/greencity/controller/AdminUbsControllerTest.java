@@ -24,6 +24,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static greencity.ModelUtils.getUuid;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class AdminUbsControllerTest {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private final String RANDOM_UUID = UUID.randomUUID().toString();
     private MockMvc mockMvc;
 
     @Mock
@@ -58,21 +61,20 @@ class AdminUbsControllerTest {
 
     @Test
     void getTableParameters() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
         mockMvc.perform(get(management + "/tableParams")
             .principal(principal))
             .andExpect(status().isOk());
-        verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf");
+        verify(ordersAdminsPageService).getParametersForOrdersTable(RANDOM_UUID);
     }
 
     @Test
     void saveNewValueFromOrdersTableTest() throws Exception {
         RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
         ChangeOrderResponseDTO changeOrderResponseDTO = ModelUtils.getChangeOrderResponseDTO();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(dto);
+        String json = OBJECT_MAPPER.writeValueAsString(dto);
 
-        when(ordersAdminsPageService.chooseOrdersDataSwitcher("35467585763t4sfgchjfuyetf", dto))
+        when(ordersAdminsPageService.chooseOrdersDataSwitcher(principal.getName(), dto))
             .thenReturn(changeOrderResponseDTO);
 
         mockMvc.perform(put(management + "/changingOrder")
@@ -81,15 +83,14 @@ class AdminUbsControllerTest {
             .content(json))
             .andExpect(status().isOk());
 
-        verify(ordersAdminsPageService).chooseOrdersDataSwitcher("35467585763t4sfgchjfuyetf", dto);
+        verify(ordersAdminsPageService).chooseOrdersDataSwitcher(principal.getName(), dto);
     }
 
     @Test
     void getAllOrdersForUserTest() throws Exception {
         List<Long> listOfOrdersId = List.of(1L);
         List<Long> unblockedOrdersId = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(listOfOrdersId);
+        String json = OBJECT_MAPPER.writeValueAsString(listOfOrdersId);
 
         when(ordersAdminsPageService.unblockOrder(null, listOfOrdersId)).thenReturn(unblockedOrdersId);
 
@@ -105,8 +106,7 @@ class AdminUbsControllerTest {
     @Test
     void blockOrdersTest() throws Exception {
         List<BlockedOrderDto> dto = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(dto);
+        String json = OBJECT_MAPPER.writeValueAsString(dto);
 
         when(ordersAdminsPageService.requestToBlockOrder(null, List.of())).thenReturn(dto);
 
@@ -121,7 +121,7 @@ class AdminUbsControllerTest {
 
     @Test
     void getColumnWidthForEmployeeTest() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
         when(ordersAdminsPageService.getColumnWidthForEmployee(anyString())).thenReturn(new ColumnWidthDto());
 
         mockMvc.perform(get(management + "/orderTableColumnsWidth")
@@ -132,9 +132,8 @@ class AdminUbsControllerTest {
     @Test
     void saveColumnWidthForEmployeeTest() throws Exception {
         ColumnWidthDto columnWidthDto = new ColumnWidthDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(columnWidthDto);
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        String json = OBJECT_MAPPER.writeValueAsString(columnWidthDto);
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
         doNothing().when(ordersAdminsPageService).saveColumnWidthForEmployee(any(ColumnWidthDto.class), anyString());
         mockMvc.perform(put(management + "/orderTableColumnsWidth")
             .principal(principal)

@@ -44,11 +44,12 @@ class ClientControllerTest {
     @InjectMocks
     ClientController clientController;
 
-    private Principal principal = getUuid();
+    private static final Principal PRINCIPAL = getUuid();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @BeforeEach
     void setup() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(clientController)
+        mockMvc = MockMvcBuilders.standaloneSetup(clientController)
             .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
             .build();
     }
@@ -59,22 +60,21 @@ class ClientControllerTest {
             .id(1)
             .amount(3)
             .build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(dto);
+        String responseJSON = OBJECT_MAPPER.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/" + 1L + makeOrderAgainLink)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService, times(1)).makeOrderAgain(new Locale("en"), 1L);
+        verify(ubsClientService, times(1)).makeOrderAgain(Locale.ENGLISH, 1L);
     }
 
     @Test
     void getOrderPaymentDetail() throws Exception {
         mockMvc.perform(get(ubsLink + getOrderPaymentDetailLink + 1L)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
@@ -83,8 +83,8 @@ class ClientControllerTest {
 
     @Test
     void getAllPointsForUserTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + getAllPointsForUser)
-            .principal(principal)
+        mockMvc.perform(get(ubsLink + getAllPointsForUser)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
@@ -97,43 +97,42 @@ class ClientControllerTest {
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
             .build();
 
-        this.mockMvc.perform(get(ubsLink + "/user-orders", 1)
-            .principal(principal)
+        mockMvc.perform(get(ubsLink + "/user-orders", 1)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
     @Test
     void getDataForOrderTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/user-order/{id}", 1)
-            .principal(principal)
+        mockMvc.perform(get(ubsLink + "/user-order/{id}", 1)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
     @Test
     void deleteOrderTest() throws Exception {
-        this.mockMvc.perform(delete(ubsLink + "/delete-order/{id}", 1)
-            .principal(principal)
+        mockMvc.perform(delete(ubsLink + "/delete-order/{id}", 1)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }
 
     @Test
     void processOrderFondy() throws Exception {
         OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String dtoJson = objectMapper.writeValueAsString(dto);
+        String dtoJson = OBJECT_MAPPER.writeValueAsString(dto);
 
-        this.mockMvc.perform(post(ubsLink + "/processOrderFondy")
+        mockMvc.perform(post(ubsLink + "/processOrderFondy")
             .contentType(MediaType.APPLICATION_JSON)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .content(dtoJson))
             .andExpect(status().isOk());
     }
 
     @Test
     void getUserBonusesTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/user-bonuses")
-            .principal(principal)).andExpect(status().isOk());
+        mockMvc.perform(get(ubsLink + "/user-bonuses")
+            .principal(PRINCIPAL)).andExpect(status().isOk());
     }
 }

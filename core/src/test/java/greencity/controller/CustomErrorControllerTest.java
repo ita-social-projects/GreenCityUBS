@@ -21,7 +21,7 @@ class CustomErrorControllerTest {
     HttpServletRequest request;
     @InjectMocks
     CustomErrorController customErrorController;
-    private static final String response = "NOT_FOUND";
+    private static final String RESPONSE = "NOT_FOUND";
 
     @Test
     void testHandleError() {
@@ -34,6 +34,6 @@ class CustomErrorControllerTest {
     void getErrorPathTest() {
         String expected = "/error";
         String actual = customErrorController.getErrorPath();
-        assertEquals(actual, expected);
+        assertEquals(expected, actual);
     }
 }

@@ -10,7 +10,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -56,6 +55,8 @@ class AccessTokenAuthenticationFilterTest {
 
     FilterChain chain = new MockFilterChain();
 
+    private static final String TOKEN = "SuperSecretAccessToken";
+
     @InjectMocks
     private AccessTokenAuthenticationFilter authenticationFilter;
 
@@ -89,11 +90,9 @@ class AccessTokenAuthenticationFilterTest {
 
     @Test
     void doFilterInternalTokenHasExpiredTest() throws IOException, ServletException {
-        String token = "SuperSecretAccessToken";
-
-        when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
+        when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(TOKEN);
         when(providerManager.authenticate(
-            new UsernamePasswordAuthenticationToken(token, null)))
+            new UsernamePasswordAuthenticationToken(TOKEN, null)))
             .thenThrow(ExpiredJwtException.class);
         authenticationFilter.doFilterInternal(request, response, chain);
 
@@ -101,14 +100,13 @@ class AccessTokenAuthenticationFilterTest {
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(providerManager.authenticate(
-            new UsernamePasswordAuthenticationToken(token, null)));
+            new UsernamePasswordAuthenticationToken(TOKEN, null)));
     }
 
     @Test
     @Disabled
     void doFilterInternalAccessDeniedTest() throws IOException, ServletException {
-        String token = "SuperSecretAccessToken";
-        when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
+        when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(TOKEN);
         when(providerManager.authenticate(any()))
             .thenReturn(new UsernamePasswordAuthenticationToken("test@mail.com", null));
         when(userRemoteClient.findNotDeactivatedByEmail("test@mail.com")).thenThrow(RuntimeException.class);

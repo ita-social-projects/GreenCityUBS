@@ -80,7 +80,8 @@ class ManagementEmployeeControllerTest {
     @InjectMocks
     ManagementEmployeeController controller;
 
-    private final Principal principal = getUuid();
+    private static final Principal PRINCIPAL = getUuid();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @BeforeEach
     void setup() {
@@ -98,8 +99,7 @@ class ManagementEmployeeControllerTest {
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
         dto.setEmployeeDto(employeeDto);
         dto.setTariffs(tariffs);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String dtoJson = objectMapper.writeValueAsString(dto);
+        String dtoJson = OBJECT_MAPPER.writeValueAsString(dto);
         MockMultipartFile jsonFile = new MockMultipartFile(
             "employee",
             "employee.json",
@@ -108,7 +108,7 @@ class ManagementEmployeeControllerTest {
         mockMvc.perform(
             multipart(UBS_LINK + SAVE_LINK)
                 .file(jsonFile)
-                .principal(principal)
+                .principal(PRINCIPAL)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isCreated());
         verify(service).save(dto, null);
@@ -118,7 +118,7 @@ class ManagementEmployeeControllerTest {
     void saveBadRequestTest() throws Exception {
         mockMvc.perform(post(UBS_LINK + SAVE_LINK)
             .content("{}")
-            .principal(principal)
+            .principal(PRINCIPAL)
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
@@ -153,8 +153,7 @@ class ManagementEmployeeControllerTest {
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
         dto.setEmployeeDto(employeeDto);
         dto.setTariffs(tariffs);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String dtoJson = objectMapper.writeValueAsString(dto);
+        String dtoJson = OBJECT_MAPPER.writeValueAsString(dto);
 
         MockMultipartFile jsonFile = new MockMultipartFile(
             "employee",
@@ -169,7 +168,7 @@ class ManagementEmployeeControllerTest {
         });
 
         mockMvc.perform(builder.file(jsonFile)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isOk());
         verify(service, times(1)).update(dto, null);
@@ -180,7 +179,7 @@ class ManagementEmployeeControllerTest {
         doNothing().when(service).deactivateEmployee(1L);
 
         mockMvc.perform(put(UBS_LINK + DELETE_LINK + "/" + 1)
-            .principal(principal)).andExpect(status().isOk());
+            .principal(PRINCIPAL)).andExpect(status().isOk());
         verify(service, times(1)).deactivateEmployee(1L);
     }
 
@@ -189,21 +188,21 @@ class ManagementEmployeeControllerTest {
         doNothing().when(service).activateEmployee(1L);
 
         mockMvc.perform(put(UBS_LINK + ACTIVATE_LINK + "/" + 1)
-            .principal(principal)).andExpect(status().isOk());
+            .principal(PRINCIPAL)).andExpect(status().isOk());
         verify(service, times(1)).activateEmployee(1L);
     }
 
     @Test
     void deleteEmployeeImage() throws Exception {
         mockMvc.perform(delete(UBS_LINK + DELETE_IMAGE_LINK + 1)
-            .principal(principal)).andExpect(status().isOk());
+            .principal(PRINCIPAL)).andExpect(status().isOk());
         verify(service, atLeastOnce()).deleteEmployeeImage(1L);
     }
 
     @Test
     void getAllPosition() throws Exception {
         mockMvc.perform(get(UBS_LINK + GET_ALL_POSITIONS_LINK)
-            .principal(principal)).andExpect(status().isOk());
+            .principal(PRINCIPAL)).andExpect(status().isOk());
         verify(service, times(1)).getAllPositions();
     }
 
@@ -246,11 +245,10 @@ class ManagementEmployeeControllerTest {
     @Test
     void editAuthorities() throws Exception {
         UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(dto);
+        String json = OBJECT_MAPPER.writeValueAsString(dto);
 
         mockMvc.perform(put(UBS_LINK + "/edit-authorities")
-            .principal(principal)
+            .principal(PRINCIPAL)
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -261,7 +259,7 @@ class ManagementEmployeeControllerTest {
     @Test
     void getTariffInfoForEmployeeTest() throws Exception {
         mockMvc.perform(get(UBS_LINK + GET_ALL_TARIFFS)
-            .principal(principal)).andExpect(status().isOk());
+            .principal(PRINCIPAL)).andExpect(status().isOk());
         verify(service, times(1)).getTariffsForEmployee();
     }
 

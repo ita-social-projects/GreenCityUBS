@@ -42,7 +42,8 @@ class NotificationControllerTest {
     @InjectMocks
     NotificationController notificationController;
 
-    private final Principal principal = getUuid();
+    private static final Principal PRINCIPAL = getUuid();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @BeforeEach
     void setup() {
@@ -54,11 +55,10 @@ class NotificationControllerTest {
     @Test
     void getNotification() throws Exception {
         NotificationDto dto = getNotificationDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(List.of(dto));
+        String responseJSON = OBJECT_MAPPER.writeValueAsString(List.of(dto));
 
         mockMvc.perform(post(notificationLink + "/" + 1L + "?lang=ua")
-            .principal(principal)
+            .principal(PRINCIPAL)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -68,7 +68,7 @@ class NotificationControllerTest {
     @Test
     void getNotificationsForCurrentUser() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get(notificationLink)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -76,7 +76,7 @@ class NotificationControllerTest {
     @Test
     void getUnreadenNotificationsTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get(notificationLink + "/quantityUnreadenNotifications")
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }

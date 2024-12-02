@@ -23,8 +23,16 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
     /**
      * Service for getting districts in city.
      */
-    @Autowired
-    private LocationApiService locationApiService;
+    private final LocationApiService locationApiService;
+
+    /**
+     * Constructor.
+     *
+     * @param locationApiService autowired {@link LocationApiService} object
+     */
+    public AddressToAddressDtoMapper(LocationApiService locationApiService) {
+        this.locationApiService = locationApiService;
+    }
 
     /**
      * Method convert {@link Address} to {@link AddressDto}.

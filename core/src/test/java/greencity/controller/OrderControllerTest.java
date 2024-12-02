@@ -13,7 +13,6 @@ import greencity.dto.order.FondyOrderResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
-import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.user.UBSuserNotFoundException;
@@ -37,11 +36,11 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.util.NestedServletException;
 
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getRedirectionConfig;
@@ -67,8 +66,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class OrderControllerTest {
-    private static final String ubsLink = "/ubs";
-
     private MockMvc mockMvc;
 
     @Mock
@@ -92,7 +89,11 @@ class OrderControllerTest {
     @Mock
     private UBSuserRepository ubSuserRepository;
 
-    private Principal principal = getPrincipal();
+    private static final String ubsLink = "/ubs";
+    private static final String RANDOM_UUID = UUID.randomUUID().toString();
+
+    private static final Principal PRINCIPAL = getPrincipal();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @BeforeEach
     void setup() {
@@ -104,10 +105,8 @@ class OrderControllerTest {
 
     @Test
     void getCurrentUserPointsByTariffAndLocationId() throws Exception {
-        ;
-
         mockMvc.perform(get(ubsLink + "/order-details-for-tariff")
-            .principal(principal)
+            .principal(PRINCIPAL)
             .param("tariffId", "1")
             .param("locationId", "1")
             .contentType(MediaType.APPLICATION_JSON))
@@ -119,15 +118,15 @@ class OrderControllerTest {
     @Test
     void getCurrentUserPointsByOrderId() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString())))
-            .thenReturn("35467585763t4sfgchjfuyetf");
+            .thenReturn(RANDOM_UUID);
 
         mockMvc.perform(get(ubsLink + "/details-for-existing-order/{orderId}", "1")
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageDataByOrderId("35467585763t4sfgchjfuyetf", 1L);
+        verify(ubsClientService).getFirstPageDataByOrderId(RANDOM_UUID, 1L);
     }
 
     @Test
@@ -139,41 +138,38 @@ class OrderControllerTest {
 
     @Test
     void getUBSusers() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
 
         mockMvc.perform(get(ubsLink + "/personal-data")
-            .principal(principal))
+            .principal(PRINCIPAL))
             .andExpect(status().isOk());
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getSecondPageData("35467585763t4sfgchjfuyetf");
+        verify(ubsClientService).getSecondPageData(RANDOM_UUID);
     }
 
     @Test
     void processOrder() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
         OrderResponseDto dto = ModelUtils.getOrderResponseDto();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
+        String orderResponseDtoJSON = OBJECT_MAPPER.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/processOrder")
             .content(orderResponseDtoJSON)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).saveFullOrderToDB(any(), eq("35467585763t4sfgchjfuyetf"), eq(null));
+        verify(ubsClientService).saveFullOrderToDB(any(), eq(RANDOM_UUID), eq(null));
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
     }
 
     @Test
     void processOrderId() throws Exception {
         Long orderId = 1L;
-        String uuid = "35467585763t4sfgchjfuyetf";
-        ObjectMapper objectMapper = new ObjectMapper();
         OrderResponseDto dto = ModelUtils.getOrderResponseDto();
-        String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
+        String orderResponseDtoJSON = OBJECT_MAPPER.writeValueAsString(dto);
 
         OrderDetailStatusDto orderDetailStatusDto = getUnpaidOrderDetailStatusDto();
         orderDetailStatusDto.setOrderStatus(OrderStatus.FORMED.name());
@@ -182,16 +178,16 @@ class OrderControllerTest {
             .orderId(orderId)
             .link("Link")
             .build();
-        String resultJson = objectMapper.writeValueAsString(resultObject);
+        String resultJson = OBJECT_MAPPER.writeValueAsString(resultObject);
 
-        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn(uuid);
+        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn(RANDOM_UUID);
         when(ubsManagementService.getOrderDetailStatus(orderId)).thenReturn(orderDetailStatusDto);
         when(ubsClientService.saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong()))
             .thenReturn(resultObject);
 
         mockMvc.perform(post(ubsLink + "/processOrder/{id}", orderId)
             .content(orderResponseDtoJSON)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -207,15 +203,14 @@ class OrderControllerTest {
         OrderResponseDto dto = ModelUtils.getOrderResponseDto();
         OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getPaidOrderDetailStatusDto();
 
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
         when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
+        String orderResponseDtoJSON = OBJECT_MAPPER.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/processOrder/{id}", 1L)
             .content(orderResponseDtoJSON)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
     }
@@ -230,15 +225,14 @@ class OrderControllerTest {
         OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getPaidOrderDetailStatusDto();
         orderDetailStatusDto.setOrderStatus(orderStatus.name());
 
-        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn(RANDOM_UUID);
         when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
+        String orderResponseDtoJSON = OBJECT_MAPPER.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/processOrder/{id}", orderId)
             .content(orderResponseDtoJSON)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
 
@@ -252,7 +246,7 @@ class OrderControllerTest {
         UserInfoDto userInfoDto = getUserInfoDto();
         when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, null)).thenReturn(userInfoDto);
         mockMvc.perform(get(ubsLink + "/user-info" + "/{orderId}", 1L)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
@@ -264,11 +258,10 @@ class OrderControllerTest {
         UbsCustomersDto ubsCustomersDto = getUbsCustomersDto();
         UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
         when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null)).thenReturn(ubsCustomersDto);
-        ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(put(ubsLink + "/update-recipients-data")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
-            .principal(principal))
+            .content(OBJECT_MAPPER.writeValueAsString(ubsCustomersDtoUpdate))
+            .principal(PRINCIPAL))
             .andExpect(status().isOk());
 
         verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null);
@@ -276,7 +269,6 @@ class OrderControllerTest {
 
     @Test
     void updatesRecipientsInfoWithOutUser() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
         UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
 
         when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null))
@@ -286,8 +278,8 @@ class OrderControllerTest {
             assertThrows(ServletException.class, () -> {
                 mockMvc.perform(put(ubsLink + "/update-recipients-data")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
-                    .principal(principal))
+                    .content(OBJECT_MAPPER.writeValueAsString(ubsCustomersDtoUpdate))
+                    .principal(PRINCIPAL))
                     .andExpect(status().isBadRequest());
             });
 
@@ -298,19 +290,19 @@ class OrderControllerTest {
     @Test
     void getsCancellationReason() throws Exception {
         OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
         when(ubsClientService.getOrderCancellationReason(anyLong(), anyString())).thenReturn(dto);
 
         mockMvc.perform(get(ubsLink + "/order/{id}/cancellation", 1L)
-            .principal(principal))
+            .principal(PRINCIPAL))
             .andExpect(status().isOk());
-        verify(ubsClientService).getOrderCancellationReason(1L, "35467585763t4sfgchjfuyetf");
+        verify(ubsClientService).getOrderCancellationReason(1L, RANDOM_UUID);
     }
 
     @Test
     void testGetOrderHistoryByOrderId() throws Exception {
         mockMvc.perform(get(ubsLink + "/order_history" + "/{orderId}", 1L)
-            .principal(principal))
+            .principal(PRINCIPAL))
             .andExpect(status().isOk());
 
         verify(ubsClientService, times(1))
@@ -320,7 +312,7 @@ class OrderControllerTest {
     @Test
     void getFondyStatusPayment2() throws Exception {
         mockMvc.perform(get(ubsLink + "/getFondyStatus/{orderId}", 1)
-            .principal(principal))
+            .principal(PRINCIPAL))
             .andExpect(status().isOk());
     }
 
@@ -339,7 +331,7 @@ class OrderControllerTest {
     @SneakyThrows
     void getAllActiveLocationsByCourierIdTest() {
         mockMvc.perform(get(ubsLink + "/locations/{courierId}", 1L)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
@@ -353,7 +345,7 @@ class OrderControllerTest {
     @SneakyThrows
     void getTariffForOrder() {
         mockMvc.perform(get(ubsLink + "/orders/1/tariff")
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
@@ -379,7 +371,7 @@ class OrderControllerTest {
         mockMvc.perform(get(ubsLink + "/locations")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
+            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(locationsDtoList)));
 
         verify(ubsClientService).getAllLocations();
     }
@@ -407,7 +399,7 @@ class OrderControllerTest {
         mockMvc.perform(get(ubsLink + "/locationsByCourier/{courierId}", courierId)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
+            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(locationsDtoList)));
 
         verify(ubsClientService).getAllLocationsByCourierId(courierId);
     }

@@ -55,8 +55,9 @@ class UserProfileControllerTest {
     @Mock
     private Validator mockValidator;
 
-    private Principal principal = getPrincipal();
-    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+    private static final Principal PRINCIPAL = getPrincipal();
+    private static final ErrorAttributes ERROR_ATTRIBUTES = new DefaultErrorAttributes();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @BeforeEach
     void setup() {
@@ -64,7 +65,7 @@ class UserProfileControllerTest {
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRemoteClient))
-            .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
+            .setControllerAdvice(new CustomExceptionHandler(ERROR_ATTRIBUTES))
             .setValidator(mockValidator)
             .build();
     }
@@ -75,12 +76,11 @@ class UserProfileControllerTest {
         List<AddressDto> addressDto = ModelUtils.addressDto();
         userProfileDto.setAddressDto(addressDto);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(userProfileDto);
+        String responseJSON = OBJECT_MAPPER.writeValueAsString(userProfileDto);
 
         mockMvc.perform(put(AppConstant.ubsLink + "/user/update")
             .content(responseJSON)
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
@@ -88,7 +88,7 @@ class UserProfileControllerTest {
     @Test
     void getProfileData() throws Exception {
         mockMvc.perform(get(AppConstant.ubsLink + "/user/getUserProfile")
-            .principal(principal)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
@@ -102,8 +102,7 @@ class UserProfileControllerTest {
 
     @Test
     void createUserProfile() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String content = objectMapper.writeValueAsString(getUserProfileCreateDto());
+        String content = OBJECT_MAPPER.writeValueAsString(getUserProfileCreateDto());
         mockMvc.perform(post(AppConstant.ubsLink + "/user/create")
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))

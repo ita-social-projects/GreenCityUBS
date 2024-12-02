@@ -3,12 +3,15 @@ package greencity.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Encoders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import jakarta.servlet.http.HttpServletRequest;
+
+import javax.crypto.SecretKey;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,16 +28,18 @@ class JwtToolTest {
     private HttpServletRequest mockHttpServletRequest;
 
     private JwtTool jwtTool;
+    private static final SecretKey secretKey = Jwts.SIG.HS512.key().build();
+    private static final String keyString = Encoders.BASE64.encode(secretKey.getEncoded());
 
     @BeforeEach
     public void setup() {
-        jwtTool = new JwtTool("testAccessTokenKey");
+        jwtTool = new JwtTool(keyString);
     }
 
     @Test
     void testGetAccessTokenKey() {
         String accessTokenKey = jwtTool.getAccessTokenKey();
-        assertEquals("testAccessTokenKey", accessTokenKey);
+        assertEquals(keyString, accessTokenKey);
     }
 
     @Test
@@ -82,9 +87,9 @@ class JwtToolTest {
     @Test
     void testGetAuthoritiesFromToken() {
         String accessToken = Jwts.builder()
-            .setSubject("test@example.com")
+            .subject("test@example.com")
             .claim("employee_authorities", Arrays.asList("ROLE_USER", "ROLE_ADMIN"))
-            .signWith(SignatureAlgorithm.HS256, "testAccessTokenKey")
+            .signWith(secretKey)
             .compact();
 
         List<String> authorities = jwtTool.getAuthoritiesFromToken(accessToken);
