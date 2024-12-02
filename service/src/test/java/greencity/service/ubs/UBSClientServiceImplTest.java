@@ -1801,7 +1801,7 @@ class UBSClientServiceImplTest {
 
         mockedContextHolder.verify(SecurityContextHolder::getContext);
         verify(securityContext).getAuthentication();
-        verify(authentication).getAuthorities();
+        verify(authentication, times(2)).getAuthorities();
 
         mockedContextHolder.close();
     }
