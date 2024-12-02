@@ -89,4 +89,5 @@ public class OrderHistory {
     public static final String PAYMENT_REVERSED = "Оплата повернена після успіху";
     public static final String PAYMENT_PENDING = "Платіж обробляється";
     public static final String PAYMENT_FAILURE = "Неуспішна оплата";
+    public static final String UBS_ADMIN = "UBS ADMIN";
 }
