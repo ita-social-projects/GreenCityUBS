@@ -4,6 +4,7 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
 import lombok.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Getter
@@ -17,6 +18,7 @@ public class UpdateOrderPageAdminDto {
     private UbsCustomersDtoUpdate userInfoDto;
     private OrderAddressExportDetailsDtoUpdate addressExportDetailsDto;
     private EcoNumberDto ecoNumberFromShop;
+    @Valid
     private ExportDetailsDtoUpdate exportDetailsDto;
     private UpdateOrderDetailDto orderDetailDto;
     private List<UpdateResponsibleEmployeeDto> updateResponsibleEmployeeDto;
