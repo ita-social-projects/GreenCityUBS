@@ -146,6 +146,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
@@ -170,10 +171,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
+import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
@@ -1172,11 +1173,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String userUuid) {
         var ubsUser = getUbsUserById(dtoUpdate.getRecipientId());
-        checkUserHasAccessToUpdateData(ubsUser, userUuid);
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        checkUserHasAccessToUpdateData(ubsUser, userUuid, authentication);
 
         ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
-        eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.CLIENT,
-            ubsUser.getOrders().getFirst());
+        if (!isAdmin(authentication)) {
+            eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.CLIENT,
+                ubsUser.getOrders().getFirst());
+        } else {
+            eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.UBS_ADMIN,
+                ubsUser.getOrders().getFirst());
+        }
 
         return UbsCustomersDto.builder()
             .name(ubsUser.getSenderFirstName() + " " + ubsUser.getSenderLastName())
@@ -1185,20 +1193,29 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
+    /**
+     * Method checks if current user is admin.
+     *
+     * @return {@link Boolean} true if user is admin, false otherwise;
+     */
+    private boolean isAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals(UBS_EMPLOYEE_WITH_PREFIX));
+    }
+
     private UBSuser getUbsUserById(Long recipientId) {
         return ubsUserRepository.findById(recipientId)
             .orElseThrow(() -> new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + recipientId));
     }
 
-    private void checkUserHasAccessToUpdateData(UBSuser ubsUser, String userUuid) {
+    private void checkUserHasAccessToUpdateData(UBSuser ubsUser, String userUuid, Authentication authentication) {
         var uuid = ubsUser.getUser().getUuid();
-        if (checkUserRoleIsUser() && !(uuid.equals(userUuid))) {
+        if (checkUserRoleIsUser(authentication) && !(uuid.equals(userUuid))) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
     }
 
-    private boolean checkUserRoleIsUser() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
+    private boolean checkUserRoleIsUser(Authentication authentication) {
         return authentication.getAuthorities().stream()
             .anyMatch(authority -> authority.getAuthority().equals(USER_WITH_PREFIX));
     }
