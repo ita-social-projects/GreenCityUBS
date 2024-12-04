@@ -153,7 +153,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 false, true, true, 5, EditType.READ_ONLY, new ArrayList<>(), ordersInfo),
             new ColumnDTO(new TitleDto("commentsForOrder", "Коментар адміністратора", "Admin comment"),
                 "commentsForOrder",
-                20, false, true, false, 33, EditType.READ_ONLY, new ArrayList<>(), ordersInfo),
+                20, false, true, false, 33, EditType.INLINE, new ArrayList<>(), ordersInfo),
             new ColumnDTO(new TitleDto("clientName", "Ім'я клієнта", "Client name"), "clientName", 20,
                 false, true, false, 6, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
             new ColumnDTO(new TitleDto("clientPhone", "Телефон клієнта", "Phone number"), "clientPhoneNumber",
@@ -182,7 +182,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(
                 new TitleDto("commentToAddressForClient", "Коментар до адреси",
                     "Comment to address"),
-                "commentToAddressForClient", 20, false, true, false, 16, EditType.READ_ONLY, new ArrayList<>(),
+                "commentToAddressForClient", 20, false, true, false, 16, EditType.INLINE, new ArrayList<>(),
                 exportAddress),
             new ColumnDTO(new TitleDto("bagsAmount", "К-сть пакетів", "Bags amount"), "bagAmount", 20, false, true,
                 false,
@@ -200,7 +200,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(
                 new TitleDto("commentForOrderByClient", "Коментар до замовлення",
                     "Comment to the order"),
-                "commentForOrderByClient", 20, false, true, false, 22, EditType.READ_ONLY, new ArrayList<>(),
+                "commentForOrderByClient", 20, false, true, false, 22, EditType.INLINE, new ArrayList<>(),
                 ordersInfo),
             new ColumnDTO(new TitleDto("totalPayment", "Оплата", "Total payment"),
                 "totalPayment", 20, false, true,

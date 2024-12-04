@@ -1059,6 +1059,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Optional.ofNullable(dto.getAddressHouseNumber()).ifPresent(address::setHouseNumber);
         Optional.ofNullable(dto.getAddressHouseCorpus()).ifPresent(address::setHouseCorpus);
         Optional.ofNullable(dto.getAddressEntranceNumber()).ifPresent(address::setEntranceNumber);
+        Optional.ofNullable(dto.getAddressComment()).ifPresent(address::setAddressComment);
 
         return address;
     }
@@ -1609,6 +1610,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), order, email);
         }
         if (nonNull(updateOrderPageDto.getOrderDetailDto())) {
+            setComment(order, updateOrderPageDto.getOrderDetailDto().getUserComment());
             setOrderDetail(
                 order,
                 updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1631,6 +1633,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
             notificationService.notifyUnpaidOrder(order);
         }
+    }
+
+    /**
+     * This is method which is sets comment for order.
+     *
+     * @param order   {@link Order}.
+     * @param comment {@link String}.
+     */
+    private void setComment(Order order, String comment) {
+        order.setComment(comment);
     }
 
     /**

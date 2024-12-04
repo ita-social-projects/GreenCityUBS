@@ -44,4 +44,6 @@ public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     private String addressRegion;
     @Length(max = 15)
     private String addressRegionEng;
+    @Length(min = 10, max = 255)
+    private String addressComment;
 }
