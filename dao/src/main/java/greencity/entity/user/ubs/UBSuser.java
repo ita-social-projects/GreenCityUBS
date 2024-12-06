@@ -2,9 +2,9 @@ package greencity.entity.user.ubs;
 
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.util.List;
 
 @NoArgsConstructor

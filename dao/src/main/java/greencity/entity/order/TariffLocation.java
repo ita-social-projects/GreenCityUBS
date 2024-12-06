@@ -1,10 +1,9 @@
 package greencity.entity.order;
 
-import greencity.enums.LocationStatus;
 import greencity.entity.user.Location;
-import lombok.*;
-
+import greencity.enums.LocationStatus;
 import jakarta.persistence.*;
+import lombok.*;
 
 @Builder
 @Entity

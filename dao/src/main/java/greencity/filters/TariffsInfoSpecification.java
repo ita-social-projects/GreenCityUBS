@@ -1,15 +1,15 @@
 package greencity.filters;
 
-import greencity.enums.TariffStatus;
 import greencity.entity.order.Courier;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.TariffStatus;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
-import jakarta.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -2,6 +2,7 @@ package greencity.entity.user.employee;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 
 @Embeddable

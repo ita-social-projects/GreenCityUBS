@@ -1,15 +1,15 @@
 package greencity.entity.user.employee;
 
 import greencity.entity.TariffsInfoRecievingEmployee;
+import greencity.entity.order.Order;
 import greencity.entity.order.Service;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.enums.EmployeeStatus;
-import greencity.entity.order.Order;
-import greencity.entity.order.TariffsInfo;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
 
-import jakarta.persistence.*;
 import java.util.List;
 import java.util.Set;
 

@@ -1,8 +1,7 @@
 package greencity.entity.notifications;
 
-import lombok.*;
-
 import jakarta.persistence.*;
+import lombok.*;
 
 @Data
 @EqualsAndHashCode(exclude = {"userNotification"})

@@ -2,9 +2,9 @@ package greencity.entity.order;
 
 import greencity.entity.user.employee.Employee;
 import greencity.enums.CourierStatus;
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 

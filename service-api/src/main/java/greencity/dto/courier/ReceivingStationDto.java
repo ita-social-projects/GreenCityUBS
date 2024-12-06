@@ -1,10 +1,10 @@
 package greencity.dto.courier;
 
 import greencity.enums.StationStatus;
-import lombok.*;
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import lombok.*;
+
 import java.time.LocalDate;
 
 @Data

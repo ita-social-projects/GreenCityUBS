@@ -3,18 +3,17 @@ package greencity.repository;
 import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Repository;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Subquery;
-import jakarta.persistence.criteria.Expression;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;

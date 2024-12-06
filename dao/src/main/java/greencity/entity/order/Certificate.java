@@ -1,9 +1,9 @@
 package greencity.entity.order;
 
 import greencity.enums.CertificateStatus;
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity

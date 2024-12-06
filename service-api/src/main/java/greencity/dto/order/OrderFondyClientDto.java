@@ -1,10 +1,10 @@
 package greencity.dto.order;
 
-import lombok.*;
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.*;
+
 import java.util.Set;
 
 @Getter

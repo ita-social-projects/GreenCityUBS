@@ -1,8 +1,7 @@
 package greencity.dto.certificate;
 
-import lombok.*;
-
 import jakarta.validation.constraints.*;
+import lombok.*;
 
 @Getter
 @Setter

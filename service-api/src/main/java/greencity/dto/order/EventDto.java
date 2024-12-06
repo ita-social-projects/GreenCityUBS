@@ -1,9 +1,9 @@
 package greencity.dto.order;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Getter

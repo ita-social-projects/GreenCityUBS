@@ -1,18 +1,19 @@
 package greencity.repository;
 
 import greencity.entity.coords.Coordinates;
-import greencity.enums.AddressStatus;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.enums.AddressStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

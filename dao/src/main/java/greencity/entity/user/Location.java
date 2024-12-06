@@ -1,9 +1,10 @@
 package greencity.entity.user;
 
 import greencity.entity.coords.Coordinates;
+import greencity.entity.order.TariffLocation;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.LocationStatus;
-import greencity.entity.order.TariffLocation;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -12,7 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

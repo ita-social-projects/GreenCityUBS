@@ -1,9 +1,9 @@
 package greencity.dto.location;
 
-import lombok.*;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
 import java.util.List;
 
 @Getter

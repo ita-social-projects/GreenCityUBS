@@ -1,8 +1,7 @@
 package greencity.dto.courier;
 
-import lombok.*;
-
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 @Getter
 @NoArgsConstructor

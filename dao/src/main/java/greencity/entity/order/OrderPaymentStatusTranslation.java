@@ -1,8 +1,7 @@
 package greencity.entity.order;
 
-import lombok.*;
-
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Data

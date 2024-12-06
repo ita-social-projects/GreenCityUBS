@@ -1,11 +1,11 @@
 package greencity.entity.user;
 
+import greencity.entity.order.Order;
 import greencity.enums.ViolationLevel;
 import greencity.enums.ViolationStatus;
-import greencity.entity.order.Order;
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 

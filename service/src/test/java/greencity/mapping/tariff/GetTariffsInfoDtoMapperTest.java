@@ -1,14 +1,13 @@
 package greencity.mapping.tariff;
 
+import greencity.ModelUtils;
 import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.entity.order.TariffsInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import greencity.ModelUtils;
-import greencity.entity.order.TariffsInfo;
 
 @ExtendWith(MockitoExtension.class)
 class GetTariffsInfoDtoMapperTest {

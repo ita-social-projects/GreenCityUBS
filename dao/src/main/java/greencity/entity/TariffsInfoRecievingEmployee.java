@@ -3,12 +3,11 @@ package greencity.entity;
 import greencity.TariffsInfoRecievingEmployeeId;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import jakarta.persistence.*;
 
 @Data
 @Entity

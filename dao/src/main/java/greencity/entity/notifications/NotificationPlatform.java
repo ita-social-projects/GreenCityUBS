@@ -2,9 +2,8 @@ package greencity.entity.notifications;
 
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationStatus;
-import lombok.*;
-
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "notification_platforms")

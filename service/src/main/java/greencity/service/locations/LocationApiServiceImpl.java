@@ -4,8 +4,10 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.location.api.LocationDto;
 import greencity.enums.LocationDivision;
 import greencity.exceptions.NotFoundException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -15,18 +17,14 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.collections4.CollectionUtils;
-
-import org.springframework.cache.annotation.Cacheable;
+import java.util.stream.Collectors;
 
 @Service
 @EnableCaching

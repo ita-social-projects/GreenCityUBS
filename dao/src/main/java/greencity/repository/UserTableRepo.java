@@ -1,15 +1,15 @@
 package greencity.repository;
 
-import greencity.enums.SortingOrder;
 import greencity.entity.user.User;
+import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Repository;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;

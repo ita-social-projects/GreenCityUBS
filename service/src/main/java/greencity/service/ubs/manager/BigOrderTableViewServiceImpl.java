@@ -1,29 +1,27 @@
 package greencity.service.ubs.manager;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.persistence.EntityNotFoundException;
-
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
-import greencity.dto.user.UserVO;
-import greencity.exceptions.user.UserNotFoundException;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.stereotype.Service;
-
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.table.CustomTableViewDto;
+import greencity.dto.user.UserVO;
 import greencity.entity.parameters.CustomTableView;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CustomTableViewRepo;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 

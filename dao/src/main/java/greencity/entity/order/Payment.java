@@ -2,9 +2,8 @@ package greencity.entity.order;
 
 import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentType;
-import lombok.*;
-
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Data

@@ -64,6 +64,7 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import org.springframework.http.HttpStatus;
+
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -74,6 +75,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import static greencity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {

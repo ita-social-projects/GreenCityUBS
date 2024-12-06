@@ -19,21 +19,21 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
-import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
-import static greencity.ModelUtils.TEST_NOTIFICATION_PAGEABLE;
 import static greencity.ModelUtils.TEMPLATE_PAGE;
-import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_PAGEABLE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO;
 import static greencity.constant.ErrorMessage.NOTIFICATION_STATUS_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID;
 import static greencity.enums.NotificationStatus.INACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationTemplateServiceImplTest {

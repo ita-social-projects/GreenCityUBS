@@ -1,19 +1,19 @@
 package greencity.repository;
 
-import greencity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
+import greencity.enums.CertificateStatus;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
-import lombok.ToString;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Repository;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.ToString;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

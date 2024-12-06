@@ -1,9 +1,8 @@
 package greencity.entity.telegram;
 
 import greencity.entity.user.User;
-import lombok.*;
-
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Data

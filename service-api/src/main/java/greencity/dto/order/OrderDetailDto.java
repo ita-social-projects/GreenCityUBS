@@ -3,10 +3,10 @@ package greencity.dto.order;
 import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagMappingDto;
 import greencity.dto.bag.BagTransDto;
-import lombok.*;
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
 import java.util.List;
 
 @Getter

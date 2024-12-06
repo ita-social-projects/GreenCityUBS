@@ -1,13 +1,13 @@
 package greencity.repository;
 
-import greencity.enums.SortingOrder;
 import greencity.entity.user.Violation;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Repository;
-
+import greencity.enums.SortingOrder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 import static java.util.Objects.nonNull;

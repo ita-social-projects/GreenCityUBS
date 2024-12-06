@@ -1,13 +1,13 @@
 package greencity.entity.notifications;
 
-import greencity.enums.NotificationType;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import greencity.enums.NotificationType;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Cascade;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

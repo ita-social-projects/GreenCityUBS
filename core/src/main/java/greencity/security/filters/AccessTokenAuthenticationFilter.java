@@ -4,6 +4,10 @@ import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
 import greencity.service.FeignClientCallAsync;
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -12,10 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -74,12 +74,12 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (ExpiredJwtException e) {
-                log.info("Token has expired: " + token);
+                log.info("Token has expired: {}", token);
             } catch (InterruptedException e) {
-                log.info("Thread was interrupted: " + e.getMessage());
+                log.info("Thread was interrupted: {}", e.getMessage());
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                log.info("Access denied with token: " + e.getMessage());
+                log.info("Access denied with token: {}", e.getMessage());
             }
         }
         chain.doFilter(request, response);

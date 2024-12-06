@@ -3,9 +3,9 @@ package greencity.entity.user.employee;
 import greencity.entity.order.Order;
 import greencity.entity.order.TariffsInfo;
 import greencity.enums.StationStatus;
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;

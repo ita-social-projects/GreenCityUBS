@@ -2,8 +2,8 @@ package greencity.service.ubs;
 
 import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForAdding;
-import greencity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
+import greencity.enums.CertificateStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.filters.CertificateFilterCriteria;
