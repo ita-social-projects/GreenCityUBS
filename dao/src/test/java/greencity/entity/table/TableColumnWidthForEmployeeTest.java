@@ -24,7 +24,9 @@ class TableColumnWidthForEmployeeTest {
         return Stream.of(
             Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getAddress()),
             Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getAmountDue()),
-            Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getBagsAmount()),
+            Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getMixedWaste120L()),
+            Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getTextileWaste60L()),
+            Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getTextileWaste20L()),
             Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getBlockedBy()),
             Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getCity()),
             Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getClientEmail()),

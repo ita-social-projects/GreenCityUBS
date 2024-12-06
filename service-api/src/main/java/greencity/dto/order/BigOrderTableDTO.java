@@ -27,7 +27,9 @@ public class BigOrderTableDTO {
     private SenderLocation district;
     private SenderLocation address;
     private String commentToAddressForClient;
-    private String bagsAmount;
+    private String mixedWaste120L;
+    private String textileWaste60L;
+    private String textileWaste20L;
     private Double totalOrderSum;
     private String orderCertificateCode;
     private Long generalDiscount;
