@@ -3,6 +3,9 @@ package greencity.security.providers;
 import greencity.security.JwtTool;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import javax.crypto.SecretKey;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,7 +19,7 @@ import java.util.stream.Collectors;
  * Class that provides authentication logic.
  *
  * @author Yurii Koval
- * @version 1.1
+ * @version 2.0
  */
 public class JwtAuthenticationProvider implements AuthenticationProvider {
     private final JwtTool jwtTool;
@@ -38,27 +41,30 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
      * @return {@link Authentication} if user successfully authenticated.
      * @throws io.jsonwebtoken.ExpiredJwtException   - if the token expired.
      * @throws UnsupportedJwtException               if the argument does not
-     *                                               represent an Claims JWS
+     *                                               represent a Claims JWS
      * @throws io.jsonwebtoken.MalformedJwtException if the string is not a valid
      *                                               JWS
-     * @throws io.jsonwebtoken.SignatureException    if the JWS signature validation
-     *                                               fails
      */
     @Override
     public Authentication authenticate(Authentication authentication) {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtTool.getAccessTokenKey());
+        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
+
         String email = Jwts.parser()
-            .setSigningKey(jwtTool.getAccessTokenKey())
+            .verifyWith(secretKey)
             .build()
-            .parseClaimsJws(authentication.getName())
-            .getBody()
+            .parseSignedClaims(authentication.getName())
+            .getPayload()
             .getSubject();
+
         @SuppressWarnings({"unchecked, rawtype"})
         List<String> role = (List<String>) Jwts.parser()
-            .setSigningKey(jwtTool.getAccessTokenKey())
+            .verifyWith(secretKey)
             .build()
-            .parseClaimsJws(authentication.getName())
-            .getBody()
+            .parseSignedClaims(authentication.getName())
+            .getPayload()
             .get("role");
+
         return new UsernamePasswordAuthenticationToken(
             email,
             role.contains("ROLE_UBS_EMPLOYEE")
