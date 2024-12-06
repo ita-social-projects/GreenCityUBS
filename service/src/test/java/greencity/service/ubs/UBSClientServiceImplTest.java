@@ -33,7 +33,6 @@ import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
@@ -3137,47 +3136,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getPaymentResponseFromFondy() {
-        Order order = getOrder();
-        FondyPaymentResponse expected = FondyPaymentResponse.builder()
-            .paymentStatus("success")
-            .build();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid(order.getUser().getUuid())).thenReturn(order.getUser());
-
-        assertEquals(expected,
-            ubsService.getPaymentResponseFromFondy(1L, order.getUser().getUuid()));
-    }
-
-    @Test
-    void getPaymentResponseFromFondyOrderNotFoundException() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ubsService.getPaymentResponseFromFondy(1L, "abc"));
-    }
-
-    @Test
-    void getPaymentResponseFromFondyPaymentNotFoundException() {
-        Order order = getOrder().setPayment(Collections.emptyList());
-        String uuid = order.getUser().getUuid();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid(uuid)).thenReturn(order.getUser());
-
-        assertThrows(NotFoundException.class, () -> ubsService.getPaymentResponseFromFondy(1L, uuid));
-    }
-
-    @Test
-    void getPaymentResponseFromFondyAccessDeniedException() {
-        Order order = getOrder();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
-
-        assertThrows(AccessDeniedException.class, () -> ubsService.getPaymentResponseFromFondy(1L, "abc"));
-    }
-
-    @Test
     void getOrderForUserTest() {
         OrderStatusTranslation orderStatusTranslation = getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
@@ -3922,7 +3880,7 @@ class UBSClientServiceImplTest {
 
     private String invokeParseSettlementDate(String settlementDate) {
         try {
-            var method = UBSClientServiceImpl.class.getDeclaredMethod("parseFondySettlementDate", String.class);
+            var method = UBSClientServiceImpl.class.getDeclaredMethod("parseSettlementDate", String.class);
             method.setAccessible(true);
             return (String) method.invoke(ubsClientService, settlementDate);
         } catch (Exception e) {

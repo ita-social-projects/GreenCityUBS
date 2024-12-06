@@ -42,7 +42,6 @@ import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
@@ -177,7 +176,6 @@ import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
 import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
 import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
@@ -197,7 +195,6 @@ import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_U
 import static greencity.constant.ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED;
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
@@ -338,7 +335,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .maskedCard(response.getCardPan())
             .cardType(response.getCardType())
             .orderTime(response.getCreatedDate())
-            .settlementDate(parseFondySettlementDate(""))
+            .settlementDate(parseSettlementDate(""))
             .fee(0L)
             .paymentSystem(response.getPaymentSystem())
             .senderEmail(response.getEmail())
@@ -346,7 +343,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
-    private String parseFondySettlementDate(String settlementDate) {
+    private String parseSettlementDate(String settlementDate) {
         return settlementDate.isEmpty()
             ? LocalDate.now().toString()
             : LocalDate.parse(settlementDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString();
@@ -714,26 +711,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return PaymentSystemResponse.builder()
             .orderId(order.getId())
             .link(link)
-            .build();
-    }
-
-    @Override
-    public FondyPaymentResponse getPaymentResponseFromFondy(Long id, String uuid) {
-        Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
-            throw new AccessDeniedException(CANNOT_ACCESS_PAYMENT_STATUS);
-        }
-        if (order.getPayment().isEmpty()) {
-            throw new NotFoundException(PAYMENT_NOT_FOUND + id);
-        }
-        return getFondyPaymentResponse(order);
-    }
-
-    private FondyPaymentResponse getFondyPaymentResponse(Order order) {
-        Payment payment = order.getPayment().getLast();
-        return FondyPaymentResponse.builder()
-            .paymentStatus(payment.getPaymentStatus().name().equals("PAID") ? "success" : null)
             .build();
     }
 
