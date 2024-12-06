@@ -77,7 +77,6 @@ import greencity.enums.PaymentSystem;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
@@ -256,7 +255,6 @@ import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -3816,14 +3814,14 @@ class UBSClientServiceImplTest {
         assertEquals("approved", result);
     }
 
-    @Test
-    void shouldThrowExceptionWhenSignatureIsInvalid() {
-        String privateKey = "privateKey";
-        String data = "data";
-        String wrongSignature = "abc";
-        assertThrows(WrongSignatureException.class,
-            () -> ubsClientService.checkSignature(privateKey, data, wrongSignature));
-    }
+//    @Test
+//    void shouldThrowExceptionWhenSignatureIsInvalid() {
+//        String privateKey = "privateKey";
+//        String data = "data";
+//        String wrongSignature = "abc";
+//        assertThrows(WrongSignatureException.class,
+//            () -> ubsClientService.checkSignature(privateKey, data, wrongSignature));
+//    }
 
     @Test
     void testValidatePaymentSuccess() {
@@ -3930,15 +3928,6 @@ class UBSClientServiceImplTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Test
-    void testCheckSignatureValidSignature() throws NoSuchAlgorithmException {
-        String privateKey = "secretKey";
-        String data = "data";
-        String receivedSignature = createSignature(privateKey, data);
-
-        assertDoesNotThrow(() -> invokeCheckSignature(privateKey, data, receivedSignature));
     }
 
     @Test
@@ -4141,17 +4130,6 @@ class UBSClientServiceImplTest {
         OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         assertThrows(BadRequestException.class, () -> ubsService.processOrder("uuid", dto));
-    }
-
-    private void invokeCheckSignature(String privateKey, String data, String receivedSignature) {
-        try {
-            var method = UBSClientServiceImpl.class.getDeclaredMethod("checkSignature", String.class, String.class,
-                String.class);
-            method.setAccessible(true);
-            method.invoke(ubsClientService, privateKey, data, receivedSignature);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private String createSignature(String privateKey, String data) throws NoSuchAlgorithmException {

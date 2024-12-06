@@ -99,7 +99,6 @@ import greencity.enums.PaymentType;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
@@ -152,8 +151,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -353,31 +350,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return settlementDate.isEmpty()
             ? LocalDate.now().toString()
             : LocalDate.parse(settlementDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString();
-    }
-
-    /**
-     * This method is used to validate the signature of the payment received from
-     * LiqPay. It concatenates the private key and data, generates a SHA-1 hash,
-     * encodes it in Base64, and compares it with the received signature. If the
-     * generated signature doesn't match the received one, it throws a
-     * `WrongSignatureException`.
-     *
-     * @param privateKey        The private key used for signature validation.
-     * @param data              The data received from LiqPay.
-     * @param receivedSignature The signature received from LiqPay.
-     */
-    protected void checkSignature(String privateKey, String data, String receivedSignature) {
-        String message = privateKey + data + privateKey;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-1"); // NOSONAR
-            byte[] messageDigest = md.digest(message.getBytes(StandardCharsets.UTF_8));
-            String signature = Base64.getEncoder().encodeToString(messageDigest);
-            if (!receivedSignature.equals(signature)) {
-                throw new WrongSignatureException(ErrorMessage.WRONG_SIGNATURE_USED);
-            }
-        } catch (NoSuchAlgorithmException e) {
-            throw new WrongSignatureException(ErrorMessage.WRONG_SIGNATURE_USED);
-        }
     }
 
     /**
