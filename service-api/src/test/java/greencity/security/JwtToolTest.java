@@ -2,8 +2,11 @@ package greencity.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoders;
+import io.jsonwebtoken.security.Keys;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +16,6 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import javax.crypto.SecretKey;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -62,25 +64,34 @@ class JwtToolTest {
     void testCreateAccessToken() {
         String email = "test@example.com";
         int ttl = 60;
+
         String accessToken = jwtTool.createAccessToken(email, ttl);
         assertNotNull(accessToken);
 
-        Claims claims =
-            Jwts.parser().setSigningKey(jwtTool.getAccessTokenKey()).build().parseClaimsJws(accessToken).getPayload();
+        byte[] keyBytes = Decoders.BASE64.decode(jwtTool.getAccessTokenKey());
+        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
+
+        Claims claims = Jwts.parser()
+            .verifyWith(secretKey)
+            .build()
+            .parseSignedClaims(accessToken)
+            .getPayload();
 
         // Verify the subject (email) claim
         assertEquals(email, claims.getSubject());
 
         // Verify the role claim
+        @SuppressWarnings("unchecked")
         List<String> roles = (List<String>) claims.get("role");
         assertEquals(Arrays.asList("ROLE_USER", "ROLE_ADMIN"), roles);
 
         // Verify the expiration time
         Date expiration = claims.getExpiration();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(expiration);
-        calendar.add(Calendar.MINUTE, -ttl);
-        Date expectedExpiration = calendar.getTime();
+
+        Instant expirationInstant = expiration.toInstant();
+        Instant adjustedInstant = expirationInstant.minus(ttl, ChronoUnit.MINUTES);
+
+        Date expectedExpiration = Date.from(adjustedInstant);
         assertEquals(expectedExpiration, claims.getIssuedAt());
     }
 

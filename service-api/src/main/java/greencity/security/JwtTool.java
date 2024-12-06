@@ -4,6 +4,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import javax.crypto.SecretKey;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -51,14 +53,12 @@ public class JwtTool {
     /**
      * Method for creating access token.
      *
-     * @param email this is email of user.
-     * @param ttl   is token time to live.
+     * @param email — email of user.
+     * @param ttl   — token time to live in minutes.
      */
     public String createAccessToken(String email, int ttl) {
-        Date now = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(now);
-        calendar.add(Calendar.MINUTE, ttl);
+        Instant now = Instant.now();
+        Instant expiration = now.plus(ttl, ChronoUnit.MINUTES);
 
         byte[] keyBytes = Decoders.BASE64.decode(accessTokenKey);
         Key key = Keys.hmacShaKeyFor(keyBytes);
@@ -66,15 +66,14 @@ public class JwtTool {
         return Jwts.builder()
             .subject(email)
             .claim("role", Arrays.asList("ROLE_USER", "ROLE_ADMIN"))
-            .issuedAt(now)
-            .expiration(calendar.getTime())
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(expiration))
             .signWith(key)
             .compact();
     }
 
     /**
      * Method for getting employee authorities from access token.
-     *
      */
     @SuppressWarnings("unchecked")
     public List<String> getAuthoritiesFromToken(String accessToken) {
