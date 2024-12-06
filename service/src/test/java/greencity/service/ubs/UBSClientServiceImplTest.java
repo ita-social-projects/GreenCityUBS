@@ -111,9 +111,6 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3772,15 +3769,6 @@ class UBSClientServiceImplTest {
         assertEquals("approved", result);
     }
 
-//    @Test
-//    void shouldThrowExceptionWhenSignatureIsInvalid() {
-//        String privateKey = "privateKey";
-//        String data = "data";
-//        String wrongSignature = "abc";
-//        assertThrows(WrongSignatureException.class,
-//            () -> ubsClientService.checkSignature(privateKey, data, wrongSignature));
-//    }
-
     @Test
     void testValidatePaymentSuccess() {
         PaymentResponseDto response = getPaymentResponseDto();
@@ -4088,13 +4076,6 @@ class UBSClientServiceImplTest {
         OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         assertThrows(BadRequestException.class, () -> ubsService.processOrder("uuid", dto));
-    }
-
-    private String createSignature(String privateKey, String data) throws NoSuchAlgorithmException {
-        String message = privateKey + data + privateKey;
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        byte[] messageDigest = md.digest(message.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(messageDigest);
     }
 
     @Test
