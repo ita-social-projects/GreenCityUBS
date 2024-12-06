@@ -253,12 +253,9 @@ public class AdminUbsController {
         return ResponseEntity.ok(ordersAdminsPageService.getAllLocationsInfo());
     }
 
-    @Operation(summary = "sets a isTableFreeze value for tableColumnWidthForEmployee entity")
+    @Operation(summary = "sets a isTableFreeze value for tableColumnWidthForEmployee")
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "isTableFreeze is successfully updated",
-            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class))))
+        @ApiResponse(responseCode = "200", description = "isTableFreeze is successfully updated")
     })
     @PutMapping("/saveOrderTableColumnsWidthIsFreeze")
     public ResponseEntity<HttpStatus> saveIsFreeze(@CurrentUserUuid String uuid,
