@@ -60,6 +60,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
@@ -192,6 +194,8 @@ public class OrderController {
         @Valid @PathVariable("id") Optional<Long> id) {
         if (id.isPresent()) {
             OrderDetailStatusDto orderDetailStatusDto = ubsManagementService.getOrderDetailStatus(id.get());
+            RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+            requestAttributes.setAttribute("orderDetailStatus", orderDetailStatusDto, RequestAttributes.SCOPE_REQUEST);
             if (PaymentStatus.PAID.name().equals(orderDetailStatusDto.getPaymentStatus())
                 || !OrderStatus.FORMED.name().equals(orderDetailStatusDto.getOrderStatus())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);

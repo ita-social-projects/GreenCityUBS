@@ -137,6 +137,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -149,6 +150,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import static greencity.ModelUtils.KYIV_REGION_EN;
 import static greencity.ModelUtils.KYIV_REGION_UA;
@@ -799,6 +802,10 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
         when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
@@ -1038,6 +1045,10 @@ class UBSClientServiceImplTest {
         String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
         when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
             .thenReturn(mockWayForPayResponse);
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -1096,6 +1107,10 @@ class UBSClientServiceImplTest {
         String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
         when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
             .thenReturn(mockWayForPayResponse);
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -1150,6 +1165,10 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -1207,6 +1226,10 @@ class UBSClientServiceImplTest {
         String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
         when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
             .thenReturn(mockWayForPayResponse);
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -1443,6 +1466,10 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
         Assertions.assertNotNull(result);
@@ -2916,6 +2943,10 @@ class UBSClientServiceImplTest {
         when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(getActiveCertificateWith10Points()));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         String mockWayForPayResponse = "{\"invoiceUrl\": \"http://example.com/invoice\"}";
         when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
@@ -2978,6 +3009,10 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(modelMapper.map(address, OrderAddress.class)).thenReturn(orderAddress);
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -3562,6 +3597,10 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         assertThrows(NotFoundException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
@@ -3608,6 +3647,12 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+//        when(ubsManagementService.getOrderDetailStatus(any())).thenReturn(ModelUtils.getOrderDetailStatusDto());
+
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         assertThrows(NotFoundException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
@@ -4289,6 +4334,10 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
             .thenReturn(getCheckoutResponseFromMonoBank());
+        RequestAttributes requestAttributes = Mockito.mock(RequestAttributes.class);
+        when(requestAttributes.getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST))
+            .thenReturn(ModelUtils.getOrderDetailStatusDto());
+        RequestContextHolder.setRequestAttributes(requestAttributes);
 
         PaymentSystemResponse paymentSystemResponse = ubsClientService.saveFullOrderToDB(dto, uuid, 1L);
 

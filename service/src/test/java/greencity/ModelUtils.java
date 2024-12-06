@@ -2342,6 +2342,17 @@ public class ModelUtils {
             .build();
     }
 
+    public static OrderDetailStatusDto getOrderDetailStatusDto() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String orderDate = TEST_ORDER.getOrderDate().toLocalDate().format(formatter);
+
+        return OrderDetailStatusDto.builder()
+            .orderStatus(TEST_ORDER.getOrderStatus().name())
+            .paymentStatus(TEST_PAYMENT_LIST.getFirst().getPaymentStatus().name())
+            .date(orderDate)
+            .build();
+    }
+
     private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
             .id(1L)

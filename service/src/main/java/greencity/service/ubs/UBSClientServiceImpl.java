@@ -31,16 +31,7 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
@@ -146,9 +137,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -604,6 +598,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
+        checkIfOrderIsNotPayedAndSendEmailAsync(order, orderId);
+
         notificationService.notifyCreatedOrder(order);
 
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
@@ -611,6 +607,25 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         return processPayment(dto, order, sumToPayInCoins, currentUser);
+    }
+
+    @Async
+    protected void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long orderId) {
+        try {
+            Thread.sleep(60000);
+            checkIfOrderIsNotPayedAndSendEmail(order);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("An error in the execution of an asynchronous task", e);
+        }
+    }
+
+    private void checkIfOrderIsNotPayedAndSendEmail(Order order) {
+        OrderDetailStatusDto orderDetailStatusDto = (OrderDetailStatusDto) RequestContextHolder.getRequestAttributes()
+            .getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST);
+        if (PaymentStatus.UNPAID.name().equals(orderDetailStatusDto.getPaymentStatus())) {
+            notificationService.notifyUnpaidOrderPermanently(order);
+        }
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,

@@ -787,6 +787,13 @@ public class NotificationServiceImpl implements NotificationService {
         userNotificationRepository.markAsDeletedUserNotificationByIdAndUserId(notificationId, userId);
     }
 
+    @Override
+    public void notifyUnpaidOrderPermanently(Order order) {
+        Double amountToPay = getAmountToPay(order);
+        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
+        fillAndSendNotification(parameters, order, NotificationType.UNPAID_ORDER);
+    }
+
     private Set<NotificationParameter> getNotificationParametersForNewOrder(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
         parameters.add(NotificationParameter.builder()

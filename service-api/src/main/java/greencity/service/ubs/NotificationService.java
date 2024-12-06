@@ -233,4 +233,14 @@ public interface NotificationService {
      * @author Roman Kasarab
      */
     void deleteNotification(Long notificationId, String userUuid);
+
+    /**
+     * Notify user that order has unpaid status for a long time. This method is used
+     * by schedule task, which runs every day.
+     *
+     * @param order the order to send notification for
+     *
+     * @author Vladyslav Haliara
+     */
+    void notifyUnpaidOrderPermanently(Order order);
 }
