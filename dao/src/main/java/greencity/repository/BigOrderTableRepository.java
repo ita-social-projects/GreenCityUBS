@@ -51,7 +51,7 @@ public class BigOrderTableRepository {
      * @author Kuzbyt Maksym
      */
     public Page<BigOrderTableViews> findAll(OrderPage orderPage, OrderSearchCriteria searchCriteria,
-                                            List<Long> tariffsInfoIds, String userLanguage) {
+        List<Long> tariffsInfoIds, String userLanguage) {
         var criteriaQuery = criteriaBuilder.createQuery(BigOrderTableViews.class);
         var orderRoot = criteriaQuery.from(BigOrderTableViews.class);
 
@@ -73,7 +73,7 @@ public class BigOrderTableRepository {
     }
 
     private Predicate getPredicate(OrderSearchCriteria sc, Root<BigOrderTableViews> orderRoot,
-                                   List<Long> tariffsInfoIds) {
+        List<Long> tariffsInfoIds) {
         var predicates = new ArrayList<Predicate>();
 
         getPredicateByEnumValue(predicates, sc, orderRoot);
@@ -90,7 +90,7 @@ public class BigOrderTableRepository {
     }
 
     private void getPredicateByEnumValue(List<Predicate> predicates, OrderSearchCriteria sc,
-                                         Root<BigOrderTableViews> orderRoot) {
+        Root<BigOrderTableViews> orderRoot) {
         orderFilterDataProvider.getFiltersEnum().entrySet().stream()
             .filter(e -> e.getValue().apply(sc) != null)
             .map(e -> criteriaPredicate.filter(e.getValue().apply(sc), orderRoot, e.getKey()))
@@ -98,7 +98,7 @@ public class BigOrderTableRepository {
     }
 
     private void getPredicateByStringValue(List<Predicate> predicates, OrderSearchCriteria sc,
-                                           Root<BigOrderTableViews> orderRoot) {
+        Root<BigOrderTableViews> orderRoot) {
         orderFilterDataProvider.getFiltersString().entrySet().stream()
             .filter(e -> e.getValue().apply(sc) != null)
             .map(e -> criteriaPredicate.filter(e.getValue().apply(sc), orderRoot, e.getKey()))
@@ -106,7 +106,7 @@ public class BigOrderTableRepository {
     }
 
     private void getPredicateByLongValue(List<Predicate> predicates, OrderSearchCriteria sc,
-                                         Root<BigOrderTableViews> orderRoot) {
+        Root<BigOrderTableViews> orderRoot) {
         orderFilterDataProvider.getFiltersLong().entrySet().stream()
             .filter(e -> e.getValue().apply(sc) != null)
             .map(e -> {
@@ -123,7 +123,7 @@ public class BigOrderTableRepository {
     }
 
     private void getPredicateByDateFilter(List<Predicate> predicates, OrderSearchCriteria sc,
-                                          Root<BigOrderTableViews> orderRoot) {
+        Root<BigOrderTableViews> orderRoot) {
         orderFilterDataProvider.getFiltersDateFilter().entrySet().stream()
             .filter(e -> e.getValue().apply(sc) != null)
             .map(e -> criteriaPredicate.filter(e.getValue().apply(sc), orderRoot, e.getKey()))
@@ -131,12 +131,12 @@ public class BigOrderTableRepository {
     }
 
     private void getPredicateByTariffsInfoId(List<Predicate> predicates, List<Long> tariffsInfoIds,
-                                             Root<BigOrderTableViews> orderRoot) {
+        Root<BigOrderTableViews> orderRoot) {
         predicates.add(criteriaPredicate.filter(tariffsInfoIds, orderRoot, "tariffsInfoId"));
     }
 
     private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root,
-                      String userLanguage) {
+        String userLanguage) {
         if (UKRAINIAN_LANGUAGE.equals(userLanguage)
             && (ORDER_STATUS.equals(orderPage.getSortBy()) || ORDER_PAYMENT_STATUS.equals(orderPage.getSortBy()))) {
             applySortingForUkrainianLocalization(orderPage, cq, root);
@@ -156,7 +156,7 @@ public class BigOrderTableRepository {
     }
 
     private void applySortingCriteria(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq,
-                                      Expression<?> sortingExpression) {
+        Expression<?> sortingExpression) {
         if (orderPage.getSortDirection() == Sort.Direction.ASC) {
             cq.orderBy(criteriaBuilder.asc(sortingExpression));
         } else {
@@ -165,8 +165,8 @@ public class BigOrderTableRepository {
     }
 
     private void applySortingForUkrainianLocalization(OrderPage orderPage,
-                                                      CriteriaQuery<BigOrderTableViews> cq,
-                                                      Root<BigOrderTableViews> root) {
+        CriteriaQuery<BigOrderTableViews> cq,
+        Root<BigOrderTableViews> root) {
         switch (orderPage.getSortBy()) {
             case (ORDER_STATUS):
                 applySortingOrderForUALocalizationByEnumeration(orderPage, cq, root,

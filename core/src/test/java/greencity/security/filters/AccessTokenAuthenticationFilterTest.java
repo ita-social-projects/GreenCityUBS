@@ -71,7 +71,7 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
-    @Disabled
+    @Disabled("Not implemented by the original author")
     void doFilterInternalTest() throws IOException, ServletException {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn("SuperSecretAccessToken");
         when(providerManager.authenticate(any()))
@@ -102,7 +102,7 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
-    @Disabled
+    @Disabled("Not implemented by the original author")
     void doFilterInternalAccessDeniedTest() throws IOException, ServletException {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(TOKEN);
         when(providerManager.authenticate(any()))
