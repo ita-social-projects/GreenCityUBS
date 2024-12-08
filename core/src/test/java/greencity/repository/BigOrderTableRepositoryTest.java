@@ -14,12 +14,10 @@ import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
@@ -27,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/insert.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
@@ -85,13 +82,13 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .sorted(Comparator.comparing(BigOrderTableViews::getOrderPaymentStatus).reversed())
             .map(BigOrderTableViews::getOrderPaymentStatus)
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository.findAll(page, DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
                 .getContent()
                 .stream()
                 .map(BigOrderTableViews::getOrderPaymentStatus)
-                .collect(Collectors.toList());
+                .toList();
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
@@ -100,7 +97,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setOrderStatus(new OrderStatus[] {OrderStatus.FORMED});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(a -> a.getOrderStatus().equals(OrderStatus.FORMED.name()))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
             .getContent();
@@ -122,7 +119,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(a -> a.getOrderStatus().equals(OrderStatus.FORMED.name())
                 || a.getOrderStatus().equals(OrderStatus.CONFIRMED.name()))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository.findAll(DEFAULT_ORDER_PAGE_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
                 .getContent();
@@ -135,7 +132,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             new OrderSearchCriteria().setOrderPaymentStatus(new OrderPaymentStatus[] {OrderPaymentStatus.PAID});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(order -> order.getOrderPaymentStatus().equals(OrderPaymentStatus.PAID.name()))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
             .getContent();
@@ -147,7 +144,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setCities(new String[] {"Київ"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(a -> a.getCity().equals("Київ"))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
             .getContent();
@@ -159,7 +156,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setRegion(new String[] {"Київська область"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(a -> a.getRegion().equals("Київська область"))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
             .getContent();
@@ -171,10 +168,10 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setDistricts(new String[] {"Подільський"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .map(BigOrderTableViews::getDistrict)
-            .filter(district -> district.equals("Подільський")).collect(Collectors.toList());
+            .filter(district -> district.equals("Подільський")).toList();
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
-            .getContent().stream().map(BigOrderTableViews::getDistrict).collect(Collectors.toList());
+            .getContent().stream().map(BigOrderTableViews::getDistrict).toList();
         Assertions.assertEquals(
             expectedValue, actualValue);
     }
@@ -185,7 +182,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(order -> order.getOrderDate().isBefore(ChronoLocalDate.from(ORDER_DATE_END))
                 && order.getOrderDate().isAfter(ChronoLocalDate.from(ORDER_DATE_START)))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -199,7 +196,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         LocalDateTime endDate = LocalDateTime.of(2022, 2, 2, 0, 0, 1);
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(order -> order.getOrderDate().isBefore(ChronoLocalDate.from(endDate)))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -212,7 +209,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setOrderDate(new DateFilter().setFrom("2022-02-01"));
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(order -> order.getOrderDate().isAfter(ChronoLocalDate.from(ORDER_DATE_START)))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -228,7 +225,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             .filter(order -> order.getDateOfExport() != null &&
                 order.getDateOfExport().isAfter(ChronoLocalDate.from(ORDER_EXPORT_DATE_START)) &&
                 order.getDateOfExport().isBefore(ChronoLocalDate.from(ORDER_EXPORT_DATE_END)))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -244,7 +241,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             .filter(order -> order.getPaymentDate() != null &&
                 order.getPaymentDate().isAfter(ChronoLocalDate.from(ORDER_DATE_START))
                 && order.getPaymentDate().isBefore(ChronoLocalDate.from(ORDER_DATE_END)))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -257,7 +254,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setReceivingStation(new Long[] {1L});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(order -> order.getReceivingStationId() != null && order.getReceivingStationId().equals(1L))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -270,7 +267,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setResponsibleLogicManId(new Long[] {10L});
         var expectedValue = ModelUtils.getAllBOTViewsASC().stream()
             .filter(order -> order.getResponsibleLogicManId() != null && order.getResponsibleLogicManId().equals(10L))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_ASC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -283,7 +280,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setResponsibleCallerId(new Long[] {15L});
         var expectedValue = ModelUtils.getAllBOTViewsASC().stream()
             .filter(order -> order.getResponsibleCallerId() != null && order.getResponsibleCallerId().equals(15L))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_ASC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -296,7 +293,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setResponsibleDriverId(new Long[] {10L});
         var expectedValue = ModelUtils.getAllBOTViewsASC().stream()
             .filter(order -> order.getResponsibleDriverId() != null && order.getResponsibleDriverId().equals(10L))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_ASC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -309,7 +306,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setResponsibleNavigatorId(new Long[] {10L});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(order -> order.getResponsibleNavigatorId() != null && order.getResponsibleNavigatorId().equals(10L))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -322,7 +319,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setSearch(new String[] {"+380631144678"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(order -> order.getClientPhoneNumber().equals("+380631144678"))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -357,7 +354,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var filter = new OrderSearchCriteria().setSearch(new String[] {"Anna Maria"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(order -> order.getClientName() != null && order.getClientName().equals("Anna Maria"))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -373,7 +370,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
             .filter(order -> order.getOrderPaymentStatus().equals(PaymentStatus.PAID.name()) &&
                 order.getOrderStatus().equals(OrderStatus.FORMED.name()))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -389,7 +386,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var expectedValue = ModelUtils.getAllBOTViewsASC().stream()
             .filter(order -> order.getOrderPaymentStatus().equals(PaymentStatus.PAID.name()) &&
                 order.getOrderStatus().equals(OrderStatus.FORMED.name()))
-            .collect(Collectors.toList());
+            .toList();
         var actualValue =
             bigOrderTableRepository
                 .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_ASC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -443,7 +440,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         List<BigOrderTableViews> bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
-            Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(false));
+            Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(true));
         Assertions.assertTrue(isListCorrectlySorted);
     }
 
@@ -454,7 +451,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         var bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
-            Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(true));
+            Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(false));
         Assertions.assertTrue(isListCorrectlySorted);
     }
 
@@ -470,12 +467,12 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
     private Comparator<BigOrderTableViews> orderStatusTranslationComparator(boolean ascending) {
         Comparator<BigOrderTableViews> comparator = Comparator.comparingInt(
             view -> OrderStatusSortingTranslation.valueOf(view.getOrderStatus()).getSortOrder());
-        return ascending ? comparator.reversed() : comparator;
+        return ascending ? comparator : comparator.reversed();
     }
 
-    private Comparator<BigOrderTableViews> orderPaymentStatusTranslationComparator(boolean descending) {
+    private Comparator<BigOrderTableViews> orderPaymentStatusTranslationComparator(boolean ascending) {
         Comparator<BigOrderTableViews> comparator = Comparator.comparingInt(
             view -> OrderPaymentStatusSortingTranslation.valueOf(view.getOrderPaymentStatus()).getSortOrder());
-        return descending ? comparator.reversed() : comparator;
+        return ascending ? comparator : comparator.reversed();
     }
 }

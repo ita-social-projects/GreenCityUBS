@@ -3,7 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <include file="db/changelog/logs/liquibase-outputChangeLog.xml"/>
     <include file="db/changelog/logs/ch-addNotNullConstraint-tocerf-date-Bilonizhka.xml"/>
     <include file="db/changelog/logs/ch-changeFirstAndLastNames-capacity-Bilonizhka.xml"/>
@@ -34,10 +34,10 @@
     <include file="db/changelog/logs/ch-add-column-station-status-Korzh.xml"/>
     <include file="db/changelog/logs/ch-add-table-employee-receiving-station-mapping-Danylko.xml"/>
     <include file="db/changelog/logs/ch-create-index-employee-email-Danylko.xml"/>
-    <include file="db/changelog/logs/ch-add-new-order_bag_mapping-columns-Mahdziak.xml"/>
     <include file="db/changelog/logs/ch-add-unique-constraint-position-receiving-st-Danylko.xml"/>
     <include file="db/changelog/logs/ch-change-column-name-position-rec-station-Danylko.xml"/>
-    <include file="db/changelog/logs/ch-add-columns-violation-level-violation-date-in-violations-description-mapping-Rusanovscaia.xml"/>
+    <include
+            file="db/changelog/logs/ch-add-columns-violation-level-violation-date-in-violations-description-mapping-Rusanovscaia.xml"/>
     <include file="db/changelog/logs/ch-add-column-image-path-to-violations-description-mapping-Rusanovscaia.xml"/>
     <include file="db/changelog/logs/ch-add-column-id-to-violations-description-mapping-Rusanovscaia.xml"/>
     <include file="db/changelog/logs/ch-add-new-payment-status-column-Mahdziak.xml"/>
@@ -95,11 +95,16 @@
     <include file="db/changelog/logs/ch-add-table-regions-Makitra.xml"/>
     <include file="db/changelog/logs/ch-alter-table-column-paymentId-payment-table-Kozak.xml"/>
     <include file="db/changelog/logs/ch-add-column-sum_total_amount_without_discounts-Kyzbyt_Maksym.xml"/>
-    <include file="db/changelog/logs/ch-add-create_function_for_calculate_sum_total_amount_without_discounts_bag_table-Kyzbyt_Maksym.xml"/>
-    <include file="db/changelog/logs/ch-add-create_function_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
-    <include file="db/changelog/logs/ch-add-trigger_for_calculate_sum_total_amount_without_discounts_bag_table-Kyzbyt_Maksym.xml"/>
-    <include file="db/changelog/logs/ch-add-trigger_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
-    <include file="db/changelog/logs/ch-change_function_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
+    <include
+            file="db/changelog/logs/ch-add-create_function_for_calculate_sum_total_amount_without_discounts_bag_table-Kyzbyt_Maksym.xml"/>
+    <include
+            file="db/changelog/logs/ch-add-create_function_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
+    <include
+            file="db/changelog/logs/ch-add-trigger_for_calculate_sum_total_amount_without_discounts_bag_table-Kyzbyt_Maksym.xml"/>
+    <include
+            file="db/changelog/logs/ch-add-trigger_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
+    <include
+            file="db/changelog/logs/ch-change_function_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-add-columns-address-Boiarchuk.xml"/>
     <include file="db/changelog/logs/ch-insert-into-order_payment_status_transaltion-Makitra.xml"/>
     <include file="db/changelog/logs/ch-insert-order-status-translations-Makitra.xml"/>
@@ -184,7 +189,8 @@
     <include file="db/changelog/logs/ch-drop-column-receiving-station-Kharchenko.xml"/>
     <include file="db/changelog/logs/ch-drop-table-order-employee-Kharchenko.xml"/>
     <include file="db/changelog/logs/ch-add-column-notify-to-telegram-bot-Seti.xml"/>
-    <include file="/db/changelog/logs/ch-change-columns-location_status-to-tariff_status-in-table-tariff_info-Oliyarnik.xml"/>
+    <include
+            file="/db/changelog/logs/ch-change-columns-location_status-to-tariff_status-in-table-tariff_info-Oliyarnik.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Golik.xml"/>
     <include file="db/changelog/logs/ch-delete-order-status-translations-Golik.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table_view-Golik-1.xml"/>
@@ -219,7 +225,6 @@
     <include file="db/changelog/logs/2023-08-08-change-bag-name-column-length.xml"/>
     <include file="db/changelog/logs/ch-add-column-status-to-bag-table-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-update-order-bag-mapping-table-Spodaryk.xml"/>
-    <include file="/db/changelog/logs/ch-add-column-order-bag-mapping-table-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-insert-into-users-Spodaryk.xml"/>
     <include file="/db/changelog/logs/ch-add-columns-nameEventEng-and-authorEng-to-Events-Bokalo.xml"/>
     <include file="/db/changelog/logs/ch-update-employees-set-new-main-email-Midianyi.xml"/>
