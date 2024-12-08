@@ -78,7 +78,7 @@ class UserProfileControllerTest {
 
         String responseJSON = OBJECT_MAPPER.writeValueAsString(userProfileDto);
 
-        mockMvc.perform(put(AppConstant.ubsLink + "/user/update")
+        mockMvc.perform(put(AppConstant.UBS_USER_PROFILE_LINK + "/user/update")
             .content(responseJSON)
             .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
@@ -87,7 +87,7 @@ class UserProfileControllerTest {
 
     @Test
     void getProfileData() throws Exception {
-        mockMvc.perform(get(AppConstant.ubsLink + "/user/getUserProfile")
+        mockMvc.perform(get(AppConstant.UBS_USER_PROFILE_LINK + "/user/getUserProfile")
             .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -95,7 +95,7 @@ class UserProfileControllerTest {
 
     @Test
     void deactivateUser() throws Exception {
-        mockMvc.perform(put(AppConstant.ubsLink + deactivateUser + "?id=5"))
+        mockMvc.perform(put(AppConstant.UBS_USER_PROFILE_LINK + deactivateUser + "?id=5"))
             .andExpect(status().isOk());
         verify(ubsClientService).markUserAsDeactivated(5L);
     }
@@ -103,7 +103,7 @@ class UserProfileControllerTest {
     @Test
     void createUserProfile() throws Exception {
         String content = OBJECT_MAPPER.writeValueAsString(getUserProfileCreateDto());
-        mockMvc.perform(post(AppConstant.ubsLink + "/user/create")
+        mockMvc.perform(post(AppConstant.UBS_USER_PROFILE_LINK + "/user/create")
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
