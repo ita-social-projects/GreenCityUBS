@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -49,11 +48,9 @@ public class AddressController {
      * @return {@link HttpStatus} - http status.
      */
     @Operation(summary = "Get all addresses for order")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = OrderWithAddressesResponseDto.class))),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
-    })
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+        content = @Content(schema = @Schema(implementation = OrderWithAddressesResponseDto.class)))
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
     @GetMapping("/findAll-order-address")
     public ResponseEntity<OrderWithAddressesResponseDto> getAllAddressesForCurrentUser(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
@@ -68,13 +65,11 @@ public class AddressController {
      * @return {@link HttpStatus} - http status.
      */
     @Operation(summary = "Save order address")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
-            content = @Content(schema = @Schema(implementation = OrderWithAddressesResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
-    })
+    @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
+        content = @Content(schema = @Schema(implementation = OrderWithAddressesResponseDto.class)))
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/save-order-address")
     public ResponseEntity<OrderWithAddressesResponseDto> saveAddressForOrder(
@@ -92,14 +87,12 @@ public class AddressController {
      * @return {@link HttpStatus} - http status.
      */
     @Operation(summary = "Update order address(if placeId is null updates only addressComment)")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = OrderWithAddressesResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
-    })
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+        content = @Content(schema = @Schema(implementation = OrderWithAddressesResponseDto.class)))
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     @PutMapping("/update-order-address")
     public ResponseEntity<OrderWithAddressesResponseDto> updateAddressForOrder(
         @Valid @RequestBody OrderAddressDtoRequest dtoRequest,
@@ -116,14 +109,12 @@ public class AddressController {
      * @return {@link HttpStatus} - http status.
      */
     @Operation(summary = "Delete order address")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.CREATED,
-            content = @Content(schema = @Schema(implementation = OrderWithAddressesResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
-    })
+    @ApiResponse(responseCode = "200", description = HttpStatuses.CREATED,
+        content = @Content(schema = @Schema(implementation = OrderWithAddressesResponseDto.class)))
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     @DeleteMapping("/order-addresses/{id}")
     public ResponseEntity<OrderWithAddressesResponseDto> deleteOrderAddress(
         @Valid @PathVariable("id") Long id,
@@ -140,14 +131,12 @@ public class AddressController {
      * @return {@link ResponseEntity}.
      */
     @Operation(summary = "Make address actual (default)")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = AddressDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
-    })
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+        content = @Content(schema = @Schema(implementation = AddressDto.class)))
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     @PatchMapping("/makeAddressActual/{addressId}")
     public ResponseEntity<AddressDto> makeAddressActual(
         @PathVariable Long addressId,
@@ -166,13 +155,11 @@ public class AddressController {
      */
     @Operation(summary = "Get all districts for a given region and city",
         description = "Provide a region and a city to look up for associated districts")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = OrderCancellationReasonDto.class))),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
-    })
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+        content = @Content(schema = @Schema(implementation = OrderCancellationReasonDto.class)))
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     @GetMapping("/get-all-districts")
     public ResponseEntity<List<DistrictDto>> getAllDistrictsForRegionAndCity(@RequestParam String region,
         @RequestParam String city) {

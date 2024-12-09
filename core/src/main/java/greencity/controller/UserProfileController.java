@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -41,13 +40,11 @@ public class UserProfileController {
      * @author Mykhaolo Berezhinskiy
      */
     @Operation(summary = "Update user profile")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = UserProfileDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
-    })
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+        content = @Content(schema = @Schema(implementation = UserProfileDto.class)))
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     @PutMapping("/user/update")
     public ResponseEntity<UserProfileUpdateDto> updateUserData(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
@@ -62,12 +59,10 @@ public class UserProfileController {
      * @author Liubomyr Bratakh
      */
     @Operation(summary = "Get user's profile data.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = UserProfileDto.class))),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
-    })
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+        content = @Content(schema = @Schema(implementation = UserProfileDto.class)))
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     @GetMapping("/user/getUserProfile")
     public ResponseEntity<UserProfileDto> getUserData(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
@@ -82,11 +77,9 @@ public class UserProfileController {
      * @author Maksym Golik.
      */
     @Operation(summary = "Create user profile")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
-            content = @Content(schema = @Schema(implementation = Long.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-    })
+    @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
+        content = @Content(schema = @Schema(implementation = Long.class)))
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
     @PostMapping("/user/create")
     public ResponseEntity<Long> createUserProfile(
         @Valid @RequestBody UserProfileCreateDto userProfileCreateDto) {
@@ -100,14 +93,12 @@ public class UserProfileController {
      * @author Liubomyr Bratakh.
      */
     @Operation(summary = "mark user as DEACTIVATED")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
-        @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY)
-    })
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY)
     @PutMapping("/user/markUserAsDeactivated")
     public ResponseEntity<HttpStatus> deactivateUser(
         @RequestParam Long id) {
