@@ -5,13 +5,8 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Encoders;
-import io.jsonwebtoken.security.Keys;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,7 +16,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.crypto.SecretKey;
 
@@ -40,7 +34,7 @@ class JwtAuthenticationProviderTest {
     private static final Role expectedRole = Role.ROLE_ADMIN;
 
     private JwtAuthenticationProvider jwtAuthenticationProvider;
-    private static final String expectedEmail = "qqq@email.com";
+    private static final String EXPECTED_EMAIL = "qqq@email.com";
     private static final SecretKey secretKey = Jwts.SIG.HS512.key().build();
 
     @BeforeEach
@@ -56,7 +50,7 @@ class JwtAuthenticationProviderTest {
     void authenticateWithValidAccessToken() {
         String accessToken = Jwts.builder()
             .signWith(secretKey)
-            .subject(expectedEmail)
+            .subject(EXPECTED_EMAIL)
             .issuedAt(Date.from(Instant.now()))
             .expiration(Date.from(Instant.now().plus(30, ChronoUnit.DAYS)))
             .claim("role", List.of(expectedRole)).compact();
@@ -65,12 +59,12 @@ class JwtAuthenticationProviderTest {
             null);
         Authentication actual = jwtAuthenticationProvider.authenticate(authentication);
 
-        assertEquals(expectedEmail, actual.getPrincipal());
+        assertEquals(EXPECTED_EMAIL, actual.getPrincipal());
         assertEquals(
             Stream.of(expectedRole)
                 .map(Role::toString)
                 .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList()),
+                .toList(),
             actual.getAuthorities());
         assertEquals(Collections.emptyList(), actual.getCredentials());
     }
@@ -79,7 +73,7 @@ class JwtAuthenticationProviderTest {
     void authenticateWithExpiredAccessToken() {
         String accessToken = Jwts.builder()
             .signWith(secretKey)
-            .subject(expectedEmail)
+            .subject(EXPECTED_EMAIL)
             .issuedAt(Date.from(Instant.now().minus(30, ChronoUnit.DAYS)))
             .expiration(Date.from(Instant.now().minus(24, ChronoUnit.DAYS)))
             .claim("role", List.of(expectedRole)).compact();
