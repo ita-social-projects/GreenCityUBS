@@ -5,7 +5,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.user.ubs.UBSUser;
 import greencity.enums.CancellationReason;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -72,7 +72,7 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "ubs_user_id")
-    private UBSuser ubsUser;
+    private UBSUser ubsUser;
 
     @Column(name = "order_date")
     private LocalDateTime orderDate;

@@ -42,8 +42,8 @@ public class CertificateCriteriaRepo {
     /**
      * Method for finding certificates with some criteria.
      *
-     * @author Sikhovskiy Rostyslav
      * @return Pages of certificates with filtering and sorting data
+     * @author Sikhovskiy Rostyslav
      */
 
     public Page<Certificate> findAllWithFilter(CertificatePage certificatePage,

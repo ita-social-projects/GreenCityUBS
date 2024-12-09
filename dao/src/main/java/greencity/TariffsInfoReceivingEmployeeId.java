@@ -11,7 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-public class TariffsInfoRecievingEmployeeId implements Serializable {
+public class TariffsInfoReceivingEmployeeId implements Serializable {
     private Long employee;
     private Long tariffsInfo;
 }

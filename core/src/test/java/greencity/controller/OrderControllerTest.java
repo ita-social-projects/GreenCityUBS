@@ -17,7 +17,7 @@ import greencity.dto.user.UserInfoDto;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.repository.OrderRepository;
-import greencity.repository.UBSuserRepository;
+import greencity.repository.UBSUserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
@@ -87,7 +87,7 @@ class OrderControllerTest {
     OrderController orderController;
 
     @Mock
-    private UBSuserRepository ubSuserRepository;
+    private UBSUserRepository ubSuserRepository;
 
     private static final String UBS_LINK = "/ubs";
     private static final String RANDOM_UUID = UUID.randomUUID().toString();

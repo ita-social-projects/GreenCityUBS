@@ -83,7 +83,6 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      *
      * @param bagId   {@link Integer} bag id
      * @param orderId {@link Long} order id
-     *
      * @return {@link Optional} of {@link Integer} returns actual bags' amount
      * @author Olena Sotnik
      */

@@ -24,7 +24,6 @@ public interface TelegramBotRepository extends CrudRepository<TelegramBot, Long>
      * @param chatId   {@link Long}.
      * @param isNotify {@link Boolean}
      * @return {@link Optional} {@link TelegramBot}.
-     *
      * @author Julia Seti
      */
     Optional<TelegramBot> findByUserAndChatIdAndIsNotify(User user, Long chatId, Boolean isNotify);
@@ -34,7 +33,6 @@ public interface TelegramBotRepository extends CrudRepository<TelegramBot, Long>
      *
      * @param user {@link User}.
      * @return {@link Optional} {@link TelegramBot}.
-     *
      * @author Julia Seti
      */
     Optional<TelegramBot> findByUser(User user);

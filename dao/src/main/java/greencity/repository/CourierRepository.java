@@ -20,7 +20,6 @@ public interface CourierRepository extends JpaRepository<Courier, Long> {
      * Method for getting all active couriers.
      *
      * @return list of {@link Courier}
-     *
      * @author Anton Bondar
      */
     @Query(value = "SELECT c FROM Courier c WHERE c.courierStatus = 'ACTIVE'")

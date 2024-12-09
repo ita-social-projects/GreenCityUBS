@@ -17,7 +17,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static greencity.enums.EmployeeStatus.employeeStatusExist;
 import static java.util.Arrays.stream;
@@ -163,7 +162,7 @@ public class EmployeeCriteriaRepository {
         List<Expression<String>> toUpperCaseExpressions) {
         return stream(searchLine.split("\\s+"))
             .map(searchArgument -> mapSearchArgumentToPredicate(searchArgument, toUpperCaseExpressions))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<Expression<String>> extractPossibleExpressionsForSearchLineFiltering(
@@ -189,6 +188,6 @@ public class EmployeeCriteriaRepository {
     }
 
     private boolean isStringNotNullAndNotEmpty(String str) {
-        return str != null && str.length() > 0;
+        return str != null && !str.isEmpty();
     }
 }

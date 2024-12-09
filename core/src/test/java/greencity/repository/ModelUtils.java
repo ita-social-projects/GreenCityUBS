@@ -5,7 +5,7 @@ import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.user.ubs.UBSUser;
 import greencity.enums.AddressStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -41,7 +41,7 @@ public class ModelUtils {
             .orderStatus(OrderStatus.FORMED)
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .user(User.builder().id(1L).build())
-            .ubsUser(UBSuser.builder().id(1L).build())
+            .ubsUser(UBSUser.builder().id(1L).build())
             .orderDate(LocalDateTime.now())
             .build());
         return orderList;

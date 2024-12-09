@@ -53,7 +53,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.user.ubs.UBSUser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.CertificateStatus;
@@ -83,7 +83,7 @@ import greencity.repository.OrdersForUserRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.TelegramBotRepository;
-import greencity.repository.UBSuserRepository;
+import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
@@ -186,8 +186,8 @@ import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
 import static greencity.ModelUtils.getTestOrderAddressDtoRequestWithNullPlaceId;
 import static greencity.ModelUtils.getTestOrderAddressLocationDto;
 import static greencity.ModelUtils.getTestUser;
-import static greencity.ModelUtils.getUBSuser;
-import static greencity.ModelUtils.getUBSuserWithoutSender;
+import static greencity.ModelUtils.getUBSUser;
+import static greencity.ModelUtils.getUBSUserWithoutSender;
 import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getUserForCreate;
@@ -242,7 +242,7 @@ class UBSClientServiceImplTest {
     private BagRepository bagRepository;
 
     @Mock
-    private UBSuserRepository ubsUserRepository;
+    private UBSUserRepository ubsUserRepository;
 
     @Mock
     private ModelMapper modelMapper;
@@ -647,7 +647,7 @@ class UBSClientServiceImplTest {
         Bag bag = getBagForOrder();
         TariffsInfo tariffsInfo = getTariffInfo();
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
@@ -673,7 +673,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser.setId(null)));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser.setId(null));
+        when(modelMapper.map(dto.getPersonalData(), UBSUser.class)).thenReturn(ubSuser.setId(null));
         when(addressRepository.findById(any())).thenReturn(Optional.of(getAddress().setUser(getTestUser())));
         when(locationRepository.findById(any())).thenReturn(Optional.of(getLocation()));
 
@@ -700,7 +700,7 @@ class UBSClientServiceImplTest {
         Bag bag = getBagForOrder();
         TariffsInfo tariffsInfo = getTariffInfo();
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
@@ -726,7 +726,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser.setId(null)));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser.setId(null));
+        when(modelMapper.map(dto.getPersonalData(), UBSUser.class)).thenReturn(ubSuser.setId(null));
         when(addressRepository.findById(any()))
             .thenReturn(Optional.of(getAddress().setAddressStatus(AddressStatus.DELETED)));
         when(locationRepository.findById(any())).thenReturn(Optional.of(getLocation()));
@@ -811,7 +811,7 @@ class UBSClientServiceImplTest {
         TariffsInfo tariffsInfo = getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag();
         bag.setTariffsInfo(tariffsInfo);
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
@@ -852,7 +852,7 @@ class UBSClientServiceImplTest {
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
@@ -888,7 +888,7 @@ class UBSClientServiceImplTest {
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setAddressStatus(AddressStatus.NEW);
@@ -965,7 +965,7 @@ class UBSClientServiceImplTest {
         TariffsInfo tariffsInfo = getTariffInfoWithLimitOfBags();
         bag.setTariffsInfo(tariffsInfo);
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
@@ -1001,9 +1001,9 @@ class UBSClientServiceImplTest {
             .setRecipientEmail("mail@mail.ua")
             .setRecipientPhone("067894522")
             .setAlternateEmail("my@email.com");
-        List<UBSuser> ubsUser = List.of(getUBSuser());
+        List<UBSUser> ubsUser = List.of(getUBSUser());
         when(userRepository.findByUuid(RANDOM_UUID)).thenReturn(user);
-        when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
+        when(ubsUserRepository.findUBSUserByUser(user)).thenReturn(ubsUser);
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
         PersonalDataDto actual = ubsService.getSecondPageData(RANDOM_UUID);
 
@@ -1018,9 +1018,9 @@ class UBSClientServiceImplTest {
             .setUuid(RANDOM_UUID)
             .setRecipientEmail("mail@mail.ua")
             .setRecipientPhone("067894522");
-        List<UBSuser> ubsUser = List.of(getUBSuser());
+        List<UBSUser> ubsUser = List.of(getUBSUser());
         when(userRepository.findByUuid(RANDOM_UUID)).thenReturn(user);
-        when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
+        when(ubsUserRepository.findUBSUserByUser(user)).thenReturn(ubsUser);
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
 
         PersonalDataDto actual = ubsService.getSecondPageData(RANDOM_UUID);
@@ -1037,9 +1037,9 @@ class UBSClientServiceImplTest {
             .setRecipientEmail("mail@mail.ua")
             .setRecipientPhone("067894522")
             .setAlternateEmail("");
-        List<UBSuser> ubsUser = List.of(getUBSuser());
+        List<UBSUser> ubsUser = List.of(getUBSUser());
         when(userRepository.findByUuid(RANDOM_UUID)).thenReturn(user);
-        when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
+        when(ubsUserRepository.findUBSUserByUser(user)).thenReturn(ubsUser);
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
 
         PersonalDataDto actual = ubsService.getSecondPageData(RANDOM_UUID);
@@ -1057,7 +1057,7 @@ class UBSClientServiceImplTest {
             .setRecipientPhone("067894522")
             .setAlternateEmail("my@email.com");
         when(userRepository.findByUuid(RANDOM_UUID)).thenReturn(user);
-        when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(Collections.emptyList());
+        when(ubsUserRepository.findUBSUserByUser(user)).thenReturn(Collections.emptyList());
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
 
         PersonalDataDto actual = ubsService.getSecondPageData(RANDOM_UUID);
@@ -1074,16 +1074,16 @@ class UBSClientServiceImplTest {
             .setRecipientEmail("mail@mail.ua")
             .setRecipientPhone("067894522")
             .setAlternateEmail("my@email.com");
-        List<UBSuser> ubsUser = Collections.singletonList(getUBSuser());
+        List<UBSUser> ubsUser = Collections.singletonList(getUBSUser());
         when(userRepository.findByUuid(RANDOM_UUID)).thenReturn(user);
-        when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
+        when(ubsUserRepository.findUBSUserByUser(user)).thenReturn(ubsUser);
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
         PersonalDataDto actual = ubsService.getSecondPageData(RANDOM_UUID);
 
         assertEquals(expected, actual);
 
         verify(userRepository, times(1)).findByUuid(anyString());
-        verify(ubsUserRepository, times(1)).findUBSuserByUser(any());
+        verify(ubsUserRepository, times(1)).findUBSUserByUser(any());
         verify(modelMapper, times(1)).map(user, PersonalDataDto.class);
     }
 
@@ -1278,7 +1278,7 @@ class UBSClientServiceImplTest {
             .recipientEmail("anatolii.andr@gmail.com")
             .recipientPhoneNumber("095123456").build();
 
-        Optional<UBSuser> user = Optional.of(getUBSuser());
+        Optional<UBSUser> user = Optional.of(getUBSUser());
         when(ubsUserRepository.findById(1L)).thenReturn(user);
         when(ubsUserRepository.save(user.get())).thenReturn(user.get());
 
@@ -2515,7 +2515,7 @@ class UBSClientServiceImplTest {
         Bag bag = getBagForOrder();
         bag.setTariffsInfo(getTariffInfoWithLimitOfBags());
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
@@ -2560,7 +2560,7 @@ class UBSClientServiceImplTest {
         tariffsInfo.setMin(50000L);
         bag.setTariffsInfo(tariffsInfo);
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
@@ -2603,7 +2603,7 @@ class UBSClientServiceImplTest {
         tariffsInfo.setMax(500L);
         bag.setTariffsInfo(tariffsInfo);
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
@@ -2890,7 +2890,7 @@ class UBSClientServiceImplTest {
     void senderInfoDtoBuilderTest() {
         OrderStatusTranslation orderStatusTranslation = getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
-        UBSuser ubsuser = getUBSuserWithoutSender();
+        UBSUser ubsuser = getUBSUserWithoutSender();
         Order order = getOrderTest().setUbsUser(ubsuser);
         User user = getTestUser();
         List<Order> orderList = new ArrayList<>();
@@ -3030,7 +3030,7 @@ class UBSClientServiceImplTest {
         order.updateWithNewOrderBags(List.of(ModelUtils.getOrderBag()));
         Bag bag = getBagForOrder();
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.DELETED);
@@ -3053,7 +3053,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(modelMapper.map(dto.getPersonalData(), UBSUser.class)).thenReturn(ubSuser);
 
         assertThrows(NotFoundException.class,
             () -> ubsService.saveFullOrderToDB(dto, RANDOM_UUID, null));
@@ -3074,7 +3074,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = getBagForOrder();
 
-        UBSuser ubSuser = getUBSuser();
+        UBSUser ubSuser = getUBSUser();
 
         OrderAddress address = ubSuser.getOrderAddress();
         address.setAddressStatus(AddressStatus.NEW);
@@ -3097,7 +3097,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(modelMapper.map(dto.getPersonalData(), UBSUser.class)).thenReturn(ubSuser);
 
         assertThrows(NotFoundException.class,
             () -> ubsService.saveFullOrderToDB(dto, RANDOM_UUID, null));

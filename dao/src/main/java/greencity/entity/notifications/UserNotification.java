@@ -43,9 +43,9 @@ public class UserNotification {
     private Set<NotificationParameter> parameters = new HashSet<>();
 
     @Column(name = "notification_time")
-    private LocalDateTime notificationTime = getCurentLocalTime();
+    private LocalDateTime notificationTime = getCurrentLocalTime();
 
-    private static LocalDateTime getCurentLocalTime() {
+    private static LocalDateTime getCurrentLocalTime() {
         return ZonedDateTime.now(ZoneId.of("Europe/Kiev")).toLocalDateTime();
     }
 }

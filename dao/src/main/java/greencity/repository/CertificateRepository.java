@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.order.Certificate;
 import greencity.enums.CertificateStatus;
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,7 +32,8 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @return list of {@link Certificate}.
      * @author Nazar Struk
      */
-    Page<Certificate> findAll(Pageable page);
+    @NonNull
+    Page<Certificate> findAll(@NonNull Pageable page);
 
     /**
      * The query for searching all certificates by order id.

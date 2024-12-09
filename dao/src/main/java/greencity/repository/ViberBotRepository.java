@@ -21,7 +21,6 @@ public interface ViberBotRepository extends JpaRepository<ViberBot, Long> {
      *
      * @param user {@link User}.
      * @return {@link Optional} {@link ViberBot}.
-     *
      * @author Julia Seti
      */
     Optional<ViberBot> findByUser(User user);

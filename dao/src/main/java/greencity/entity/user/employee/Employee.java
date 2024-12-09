@@ -1,6 +1,6 @@
 package greencity.entity.user.employee;
 
-import greencity.entity.TariffsInfoRecievingEmployee;
+import greencity.entity.TariffsInfoReceivingEmployee;
 import greencity.entity.order.Order;
 import greencity.entity.order.Service;
 import greencity.entity.order.TariffsInfo;
@@ -19,8 +19,8 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = {"employeePosition", "attachedOrders", "employeeOrderPositions", "orders", "tariffs",
-    "createdServices", "editedServices"})
+@EqualsAndHashCode(exclude = {"employeePosition", "employeeOrderPositions", "orders", "tariffs", "createdServices",
+    "editedServices"})
 @Table(name = "employees")
 public class Employee {
     @Id
@@ -57,7 +57,7 @@ public class Employee {
     private Set<Position> employeePosition;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TariffsInfoRecievingEmployee> tariffsInfoReceivingEmployees;
+    private List<TariffsInfoReceivingEmployee> tariffsInfoReceivingEmployees;
 
     @OneToMany(mappedBy = "creator")
     private List<TariffsInfo> tariffs;

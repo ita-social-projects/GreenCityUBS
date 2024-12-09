@@ -1,5 +1,6 @@
 package greencity.enums;
 
 public enum SortingOrder {
-    ASC, DESC
+    ASC,
+    DESC
 }

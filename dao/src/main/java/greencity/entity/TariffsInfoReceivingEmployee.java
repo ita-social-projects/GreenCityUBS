@@ -1,6 +1,6 @@
 package greencity.entity;
 
-import greencity.TariffsInfoRecievingEmployeeId;
+import greencity.TariffsInfoReceivingEmployeeId;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import jakarta.persistence.*;
@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @Entity
 @Builder
 @Table(name = "tariff_infos_receiving_employee_mapping")
-@IdClass(TariffsInfoRecievingEmployeeId.class)
+@IdClass(TariffsInfoReceivingEmployeeId.class)
 @AllArgsConstructor
 @NoArgsConstructor
-public class TariffsInfoRecievingEmployee {
+public class TariffsInfoReceivingEmployee {
     @Id
     @ManyToOne
     @JoinColumn(name = "employee_id", referencedColumnName = "id")

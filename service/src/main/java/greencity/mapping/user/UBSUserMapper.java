@@ -1,25 +1,25 @@
 package greencity.mapping.user;
 
 import greencity.dto.user.PersonalDataDto;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.user.ubs.UBSUser;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 /**
  * Class that used by {@link ModelMapper} to map {@link PersonalDataDto} into
- * {@link UBSuser}.
+ * {@link UBSUser}.
  */
 @Component
-public class UBSuserMapper extends AbstractConverter<PersonalDataDto, UBSuser> {
+public class UBSUserMapper extends AbstractConverter<PersonalDataDto, UBSUser> {
     /**
-     * Method convert {@link PersonalDataDto} to {@link UBSuser}.
+     * Method convert {@link PersonalDataDto} to {@link UBSUser}.
      *
-     * @return {@link UBSuser}
+     * @return {@link UBSUser}
      */
     @Override
-    protected UBSuser convert(PersonalDataDto personalDataDto) {
-        return UBSuser.builder()
+    protected UBSUser convert(PersonalDataDto personalDataDto) {
+        return UBSUser.builder()
             .id(personalDataDto.getId())
             .firstName(personalDataDto.getFirstName())
             .lastName(personalDataDto.getLastName())

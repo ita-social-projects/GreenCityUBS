@@ -7,6 +7,7 @@ import greencity.entity.user.Region;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.TariffStatus;
 import jakarta.persistence.criteria.*;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -20,7 +21,8 @@ public class TariffsInfoSpecification implements Specification<TariffsInfo> {
     private final TariffsInfoFilterCriteria criteria;
 
     @Override
-    public Predicate toPredicate(Root<TariffsInfo> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+    public Predicate toPredicate(@NonNull Root<TariffsInfo> root, @NonNull CriteriaQuery<?> query,
+        @NonNull CriteriaBuilder criteriaBuilder) {
         Path<Location> location = root.join("tariffLocations").get("location");
         Path<Region> region = location.get("region");
         Path<Courier> courier = root.get("courier");

@@ -154,7 +154,7 @@ import static greencity.ModelUtils.getOrderStatusTranslations;
 import static greencity.ModelUtils.getOrderUserFirst;
 import static greencity.ModelUtils.getOrderWithoutPayment;
 import static greencity.ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto;
-import static greencity.ModelUtils.getOrdersStatusCanseledDto;
+import static greencity.ModelUtils.getOrdersStatusCanceledDto;
 import static greencity.ModelUtils.getOrdersStatusConfirmedDto;
 import static greencity.ModelUtils.getOrdersStatusDoneDto;
 import static greencity.ModelUtils.getOrdersStatusFormedDto2;
@@ -1470,7 +1470,7 @@ class UBSManagementServiceImplTest {
 
     @Test
     void testSetOrderDetailsCanceled() {
-        Order order = getOrdersStatusCanseledDto();
+        Order order = getOrdersStatusCanceledDto();
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         doNothing().when(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());

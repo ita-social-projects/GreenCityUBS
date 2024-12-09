@@ -1,6 +1,6 @@
 package greencity.entity.order;
 
-import greencity.entity.TariffsInfoRecievingEmployee;
+import greencity.entity.TariffsInfoReceivingEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierLimit;
@@ -19,8 +19,8 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders", "employees", "creator"})
-@EqualsAndHashCode(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders", "employees",
+@ToString(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders", "creator"})
+@EqualsAndHashCode(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders",
     "courier", "creator"})
 
 public class TariffsInfo {
@@ -41,7 +41,7 @@ public class TariffsInfo {
     private Set<ReceivingStation> receivingStationList;
 
     @OneToMany(mappedBy = "tariffsInfo")
-    private List<TariffsInfoRecievingEmployee> employeeAssoc;
+    private List<TariffsInfoReceivingEmployee> employeeAssoc;
 
     @Column
     @Enumerated(EnumType.STRING)

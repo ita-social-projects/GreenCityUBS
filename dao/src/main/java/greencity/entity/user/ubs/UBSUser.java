@@ -9,14 +9,14 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"orders", "address", "user",})
-@ToString(exclude = {"orders", "address", "user",})
+@EqualsAndHashCode(exclude = {"orders", "user",})
+@ToString(exclude = {"orders", "user",})
 @Getter
 @Setter
 @Builder
 @Table(name = "ubs_user")
 @Entity
-public class UBSuser {
+public class UBSUser {
     @Id
     private Long id;
 

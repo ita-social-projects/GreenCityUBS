@@ -4,7 +4,7 @@ import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.user.ubs.UBSUser;
 import greencity.entity.viber.ViberBot;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,7 +27,7 @@ public class User {
     private Long id;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    private Set<UBSuser> ubsUsers;
+    private Set<UBSUser> ubsUsers;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Order> orders;
