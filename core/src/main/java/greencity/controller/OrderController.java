@@ -194,8 +194,6 @@ public class OrderController {
         @Valid @PathVariable("id") Optional<Long> id) {
         if (id.isPresent()) {
             OrderDetailStatusDto orderDetailStatusDto = ubsManagementService.getOrderDetailStatus(id.get());
-            RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-            requestAttributes.setAttribute("orderDetailStatus", orderDetailStatusDto, RequestAttributes.SCOPE_REQUEST);
             if (PaymentStatus.PAID.name().equals(orderDetailStatusDto.getPaymentStatus())
                 || !OrderStatus.FORMED.name().equals(orderDetailStatusDto.getOrderStatus())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);

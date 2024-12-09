@@ -598,7 +598,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
-        checkIfOrderIsNotPayedAndSendEmailAsync(order, orderId);
+        checkIfOrderIsNotPayedAndSendEmailAsync(order, sumToPayInCoins);
 
         notificationService.notifyCreatedOrder(order);
 
@@ -610,21 +610,21 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Async
-    protected void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long orderId) {
+    protected void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins) {
         try {
-            Thread.sleep(60000);
-            checkIfOrderIsNotPayedAndSendEmail(order);
+            Thread.sleep(1000);
+            checkIfOrderIsNotPayedAndSendEmail(order, sumToPayInCoins);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("An error in the execution of an asynchronous task", e);
         }
     }
 
-    private void checkIfOrderIsNotPayedAndSendEmail(Order order) {
-        OrderDetailStatusDto orderDetailStatusDto = (OrderDetailStatusDto) RequestContextHolder.getRequestAttributes()
-            .getAttribute("orderDetailStatus", RequestAttributes.SCOPE_REQUEST);
-        if (PaymentStatus.UNPAID.name().equals(orderDetailStatusDto.getPaymentStatus())) {
-            notificationService.notifyUnpaidOrderPermanently(order);
+    private void checkIfOrderIsNotPayedAndSendEmail(Order order, Long sumToPayInCoins) {
+        boolean isOrderPayed = order.getOrderPaymentStatus().equals(OrderPaymentStatus.PAID);
+        if (!isOrderPayed) {
+            Double sumToPay = sumToPayInCoins.doubleValue();
+            notificationService.notifyUnpaidOrderPermanently(order, sumToPay);
         }
     }
 
