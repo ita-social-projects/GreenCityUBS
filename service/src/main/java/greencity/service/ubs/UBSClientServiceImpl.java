@@ -610,7 +610,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Async
-    protected void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins) {
+    public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins) {
         try {
             Thread.sleep(1000);
             checkIfOrderIsNotPayedAndSendEmail(order, sumToPayInCoins);
