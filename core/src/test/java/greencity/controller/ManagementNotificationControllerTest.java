@@ -48,7 +48,7 @@ class ManagementNotificationControllerTest {
     @Mock
     UserRemoteClient userRemoteClient;
 
-    private static final String url = "/admin/notification";
+    private static final String ADMIN_NOTIFICATION_LINK = "/admin/notification";
     private static final ErrorAttributes ERROR_ATTRIBUTES = new DefaultErrorAttributes();
     private static final Principal PRINCIPAL = getUuid();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -66,7 +66,7 @@ class ManagementNotificationControllerTest {
     @Test
     void getAllTest() throws Exception {
         String responseJSON = OBJECT_MAPPER.writeValueAsString(List.of(ModelUtils.getNotificationTemplateDto()));
-        mockMvc.perform(get(url + "/get-all-templates")
+        mockMvc.perform(get(ADMIN_NOTIFICATION_LINK + "/get-all-templates")
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -76,7 +76,7 @@ class ManagementNotificationControllerTest {
     void updateNotificationTemplateTest() throws Exception {
         String jsonDto = OBJECT_MAPPER.writeValueAsString(
             ModelUtils.getNotificationTemplateWithPlatformsUpdateDto());
-        mockMvc.perform(put(url + "/update-template/{id}", 1L)
+        mockMvc.perform(put(ADMIN_NOTIFICATION_LINK + "/update-template/{id}", 1L)
             .principal(PRINCIPAL)
             .content(jsonDto)
             .contentType(MediaType.APPLICATION_JSON))
@@ -86,7 +86,7 @@ class ManagementNotificationControllerTest {
     @Test
     void getNotificationTemplateTest() throws Exception {
         String responseJSON = OBJECT_MAPPER.writeValueAsString(ModelUtils.getNotificationTemplateWithPlatformsDto());
-        mockMvc.perform(get(url + "/get-template/{id}", 1L)
+        mockMvc.perform(get(ADMIN_NOTIFICATION_LINK + "/get-template/{id}", 1L)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -96,12 +96,12 @@ class ManagementNotificationControllerTest {
     void saveBadRequestTest() throws Exception {
         NotificationTemplateWithPlatformsUpdateDto dto = ModelUtils.getNotificationTemplateWithPlatformsUpdateDto();
         Long id = 1L;
-        String JsonDto = OBJECT_MAPPER.writeValueAsString(dto);
+        String jsonDto = OBJECT_MAPPER.writeValueAsString(dto);
         doThrow(NotFoundException.class)
             .when(notificationTemplateService).update(id, dto);
-        mockMvc.perform(put(url + "/update-template/{id}", id)
+        mockMvc.perform(put(ADMIN_NOTIFICATION_LINK + "/update-template/{id}", id)
             .principal(PRINCIPAL)
-            .content(JsonDto)
+            .content(jsonDto)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
         verify(notificationTemplateService).update(id, dto);
@@ -111,7 +111,7 @@ class ManagementNotificationControllerTest {
     void deactivateNotificationTemplate() throws Exception {
         Long id = 1L;
         String status = INACTIVE.name();
-        mockMvc.perform(put(url + "/change-template-status/{id}", id)
+        mockMvc.perform(put(ADMIN_NOTIFICATION_LINK + "/change-template-status/{id}", id)
             .param("status", status)
             .principal(PRINCIPAL))
             .andExpect(status().isOk());
@@ -126,7 +126,7 @@ class ManagementNotificationControllerTest {
         doThrow(BadRequestException.class)
             .when(notificationTemplateService).changeNotificationStatusById(id, status);
 
-        mockMvc.perform(put(url + "/change-template-status/{id}", id)
+        mockMvc.perform(put(ADMIN_NOTIFICATION_LINK + "/change-template-status/{id}", id)
             .param("status", status)
             .principal(PRINCIPAL))
             .andExpect(status().isBadRequest());
@@ -142,7 +142,7 @@ class ManagementNotificationControllerTest {
         doThrow(NotFoundException.class)
             .when(notificationTemplateService).changeNotificationStatusById(id, status);
 
-        mockMvc.perform(MockMvcRequestBuilders.put(url + "/change-template-status/{id}", id)
+        mockMvc.perform(MockMvcRequestBuilders.put(ADMIN_NOTIFICATION_LINK + "/change-template-status/{id}", id)
             .param("status", status)
             .principal(PRINCIPAL))
             .andExpect(MockMvcResultMatchers.status().isNotFound());

@@ -38,13 +38,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SecurityConfig.class)
 class AdminUbsControllerTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private final String RANDOM_UUID = UUID.randomUUID().toString();
+    private static final String RANDOM_UUID = UUID.randomUUID().toString();
     private MockMvc mockMvc;
 
     @Mock
     private OrdersAdminsPageService ordersAdminsPageService;
 
-    private static final String management = "/ubs/management";
+    private static final String UBS_MANAGEMENT_LINK = "/ubs/management";
+
     @InjectMocks
     AdminUbsController adminUbsController;
 
@@ -62,7 +63,7 @@ class AdminUbsControllerTest {
     @Test
     void getTableParameters() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
-        mockMvc.perform(get(management + "/tableParams")
+        mockMvc.perform(get(UBS_MANAGEMENT_LINK + "/tableParams")
             .principal(principal))
             .andExpect(status().isOk());
         verify(ordersAdminsPageService).getParametersForOrdersTable(RANDOM_UUID);
@@ -77,7 +78,7 @@ class AdminUbsControllerTest {
         when(ordersAdminsPageService.chooseOrdersDataSwitcher(principal.getName(), dto))
             .thenReturn(changeOrderResponseDTO);
 
-        mockMvc.perform(put(management + "/changingOrder")
+        mockMvc.perform(put(UBS_MANAGEMENT_LINK + "/changingOrder")
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal)
             .content(json))
@@ -94,7 +95,7 @@ class AdminUbsControllerTest {
 
         when(ordersAdminsPageService.unblockOrder(null, listOfOrdersId)).thenReturn(unblockedOrdersId);
 
-        mockMvc.perform(put(management + "/unblockOrders")
+        mockMvc.perform(put(UBS_MANAGEMENT_LINK + "/unblockOrders")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)
             .content(json))
@@ -110,7 +111,7 @@ class AdminUbsControllerTest {
 
         when(ordersAdminsPageService.requestToBlockOrder(null, List.of())).thenReturn(dto);
 
-        mockMvc.perform(put(management + "/blockOrders")
+        mockMvc.perform(put(UBS_MANAGEMENT_LINK + "/blockOrders")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)
             .content(json))
@@ -124,7 +125,7 @@ class AdminUbsControllerTest {
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
         when(ordersAdminsPageService.getColumnWidthForEmployee(anyString())).thenReturn(new ColumnWidthDto());
 
-        mockMvc.perform(get(management + "/orderTableColumnsWidth")
+        mockMvc.perform(get(UBS_MANAGEMENT_LINK + "/orderTableColumnsWidth")
             .principal(principal))
             .andExpect(status().isOk());
     }
@@ -135,7 +136,7 @@ class AdminUbsControllerTest {
         String json = OBJECT_MAPPER.writeValueAsString(columnWidthDto);
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
         doNothing().when(ordersAdminsPageService).saveColumnWidthForEmployee(any(ColumnWidthDto.class), anyString());
-        mockMvc.perform(put(management + "/orderTableColumnsWidth")
+        mockMvc.perform(put(UBS_MANAGEMENT_LINK + "/orderTableColumnsWidth")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)
             .content(json))

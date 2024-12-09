@@ -91,39 +91,43 @@ class ManagementOrderControllerTest {
     private static final Principal PRINCIPAL = getUuid();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    public static final String contentForaddingcontroller = "{\n"
-        + " \"code\": \"1111-2222\",\n" +
-        " \"monthCount\": 8,\n" +
-        " \"points\": 100\n"
-        + "}";
+    public static final String CONTENT_FOR_ADDING_CONTROLLER = """
+        {
+         "code": "1111-2222",
+         "monthCount": 8,
+         "points": 100
+        }""";
 
-    public static final String contentForUpdatingController = "{\n"
-        + " \"district\": \"test\",\n"
-        + " \"street\": \"test\",\n"
-        + " \"houseCorpus\": \"4\",\n"
-        + " \"entranceNumber\": \"2\",\n"
-        + " \"houseNumber\": \"1\"\n"
-        + "}";
+    public static final String CONTENT_FOR_UPDATING_CONTROLLER = """
+        {
+         "district": "test",
+         "street": "test",
+         "houseCorpus": "4",
+         "entranceNumber": "2",
+         "houseNumber": "1"
+        }""";
 
-    public static final String contentForUpdatingOrderDetailController = "[\n"
-        + "{\n"
-        + "\"amount\": 0,\n"
-        + "\"bagId\": 0,\n"
-        + "\"confirmedQuantity\": 0,\n"
-        + "\"exportedQuantity\": 0,\n"
-        + "\"orderId\": 0\n"
-        + "}\n"
-        + "]";
+    public static final String CONTENT_FOR_UPDATING_ORDER_DETAIL_CONTROLLER = """
+        [
+        {
+        "amount": 0,
+        "bagId": 0,
+        "confirmedQuantity": 0,
+        "exportedQuantity": 0,
+        "orderId": 0
+        }
+        ]""";
 
-    public static final String contentForUpdatingEmployeeByOrderController = "{\n"
-        + "\"employeeOrderPositionDTOS\": [\n"
-        + "{\n"
-        + "\"name\": \"Alisson Becker\",\n"
-        + "\"positionId\": 1\n"
-        + "}\n"
-        + "],\n"
-        + "\"orderId\": 8\n"
-        + "}";
+    public static final String CONTENT_FOR_UPDATING_EMPLOYEE_BY_ORDER_CONTROLLER = """
+        {
+        "employeeOrderPositionDTOS": [
+        {
+        "name": "Alisson Becker",
+        "positionId": 1
+        }
+        ],
+        "orderId": 8
+        }""";
 
     @BeforeEach
     void setup() {
@@ -146,7 +150,7 @@ class ManagementOrderControllerTest {
     @Test
     void addCertificateTest() throws Exception {
         mockMvc.perform(post(UBS_LINK + "/addCertificate")
-            .content(contentForaddingcontroller)
+            .content(CONTENT_FOR_ADDING_CONTROLLER)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
         CertificateDtoForAdding certificateDtoForAdding = CertificateDtoForAdding.builder()
@@ -207,9 +211,9 @@ class ManagementOrderControllerTest {
     @Test
     void updateOrderStatusesDetail() throws Exception {
         OrderDetailStatusDto dto = ModelUtils.getPaidOrderDetailStatusDto();
-        String orderResponceDtoJSON = OBJECT_MAPPER.writeValueAsString(dto);
+        String orderResponseDtoJSON = OBJECT_MAPPER.writeValueAsString(dto);
         this.mockMvc.perform(put(UBS_LINK + "/update-order-detail-status" + "/{id}", 1L)
-            .content(orderResponceDtoJSON)
+            .content(orderResponseDtoJSON)
             .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
@@ -252,9 +256,9 @@ class ManagementOrderControllerTest {
     @Test
     void updateOrderExportedDetail() throws Exception {
         ExportDetailsDto dto = ModelUtils.getOrderDetailExportDto();
-        String orderResponceDtoJSON = OBJECT_MAPPER.writeValueAsString(dto);
+        String orderResponseDtoJSON = OBJECT_MAPPER.writeValueAsString(dto);
         this.mockMvc.perform(put(UBS_LINK + "/update-order-export-details" + "/{id}", 1L)
-            .content(orderResponceDtoJSON)
+            .content(orderResponseDtoJSON)
             .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
@@ -284,7 +288,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void deleteManualPayment() throws Exception {
-        mockMvc.perform(delete(UBS_LINK + "/delete-manual-payment/{id}", 1l))
+        mockMvc.perform(delete(UBS_LINK + "/delete-manual-payment/{id}", 1L))
             .andExpect(status().isOk()).andDo(print());
     }
 
@@ -296,7 +300,7 @@ class ManagementOrderControllerTest {
             "", "application/json", responseJSON.getBytes());
 
         MockMultipartHttpServletRequestBuilder builder =
-            multipart(UBS_LINK + "/update-manual-payment/{id}", 1l);
+            multipart(UBS_LINK + "/update-manual-payment/{id}", 1L);
         builder.with(request -> {
             request.setMethod("PUT");
             return request;
@@ -436,10 +440,10 @@ class ManagementOrderControllerTest {
     @Test
     void getUpdateAllOrderPageAdminInfoTest() throws Exception {
         UpdateAllOrderPageDto dto = ModelUtils.getUpdateAllOrderPageDto();
-        String JsonDto = OBJECT_MAPPER.writeValueAsString(dto);
+        String jsonDto = OBJECT_MAPPER.writeValueAsString(dto);
 
         mockMvc.perform(put(UBS_LINK + "/all-order-page-admin-info")
-            .content(JsonDto)
+            .content(jsonDto)
             .principal(PRINCIPAL)
             .param("lang", "ua")
             .contentType(MediaType.APPLICATION_JSON))

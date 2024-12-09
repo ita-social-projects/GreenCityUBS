@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class NotificationControllerTest {
-    private static final String notificationLink = "/notifications";
+    private static final String NOTIFICATIONS_LINK = "/notifications";
 
     private MockMvc mockMvc;
 
@@ -57,7 +57,7 @@ class NotificationControllerTest {
         NotificationDto dto = getNotificationDto();
         String responseJSON = OBJECT_MAPPER.writeValueAsString(List.of(dto));
 
-        mockMvc.perform(post(notificationLink + "/" + 1L + "?lang=ua")
+        mockMvc.perform(post(NOTIFICATIONS_LINK + "/" + 1L + "?lang=ua")
             .principal(PRINCIPAL)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
@@ -67,15 +67,15 @@ class NotificationControllerTest {
 
     @Test
     void getNotificationsForCurrentUser() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink)
+        mockMvc.perform(MockMvcRequestBuilders.get(NOTIFICATIONS_LINK)
             .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
-    void getUnreadenNotificationsTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink + "/quantityUnreadenNotifications")
+    void getUnreadNotificationsTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get(NOTIFICATIONS_LINK + "/quantityUnreadenNotifications")
             .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());

@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class UserProfileControllerTest {
-    private static final String deactivateUser = "/user/markUserAsDeactivated";
+    private static final String DEACTIVATE_USER_LINK = "/user/markUserAsDeactivated";
 
     private MockMvc mockMvc;
 
@@ -95,7 +95,7 @@ class UserProfileControllerTest {
 
     @Test
     void deactivateUser() throws Exception {
-        mockMvc.perform(put(AppConstant.UBS_USER_PROFILE_LINK + deactivateUser + "?id=5"))
+        mockMvc.perform(put(AppConstant.UBS_USER_PROFILE_LINK + DEACTIVATE_USER_LINK + "?id=5"))
             .andExpect(status().isOk());
         verify(ubsClientService).markUserAsDeactivated(5L);
     }
