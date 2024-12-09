@@ -33,7 +33,6 @@ import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
@@ -77,7 +76,6 @@ import greencity.enums.PaymentSystem;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
@@ -113,9 +111,6 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -256,7 +251,6 @@ import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -3139,47 +3133,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getPaymentResponseFromFondy() {
-        Order order = getOrder();
-        FondyPaymentResponse expected = FondyPaymentResponse.builder()
-            .paymentStatus("success")
-            .build();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid(order.getUser().getUuid())).thenReturn(order.getUser());
-
-        assertEquals(expected,
-            ubsService.getPaymentResponseFromFondy(1L, order.getUser().getUuid()));
-    }
-
-    @Test
-    void getPaymentResponseFromFondyOrderNotFoundException() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ubsService.getPaymentResponseFromFondy(1L, "abc"));
-    }
-
-    @Test
-    void getPaymentResponseFromFondyPaymentNotFoundException() {
-        Order order = getOrder().setPayment(Collections.emptyList());
-        String uuid = order.getUser().getUuid();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid(uuid)).thenReturn(order.getUser());
-
-        assertThrows(NotFoundException.class, () -> ubsService.getPaymentResponseFromFondy(1L, uuid));
-    }
-
-    @Test
-    void getPaymentResponseFromFondyAccessDeniedException() {
-        Order order = getOrder();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
-
-        assertThrows(AccessDeniedException.class, () -> ubsService.getPaymentResponseFromFondy(1L, "abc"));
-    }
-
-    @Test
     void getOrderForUserTest() {
         OrderStatusTranslation orderStatusTranslation = getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
@@ -3817,15 +3770,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenSignatureIsInvalid() {
-        String privateKey = "privateKey";
-        String data = "data";
-        String wrongSignature = "abc";
-        assertThrows(WrongSignatureException.class,
-            () -> ubsClientService.checkSignature(privateKey, data, wrongSignature));
-    }
-
-    @Test
     void testValidatePaymentSuccess() {
         PaymentResponseDto response = getPaymentResponseDto();
 
@@ -3924,21 +3868,12 @@ class UBSClientServiceImplTest {
 
     private String invokeParseSettlementDate(String settlementDate) {
         try {
-            var method = UBSClientServiceImpl.class.getDeclaredMethod("parseFondySettlementDate", String.class);
+            var method = UBSClientServiceImpl.class.getDeclaredMethod("parseSettlementDate", String.class);
             method.setAccessible(true);
             return (String) method.invoke(ubsClientService, settlementDate);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Test
-    void testCheckSignatureValidSignature() throws NoSuchAlgorithmException {
-        String privateKey = "secretKey";
-        String data = "data";
-        String receivedSignature = createSignature(privateKey, data);
-
-        assertDoesNotThrow(() -> invokeCheckSignature(privateKey, data, receivedSignature));
     }
 
     @Test
@@ -4141,24 +4076,6 @@ class UBSClientServiceImplTest {
         OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         assertThrows(BadRequestException.class, () -> ubsService.processOrder("uuid", dto));
-    }
-
-    private void invokeCheckSignature(String privateKey, String data, String receivedSignature) {
-        try {
-            var method = UBSClientServiceImpl.class.getDeclaredMethod("checkSignature", String.class, String.class,
-                String.class);
-            method.setAccessible(true);
-            method.invoke(ubsClientService, privateKey, data, receivedSignature);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String createSignature(String privateKey, String data) throws NoSuchAlgorithmException {
-        String message = privateKey + data + privateKey;
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        byte[] messageDigest = md.digest(message.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(messageDigest);
     }
 
     @Test

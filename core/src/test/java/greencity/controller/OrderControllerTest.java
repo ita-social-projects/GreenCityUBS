@@ -332,13 +332,6 @@ class OrderControllerTest {
     }
 
     @Test
-    void getFondyStatusPayment2() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getFondyStatus/{orderId}", 1)
-            .principal(principal))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     @SneakyThrows
     void getInfoAboutTariffTest() {
         mockMvc.perform(get(ubsLink + "/tariffinfo/{locationId}", 1L)
