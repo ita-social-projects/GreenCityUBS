@@ -623,7 +623,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void checkIfOrderIsNotPayedAndSendEmail(Order order, Long sumToPayInCoins) {
         boolean isOrderPayed = order.getOrderPaymentStatus().equals(OrderPaymentStatus.PAID);
         if (!isOrderPayed) {
-            Double sumToPay = sumToPayInCoins.doubleValue()/100.0;
+            Double sumToPay = sumToPayInCoins.doubleValue() / 100.0;
             notificationService.notifyUnpaidOrderPermanently(order, sumToPay);
         }
     }
