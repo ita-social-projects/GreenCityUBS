@@ -41,8 +41,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -85,6 +83,9 @@ import static greencity.ModelUtils.TEST_USER_NOTIFICATION_5;
 import static greencity.ModelUtils.TEST_USER_NOTIFICATION_6;
 import static greencity.ModelUtils.TEST_USER_NOTIFICATION_7;
 import static greencity.ModelUtils.TEST_VIOLATION;
+import static greencity.ModelUtils.getUnpaidOrderUrl;
+import static greencity.ModelUtils.getUserNotificationForUnpaidOrder;
+import static greencity.ModelUtils.getNotifyInternallyFormedOrder;
 import static greencity.ModelUtils.createUserNotificationForViolationWithParameters;
 import static greencity.ModelUtils.createViolationNotificationDto;
 import static greencity.ModelUtils.getBag1list;
@@ -92,11 +93,13 @@ import static greencity.ModelUtils.getBag4list;
 import static greencity.ModelUtils.getActiveCertificateWith10Points;
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getViolation;
-import static greencity.ModelUtils.getNotifyInternallyFormedOrder;
 import static greencity.enums.NotificationReceiverType.SITE;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -267,6 +270,33 @@ class NotificationServiceImplTest {
             verify(notificationService).notifyPaidOrder(order);
             verify(userNotificationRepository).save(any(UserNotification.class));
             verify(notificationParameterRepository).saveAll(Set.of(orderNumber));
+        }
+
+        @Test
+        void notifyUnpaidOrderPermanentlyTest() {
+            String orderUrl = getUnpaidOrderUrl();
+
+            UserNotification userNotification = getUserNotificationForUnpaidOrder();
+
+            Double amountToPay = userNotification.getParameters().stream()
+                .filter(param -> "amountToPay".equals(param.getKey()))
+                .findFirst()
+                .map(param -> Double.parseDouble(param.getValue()))
+                .orElseThrow(() -> new IllegalArgumentException("amountToPay not found in parameters"));
+
+            when(internalUrlConfigProp.getOrderUrl()).thenReturn(orderUrl);
+            when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(userNotification);
+            when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
+                List<NotificationParameter> parameters = new ArrayList<>(invocation.getArgument(0));
+                return parameters;
+            });
+
+            assertDoesNotThrow(
+                () -> notificationService.notifyUnpaidOrderPermanently(userNotification.getOrder(), amountToPay));
+
+            verify(userNotificationRepository).save(any(UserNotification.class));
+            verify(notificationParameterRepository).saveAll(any());
+
         }
 
         @Test

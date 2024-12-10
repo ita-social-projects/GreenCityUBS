@@ -2824,6 +2824,58 @@ public class ModelUtils {
         return parameters;
     }
 
+    private static User createTestUser() {
+        User user = User.builder().id(1L).build();
+        return user;
+    }
+
+    private static Order createTestUnpaidOrder() {
+        Order order = Order.builder().id(1L).user(createTestUser()).build();
+        return order;
+    }
+
+    public static String getUnpaidOrderUrl() {
+        Order order = createTestUnpaidOrder();
+        String orderUrl = "http://localhost:4200/#/ubs/order?existingOrderId=" + order.getId();
+        return orderUrl;
+    }
+
+    public static Set<NotificationParameter> createNotificationParameterForUnpaidOrder() {
+        double amountToPay = 10000.0;
+        Order order = createTestUnpaidOrder();
+        String orderUrl = getUnpaidOrderUrl();
+        Set<NotificationParameter> notificationParameters = new HashSet<>();
+        notificationParameters.add(NotificationParameter.builder()
+            .key("orderNumber")
+            .value(order.getId().toString())
+            .build());
+
+        notificationParameters.add(NotificationParameter.builder()
+            .key("amountToPay")
+            .value(String.format("%.2f", amountToPay))
+            .build());
+
+        notificationParameters.add(NotificationParameter.builder()
+            .key("payButton")
+            .value(orderUrl)
+            .build());
+        return notificationParameters;
+    }
+
+    public static UserNotification getUserNotificationForUnpaidOrder() {
+        User user = createTestUser();
+        Order order = createTestUnpaidOrder();
+        UserNotification userNotification = UserNotification.builder()
+            .id(1L)
+            .user(user)
+            .order(order)
+            .notificationType(NotificationType.UNPAID_ORDER)
+            .notificationTime(LocalDateTime.now(fixedClock))
+            .parameters(createNotificationParameterForUnpaidOrder())
+            .build();
+        return userNotification;
+    }
+
     private static Set<NotificationParameter> createNotificationParameterSet2() {
         Set<NotificationParameter> parameters = new HashSet<>();
 
