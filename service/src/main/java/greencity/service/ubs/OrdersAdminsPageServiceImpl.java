@@ -55,9 +55,11 @@ import greencity.service.notification.NotificationServiceImpl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -78,12 +80,15 @@ import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPTY_ORDERS_ID_COLLECTION;
+import static greencity.constant.ErrorMessage.INVALID_COLUMN_VALUE;
 import static greencity.constant.ErrorMessage.ORDER_IS_BLOCKED;
 import static greencity.constant.ErrorMessage.ORDER_PAYMENT_STATUS_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ORDER_STATUS_INVALID;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.OrderHistory.UBS_ADMIN;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -121,6 +126,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String CANCELLATION_REASON = "cancellationReason";
     private static final String CANCELLATION_COMMENT = "cancellationComment";
     private static final String ADMIN_COMMENT = "adminComment";
+    private static final String ADDRESS_COMMENT = "commentToAddressForClient";
+    private static final String CLIENT_COMMENT = "commentForOrderByClient";
+    private static final String ORDER_COMMENT = "commentsForOrder";
     private static final String WITHOUT_ID = "-1";
     private static final String WITHOUT_MANAGER_EN = "Without manager";
     private static final String WITHOUT_MANAGER_UA = "Без менеджера";
@@ -270,11 +278,91 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 cancellationCommentForDevelopStage(ordersId, value, employee));
             case ADMIN_COMMENT -> createReturnForSwitchChangeOrder(
                 adminCommentForDevelopStage(ordersId, value, employee));
+            case ADDRESS_COMMENT -> createReturnForSwitchChangeOrder(
+                addAddressComment(ordersId, value, employee));
+            case CLIENT_COMMENT, ORDER_COMMENT -> createReturnForSwitchChangeOrder(
+                addCommentToOrder(ordersId, value, employee, columnName));
             default -> {
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
                 yield createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
             }
         };
+    }
+
+    private List<Long> addAddressComment(List<Long> ordersId, String value, Employee employee) {
+        List<Long> unresolvedGoals = new ArrayList<>();
+
+        for (Long orderId : ordersId) {
+            Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+
+            validateOrder(order, employee);
+
+            eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
+            orderLockService.unlockOrder(order);
+        }
+        return unresolvedGoals;
+    }
+
+    /**
+     * Add comment to order.
+     *
+     * @param ordersId list of order ids
+     * @param value    comment value
+     * @param employee employee who makes changes
+     * @param columnName column name
+     * @return list of order ids with unresolved goals
+     */
+    private List<Long> addCommentToOrder(List<Long> ordersId, String value, Employee employee, String columnName) {
+        Map<String, Consumer<Order>> commentSetters = Map.of(
+            CLIENT_COMMENT, order -> order.setComment(value),
+            ORDER_COMMENT, order -> order.setAdminComment(value)
+        );
+
+        if (!commentSetters.containsKey(columnName)) {
+            throw new BadRequestException(INVALID_COLUMN_VALUE + columnName);
+        }
+
+        List<Long> unresolvedGoals = new ArrayList<>();
+
+        for (Long orderId : ordersId) {
+            try {
+                Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+
+                validateOrder(order, employee);
+
+                commentSetters.get(columnName).accept(order);
+
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
+                orderLockService.unlockOrder(order);
+            } catch (Exception e) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
+    }
+
+    /**
+     * Checks if the given {@code order} can be modified by the current {@code employee}.
+     * If the order is blocked by another employee, throws
+     * {@link BadRequestException}.
+     * If the order status is {@link OrderStatus#CANCELED}, {@link OrderStatus#DONE}, or
+     * {@link OrderStatus#BROUGHT_IT_HIMSELF}, throws
+     * {@link BadRequestException}.
+     * @param order the order to validate
+     * @param employee the current employee
+     * @throws BadRequestException if the order cannot be modified
+     */
+    private void validateOrder(Order order, Employee employee) {
+        if (isOrderBlockedByAnotherEmployee(order, employee.getId())) {
+            throw new BadRequestException(ORDER_IS_BLOCKED + order.getBlockedByEmployee().getId());
+        }
+        if (OrderStatus.CANCELED.equals(order.getOrderStatus())
+            || OrderStatus.DONE.equals(order.getOrderStatus())
+            || OrderStatus.BROUGHT_IT_HIMSELF.equals(order.getOrderStatus())) {
+            throw new BadRequestException(String.format(ORDER_STATUS_INVALID, order.getId()));
+        }
     }
 
     @Override
