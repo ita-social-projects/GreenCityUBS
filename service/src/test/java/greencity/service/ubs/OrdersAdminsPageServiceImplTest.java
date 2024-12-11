@@ -39,7 +39,6 @@ import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.OrderStatusTranslationRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
