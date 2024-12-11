@@ -5602,4 +5602,12 @@ public class ModelUtils {
 
             .build();
     }
+
+    public static RequestToChangeOrdersDataDto getChangeRequest(String columnName) {
+        return RequestToChangeOrdersDataDto.builder()
+            .columnName(columnName)
+            .orderIdsList(List.of(1L))
+            .newValue("Test comment")
+            .build();
+    }
 }
