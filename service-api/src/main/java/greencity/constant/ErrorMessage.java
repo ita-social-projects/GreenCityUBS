@@ -181,5 +181,4 @@ public class ErrorMessage {
     public static final String COULD_NOT_RETRIEVE_USER_LANGUAGE = "Could not retrieve user language";
     public static final String INVALID_COLUMN_VALUE = "Invalid column value: ";
     public static final String ORDER_STATUS_INVALID = "Order with ID %d cannot be updated due to its current status.";
-
 }

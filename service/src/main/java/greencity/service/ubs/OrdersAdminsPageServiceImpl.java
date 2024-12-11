@@ -22,6 +22,7 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.locations.City;
 import greencity.entity.user.locations.District;
+import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -40,6 +41,7 @@ import greencity.repository.AddressRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
@@ -81,6 +83,7 @@ import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPTY_ORDERS_ID_COLLECTION;
 import static greencity.constant.ErrorMessage.INVALID_COLUMN_VALUE;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
 import static greencity.constant.ErrorMessage.ORDER_IS_BLOCKED;
 import static greencity.constant.ErrorMessage.ORDER_PAYMENT_STATUS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_INVALID;
@@ -115,6 +118,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final RegionRepository regionRepository;
     private final CityRepository cityRepository;
     private final DistrictRepository districtRepository;
+    private final OrderAddressRepository orderAddressRepository;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String DATE_OF_EXPORT = "dateOfExport";
     private static final String RECEIVING = "receivingStation";
@@ -289,35 +293,67 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         };
     }
 
+    /**
+     * Adds an address comment to a list of orders. For each order ID in the
+     * provided list, this method attempts to add an address comment. If the order
+     * is found and valid, the comment is set using the provided value. If any
+     * exception occurs during the process, the order ID is added to a list of
+     * unresolved goals.
+     *
+     * @param ordersId list of order IDs to update
+     * @param value    the comment to be added to the order's address
+     * @param employee the employee making the change
+     * @return a list of order IDs for which the comment could not be added
+     */
     private List<Long> addAddressComment(List<Long> ordersId, String value, Employee employee) {
         List<Long> unresolvedGoals = new ArrayList<>();
 
         for (Long orderId : ordersId) {
-            Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+            try {
+                Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-            validateOrder(order, employee);
+                validateOrder(order, employee);
+                setAddressComment(value, orderId);
 
-            eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
-            orderLockService.unlockOrder(order);
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
+                orderLockService.unlockOrder(order);
+            } catch (Exception e) {
+                unresolvedGoals.add(orderId);
+            }
         }
         return unresolvedGoals;
     }
 
     /**
+     * Updates the address comment of an order.
+     *
+     * @param value   the new comment
+     * @param orderId the id of the order
+     * @throws NotFoundException if the order does not have an address
+     */
+    private void setAddressComment(String value, Long orderId) {
+        OrderAddress address = orderAddressRepository.getOrderAddressByOrderId(orderId);
+        if (address == null) {
+            throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
+        }
+        address.setAddressComment(value);
+        orderAddressRepository.save(address);
+    }
+
+    /**
      * Add comment to order.
      *
-     * @param ordersId list of order ids
-     * @param value    comment value
-     * @param employee employee who makes changes
+     * @param ordersId   list of order ids
+     * @param value      comment value
+     * @param employee   employee who makes changes
      * @param columnName column name
      * @return list of order ids with unresolved goals
      */
     private List<Long> addCommentToOrder(List<Long> ordersId, String value, Employee employee, String columnName) {
         Map<String, Consumer<Order>> commentSetters = Map.of(
             CLIENT_COMMENT, order -> order.setComment(value),
-            ORDER_COMMENT, order -> order.setAdminComment(value)
-        );
+            ORDER_COMMENT, order -> order.setAdminComment(value));
 
         if (!commentSetters.containsKey(columnName)) {
             throw new BadRequestException(INVALID_COLUMN_VALUE + columnName);
@@ -344,13 +380,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     /**
-     * Checks if the given {@code order} can be modified by the current {@code employee}.
-     * If the order is blocked by another employee, throws
-     * {@link BadRequestException}.
-     * If the order status is {@link OrderStatus#CANCELED}, {@link OrderStatus#DONE}, or
-     * {@link OrderStatus#BROUGHT_IT_HIMSELF}, throws
-     * {@link BadRequestException}.
-     * @param order the order to validate
+     * Checks if the given {@code order} can be modified by the current
+     * {@code employee}. If the order is blocked by another employee, throws
+     * {@link BadRequestException}. If the order status is
+     * {@link OrderStatus#CANCELED}, {@link OrderStatus#DONE}, or
+     * {@link OrderStatus#BROUGHT_IT_HIMSELF}, throws {@link BadRequestException}.
+     *
+     * @param order    the order to validate
      * @param employee the current employee
      * @throws BadRequestException if the order cannot be modified
      */
