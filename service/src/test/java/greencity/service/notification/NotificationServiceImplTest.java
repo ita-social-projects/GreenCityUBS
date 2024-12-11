@@ -287,8 +287,7 @@ class NotificationServiceImplTest {
             when(internalUrlConfigProp.getOrderUrl()).thenReturn(orderUrl);
             when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(userNotification);
             when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
-                List<NotificationParameter> parameters = new ArrayList<>(invocation.getArgument(0));
-                return parameters;
+                return new ArrayList<>(invocation.getArgument(0));
             });
 
             assertDoesNotThrow(

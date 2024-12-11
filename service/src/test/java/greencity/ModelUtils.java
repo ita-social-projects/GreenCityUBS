@@ -2342,17 +2342,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderDetailStatusDto getOrderDetailStatusDto() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String orderDate = TEST_ORDER.getOrderDate().toLocalDate().format(formatter);
-
-        return OrderDetailStatusDto.builder()
-            .orderStatus(TEST_ORDER.getOrderStatus().name())
-            .paymentStatus(TEST_PAYMENT_LIST.getFirst().getPaymentStatus().name())
-            .date(orderDate)
-            .build();
-    }
-
     private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
             .id(1L)
@@ -2825,19 +2814,16 @@ public class ModelUtils {
     }
 
     private static User createTestUser() {
-        User user = User.builder().id(1L).build();
-        return user;
+        return User.builder().id(1L).build();
     }
 
     private static Order createTestUnpaidOrder() {
-        Order order = Order.builder().id(1L).user(createTestUser()).build();
-        return order;
+        return Order.builder().id(1L).user(createTestUser()).build();
     }
 
     public static String getUnpaidOrderUrl() {
         Order order = createTestUnpaidOrder();
-        String orderUrl = "http://localhost:4200/#/ubs/order?existingOrderId=" + order.getId();
-        return orderUrl;
+        return "http://localhost:4200/#/ubs/order?existingOrderId=" + order.getId();
     }
 
     public static Set<NotificationParameter> createNotificationParameterForUnpaidOrder() {
@@ -2865,7 +2851,7 @@ public class ModelUtils {
     public static UserNotification getUserNotificationForUnpaidOrder() {
         User user = createTestUser();
         Order order = createTestUnpaidOrder();
-        UserNotification userNotification = UserNotification.builder()
+        return UserNotification.builder()
             .id(1L)
             .user(user)
             .order(order)
@@ -2873,7 +2859,6 @@ public class ModelUtils {
             .notificationTime(LocalDateTime.now(fixedClock))
             .parameters(createNotificationParameterForUnpaidOrder())
             .build();
-        return userNotification;
     }
 
     private static Set<NotificationParameter> createNotificationParameterSet2() {
