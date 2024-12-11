@@ -1,10 +1,10 @@
 package greencity.client;
 
-import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.client.config.UserRemoteClientFallbackFactory;
+import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.dto.customer.UbsCustomersDto;
-import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeePositionsDto;
+import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.position.PositionAuthoritiesDto;

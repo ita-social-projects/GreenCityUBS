@@ -3,9 +3,9 @@ package greencity.entity.user.employee;
 import greencity.entity.order.Order;
 import greencity.entity.order.TariffsInfo;
 import greencity.enums.StationStatus;
+import jakarta.persistence.*;
 import lombok.*;
 
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +26,8 @@ public class ReceivingStation {
     @Column(length = 50, nullable = false, unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "receivingStationList", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "receivingStationList", cascade = {CascadeType.DETACH, CascadeType.MERGE,
+        CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<TariffsInfo> tariffsInfo;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "receivingStation")

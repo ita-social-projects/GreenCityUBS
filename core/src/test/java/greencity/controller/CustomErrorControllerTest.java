@@ -1,14 +1,13 @@
 package greencity.controller;
 
 import greencity.configuration.SecurityConfig;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
-
-import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,11 +20,11 @@ class CustomErrorControllerTest {
     HttpServletRequest request;
     @InjectMocks
     CustomErrorController customErrorController;
-    private static final String response = "NOT_FOUND";
+    private static final String RESPONSE = "NOT_FOUND";
 
     @Test
     void testHandleError() {
-        when(request.getAttribute("javax.servlet.error.status_code")).thenReturn(404);
+        when(request.getAttribute("jakarta.servlet.error.status_code")).thenReturn(404);
         String result = customErrorController.handleError(request);
         assertNotNull(result);
     }
@@ -34,6 +33,6 @@ class CustomErrorControllerTest {
     void getErrorPathTest() {
         String expected = "/error";
         String actual = customErrorController.getErrorPath();
-        assertEquals(actual, expected);
+        assertEquals(expected, actual);
     }
 }

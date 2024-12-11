@@ -4,17 +4,17 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.dto.employee.EmployeeWithTariffsIdDto;
+import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
-import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.TariffWithChatAccess;
-import greencity.entity.TariffsInfoRecievingEmployee;
+import greencity.entity.TariffsInfoReceivingEmployee;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeFilterView;
@@ -34,6 +34,7 @@ import greencity.repository.ReceivingStationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -44,11 +45,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -102,7 +102,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         List<TariffWithChatAccess> tariffs = dto.getTariffs();
         if (tariffs != null) {
             tariffs.forEach(tariff -> {
-                TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
+                TariffsInfoReceivingEmployee tariffsInfoReceivingEmployees = new TariffsInfoReceivingEmployee();
                 tariffsInfoReceivingEmployees.setEmployee(employee);
                 tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
                 tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())
@@ -157,7 +157,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             getEmployeeDto.setTariffs(employees.stream()
                 .filter(employee -> employee.getId().equals(employeeFilterView.getEmployeeId()))
                 .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()
-                    .map(tariffsInfoRecievingEmployee -> modelMapper.map(tariffsInfoRecievingEmployee.getTariffsInfo(),
+                    .map(tariffsInfoReceivingEmployee -> modelMapper.map(tariffsInfoReceivingEmployee.getTariffsInfo(),
                         GetTariffInfoForEmployeeDto.class)))
                 .collect(Collectors.toList()));
             initializeGetEmployeeDtoCollections(getEmployeeDto);
@@ -192,11 +192,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         List<GetTariffInfoForEmployeeDto> tariffs = employees.stream()
             .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
             .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()
-                .map(tariffsInfoRecievingEmployee -> {
+                .map(tariffsInfoReceivingEmployee -> {
                     GetTariffInfoForEmployeeDto tariffDto =
-                        modelMapper.map(tariffsInfoRecievingEmployee.getTariffsInfo(),
+                        modelMapper.map(tariffsInfoReceivingEmployee.getTariffsInfo(),
                             GetTariffInfoForEmployeeDto.class);
-                    tariffDto.setHasChat(tariffsInfoRecievingEmployee.getHasChat());
+                    tariffDto.setHasChat(tariffsInfoReceivingEmployee.getHasChat());
                     return tariffDto;
                 }))
             .collect(Collectors.toList());
@@ -243,7 +243,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         updatedEmployee.setEmployeeStatus(upEmployee.getEmployeeStatus());
         if (dto.getTariffs() != null) {
             dto.getTariffs().stream().forEach(tariff -> {
-                TariffsInfoRecievingEmployee tariffsInfoReceivingEmployees = new TariffsInfoRecievingEmployee();
+                TariffsInfoReceivingEmployee tariffsInfoReceivingEmployees = new TariffsInfoReceivingEmployee();
                 tariffsInfoReceivingEmployees.setEmployee(updatedEmployee);
                 tariffsInfoReceivingEmployees.setHasChat(tariff.getHasChat());
                 tariffsInfoReceivingEmployees.setTariffsInfo(tariffsInfoRepository.findById(tariff.getTariffId())

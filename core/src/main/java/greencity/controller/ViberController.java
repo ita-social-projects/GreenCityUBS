@@ -17,12 +17,12 @@ public class ViberController {
     private final ViberService viberService;
 
     /**
-     * The method sets the URL of the Viberr bot to which Viber requests will be
+     * The method sets the URL of the Viber bot to which Viber requests will be
      * sent.
      *
      * @return {@link String} - which contains the status of success or failure.
      */
-    @GetMapping(value = "/setwebhook", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/setwebhook", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> setWebHook() {
         return viberService.setWebhook();
     }
@@ -32,18 +32,18 @@ public class ViberController {
      *
      * @return {@link String} - which contains the status of success or failure.
      */
-    @GetMapping(value = "/removewebhook", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/removewebhook", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> removeWebHook() {
         return viberService.removeWebHook();
     }
 
     /**
-     * The method receives all requestss from Viberr.
-     * 
+     * The method receives all requests from Viber.
+     *
      * @param callbackDto - contains all the necessary data.
      */
-    @PostMapping(value = "/bot", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
-        produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/bot", consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     public void callBack(@RequestBody CallbackDto callbackDto) {
         if (EventTypes.conversation_started.toString().equals(callbackDto.getEvent())) {
             viberService.sendWelcomeMessageAndPreRegisterViberBotForUser(callbackDto.getUser().getId(),
@@ -60,7 +60,7 @@ public class ViberController {
      * @return @return {@link String} - which contains the status of success or
      *         failure.
      */
-    @GetMapping(value = "/accountinfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/accountinfo", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getAccountInfo() {
         return viberService.getAccountInfo();
     }

@@ -26,15 +26,11 @@ public class RetrieveMessageErrorDecoder implements ErrorDecoder {
             return new Exception(e.getMessage());
         }
 
-        switch (response.status()) {
-            case 400:
-                return new BadRequestException(exception.getMessage());
-            case 403:
-                return new AccessDeniedException(exception.getMessage());
-            case 404:
-                return new NotFoundException(exception.getMessage());
-            default:
-                return new RemoteServerUnavailableException(exception.getMessage());
-        }
+        return switch (response.status()) {
+            case 400 -> new BadRequestException(exception.getMessage());
+            case 403 -> new AccessDeniedException(exception.getMessage());
+            case 404 -> new NotFoundException(exception.getMessage());
+            default -> new RemoteServerUnavailableException(exception.getMessage());
+        };
     }
 }

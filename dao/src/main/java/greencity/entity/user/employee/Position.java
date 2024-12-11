@@ -1,9 +1,9 @@
 package greencity.entity.user.employee;
 
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
 
-import javax.persistence.*;
 import java.util.Set;
 
 @NoArgsConstructor

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "greencity.bots", ignoreUnknownFields = false)
-public class BotsConfgProp {
+public class BotsConfigProp {
     private String ubsBotName;
     private String ubsBotToken;
     private String viberBotUri;

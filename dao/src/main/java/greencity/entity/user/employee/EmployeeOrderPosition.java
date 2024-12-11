@@ -1,9 +1,8 @@
 package greencity.entity.user.employee;
 
 import greencity.entity.order.Order;
+import jakarta.persistence.*;
 import lombok.*;
-
-import javax.persistence.*;
 
 @NoArgsConstructor
 @AllArgsConstructor

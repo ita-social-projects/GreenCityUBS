@@ -4,11 +4,11 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.dto.language.LanguageVO;
 import greencity.dto.user.UserVO;
-import greencity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
+import greencity.enums.NotificationType;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
 import lombok.SneakyThrows;
@@ -58,7 +58,8 @@ class TelegramServiceTest {
             template.getTitle() + "\n\n" + template.getNotificationPlatforms().get(0).getBody());
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
-                notification.getNotificationType(), MOBILE)).thenReturn(Optional.of(template));
+                notification.getNotificationType(), MOBILE))
+            .thenReturn(Optional.of(template));
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
         when(ubsTelegramBot.execute(sendMessage)).thenReturn(null);
@@ -73,7 +74,8 @@ class TelegramServiceTest {
     void testTelegramException() {
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
-                notification.getNotificationType(), MOBILE)).thenReturn(Optional.of(template));
+                notification.getNotificationType(), MOBILE))
+            .thenReturn(Optional.of(template));
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
         when(ubsTelegramBot.execute(any(SendMessage.class))).thenThrow(new TelegramApiException());

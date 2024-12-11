@@ -17,11 +17,6 @@ import java.time.ZoneId;
 @EnableScheduling
 @NoArgsConstructor
 public class NotificationScheduler {
-    @Bean
-    Clock kyivZonedClock() {
-        return Clock.system(ZoneId.of("Europe/Kiev"));
-    }
-
     @Autowired
     private NotificationServiceImpl notificationService;
 

@@ -25,7 +25,6 @@ public interface OrderStatusTranslationRepository extends JpaRepository<OrderSta
      * This method which is list statuses.
      *
      * @return {@link List}.
-     *
      * @author Yuriy Bahlay.
      */
     List<OrderStatusTranslation> findAllBy();

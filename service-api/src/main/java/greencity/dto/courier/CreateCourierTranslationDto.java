@@ -1,8 +1,7 @@
 package greencity.dto.courier;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-
-import javax.validation.constraints.NotNull;
 
 @Getter
 @NoArgsConstructor

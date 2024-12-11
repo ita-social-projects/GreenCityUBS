@@ -1,10 +1,10 @@
 package greencity.dto.user;
 
 import greencity.annotations.ValidPhoneNumber;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.*;
 import java.io.Serializable;
 
 @Getter

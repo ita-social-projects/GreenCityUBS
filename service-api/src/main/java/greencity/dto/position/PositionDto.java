@@ -1,9 +1,9 @@
 package greencity.dto.position;
 
-import lombok.Data;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Pattern;
+import lombok.Data;
 
 @Builder
 @Data

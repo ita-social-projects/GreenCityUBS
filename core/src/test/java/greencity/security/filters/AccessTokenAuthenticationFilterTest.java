@@ -1,16 +1,13 @@
 package greencity.security.filters;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Optional;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Ignore;
+import greencity.client.UserRemoteClient;
+import greencity.dto.user.UserVO;
+import greencity.security.JwtTool;
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -27,10 +24,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-import greencity.client.UserRemoteClient;
-import greencity.dto.user.UserVO;
-import greencity.security.JwtTool;
-import io.jsonwebtoken.ExpiredJwtException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +53,8 @@ class AccessTokenAuthenticationFilterTest {
 
     FilterChain chain = new MockFilterChain();
 
+    private static final String TOKEN = "SuperSecretAccessToken";
+
     @InjectMocks
     private AccessTokenAuthenticationFilter authenticationFilter;
 
@@ -72,7 +71,7 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
-    @Disabled
+    @Disabled("Not implemented by the original author")
     void doFilterInternalTest() throws IOException, ServletException {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn("SuperSecretAccessToken");
         when(providerManager.authenticate(any()))
@@ -89,26 +88,23 @@ class AccessTokenAuthenticationFilterTest {
 
     @Test
     void doFilterInternalTokenHasExpiredTest() throws IOException, ServletException {
-        String token = "SuperSecretAccessToken";
-
-        when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
+        when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(TOKEN);
         when(providerManager.authenticate(
-            new UsernamePasswordAuthenticationToken(token, null)))
-                .thenThrow(ExpiredJwtException.class);
+            new UsernamePasswordAuthenticationToken(TOKEN, null)))
+            .thenThrow(ExpiredJwtException.class);
         authenticationFilter.doFilterInternal(request, response, chain);
 
         assertTrue(systemOutContent.toString().contains("Token has expired: "));
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(providerManager.authenticate(
-            new UsernamePasswordAuthenticationToken(token, null)));
+            new UsernamePasswordAuthenticationToken(TOKEN, null)));
     }
 
     @Test
-    @Disabled
+    @Disabled("Not implemented by the original author")
     void doFilterInternalAccessDeniedTest() throws IOException, ServletException {
-        String token = "SuperSecretAccessToken";
-        when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
+        when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(TOKEN);
         when(providerManager.authenticate(any()))
             .thenReturn(new UsernamePasswordAuthenticationToken("test@mail.com", null));
         when(userRemoteClient.findNotDeactivatedByEmail("test@mail.com")).thenThrow(RuntimeException.class);

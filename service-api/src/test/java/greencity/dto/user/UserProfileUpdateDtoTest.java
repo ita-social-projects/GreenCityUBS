@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class UserProfileUpdateDtoTest {
     void checkRegexPattern(String fieldName, String testValue, boolean validates) throws NoSuchFieldException {
         Field field = UserProfileUpdateDto.class.getDeclaredField(fieldName);
-        javax.validation.constraints.Pattern[] annotations =
-            field.getAnnotationsByType(javax.validation.constraints.Pattern.class);
+        jakarta.validation.constraints.Pattern[] annotations =
+            field.getAnnotationsByType(jakarta.validation.constraints.Pattern.class);
         assertEquals(testValue.matches(annotations[0].regexp()), validates);
     }
 

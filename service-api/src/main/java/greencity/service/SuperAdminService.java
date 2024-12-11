@@ -40,7 +40,7 @@ public interface SuperAdminService {
 
     /**
      * Method return All Tariff Service by Tariff id.
-     * 
+     *
      * @param id {@link Long} - selected tariff id.
      * @return {@link List} of {@link GetTariffServiceDto} - returned list of Tariff
      *         Service.

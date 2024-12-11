@@ -38,8 +38,9 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.payment.PaymentLinkException;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
-import javax.transaction.Transactional;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -292,7 +293,7 @@ public interface UBSClientService {
 
     /**
      * Method return link with Fondy payment .
-     * 
+     *
      * @param dto - current OrderFondyClientDto dto.
      * @author Max Boiarchuk
      */
@@ -400,7 +401,7 @@ public interface UBSClientService {
 
     /**
      * Method gets all districts in city.
-     * 
+     *
      * @param region - name of region
      * @param city   - name of city
      *

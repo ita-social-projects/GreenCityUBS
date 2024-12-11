@@ -71,9 +71,10 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.user.ubs.UBSUser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
+import greencity.enums.BagStatus;
 import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -82,7 +83,6 @@ import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.TariffStatus;
-import greencity.enums.BagStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
@@ -108,7 +108,7 @@ import greencity.repository.RegionRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.TelegramBotRepository;
-import greencity.repository.UBSuserRepository;
+import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
@@ -117,6 +117,8 @@ import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
@@ -127,8 +129,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import javax.persistence.EntityNotFoundException;
-import javax.transaction.Transactional;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -151,6 +152,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.BAD_ORDER_STATUS_REQUEST;
@@ -208,7 +210,7 @@ import static java.util.stream.Collectors.toMap;
 public class UBSClientServiceImpl implements UBSClientService {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
-    private final UBSuserRepository ubsUserRepository;
+    private final UBSUserRepository ubsUserRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
@@ -370,7 +372,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndOrderIdAndUserPoints(Long tariffId,
-        Integer userPoints, Long orderId) {
+        Integer userPoints,
+        Long orderId) {
         var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
             .map(bag -> buildBagTranslationDto(orderId, bag))
             .collect(toList());
@@ -417,10 +420,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public PersonalDataDto getSecondPageData(String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        List<UBSuser> ubsUser = ubsUserRepository.findUBSuserByUser(currentUser);
+        List<UBSUser> ubsUser = ubsUserRepository.findUBSUserByUser(currentUser);
 
         if (ubsUser.isEmpty()) {
-            ubsUser = Collections.singletonList(UBSuser.builder().id(null).build());
+            ubsUser = Collections.singletonList(UBSUser.builder().id(null).build());
         }
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
         dto.setUbsUserId(ubsUser.get(0).getId());
@@ -455,8 +458,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     @Transactional
@@ -480,7 +481,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPayInCoins = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPayInCoins);
 
-        UBSuser userData =
+        UBSUser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
@@ -944,7 +945,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private SenderInfoDto senderInfoDtoBuilder(Order order) {
-        UBSuser sender = order.getUbsUser();
+        UBSUser sender = order.getUbsUser();
         if (sender.getSenderFirstName() != null && !sender.getSenderFirstName().isEmpty()
             && sender.getSenderLastName() != null && !sender.getSenderLastName().isEmpty()
             && sender.getSenderPhoneNumber() != null && !sender.getSenderPhoneNumber().isEmpty()) {
@@ -1072,11 +1073,11 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String email) {
-        Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getRecipientId());
+        Optional<UBSUser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getRecipientId());
         if (optionalUbsUser.isEmpty()) {
             throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getRecipientId());
         }
-        UBSuser user = optionalUbsUser.get();
+        UBSUser user = optionalUbsUser.get();
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
         eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().get(0));
         return UbsCustomersDto.builder()
@@ -1104,7 +1105,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return user.getId();
     }
 
-    private UBSuser updateRecipientDataInOrder(UBSuser ubsUser, UbsCustomersDtoUpdate dto) {
+    private UBSUser updateRecipientDataInOrder(UBSUser ubsUser, UbsCustomersDtoUpdate dto) {
         if (nonNull(dto.getRecipientEmail())) {
             ubsUser.setSenderEmail(dto.getRecipientEmail());
         }
@@ -1122,7 +1123,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
-        List<OrderBag> bagsOrdered, UBSuser userData,
+        List<OrderBag> bagsOrdered, UBSUser userData,
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
@@ -1195,15 +1196,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         return paymentRequestDto;
     }
 
-    private UBSuser formUserDataToBeSaved(PersonalDataDto dto, Long addressId, Long locationId, User currentUser) {
-        UBSuser ubsUserFromDatabaseById = null;
+    private UBSUser formUserDataToBeSaved(PersonalDataDto dto, Long addressId, Long locationId, User currentUser) {
+        UBSUser ubsUserFromDatabaseById = null;
         if (dto.getUbsUserId() != null) {
             ubsUserFromDatabaseById =
                 ubsUserRepository.findById(dto.getUbsUserId())
                     .orElseThrow(() -> new BadRequestException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
                         + dto.getUbsUserId()));
         }
-        UBSuser mappedFromDtoUser = modelMapper.map(dto, UBSuser.class);
+        UBSUser mappedFromDtoUser = modelMapper.map(dto, UBSUser.class);
         mappedFromDtoUser.setUser(currentUser);
         mappedFromDtoUser.setPhoneNumber(
             UAPhoneNumberUtil.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
@@ -1492,7 +1493,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void getOrder(OrderResponseDto dto, User currentUser, List<OrderBag> amountOfBagsOrdered,
-        long sumToPayInCoins, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
+        long sumToPayInCoins, Order order, Set<Certificate> orderCertificates, UBSUser userData) {
         formAndSaveOrder(order, orderCertificates, amountOfBagsOrdered, userData, currentUser, sumToPayInCoins);
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
@@ -1673,7 +1674,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order, long sumToPayInCoins) {
         if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
             Set<Certificate> certificates =
-                certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+                certificateRepository.findAllByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
                     CertificateStatus.ACTIVE);
             if (certificates.isEmpty()) {
                 throw new NotFoundException(CERTIFICATE_NOT_FOUND);

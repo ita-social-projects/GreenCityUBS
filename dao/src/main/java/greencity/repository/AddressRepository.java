@@ -15,9 +15,9 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     /**
      * Method returns {@link Coordinates} of undelivered orders.
      *
-     * @return list of {@link Coordinates}.
+     * @return set of {@link Coordinates}.
      */
-    @Query("select a.coordinates from Address a inner join UBSuser u on a.id = u.orderAddress.id "
+    @Query("select a.coordinates from Address a inner join UBSUser u on a.id = u.orderAddress.id "
         + "inner join Order o on u = o.ubsUser "
         + "where o.orderPaymentStatus = 'PAID' and a.coordinates is not null")
     Set<Coordinates> undeliveredOrdersCoords();
@@ -26,10 +26,10 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      * Method returns {@link Coordinates} of undelivered orders which not exceed
      * given capacity limit.
      *
-     * @return list of {@link Coordinates}.
+     * @return set of {@link Coordinates}.
      */
     @Query("select a.coordinates "
-        + "from UBSuser u "
+        + "from UBSUser u "
         + "join Address a on a.id = u.orderAddress.id "
         + "join Order o on u = o.ubsUser "
         + "join o.amountOfBagsOrdered bags "
@@ -46,7 +46,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      * @return {@link Integer}.
      */
     @Query("select sum(bags * b.capacity) "
-        + "from UBSuser u "
+        + "from UBSUser u "
         + "join Address a on a.id = u.orderAddress.id "
         + "join Order o on u = o.ubsUser "
         + "join o.amountOfBagsOrdered bags "
@@ -95,7 +95,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
 
     /**
      * Finds first non-deleted {@link Address} associated with the given user ID.
-     * 
+     *
      * @param userId the ID of the user whose address is being searched for
      * @return an {@link Optional} containing the first {@link Address} record that
      *         matches the provided userId and has an address status other than

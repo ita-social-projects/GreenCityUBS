@@ -33,23 +33,25 @@ import static greencity.ModelUtils.getUuid;
 import static greencity.enums.NotificationStatus.INACTIVE;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class ManagementNotificationControllerTest {
-    private static final String url = "/admin/notification";
     private MockMvc mockMvc;
     @InjectMocks
     ManagementNotificationController notificationController;
     @Mock
     NotificationTemplateService notificationTemplateService;
-    private final ErrorAttributes errorAttributes = new DefaultErrorAttributes();
-    private final Principal principal = getUuid();
     @Mock
     UserRemoteClient userRemoteClient;
+
+    private static final String ADMIN_NOTIFICATION_LINK = "/admin/notification";
+    private static final ErrorAttributes ERROR_ATTRIBUTES = new DefaultErrorAttributes();
+    private static final Principal PRINCIPAL = getUuid();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @BeforeEach
     void setup() {
@@ -57,15 +59,14 @@ class ManagementNotificationControllerTest {
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRemoteClient))
-            .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
+            .setControllerAdvice(new CustomExceptionHandler(ERROR_ATTRIBUTES))
             .build();
     }
 
     @Test
     void getAllTest() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(List.of(ModelUtils.getNotificationTemplateDto()));
-        mockMvc.perform(get(url + "/get-all-templates")
+        String responseJSON = OBJECT_MAPPER.writeValueAsString(List.of(ModelUtils.getNotificationTemplateDto()));
+        mockMvc.perform(get(ADMIN_NOTIFICATION_LINK + "/get-all-templates")
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -73,11 +74,10 @@ class ManagementNotificationControllerTest {
 
     @Test
     void updateNotificationTemplateTest() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonDto = objectMapper.writeValueAsString(
+        String jsonDto = OBJECT_MAPPER.writeValueAsString(
             ModelUtils.getNotificationTemplateWithPlatformsUpdateDto());
-        mockMvc.perform(put(url + "/update-template/{id}", 1L)
-            .principal(principal)
+        mockMvc.perform(put(ADMIN_NOTIFICATION_LINK + "/update-template/{id}", 1L)
+            .principal(PRINCIPAL)
             .content(jsonDto)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -85,9 +85,8 @@ class ManagementNotificationControllerTest {
 
     @Test
     void getNotificationTemplateTest() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(ModelUtils.getNotificationTemplateWithPlatformsDto());
-        mockMvc.perform(get(url + "/get-template/{id}", 1L)
+        String responseJSON = OBJECT_MAPPER.writeValueAsString(ModelUtils.getNotificationTemplateWithPlatformsDto());
+        mockMvc.perform(get(ADMIN_NOTIFICATION_LINK + "/get-template/{id}", 1L)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -95,15 +94,14 @@ class ManagementNotificationControllerTest {
 
     @Test
     void saveBadRequestTest() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
         NotificationTemplateWithPlatformsUpdateDto dto = ModelUtils.getNotificationTemplateWithPlatformsUpdateDto();
         Long id = 1L;
-        String JsonDto = objectMapper.writeValueAsString(dto);
+        String jsonDto = OBJECT_MAPPER.writeValueAsString(dto);
         doThrow(NotFoundException.class)
             .when(notificationTemplateService).update(id, dto);
-        mockMvc.perform(put(url + "/update-template/{id}", id)
-            .principal(principal)
-            .content(JsonDto)
+        mockMvc.perform(put(ADMIN_NOTIFICATION_LINK + "/update-template/{id}", id)
+            .principal(PRINCIPAL)
+            .content(jsonDto)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
         verify(notificationTemplateService).update(id, dto);
@@ -113,9 +111,9 @@ class ManagementNotificationControllerTest {
     void deactivateNotificationTemplate() throws Exception {
         Long id = 1L;
         String status = INACTIVE.name();
-        mockMvc.perform(put(url + "/change-template-status/{id}", id)
+        mockMvc.perform(put(ADMIN_NOTIFICATION_LINK + "/change-template-status/{id}", id)
             .param("status", status)
-            .principal(principal))
+            .principal(PRINCIPAL))
             .andExpect(status().isOk());
         verify(notificationTemplateService).changeNotificationStatusById(id, status);
     }
@@ -128,9 +126,9 @@ class ManagementNotificationControllerTest {
         doThrow(BadRequestException.class)
             .when(notificationTemplateService).changeNotificationStatusById(id, status);
 
-        mockMvc.perform(put(url + "/change-template-status/{id}", id)
+        mockMvc.perform(put(ADMIN_NOTIFICATION_LINK + "/change-template-status/{id}", id)
             .param("status", status)
-            .principal(principal))
+            .principal(PRINCIPAL))
             .andExpect(status().isBadRequest());
 
         verify(notificationTemplateService).changeNotificationStatusById(id, status);
@@ -144,9 +142,9 @@ class ManagementNotificationControllerTest {
         doThrow(NotFoundException.class)
             .when(notificationTemplateService).changeNotificationStatusById(id, status);
 
-        mockMvc.perform(MockMvcRequestBuilders.put(url + "/change-template-status/{id}", id)
+        mockMvc.perform(MockMvcRequestBuilders.put(ADMIN_NOTIFICATION_LINK + "/change-template-status/{id}", id)
             .param("status", status)
-            .principal(principal))
+            .principal(PRINCIPAL))
             .andExpect(MockMvcResultMatchers.status().isNotFound());
 
         verify(notificationTemplateService).changeNotificationStatusById(id, status);

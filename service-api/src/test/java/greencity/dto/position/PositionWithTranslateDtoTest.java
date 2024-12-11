@@ -13,8 +13,8 @@ class PositionWithTranslateDtoTest {
 
     void idValidation(Long id, boolean validates) throws NoSuchFieldException {
         Field field = PositionWithTranslateDto.class.getDeclaredField("id");
-        javax.validation.constraints.Min[] annotations =
-            field.getAnnotationsByType(javax.validation.constraints.Min.class);
+        jakarta.validation.constraints.Min[] annotations =
+            field.getAnnotationsByType(jakarta.validation.constraints.Min.class);
         assertEquals(id >= annotations[0].value(), validates);
     }
 

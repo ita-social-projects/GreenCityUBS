@@ -1,9 +1,10 @@
 package greencity.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public enum OrderPaymentStatus {
@@ -13,15 +14,6 @@ public enum OrderPaymentStatus {
     PAYMENT_REFUNDED(4);
 
     private int statusValue;
-
-    /**
-     * This is method get status value.
-     *
-     * @return {@link int}.
-     */
-    public int getStatusValue() {
-        return statusValue;
-    }
 
     /**
      * This is method which convert value from num to enum.

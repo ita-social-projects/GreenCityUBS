@@ -1,9 +1,8 @@
 package greencity.entity.viber;
 
 import greencity.entity.user.User;
+import jakarta.persistence.*;
 import lombok.*;
-
-import javax.persistence.*;
 
 @Entity
 @Table(name = "viber_bot")

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +83,6 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      *
      * @param bagId   {@link Integer} bag id
      * @param orderId {@link Long} order id
-     *
      * @return {@link Optional} of {@link Integer} returns actual bags' amount
      * @author Olena Sotnik
      */

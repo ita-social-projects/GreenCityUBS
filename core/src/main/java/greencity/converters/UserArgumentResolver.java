@@ -2,10 +2,7 @@ package greencity.converters;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.client.UserRemoteClient;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -17,12 +14,12 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import java.security.Principal;
 
 @Component
-@AllArgsConstructor
-@Slf4j
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
-    @Lazy
-    @Autowired
-    private UserRemoteClient userRemoteClient;
+    private final UserRemoteClient userRemoteClient;
+
+    public UserArgumentResolver(@Lazy UserRemoteClient userRemoteClient) {
+        this.userRemoteClient = userRemoteClient;
+    }
 
     /**
      * Method checks if parameter is {@link Long} and is annotated with
@@ -38,7 +35,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+    public Object resolveArgument(@NotNull MethodParameter parameter, ModelAndViewContainer mavContainer,
         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Principal principal = webRequest.getUserPrincipal();
         return principal != null ? userRemoteClient.findUuidByEmail(principal.getName()) : null;

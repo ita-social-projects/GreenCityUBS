@@ -1,13 +1,13 @@
 package greencity.entity.notifications;
 
-import greencity.enums.NotificationType;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import greencity.enums.NotificationType;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Cascade;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -43,9 +43,9 @@ public class UserNotification {
     private Set<NotificationParameter> parameters = new HashSet<>();
 
     @Column(name = "notification_time")
-    private LocalDateTime notificationTime = getCurentLocalTime();
+    private LocalDateTime notificationTime = getCurrentLocalTime();
 
-    private static LocalDateTime getCurentLocalTime() {
+    private static LocalDateTime getCurrentLocalTime() {
         return ZonedDateTime.now(ZoneId.of("Europe/Kiev")).toLocalDateTime();
     }
 }

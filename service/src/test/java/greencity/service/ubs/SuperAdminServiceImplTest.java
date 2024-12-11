@@ -31,11 +31,11 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.BagStatus;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.StationStatus;
 import greencity.enums.TariffStatus;
-import greencity.enums.BagStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -67,17 +67,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Arrays;
-import java.util.Optional;
-import java.util.Map;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -261,7 +263,7 @@ class SuperAdminServiceImplTest {
         when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService
             .getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag2())))
-                .thenReturn(ModelUtils.getAmount());
+            .thenReturn(ModelUtils.getAmount());
         when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
 
         superAdminService.deleteTariffService(1);
@@ -409,7 +411,7 @@ class SuperAdminServiceImplTest {
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
         when(orderBagService
             .getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag().setConfirmedQuantity(2))))
-                .thenReturn(ModelUtils.getAmount());
+            .thenReturn(ModelUtils.getAmount());
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 
@@ -445,7 +447,7 @@ class SuperAdminServiceImplTest {
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
         when(orderBagService.getActualBagsAmountForOrder(
             Arrays.asList(ModelUtils.getOrderBag().setExportedQuantity(2).setConfirmedQuantity(2))))
-                .thenReturn(ModelUtils.getAmount());
+            .thenReturn(ModelUtils.getAmount());
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 

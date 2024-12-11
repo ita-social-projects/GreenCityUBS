@@ -14,17 +14,20 @@ import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersForUserService;
 import greencity.service.ubs.ValuesForUserTableService;
 import greencity.service.ubs.ViolationService;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
@@ -44,18 +47,18 @@ public class AdminUbsController {
      * @param sortingOrder {@link SortingOrder}
      * @author Stepan Tehlivets.
      */
-    @ApiOperation("Get users for the table")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
+    @Operation(summary = "Get users for the table")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_CLIENTS_PAGE', authentication)")
     @GetMapping("/usersAll")
     public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(CustomerPage page,
-        String columnName, Principal principal,
-        @RequestParam SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria) {
+        String columnName,
+        Principal principal,
+        @RequestParam SortingOrder sortingOrder,
+        UserFilterCriteria userFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(valuesForUserTable.getAllFields(page, columnName, sortingOrder, userFilterCriteria,
                 principal.getName()));
@@ -66,16 +69,14 @@ public class AdminUbsController {
      *
      * @author Liubomyr Pater
      */
-    @ApiOperation("Get all parameters for building table of orders")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
+    @Operation(summary = "Get all parameters for building table of orders")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     @GetMapping("/tableParams")
     public ResponseEntity<TableParamsDto> getTableParameters(
-        @ApiIgnore @CurrentUserUuid String userUuid) {
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getParametersForOrdersTable(userUuid));
     }
 
@@ -85,17 +86,15 @@ public class AdminUbsController {
      * @param userUuid of {@link String}
      * @author Oleh Kulbaba
      */
-    @ApiOperation("Get width of columns for order table")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
+    @Operation(summary = "Get width of columns for order table")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @GetMapping("/orderTableColumnsWidth")
     public ResponseEntity<ColumnWidthDto> getTableColumnWidthForCurrentUser(
-        @ApiIgnore @CurrentUserUuid String userUuid) {
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getColumnWidthForEmployee(userUuid));
     }
 
@@ -106,17 +105,15 @@ public class AdminUbsController {
      * @param columnWidthDto of {@link ColumnWidthDto}
      * @author Oleh Kulbaba
      */
-    @ApiOperation("Edit width of columns for order table")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
+    @Operation(summary = "Edit width of columns for order table")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @PutMapping("/orderTableColumnsWidth")
     public ResponseEntity<HttpStatus> saveTableColumnWidthForCurrentUser(
-        @ApiIgnore @CurrentUserUuid String userUuid,
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @RequestBody ColumnWidthDto columnWidthDto) {
         ordersAdminsPageService.saveColumnWidthForEmployee(columnWidthDto, userUuid);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -127,15 +124,14 @@ public class AdminUbsController {
      *
      * @author Liubomyr Pater
      */
-    @ApiOperation(value = "Save changes in orders")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-    })
+    @Operation(summary = "Save changes in orders")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+        content = @Content(schema = @Schema(implementation = PageableDto.class)))
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
     @PutMapping("/changingOrder")
     public ResponseEntity<List<Long>> saveNewValueFromOrdersTable(
-        @ApiIgnore HttpServletRequest request,
+        @Parameter(hidden = true) HttpServletRequest request,
         @Valid @RequestBody RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO) {
         ChangeOrderResponseDTO changeOrderResponseDTO =
             ordersAdminsPageService.chooseOrdersDataSwitcher(request.getUserPrincipal().getName(),
@@ -149,15 +145,14 @@ public class AdminUbsController {
      *
      * @author Liubomyr Pater
      */
-    @ApiOperation(value = "Block orders for changing by another users")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-    })
+    @Operation(summary = "Block orders for changing by another users")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+        content = @Content(schema = @Schema(implementation = PageableDto.class)))
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
     @PutMapping("/blockOrders")
     public ResponseEntity<List<BlockedOrderDto>> blockOrders(
-        @ApiIgnore @CurrentUserUuid String userUuid,
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @RequestBody List<Long> listOfOrdersId) {
         List<BlockedOrderDto> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
         return ResponseEntity.status(HttpStatus.OK).body(blockedOrderDTOS);
@@ -168,15 +163,14 @@ public class AdminUbsController {
      *
      * @author Liubomyr Pater
      */
-    @ApiOperation(value = "Block orders for changing by another users")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-    })
+    @Operation(summary = "Block orders for changing by another users")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+        content = @Content(schema = @Schema(implementation = PageableDto.class)))
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
     @PutMapping("/unblockOrders")
     public ResponseEntity<List<Long>> unblockOrders(
-        @ApiIgnore @CurrentUserUuid String userUuid,
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @RequestBody List<Long> listOfOrdersId) {
         List<Long> unblockedOrdersId = ordersAdminsPageService.unblockOrder(userUuid, listOfOrdersId);
         return ResponseEntity.status(HttpStatus.OK).body(unblockedOrdersId);
@@ -188,16 +182,14 @@ public class AdminUbsController {
      * @param userId {@link Long}
      * @author Roman Sulymka.
      */
-    @ApiOperation("Get users for the table")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
+    @Operation(summary = "Get users for the table")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     @GetMapping("/{userId}/ordersAll")
     public ResponseEntity<UserWithOrdersDto> getAllOrdersForUser(
-        @ApiIgnore Pageable page, @PathVariable Long userId,
+        @Parameter(hidden = true) Pageable page, @PathVariable Long userId,
         @RequestParam SortingOrder sortingType, @RequestParam String column) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ordersForUserService.getAllOrders(page, userId, sortingType, column));
@@ -209,17 +201,15 @@ public class AdminUbsController {
      * @param userId {@link Long}
      * @author Roman Sulymka and Max Bohonko.
      */
-    @ApiOperation("Get user's violations")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
+    @Operation(summary = "Get user's violations")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     @ApiPageable
     @GetMapping("/{userId}/violationsAll")
     public ResponseEntity<UserViolationsWithUserName> getAllViolationsByUser(
-        @ApiIgnore Pageable page, @PathVariable Long userId,
+        @Parameter(hidden = true) Pageable page, @PathVariable Long userId,
         @RequestParam String columnName,
         @RequestParam SortingOrder sortingOrder) {
         return ResponseEntity.status(HttpStatus.OK)

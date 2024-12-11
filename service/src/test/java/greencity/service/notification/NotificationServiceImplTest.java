@@ -8,18 +8,18 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.entity.order.Event;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
-import greencity.enums.NotificationReceiverType;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.UserNotification;
+import greencity.entity.order.Event;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
@@ -335,7 +335,7 @@ class NotificationServiceImplTest {
 
             when(userNotificationRepository.getUserIdByDateOfLastNotificationAndNotificationType(
                 LocalDate.now(clock).minusMonths(2L), NotificationType.LETS_STAY_CONNECTED.toString()))
-                    .thenReturn(List.of(11L, 22L));
+                .thenReturn(List.of(11L, 22L));
             when(userRepository.getInactiveUsersByDateOfLastOrder(LocalDate.now(clock).minusMonths(2L)))
                 .thenReturn(List.of(user, user1));
             when(userNotificationRepository.save(any())).thenReturn(notification);

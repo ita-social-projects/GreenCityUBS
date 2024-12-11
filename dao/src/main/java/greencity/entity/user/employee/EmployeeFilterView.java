@@ -1,12 +1,10 @@
 package greencity.entity.user.employee;
 
-import greencity.entity.order.TariffsInfo;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
 
 @Entity
 @Table(name = "employees_filters")

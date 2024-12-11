@@ -35,7 +35,6 @@ public interface OrderPaymentStatusTranslationRepository
      * This is method which is find order payment status.
      *
      * @return {@link String}.
-     *
      * @author Yuriy Bahlay.
      */
     OrderPaymentStatusTranslation getById(Long id);

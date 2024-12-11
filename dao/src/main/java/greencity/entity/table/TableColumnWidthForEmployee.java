@@ -1,12 +1,11 @@
 package greencity.entity.table;
 
 import greencity.entity.user.employee.Employee;
-import lombok.Data;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.Builder;
-
-import javax.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "column_width_for_employee")

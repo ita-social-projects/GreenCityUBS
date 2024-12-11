@@ -1,29 +1,27 @@
 package greencity.repository;
 
 import greencity.entity.coords.Coordinates;
-import greencity.enums.AddressStatus;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.user.ubs.UBSUser;
+import greencity.enums.AddressStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 public class ModelUtils {
-    private final static DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyy-MM-d");
-
     public static User getUser() {
         return User.builder()
             .uuid(UUID.randomUUID().toString())
@@ -43,7 +41,7 @@ public class ModelUtils {
             .orderStatus(OrderStatus.FORMED)
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .user(User.builder().id(1L).build())
-            .ubsUser(UBSuser.builder().id(1L).build())
+            .ubsUser(UBSUser.builder().id(1L).build())
             .orderDate(LocalDateTime.now())
             .build());
         return orderList;

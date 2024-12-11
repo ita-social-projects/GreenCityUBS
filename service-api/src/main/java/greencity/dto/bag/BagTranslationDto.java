@@ -1,5 +1,6 @@
 package greencity.dto.bag;
 
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -7,7 +8,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
-import javax.validation.constraints.Min;
+
 import java.io.Serializable;
 
 @AllArgsConstructor

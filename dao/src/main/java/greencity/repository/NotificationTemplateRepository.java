@@ -16,7 +16,6 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
      * method, that returns {@link Optional}of{@link NotificationTemplate} by Type
      * and LanguageCode and Receiver Type.
      *
-     *
      * @return {@link Optional} of {@link NotificationTemplate} with all codes.
      * @author Ann Sakhno
      */

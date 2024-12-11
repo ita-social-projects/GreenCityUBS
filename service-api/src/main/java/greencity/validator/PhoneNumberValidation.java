@@ -6,9 +6,8 @@ import com.google.i18n.phonenumbers.Phonenumber;
 import greencity.annotations.ValidPhoneNumber;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.NotFoundException;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class PhoneNumberValidation implements ConstraintValidator<ValidPhoneNumber, String> {
     @Override

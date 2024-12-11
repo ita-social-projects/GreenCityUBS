@@ -64,6 +64,7 @@ import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import org.springframework.http.HttpStatus;
+
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -73,7 +74,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 import static greencity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
@@ -258,7 +259,7 @@ public class ModelUtils {
     public static ViolationDetailInfoDto getViolationDetailInfoDto() {
         LocalDateTime localdatetime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 0, 0);
 
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
@@ -270,17 +271,16 @@ public class ModelUtils {
     }
 
     public static Address address() {
-        List<Long> id = addressDto().stream().map(AddressDto::getId).collect(Collectors.toList());
-        List<String> city = addressDto().stream().map(AddressDto::getCity).collect(Collectors.toList());
-        List<String> street = addressDto().stream().map(AddressDto::getStreet).collect(Collectors.toList());
-        List<String> district = addressDto().stream().map(AddressDto::getDistrict).collect(Collectors.toList());
-        List<String> houseNumber = addressDto().stream().map(AddressDto::getHouseNumber).collect(Collectors.toList());
-        List<String> entranceNumber =
-            addressDto().stream().map(AddressDto::getEntranceNumber).collect(Collectors.toList());
-        List<String> houseCorpus = addressDto().stream().map(AddressDto::getHouseCorpus).collect(Collectors.toList());
-        List<Boolean> actual = addressDto().stream().map(AddressDto::getActual).collect(Collectors.toList());
+        List<Long> id = addressDto().stream().map(AddressDto::getId).toList();
+        List<String> city = addressDto().stream().map(AddressDto::getCity).toList();
+        List<String> street = addressDto().stream().map(AddressDto::getStreet).toList();
+        List<String> district = addressDto().stream().map(AddressDto::getDistrict).toList();
+        List<String> houseNumber = addressDto().stream().map(AddressDto::getHouseNumber).toList();
+        List<String> entranceNumber = addressDto().stream().map(AddressDto::getEntranceNumber).toList();
+        List<String> houseCorpus = addressDto().stream().map(AddressDto::getHouseCorpus).toList();
+        List<Boolean> actual = addressDto().stream().map(AddressDto::getActual).toList();
         return Address.builder()
-            .id(id.get(0))
+            .id(id.getFirst())
             .city(String.valueOf(city))
             .district(String.valueOf(district))
             .street(String.valueOf(street))

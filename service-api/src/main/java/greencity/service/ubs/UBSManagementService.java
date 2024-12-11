@@ -30,11 +30,12 @@ import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.order.Order;
 import greencity.enums.SortingOrder;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
 
 public interface UBSManagementService {
     /**
@@ -281,7 +282,7 @@ public interface UBSManagementService {
 
     /**
      * This is method which is updates admin page info for order.
-     * 
+     *
      * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
      * @param order                   {@link Order}.
      * @param email                   {@link String}.

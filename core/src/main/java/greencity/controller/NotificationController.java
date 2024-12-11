@@ -9,16 +9,15 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.service.ubs.NotificationService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Locale;
 
@@ -34,18 +33,17 @@ public class NotificationController {
      *
      * @author Ihor Volianskyi
      */
-    @ApiOperation("Return body of the notification and set status - is read")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
+    @Operation(summary = "Return body of the notification and set status - is read")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     @PostMapping(value = "/{id}")
     @ApiLocale
-    public ResponseEntity<NotificationDto> getNotification(@ApiIgnore @CurrentUserUuid String userUuid,
-        @PathVariable Long id, @ApiIgnore @ValidLanguage Locale locale) {
+    public ResponseEntity<NotificationDto> getNotification(@Parameter(hidden = true) @CurrentUserUuid String userUuid,
+        @PathVariable Long id,
+        @Parameter(hidden = true) @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationService.getNotification(userUuid, id, locale.getLanguage()));
     }
@@ -56,16 +54,14 @@ public class NotificationController {
      * @return Page with notifications.
      * @author Ihor Volianskyi
      */
-    @ApiOperation(value = "Get page with notifications for current user")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-    })
+    @Operation(summary = "Get page with notifications for current user")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
     @GetMapping
     @ApiPageableWithLocale
     public ResponseEntity<PageableDto<NotificationShortDto>> getNotificationsForCurrentUser(
-        @ApiIgnore @CurrentUserUuid String userUuid,
-        @ApiIgnore @ValidLanguage Locale locale, @ApiIgnore Pageable pageable) {
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
+        @Parameter(hidden = true) @ValidLanguage Locale locale, @Parameter(hidden = true) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationService.getAllNotificationsForUser(userUuid, locale.getLanguage(), pageable));
     }
@@ -76,22 +72,14 @@ public class NotificationController {
      * @return quantity of unread notifications.
      * @author Igor Boykov
      */
-    @ApiOperation(value = "Get all unread notifications")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-    })
+    @Operation(summary = "Get all unread notifications")
+    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     @GetMapping(value = "quantityUnreadenNotifications")
-    public ResponseEntity<Long> getAllUnreadenNotificationsForCurrentUser(
-        @ApiIgnore @CurrentUserUuid String userUuid) {
+    public ResponseEntity<Long> getAllUnreadNotificationsForCurrentUser(
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationService.getUnreadenNotifications(userUuid));
     }
-
-    /**
-     * Controller updates body in notification templates for receiving type SITE.
-     *
-     * @author Natalia Kozak
-     */
 }

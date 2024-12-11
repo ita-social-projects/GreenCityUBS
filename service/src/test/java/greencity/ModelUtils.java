@@ -111,7 +111,7 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
-import greencity.entity.TariffsInfoRecievingEmployee;
+import greencity.entity.TariffsInfoReceivingEmployee;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationPlatform;
@@ -146,7 +146,7 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.user.ubs.UBSUser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.BagStatus;
@@ -472,8 +472,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static UBSuser getUBSuser() {
-        return UBSuser.builder()
+    public static UBSUser getUBSUser() {
+        return UBSUser.builder()
             .firstName("oleh")
             .lastName("ivanov")
             .email("mail@mail.ua")
@@ -501,8 +501,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static UBSuser getUBSuserWtihoutOrderAddress() {
-        return UBSuser.builder()
+    public static UBSUser getUBSUserWithoutOrderAddress() {
+        return UBSUser.builder()
             .firstName("oleh")
             .lastName("ivanov")
             .email("mail@mail.ua")
@@ -516,8 +516,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static UBSuser getUBSuserWithoutSender() {
-        return UBSuser.builder()
+    public static UBSUser getUBSUserWithoutSender() {
+        return UBSUser.builder()
             .firstName("oleh")
             .lastName("ivanov")
             .email("mail@mail.ua")
@@ -575,7 +575,7 @@ public class ModelUtils {
                 .comment("avb")
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .ubsUser(UBSuser.builder()
+            .ubsUser(UBSUser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
                 .email("mail@mail.ua")
@@ -611,7 +611,7 @@ public class ModelUtils {
                 .name("Саперно-Слобідська")
                 .build())
             .cancellationReason(CancellationReason.OUT_OF_CITY)
-            .imageReasonNotTakingBags(List.of("foto"))
+            .imageReasonNotTakingBags(List.of("photo"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
             .events(new ArrayList<>())
@@ -629,7 +629,7 @@ public class ModelUtils {
                 .comment("avb")
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .ubsUser(UBSuser.builder()
+            .ubsUser(UBSUser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
                 .email("mail@mail.ua")
@@ -667,7 +667,7 @@ public class ModelUtils {
                 .name("Саперно-Слобідська")
                 .build())
             .cancellationReason(CancellationReason.OUT_OF_CITY)
-            .imageReasonNotTakingBags(List.of("foto"))
+            .imageReasonNotTakingBags(List.of("photo"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
             .build();
@@ -677,7 +677,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .counterOrderPaymentId(0L)
-            .ubsUser(UBSuser.builder()
+            .ubsUser(UBSUser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
                 .email("mail@mail.ua")
@@ -828,7 +828,7 @@ public class ModelUtils {
         for (Coordinates coordinates : getCoordinatesSet()) {
             orders.add(Order.builder()
                 .id(++id)
-                .ubsUser(UBSuser.builder()
+                .ubsUser(UBSUser.builder()
                     .id(++userId)
                     .orderAddress(OrderAddress.builder()
                         .coordinates(coordinates)
@@ -1211,8 +1211,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static TariffsInfoRecievingEmployee getTariffsInfoRecievingEmployee() {
-        return TariffsInfoRecievingEmployee
+    public static TariffsInfoReceivingEmployee getTariffsInfoRecievingEmployee() {
+        return TariffsInfoReceivingEmployee
             .builder()
             .employee(getEmployee())
             .tariffsInfo(getTariffInfo())
@@ -1462,7 +1462,7 @@ public class ModelUtils {
                 .recipientPhone("091546745")
                 .recipientEmail("wayn@email.com")
                 .violations(4).build())
-            .ubsUser(UBSuser.builder()
+            .ubsUser(UBSUser.builder()
                 .id(1L)
                 .firstName("Anatolii")
                 .lastName("Petyrov")
@@ -1486,7 +1486,7 @@ public class ModelUtils {
                 .recipientPhone("091546745")
                 .recipientEmail("wayn@email.com")
                 .violations(4).build())
-            .ubsUser(UBSuser.builder()
+            .ubsUser(UBSUser.builder()
                 .id(1L)
                 .firstName("Anatolii")
                 .lastName("Petyrov")
@@ -1831,7 +1831,7 @@ public class ModelUtils {
         LocationDto locationDto1 = LocationDto.builder()
             .locationNameMap(Map.of("name", "Вінниця", "name_en", "Vinnytsa"))
             .build();
-        return Arrays.asList(locationDto1);
+        return singletonList(locationDto1);
     }
 
     public static DistrictDto getDistrictDto() {
@@ -1861,7 +1861,7 @@ public class ModelUtils {
             .cityEn("CityEng")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
-            .addressRegionDistrictList(Arrays.asList(getDistrictDto()))
+            .addressRegionDistrictList(singletonList(getDistrictDto()))
             .build();
     }
 
@@ -1943,7 +1943,7 @@ public class ModelUtils {
     public static Violation getViolation() {
         LocalDateTime localdatetime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 0, 0);
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
@@ -1959,7 +1959,7 @@ public class ModelUtils {
     public static Violation getViolation2() {
         LocalDateTime localdatetime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 0, 0);
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
@@ -1974,7 +1974,7 @@ public class ModelUtils {
     public static ViolationDetailInfoDto getViolationDetailInfoDto() {
         LocalDateTime localdatetime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 0, 0);
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
             .addedByUser("Alan Po")
@@ -2088,10 +2088,10 @@ public class ModelUtils {
             .build();
     }
 
-    public static Set<UBSuser> getUbsUsers() {
-        Set<UBSuser> ubSusers = new HashSet<>();
-        ubSusers.add(UBSuser.builder().id(1L).build());
-        return ubSusers;
+    public static Set<UBSUser> getUbsUsers() {
+        Set<UBSUser> ubsUsers = new HashSet<>();
+        ubsUsers.add(UBSUser.builder().id(1L).build());
+        return ubsUsers;
     }
 
     public static Payment getManualPayment() {
@@ -2126,7 +2126,7 @@ public class ModelUtils {
                 .amount(350L)
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .ubsUser(UBSuser.builder()
+            .ubsUser(UBSUser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
                 .email("mail@mail.ua")
@@ -2324,8 +2324,8 @@ public class ModelUtils {
             .build();
     }
 
-    private static UBSuser createUbsUser() {
-        return UBSuser.builder()
+    private static UBSUser createUbsUser() {
+        return UBSUser.builder()
             .id(10L)
             .orderAddress(createAddress())
             .build();
@@ -2386,7 +2386,7 @@ public class ModelUtils {
 
         return OrderDetailStatusDto.builder()
             .orderStatus(TEST_ORDER.getOrderStatus().name())
-            .paymentStatus(TEST_PAYMENT_LIST.get(0).getPaymentStatus().name())
+            .paymentStatus(TEST_PAYMENT_LIST.getFirst().getPaymentStatus().name())
             .date(orderDate)
             .build();
     }
@@ -3770,7 +3770,7 @@ public class ModelUtils {
             .setDistrictEn("Shevchenkivs'kyi")
             .setAddress("Січових Стрільців, 37, 1, 1")
             .setAddressEn("Sichovyh Stril'tsiv, 37, 1, 1")
-            .setCommentToAddressForClient("coment")
+            .setCommentToAddressForClient("comment")
             .setBagAmount("3")
             .setTotalOrderSum(50000L)
             .setOrderCertificateCode("5489-2789")
@@ -3810,7 +3810,7 @@ public class ModelUtils {
             .setDistrict(new SenderLocation().setUa("Шевченківський").setEn("Shevchenkivs'kyi"))
             .setAddress(
                 new SenderLocation().setUa("Січових Стрільців, 37, 1, 1").setEn("Sichovyh Stril'tsiv, 37, 1, 1"))
-            .setCommentToAddressForClient("coment")
+            .setCommentToAddressForClient("comment")
             .setBagsAmount("3")
             .setTotalOrderSum(500.)
             .setOrderCertificateCode("5489-2789")
@@ -3887,7 +3887,7 @@ public class ModelUtils {
                 .comment("avb")
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .ubsUser(UBSuser.builder()
+            .ubsUser(UBSUser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
                 .email("mail@mail.ua")
@@ -3920,7 +3920,7 @@ public class ModelUtils {
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .writeOffStationSum(50_00L)
-            .imageReasonNotTakingBags(List.of("foto"))
+            .imageReasonNotTakingBags(List.of("photo"))
 
             .tariffsInfo(TariffsInfo.builder()
                 .courier(Courier.builder()
@@ -4085,7 +4085,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static Order getOrdersStatusCanseledDto() {
+    public static Order getOrdersStatusCanceledDto() {
         return Order.builder()
             .id(1L)
             .payment(List.of(Payment.builder().id(1L).build()))
@@ -4130,7 +4130,7 @@ public class ModelUtils {
             .entranceNumber("5")
             .houseCorpus("1")
             .houseNumber("4")
-            .comment("helo")
+            .comment("hello")
             .build();
     }
 
@@ -4189,7 +4189,7 @@ public class ModelUtils {
                 .comment("avb")
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .ubsUser(UBSuser.builder()
+            .ubsUser(UBSUser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
                 .email("mail@mail.ua")
@@ -4221,7 +4221,7 @@ public class ModelUtils {
                 .build())
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
-            .imageReasonNotTakingBags(List.of("foto"))
+            .imageReasonNotTakingBags(List.of("photo"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>())
             .build();
@@ -4326,12 +4326,12 @@ public class ModelUtils {
 
         AddressInfoDto addressInfoDto = AddressInfoDto.builder()
             .addressStreet("StreetTest")
-            .addressDistinct("AdressDistinctTest")
+            .addressDistinct("AddressDistinctTest")
             .addressRegion("TestRegion")
             .addressComment("TestComment")
             .addressCity("TestCity")
             .addressStreetEng("StreetEng")
-            .addressDistinctEng("DisticntEng")
+            .addressDistinctEng("DistinctEng")
             .addressCityEng("CityEng")
             .addressRegionEng("RegionEng")
             .build();
@@ -4495,12 +4495,13 @@ public class ModelUtils {
     }
 
     public static String getSuccessfulFondyResponse() {
-        return "{\n" +
-            "  \"response\":{\n" +
-            "    \"response_status\":\"success\",\n" +
-            "    \"checkout_url\":\"https://pay.fondy.eu/checkout?token=afcb21aef707b1fea2565b66bac7dc41d7833390\"\n" +
-            "  }\n" +
-            "}";
+        return """
+            {
+              "response":{
+                "response_status":"success",
+                "checkout_url":"https://pay.fondy.eu/checkout?token=afcb21aef707b1fea2565b66bac7dc41d7833390"
+              }
+            }""";
     }
 
     public static List<GeocodingResult> getGeocodingResultWithKyivRegion() {

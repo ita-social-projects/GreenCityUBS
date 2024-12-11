@@ -1,7 +1,7 @@
 package greencity.mapping.employee;
 
-import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.position.PositionDto;
 import greencity.entity.user.employee.Employee;
 import org.modelmapper.AbstractConverter;

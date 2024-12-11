@@ -8,14 +8,14 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.entity.notifications.NotificationPlatform;
-import greencity.entity.order.*;
-import greencity.enums.*;
 import greencity.entity.notifications.NotificationParameter;
+import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
+import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
+import greencity.enums.*;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
@@ -39,6 +39,7 @@ import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -63,9 +64,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final OrderRepository orderRepository;
     private final ViolationRepository violationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
-    @Autowired
-    @Qualifier("kyivZonedClock")
-    private Clock clock;
+    private final Clock clock;
     private final List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
     @Autowired

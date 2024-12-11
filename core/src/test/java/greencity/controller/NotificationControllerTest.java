@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class NotificationControllerTest {
-    private static final String notificationLink = "/notifications";
+    private static final String NOTIFICATIONS_LINK = "/notifications";
 
     private MockMvc mockMvc;
 
@@ -42,7 +42,8 @@ class NotificationControllerTest {
     @InjectMocks
     NotificationController notificationController;
 
-    private final Principal principal = getUuid();
+    private static final Principal PRINCIPAL = getUuid();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @BeforeEach
     void setup() {
@@ -54,11 +55,10 @@ class NotificationControllerTest {
     @Test
     void getNotification() throws Exception {
         NotificationDto dto = getNotificationDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(List.of(dto));
+        String responseJSON = OBJECT_MAPPER.writeValueAsString(List.of(dto));
 
-        mockMvc.perform(post(notificationLink + "/" + 1L + "?lang=ua")
-            .principal(principal)
+        mockMvc.perform(post(NOTIFICATIONS_LINK + "/" + 1L + "?lang=ua")
+            .principal(PRINCIPAL)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -67,16 +67,16 @@ class NotificationControllerTest {
 
     @Test
     void getNotificationsForCurrentUser() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink)
-            .principal(principal)
+        mockMvc.perform(MockMvcRequestBuilders.get(NOTIFICATIONS_LINK)
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
-    void getUnreadenNotificationsTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink + "/quantityUnreadenNotifications")
-            .principal(principal)
+    void getUnreadNotificationsTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get(NOTIFICATIONS_LINK + "/quantityUnreadenNotifications")
+            .principal(PRINCIPAL)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }

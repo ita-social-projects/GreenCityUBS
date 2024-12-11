@@ -7,7 +7,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class OrderPaymentStatusSortingTranslationTest {
+class OrderPaymentStatusSortingTranslationTest {
     @Test
     void testGetSortOrder() {
         assertEquals(1, OrderPaymentStatusSortingTranslation.UNPAID.getSortOrder());

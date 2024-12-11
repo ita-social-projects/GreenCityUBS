@@ -1,9 +1,12 @@
 package greencity.enums;
 
+import lombok.Getter;
+
 /**
  * Enum for representing various location divisions. Each enum instance
  * represents a different level of division, with an associated level ID
  */
+@Getter
 public enum LocationDivision {
     /**
      * Represents a region or autonomous republic.
@@ -33,7 +36,7 @@ public enum LocationDivision {
     /**
      * ID for the location division level.
      */
-    int levelId;
+    final int levelId;
 
     /**
      * Constructor for creating a location division instance.
@@ -42,14 +45,5 @@ public enum LocationDivision {
      */
     LocationDivision(int levelId) {
         this.levelId = levelId;
-    }
-
-    /**
-     * Returns the ID for the location division level.
-     *
-     * @return The ID for the location division level.
-     */
-    public int getLevelId() {
-        return levelId;
     }
 }

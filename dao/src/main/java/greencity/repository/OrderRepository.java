@@ -1,8 +1,8 @@
 package greencity.repository;
 
-import greencity.enums.OrderPaymentStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import greencity.enums.OrderPaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,7 +23,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @return list of {@link Order}.
      */
     @Query("select o from Address a "
-        + "inner join UBSuser u "
+        + "inner join UBSUser u "
         + "on a.id = u.orderAddress.id "
         + "inner join Order o "
         + "on o.ubsUser.id = u.id "
@@ -38,7 +38,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      *
      * @return list of {@link Order}.
      */
-    @Query("select o from Address a inner join UBSuser u on a.id = u.orderAddress.id "
+    @Query("select o from Address a inner join UBSUser u on a.id = u.orderAddress.id "
         + "inner join Order o on u = o.ubsUser "
         + "where o.orderStatus = 'PAID' and a.coordinates is not null")
     List<Order> undeliveredAddresses();
@@ -212,7 +212,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method sets admin comment for order by order id.
-     * 
+     *
      * @param orderId      - order's ID
      * @param adminComment - admin comment to set
      */

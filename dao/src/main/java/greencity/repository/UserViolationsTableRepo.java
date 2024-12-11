@@ -1,13 +1,13 @@
 package greencity.repository;
 
-import greencity.enums.SortingOrder;
 import greencity.entity.user.Violation;
+import greencity.enums.SortingOrder;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
@@ -60,16 +60,11 @@ public class UserViolationsTableRepo {
         Expression<?> sortBy = violationRoot.get("violationDate");
 
         if (nonNull(column)) {
-            switch (column) {
-                case "orderId":
-                    sortBy = violationRoot.get("order").get("id");
-                    break;
-                case "violationLevel":
-                    sortBy = violationRoot.get("violationLevel");
-                    break;
-                default:
-                    sortBy = violationRoot.get("violationDate");
-            }
+            sortBy = switch (column) {
+                case "orderId" -> violationRoot.get("order").get("id");
+                case "violationLevel" -> violationRoot.get("violationLevel");
+                default -> violationRoot.get("violationDate");
+            };
         }
         if (sortingOrder.equals(SortingOrder.DESC)) {
             criteriaQuery.orderBy(criteriaBuilder.desc(sortBy));
