@@ -82,7 +82,6 @@ import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPTY_ORDERS_ID_COLLECTION;
-import static greencity.constant.ErrorMessage.INVALID_COLUMN_VALUE;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
 import static greencity.constant.ErrorMessage.ORDER_IS_BLOCKED;
 import static greencity.constant.ErrorMessage.ORDER_PAYMENT_STATUS_NOT_FOUND;
@@ -334,7 +333,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
      */
     private void setAddressComment(String value, Long orderId) {
         OrderAddress address = orderAddressRepository.getOrderAddressByOrderId(orderId);
-        if (address == null) {
+        if (isNull(address)) {
             throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
         }
         address.setAddressComment(value);
@@ -354,10 +353,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         Map<String, Consumer<Order>> commentSetters = Map.of(
             CLIENT_COMMENT, order -> order.setComment(value),
             ORDER_COMMENT, order -> order.setAdminComment(value));
-
-        if (!commentSetters.containsKey(columnName)) {
-            throw new BadRequestException(INVALID_COLUMN_VALUE + columnName);
-        }
 
         List<Long> unresolvedGoals = new ArrayList<>();
 
