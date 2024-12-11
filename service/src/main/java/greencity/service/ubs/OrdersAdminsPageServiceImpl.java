@@ -332,10 +332,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
      * @throws NotFoundException if the order does not have an address
      */
     private void setAddressComment(String value, Long orderId) {
-        OrderAddress address = orderAddressRepository.getOrderAddressByOrderId(orderId);
-        if (isNull(address)) {
-            throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
-        }
+        OrderAddress address = orderAddressRepository.findByOrderId(orderId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+
         address.setAddressComment(value);
         orderAddressRepository.save(address);
     }

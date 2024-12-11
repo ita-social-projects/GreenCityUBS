@@ -1244,13 +1244,13 @@ class OrdersAdminsPageServiceImplTest {
     void addNewAddressCommentTest() {
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getOrder()));
-        when(orderAddressRepository.getOrderAddressByOrderId(anyLong())).thenReturn(ModelUtils.getOrderAddress());
+        when(orderAddressRepository.findByOrderId(anyLong())).thenReturn(Optional.of(ModelUtils.getOrderAddress()));
 
         ordersAdminsPageService.chooseOrdersDataSwitcher(EMAIL, ModelUtils.getChangeRequest(ADDRESS_COMMENT));
 
         verify(employeeRepository).findByEmail(anyString());
         verify(orderRepository).findById(anyLong());
-        verify(orderAddressRepository).getOrderAddressByOrderId(anyLong());
+        verify(orderAddressRepository).findByOrderId(anyLong());
         verify(orderAddressRepository).save(any(OrderAddress.class));
         verify(orderLockService).unlockOrder(any(Order.class));
         verify(eventService).save(anyString(), anyString(), any(Order.class));
@@ -1275,7 +1275,7 @@ class OrdersAdminsPageServiceImplTest {
     void addNewAddressCommentWithErrorsTest2() {
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getOrder()));
-        when(orderAddressRepository.getOrderAddressByOrderId(anyLong())).thenReturn(null);
+        when(orderAddressRepository.findByOrderId(anyLong())).thenReturn(null);
 
         ChangeOrderResponseDTO changeOrderResponseDTO =
             ordersAdminsPageService.chooseOrdersDataSwitcher(EMAIL, ModelUtils.getChangeRequest(ADDRESS_COMMENT));
@@ -1285,7 +1285,7 @@ class OrdersAdminsPageServiceImplTest {
 
         verify(employeeRepository).findByEmail(anyString());
         verify(orderRepository).findById(anyLong());
-        verify(orderAddressRepository).getOrderAddressByOrderId(anyLong());
+        verify(orderAddressRepository).findByOrderId(anyLong());
     }
 
     @Test
