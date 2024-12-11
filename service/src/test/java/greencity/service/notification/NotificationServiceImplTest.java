@@ -43,7 +43,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
@@ -84,7 +83,6 @@ import static greencity.ModelUtils.TEST_USER_NOTIFICATION_6;
 import static greencity.ModelUtils.TEST_USER_NOTIFICATION_7;
 import static greencity.ModelUtils.TEST_VIOLATION;
 import static greencity.ModelUtils.getUnpaidOrderUrl;
-import static greencity.ModelUtils.getUserNotificationForUnpaidOrder;
 import static greencity.ModelUtils.getNotifyInternallyFormedOrder;
 import static greencity.ModelUtils.createUserNotificationForViolationWithParameters;
 import static greencity.ModelUtils.createViolationNotificationDto;
@@ -156,10 +154,10 @@ class NotificationServiceImplTest {
     private ExecutorService executorService;
 
     @Mock
-    private Order order;
+    private Order mockOrder;
 
     @Mock
-    private UserNotification userNotification;
+    private UserNotification mockUserNotification;
 
     @Spy
     @InjectMocks
@@ -284,15 +282,15 @@ class NotificationServiceImplTest {
             String orderUrl = getUnpaidOrderUrl();
 
             Double amountToPay = 10000.0;
-            when(order.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
-            when(userNotification.getOrder()).thenReturn(order);
+            when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
+            when(mockUserNotification.getOrder()).thenReturn(mockOrder);
             when(internalUrlConfigProp.getOrderUrl()).thenReturn(orderUrl);
-            when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(userNotification);
+            when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(mockUserNotification);
             when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
                 return new ArrayList<>(invocation.getArgument(0));
             });
 
-            assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(userNotification.getOrder(),
+            assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(mockUserNotification.getOrder(),
                 amountToPay.longValue()));
 
             verify(userNotificationRepository).save(any(UserNotification.class));
