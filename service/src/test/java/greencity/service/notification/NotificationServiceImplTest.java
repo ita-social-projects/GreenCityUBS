@@ -102,6 +102,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -153,6 +154,12 @@ class NotificationServiceImplTest {
 
     @Mock
     private ExecutorService executorService;
+
+    @Mock
+    private Order order;
+
+    @Mock
+    private UserNotification userNotification;
 
     @Spy
     @InjectMocks
@@ -276,26 +283,20 @@ class NotificationServiceImplTest {
         void notifyUnpaidOrderPermanentlyTest() {
             String orderUrl = getUnpaidOrderUrl();
 
-            UserNotification userNotification = getUserNotificationForUnpaidOrder();
-
-            Double amountToPay = userNotification.getParameters().stream()
-                .filter(param -> "amountToPay".equals(param.getKey()))
-                .findFirst()
-                .map(param -> Double.parseDouble(param.getValue()))
-                .orElseThrow(() -> new IllegalArgumentException("amountToPay not found in parameters"));
-
+            Double amountToPay = 10000.0;
+            when(order.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
+            when(userNotification.getOrder()).thenReturn(order);
             when(internalUrlConfigProp.getOrderUrl()).thenReturn(orderUrl);
             when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(userNotification);
             when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
                 return new ArrayList<>(invocation.getArgument(0));
             });
 
-            assertDoesNotThrow(
-                () -> notificationService.notifyUnpaidOrderPermanently(userNotification.getOrder(), amountToPay));
+            assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(userNotification.getOrder(),
+                amountToPay.longValue()));
 
             verify(userNotificationRepository).save(any(UserNotification.class));
             verify(notificationParameterRepository).saveAll(any());
-
         }
 
         @Test
@@ -818,7 +819,7 @@ class NotificationServiceImplTest {
         @Test
         void testNotifyInactiveAccounts() {
             AbstractNotificationProvider abstractNotificationProvider =
-                Mockito.mock(AbstractNotificationProvider.class);
+                mock(AbstractNotificationProvider.class);
             NotificationServiceImpl notificationService1 = new NotificationServiceImpl(
                 userRepository,
                 userNotificationRepository,

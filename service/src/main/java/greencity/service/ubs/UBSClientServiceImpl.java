@@ -132,13 +132,18 @@ import greencity.repository.ViberBotRepository;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
+import greencity.service.notification.NotificationServiceImpl;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TableGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
@@ -146,6 +151,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -165,6 +171,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -231,6 +238,7 @@ import static java.util.stream.Collectors.toMap;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UBSClientServiceImpl implements UBSClientService {
     private static final Long CITY_ID_KIEV = 3L;
     private static final String KYIV_CITY = "Kyiv City";
@@ -268,6 +276,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final CityRepository cityRepository;
     private final DistrictRepository districtRepository;
     private final MonoBankClient monoBankClient;
+    private final TaskScheduler taskScheduler;
+    private final NotificationServiceImpl notificationServiceImpl;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
@@ -618,21 +630,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Async
     public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins) {
-        try {
-            Thread.sleep(1000);
-            checkIfOrderIsNotPayedAndSendEmail(order, sumToPayInCoins);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("An error in the execution of an asynchronous task", e);
-        }
-    }
-
-    private void checkIfOrderIsNotPayedAndSendEmail(Order order, Long sumToPayInCoins) {
-        boolean isOrderPayed = order.getOrderPaymentStatus().equals(OrderPaymentStatus.PAID);
-        if (!isOrderPayed) {
-            Double sumToPay = sumToPayInCoins.doubleValue() / 100.0;
-            notificationService.notifyUnpaidOrderPermanently(order, sumToPay);
-        }
+        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,

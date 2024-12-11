@@ -242,5 +242,5 @@ public interface NotificationService {
      *
      * @author Vladyslav Haliara
      */
-    void notifyUnpaidOrderPermanently(Order order, Double sumToPay);
+    void notifyUnpaidOrderPermanently(Order order, Long sumToPay);
 }

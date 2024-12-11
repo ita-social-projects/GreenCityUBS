@@ -788,9 +788,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyUnpaidOrderPermanently(Order order, Double amountToPay) {
-        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
-        fillAndSendNotification(parameters, order, NotificationType.UNPAID_ORDER);
+    public void notifyUnpaidOrderPermanently(Order order, Long amountToPay) {
+        boolean isOrderPayed = order.getOrderPaymentStatus().equals(OrderPaymentStatus.PAID);
+        if (!isOrderPayed) {
+            Double amount = amountToPay.doubleValue() / 100.0;
+            Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amount);
+            fillAndSendNotification(parameters, order, NotificationType.UNPAID_ORDER);
+        }
     }
 
     private Set<NotificationParameter> getNotificationParametersForNewOrder(Order order) {
