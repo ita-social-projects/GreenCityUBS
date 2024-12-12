@@ -287,16 +287,16 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     /**
      * Adds a client comment to a list of orders. For each order ID in the given
      * list, this method retrieves the corresponding order from the database, sets
-     * its comment to the given value, saves the order, and records an event in the
-     * order history. If any order cannot be processed, its ID is added to the list
-     * of unresolved goals, and an exception is logged.
+     * its comment to the given comment, saves the order, and records an event in
+     * the order history. If any order cannot be processed, its ID is added to the
+     * list of unresolved goals, and an exception is logged.
      *
      * @param ordersId list of order IDs
-     * @param value    comment value
+     * @param comment  comment comment
      * @param employee employee who makes changes
      * @return list of order IDs with unresolved goals
      */
-    private List<Long> addClientComment(List<Long> ordersId, String value, Employee employee) {
+    private List<Long> addClientComment(List<Long> ordersId, String comment, Employee employee) {
         List<Long> unresolvedGoals = new ArrayList<>();
 
         for (Long orderId : ordersId) {
@@ -305,7 +305,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
                 validateOrder(order, employee);
-                order.setComment(value);
+                order.setComment(comment);
 
                 eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
                 unblockOrder(order);
@@ -319,16 +319,16 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     /**
      * Adds an address comment to a list of orders. For each order ID in the
      * provided list, this method attempts to add an address comment. If the order
-     * is found and valid, the comment is set using the provided value. If any
+     * is found and valid, the comment is set using the provided comment. If any
      * exception occurs during the process, the order ID is added to a list of
      * unresolved goals.
      *
      * @param ordersId list of order IDs to update
-     * @param value    the comment to be added to the order's address
+     * @param comment  the comment to be added to the order's address
      * @param employee the employee making the change
      * @return a list of order IDs for which the comment could not be added
      */
-    private List<Long> addAddressComment(List<Long> ordersId, String value, Employee employee) {
+    private List<Long> addAddressComment(List<Long> ordersId, String comment, Employee employee) {
         List<Long> unresolvedGoals = new ArrayList<>();
 
         for (Long orderId : ordersId) {
@@ -337,7 +337,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
                 validateOrder(order, employee);
-                setAddressComment(value, orderId);
+                setAddressComment(comment, orderId);
 
                 eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
                 unblockOrder(order);
@@ -367,11 +367,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
      * Add comment to order.
      *
      * @param ordersId list of order ids
-     * @param value    comment value
+     * @param comment  comment comment
      * @param employee employee who makes changes
      * @return list of order ids with unresolved goals
      */
-    private List<Long> addCommentToOrder(List<Long> ordersId, String value, Employee employee) {
+    private List<Long> addCommentToOrder(List<Long> ordersId, String comment, Employee employee) {
         List<Long> unresolvedGoals = new ArrayList<>();
 
         for (Long orderId : ordersId) {
@@ -380,7 +380,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
                 validateOrder(order, employee);
-                order.setAdminComment(value);
+                order.setAdminComment(comment);
 
                 eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
                 unblockOrder(order);
