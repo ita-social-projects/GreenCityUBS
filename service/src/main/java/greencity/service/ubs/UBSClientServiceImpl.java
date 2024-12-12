@@ -137,13 +137,9 @@ import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TableGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
@@ -151,7 +147,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -171,7 +166,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -238,7 +232,6 @@ import static java.util.stream.Collectors.toMap;
  */
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class UBSClientServiceImpl implements UBSClientService {
     private static final Long CITY_ID_KIEV = 3L;
     private static final String KYIV_CITY = "Kyiv City";
@@ -276,10 +269,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final CityRepository cityRepository;
     private final DistrictRepository districtRepository;
     private final MonoBankClient monoBankClient;
-    private final TaskScheduler taskScheduler;
     private final NotificationServiceImpl notificationServiceImpl;
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;

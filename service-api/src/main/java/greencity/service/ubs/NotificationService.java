@@ -235,10 +235,11 @@ public interface NotificationService {
     void deleteNotification(Long notificationId, String userUuid);
 
     /**
-     * Notify user that order has unpaid status for a long time. This method is used
-     * by schedule task, which runs every day.
+     * Notify user that order has unpaid status when it was created and not paid.
+     * This method is used one time when user create new order.
      *
-     * @param order the order to send notification for
+     * @param order    the order to send notification for
+     * @param sumToPay the sum to pay
      *
      * @author Vladyslav Haliara
      */
