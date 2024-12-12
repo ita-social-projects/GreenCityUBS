@@ -57,7 +57,7 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
         if (nonNull(employeeByUuid)) {
             TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository
                 .findByEmployeeId(employeeByUuid.getId()).orElse(null);
-            if (nonNull(tableByEmployeeId) && tableByEmployeeId.getIsTableFreeze()) {
+            if (nonNull(tableByEmployeeId) && tableByEmployeeId.isTableFreeze()) {
                 return;
             }
         }
@@ -92,7 +92,7 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
             TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository
                 .findByEmployeeId(employeeByUuid.getId()).orElse(null);
             if (nonNull(tableByEmployeeId)) {
-                tableByEmployeeId.setIsTableFreeze(value);
+                tableByEmployeeId.setTableFreeze(value);
                 return tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
             }
         }

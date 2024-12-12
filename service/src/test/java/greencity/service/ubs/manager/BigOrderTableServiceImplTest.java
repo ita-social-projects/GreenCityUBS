@@ -148,7 +148,7 @@ class BigOrderTableServiceImplTest {
         verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(getEmployee().getId());
         verify(tableColumnWidthForEmployeeRepository).save(getTestTableColumnWidthWithIsTableFreezeTrue());
 
-        Assertions.assertEquals(true, byUuid1.getIsTableFreeze(), "Should be true");
+        Assertions.assertTrue(byUuid1.isTableFreeze(), "Should be true");
     }
 
     @Test
@@ -161,7 +161,7 @@ class BigOrderTableServiceImplTest {
         verify(tableColumnWidthForEmployeeRepository, times(0)).findByEmployeeId(getEmployee().getId());
         verify(tableColumnWidthForEmployeeRepository, times(0)).save(getTestTableColumnWidthWithIsTableFreezeTrue());
 
-        Assertions.assertNull(byUuid1, "Should be true");
+        Assertions.assertNull(byUuid1, "Should be null");
     }
 
     private OrderPage getOrderPage() {
