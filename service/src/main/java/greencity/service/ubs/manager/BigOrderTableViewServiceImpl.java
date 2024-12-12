@@ -8,7 +8,10 @@ import greencity.dto.user.UserVO;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.*;
+import greencity.repository.BigOrderTableRepository;
+import greencity.repository.CustomTableViewRepo;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.TableColumnWidthForEmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,6 +24,7 @@ import greencity.entity.parameters.CustomTableView;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import lombok.AllArgsConstructor;
+
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static java.util.Objects.nonNull;
 
@@ -31,7 +35,6 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     private final CustomTableViewRepo customTableViewRepo;
     private final ModelMapper modelMapper;
     private final EmployeeRepository employeeRepository;
-    private final UserRepository userRepository;
     private final UserRemoteClient userRemoteClient;
     private final TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
 
