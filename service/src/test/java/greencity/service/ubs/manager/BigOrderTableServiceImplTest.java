@@ -85,6 +85,34 @@ class BigOrderTableServiceImplTest {
     }
 
     @Test
+    void changeOrderTableViewForEmployeeTableIsTableFreezeTrue() {
+        String uuid = "uuid1";
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.ofNullable(getEmployee()));
+        when(tableColumnWidthForEmployeeRepository.findByEmployeeId(getEmployee().getId()))
+                .thenReturn(Optional.ofNullable(getTestTableColumnWidthWithIsTableFreezeTrue()));
+
+        bigOrderTableService.changeOrderTableView(uuid, "titles1,titles2");
+
+        verify(employeeRepository).findByUuid(uuid);
+        verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(getEmployee().getId());
+    }
+
+    @Test
+    void changeOrderTableViewForEmployeeTableIsTableFreezeFalse() {
+        String uuid = "Test";
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.ofNullable(getEmployee()));
+        when(tableColumnWidthForEmployeeRepository.findByEmployeeId(getEmployee().getId()))
+                .thenReturn(Optional.ofNullable(getTestTableColumnWidth()));
+
+        bigOrderTableService.changeOrderTableView(uuid, "titles1,titles2");
+
+        verify(employeeRepository).findByUuid(uuid);
+        verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(getEmployee().getId());
+    }
+
+    @Test
     void getCustomTableParametersForExistUuid() {
         CustomTableView customTableView = ModelUtils.getCustomTableView();
         when(customTableViewRepo.findByUuid("uuid1")).thenReturn(customTableView);

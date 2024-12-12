@@ -5247,6 +5247,7 @@ public class ModelUtils {
             .amountDue(60)
             .bagsAmount(150)
             .city(200)
+            .isTableFreeze(false)
             .build();
     }
 
