@@ -5250,6 +5250,17 @@ public class ModelUtils {
             .build();
     }
 
+    public static TableColumnWidthForEmployee getTestTableColumnWidthWithIsTableFreezeTrue() {
+        return TableColumnWidthForEmployee.builder()
+                .employee(getEmployee())
+                .address(50)
+                .amountDue(60)
+                .bagsAmount(150)
+                .city(200)
+                .isTableFreeze(true)
+                .build();
+    }
+
     public static ColumnWidthDto getTestColumnWidthDto() {
         return ColumnWidthDto.builder()
             .address(100)
