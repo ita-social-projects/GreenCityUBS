@@ -88,11 +88,9 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     @Override
     public TableColumnWidthForEmployee changeIsFreezeStatus(String uuid, Boolean value) {
         Employee employeeByUuid = employeeRepository.findByUuid(uuid).orElse(null);
-
         if (nonNull(employeeByUuid)) {
             TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository
                 .findByEmployeeId(employeeByUuid.getId()).orElse(null);
-
             if (nonNull(tableByEmployeeId)) {
                 tableByEmployeeId.setIsTableFreeze(value);
                 return tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
