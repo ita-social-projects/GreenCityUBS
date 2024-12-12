@@ -90,7 +90,7 @@ class BigOrderTableServiceImplTest {
 
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.ofNullable(getEmployee()));
         when(tableColumnWidthForEmployeeRepository.findByEmployeeId(getEmployee().getId()))
-                .thenReturn(Optional.ofNullable(getTestTableColumnWidthWithIsTableFreezeTrue()));
+            .thenReturn(Optional.ofNullable(getTestTableColumnWidthWithIsTableFreezeTrue()));
 
         bigOrderTableService.changeOrderTableView(uuid, "titles1,titles2");
 
@@ -104,7 +104,7 @@ class BigOrderTableServiceImplTest {
 
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.ofNullable(getEmployee()));
         when(tableColumnWidthForEmployeeRepository.findByEmployeeId(getEmployee().getId()))
-                .thenReturn(Optional.ofNullable(getTestTableColumnWidth()));
+            .thenReturn(Optional.ofNullable(getTestTableColumnWidth()));
 
         bigOrderTableService.changeOrderTableView(uuid, "titles1,titles2");
 
