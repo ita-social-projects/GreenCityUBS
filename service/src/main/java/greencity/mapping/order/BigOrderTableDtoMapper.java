@@ -4,6 +4,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.SenderLocation;
 import greencity.entity.order.BigOrderTableViews;
+import java.util.Optional;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -36,9 +37,18 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
             .setCommentToAddressForClient(bigViews.getCommentToAddressForClient())
             .setCommentForOrderByClient(bigViews.getCommentForOrderByClient())
             .setCommentsForOrder(bigViews.getCommentForOrderByAdmin())
-            .setMixedWaste120L(String.valueOf(bigViews.getMixedWaste120()))
-            .setTextileWaste60L(String.valueOf(bigViews.getTextileWaste60()))
-            .setTextileWaste20L(String.valueOf(bigViews.getTextileWaste20()))
+            .setMixedWaste120L(Optional.ofNullable(bigViews.getMixedWaste120())
+                .filter(value -> value != 0)
+                .map(String::valueOf)
+                .orElse("-"))
+            .setTextileWaste60L(Optional.ofNullable(bigViews.getTextileWaste60())
+                .filter(value -> value != 0)
+                .map(String::valueOf)
+                .orElse("-"))
+            .setTextileWaste20L(Optional.ofNullable(bigViews.getTextileWaste20())
+                .filter(value -> value != 0)
+                .map(String::valueOf)
+                .orElse("-"))
             .setTotalOrderSum(convertCoinsIntoBills(bigViews.getTotalOrderSum()))
             .setOrderCertificateCode(bigViews.getOrderCertificateCode())
             .setGeneralDiscount(bigViews.getGeneralDiscount())

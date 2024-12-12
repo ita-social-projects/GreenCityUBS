@@ -3812,6 +3812,8 @@ public class ModelUtils {
                 new SenderLocation().setUa("Січових Стрільців, 37, 1, 1").setEn("Sichovyh Stril'tsiv, 37, 1, 1"))
             .setCommentToAddressForClient("coment")
             .setMixedWaste120L("3")
+            .setTextileWaste60L("-")
+            .setTextileWaste20L("-")
             .setTotalOrderSum(500.)
             .setOrderCertificateCode("5489-2789")
             .setGeneralDiscount(100L)
@@ -3844,7 +3846,10 @@ public class ModelUtils {
             .setRegion(new SenderLocation().setEn(null).setUa(null))
             .setCity(new SenderLocation().setEn(null).setUa(null))
             .setDistrict(new SenderLocation().setEn(null).setUa(null))
-            .setAddress(new SenderLocation().setEn(null).setUa(null));
+            .setAddress(new SenderLocation().setEn(null).setUa(null))
+            .setMixedWaste120L("-")
+            .setTextileWaste60L("-")
+            .setTextileWaste20L("-");
     }
 
     public static BigOrderTableViews getBigOrderTableViewsByDateNullTest() {
