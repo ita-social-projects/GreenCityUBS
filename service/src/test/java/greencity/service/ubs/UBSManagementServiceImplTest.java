@@ -307,6 +307,7 @@ class UBSManagementServiceImplTest {
         Order order = getOrder();
         ReadAddressByOrderDto readAddressByOrderDto = ModelUtils.getReadAddressByOrderDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderAddressRepository.findByOrderId(anyLong())).thenReturn(Optional.of(ModelUtils.getOrderAddress()));
         when(ubsManagementService.getAddressByOrderId(1L)).thenReturn(readAddressByOrderDto);
         Assertions.assertNotNull(order);
     }

@@ -11,6 +11,7 @@ import greencity.dto.table.ColumnWidthDto;
 import greencity.entity.order.Event;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.CancellationReason;
 import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
@@ -86,8 +88,14 @@ class OrdersAdminsPageServiceImplTest {
     private UserRemoteClient userRemoteClient;
     @Mock
     private TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
+    @Mock
+    private OrderAddressRepository orderAddressRepository;
     @InjectMocks
     private OrdersAdminsPageServiceImpl ordersAdminsPageService;
+    private static final String EMAIL = "test@email.com";
+    private static final String ADDRESS_COMMENT = "commentToAddressForClient";
+    private static final String CLIENT_COMMENT = "commentForOrderByClient";
+    private static final String ORDER_COMMENT = "commentsForOrder";
 
     @Test
     void getParametersForOrdersExceptionTable() {
@@ -1216,5 +1224,121 @@ class OrdersAdminsPageServiceImplTest {
         verify(positionRepository).findById(1L);
         verify(orderRepository).findById(1L);
         verify(employeeOrderPositionRepository).existsByOrderAndPosition(any(Order.class), any(Position.class));
+    }
+
+    @Test
+    void addNewAddressCommentTest() {
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getOrder()));
+        when(orderAddressRepository.findByOrderId(anyLong())).thenReturn(Optional.of(ModelUtils.getOrderAddress()));
+
+        ordersAdminsPageService.chooseOrdersDataSwitcher(EMAIL, ModelUtils.getChangeRequest(ADDRESS_COMMENT));
+
+        verify(employeeRepository).findByEmail(anyString());
+        verify(orderRepository).findById(anyLong());
+        verify(orderAddressRepository).findByOrderId(anyLong());
+        verify(orderAddressRepository).save(any(OrderAddress.class));
+        verify(orderRepository).save(any(Order.class));
+        verify(eventService).save(anyString(), anyString(), any(Order.class));
+    }
+
+    @Test
+    void addNewAddressCommentWithErrorsTest() {
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
+        when(orderRepository.findById(anyLong())).thenThrow(NotFoundException.class);
+
+        ChangeOrderResponseDTO changeOrderResponseDTO =
+            ordersAdminsPageService.chooseOrdersDataSwitcher(EMAIL, ModelUtils.getChangeRequest(ADDRESS_COMMENT));
+
+        assertEquals(1, changeOrderResponseDTO.getUnresolvedGoalsOrderId().size());
+        assertEquals(HttpStatus.OK, changeOrderResponseDTO.getHttpStatus());
+
+        verify(employeeRepository).findByEmail(anyString());
+        verify(orderRepository).findById(anyLong());
+    }
+
+    @Test
+    void addNewAddressCommentWithErrorsTest2() {
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getOrder()));
+        when(orderAddressRepository.findByOrderId(anyLong())).thenReturn(null);
+
+        ChangeOrderResponseDTO changeOrderResponseDTO =
+            ordersAdminsPageService.chooseOrdersDataSwitcher(EMAIL, ModelUtils.getChangeRequest(ADDRESS_COMMENT));
+
+        assertEquals(1, changeOrderResponseDTO.getUnresolvedGoalsOrderId().size());
+        assertEquals(HttpStatus.OK, changeOrderResponseDTO.getHttpStatus());
+
+        verify(employeeRepository).findByEmail(anyString());
+        verify(orderRepository).findById(anyLong());
+        verify(orderAddressRepository).findByOrderId(anyLong());
+    }
+
+    @Test
+    void addNewCommentWhenOrderIsBlockedTest() {
+        Order order = ModelUtils.getOrder();
+        Employee adminEmployee = ModelUtils.getFullEmployee();
+        adminEmployee.setId(2L);
+        order.setBlockedByEmployee(adminEmployee);
+
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        ChangeOrderResponseDTO changeOrderResponseDTO =
+            ordersAdminsPageService.chooseOrdersDataSwitcher(EMAIL, ModelUtils.getChangeRequest(ADDRESS_COMMENT));
+
+        assertEquals(1, changeOrderResponseDTO.getUnresolvedGoalsOrderId().size());
+        assertEquals(HttpStatus.OK, changeOrderResponseDTO.getHttpStatus());
+
+        verify(employeeRepository).findByEmail(anyString());
+        verify(orderRepository).findById(anyLong());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = OrderStatus.class, names = {"DONE", "CANCELED", "BROUGHT_IT_HIMSELF"})
+    void addNewCommentWithDifferentOrderStatusTest(OrderStatus orderStatus) {
+        Order order = ModelUtils.getOrder();
+        order.setOrderStatus(orderStatus);
+
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        ChangeOrderResponseDTO changeOrderResponseDTO =
+            ordersAdminsPageService.chooseOrdersDataSwitcher(EMAIL, ModelUtils.getChangeRequest(ADDRESS_COMMENT));
+
+        assertEquals(1, changeOrderResponseDTO.getUnresolvedGoalsOrderId().size());
+        assertEquals(HttpStatus.OK, changeOrderResponseDTO.getHttpStatus());
+
+        verify(employeeRepository).findByEmail(anyString());
+        verify(orderRepository).findById(anyLong());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {CLIENT_COMMENT, ORDER_COMMENT})
+    void addNewCommentTest(String columnName) {
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getOrder()));
+
+        ordersAdminsPageService.chooseOrdersDataSwitcher(EMAIL, ModelUtils.getChangeRequest(columnName));
+
+        verify(employeeRepository).findByEmail(anyString());
+        verify(orderRepository).findById(anyLong());
+        verify(orderRepository).save(any(Order.class));
+        verify(eventService).save(anyString(), anyString(), any(Order.class));
+    }
+
+    @Test
+    void addNewCommentWithNotExistingOrderTest() {
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
+        when(orderRepository.findById(anyLong())).thenThrow(NotFoundException.class);
+
+        ChangeOrderResponseDTO changeOrderResponseDTO =
+            ordersAdminsPageService.chooseOrdersDataSwitcher(EMAIL, ModelUtils.getChangeRequest(ORDER_COMMENT));
+
+        assertEquals(1, changeOrderResponseDTO.getUnresolvedGoalsOrderId().size());
+        assertEquals(HttpStatus.OK, changeOrderResponseDTO.getHttpStatus());
+
+        verify(employeeRepository).findByEmail(anyString());
+        verify(orderRepository).findById(anyLong());
     }
 }

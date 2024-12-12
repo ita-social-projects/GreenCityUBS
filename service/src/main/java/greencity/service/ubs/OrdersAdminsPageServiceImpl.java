@@ -16,6 +16,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -34,6 +35,7 @@ import greencity.repository.AddressRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
@@ -70,12 +72,15 @@ import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPTY_ORDERS_ID_COLLECTION;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
 import static greencity.constant.ErrorMessage.ORDER_IS_BLOCKED;
 import static greencity.constant.ErrorMessage.ORDER_PAYMENT_STATUS_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ORDER_STATUS_INVALID;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.OrderHistory.UBS_ADMIN;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -99,6 +104,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final EventService eventService;
     private final NotificationServiceImpl notificationService;
     private final SuperAdminService superAdminService;
+    private final OrderAddressRepository orderAddressRepository;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String DATE_OF_EXPORT = "dateOfExport";
     private static final String RECEIVING = "receivingStation";
@@ -110,6 +116,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String CANCELLATION_REASON = "cancellationReason";
     private static final String CANCELLATION_COMMENT = "cancellationComment";
     private static final String ADMIN_COMMENT = "adminComment";
+    private static final String ADDRESS_COMMENT = "commentToAddressForClient";
+    private static final String CLIENT_COMMENT = "commentForOrderByClient";
+    private static final String ORDER_COMMENT = "commentsForOrder";
     private static final String WITHOUT_ID = "-1";
     private static final String WITHOUT_MANAGER_EN = "Without manager";
     private static final String WITHOUT_MANAGER_UA = "Без менеджера";
@@ -151,8 +160,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 4, EditType.READ_ONLY, new ArrayList<>(), ordersInfo),
             new ColumnDTO(new TitleDto("paymentDate", "Дата оплати", "Payment date"), "paymentDate", 20,
                 false, true, true, 5, EditType.READ_ONLY, new ArrayList<>(), ordersInfo),
-            new ColumnDTO(new TitleDto("commentsForOrder", "Коментар адміністратора", "Admin comment"),
-                "commentsForOrder",
+            new ColumnDTO(new TitleDto(ORDER_COMMENT, "Коментар адміністратора", "Admin comment"),
+                ORDER_COMMENT,
                 20, false, true, false, 33, EditType.INLINE, new ArrayList<>(), ordersInfo),
             new ColumnDTO(new TitleDto("clientName", "Ім'я клієнта", "Client name"), "clientName", 20,
                 false, true, false, 6, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
@@ -180,9 +189,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(
-                new TitleDto("commentToAddressForClient", "Коментар до адреси",
+                new TitleDto(ADDRESS_COMMENT, "Коментар до адреси",
                     "Comment to address"),
-                "commentToAddressForClient", 20, false, true, false, 16, EditType.INLINE, new ArrayList<>(),
+                ADDRESS_COMMENT, 20, false, true, false, 16, EditType.INLINE, new ArrayList<>(),
                 exportAddress),
             new ColumnDTO(new TitleDto("bagsAmount", "К-сть пакетів", "Bags amount"), "bagAmount", 20, false, true,
                 false,
@@ -198,9 +207,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("amountDue", "Сума до оплати", "Amount due"), "amountDue", 20,
                 false, true, false, 21, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(
-                new TitleDto("commentForOrderByClient", "Коментар до замовлення",
+                new TitleDto(CLIENT_COMMENT, "Коментар до замовлення",
                     "Comment to the order"),
-                "commentForOrderByClient", 20, false, true, false, 22, EditType.INLINE, new ArrayList<>(),
+                CLIENT_COMMENT, 20, false, true, false, 22, EditType.INLINE, new ArrayList<>(),
                 ordersInfo),
             new ColumnDTO(new TitleDto("totalPayment", "Оплата", "Total payment"),
                 "totalPayment", 20, false, true,
@@ -260,9 +269,147 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             case ADMIN_COMMENT:
                 return createReturnForSwitchChangeOrder(
                     adminCommentForDevelopStage(ordersId, value, employee));
+            case ADDRESS_COMMENT:
+                return createReturnForSwitchChangeOrder(
+                    addAddressComment(ordersId, value, employee));
+            case CLIENT_COMMENT:
+                return createReturnForSwitchChangeOrder(
+                    addClientComment(ordersId, value, employee));
+            case ORDER_COMMENT:
+                return createReturnForSwitchChangeOrder(
+                    addCommentToOrder(ordersId, value, employee));
             default:
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
+        }
+    }
+
+    /**
+     * Adds a client comment to a list of orders. For each order ID in the given
+     * list, this method retrieves the corresponding order from the database, sets
+     * its comment to the given comment, saves the order, and records an event in
+     * the order history. If any order cannot be processed, its ID is added to the
+     * list of unresolved goals, and an exception is logged.
+     *
+     * @param ordersId list of order IDs
+     * @param comment  comment comment
+     * @param employee employee who makes changes
+     * @return list of order IDs with unresolved goals
+     */
+    private List<Long> addClientComment(List<Long> ordersId, String comment, Employee employee) {
+        List<Long> unresolvedGoals = new ArrayList<>();
+
+        for (Long orderId : ordersId) {
+            try {
+                Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+
+                validateOrder(order, employee);
+                order.setComment(comment);
+
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
+                unblockOrder(order);
+            } catch (Exception e) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
+    }
+
+    /**
+     * Adds an address comment to a list of orders. For each order ID in the
+     * provided list, this method attempts to add an address comment. If the order
+     * is found and valid, the comment is set using the provided comment. If any
+     * exception occurs during the process, the order ID is added to a list of
+     * unresolved goals.
+     *
+     * @param ordersId list of order IDs to update
+     * @param comment  the comment to be added to the order's address
+     * @param employee the employee making the change
+     * @return a list of order IDs for which the comment could not be added
+     */
+    private List<Long> addAddressComment(List<Long> ordersId, String comment, Employee employee) {
+        List<Long> unresolvedGoals = new ArrayList<>();
+
+        for (Long orderId : ordersId) {
+            try {
+                Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+
+                validateOrder(order, employee);
+                setAddressComment(comment, orderId);
+
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
+                unblockOrder(order);
+            } catch (Exception e) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
+    }
+
+    /**
+     * Updates the address comment of an order.
+     *
+     * @param value   the new comment
+     * @param orderId the id of the order
+     * @throws NotFoundException if the order does not have an address
+     */
+    private void setAddressComment(String value, Long orderId) {
+        OrderAddress address = orderAddressRepository.findByOrderId(orderId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+
+        address.setAddressComment(value);
+        orderAddressRepository.save(address);
+    }
+
+    /**
+     * Add comment to order.
+     *
+     * @param ordersId list of order ids
+     * @param comment  comment comment
+     * @param employee employee who makes changes
+     * @return list of order ids with unresolved goals
+     */
+    private List<Long> addCommentToOrder(List<Long> ordersId, String comment, Employee employee) {
+        List<Long> unresolvedGoals = new ArrayList<>();
+
+        for (Long orderId : ordersId) {
+            try {
+                Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+
+                validateOrder(order, employee);
+                order.setAdminComment(comment);
+
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
+                unblockOrder(order);
+            } catch (Exception e) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
+    }
+
+    /**
+     * Checks if the given {@code order} can be modified by the current
+     * {@code employee}. If the order is blocked by another employee, throws
+     * {@link BadRequestException}. If the order status is
+     * {@link OrderStatus#CANCELED}, {@link OrderStatus#DONE}, or
+     * {@link OrderStatus#BROUGHT_IT_HIMSELF}, throws {@link BadRequestException}.
+     *
+     * @param order    the order to validate
+     * @param employee the current employee
+     * @throws BadRequestException if the order cannot be modified
+     */
+    private void validateOrder(Order order, Employee employee) {
+        if (isOrderBlockedByAnotherEmployee(order, employee.getId())) {
+            throw new BadRequestException(ORDER_IS_BLOCKED + order.getBlockedByEmployee().getId());
+        }
+        if (OrderStatus.CANCELED.equals(order.getOrderStatus())
+            || OrderStatus.DONE.equals(order.getOrderStatus())
+            || OrderStatus.BROUGHT_IT_HIMSELF.equals(order.getOrderStatus())) {
+            throw new BadRequestException(String.format(ORDER_STATUS_INVALID, order.getId()));
         }
     }
 
@@ -911,6 +1058,19 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             }
         }
         return unblockedOrdersId;
+    }
+
+    /**
+     * Unblocks an order and clears the blockedByEmployee field. This method is a
+     * utility method used internally by the service to unblock orders after certain
+     * operations. It is not intended to be used by external code.
+     *
+     * @param order the order to be unblocked
+     */
+    private void unblockOrder(Order order) {
+        order.setBlocked(false);
+        order.setBlockedByEmployee(null);
+        orderRepository.save(order);
     }
 
     private boolean isOrderBlockedByAnotherEmployee(Order order, Long employeeId) {

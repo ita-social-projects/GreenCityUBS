@@ -82,6 +82,7 @@ public final class OrderHistory {
     public static final String UPDATE_DATE_EXPORT = "Змінено деталі вивезення. Дата вивезення:";
     public static final String SET_DATE_EXPORT = "Встановлено деталі вивезення. Дата вивезення:";
     public static final String UPDATE_MIX_WASTE = "Змінено деталі замовлення. Мікс відходів ";
+    public static final String UBS_ADMIN = "UBS ADMIN";
 
     /**
      * Constructor.
