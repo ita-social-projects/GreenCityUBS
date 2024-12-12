@@ -5,6 +5,7 @@ import greencity.client.UserRemoteClient;
 import greencity.dto.language.LanguageVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.parameters.CustomTableView;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;
@@ -12,6 +13,7 @@ import greencity.filters.OrderSearchCriteria;
 import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CustomTableViewRepo;
 import greencity.repository.EmployeeRepository;
+import greencity.repository.TableColumnWidthForEmployeeRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,8 +24,9 @@ import org.springframework.data.domain.Page;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
+
+import static greencity.ModelUtils.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BigOrderTableServiceImplTest {
@@ -37,12 +40,14 @@ class BigOrderTableServiceImplTest {
     private EmployeeRepository employeeRepository;
     @Mock
     private UserRemoteClient userRemoteClient;
+    @Mock
+    TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
 
     @Test
     void getOrders() {
         var orderPage = getOrderPage();
         var orderSearchCriteria = getOrderSearchCriteria();
-        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Optional<Employee> employee = Optional.of(getEmployee());
         List<Long> tariffsInfoIds = new ArrayList<>();
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(employee);
         UserVO userVO = new UserVO().setLanguageVO(new LanguageVO(null, "eng"));
@@ -99,6 +104,36 @@ class BigOrderTableServiceImplTest {
 
         verify(customTableViewRepo).existsByUuid(customTableView.getUuid());
         Assertions.assertNotNull(customTableView);
+    }
+
+    @Test
+    void changeIsFreezeStatusTest() {
+        when(employeeRepository.findByUuid("Test")).thenReturn(Optional.ofNullable(getEmployee()));
+        when(tableColumnWidthForEmployeeRepository.findByEmployeeId(getEmployee().getId()))
+                .thenReturn(Optional.ofNullable(getTestTableColumnWidth()));
+        when(tableColumnWidthForEmployeeRepository.save(getTestTableColumnWidthWithIsTableFreezeTrue()))
+                .thenReturn(getTestTableColumnWidthWithIsTableFreezeTrue());
+
+        TableColumnWidthForEmployee byUuid1 = bigOrderTableService.changeIsFreezeStatus("Test", true);
+
+        verify(employeeRepository).findByUuid("Test");
+        verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(getEmployee().getId());
+        verify(tableColumnWidthForEmployeeRepository).save(getTestTableColumnWidthWithIsTableFreezeTrue());
+
+        Assertions.assertEquals(true, byUuid1.getIsTableFreeze(), "Should be true");
+    }
+
+    @Test
+    void changeIsFreezeStatusForNon_ExistUuidTest() {
+        when(employeeRepository.findByUuid("Non_Exist")).thenReturn(Optional.empty());
+
+        TableColumnWidthForEmployee byUuid1 = bigOrderTableService.changeIsFreezeStatus("Non_Exist", true);
+
+        verify(employeeRepository).findByUuid("Non_Exist");
+        verify(tableColumnWidthForEmployeeRepository, times(0)).findByEmployeeId(getEmployee().getId());
+        verify(tableColumnWidthForEmployeeRepository, times(0)).save(getTestTableColumnWidthWithIsTableFreezeTrue());
+
+        Assertions.assertNull(byUuid1, "Should be true");
     }
 
     private OrderPage getOrderPage() {

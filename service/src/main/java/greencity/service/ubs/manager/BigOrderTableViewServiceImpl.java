@@ -84,7 +84,7 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     }
 
     @Override
-    public void changeIsFreezeStatus(String uuid, Boolean value) {
+    public TableColumnWidthForEmployee changeIsFreezeStatus(String uuid, Boolean value) {
         Employee employeeByUuid = employeeRepository.findByUuid(uuid).orElse(null);
 
         if (nonNull(employeeByUuid)) {
@@ -93,9 +93,10 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
 
             if (nonNull(tableByEmployeeId)) {
                 tableByEmployeeId.setIsTableFreeze(value);
-                tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
+                return tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
             }
         }
+        return null;
     }
 
     private CustomTableViewDto castTableViewToDto(String titles) {
