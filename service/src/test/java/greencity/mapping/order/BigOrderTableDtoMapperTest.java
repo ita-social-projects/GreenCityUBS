@@ -2,20 +2,29 @@ package greencity.mapping.order;
 
 import greencity.ModelUtils;
 import greencity.dto.order.BigOrderTableDTO;
-import greencity.dto.order.SenderLocation;
 import greencity.entity.order.BigOrderTableViews;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BigOrderTableDtoMapperTest {
     @InjectMocks
     BigOrderTableDtoMapper bigOrderTableDtoMapper;
+    private BigOrderTableViews bigViews;
+
+    @BeforeEach
+    void setUp() {
+        bigViews = mock(BigOrderTableViews.class);
+    }
 
     @Test
     void convert() {
@@ -31,34 +40,32 @@ class BigOrderTableDtoMapperTest {
         assertEquals(bigOrderTableDto, bigOrderTableDtoMapper.convert(bigOrderTableView));
     }
 
-    @Test
-    void convertTest() {
-        BigOrderTableViews bigViews = ModelUtils.getBigOrderTableViews1();
-
-        BigOrderTableDTO result = bigOrderTableDtoMapper.convert(bigViews);
-
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("PENDING", result.getOrderStatus());
-        assertEquals("PAID", result.getOrderPaymentStatus());
-        assertEquals("2024-12-13", result.getOrderDate());
-        assertEquals("2024-12-14", result.getPaymentDate());
-        assertEquals("John Doe", result.getClientName());
-        assertEquals("johndoe@example.com", result.getClientEmail());
-        assertEquals("1234567890", result.getClientPhone());
-        assertEquals("Jane Smith", result.getSenderName());
-        assertEquals("0987654321", result.getSenderPhone());
-        assertEquals("janesmith@example.com", result.getSenderEmail());
-        assertEquals(2, result.getViolationsAmount());
-        assertEquals(new SenderLocation("Kyiv Region", "Kyiv Oblast"), result.getRegion());
-        assertEquals(new SenderLocation("Kyiv", "Kyiv"), result.getCity());
-        assertEquals(new SenderLocation("Pecherskyi", "Pecherskyi"), result.getDistrict());
-        assertEquals(new SenderLocation("Khreshchatyk 1", "Khreshchatyk 1"), result.getAddress());
-        assertEquals("-", result.getTextileWaste60L());
-        assertEquals("-", result.getTextileWaste20L());
-        assertEquals("5", result.getMixedWaste120L());
-        assertEquals(15.00, result.getTotalOrderSum());
-        assertEquals(12.00, result.getAmountDue());
-        assertEquals(3.00, result.getTotalPayment());
+    @ParameterizedTest
+    @CsvSource({
+        "0, -, setMixedWaste120L",
+        "100, '100', setMixedWaste120L",
+        "0, '-', setTextileWaste60L",
+        "50, '50', setTextileWaste60L",
+        "0, '-', setTextileWaste20L",
+        "20, '20', setTextileWaste20L"
+    })
+    void testWasteFields(Long input, String expected, String method) {
+        switch (method) {
+            case "setMixedWaste120L" -> {
+                when(bigViews.getMixedWaste120()).thenReturn(input);
+                BigOrderTableDTO result = bigOrderTableDtoMapper.convert(bigViews);
+                assertEquals(expected, result.getMixedWaste120L());
+            }
+            case "setTextileWaste60L" -> {
+                when(bigViews.getTextileWaste60()).thenReturn(input);
+                BigOrderTableDTO result = bigOrderTableDtoMapper.convert(bigViews);
+                assertEquals(expected, result.getTextileWaste60L());
+            }
+            case "setTextileWaste20L" -> {
+                when(bigViews.getTextileWaste20()).thenReturn(input);
+                BigOrderTableDTO result = bigOrderTableDtoMapper.convert(bigViews);
+                assertEquals(expected, result.getTextileWaste20L());
+            }
+        }
     }
 }

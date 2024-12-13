@@ -5608,37 +5608,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static BigOrderTableViews getBigOrderTableViews1() {
-        return BigOrderTableViews.builder()
-            .id(1L)
-            .orderStatus("PENDING")
-            .orderPaymentStatus("PAID")
-            .orderDate(LocalDate.of(2024, 12, 13))
-            .paymentDate(LocalDate.of(2024, 12, 14))
-            .clientName("John Doe")
-            .clientEmail("johndoe@example.com")
-            .clientPhoneNumber("1234567890")
-            .senderName("Jane Smith")
-            .senderPhone("0987654321")
-            .senderEmail("janesmith@example.com")
-            .violationsAmount(2)
-            .region("Kyiv Region")
-            .regionEn("Kyiv Oblast")
-            .city("Kyiv")
-            .cityEn("Kyiv")
-            .district("Pecherskyi")
-            .districtEn("Pecherskyi")
-            .address("Khreshchatyk 1")
-            .addressEn("Khreshchatyk 1")
-            .mixedWaste120(5L)
-            .textileWaste60(0L)
-            .textileWaste20(null)
-            .totalOrderSum(1500L)
-            .amountDue(1200L)
-            .totalPayment(300L)
-            .build();
-    }
-
     public static RequestToChangeOrdersDataDto getChangeRequest(String columnName) {
         return RequestToChangeOrdersDataDto.builder()
             .columnName(columnName)
