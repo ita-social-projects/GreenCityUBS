@@ -25,8 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static greencity.ModelUtils.*;
-import static org.mockito.Mockito.*;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getTestTableColumnWidth;
+import static greencity.ModelUtils.getTestTableColumnWidthWithIsTableFreezeTrue;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class BigOrderTableServiceImplTest {
