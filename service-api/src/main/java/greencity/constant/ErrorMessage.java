@@ -179,4 +179,5 @@ public class ErrorMessage {
     public static final String TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST =
         "Could not find tariff information for bags with IDs %s at location with id: %d";
     public static final String COULD_NOT_RETRIEVE_USER_LANGUAGE = "Could not retrieve user language";
+    public static final String CANNOT_CHANGE_ORDER_TABLE_VIEW = "You can't change order table view when table is frozen";
 }

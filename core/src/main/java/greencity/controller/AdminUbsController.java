@@ -258,7 +258,8 @@ public class AdminUbsController {
         @ApiResponse(
             responseCode = "200",
             description = "isTableFreeze is successfully updated",
-            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class))))
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))
+        )
     })
     @PutMapping("/saveOrderTableColumnsWidthIsFreeze")
     public ResponseEntity<HttpStatus> saveIsFreeze(@CurrentUserUuid String uuid,
