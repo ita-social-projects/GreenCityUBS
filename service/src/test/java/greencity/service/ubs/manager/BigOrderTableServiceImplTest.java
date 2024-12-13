@@ -15,6 +15,7 @@ import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CustomTableViewRepo;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TableColumnWidthForEmployeeRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -159,15 +160,37 @@ class BigOrderTableServiceImplTest {
 
     @Test
     void changeIsFreezeStatusForNon_ExistUuidTest() {
-        when(employeeRepository.findByUuid("Non_Exist")).thenReturn(Optional.empty());
+        String nonExistUuid = "Non_Exist";
+        when(employeeRepository.findByUuid(nonExistUuid)).thenReturn(Optional.empty());
 
-        TableColumnWidthForEmployee byUuid1 = bigOrderTableService.changeIsFreezeStatus("Non_Exist", true);
+        Assertions.assertThrows(
+                EntityNotFoundException.class,
+                () -> bigOrderTableService.changeIsFreezeStatus(nonExistUuid, true),
+                "Should throw EntityNotFoundException"
+        );
 
-        verify(employeeRepository).findByUuid("Non_Exist");
+        verify(employeeRepository).findByUuid(nonExistUuid);
         verify(tableColumnWidthForEmployeeRepository, times(0)).findByEmployeeId(getEmployee().getId());
         verify(tableColumnWidthForEmployeeRepository, times(0)).save(getTestTableColumnWidthWithIsTableFreezeTrue());
 
-        Assertions.assertNull(byUuid1, "Should be null");
+    }
+
+    @Test
+    void changeIsFreezeStatusForNon_ExistEmployeeTableTest() {
+        String uuid = "Test";
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.ofNullable(getEmployee()));
+        when(tableColumnWidthForEmployeeRepository.findByEmployeeId(getEmployee().getId()))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(
+                EntityNotFoundException.class,
+                () -> bigOrderTableService.changeIsFreezeStatus(uuid, true),
+                "Should throw EntityNotFoundException"
+        );
+
+        verify(employeeRepository).findByUuid(uuid);
+        verify(tableColumnWidthForEmployeeRepository, times(1)).findByEmployeeId(getEmployee().getId());
+
     }
 
     private OrderPage getOrderPage() {

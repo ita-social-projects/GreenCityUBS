@@ -27,7 +27,9 @@ import greencity.filters.OrderSearchCriteria;
 import lombok.AllArgsConstructor;
 
 import static greencity.constant.ErrorMessage.CANNOT_CHANGE_ORDER_TABLE_VIEW;
+import static greencity.constant.ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -98,8 +100,9 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
                 tableByEmployeeId.setTableFreeze(value);
                 return tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
             }
+            throw new EntityNotFoundException(TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND);
         }
-        return null;
+        throw new EntityNotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND);
     }
 
     private CustomTableViewDto castTableViewToDto(String titles) {
