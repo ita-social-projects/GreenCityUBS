@@ -5,7 +5,6 @@ import greencity.dto.table.CustomTableViewDto;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import greencity.repository.TableColumnWidthForEmployeeRepository;
 import org.springframework.data.domain.Page;
 
 public interface BigOrderTableServiceView {

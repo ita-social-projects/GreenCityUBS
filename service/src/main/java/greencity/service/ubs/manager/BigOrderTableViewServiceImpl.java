@@ -24,7 +24,6 @@ import greencity.entity.parameters.CustomTableView;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import lombok.AllArgsConstructor;
-
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static java.util.Objects.nonNull;
 
@@ -58,7 +57,7 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
         if (nonNull(employeeByUuid)) {
             TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository
                 .findByEmployeeId(employeeByUuid.getId()).orElse(null);
-            if (nonNull(tableByEmployeeId) && tableByEmployeeId.getIsTableFreeze()) {
+            if (nonNull(tableByEmployeeId) && tableByEmployeeId.isTableFreeze()) {
                 return;
             }
         }
@@ -89,13 +88,11 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     @Override
     public TableColumnWidthForEmployee changeIsFreezeStatus(String uuid, Boolean value) {
         Employee employeeByUuid = employeeRepository.findByUuid(uuid).orElse(null);
-
         if (nonNull(employeeByUuid)) {
             TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository
                 .findByEmployeeId(employeeByUuid.getId()).orElse(null);
-
             if (nonNull(tableByEmployeeId)) {
-                tableByEmployeeId.setIsTableFreeze(value);
+                tableByEmployeeId.setTableFreeze(value);
                 return tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
             }
         }
