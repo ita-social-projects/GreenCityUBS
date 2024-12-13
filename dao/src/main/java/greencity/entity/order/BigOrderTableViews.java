@@ -1,14 +1,14 @@
 package greencity.entity.order;
 
+import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -39,7 +39,12 @@ public class BigOrderTableViews {
     private String districtEn;
     private String addressEn;
     private String commentToAddressForClient;
-    private String bagAmount;
+    @Column(name = "mixed_waste_120")
+    private Long mixedWaste120;
+    @Column(name = "textile_waste_60")
+    private Long textileWaste60;
+    @Column(name = "textile_waste_20")
+    private Long textileWaste20;
     private Long totalOrderSum;
     private String orderCertificateCode;
     private Long generalDiscount;

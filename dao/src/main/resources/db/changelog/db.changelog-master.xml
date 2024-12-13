@@ -233,4 +233,6 @@
     <include file="/db/changelog/logs/ch-update-notification-templates-Herchanivska.xml"/>
     <include file="db/changelog/logs/ch-update-text-for-notifications-Rozhko.xml"/>
     <include file="db/changelog/logs/2024-11-22-rename-positions-Kizerov.xml"/>
+    <include file="db/changelog/logs/2024-12-5-update-big-order-table-view-Kizerov.xml"/>
+    <include file="db/changelog/logs/2024-12-5-update-colum_width_for_employee-Kizerov.xml"/>
 </databaseChangeLog>
