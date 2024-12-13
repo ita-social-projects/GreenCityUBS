@@ -109,6 +109,7 @@ public class NotificationServiceImpl implements NotificationService {
     private static final int MAX_NOTIFICATION_ORDER_AGE_MONTHS = 1;
     private static final int MIN_NOTIFICATION_ORDER_AGE_DAYS = 3;
     private static final int MAX_NOTIFICATIONS_PER_WEEK = 1;
+    private static final double PERCENTAGE_DIVISOR = 100.0;
 
     private final OrderBagService orderBagService;
 
@@ -785,6 +786,16 @@ public class NotificationServiceImpl implements NotificationService {
             throw new NotFoundException(NOTIFICATION_DOES_NOT_EXIST);
         }
         userNotificationRepository.markAsDeletedUserNotificationByIdAndUserId(notificationId, userId);
+    }
+
+    @Override
+    public void notifyUnpaidOrderPermanently(Order order, Long amountToPay) {
+        boolean isOrderPayed = order.getOrderPaymentStatus() == OrderPaymentStatus.PAID;
+        if (!isOrderPayed) {
+            Double amount = amountToPay.doubleValue() / PERCENTAGE_DIVISOR;
+            Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amount);
+            fillAndSendNotification(parameters, order, NotificationType.UNPAID_ORDER);
+        }
     }
 
     private Set<NotificationParameter> getNotificationParametersForNewOrder(Order order) {

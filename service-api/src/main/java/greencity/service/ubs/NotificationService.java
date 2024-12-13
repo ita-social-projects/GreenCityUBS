@@ -233,4 +233,15 @@ public interface NotificationService {
      * @author Roman Kasarab
      */
     void deleteNotification(Long notificationId, String userUuid);
+
+    /**
+     * Notify user that order has unpaid status when it was created and not paid.
+     * This method is used one time when user create new order.
+     *
+     * @param order    the order to send notification for
+     * @param sumToPay the sum to pay
+     *
+     * @author Vladyslav Haliara
+     */
+    void notifyUnpaidOrderPermanently(Order order, Long sumToPay);
 }
