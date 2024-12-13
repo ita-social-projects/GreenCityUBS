@@ -26,7 +26,6 @@ import org.springframework.data.domain.Page;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import static greencity.ModelUtils.getEmployee;
 import static greencity.ModelUtils.getTestTableColumnWidth;
 import static greencity.ModelUtils.getTestTableColumnWidthWithIsTableFreezeTrue;
