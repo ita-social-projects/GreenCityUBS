@@ -3,6 +3,7 @@ package greencity.mapping.order;
 import greencity.ModelUtils;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.entity.order.BigOrderTableViews;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class BigOrderTableDtoMapperTest {
     @InjectMocks
     BigOrderTableDtoMapper bigOrderTableDtoMapper;
@@ -66,6 +68,7 @@ class BigOrderTableDtoMapperTest {
                 BigOrderTableDTO result = bigOrderTableDtoMapper.convert(bigViews);
                 assertEquals(expected, result.getTextileWaste20L());
             }
+            default -> log.error("Method not found");
         }
     }
 }
