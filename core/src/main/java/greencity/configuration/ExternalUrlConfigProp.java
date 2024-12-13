@@ -10,6 +10,5 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 @ConfigurationProperties(prefix = "greencity.external", ignoreUnknownFields = false)
 public class ExternalUrlConfigProp {
-    private String fondyApiUrl;
     private String viberApiUrl;
 }

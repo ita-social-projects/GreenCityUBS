@@ -42,7 +42,6 @@ import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
@@ -99,7 +98,6 @@ import greencity.enums.PaymentType;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
@@ -132,6 +130,7 @@ import greencity.repository.ViberBotRepository;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
+import greencity.service.notification.NotificationServiceImpl;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
@@ -146,13 +145,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -170,16 +169,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
+import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
 import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
 import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
@@ -199,7 +197,6 @@ import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_U
 import static greencity.constant.ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED;
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
@@ -266,6 +263,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final CityRepository cityRepository;
     private final DistrictRepository districtRepository;
     private final MonoBankClient monoBankClient;
+    private final NotificationServiceImpl notificationServiceImpl;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
@@ -340,7 +338,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .maskedCard(response.getCardPan())
             .cardType(response.getCardType())
             .orderTime(response.getCreatedDate())
-            .settlementDate(parseFondySettlementDate(""))
+            .settlementDate(parseSettlementDate(""))
             .fee(0L)
             .paymentSystem(response.getPaymentSystem())
             .senderEmail(response.getEmail())
@@ -348,35 +346,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
-    private String parseFondySettlementDate(String settlementDate) {
+    private String parseSettlementDate(String settlementDate) {
         return settlementDate.isEmpty()
             ? LocalDate.now().toString()
             : LocalDate.parse(settlementDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString();
-    }
-
-    /**
-     * This method is used to validate the signature of the payment received from
-     * LiqPay. It concatenates the private key and data, generates a SHA-1 hash,
-     * encodes it in Base64, and compares it with the received signature. If the
-     * generated signature doesn't match the received one, it throws a
-     * `WrongSignatureException`.
-     *
-     * @param privateKey        The private key used for signature validation.
-     * @param data              The data received from LiqPay.
-     * @param receivedSignature The signature received from LiqPay.
-     */
-    protected void checkSignature(String privateKey, String data, String receivedSignature) {
-        String message = privateKey + data + privateKey;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-1"); // NOSONAR
-            byte[] messageDigest = md.digest(message.getBytes(StandardCharsets.UTF_8));
-            String signature = Base64.getEncoder().encodeToString(messageDigest);
-            if (!receivedSignature.equals(signature)) {
-                throw new WrongSignatureException(ErrorMessage.WRONG_SIGNATURE_USED);
-            }
-        } catch (NoSuchAlgorithmException e) {
-            throw new WrongSignatureException(ErrorMessage.WRONG_SIGNATURE_USED);
-        }
     }
 
     /**
@@ -603,6 +576,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
+        checkIfOrderIsNotPayedAndSendEmailAsync(order, sumToPayInCoins);
+
         notificationService.notifyCreatedOrder(order);
 
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
@@ -610,6 +585,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         return processPayment(dto, order, sumToPayInCoins, currentUser);
+    }
+
+    @Async
+    public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins) {
+        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,
@@ -741,26 +721,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return PaymentSystemResponse.builder()
             .orderId(order.getId())
             .link(link)
-            .build();
-    }
-
-    @Override
-    public FondyPaymentResponse getPaymentResponseFromFondy(Long id, String uuid) {
-        Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
-            throw new AccessDeniedException(CANNOT_ACCESS_PAYMENT_STATUS);
-        }
-        if (order.getPayment().isEmpty()) {
-            throw new NotFoundException(PAYMENT_NOT_FOUND + id);
-        }
-        return getFondyPaymentResponse(order);
-    }
-
-    private FondyPaymentResponse getFondyPaymentResponse(Order order) {
-        Payment payment = order.getPayment().getLast();
-        return FondyPaymentResponse.builder()
-            .paymentStatus(payment.getPaymentStatus().name().equals("PAID") ? "success" : null)
             .build();
     }
 
@@ -1172,11 +1132,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String userUuid) {
         var ubsUser = getUbsUserById(dtoUpdate.getRecipientId());
-        checkUserHasAccessToUpdateData(ubsUser, userUuid);
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        checkUserHasAccessToUpdateData(ubsUser, userUuid, authentication);
 
         ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
-        eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.CLIENT,
-            ubsUser.getOrders().getFirst());
+        if (!isAdmin(authentication)) {
+            eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.CLIENT,
+                ubsUser.getOrders().getFirst());
+        } else {
+            eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.UBS_ADMIN,
+                ubsUser.getOrders().getFirst());
+        }
 
         return UbsCustomersDto.builder()
             .name(ubsUser.getSenderFirstName() + " " + ubsUser.getSenderLastName())
@@ -1185,20 +1152,29 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
+    /**
+     * Method checks if current user is admin.
+     *
+     * @return {@link Boolean} true if user is admin, false otherwise;
+     */
+    private boolean isAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals(UBS_EMPLOYEE_WITH_PREFIX));
+    }
+
     private UBSuser getUbsUserById(Long recipientId) {
         return ubsUserRepository.findById(recipientId)
             .orElseThrow(() -> new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + recipientId));
     }
 
-    private void checkUserHasAccessToUpdateData(UBSuser ubsUser, String userUuid) {
+    private void checkUserHasAccessToUpdateData(UBSuser ubsUser, String userUuid, Authentication authentication) {
         var uuid = ubsUser.getUser().getUuid();
-        if (checkUserRoleIsUser() && !(uuid.equals(userUuid))) {
+        if (checkUserRoleIsUser(authentication) && !(uuid.equals(userUuid))) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
     }
 
-    private boolean checkUserRoleIsUser() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
+    private boolean checkUserRoleIsUser(Authentication authentication) {
         return authentication.getAuthorities().stream()
             .anyMatch(authority -> authority.getAuthority().equals(USER_WITH_PREFIX));
     }

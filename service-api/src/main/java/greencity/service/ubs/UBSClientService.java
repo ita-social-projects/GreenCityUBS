@@ -3,7 +3,16 @@ package greencity.service.ubs;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDto;
 import greencity.dto.TariffInfoByLocationDto;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWayForPayClientDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.DeactivateUserRequestDto;
@@ -16,17 +25,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.PaymentSystemResponse;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.position.PositionAuthoritiesDto;
@@ -106,16 +105,6 @@ public interface UBSClientService {
      * @author Oleh Bilonizhka
      */
     PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
-
-    /**
-     * Method get status of order from db by id.
-     *
-     * @param orderId {@link Long} order id;
-     * @param uuid    current {@link User}'s uuid;
-     * @return - payment status
-     * @author Vadym Makitra
-     */
-    FondyPaymentResponse getPaymentResponseFromFondy(Long orderId, String uuid);
 
     /**
      * Methods return list of all user addresses.

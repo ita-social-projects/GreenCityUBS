@@ -2813,6 +2813,54 @@ public class ModelUtils {
         return parameters;
     }
 
+    private static User createTestUser() {
+        return User.builder().id(1L).build();
+    }
+
+    private static Order createTestUnpaidOrder() {
+        return Order.builder().id(1L).user(createTestUser()).build();
+    }
+
+    public static String getUnpaidOrderUrl() {
+        Order order = createTestUnpaidOrder();
+        return "http://localhost:4200/#/ubs/order?existingOrderId=" + order.getId();
+    }
+
+    public static Set<NotificationParameter> createNotificationParameterForUnpaidOrder() {
+        double amountToPay = 10000.0;
+        Order order = createTestUnpaidOrder();
+        String orderUrl = getUnpaidOrderUrl();
+        Set<NotificationParameter> notificationParameters = new HashSet<>();
+        notificationParameters.add(NotificationParameter.builder()
+            .key("orderNumber")
+            .value(order.getId().toString())
+            .build());
+
+        notificationParameters.add(NotificationParameter.builder()
+            .key("amountToPay")
+            .value(String.format("%.2f", amountToPay))
+            .build());
+
+        notificationParameters.add(NotificationParameter.builder()
+            .key("payButton")
+            .value(orderUrl)
+            .build());
+        return notificationParameters;
+    }
+
+    public static UserNotification getUserNotificationForUnpaidOrder() {
+        User user = createTestUser();
+        Order order = createTestUnpaidOrder();
+        return UserNotification.builder()
+            .id(1L)
+            .user(user)
+            .order(order)
+            .notificationType(NotificationType.UNPAID_ORDER)
+            .notificationTime(LocalDateTime.now(fixedClock))
+            .parameters(createNotificationParameterForUnpaidOrder())
+            .build();
+    }
+
     private static Set<NotificationParameter> createNotificationParameterSet2() {
         Set<NotificationParameter> parameters = new HashSet<>();
 
@@ -5612,6 +5660,14 @@ public class ModelUtils {
                 .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
                 .build())
 
+            .build();
+    }
+
+    public static RequestToChangeOrdersDataDto getChangeRequest(String columnName) {
+        return RequestToChangeOrdersDataDto.builder()
+            .columnName(columnName)
+            .orderIdsList(List.of(1L))
+            .newValue("Test comment")
             .build();
     }
 }

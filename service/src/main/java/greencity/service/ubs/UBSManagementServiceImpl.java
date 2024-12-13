@@ -237,7 +237,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (orderRepository.findById(orderId).isEmpty()) {
             throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
         }
-        return modelMapper.map(orderAddressRepository.getOrderAddressByOrderId(orderId), ReadAddressByOrderDto.class);
+        OrderAddress orderAddress = orderAddressRepository.findByOrderId(orderId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+        return modelMapper.map(orderAddress, ReadAddressByOrderDto.class);
     }
 
     /**
@@ -250,7 +252,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId()));
         OrderAddress updatedOrderAddress = ubsClientService.updateOrderAddress(dtoUpdate);
-        mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress);
+        mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress, dtoUpdate.getAddressComment());
         orderAddressRepository.save(updatedOrderAddress);
         eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
         return Optional.of(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class));
@@ -1263,6 +1265,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), order, email);
         }
         if (nonNull(updateOrderPageDto.getOrderDetailDto())) {
+            setComment(order, updateOrderPageDto.getOrderDetailDto().getUserComment());
             setOrderDetail(
                 order,
                 updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1286,6 +1289,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
             notificationService.notifyUnpaidOrder(order);
         }
+    }
+
+    /**
+     * This is method which sets user comment in order.
+     *
+     * @param order       {@link Order}.
+     * @param userComment {@link String}.
+     */
+    private void setComment(Order order, String userComment) {
+        order.setComment(userComment);
     }
 
     /**
@@ -1450,11 +1463,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private void mapUpdatedOrderAddressFields(OrderAddress orderAddress, OrderAddress updatedOrderAddress) {
+    private void mapUpdatedOrderAddressFields(OrderAddress orderAddress, OrderAddress updatedOrderAddress,
+        String comment) {
         updatedOrderAddress.setLocation(orderAddress.getLocation());
         updatedOrderAddress.setId(orderAddress.getId());
         updatedOrderAddress.setActual(orderAddress.getActual());
-        updatedOrderAddress.setAddressComment(orderAddress.getAddressComment());
+        updatedOrderAddress.setAddressComment(comment);
         updatedOrderAddress.setCoordinates(orderAddress.getCoordinates());
         updatedOrderAddress.setAddressStatus(orderAddress.getAddressStatus());
     }

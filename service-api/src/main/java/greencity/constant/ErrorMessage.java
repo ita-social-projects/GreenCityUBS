@@ -183,4 +183,5 @@ public class ErrorMessage {
         "You can't change order table view when table is frozen";
     public static final String TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND =
         "Table column width by employee id not found";
+    public static final String ORDER_STATUS_INVALID = "Order with ID %d cannot be updated due to its current status.";
 }

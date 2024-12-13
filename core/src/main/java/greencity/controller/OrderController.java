@@ -19,7 +19,6 @@ import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
-import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
@@ -339,29 +338,6 @@ public class OrderController {
         @PathVariable("id") final Long id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.ok().body(ubsClientService.getOrderCancellationReason(id, uuid));
-    }
-
-    /**
-     * Controller for getting status about payment from Fondy.
-     *
-     * @param orderId - current order.
-     * @param uuid    current {@link User}'s uuid.
-     * @return {@link String}
-     */
-    @Operation(summary = "Get status of Payment from Fondy")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @GetMapping(value = "/getFondyStatus/{orderId}")
-    public ResponseEntity<FondyPaymentResponse> getFondyStatusPayment(
-        @Valid @PathVariable Long orderId,
-        @Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getPaymentResponseFromFondy(orderId, uuid));
     }
 
     /**
