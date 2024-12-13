@@ -5,11 +5,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableFeignClients
 @EnableCaching
+@EnableAsync
 public class UbsApplication {
     /**
      * Main method of SpringBoot app.

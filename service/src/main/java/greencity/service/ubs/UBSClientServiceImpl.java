@@ -130,6 +130,7 @@ import greencity.repository.ViberBotRepository;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
+import greencity.service.notification.NotificationServiceImpl;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
@@ -144,6 +145,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -261,6 +263,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final CityRepository cityRepository;
     private final DistrictRepository districtRepository;
     private final MonoBankClient monoBankClient;
+    private final NotificationServiceImpl notificationServiceImpl;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
@@ -573,6 +576,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
+        checkIfOrderIsNotPayedAndSendEmailAsync(order, sumToPayInCoins);
+
         notificationService.notifyCreatedOrder(order);
 
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
@@ -580,6 +585,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         return processPayment(dto, order, sumToPayInCoins, currentUser);
+    }
+
+    @Async
+    public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins) {
+        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,

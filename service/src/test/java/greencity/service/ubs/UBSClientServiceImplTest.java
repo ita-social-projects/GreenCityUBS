@@ -106,6 +106,7 @@ import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
+import greencity.service.notification.NotificationServiceImpl;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
@@ -392,6 +393,9 @@ class UBSClientServiceImplTest {
 
     @Mock
     private OrderUtils orderUtils;
+
+    @Mock
+    private NotificationServiceImpl notificationServiceImpl;
 
     @Value("${greencity.monobank.token}")
     private String token;
