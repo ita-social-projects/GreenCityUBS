@@ -98,8 +98,9 @@ class BigOrderTableServiceImplTest {
         when(tableColumnWidthForEmployeeRepository.findByEmployeeId(getEmployee().getId()))
             .thenReturn(Optional.ofNullable(getTestTableColumnWidthWithIsTableFreezeTrue()));
 
-        Assertions.assertThrows(BadRequestException.class, () -> bigOrderTableService.changeOrderTableView(uuid, "titles1,titles2"),
-                "should throw BadRequestException");
+        Assertions.assertThrows(BadRequestException.class,
+            () -> bigOrderTableService.changeOrderTableView(uuid, "titles1,titles2"),
+            "should throw BadRequestException");
 
         verify(employeeRepository).findByUuid(uuid);
         verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(getEmployee().getId());
@@ -164,10 +165,9 @@ class BigOrderTableServiceImplTest {
         when(employeeRepository.findByUuid(nonExistUuid)).thenReturn(Optional.empty());
 
         Assertions.assertThrows(
-                EntityNotFoundException.class,
-                () -> bigOrderTableService.changeIsFreezeStatus(nonExistUuid, true),
-                "Should throw EntityNotFoundException"
-        );
+            EntityNotFoundException.class,
+            () -> bigOrderTableService.changeIsFreezeStatus(nonExistUuid, true),
+            "Should throw EntityNotFoundException");
 
         verify(employeeRepository).findByUuid(nonExistUuid);
         verify(tableColumnWidthForEmployeeRepository, times(0)).findByEmployeeId(getEmployee().getId());
@@ -180,13 +180,12 @@ class BigOrderTableServiceImplTest {
         String uuid = "Test";
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.ofNullable(getEmployee()));
         when(tableColumnWidthForEmployeeRepository.findByEmployeeId(getEmployee().getId()))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         Assertions.assertThrows(
-                EntityNotFoundException.class,
-                () -> bigOrderTableService.changeIsFreezeStatus(uuid, true),
-                "Should throw EntityNotFoundException"
-        );
+            EntityNotFoundException.class,
+            () -> bigOrderTableService.changeIsFreezeStatus(uuid, true),
+            "Should throw EntityNotFoundException");
 
         verify(employeeRepository).findByUuid(uuid);
         verify(tableColumnWidthForEmployeeRepository, times(1)).findByEmployeeId(getEmployee().getId());
