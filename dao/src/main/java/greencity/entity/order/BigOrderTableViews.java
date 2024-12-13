@@ -40,11 +40,11 @@ public class BigOrderTableViews {
     private String addressEn;
     private String commentToAddressForClient;
     @Column(name = "mixed_waste_120")
-    private long mixedWaste120;
+    private Long mixedWaste120;
     @Column(name = "textile_waste_60")
-    private long textileWaste60;
+    private Long textileWaste60;
     @Column(name = "textile_waste_20")
-    private long textileWaste20;
+    private Long textileWaste20;
     private Long totalOrderSum;
     private String orderCertificateCode;
     private Long generalDiscount;
