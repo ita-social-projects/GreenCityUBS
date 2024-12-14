@@ -7,16 +7,13 @@
     <changeSet id="update-custom_table_view-and-column_width_for_employee" author="Kizerov Dmytro">
         <sql>
             UPDATE custom_table_view
-            SET titles = 'select,id,orderDate,clientPhone,district,clientName,senderPhone,senderName,clientEmail,mixedWaste120L,textileWaste60L,textileWaste20L,totalOrderSum,amountDue,totalPayment,commentForOrderByClient,dateOfExport,idOrderFromShop,orderCertificateCode,commentsForOrder,city,address,commentToAddressForClient,paymentDate,orderPaymentStatus,orderStatus'
-            WHERE uuid = (SELECT e.uuid FROM employees e WHERE e.email = 'pickup@nowaste.org.ua');
+            SET titles = 'select,id,orderDate,clientPhone,district,clientName,senderPhone,senderName,clientEmail,mixedWaste120L,textileWaste60L,textileWaste20L,totalOrderSum,amountDue,totalPayment,commentForOrderByClient,dateOfExport,idOrderFromShop,orderCertificateCode,commentsForOrder,city,address,commentToAddressForClient,paymentDate,orderPaymentStatus,orderStatus';
         </sql>
         <sql>
             UPDATE column_width_for_employee
             SET mixed_waste_120l = 120,
                 textile_waste_60l = 120,
-                textile_waste_20l = 120
-            WHERE employee_id = (SELECT e.id FROM employees e WHERE e.email = 'pickup@nowaste.org.ua');
+                textile_waste_20l = 120;
         </sql>
     </changeSet>
-
 </databaseChangeLog>
