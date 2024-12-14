@@ -54,7 +54,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
     private static final OrderPage ORDER_PAGE_PAGE_NUMBER_3_PAGE_SIZE_2_ASC =
         new OrderPage().setPageNumber(3).setPageSize(2).setSortBy("id").setSortDirection(Sort.Direction.ASC);
 
-    // @Test
+    @Test
     void is_ModelUtil_Data_Equal_SQL() {
         List<BigOrderTableViews> expectedValue = ModelUtils.getAllBOTViewsASC();
         var actualValue = bigOrderTableRepository.findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_ASC,
@@ -62,7 +62,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Default_Page_ASC() {
         var expectedValue = ModelUtils.getListBOTViewsStandardPageASC();
         var actualValue = bigOrderTableRepository.findAll(DEFAULT_ORDER_PAGE_ASC,
@@ -70,7 +70,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Default_Page_DESC() {
         var expectedValue = ModelUtils.getListBOTViewsStandardPageDESC();
         var actualValue = bigOrderTableRepository.findAll(DEFAULT_ORDER_PAGE_DESC,
@@ -95,7 +95,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Filter_By_Order_Status_Is_Formed_DESC() {
         var filter = new OrderSearchCriteria().setOrderStatus(new OrderStatus[] {OrderStatus.FORMED});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
@@ -115,7 +115,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Filter_By_Order_Status_Is_Formed_And_CONFIRMED_DESC() {
         var filter =
             new OrderSearchCriteria().setOrderStatus(new OrderStatus[] {OrderStatus.FORMED, OrderStatus.CONFIRMED});
@@ -129,7 +129,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Filter_By_Payment_Status_Is_PAID_DESC() {
         var filter =
             new OrderSearchCriteria().setOrderPaymentStatus(new OrderPaymentStatus[] {OrderPaymentStatus.PAID});
@@ -142,7 +142,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Filter_By_City_DESC() {
         var filter = new OrderSearchCriteria().setCities(new String[] {"Київ"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
@@ -154,7 +154,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Filter_By_Region_DESC() {
         var filter = new OrderSearchCriteria().setRegion(new String[] {"Київська область"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
@@ -179,7 +179,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Filter_By_Order_Date_Between_DESC() {
         var filter = new OrderSearchCriteria().setOrderDate(new DateFilter().setFrom("2022-02-01").setTo("2022-02-02"));
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
@@ -193,7 +193,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Filter_By_Order_Date_Less_Then_Or_Equal_DESC() {
         var filter = new OrderSearchCriteria().setOrderDate(new DateFilter().setTo("2022-02-01"));
         LocalDateTime endDate = LocalDateTime.of(2022, 2, 2, 0, 0, 1);
@@ -207,7 +207,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Filter_By_Order_Date_Greater_Then_Or_Equal_DESC() {
         var filter = new OrderSearchCriteria().setOrderDate(new DateFilter().setFrom("2022-02-01"));
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
@@ -291,7 +291,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Filter_By_Responsible_Driver_ASC() {
         var filter = new OrderSearchCriteria().setResponsibleDriverId(new Long[] {10L});
         var expectedValue = ModelUtils.getAllBOTViewsASC().stream()
@@ -317,7 +317,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Search_by_phone_DESC() {
         var filter = new OrderSearchCriteria().setSearch(new String[] {"+380631144678"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
@@ -330,29 +330,29 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Sort_By_OrderStatus_UA_Localization_ASC() {
         OrderPage orderPage = new OrderPage().setPageNumber(0).setPageSize(15).setSortBy("orderStatus")
             .setSortDirection(Sort.Direction.ASC);
         List<BigOrderTableViews> bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
-            Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(true));
+            Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(false));
         Assertions.assertTrue(isListCorrectlySorted);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Sort_By_OrderStatus_UA_Localization_DESC() {
         OrderPage orderPage = new OrderPage().setPageNumber(0).setPageSize(15).setSortBy("orderStatus")
             .setSortDirection(Sort.Direction.DESC);
         var bigOrderTableViewsList = bigOrderTableRepository.findAll(orderPage,
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
-            Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(false));
+            Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(true));
         Assertions.assertTrue(isListCorrectlySorted);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_Search_by_Client_Name_DESC() {
         var filter = new OrderSearchCriteria().setSearch(new String[] {"Anna Maria"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
@@ -397,7 +397,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    // @Test
+    @Test
     void get_All_Orders_PageImpl_ASC() {
         var expectedValue = ModelUtils.getPageableAllBOTViews_ASC();
         var actualValue =
@@ -467,10 +467,10 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(expectedValue, actualValue);
     }
 
-    private Comparator<BigOrderTableViews> orderStatusTranslationComparator(boolean ascending) {
+    private Comparator<BigOrderTableViews> orderStatusTranslationComparator(boolean descending) {
         Comparator<BigOrderTableViews> comparator = Comparator.comparingInt(
             view -> OrderStatusSortingTranslation.valueOf(view.getOrderStatus()).getSortOrder());
-        return ascending ? comparator.reversed() : comparator;
+        return descending ? comparator.reversed() : comparator;
     }
 
     private Comparator<BigOrderTableViews> orderPaymentStatusTranslationComparator(boolean descending) {

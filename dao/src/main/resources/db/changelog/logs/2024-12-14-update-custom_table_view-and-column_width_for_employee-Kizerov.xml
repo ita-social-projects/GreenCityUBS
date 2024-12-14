@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="update-custom_table_view-and-column_width_for_employee" author="Kizerov Dmytro">
+        <sql>
+            UPDATE custom_table_view
+            SET titles = 'select,id,orderDate,clientPhone,district,clientName,senderPhone,senderName,clientEmail,mixedWaste120L,textileWaste60L,textileWaste20L,totalOrderSum,amountDue,totalPayment,commentForOrderByClient,dateOfExport,idOrderFromShop,orderCertificateCode,commentsForOrder,city,address,commentToAddressForClient,paymentDate,orderPaymentStatus,orderStatus'
+            WHERE uuid = (SELECT e.uuid FROM employees e WHERE e.email = 'pickup@nowaste.org.ua');
+        </sql>
+        <sql>
+            UPDATE column_width_for_employee
+            SET mixed_waste_120l = 120,
+                textile_waste_60l = 120,
+                textile_waste_20l = 120
+            WHERE employee_id = (SELECT e.id FROM employees e WHERE e.email = 'pickup@nowaste.org.ua');
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
