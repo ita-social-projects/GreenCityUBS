@@ -258,4 +258,5 @@
     <include file="db/changelog/logs/2024-12-09-update-big-order-table-view-Kizerov.xml"/>
     <include file="db/changelog/logs/2024-12-09-update-colum_width_for_employee-Kizerov.xml"/>
     <include file="db/changelog/logs/2024-12-14-update-custom_table_view-Kizerov.xml"/>
+    <include file="db/changelog/logs/2024-12-16-hotfix-big_order_table-Kizerov.xml"/>
 </databaseChangeLog>
