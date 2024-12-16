@@ -5309,7 +5309,7 @@ public class ModelUtils {
             .employee(getEmployee())
             .address(50)
             .amountDue(60)
-            .bagsAmount(150)
+            .mixedWaste120L(150)
             .city(200)
             .isTableFreeze(true)
             .build();
