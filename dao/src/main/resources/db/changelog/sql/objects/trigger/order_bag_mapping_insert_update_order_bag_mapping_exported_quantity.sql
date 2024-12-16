@@ -1,1 +1,6 @@
-CREATE OR REPLACE TRIGGER insert_update_order_bag_mapping_exported_quantity AFTER UPDATE OF exported_quantity ON public.order_bag_mapping FOR EACH ROW EXECUTE FUNCTION sum_total_amount_without_discounts_obm_exported_quantity()
+DROP TRIGGER IF EXISTS insert_update_order_bag_mapping_exported_quantity ON public.order_bag_mapping;
+CREATE TRIGGER insert_update_order_bag_mapping_exported_quantity
+    AFTER UPDATE OF exported_quantity
+    ON public.order_bag_mapping
+    FOR EACH ROW
+EXECUTE FUNCTION sum_total_amount_without_discounts_obm_exported_quantity();

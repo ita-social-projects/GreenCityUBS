@@ -306,7 +306,7 @@
     <changeSet author="holotsvan (generated)" id="1734272689558-11">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM employees;
+                SELECT COUNT(*) FROM locations;
             </sqlCheck>
         </preConditions>
         <insert tableName="locations">
@@ -355,7 +355,7 @@
     <changeSet author="holotsvan (generated)" id="1734272689558-13">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM employees WHERE id = 1;
+                SELECT COUNT(*) FROM courier;
             </sqlCheck>
         </preConditions>
         <insert tableName="courier">
@@ -1742,8 +1742,7 @@
     <changeSet author="holotsvan (generated)" id="1734272689558-52">
         <sqlFile
                 path="../sql/objects/trigger/order_bag_mapping_insert_update_order_bag_mapping_amount.sql"
-                relativeToChangelogFile="true"
-                />
+                relativeToChangelogFile="true"/>
     </changeSet>
 
     <changeSet author="holotsvan (generated)" id="1734272689558-53">
