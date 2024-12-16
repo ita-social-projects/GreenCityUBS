@@ -7,7 +7,9 @@
     <changeSet id="update-custom_table_view" author="Kizerov Dmytro">
         <sql>
             UPDATE custom_table_view
-            SET titles = 'select,id,orderDate,clientPhone,district,clientName,senderPhone,senderName,clientEmail,mixedWaste120L,textileWaste60L,textileWaste20L,totalOrderSum,amountDue,totalPayment,commentForOrderByClient,dateOfExport,idOrderFromShop,orderCertificateCode,commentsForOrder,city,address,commentToAddressForClient,paymentDate,orderPaymentStatus,orderStatus';
+            SET titles = 'select,id,orderStatus,orderPaymentStatus,orderDate,paymentDate,commentsForOrder,clientName,clientPhone,clientEmail,senderName,senderPhone,senderEmail,violationsAmount,
+region,city,district,address,commentToAddressForClient,mixedWaste120L,textileWaste60L,textileWaste20L,totalOrderSum,orderCertificateCode,generalDiscount,amountDue,commentForOrderByClient,
+totalPayment,dateOfExport,timeOfExport,idOrderFromShop,receivingStation,responsibleCaller,responsibleLogicMan,responsibleDriver,responsibleNavigator,blockedBy';
         </sql>
     </changeSet>
 </databaseChangeLog>
