@@ -12,7 +12,9 @@ import lombok.NoArgsConstructor;
 public class ColumnWidthDto {
     private Integer address;
     private Integer amountDue;
-    private Integer bagsAmount;
+    private Integer mixedWaste120L;
+    private Integer textileWaste60L;
+    private Integer textileWaste20L;
     private Integer blockedBy;
     private Integer city;
     private Integer clientEmail;
@@ -44,4 +46,5 @@ public class ColumnWidthDto {
     private Integer totalOrderSum;
     private Integer totalPayment;
     private Integer violationsAmount;
+    private Boolean isTableFreeze;
 }

@@ -1,0 +1,3120 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="orders"/>
+            </not>
+        </preConditions>
+        <createTable tableName="orders">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="orders_pkey"/>
+            </column>
+            <column name="comment" type="VARCHAR(255)"/>
+            <column name="deliver_from" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="deliver_to" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="order_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="order_status" type="VARCHAR(18)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="points_to_use" type="INTEGER"/>
+            <column name="ubs_user_id" type="BIGINT"/>
+            <column name="users_id" type="BIGINT"/>
+            <column name="order_payment_status" type="VARCHAR(40)"/>
+            <column name="cancellation_reason" type="VARCHAR(40)"/>
+            <column name="cancellation_comment" type="VARCHAR(170)"/>
+            <column name="reason_not_taking_bag_description" type="VARCHAR(512)"/>
+            <column name="image_reason_not_taking_bags" type="VARCHAR(2048)"/>
+            <column name="date_of_export" type="date"/>
+            <column name="employee_id" type="BIGINT"/>
+            <column name="blocked" type="BOOLEAN"/>
+            <column name="admin_comment" type="VARCHAR(255)"/>
+            <column defaultValueNumeric="0" name="counter_order_payment_id" type="BIGINT"/>
+            <column name="sum_total_amount_without_discounts" type="BIGINT"/>
+            <column name="receiving_station_id" type="BIGINT"/>
+            <column name="tariffs_info_id" type="BIGINT"/>
+            <column defaultValueNumeric="0" name="ubs_courier_sum" type="BIGINT"/>
+            <column defaultValueNumeric="0" name="write_off_station_sum" type="BIGINT"/>
+            <column name="blocked_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="users"/>
+            </not>
+        </preConditions>
+        <createTable tableName="users">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="users_pkey"/>
+            </column>
+            <column defaultValueNumeric="0" name="current_points" type="INTEGER"/>
+            <column name="uuid" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="violations" type="INTEGER"/>
+            <column name="recipient_name" type="VARCHAR(170)"/>
+            <column name="recipient_email" type="VARCHAR(170)"/>
+            <column name="recipient_phone" type="VARCHAR(30)"/>
+            <column name="recipient_surname" type="VARCHAR(170)"/>
+            <column name="last_order_location" type="BIGINT"/>
+            <column name="date_of_registration" type="date"/>
+            <column name="alternate_email" type="VARCHAR(170)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-3">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM users;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="users">
+            <column name="id" valueNumeric="1"/>
+            <column name="current_points" valueNumeric="0"/>
+            <column name="uuid" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="violations" valueNumeric="0"/>
+            <column name="recipient_name" value="ADMIN"/>
+            <column name="recipient_email" value="admin.greencity@starmaker.email"/>
+            <column name="recipient_phone" value="+380979797979"/>
+            <column name="recipient_surname" value="GREENCITY"/>
+            <column name="last_order_location"/>
+            <column name="date_of_registration" valueDate="1970-01-01"/>
+            <column name="alternate_email"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-4">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="address"/>
+            </not>
+        </preConditions>
+        <createTable tableName="address">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="address_pkey"/>
+            </column>
+            <column defaultValue="''''Kyiv''''::character varying" name="city" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_comment" type="VARCHAR(255)"/>
+            <column name="latitude" type="FLOAT8"/>
+            <column name="longitude" type="FLOAT8"/>
+            <column name="district" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entrance_number" type="VARCHAR(4)"/>
+            <column name="house_corpus" type="VARCHAR(5)"/>
+            <column name="house_number" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="street" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="actual" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="NEW" name="status" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region" type="VARCHAR(30)"/>
+            <column name="city_en" type="VARCHAR"/>
+            <column name="region_en" type="VARCHAR"/>
+            <column name="street_en" type="VARCHAR"/>
+            <column name="district_en" type="VARCHAR"/>
+            <column name="region_id" type="BIGINT"/>
+            <column name="city_id" type="BIGINT"/>
+            <column name="district_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-5">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="employees"/>
+            </not>
+        </preConditions>
+        <createTable tableName="employees">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="employees_pkey"/>
+            </column>
+            <column name="first_name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(170)"/>
+            <column name="image_path" type="VARCHAR(255)"/>
+            <column defaultValue="ACTIVE" name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uuid" type="VARCHAR(60)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-6">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM employees WHERE id = 1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="employees">
+            <column name="id" valueNumeric="1"/>
+            <column name="first_name" value="UBS"/>
+            <column name="last_name" value="ADMIN"/>
+            <column name="phone_number" value="+380675554433"/>
+            <column name="email" value="pickup@nowaste.org.ua"/>
+            <column name="image_path"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="uuid" value="d0840b34-3f17-4820-a375-305b855dff8b"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="payment"/>
+            </not>
+        </preConditions>
+        <createTable tableName="payment">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="payment_pkey"/>
+            </column>
+            <column name="amount" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="VARCHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="response_status" type="VARCHAR(50)"/>
+            <column name="sender_cell_phone" type="VARCHAR(16)"/>
+            <column name="sender_account" type="VARCHAR(50)"/>
+            <column name="masked_card" type="VARCHAR(19)"/>
+            <column name="card_type" type="VARCHAR(50)"/>
+            <column name="response_code" type="INTEGER"/>
+            <column name="response_description" type="VARCHAR(1024)"/>
+            <column name="order_time" type="VARCHAR(19)"/>
+            <column name="settlement_date" type="VARCHAR(10)"/>
+            <column name="fee" type="BIGINT"/>
+            <column name="payment_system" type="VARCHAR(50)"/>
+            <column name="sender_email" type="VARCHAR(254)"/>
+            <column name="payment_id" type="VARCHAR(100)"/>
+            <column name="order_id" type="BIGINT"/>
+            <column name="comment" type="VARCHAR(255)"/>
+            <column defaultValue="UNPAID" name="payment_status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="receipt_link" type="VARCHAR"/>
+            <column name="image_path" type="VARCHAR"/>
+            <column name="payment_type" type="VARCHAR"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-8">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user_notifications"/>
+            </not>
+        </preConditions>
+        <createTable tableName="user_notifications">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_notifications_pkey"/>
+            </column>
+            <column name="users_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="notification_time" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="BIGINT"/>
+            <column defaultValueBoolean="false" name="read" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="template_id" type="BIGINT"/>
+            <column defaultValueBoolean="false" name="is_deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-9">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="events"/>
+            </not>
+        </preConditions>
+        <createTable tableName="events">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="events_pkey"/>
+            </column>
+            <column name="event_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="event_name" type="VARCHAR(300)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_name_eng" type="VARCHAR"/>
+            <column name="author_eng" type="VARCHAR"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-10">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="locations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="locations">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="locations_pkey"/>
+            </column>
+            <column defaultValue="ACTIVE" name="location_status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="region_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="latitude" type="FLOAT8"/>
+            <column name="longitude" type="FLOAT8"/>
+            <column name="name_uk" type="VARCHAR"/>
+            <column name="name_en" type="VARCHAR"/>
+            <column defaultValueBoolean="false" name="is_deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-11">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM employees;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="locations">
+            <column name="id" valueNumeric="1"/>
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" valueNumeric="1"/>
+            <column name="latitude" valueNumeric="50.4782"/>
+            <column name="longitude" valueNumeric="33.5897"/>
+            <column name="name_uk" value="Київ"/>
+            <column name="name_en" value="Kyiv"/>
+            <column name="is_deleted" valueBoolean="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="id" valueNumeric="2"/>
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" valueNumeric="1"/>
+            <column name="latitude" valueNumeric="50.4782"/>
+            <column name="longitude" valueNumeric="33.5897"/>
+            <column name="name_uk" value="20 кілометрів"/>
+            <column name="name_en" value="20 km"/>
+            <column name="is_deleted" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-12">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="courier"/>
+            </not>
+        </preConditions>
+        <createTable tableName="courier">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="courier_pkey"/>
+            </column>
+            <column defaultValue="ACTIVE" name="courier_status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="create_date" type="date"/>
+            <column name="created_by_id" type="BIGINT"/>
+            <column name="name_uk" type="VARCHAR"/>
+            <column name="name_en" type="VARCHAR"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-13">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM employees WHERE id = 1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="courier">
+            <column name="id" valueNumeric="1"/>
+            <column name="courier_status" value="ACTIVE"/>
+            <column name="create_date"/>
+            <column name="created_by_id" valueNumeric="1"/>
+            <column name="name_uk" value="УБС"/>
+            <column name="name_en" value="UBS"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-14">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="order_bag_mapping"/>
+            </not>
+        </preConditions>
+        <createTable tableName="order_bag_mapping">
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="INTEGER"/>
+            <column name="bag_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exported_quantity" type="INTEGER"/>
+            <column name="confirmed_quantity" type="INTEGER"/>
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="capacity" type="INTEGER"/>
+            <column name="price" type="BIGINT"/>
+            <column name="name" type="VARCHAR(30)"/>
+            <column name="name_eng" type="VARCHAR(30)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-15">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="order_address"/>
+            </not>
+        </preConditions>
+        <createTable tableName="order_address">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="order_address_pkey"/>
+            </column>
+            <column defaultValue="Kyiv" name="city" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_comment" type="VARCHAR(255)"/>
+            <column name="latitude" type="FLOAT8"/>
+            <column name="longitude" type="FLOAT8"/>
+            <column name="district" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entrance_number" type="VARCHAR(4)"/>
+            <column name="house_corpus" type="VARCHAR(5)"/>
+            <column name="house_number" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="street" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="actual" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="NEW" name="status" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city_en" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region_en" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="street_en" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="district_en" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="district_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-16">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tariffs_info"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tariffs_info">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tariffs_info_pkey"/>
+            </column>
+            <column defaultValue="ACTIVE" name="tariff_status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator_id" type="BIGINT"/>
+            <column name="created_at" type="date"/>
+            <column defaultValue="LIMIT_BY_AMOUNT_OF_BAG" name="courier_limits" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="courier_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="limit_description" type="VARCHAR"/>
+            <column name="min" type="BIGINT"/>
+            <column name="max" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-17">
+        <sql endDelimiter="/">
+            CREATE
+            OR REPLACE FUNCTION public.sum_total_amount_without_discounts_obm_confirmed_quantity()
+            RETURNS trigger
+            LANGUAGE plpgsql
+            AS $function$
+            BEGIN
+            IF
+            ((TG_OP = 'UPDATE' OR TG_OP = 'INSERT') AND (old.confirmed_quantity IS NOT NULL OR new.confirmed_quantity IS NOT NULL)) THEN
+            UPDATE orders o
+            SET sum_total_amount_without_discounts = (SELECT SUM(obm.confirmed_quantity * b.full_price)
+                                                      FROM order_bag_mapping obm
+                                                               INNER JOIN bag b ON obm.bag_id = b.id
+                                                      WHERE order_id = o.id)
+            WHERE o.id = old.order_id
+               OR o.id = new.order_id;
+            RETURN NEW;
+            END IF;
+            END;
+            $function$;
+        /
+        </sql>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-18">
+    <sql endDelimiter="/">
+        CREATE
+        OR REPLACE FUNCTION public.sum_total_amount_without_discounts_obm_exported_quantity()
+        RETURNS trigger
+        LANGUAGE plpgsql
+        AS $function$
+        BEGIN
+        IF
+        ((TG_OP = 'UPDATE' OR TG_OP = 'INSERT') AND (old.exported_quantity IS NOT NULL OR new.exported_quantity IS NOT NULL)) THEN
+        UPDATE orders o
+        SET sum_total_amount_without_discounts = (SELECT SUM(obm.exported_quantity * b.full_price)
+                                                  FROM order_bag_mapping obm
+                                                           INNER JOIN bag b ON obm.bag_id = b.id
+                                                  WHERE order_id = o.id)
+        WHERE o.id = old.order_id
+           OR o.id = new.order_id;
+        RETURN NEW;
+        END IF;
+        END;
+        $function$;
+    /
+    </sql>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-19">
+        <sql endDelimiter="/">
+            CREATE
+            OR REPLACE FUNCTION public.total_amount_without_discounts_obm_amount()
+            RETURNS trigger
+            LANGUAGE plpgsql
+            AS $function$
+            BEGIN
+            IF
+            ((TG_OP = 'UPDATE' OR TG_OP = 'INSERT') AND (old.amount IS NOT NULL OR new.amount IS NOT NULL)) THEN
+            UPDATE orders o
+            SET sum_total_amount_without_discounts = (SELECT SUM(obm.amount * b.full_price)
+                                                      FROM order_bag_mapping obm
+                                                               INNER JOIN bag b ON obm.bag_id = b.id
+                                                      WHERE order_id = o.id)
+            WHERE o.id = old.order_id
+               OR o.id = new.order_id;
+            RETURN NEW;
+            END IF;
+            END;
+            $function$;
+        /
+        </sql>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-20">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tariffs_info;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tariffs_info">
+            <column name="id" valueNumeric="1"/>
+            <column name="tariff_status" value="ACTIVE"/>
+            <column name="creator_id" valueNumeric="1"/>
+            <column name="created_at" valueDate="2023-02-26"/>
+            <column name="courier_limits" value="LIMIT_BY_AMOUNT_OF_BAG"/>
+            <column name="courier_id" valueNumeric="1"/>
+            <column name="limit_description"/>
+            <column name="min" valueNumeric="2"/>
+            <column name="max" valueNumeric="85"/>
+        </insert>
+        <insert tableName="tariffs_info">
+            <column name="id" valueNumeric="2"/>
+            <column name="tariff_status" value="ACTIVE"/>
+            <column name="creator_id" valueNumeric="1"/>
+            <column name="created_at" valueDate="2023-02-26"/>
+            <column name="courier_limits" value="LIMIT_BY_AMOUNT_OF_BAG"/>
+            <column name="courier_id" valueNumeric="1"/>
+            <column name="limit_description"/>
+            <column name="min" valueNumeric="20"/>
+            <column name="max" valueNumeric="85"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-21">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tariffs_locations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tariffs_locations">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tariffs_locations_pkey"/>
+            </column>
+            <column name="tariffs_info_id" type="BIGINT"/>
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="ACTIVE" name="location_status" type="VARCHAR"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-22">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tariffs_locations;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tariffs_locations">
+            <column name="id" valueNumeric="1"/>
+            <column name="tariffs_info_id" valueNumeric="1"/>
+            <column name="location_id" valueNumeric="1"/>
+            <column name="location_status" value="ACTIVE"/>
+        </insert>
+        <insert tableName="tariffs_locations">
+            <column name="id" valueNumeric="2"/>
+            <column name="tariffs_info_id" valueNumeric="2"/>
+            <column name="location_id" valueNumeric="2"/>
+            <column name="location_status" value="ACTIVE"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-23">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bag"/>
+            </not>
+        </preConditions>
+        <createTable tableName="bag">
+            <column autoIncrement="true" name="id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="bag_pkey"/>
+            </column>
+            <column name="capacity" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="commission" type="BIGINT"/>
+            <column name="full_price" type="BIGINT"/>
+            <column name="created_at" type="date"/>
+            <column name="created_by_id" type="BIGINT"/>
+            <column name="edited_at" type="date"/>
+            <column name="edited_by_id" type="BIGINT"/>
+            <column name="tariffs_info_id" type="BIGINT"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="description" type="TEXT"/>
+            <column name="name_eng" type="VARCHAR(255)"/>
+            <column name="description_eng" type="TEXT"/>
+            <column defaultValueBoolean="false" name="limit_included" type="BOOLEAN"/>
+            <column defaultValue="ACTIVE" name="status" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-24">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM bag;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="bag">
+            <column name="id" valueNumeric="1"/>
+            <column name="capacity" valueNumeric="120"/>
+            <column name="price" valueNumeric="23000"/>
+            <column name="commission" valueNumeric="5000"/>
+            <column name="full_price" valueNumeric="28000"/>
+            <column name="created_at" valueDate="2023-02-07"/>
+            <column name="created_by_id" valueNumeric="1"/>
+            <column name="edited_at"/>
+            <column name="edited_by_id"/>
+            <column name="tariffs_info_id" valueNumeric="1"/>
+            <column name="name" value="Мікс відходів"/>
+            <column name="description" value="Послуга 'Мікс відходів' - 120 за тарифом 1"/>
+            <column name="name_eng" value="Mix waste"/>
+            <column name="description_eng" value="Service 'Mix waste' - 120 by tariff 1"/>
+            <column name="limit_included" valueBoolean="true"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+        <insert tableName="bag">
+            <column name="id" valueNumeric="2"/>
+            <column name="capacity" valueNumeric="20"/>
+            <column name="price" valueNumeric="11000"/>
+            <column name="commission" valueNumeric="0"/>
+            <column name="full_price" valueNumeric="11000"/>
+            <column name="created_at" valueDate="2023-02-07"/>
+            <column name="created_by_id" valueNumeric="1"/>
+            <column name="edited_at"/>
+            <column name="edited_by_id"/>
+            <column name="tariffs_info_id" valueNumeric="1"/>
+            <column name="name" value="Текстильні відходи"/>
+            <column name="description" value="Послуга 'Текстильні відходи' - 20 за тарифом 1"/>
+            <column name="name_eng" value="Textile waste"/>
+            <column name="description_eng" value="Service 'Textile waste' - 20 by tariff 1"/>
+            <column name="limit_included" valueBoolean="false"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+        <insert tableName="bag">
+            <column name="id" valueNumeric="3"/>
+            <column name="capacity" valueNumeric="60"/>
+            <column name="price" valueNumeric="22000"/>
+            <column name="commission" valueNumeric="0"/>
+            <column name="full_price" valueNumeric="22000"/>
+            <column name="created_at" valueDate="2023-02-07"/>
+            <column name="created_by_id" valueNumeric="1"/>
+            <column name="edited_at"/>
+            <column name="edited_by_id"/>
+            <column name="tariffs_info_id" valueNumeric="1"/>
+            <column name="name" value="Текстильні відходи"/>
+            <column name="description" value="Послуга 'Текстильні відходи' - 60 за тарифом 1"/>
+            <column name="name_eng" value="Textile waste"/>
+            <column name="description_eng" value="Service 'Textile waste' - 60 by tariff 1"/>
+            <column name="limit_included" valueBoolean="false"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+        <insert tableName="bag">
+            <column name="id" valueNumeric="4"/>
+            <column name="capacity" valueNumeric="120"/>
+            <column name="price" valueNumeric="23000"/>
+            <column name="commission" valueNumeric="5000"/>
+            <column name="full_price" valueNumeric="28000"/>
+            <column name="created_at" valueDate="2023-02-07"/>
+            <column name="created_by_id" valueNumeric="1"/>
+            <column name="edited_at"/>
+            <column name="edited_by_id"/>
+            <column name="tariffs_info_id" valueNumeric="2"/>
+            <column name="name" value="Мікс відходів"/>
+            <column name="description" value="Послуга 'Мікс відходів' - 120 за тарифом 2"/>
+            <column name="name_eng" value="Mix waste"/>
+            <column name="description_eng" value="Service 'Mix waste' - 120 by tariff 2"/>
+            <column name="limit_included" valueBoolean="true"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+        <insert tableName="bag">
+            <column name="id" valueNumeric="5"/>
+            <column name="capacity" valueNumeric="20"/>
+            <column name="price" valueNumeric="11000"/>
+            <column name="commission" valueNumeric="0"/>
+            <column name="full_price" valueNumeric="11000"/>
+            <column name="created_at" valueDate="2023-02-07"/>
+            <column name="created_by_id" valueNumeric="1"/>
+            <column name="edited_at"/>
+            <column name="edited_by_id"/>
+            <column name="tariffs_info_id" valueNumeric="2"/>
+            <column name="name" value="Текстильні відходи"/>
+            <column name="description" value="Послуга 'Текстильні відходи' - 20 за тарифом 2"/>
+            <column name="name_eng" value="Textile waste"/>
+            <column name="description_eng" value="Service 'Textile waste' - 20 by tariff 2"/>
+            <column name="limit_included" valueBoolean="false"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+        <insert tableName="bag">
+            <column name="id" valueNumeric="6"/>
+            <column name="capacity" valueNumeric="60"/>
+            <column name="price" valueNumeric="22000"/>
+            <column name="commission" valueNumeric="0"/>
+            <column name="full_price" valueNumeric="22000"/>
+            <column name="created_at" valueDate="2023-02-07"/>
+            <column name="created_by_id" valueNumeric="1"/>
+            <column name="edited_at"/>
+            <column name="edited_by_id"/>
+            <column name="tariffs_info_id" valueNumeric="2"/>
+            <column name="name" value="Текстильні відходи"/>
+            <column name="description" value="Послуга 'Текстильні відходи' - 60 за тарифом 2"/>
+            <column name="name_eng" value="Textile waste"/>
+            <column name="description_eng" value="Service 'Textile waste' - 60 by tariff 2"/>
+            <column name="limit_included" valueBoolean="false"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-25">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="positions"/>
+            </not>
+        </preConditions>
+        <createTable tableName="positions">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="positions_pkey"/>
+            </column>
+            <column name="name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="name_eng" name="name_eng" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-26">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM positions;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="positions">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="Менеджер послуги"/>
+            <column name="name_eng" value="Service Manager"/>
+        </insert>
+        <insert tableName="positions">
+            <column name="id" valueNumeric="3"/>
+            <column name="name" value="Логіст"/>
+            <column name="name_eng" value="Logistician"/>
+        </insert>
+        <insert tableName="positions">
+            <column name="id" valueNumeric="4"/>
+            <column name="name" value="Штурман"/>
+            <column name="name_eng" value="Navigator"/>
+        </insert>
+        <insert tableName="positions">
+            <column name="id" valueNumeric="5"/>
+            <column name="name" value="Водій"/>
+            <column name="name_eng" value="Driver"/>
+        </insert>
+        <insert tableName="positions">
+            <column name="id" valueNumeric="6"/>
+            <column name="name" value="Супер адмін"/>
+            <column name="name_eng" value="Super Admin"/>
+        </insert>
+        <insert tableName="positions">
+            <column name="id" valueNumeric="7"/>
+            <column name="name" value="Адмін"/>
+            <column name="name_eng" value="Admin"/>
+        </insert>
+        <insert tableName="positions">
+            <column name="id" valueNumeric="2"/>
+            <column name="name" value="Менеджер"/>
+            <column name="name_eng" value="Manager"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-27">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="employee_position"/>
+            </not>
+        </preConditions>
+        <createTable tableName="employee_position">
+            <column name="employee_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="employee_position_pkey"/>
+            </column>
+            <column name="position_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="employee_position_pkey"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-28">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM employee_position;
+            </sqlCheck>
+        </preConditions>
+
+        <insert tableName="employee_position">
+            <column name="employee_id" valueNumeric="1"/>
+            <column name="position_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id" valueNumeric="1"/>
+            <column name="position_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id" valueNumeric="1"/>
+            <column name="position_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id" valueNumeric="1"/>
+            <column name="position_id" valueNumeric="4"/>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id" valueNumeric="1"/>
+            <column name="position_id" valueNumeric="5"/>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id" valueNumeric="1"/>
+            <column name="position_id" valueNumeric="6"/>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id" valueNumeric="1"/>
+            <column name="position_id" valueNumeric="7"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-29">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="receiving_stations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="receiving_stations">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="receiving_stations_pkey"/>
+            </column>
+            <column name="name" type="VARCHAR(50)"/>
+            <column name="station_status" type="VARCHAR"/>
+            <column name="create_date" type="date"/>
+            <column name="created_by_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-30">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM receiving_stations WHERE id = 1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="receiving_stations">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="Саперно-Слобідська"/>
+            <column name="station_status" value="ACTIVE"/>
+            <column name="create_date" valueDate="2023-02-26"/>
+            <column name="created_by_id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-31">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="regions"/>
+            </not>
+        </preConditions>
+        <createTable tableName="regions">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="regions_pkey"/>
+            </column>
+            <column name="name_uk" type="VARCHAR"/>
+            <column name="name_en" type="VARCHAR"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-32">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM regions;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="1"/>
+            <column name="name_uk" value="Київська область"/>
+            <column name="name_en" value="Kyiv Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="10"/>
+            <column name="name_uk" value="Донецька область"/>
+            <column name="name_en" value="Donetsk Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="11"/>
+            <column name="name_uk" value="Львівська область"/>
+            <column name="name_en" value="Lviv Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="12"/>
+            <column name="name_uk" value="Полтавська область"/>
+            <column name="name_en" value="Poltava Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="13"/>
+            <column name="name_uk" value="Запорізька область"/>
+            <column name="name_en" value="Zaporizhia Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="14"/>
+            <column name="name_uk" value="Івано-Франківська область"/>
+            <column name="name_en" value="Ivano-Frankivsk Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="15"/>
+            <column name="name_uk" value="Харківська область"/>
+            <column name="name_en" value="Kharkiv Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="16"/>
+            <column name="name_uk" value="місто Київ"/>
+            <column name="name_en" value="Kyiv city"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="17"/>
+            <column name="name_uk" value="Дніпропетровська область"/>
+            <column name="name_en" value="Dnipropetrovsk Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="18"/>
+            <column name="name_uk" value="Одеська область"/>
+            <column name="name_en" value="Odessa Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="19"/>
+            <column name="name_uk" value="Вінницька область"/>
+            <column name="name_en" value="Vinnytsia Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="20"/>
+            <column name="name_uk" value="Чернівецька область"/>
+            <column name="name_en" value="Chernivtsi Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="21"/>
+            <column name="name_uk" value="Крим"/>
+            <column name="name_en" value="Crimea"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="22"/>
+            <column name="name_uk" value="Сумська область"/>
+            <column name="name_en" value="Sumy Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="23"/>
+            <column name="name_uk" value="Херсонська область"/>
+            <column name="name_en" value="Kherson Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="24"/>
+            <column name="name_uk" value="Рівненська область"/>
+            <column name="name_en" value="Rivne Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="25"/>
+            <column name="name_uk" value="Закарпатська область"/>
+            <column name="name_en" value="Zakarpattia Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="26"/>
+            <column name="name_uk" value="Житомирська область"/>
+            <column name="name_en" value="Zhytomyr Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="27"/>
+            <column name="name_uk" value="Волинська область"/>
+            <column name="name_en" value="Volyn Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="28"/>
+            <column name="name_uk" value="Черкаська область"/>
+            <column name="name_en" value="Cherkasy Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="29"/>
+            <column name="name_uk" value="Кіровоградська область"/>
+            <column name="name_en" value="Kirovohrad Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="30"/>
+            <column name="name_uk" value="Чернігівська область"/>
+            <column name="name_en" value="Chernihiv Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="31"/>
+            <column name="name_uk" value="Тернопільська область"/>
+            <column name="name_en" value="Ternopil Oblast"/>
+        </insert>
+        <insert tableName="regions">
+            <column name="id" valueNumeric="32"/>
+            <column name="name_uk" value="Миколаївська область"/>
+            <column name="name_en" value="Mykolaiv Oblast"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-33">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tariff_infos_receiving_employee_mapping"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tariff_infos_receiving_employee_mapping">
+            <column name="employee_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tariff_infos_receiving_employee_mapping_pkey"/>
+            </column>
+            <column name="tariffs_info_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tariff_infos_receiving_employee_mapping_pkey"/>
+            </column>
+            <column defaultValueBoolean="false" name="has_chat" type="BOOLEAN"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-34">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tariff_infos_receiving_employee_mapping;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tariff_infos_receiving_employee_mapping">
+            <column name="employee_id" valueNumeric="1"/>
+            <column name="tariffs_info_id" valueNumeric="1"/>
+            <column name="has_chat" valueBoolean="false"/>
+        </insert>
+        <insert tableName="tariff_infos_receiving_employee_mapping">
+            <column name="employee_id" valueNumeric="1"/>
+            <column name="tariffs_info_id" valueNumeric="2"/>
+            <column name="has_chat" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-35">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tariffs_info_receiving_stations_mapping"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tariffs_info_receiving_stations_mapping">
+            <column name="tariffs_info_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tariffs_info_receiving_stations_mapping_pkey"/>
+            </column>
+            <column name="receiving_station_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tariffs_info_receiving_stations_mapping_pkey"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-36">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tariffs_info_receiving_stations_mapping;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tariffs_info_receiving_stations_mapping">
+            <column name="tariffs_info_id" valueNumeric="1"/>
+            <column name="receiving_station_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="tariffs_info_receiving_stations_mapping">
+            <column name="tariffs_info_id" valueNumeric="2"/>
+            <column name="receiving_station_id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-37">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="notification_templates"/>
+            </not>
+        </preConditions>
+        <createTable tableName="notification_templates">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_templates_pkey"/>
+            </column>
+            <column name="notification_type" type="VARCHAR(255)"/>
+            <column name="trigger" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schedule" type="VARCHAR(50)"/>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_eng" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_status" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="is_schedule_update_forbidden" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_category" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-38">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM notification_templates;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="1"/>
+            <column name="notification_type" value="UNPAID_ORDER"/>
+            <column name="trigger" value="ORDER_NOT_PAID_FOR_3_DAYS"/>
+            <column name="time" value="AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID"/>
+            <column name="schedule" value="0 0 18 * * ?"/>
+            <column name="title" value="Неоплачене замовлення"/>
+            <column name="title_eng" value="Unpaid order"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="3"/>
+            <column name="notification_type" value="COURIER_ITINERARY_FORMED"/>
+            <column name="trigger" value="ORDER_ADDED_TO_ITINERARY_STATUS_CONFIRMED"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Маршрут сформовано"/>
+            <column name="title_eng" value="The courier route formed"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="6"/>
+            <column name="notification_type" value="VIOLATION_THE_RULES"/>
+            <column name="trigger" value="ORDER_VIOLATION_ADDED"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Недотримання правил"/>
+            <column name="title_eng" value="Violation of the rules"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="8"/>
+            <column name="notification_type" value="CHANGED_IN_RULE_VIOLATION_STATUS"/>
+            <column name="trigger" value="ORDER_VIOLATION_CHANGED"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Зміни в порушеннях правил сортування"/>
+            <column name="title_eng" value="Changes in violations of sorting rules"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="12"/>
+            <column name="notification_type" value="HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF"/>
+            <column name="trigger" value="HALF_PAID_ORDER_STATUS_BROUGHT_BY_HIMSELF"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Замовлення опалачене не повністю"/>
+            <column name="title_eng" value="Order is partially paid"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="13"/>
+            <column name="notification_type" value="DONE_OR_CANCELED_UNPAID_ORDER"/>
+            <column name="trigger" value="UNDERPAYMENT_WHEN_STATUS_DONE_OR_CANCELED"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Неоплачене замовлення"/>
+            <column name="title_eng" value="Unpaid Order"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="11"/>
+            <column name="notification_type" value="ORDER_STATUS_CHANGED"/>
+            <column name="trigger" value="ORDER_STATUS_CHANGED_FROM_FORMED_TO_BROUGHT_BY_HIMSELF"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Замовлення буде доставлено самостійно"/>
+            <column name="title_eng" value="The order will be delivered by yourself"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="7"/>
+            <column name="notification_type" value="CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER"/>
+            <column name="trigger" value="ORDER_VIOLATION_CANCELED"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Відміна порушення правил сортування"/>
+            <column name="title_eng" value="Cancellation of violation of sorting rules"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="2"/>
+            <column name="notification_type" value="ORDER_IS_PAID"/>
+            <column name="trigger" value="PAYMENT_SYSTEM_RESPONSE"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Оплата пройшла успішно"/>
+            <column name="title_eng" value="The payment was successful"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="true"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="5"/>
+            <column name="notification_type" value="ACCRUED_BONUSES_TO_ACCOUNT"/>
+            <column name="trigger" value="OVERPAYMENT_WHEN_STATUS_DONE"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Нараховано бонуси"/>
+            <column name="title_eng" value="Accrued bonuses to the account"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="true"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="10"/>
+            <column name="notification_type" value="BONUSES_FROM_CANCELLED_ORDER"/>
+            <column name="trigger" value="ORDER_WAS_CANCELED"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Переплата за замовлення"/>
+            <column name="title_eng" value="Overpayment for the order"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="true"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="14"/>
+            <column name="notification_type" value="TARIFF_PRICE_WAS_CHANGED"/>
+            <column name="trigger" value="TARIFF_PRICE_WAS_CHANGED"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Вартість тарифу була змінена."/>
+            <column name="title_eng" value="Tariff price was changed."/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="true"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="15"/>
+            <column name="notification_type" value="CREATE_NEW_ORDER"/>
+            <column name="trigger" value="CREATED_NEW_ORDER"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Нове замовлення"/>
+            <column name="title_eng" value="New order"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="4"/>
+            <column name="notification_type" value="UNPAID_PACKAGE"/>
+            <column name="trigger" value="STATUS_PARTIALLY_PAID"/>
+            <column name="time" value="IMMEDIATELY"/>
+            <column name="schedule"/>
+            <column name="title" value="Оплатіть зміну у замовленні"/>
+            <column name="title_eng" value="Pay for the change in the order"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="id" valueNumeric="9"/>
+            <column name="notification_type" value="LETS_STAY_CONNECTED"/>
+            <column name="trigger" value="TWO_MONTHS_AFTER_LAST_ORDER"/>
+            <column name="time" value="TWO_MONTHS_AFTER_LAST_ORDER"/>
+            <column name="schedule" value="0 0 18 * * ?"/>
+            <column name="title" value="Давайте залишатися на зв'язку"/>
+            <column name="title_eng" value="Let's stay connected"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="is_schedule_update_forbidden" valueBoolean="false"/>
+            <column name="user_category"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-39">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="violations_description_mapping"/>
+            </not>
+        </preConditions>
+        <createTable tableName="violations_description_mapping">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="violations_description_mapping_pkey"/>
+            </column>
+            <column name="violation_level" type="VARCHAR(15)"/>
+            <column name="violation_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="order_id" type="BIGINT"/>
+            <column name="added_by_user_id" type="BIGINT"/>
+            <column defaultValue="ACTIVE" name="violation_status" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delete_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-40">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="refunds"/>
+            </not>
+        </preConditions>
+        <createTable tableName="refunds">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="refunds_pkey"/>
+            </column>
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueDate="1970-01-01T00:00:00" name="date" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="amount" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-41">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="certificate"/>
+            </not>
+        </preConditions>
+        <createTable tableName="certificate">
+            <column name="code" type="VARCHAR(9)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="certificate_pkey"/>
+            </column>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiration_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="points" type="INTEGER"/>
+            <column name="order_id" type="BIGINT"/>
+            <column name="creation_date" type="date"/>
+            <column name="date_of_use" type="date"/>
+            <column name="initial_points_value" type="INTEGER"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-42">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="employee_order_position"/>
+            </not>
+        </preConditions>
+        <createTable tableName="employee_order_position">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="employee_order_position_pkey"/>
+            </column>
+            <column name="order_id" type="BIGINT"/>
+            <column name="employee_id" type="BIGINT"/>
+            <column name="position_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-43">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="order_additional"/>
+            </not>
+        </preConditions>
+        <createTable tableName="order_additional">
+            <column name="orders_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="additional_order" type="VARCHAR(15)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-44">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="ubs_user"/>
+            </not>
+        </preConditions>
+        <createTable tableName="ubs_user">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ubs_user_pkey"/>
+            </column>
+            <column name="email" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="users_id" type="BIGINT"/>
+            <column name="sender_first_name" type="VARCHAR(30)"/>
+            <column name="sender_last_name" type="VARCHAR(30)"/>
+            <column name="sender_email" type="VARCHAR(50)"/>
+            <column name="sender_phone_number" type="VARCHAR(15)"/>
+            <column name="alternate_email" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-45">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="viber_bot"/>
+            </not>
+        </preConditions>
+        <createTable tableName="viber_bot">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="viber_bot_pkey"/>
+            </column>
+            <column name="chat_id" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notify" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-46">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <viewExists viewName="big_order_table"/>
+            </not>
+        </preConditions>
+        <createView fullDefinition="false" viewName="big_order_table">WITH group_capacity AS (
+         SELECT this.order_id,
+                CASE
+                    WHEN ((( SELECT sum(obm.confirmed_quantity) AS sum
+                       FROM order_bag_mapping obm
+                      WHERE (obm.order_id = this.order_id)) IS NULL) AND (( SELECT sum(obm.exported_quantity) AS sum
+                       FROM order_bag_mapping obm
+                      WHERE (obm.order_id = this.order_id)) IS NULL)) THEN concat(bag.capacity, 'л - ', sum(this.amount), 'шт')
+                    WHEN ((( SELECT sum(obm.exported_quantity) AS sum
+                       FROM order_bag_mapping obm
+                      WHERE (obm.order_id = this.order_id)) IS NULL) AND (( SELECT sum(obm.confirmed_quantity) AS sum
+                       FROM order_bag_mapping obm
+                      WHERE (obm.order_id = this.order_id)) IS NOT NULL)) THEN concat(bag.capacity, 'л - ', sum(this.confirmed_quantity), 'шт')
+                    WHEN (( SELECT sum(obm.exported_quantity) AS sum
+                       FROM order_bag_mapping obm
+                      WHERE (obm.order_id = this.order_id)) IS NOT NULL) THEN concat(bag.capacity, 'л - ', sum(this.exported_quantity), 'шт')
+                    ELSE NULL::text
+                END AS amount_cap
+           FROM (order_bag_mapping this
+             LEFT JOIN bag ON ((this.bag_id = bag.id)))
+          GROUP BY bag.capacity, this.order_id
+          ORDER BY this.order_id, bag.capacity DESC
+        )
+ SELECT o.id,
+    o.order_status,
+    o.order_payment_status,
+    (o.order_date)::date AS order_date,
+    ( SELECT max((p.settlement_date)::date) AS max
+           FROM payment p
+          WHERE ((p.order_id = o.id) AND ((o.order_payment_status)::text = 'PAID'::text))) AS payment_date,
+    concat_ws(' '::text, uu.first_name, uu.last_name) AS client_name,
+    uu.phone_number AS client_phone_number,
+    uu.email AS client_email,
+    concat_ws(' '::text, uu.sender_first_name, uu.sender_last_name) AS sender_name,
+    uu.sender_phone_number AS sender_phone,
+    uu.sender_email,
+    u.violations AS violations_amount,
+    a.region,
+    a.city,
+    a.district,
+    concat_ws(', '::text, concat(a.street, ' ', a.house_number),
+        CASE
+            WHEN ((a.house_corpus IS NOT NULL) AND ((a.house_corpus)::text &lt;&gt; ''::text)) THEN concat('корп.', a.house_corpus)
+            ELSE 'корп.- '::text
+        END,
+        CASE
+            WHEN ((a.entrance_number IS NOT NULL) AND ((a.entrance_number)::text &lt;&gt; ''::text)) THEN concat('п.', a.entrance_number)
+            ELSE 'п.- '::text
+        END) AS address,
+    a.address_comment AS comment_to_address_for_client,
+    ( SELECT string_agg(group_capacity.amount_cap, '; '::text) AS string_agg
+           FROM group_capacity
+          WHERE (group_capacity.order_id = o.id)) AS bag_amount,
+    o.sum_total_amount_without_discounts AS total_order_sum,
+    ( SELECT string_agg((c.code)::text, ', '::text) AS string_agg
+           FROM certificate c
+          WHERE (c.order_id = o.id)) AS order_certificate_code,
+    (COALESCE(( SELECT sum(c.points) AS sum
+           FROM certificate c
+          WHERE (c.order_id = o.id)), (0)::bigint) + COALESCE(o.points_to_use, 0)) AS general_discount,
+    (((COALESCE(o.sum_total_amount_without_discounts, (0)::bigint))::numeric - (COALESCE(( SELECT sum(p.amount) AS sum
+           FROM payment p
+          WHERE ((p.order_id = o.id) AND ((p.payment_status)::text = 'PAID'::text))), (0)::numeric) + (((COALESCE(( SELECT sum(c.points) AS sum
+           FROM certificate c
+          WHERE (c.order_id = o.id)), (0)::bigint) * 100) + (COALESCE(o.points_to_use, 0) * 100)))::numeric)))::bigint AS amount_due,
+    o.comment AS comment_for_order_by_client,
+    ((COALESCE(( SELECT sum(p.amount) AS sum
+           FROM payment p
+          WHERE ((p.order_id = o.id) AND ((p.payment_status)::text = 'PAID'::text))), (0)::numeric) + (((COALESCE(( SELECT sum(c.points) AS sum
+           FROM certificate c
+          WHERE (c.order_id = o.id)), (0)::bigint) * 100) + (COALESCE(o.points_to_use, 0) * 100)))::numeric))::bigint AS total_payment,
+    o.date_of_export,
+    concat_ws('-'::text, (o.deliver_from)::time without time zone, (o.deliver_to)::time without time zone) AS time_of_export,
+    ( SELECT string_agg((oe.additional_order)::text, '; '::text) AS string_agg
+           FROM order_additional oe
+          WHERE (oe.orders_id = o.id)) AS id_order_from_shop,
+    r.name AS receiving_station,
+    r.id AS receiving_station_id,
+    ( SELECT concat_ws(', '::text, e_1.first_name, e_1.last_name) AS concat_ws
+           FROM (employee_order_position eop
+             LEFT JOIN employees e_1 ON ((eop.employee_id = e_1.id)))
+          WHERE ((eop.order_id = o.id) AND (eop.position_id = 3))) AS responsible_logic_man,
+    ( SELECT e_1.id
+           FROM (employee_order_position eop
+             LEFT JOIN employees e_1 ON ((eop.employee_id = e_1.id)))
+          WHERE ((eop.order_id = o.id) AND (eop.position_id = 3))) AS responsible_logic_man_id,
+    ( SELECT concat_ws(', '::text, e_1.first_name, e_1.last_name) AS concat_ws
+           FROM (employee_order_position eop
+             LEFT JOIN employees e_1 ON ((eop.employee_id = e_1.id)))
+          WHERE ((eop.order_id = o.id) AND (eop.position_id = 5))) AS responsible_driver,
+    ( SELECT e_1.id
+           FROM (employee_order_position eop
+             LEFT JOIN employees e_1 ON ((eop.employee_id = e_1.id)))
+          WHERE ((eop.order_id = o.id) AND (eop.position_id = 5))) AS responsible_driver_id,
+    ( SELECT concat_ws(', '::text, e_1.first_name, e_1.last_name) AS concat_ws
+           FROM (employee_order_position eop
+             LEFT JOIN employees e_1 ON ((eop.employee_id = e_1.id)))
+          WHERE ((eop.order_id = o.id) AND (eop.position_id = 2))) AS responsible_caller,
+    ( SELECT e_1.id
+           FROM (employee_order_position eop
+             LEFT JOIN employees e_1 ON ((eop.employee_id = e_1.id)))
+          WHERE ((eop.order_id = o.id) AND (eop.position_id = 2))) AS responsible_caller_id,
+    ( SELECT concat_ws(', '::text, e_1.first_name, e_1.last_name) AS concat_ws
+           FROM (employee_order_position eop
+             LEFT JOIN employees e_1 ON ((eop.employee_id = e_1.id)))
+          WHERE ((eop.order_id = o.id) AND (eop.position_id = 4))) AS responsible_navigator,
+    ( SELECT e_1.id
+           FROM (employee_order_position eop
+             LEFT JOIN employees e_1 ON ((eop.employee_id = e_1.id)))
+          WHERE ((eop.order_id = o.id) AND (eop.position_id = 4))) AS responsible_navigator_id,
+    o.blocked AS is_blocked,
+    concat_ws(', '::text, e.first_name, e.last_name) AS blocked_by,
+    a.region_en,
+    a.city_en,
+    a.district_en,
+    a.region_id,
+    a.city_id,
+    a.district_id,
+    concat_ws(', '::text, concat(a.street_en, ' ', a.house_number),
+        CASE
+            WHEN ((a.house_corpus IS NOT NULL) AND ((a.house_corpus)::text &lt;&gt; ''::text)) THEN concat('b.', a.house_corpus)
+            ELSE 'b.- '::text
+        END,
+        CASE
+            WHEN ((a.entrance_number IS NOT NULL) AND ((a.entrance_number)::text &lt;&gt; ''::text)) THEN concat('e.', a.entrance_number)
+            ELSE 'e.- '::text
+        END) AS address_en,
+    o.tariffs_info_id,
+    o.admin_comment AS comment_for_order_by_admin
+   FROM (((((orders o
+     LEFT JOIN employees e ON ((o.employee_id = e.id)))
+     LEFT JOIN receiving_stations r ON ((o.receiving_station_id = r.id)))
+     LEFT JOIN ubs_user uu ON ((o.ubs_user_id = uu.id)))
+     LEFT JOIN order_address a ON ((uu.id = a.id)))
+     LEFT JOIN users u ON ((o.users_id = u.id)));</createView>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-47">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists tableName="users" constraintName="users_uuid_key"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="uuid" constraintName="users_uuid_key" tableName="users"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-48">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <viewExists viewName="employees_filters"/>
+            </not>
+        </preConditions>
+        <createView fullDefinition="false" viewName="employees_filters">SELECT empl.id AS employee_id,
+    empl.first_name,
+    empl.last_name,
+    empl.phone_number,
+    empl.email,
+    empl.image_path,
+    empl.status AS employee_status,
+    pos.id AS position_id,
+    pos.name AS position_name,
+    ti.id AS tariffs_info_id,
+    reg.id AS region_id,
+    reg.name_en AS region_name_en,
+    reg.name_uk AS region_name_uk,
+    loc.id AS location_id,
+    loc.name_en AS location_name_en,
+    loc.name_uk AS location_name_uk,
+    recev_stat.id AS receiving_station_id,
+    recev_stat.name AS receiving_station_name,
+    cour.id AS courier_id,
+    cour.name_en AS courier_name_en,
+    cour.name_uk AS courier_name_uk,
+        CASE
+            WHEN ((pos.name)::text = 'Менеджер послуги'::text) THEN 'Service Manager'::text
+            WHEN ((pos.name)::text = 'Менеджер обдзвону'::text) THEN 'Call Manager'::text
+            WHEN ((pos.name)::text = 'Логіст'::text) THEN 'Logistician'::text
+            WHEN ((pos.name)::text = 'Штурман'::text) THEN 'Navigator'::text
+            WHEN ((pos.name)::text = 'Водій'::text) THEN 'Driver'::text
+            WHEN ((pos.name)::text = 'Супер адмін'::text) THEN 'Super Admin'::text
+            WHEN ((pos.name)::text = 'Адмін'::text) THEN 'Admin'::text
+            ELSE NULL::text
+        END AS position_name_en
+   FROM ((((((((((employees empl
+     LEFT JOIN employee_position ep ON ((empl.id = ep.employee_id)))
+     LEFT JOIN positions pos ON ((ep.position_id = pos.id)))
+     LEFT JOIN tariff_infos_receiving_employee_mapping tirem ON ((empl.id = tirem.employee_id)))
+     LEFT JOIN tariffs_info ti ON ((tirem.tariffs_info_id = ti.id)))
+     LEFT JOIN tariffs_locations tl ON ((ti.id = tl.tariffs_info_id)))
+     LEFT JOIN locations loc ON ((loc.id = tl.location_id)))
+     LEFT JOIN tariffs_info_receiving_stations_mapping tirsm ON ((ti.id = tirsm.tariffs_info_id)))
+     LEFT JOIN receiving_stations recev_stat ON ((tirsm.receiving_station_id = recev_stat.id)))
+     LEFT JOIN regions reg ON ((loc.region_id = reg.id)))
+     LEFT JOIN courier cour ON ((cour.id = ti.courier_id)));</createView>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-49">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists tableName="employees" constraintName="employees_email_key"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="email" constraintName="employees_email_key" tableName="employees"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-50">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists tableName="employees" constraintName="employees_uuid_key"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="uuid" constraintName="employees_uuid_key" tableName="employees"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-51">
+        <sql>
+            ALTER TABLE payment
+            DROP CONSTRAINT IF EXISTS settlement_date_is_right_format_or_null;
+        </sql>
+        <sql>
+            ALTER TABLE payment
+                ADD CONSTRAINT settlement_date_is_right_format_or_null
+                    CHECK (((settlement_date::text ~ '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$') OR (settlement_date IS NULL)));
+        </sql>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-52">
+        <sqlFile
+                path="../sql/objects/trigger/order_bag_mapping_insert_update_order_bag_mapping_amount.sql"
+                relativeToChangelogFile="true"
+                />
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-53">
+        <sqlFile
+                path="../sql/objects/trigger/order_bag_mapping_insert_update_order_bag_mapping_confirmed_quantity.sql"
+                relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-54">
+        <sqlFile
+                path="../sql/objects/trigger/order_bag_mapping_insert_update_order_bag_mapping_exported_quantity.sql"
+                relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-55">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists tableName="tariffs_locations" constraintName="tariffs_locations_tariffs_info_id_location_id_key"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="tariffs_info_id, location_id" constraintName="tariffs_locations_tariffs_info_id_location_id_key" tableName="tariffs_locations"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-56">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists tableName="positions" constraintName="positions_position_key"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="name" constraintName="positions_position_key" tableName="positions"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-57">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists tableName="receiving_stations" constraintName="receiving_stations_receiving_station_key"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="name" constraintName="receiving_stations_receiving_station_key" tableName="receiving_stations"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-58">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists tableName="refunds" constraintName="unique_order_id"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="order_id" constraintName="unique_order_id" tableName="refunds"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-59">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists tableName="viber_bot" constraintName="viber_bot_user_id_key"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="user_id" constraintName="viber_bot_user_id_key" tableName="viber_bot"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-60">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="address_id_seq"/>
+            </not>
+        </preConditions>
+        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="address_id_seq" startValue="1"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-61">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="bag_id_seq"/>
+            </not>
+        </preConditions>
+        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="bag_id_seq" startValue="1"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-62">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="employees_id_seq"/>
+            </not>
+        </preConditions>
+        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="employees_id_seq" startValue="1"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-63">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="orders_id_seq"/>
+            </not>
+        </preConditions>
+        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="orders_id_seq" startValue="1"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-64">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="positions_id_seq"/>
+            </not>
+        </preConditions>
+        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="positions_id_seq" startValue="1"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-65">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="ubs_user_id_seq"/>
+            </not>
+        </preConditions>
+        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="ubs_user_id_seq" startValue="1"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-66">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="users_id_seq"/>
+            </not>
+        </preConditions>
+        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="users_id_seq" startValue="1"/>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-67">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="change_of_points"/>
+            </not>
+        </preConditions>
+        <createTable tableName="change_of_points">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="INTEGER"/>
+            <column name="date" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="change_of_points_pkey"/>
+            </column>
+            <column name="order_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-68">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="cities"/>
+            </not>
+        </preConditions>
+        <createTable tableName="cities">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="cities_pkey"/>
+            </column>
+            <column name="name_uk" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name_en" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-69">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="column_width_for_employee"/>
+            </not>
+        </preConditions>
+        <createTable tableName="column_width_for_employee">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="column_width_for_employee_pkey"/>
+            </column>
+            <column name="employee_id" type="BIGINT"/>
+            <column name="address" type="INTEGER"/>
+            <column name="amount_due" type="INTEGER"/>
+            <column name="bags_amount" type="INTEGER"/>
+            <column name="blocked_by" type="INTEGER"/>
+            <column name="city" type="INTEGER"/>
+            <column name="client_email" type="INTEGER"/>
+            <column name="client_name" type="INTEGER"/>
+            <column name="client_phone" type="INTEGER"/>
+            <column name="comment_for_order_by_client" type="INTEGER"/>
+            <column name="comment_to_address_for_client" type="INTEGER"/>
+            <column name="comments_for_order" type="INTEGER"/>
+            <column name="date_of_export" type="INTEGER"/>
+            <column name="district" type="INTEGER"/>
+            <column name="general_discount" type="INTEGER"/>
+            <column name="order_id" type="INTEGER"/>
+            <column name="id_order_from_shop" type="INTEGER"/>
+            <column name="order_certificate_code" type="INTEGER"/>
+            <column name="order_date" type="INTEGER"/>
+            <column name="order_payment_status" type="INTEGER"/>
+            <column name="order_status" type="INTEGER"/>
+            <column name="payment_date" type="INTEGER"/>
+            <column name="receiving_status" type="INTEGER"/>
+            <column name="region" type="INTEGER"/>
+            <column name="responsible_caller" type="INTEGER"/>
+            <column name="responsible_driver" type="INTEGER"/>
+            <column name="responsible_logic_man" type="INTEGER"/>
+            <column name="responsible_navigator" type="INTEGER"/>
+            <column name="sender_email" type="INTEGER"/>
+            <column name="sender_name" type="INTEGER"/>
+            <column name="sender_phone" type="INTEGER"/>
+            <column name="time_of_export" type="INTEGER"/>
+            <column name="total_order_sum" type="INTEGER"/>
+            <column name="total_payment" type="INTEGER"/>
+            <column name="violations_amount" type="INTEGER"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-70">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="custom_table_view"/>
+            </not>
+        </preConditions>
+        <createTable tableName="custom_table_view">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="custom_table_view_pkey"/>
+            </column>
+            <column name="uuid" type="VARCHAR"/>
+            <column name="titles" type="VARCHAR(551)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-71">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="districts"/>
+            </not>
+        </preConditions>
+        <createTable tableName="districts">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="districts_pkey"/>
+            </column>
+            <column name="name_uk" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name_en" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-72">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="notification_parameters"/>
+            </not>
+        </preConditions>
+        <createTable tableName="notification_parameters">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_parameters_pkey"/>
+            </column>
+            <column name="notification_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-73">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="notification_platforms"/>
+            </not>
+        </preConditions>
+        <createTable tableName="notification_platforms">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_platforms_pkey"/>
+            </column>
+            <column name="body" type="VARCHAR(1000)"/>
+            <column name="body_eng" type="VARCHAR(1000)"/>
+            <column name="notification_receiver_type" type="VARCHAR(30)"/>
+            <column name="notification_status" type="VARCHAR(25)"/>
+            <column name="notification_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-74">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="order_payment_status_translations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="order_payment_status_translations">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="order_payment_status_translations_pkey"/>
+            </column>
+            <column name="translation_value" type="VARCHAR(30)"/>
+            <column name="order_payment_status_id" type="BIGINT"/>
+            <column name="translation_value_eng" type="VARCHAR(60)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-75">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="order_status_translations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="order_status_translations">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="order_status_translations_pkey"/>
+            </column>
+            <column name="status_id" type="BIGINT"/>
+            <column name="name" type="VARCHAR"/>
+            <column name="name_eng" type="VARCHAR(60)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-76">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="service"/>
+            </not>
+        </preConditions>
+        <createTable tableName="service">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="service_pkey"/>
+            </column>
+            <column name="price" type="BIGINT"/>
+            <column name="created_at" type="date"/>
+            <column name="created_by" type="BIGINT"/>
+            <column name="edited_at" type="date"/>
+            <column name="edited_by" type="BIGINT"/>
+            <column name="tariffs_info_id" type="BIGINT"/>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name_eng" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description_eng" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-77">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="telegram_bot"/>
+            </not>
+        </preConditions>
+        <createTable tableName="telegram_bot">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="telegram_bot_pkey"/>
+            </column>
+            <column name="chat_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notify" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-78">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user_agreements"/>
+            </not>
+        </preConditions>
+        <createTable tableName="user_agreements">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_agreements_pkey"/>
+            </column>
+            <column name="text_ua" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text_en" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-79">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="violation_images"/>
+            </not>
+        </preConditions>
+        <createTable tableName="violation_images">
+            <column name="violation_id" type="BIGINT"/>
+            <column name="image" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-80">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM notification_platforms;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="39"/>
+            <column name="body" value="Шановний Клієнте! Інформуємо Вас про необхідність оплати за послуги, замовлення №${orderNumber}. Сума до сплати ${amountToPay} грн. Оплатити: ${payButton}"/>
+            <column name="body_eng" value="Dear client! We inform you about the necessity of paying for services, order №${orderNumber}. The sum is ${amountToPay} UAH. ${payButton}"/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="13"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="27"/>
+            <column name="body" value="Привіт! Ми помітили, що ви не користувалися послугою «УБС Кур‘єр» вже %d місяці(в). Можливо, ви вирушили в тривалу подорож, а можливо, щось пішло не так зі збиранням пластиків. Поділіться, будь ласка, цим із нами, щоб ми зрозуміли, чи можемо допомогти і як саме."/>
+            <column name="body_eng" value="Hi there! We noticed that you have not used the UBS Courier service for %d months. Maybe you went on a long journey or something went wrong with collecting plastics. Please share this with us so we can understand if we can help and how."/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="9"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="14"/>
+            <column name="body" value="Вітання! Сьогодні УБС Кур’єр забрав у вас пакетів: ${realPackageNumber} (замовлення №${orderNumber}). А оплачували ви: ${paidPackageNumber}. Тож фіксуємо для вас депозит для наступного вивозу на суму ${overpayment} грн. Гарного дня!"/>
+            <column name="body_eng" value="Hello! Amount of bags collected by your UBS Courier today: ${realPackageNumber} (order №${orderNumber}). However, you paid for: ${paidPackageNumber} bags. So we have credited your account with  ${overpayment} UAH toward your next collection. Have a great day!"/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="5"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="13"/>
+            <column name="body" value="Сьогодні УБС Кур’єр забрав у вас пакетів: ${realPackageNumber} (замовлення №${orderNumber}). А оплачували ви: ${paidPackageNumber}. Тож фіксуємо для вас депозит для наступного вивозу на суму ${overpayment} грн."/>
+            <column name="body_eng" value="Amount of bags collected by your UBS Courier today: ${realPackageNumber} (order №${orderNumber}). However, you paid for: ${paidPackageNumber} bags. So we have credited your account with  ${overpayment} UAH toward your next collection."/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="5"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="21"/>
+            <column name="body" value="Вітаю! У вашому замовленні №${orderNumber} було відмінено порушення правил сортування після спілкування з менеджером. Дякуємо, що сортуєте з нами. Гарного дня."/>
+            <column name="body_eng" value="Hello! Your order №${orderNumber} has had a sorting violation canceled after speaking with a manager. Thank you for your cooperation with us. Have a good day."/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="7"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="15"/>
+            <column name="body" value="Вітання! Сьогодні УБС Кур’єр забрав у вас пакетів: ${realPackageNumber} (замовлення №${orderNumber}). А оплачували ви: ${paidPackageNumber}. Тож фіксуємо для вас депозит для наступного вивозу на суму ${overpayment} грн. Гарного дня!"/>
+            <column name="body_eng" value="Hello! Amount of bags collected by your UBS Courier today: ${realPackageNumber} (order №${orderNumber}). However, you paid for: ${paidPackageNumber} bags. So we have credited your account with  ${overpayment} UAH toward your next collection. Have a great day!"/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="5"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="17"/>
+            <column name="body" value="Вітання! На жаль, у ваших пакетах було виявлено: ${violationDescription} (замовлення №${orderNumber}). Це відходи, які ми не приймаємо. Будь ласка, ознайомтеся ще раз із нашими правилами сортування: https://bit.ly/2Q2esLB НЕ приймаємо взагалі: -батарейки, акумулятори, ртутьвмісні (люмінесцентні) лампи й термометри; -ліки та фармацевтичні відходи (маски, рукавички, шприци), а також усе, що контактувало з рідинами тіла (кров’ю, сечею, слиною, виділеннями); -використані засоби особистої гігієни та контрацепції (підгузки, прокладки, тампони, презервативи тощо); -картриджі принтера; -будівельні відходи, лаки, фарби, пластилін; -недопалки/стіки від електронних аксесуарів для куріння; -газові балони, запальнички, вибухонебезпечні предмети (гільзи, снаряди тощо); -кераміку; -гострі та ріжучі предмети. Дякуємо за розуміння!"/>
+            <column name="body_eng" value="Hello! Unfortunately, your bags contained the following: ${violationDescription} (order №${orderNumber}). This is the type of waste we do not collect. Please familiarize yourself with our recycling rules once more: https://bit.ly/2Q2esLB We do NOT collect any type of the following waste:-batteries, accumulators (lead-acid batteries), mercury-containing (fluorescent) light bulbs and thermometers; -medicine and pharmaceutical waste (masks, gloves, syringes), and anything that came into contact with bodily fluids (blood, urine, saliva, bodily secretions); -personal hygiene and contraception items that have been used (diapers, pads, tampons, condoms, etc.); -printer cartridges; -construction waste, varnish, paint, plasticine; -cigarette butts/e-cigarettes and their accessories; -gas cylinders, lighters, explosive materials (shell casings, ammunition, etc.); -ceramics; -sharp and cutting objects. Thank you for your understanding!"/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="6"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="18"/>
+            <column name="body" value="Вітання! На жаль, у ваших пакетах було виявлено: ${violationDescription} (замовлення №${orderNumber}). Це відходи, які ми не приймаємо. Будь ласка, ознайомтеся ще раз із нашими правилами сортування: https://bit.ly/2Q2esLB НЕ приймаємо взагалі: -батарейки, акумулятори, ртутьвмісні (люмінесцентні) лампи й термометри; -ліки та фармацевтичні відходи (маски, рукавички, шприци), а також усе, що контактувало з рідинами тіла (кров’ю, сечею, слиною, виділеннями); -використані засоби особистої гігієни та контрацепції (підгузки, прокладки, тампони, презервативи тощо); -картриджі принтера; -будівельні відходи, лаки, фарби, пластилін; -недопалки/стіки від електронних аксесуарів для куріння; -газові балони, запальнички, вибухонебезпечні предмети (гільзи, снаряди тощо); -кераміку; -гострі та ріжучі предмети. Дякуємо за розуміння!"/>
+            <column name="body_eng" value="Hello! Unfortunately, your bags contained the following: ${violationDescription} (order №${orderNumber}). This is the type of waste we do not collect. Please familiarize yourself with our recycling rules once more: https://bit.ly/2Q2esLB We do NOT collect any type of the following waste:-batteries, accumulators (lead-acid batteries), mercury-containing (fluorescent) light bulbs and thermometers; -medicine and pharmaceutical waste (masks, gloves, syringes), and anything that came into contact with bodily fluids (blood, urine, saliva, bodily secretions); -personal hygiene and contraception items that have been used (diapers, pads, tampons, condoms, etc.); -printer cartridges; -construction waste, varnish, paint, plasticine; -cigarette butts/e-cigarettes and their accessories; -gas cylinders, lighters, explosive materials (shell casings, ammunition, etc.); -ceramics; -sharp and cutting objects. Thank you for your understanding!"/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="6"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="20"/>
+            <column name="body" value="Вітаю! У вашому замовленні №${orderNumber} було відмінено порушення правил сортування після спілкування з менеджером. Дякуємо, що сортуєте з нами. Гарного дня."/>
+            <column name="body_eng" value="Hello! Your order №${orderNumber} has had a sorting violation canceled after speaking with a manager. Thank you for your cooperation with us. Have a good day."/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="7"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="19"/>
+            <column name="body" value="У вашому замовленні №${orderNumber} було відмінено порушення правил сортування після спілкування з менеджером. Дякуємо, що сортуєте з нами."/>
+            <column name="body_eng" value="Your order №${orderNumber} has had a sorting violation canceled after speaking with a manager. Thank you for your cooperation with us."/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="7"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="23"/>
+            <column name="body" value="Вітаю! У вашому замовленні №${orderNumber} було внесено зміни в інформацію про порушення правил сортування після спілкування з менеджером. Передивіться, будь ласка, зміни в замовленні. Дякуємо, що сортуєте разом з нами. Гарного дня."/>
+            <column name="body_eng" value="Hello! Your order №${orderNumber} has had its sorting violation information changed after speaking with the manager. Please see the changes in the order. Thank you for sorting with us. Have a good day."/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="8"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="24"/>
+            <column name="body" value="Вітаю! У вашому замовленні №${orderNumber} було внесено зміни в інформацію про порушення правил сортування після спілкування з менеджером. Передивіться, будь ласка, зміни в замовленні. Дякуємо, що сортуєте разом з нами. Гарного дня."/>
+            <column name="body_eng" value="Hello! Your order №${orderNumber} has had its sorting violation information changed after speaking with the manager. Please see the changes in the order. Thank you for sorting with us. Have a good day."/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="8"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="26"/>
+            <column name="body" value="Привіт! Ми помітили, що ви не користувалися послугою «УБС Кур‘єр» вже %d місяці(в). Можливо, ви вирушили в тривалу подорож, а можливо, щось пішло не так зі збиранням пластиків. Поділіться, будь ласка, цим із нами, щоб ми зрозуміли, чи можемо допомогти і як саме."/>
+            <column name="body_eng" value="Hi there! We noticed that you have not used the UBS Courier service for %d months. Maybe you went on a long journey or something went wrong with collecting plastics. Please share this with us so we can understand if we can help and how."/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="9"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="29"/>
+            <column name="body" value="Доброго дня! Переплата в замовленні №${orderNumber} в розмірі ${returnedPayment} грн. зараховується на ваш бонусний рахунок"/>
+            <column name="body_eng" value="Hello! Overpayment in the order №${orderNumber} amount of ${returnedPayment} UAH is credited to your bonus account."/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="10"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="30"/>
+            <column name="body" value="Доброго дня! Переплата в замовленні №${orderNumber} в розмірі ${returnedPayment} грн. зараховується на ваш бонусний рахунок"/>
+            <column name="body_eng" value="Hello! Overpayment in the order №${orderNumber} amount of ${returnedPayment} UAH is credited to your bonus account."/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="10"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="38"/>
+            <column name="body" value="Шановний Клієнте! Інформуємо Вас про необхідність оплати за послуги, замовлення №${orderNumber}. Сума до сплати ${amountToPay} грн. Оплатити: ${payButton}"/>
+            <column name="body_eng" value="Dear client! We inform you about the necessity of paying for services, order №${orderNumber}. The sum is ${amountToPay} UAH. ${payButton}"/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="13"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="22"/>
+            <column name="body" value="У вашому замовленні №${orderNumber} було внесено зміни в інформацію про порушення правил сортування після спілкування з менеджером. Передивіться, будь ласка, зміни в замовленні. Дякуємо, що сортуєте разом з нами."/>
+            <column name="body_eng" value="Your order №${orderNumber} has had its sorting violation information changed after speaking with the manager. Please see the changes in the order. Thank you for sorting with us."/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="8"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="25"/>
+            <column name="body" value="Ми помітили, що ви не користувалися послугою «УБС Кур‘єр» вже %d місяці(в). Можливо, ви вирушили в тривалу подорож, а можливо, щось пішло не так зі збиранням пластиків. Поділіться, будь ласка, цим із нами, щоб ми зрозуміли, чи можемо допомогти і як саме."/>
+            <column name="body_eng" value="We noticed that you have not used the UBS Courier service for %d months. Maybe you went on a long journey or something went wrong with collecting plastics. Please share this with us so we can understand if we can help and how."/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="9"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="28"/>
+            <column name="body" value="Переплата в замовленні №${orderNumber} в розмірі ${returnedPayment} грн. зараховується на ваш бонусний рахунок."/>
+            <column name="body_eng" value="Overpayment in the order №${orderNumber} amount of ${returnedPayment} UAH is credited to your bonus account."/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="10"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="32"/>
+            <column name="body" value="Шановний клієнт! Вам підтверджено, що замовлення №${orderNumber} буде привезено самостійно на Станцію приймання. Звертаємо Вашу увагу на необхідність здійснення оплати безпосередньо на Станції приймання. Дякуємо!"/>
+            <column name="body_eng" value="Dear client! You are confirmed the order №${orderNumber} will be brought by yourself to the Receiving station. We draw your attention to the necessity of making payment at the Receiving station. Thank you."/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="11"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="33"/>
+            <column name="body" value="Шановний клієнт! Вам підтверджено, що замовлення №${orderNumber} буде привезено самостійно на Станцію приймання. Звертаємо Вашу увагу на необхідність здійснення оплати безпосередньо на Станції приймання. Дякуємо!"/>
+            <column name="body_eng" value="Dear client! You are confirmed the order №${orderNumber} will be brought by yourself to the Receiving station. We draw your attention to the necessity of making payment at the Receiving station. Thank you."/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="11"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="35"/>
+            <column name="body" value="Шановний Клієнте! Інформуємо Вас про необхідність оплати за послуги, замовлення №${orderNumber}, на Станції приймання. Сума до сплати ${amountToPay} грн."/>
+            <column name="body_eng" value="Dear client! We inform you about the necessity of paying for services, order №${orderNumber}, at the Receiving station. The sum is ${amountToPay} UAH."/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="12"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="36"/>
+            <column name="body" value="Шановний Клієнте! Інформуємо Вас про необхідність оплати за послуги, замовлення №${orderNumber}, на Станції приймання. Сума до сплати ${amountToPay} грн."/>
+            <column name="body_eng" value="Dear client! We inform you about the necessity of paying for services, order №${orderNumber}, at the Receiving station. The sum is ${amountToPay} UAH."/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="12"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="31"/>
+            <column name="body" value="Вам підтверджено, що замовлення №${orderNumber} буде привезено самостійно на Станцію приймання. Звертаємо Вашу увагу на необхідність здійснення оплати безпосередньо на Станції приймання."/>
+            <column name="body_eng" value="You are confirmed the order №${orderNumber} will be brought by yourself to the Receiving station. We draw your attention to the necessity of making payment at the Receiving station."/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="11"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="34"/>
+            <column name="body" value="Інформуємо Вас про необхідність оплати за послуги, замовлення №${orderNumber}, на Станції приймання. Сума до сплати ${amountToPay} грн."/>
+            <column name="body_eng" value="We inform you about the necessity of paying for services, order №${orderNumber}, at the Receiving station. The sum is ${amountToPay} UAH."/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="12"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="37"/>
+            <column name="body" value="Інформуємо Вас про необхідність оплати за послуги, замовлення №${orderNumber}. Сума до сплати ${amountToPay} грн. Оплатити: ${payButton}"/>
+            <column name="body_eng" value="We inform you about the necessity of paying for services, order №${orderNumber}. The sum is ${amountToPay} UAH. ${payButton}"/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="13"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="1"/>
+            <column name="body" value="Ви нещодавно залишили заявку для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі? Сума до сплати ${amountToPay}. грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою  https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="Recently you have requested our “UBS Courier” service, however, we have not received the payment confirmation. Did you happen to encounter any issues? The sum is ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager  https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="2"/>
+            <column name="body" value="Вітання! Ви нещодавно залишили заявку для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі? Сума до сплати ${amountToPay}. грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою  https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="Hello! Recently you have requested our “UBS Courier” service, however, we have not received the payment confirmation. Did you happen to encounter any issues? The sum is ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager  https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="3"/>
+            <column name="body" value="Вітання! Ви нещодавно залишили заявку для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі? Сума до сплати ${amountToPay}. грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою  https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="Hello! Recently you have requested our “UBS Courier” service, however, we have not received the payment confirmation. Did you happen to encounter any issues? The sum is ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager  https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="5"/>
+            <column name="body" value="Вітаємо! Ви успішно замовили й оплатили послугу «УБС Кур'єр», замовлення №${orderNumber}. УБС Кур'єр приїде по ваші пакети впродовж 2–9 днів від дати оплати послуги. Коли маршрут буде сформовано, ми обов’язково зв'яжемося з вами для узгодження деталей. Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="Hello! You have successfully purchased a “UBS Courier” service, order №${orderNumber}. UBS Courier will collect your bags within 2-9 days from the payment date. Once the route is created, we will contact you to confirm the details. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="6"/>
+            <column name="body" value="Вітаємо! Ви успішно замовили й оплатили послугу «УБС Кур'єр», замовлення №${orderNumber}. УБС Кур'єр приїде по ваші пакети впродовж 2–9 днів від дати оплати послуги. Коли маршрут буде сформовано, ми обов’язково зв'яжемося з вами для узгодження деталей. Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="Hello! You have successfully purchased a “UBS Courier” service, order №${orderNumber}. UBS Courier will collect your bags within 2-9 days from the payment date. Once the route is created, we will contact you to confirm the details. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="42"/>
+            <column name="body" value="Вітання! Адміністратор вніс зміни у тариф замовлення №${orderNumber}. Просимо вас, будь ласка, оплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджером https://t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua."/>
+            <column name="body_eng" value="Hello! The administrator made changes to the tariff of order №${orderNumber}. Please pay ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot or email hello@nowaste.org.ua."/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="14"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="8"/>
+            <column name="body" value="Вітання! Ми сформували маршрут УБС Кур’єра, замовлення №${orderNumber}. Наш Кур’єр буде у вас ${date}.  Робочий час Кур'єра: з ${startTime} до ${endTime}. Будь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур'єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов'язково попередьте про це Кур'єра або менеджерів! Номер Кур'єра — +380638175035 або +380931038987. Якщо у вас залишилися будь-які питання - з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="Hello! We have created the route for your UBS Courier, order №${orderNumber}.Your Courier will arrive ${date}. Courier’s hours of operation: from ${startTime} to ${endTime}. Please be available during this time frame and make sure your phone is not on “silent”. The Courier will call you in advance, and upon arrival. If you are unable to be present during the agreed time, you may leave your bags with the concierge, but please, do notify your Courier or one of the managers! Courier’s number — +380638175035 or +380931038987. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="9"/>
+            <column name="body" value="Вітання! Ми сформували маршрут УБС Кур’єра, замовлення №${orderNumber}. Наш Кур’єр буде у вас ${date}.  Робочий час Кур'єра: з ${startTime} до ${endTime}. Будь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур'єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов'язково попередьте про це Кур'єра або менеджерів! Номер Кур'єра — +380638175035 або +380931038987. Якщо у вас залишилися будь-які питання - з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="Hello! We have created the route for your UBS Courier, order №${orderNumber}.Your Courier will arrive ${date}. Courier’s hours of operation: from ${startTime} to ${endTime}. Please be available during this time frame and make sure your phone is not on “silent”. The Courier will call you in advance, and upon arrival. If you are unable to be present during the agreed time, you may leave your bags with the concierge, but please, do notify your Courier or one of the managers! Courier’s number — +380638175035 or +380931038987. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="11"/>
+            <column name="body" value="Вітання! Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="Hello! You have made some changes to the following order №${orderNumber}. Please pay the remaining fee of ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="4"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="12"/>
+            <column name="body" value="Вітання! Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="Hello! You have made some changes to the following order №${orderNumber}. Please pay the remaining fee of ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="4"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="40"/>
+            <column name="body" value="Вітання! Адміністратор вніс зміни у тариф замовлення №${orderNumber}. Просимо вас, будь ласка, оплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджером https://t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua."/>
+            <column name="body_eng" value="Hello! The administrator made changes to the tariff of order №${orderNumber}. Please pay ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot or email hello@nowaste.org.ua."/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="14"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="10"/>
+            <column name="body" value="Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="You have made some changes to the following order №${orderNumber}. Please pay the remaining fee of ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="4"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="43"/>
+            <column name="body" value="Шановний(-а) ${customerName}, Дякуємо за Ваше замовлення на нашому сайті! Ми раді повідомити, що Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було успішно розміщене та обробляється. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua."/>
+            <column name="body_eng" value="Dear ${customerName}, Thank you for your order on our website! We are pleased to inform you that your order №${orderNumber} for the amount of ${amountToPay} UAH has been successfully placed and is being processed. If you have any questions, we are happy to assist! You can chat with a manager at t.me/nowaste_service_bot or email us at hello@nowaste.org.ua."/>
+            <column name="notification_receiver_type" value="SITE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="15"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="45"/>
+            <column name="body" value="Шановний(-а) ${customerName}, Дякуємо за Ваше замовлення на нашому сайті! Ми раді повідомити, що Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було успішно розміщене та обробляється. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua."/>
+            <column name="body_eng" value="Dear ${customerName}, Thank you for your order on our website! We are pleased to inform you that your order №${orderNumber} for the amount of ${amountToPay} UAH has been successfully placed and is being processed. If you have any questions, we are happy to assist! You can chat with a manager at t.me/nowaste_service_bot or email us at hello@nowaste.org.ua."/>
+            <column name="notification_receiver_type" value="MOBILE"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="15"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="4"/>
+            <column name="body" value="Ви успішно замовили й оплатили послугу «УБС Кур’єр», замовлення №${orderNumber}. УБС Кур’єр приїде по ваші пакети впродовж 2–9 днів від дати оплати послуги. Коли маршрут буде сформовано, ми обов’язково зв’яжемося з вами для узгодження деталей. Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="You have successfully purchased a “UBS Courier” service, order №${orderNumber}. UBS Courier will collect your bags within 2-9 days from the payment date. Once the route is created, we will contact you to confirm the details. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="7"/>
+            <column name="body" value="Ми сформували маршрут УБС Кур’єра, замовлення №${orderNumber}. Наш Кур’єр буде у вас ${date}.  Робочий час Кур’єра: з ${startTime} до ${endTime}. Будь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур’єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов’язково попередьте про це Кур’єра або менеджерів! Номер Кур’єра — +380638175035 або +380931038987. Якщо у вас залишилися будь-які питання - з радістю відповім! Чат з менеджеркою https://t.me/nowaste_service_bot  чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="We have created the route for your UBS Courier, order №${orderNumber}.Your Courier will arrive ${date}. Courier’s hours of operation: from ${startTime} to ${endTime}. Please be available during this time frame and make sure your phone is not on “silent”. The Courier will call you in advance, and upon arrival. If you are unable to be present during the agreed time, you may leave your bags with the concierge, but please, do notify your Courier or one of the managers! Courier’s number — +380638175035 or +380931038987. We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot  or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="16"/>
+            <column name="body" value="На жаль, у ваших пакетах було виявлено: ${violationDescription} (замовлення №${orderNumber}). Це відходи, які ми не приймаємо. Будь ласка, ознайомтеся ще раз із нашими правилами сортування: https://bit.ly/2Q2esLB НЕ приймаємо взагалі: -батарейки, акумулятори, ртутьвмісні (люмінесцентні) лампи й термометри; -ліки та фармацевтичні відходи (маски, рукавички, шприци), а також усе, що контактувало з рідинами тіла (кров’ю, сечею, слиною, виділеннями); -використані засоби особистої гігієни та контрацепції (підгузки, прокладки, тампони, презервативи тощо); -картриджі принтера; -будівельні відходи, лаки, фарби, пластилін; -недопалки/стіки від електронних аксесуарів для куріння; -газові балони, запальнички, вибухонебезпечні предмети (гільзи, снаряди тощо); -кераміку; -гострі та ріжучі предмети. Дякуємо за розуміння!"/>
+            <column name="body_eng" value="Unfortunately, your bags contained the following: ${violationDescription} (order №${orderNumber}). This is the type of waste we do not collect. Please familiarize yourself with our recycling rules once more: https://bit.ly/2Q2esLB We do NOT collect any type of the following waste:-batteries, accumulators (lead-acid batteries), mercury-containing (fluorescent) light bulbs and thermometers; -medicine and pharmaceutical waste (masks, gloves, syringes), and anything that came into contact with bodily fluids (blood, urine, saliva, bodily secretions); -personal hygiene and contraception items that have been used (diapers, pads, tampons, condoms, etc.); -printer cartridges; -construction waste, varnish, paint, plasticine; -cigarette butts/e-cigarettes and their accessories; -gas cylinders, lighters, explosive materials (shell casings, ammunition, etc.); -ceramics; -sharp and cutting objects. Thank you for your understanding!"/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="6"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="41"/>
+            <column name="body" value="Адміністратор вніс зміни у тариф замовлення №${orderNumber}. Просимо вас, будь ласка, оплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджером https://t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="The administrator made changes to the tariff of order №${orderNumber}. Please pay ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! Chat with a manager https://t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="14"/>
+        </insert>
+        <insert tableName="notification_platforms">
+            <column name="id" valueNumeric="44"/>
+            <column name="body" value="Дякуємо за Ваше замовлення на нашому сайті! Ми раді повідомити, що Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було успішно розміщене та обробляється. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua"/>
+            <column name="body_eng" value="Thank you for your order on our website! We are pleased to inform you that your order №${orderNumber} for the amount of ${amountToPay} UAH has been successfully placed and is being processed. If you have any questions, we are happy to assist! You can chat with a manager at t.me/nowaste_service_bot or email us at hello@nowaste.org.ua"/>
+            <column name="notification_receiver_type" value="EMAIL"/>
+            <column name="notification_status" value="ACTIVE"/>
+            <column name="notification_id" valueNumeric="15"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-81">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM order_payment_status_translations;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="order_payment_status_translations">
+            <column name="id" valueNumeric="1"/>
+            <column name="translation_value" value="Оплачено"/>
+            <column name="order_payment_status_id" valueNumeric="1"/>
+            <column name="translation_value_eng" value="Paid"/>
+        </insert>
+        <insert tableName="order_payment_status_translations">
+            <column name="id" valueNumeric="2"/>
+            <column name="translation_value" value="Не оплачено"/>
+            <column name="order_payment_status_id" valueNumeric="2"/>
+            <column name="translation_value_eng" value="Unpaid"/>
+        </insert>
+        <insert tableName="order_payment_status_translations">
+            <column name="id" valueNumeric="3"/>
+            <column name="translation_value" value="Частково оплачено"/>
+            <column name="order_payment_status_id" valueNumeric="3"/>
+            <column name="translation_value_eng" value="Half paid"/>
+        </insert>
+        <insert tableName="order_payment_status_translations">
+            <column name="id" valueNumeric="4"/>
+            <column name="translation_value" value="Оплату повернуто"/>
+            <column name="order_payment_status_id" valueNumeric="4"/>
+            <column name="translation_value_eng" value="Payment refunded"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-82">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM order_status_translations;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="order_status_translations">
+            <column name="id" valueNumeric="1"/>
+            <column name="status_id" valueNumeric="1"/>
+            <column name="name" value="Сформовано"/>
+            <column name="name_eng" value="Formed"/>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id" valueNumeric="2"/>
+            <column name="status_id" valueNumeric="2"/>
+            <column name="name" value="Узгодження"/>
+            <column name="name_eng" value="Adjustment"/>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id" valueNumeric="3"/>
+            <column name="status_id" valueNumeric="3"/>
+            <column name="name" value="Привезе сам"/>
+            <column name="name_eng" value="Brought by himself"/>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id" valueNumeric="5"/>
+            <column name="status_id" valueNumeric="5"/>
+            <column name="name" value="На маршруті"/>
+            <column name="name_eng" value="Оn the route"/>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id" valueNumeric="6"/>
+            <column name="status_id" valueNumeric="6"/>
+            <column name="name" value="Виконано"/>
+            <column name="name_eng" value="Done"/>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id" valueNumeric="7"/>
+            <column name="status_id" valueNumeric="7"/>
+            <column name="name" value="Не вивезли"/>
+            <column name="name_eng" value="Not taken out"/>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id" valueNumeric="8"/>
+            <column name="status_id" valueNumeric="8"/>
+            <column name="name" value="Скасовано"/>
+            <column name="name_eng" value="Canceled"/>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id" valueNumeric="4"/>
+            <column name="status_id" valueNumeric="4"/>
+            <column name="name" value="Підтверджено"/>
+            <column name="name_eng" value="Confirmed"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-83">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM service;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="service">
+            <column name="id" valueNumeric="5"/>
+            <column name="price" valueNumeric="5000"/>
+            <column name="created_at" valueDate="2023-02-21"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="edited_at"/>
+            <column name="edited_by"/>
+            <column name="tariffs_info_id" valueNumeric="1"/>
+            <column name="name" value="Сервіс"/>
+            <column name="description" value="Сервіс кур'єра УБС в локації Київ"/>
+            <column name="name_eng" value="Service"/>
+            <column name="description_eng" value="UBS courier service in Kyiv location"/>
+        </insert>
+        <insert tableName="service">
+            <column name="id" valueNumeric="6"/>
+            <column name="price" valueNumeric="5000"/>
+            <column name="created_at" valueDate="2023-02-21"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="edited_at"/>
+            <column name="edited_by"/>
+            <column name="tariffs_info_id" valueNumeric="2"/>
+            <column name="name" value="Сервіс"/>
+            <column name="description" value="Сервіс кур'єра УБС в локації Київ 20 кілометрів"/>
+            <column name="name_eng" value="Service"/>
+            <column name="description_eng" value="UBS courier service in Kyiv 20 km location"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-84">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM user_agreements;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="user_agreements">
+            <column name="id" valueNumeric="1"/>
+            <column name="text_ua" value="Текст українською"/>
+            <column name="text_en" value="Text in English"/>
+            <column name="created_at" valueDate="2024-08-23T12:00:00"/>
+            <column name="author_id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="holotsvan (generated)" id="1734272689558-85">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk-column_width_for_employee-to-employee"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="employee_id" baseTableName="column_width_for_employee" constraintName="fk-column_width_for_employee-to-employee" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-86">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk1evtdroba5rlynltqtprpcaay"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="ubs_user_id" baseTableName="orders" constraintName="fk1evtdroba5rlynltqtprpcaay" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="ubs_user" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-87">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk3kikhat62f7s1gei1srru7ymb"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="tariffs_info_id" baseTableName="bag" constraintName="fk3kikhat62f7s1gei1srru7ymb" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tariffs_info" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-88">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk5d5vb0bsddsipw5kdyd5bhfx"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="violations_description_mapping" constraintName="fk5d5vb0bsddsipw5kdyd5bhfx" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="orders" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-89">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk5s2hfa0bsddsipw5kdyd5bhfx"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="change_of_points" constraintName="fk5s2hfa0bsddsipw5kdyd5bhfx" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="orders" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-90">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk7428n493hjv04v7bru3hh7xg3"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="employee_id" baseTableName="employee_position" constraintName="fk7428n493hjv04v7bru3hh7xg3" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-91">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk77v8r6rgf8obsgkrp9rtriacu"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="change_of_points" constraintName="fk77v8r6rgf8obsgkrp9rtriacu" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-92">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk81wr5kagcci5f66dfx3s1p0ht"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="tariffs_info_id" baseTableName="service" constraintName="fk81wr5kagcci5f66dfx3s1p0ht" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tariffs_info" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-93">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_address_city"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="city_id" baseTableName="address" constraintName="fk_address_city" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="cities" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-94">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_address_district"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="district_id" baseTableName="address" constraintName="fk_address_district" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="districts" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-95">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_address_region"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="region_id" baseTableName="address" constraintName="fk_address_region" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="regions" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-96">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_address_to_user"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="address" constraintName="fk_address_to_user" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-97">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_bag_id_to_order"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="bag_id" baseTableName="order_bag_mapping" constraintName="fk_bag_id_to_order" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="bag" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-98">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_bag_to_employee_created"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="bag" constraintName="fk_bag_to_employee_created" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-99">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_bag_to_employee_edited"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="edited_by_id" baseTableName="bag" constraintName="fk_bag_to_employee_edited" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-100">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_cities_regions"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="region_id" baseTableName="cities" constraintName="fk_cities_regions" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="regions" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-101">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_creator_to_courier"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="courier" constraintName="fk_creator_to_courier" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-102">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_creator_to_receiving_stations"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="receiving_stations" constraintName="fk_creator_to_receiving_stations" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-103">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_creator_to_tariffs_info"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="creator_id" baseTableName="tariffs_info" constraintName="fk_creator_to_tariffs_info" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-104">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_districts_cities"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="city_id" baseTableName="districts" constraintName="fk_districts_cities" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="cities" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-105">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_events_order_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="events" constraintName="fk_events_order_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-106">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_location_to_region_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="region_id" baseTableName="locations" constraintName="fk_location_to_region_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="regions" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-107">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_locations_tariffs_locations_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="tariffs_info_id" baseTableName="tariffs_locations" constraintName="fk_locations_tariffs_locations_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tariffs_info" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-108">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_notification_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="notification_id" baseTableName="notification_parameters" constraintName="fk_notification_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="user_notifications" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-109">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_notification_platforms_to_notification_templates"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="notification_id" baseTableName="notification_platforms" constraintName="fk_notification_platforms_to_notification_templates" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="notification_templates" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-110">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_order_address_city"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="city_id" baseTableName="order_address" constraintName="fk_order_address_city" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="cities" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-111">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_order_address_district"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="district_id" baseTableName="order_address" constraintName="fk_order_address_district" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="districts" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-112">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_order_address_locations"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="location_id" baseTableName="order_address" constraintName="fk_order_address_locations" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="locations" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-113">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_order_address_region"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="region_id" baseTableName="order_address" constraintName="fk_order_address_region" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="regions" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-114">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_order_to_employee"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="employee_id" baseTableName="orders" constraintName="fk_order_to_employee" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-115">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_orders_to_tariffs_info"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="tariffs_info_id" baseTableName="orders" constraintName="fk_orders_to_tariffs_info" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tariffs_info" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-116">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_payment_to_order"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="payment" constraintName="fk_payment_to_order" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-117">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_receiving_station"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="receiving_station_id" baseTableName="orders" constraintName="fk_receiving_station" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="receiving_stations" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-118">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_receiving_stations_tariffs_info_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="tariffs_info_id" baseTableName="tariffs_info_receiving_stations_mapping" constraintName="fk_receiving_stations_tariffs_info_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tariffs_info" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-119">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_refunds_order"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="refunds" constraintName="fk_refunds_order" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-120">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_service_to_employee_created"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="service" constraintName="fk_service_to_employee_created" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-121">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_service_to_employee_edited"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="edited_by" baseTableName="service" constraintName="fk_service_to_employee_edited" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-122">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tariff_infos_receiving_employee_employee_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="employee_id" baseTableName="tariff_infos_receiving_employee_mapping" constraintName="fk_tariff_infos_receiving_employee_employee_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-123">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tariff_infos_receiving_employee_tariffs_info_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="tariffs_info_id" baseTableName="tariff_infos_receiving_employee_mapping" constraintName="fk_tariff_infos_receiving_employee_tariffs_info_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tariffs_info" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-124">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tariffs_info_receiving_stations_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="receiving_station_id" baseTableName="tariffs_info_receiving_stations_mapping" constraintName="fk_tariffs_info_receiving_stations_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="receiving_stations" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-125">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tariffs_info_to_courier"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="courier_id" baseTableName="tariffs_info" constraintName="fk_tariffs_info_to_courier" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="courier" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-126">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tariffs_locations_locations_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="location_id" baseTableName="tariffs_locations" constraintName="fk_tariffs_locations_locations_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="locations" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-127">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_ubs_user_to_order_address"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="id" baseTableName="ubs_user" constraintName="fk_ubs_user_to_order_address" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="order_address" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-128">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_user_agreements_users"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="user_agreements" constraintName="fk_user_agreements_users" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-129">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_user_notifications_order_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="user_notifications" constraintName="fk_user_notifications_order_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-130">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_users_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="users_id" baseTableName="user_notifications" constraintName="fk_users_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-131">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_users_telegram_bot_telegram_bot_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="telegram_bot" constraintName="fk_users_telegram_bot_telegram_bot_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-132">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_users_to_last_order_location"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="last_order_location" baseTableName="users" constraintName="fk_users_to_last_order_location" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="locations" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-133">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_users_viber_bot_viber_bot_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="viber_bot" constraintName="fk_users_viber_bot_viber_bot_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-134">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_violation_image_mapping"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="violation_id" baseTableName="violation_images" constraintName="fk_violation_image_mapping" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="violations_description_mapping" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-135">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_violations_description_mapping_added_by_user_id"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="added_by_user_id" baseTableName="violations_description_mapping" constraintName="fk_violations_description_mapping_added_by_user_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-136">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fke6k45xxoin4fylnwg2jkehwjf"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="users_id" baseTableName="orders" constraintName="fke6k45xxoin4fylnwg2jkehwjf" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-137">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkfce5nygk074yf9qm7ofjo7em2"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="users_id" baseTableName="ubs_user" constraintName="fkfce5nygk074yf9qm7ofjo7em2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-138">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkp3gtviaykhgjo8u63oluspkok"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="position_id" baseTableName="employee_position" constraintName="fkp3gtviaykhgjo8u63oluspkok" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="positions" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-139">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkpk7mwwg8e6a5owtr4bmxpum7b"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="certificate" constraintName="fkpk7mwwg8e6a5owtr4bmxpum7b" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-140">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkpkamv5em3c345mcyo3b6gr50a"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="order_bag_mapping" constraintName="fkpkamv5em3c345mcyo3b6gr50a" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders" validate="true"/>
+    </changeSet>
+    <changeSet author="holotsvan (generated)" id="1734272689558-141">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkpry0lrfjcpcpjo0wl6w6spscy"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="orders_id" baseTableName="order_additional" constraintName="fkpry0lrfjcpcpjo0wl6w6spscy" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

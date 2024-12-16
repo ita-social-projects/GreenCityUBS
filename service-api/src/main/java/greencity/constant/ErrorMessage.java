@@ -179,5 +179,9 @@ public class ErrorMessage {
     public static final String TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST =
         "Could not find tariff information for bags with IDs %s at location with id: %d";
     public static final String COULD_NOT_RETRIEVE_USER_LANGUAGE = "Could not retrieve user language";
+    public static final String CANNOT_CHANGE_ORDER_TABLE_VIEW =
+        "You can't change order table view when table is frozen";
+    public static final String TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND =
+        "Table column width by employee id not found";
     public static final String ORDER_STATUS_INVALID = "Order with ID %d cannot be updated due to its current status.";
 }
