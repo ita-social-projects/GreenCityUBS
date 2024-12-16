@@ -5300,6 +5300,18 @@ public class ModelUtils {
             .amountDue(60)
             .mixedWaste120L(150)
             .city(200)
+            .isTableFreeze(false)
+            .build();
+    }
+
+    public static TableColumnWidthForEmployee getTestTableColumnWidthWithIsTableFreezeTrue() {
+        return TableColumnWidthForEmployee.builder()
+            .employee(getEmployee())
+            .address(50)
+            .amountDue(60)
+            .mixedWaste120L(150)
+            .city(200)
+            .isTableFreeze(true)
             .build();
     }
 

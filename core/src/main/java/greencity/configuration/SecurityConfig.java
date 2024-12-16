@@ -174,6 +174,7 @@ public class SecurityConfig {
                     UBS_MANAG_LINK + "/unblockOrders",
                     UBS_MANAG_LINK + "/save-reason/{id}",
                     UBS_MANAG_LINK + "/orderTableColumnsWidth",
+                    UBS_MANAG_LINK + "/saveOrderTableColumnsWidthIsFreeze",
                     ADMIN_EMPL_LINK + "/**",
                     ADMIN_LINK + "/notification/update-template/{id}",
                     ADMIN_LINK + "/notification/change-template-status/{id}",

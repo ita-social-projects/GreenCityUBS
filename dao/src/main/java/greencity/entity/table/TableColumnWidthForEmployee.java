@@ -93,6 +93,8 @@ public class TableColumnWidthForEmployee {
     private Integer totalPayment = DEFAULT_WIDTH;
     @Column
     private Integer violationsAmount = DEFAULT_WIDTH;
+    @Column
+    private boolean isTableFreeze = Boolean.FALSE;
 
     /**
      * Constructor with default width for all columns.

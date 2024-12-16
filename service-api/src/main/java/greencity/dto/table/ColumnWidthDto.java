@@ -46,4 +46,5 @@ public class ColumnWidthDto {
     private Integer totalOrderSum;
     private Integer totalPayment;
     private Integer violationsAmount;
+    private Boolean isTableFreeze;
 }
