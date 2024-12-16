@@ -3838,7 +3838,7 @@ public class ModelUtils {
             .setAddress("Січових Стрільців, 37, 1, 1")
             .setAddressEn("Sichovyh Stril'tsiv, 37, 1, 1")
             .setCommentToAddressForClient("coment")
-            .setBagAmount("3")
+            .setMixedWaste120(3L)
             .setTotalOrderSum(50000L)
             .setOrderCertificateCode("5489-2789")
             .setGeneralDiscount(100L)
@@ -3878,7 +3878,9 @@ public class ModelUtils {
             .setAddress(
                 new SenderLocation().setUa("Січових Стрільців, 37, 1, 1").setEn("Sichovyh Stril'tsiv, 37, 1, 1"))
             .setCommentToAddressForClient("coment")
-            .setBagsAmount("3")
+            .setMixedWaste120L("3")
+            .setTextileWaste60L("-")
+            .setTextileWaste20L("-")
             .setTotalOrderSum(500.)
             .setOrderCertificateCode("5489-2789")
             .setGeneralDiscount(100L)
@@ -3911,6 +3913,9 @@ public class ModelUtils {
             .setRegion(new SenderLocation().setEn(null).setUa(null))
             .setCity(new SenderLocation().setEn(null).setUa(null))
             .setDistrict(new SenderLocation().setEn(null).setUa(null))
+            .setMixedWaste120L("-")
+            .setTextileWaste60L("-")
+            .setTextileWaste20L("-")
             .setAddress(new SenderLocation().setEn(null).setUa(null));
     }
 
@@ -5293,7 +5298,7 @@ public class ModelUtils {
             .employee(getEmployee())
             .address(50)
             .amountDue(60)
-            .bagsAmount(150)
+            .mixedWaste120L(150)
             .city(200)
             .isTableFreeze(false)
             .build();
@@ -5314,7 +5319,7 @@ public class ModelUtils {
         return ColumnWidthDto.builder()
             .address(100)
             .amountDue(20)
-            .bagsAmount(500)
+            .mixedWaste120L(500)
             .city(320)
             .clientPhone(340)
             .commentForOrderByClient(600)

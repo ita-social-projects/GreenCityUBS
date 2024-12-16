@@ -256,4 +256,7 @@
     <include file="/db/changelog/logs/2024-11-07-rename-positions-Kizerov.xml"/>
     <include file="db/changelog/logs/2024-11-08-rename-position-kizerov.xml"/>
     <include file="db/changelog/logs/2024-11-28-change-add-column-isTableFreeze-to-column_width_for_employee-Warded120.xml"/>
+    <include file="db/changelog/logs/2024-12-09-update-big-order-table-view-Kizerov.xml"/>
+    <include file="db/changelog/logs/2024-12-09-update-colum_width_for_employee-Kizerov.xml"/>
+    <include file="db/changelog/logs/2024-12-14-update-custom_table_view-Kizerov.xml"/>
 </databaseChangeLog>
