@@ -7,8 +7,7 @@
     <changeSet id="update-column_width_for_employee" author="Kizerov Dmytro">
         <sql>
             update column_width_for_employee
-            set employee_id = 165,
-                address = 165,
+            set address = 165,
                 amount_due = 165,
                 blocked_by = 165,
                 city = 165,
