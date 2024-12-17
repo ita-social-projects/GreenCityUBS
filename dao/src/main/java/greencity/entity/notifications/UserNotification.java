@@ -3,8 +3,11 @@ package greencity.entity.notifications;
 import greencity.enums.NotificationType;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -18,6 +21,9 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {"order", "user", "parameters", "notificationTime"})
 @Entity
 @Table(name = "user_notifications")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

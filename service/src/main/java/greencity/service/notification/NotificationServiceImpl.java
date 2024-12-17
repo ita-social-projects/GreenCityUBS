@@ -519,11 +519,14 @@ public class NotificationServiceImpl implements NotificationService {
             NotificationType.CREATE_NEW_ORDER);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyUnpaidOrderPermanently(Order order, Long amountToPay) {
         boolean isOrderPayed = order.getOrderPaymentStatus() == OrderPaymentStatus.PAID;
-        if (isOrderPayed) {
-            Double amount = amountToPay.doubleValue()  / PERCENTAGE_DIVISOR;
+        if (!isOrderPayed) {
+            Double amount = amountToPay.doubleValue() / PERCENTAGE_DIVISOR;
             Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amount);
             fillAndSendNotification(parameters, order, NotificationType.UNPAID_ORDER);
         }

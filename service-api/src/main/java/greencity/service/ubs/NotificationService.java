@@ -139,5 +139,14 @@ public interface NotificationService {
      */
     void notifyCreatedOrder(Order order);
 
+    /**
+     * Notify user that order has unpaid status when it was created and not paid.
+     * This method is used one time when user create new order.
+     *
+     * @param order       the order to send notification for
+     * @param amountToPay the sum to pay
+     *
+     * @author Vladyslav Haliara
+     */
     void notifyUnpaidOrderPermanently(Order order, Long amountToPay);
 }

@@ -499,6 +499,14 @@ public class UBSClientServiceImpl implements UBSClientService {
             return getPaymentRequestDto(order, "");
         }
     }
+
+    /**
+     * Asynchronously checks if the order is not paid and sends an email
+     * notification.
+     *
+     * @param order           the {@link Order} that is being checked
+     * @param sumToPayInCoins the sum to pay in coins for the order
+     */
     @Async
     public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, long sumToPayInCoins) {
         notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
