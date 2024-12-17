@@ -77,6 +77,7 @@ public class NotificationServiceImpl implements NotificationService {
     private static final String PAY_BUTTON = "payButton";
     private static final String CUSTOMER = "customerName";
     private static final String VIOLATION_DESCRIPTION = "violationDescription";
+    private static final double PERCENTAGE_DIVISOR = 100.0;
     @Autowired
     private final OrderBagService orderBagService;
 
@@ -516,6 +517,16 @@ public class NotificationServiceImpl implements NotificationService {
             getNotificationParametersForNewOrder(order),
             order,
             NotificationType.CREATE_NEW_ORDER);
+    }
+
+    @Override
+    public void notifyUnpaidOrderPermanently(Order order, Long amountToPay) {
+        boolean isOrderPayed = order.getOrderPaymentStatus() == OrderPaymentStatus.PAID;
+        if (isOrderPayed) {
+            Double amount = amountToPay.doubleValue()  / PERCENTAGE_DIVISOR;
+            Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amount);
+            fillAndSendNotification(parameters, order, NotificationType.UNPAID_ORDER);
+        }
     }
 
     private Set<NotificationParameter> getNotificationParametersForNewOrder(Order order) {

@@ -138,4 +138,6 @@ public interface NotificationService {
      * @param order the created order
      */
     void notifyCreatedOrder(Order order);
+
+    void notifyUnpaidOrderPermanently(Order order, Long amountToPay);
 }

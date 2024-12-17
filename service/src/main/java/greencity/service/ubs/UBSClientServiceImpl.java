@@ -126,6 +126,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
@@ -488,6 +489,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         notificationService.notifyCreatedOrder(order);
 
+        checkIfOrderIsNotPayedAndSendEmailAsync(order, sumToPayInCoins);
+
         if (dto.isShouldBePaid()) {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPayInCoins);
             String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckoutResponse(paymentRequestDto));
@@ -495,6 +498,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         } else {
             return getPaymentRequestDto(order, "");
         }
+    }
+    @Async
+    public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, long sumToPayInCoins) {
+        notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
     }
 
     private List<Integer> getBagIds(List<BagDto> dto) {
