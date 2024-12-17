@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 
 import static greencity.ModelUtils.*;
 import static greencity.enums.NotificationReceiverType.SITE;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,6 +88,12 @@ class NotificationServiceImplTest {
     ExecutorService mockExecutor = MoreExecutors.newDirectExecutorService();
     @Mock
     private OrderBagService orderBagService;
+
+    @Mock
+    private Order mockOrder;
+
+    @Mock
+    private UserNotification mockUserNotification;
 
     @Nested
     class ClockNotification {
@@ -270,6 +277,26 @@ class NotificationServiceImplTest {
 
             verify(userNotificationRepository).save(any());
             verify(notificationParameterRepository).saveAll(parameters);
+        }
+
+        @Test
+        void notifyUnpaidOrderPermanentlyTest() {
+            String orderUrl = getUnpaidOrderUrl();
+
+            Double amountToPay = 10000.0;
+            when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
+            when(mockUserNotification.getOrder()).thenReturn(mockOrder);
+            when(internalUrlConfigProp.getOrderUrl()).thenReturn(orderUrl);
+            when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(mockUserNotification);
+            when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
+                return new ArrayList<>(invocation.getArgument(0));
+            });
+
+            assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(mockUserNotification.getOrder(),
+                amountToPay.longValue()));
+
+            verify(userNotificationRepository).save(any(UserNotification.class));
+            verify(notificationParameterRepository).saveAll(any());
         }
 
         @Test

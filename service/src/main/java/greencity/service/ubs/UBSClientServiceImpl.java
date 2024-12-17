@@ -491,6 +491,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (dto.isShouldBePaid()) {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPayInCoins);
             String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckoutResponse(paymentRequestDto));
+            notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
             return getPaymentRequestDto(order, link);
         } else {
             return getPaymentRequestDto(order, "");

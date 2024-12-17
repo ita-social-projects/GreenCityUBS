@@ -128,9 +128,10 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
             + "JOIN tariffs_locations tl "
             + "ON ti.id = tl.tariffs_info_id "
             + "WHERE tl.location_id = :locationId "
-            + "AND ti.id = (SELECT DISTINCT b.tariffs_info_id "
+            + "AND ti.id IN (SELECT DISTINCT b.tariffs_info_id "
             + "FROM bag b "
             + "WHERE b.id IN :bagIds)")
+
     Optional<TariffsInfo> findTariffsInfoByBagIdAndLocationId(
         @Param("bagIds") List<Integer> bagIds, @Param("locationId") Long locationId);
 

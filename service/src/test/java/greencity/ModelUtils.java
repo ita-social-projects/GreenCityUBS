@@ -2815,6 +2815,54 @@ public class ModelUtils {
             .build();
     }
 
+    private static User createTestUser() {
+        return User.builder().id(1L).build();
+    }
+
+    private static Order createTestUnpaidOrder() {
+        return Order.builder().id(1L).user(createTestUser()).build();
+    }
+
+    public static String getUnpaidOrderUrl() {
+        Order order = createTestUnpaidOrder();
+        return "http://localhost:4200/#/ubs/order/" + order.getId();
+    }
+
+    public static Set<NotificationParameter> createNotificationParameterForUnpaidOrder() {
+        double amountToPay = 10000.0;
+        Order order = createTestUnpaidOrder();
+        String orderUrl = getUnpaidOrderUrl();
+        Set<NotificationParameter> notificationParameters = new HashSet<>();
+        notificationParameters.add(NotificationParameter.builder()
+            .key("orderNumber")
+            .value(order.getId().toString())
+            .build());
+
+        notificationParameters.add(NotificationParameter.builder()
+            .key("amountToPay")
+            .value(String.format("%.2f", amountToPay))
+            .build());
+
+        notificationParameters.add(NotificationParameter.builder()
+            .key("payButton")
+            .value(orderUrl)
+            .build());
+        return notificationParameters;
+    }
+
+    public static UserNotification getUserNotificationForUnpaidOrder() {
+        User user = createTestUser();
+        Order order = createTestUnpaidOrder();
+        return UserNotification.builder()
+            .id(1L)
+            .user(user)
+            .order(order)
+            .notificationType(NotificationType.UNPAID_ORDER)
+            .notificationTime(LocalDateTime.now())
+            .parameters(createNotificationParameterForUnpaidOrder())
+            .build();
+    }
+
     public static NotificationDto createViolationNotificationDto() {
         return NotificationDto.builder()
             .title("Title")
