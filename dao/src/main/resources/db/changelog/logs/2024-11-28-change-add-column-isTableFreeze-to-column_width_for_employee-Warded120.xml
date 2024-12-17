@@ -11,7 +11,7 @@
             </not>
         </preConditions>
         <addColumn tableName="column_width_for_employee">
-            <column name="is_table_freeze" type="boolean">
+            <column name="is_table_freeze" type="boolean" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
