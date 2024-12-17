@@ -194,7 +194,7 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.OK)
                 .body(ubsClientService.saveFullOrderToDB(dto, userUuid, id.get()));
         } else {
-                return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid, null));
+            return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid, null));
         }
     }
 

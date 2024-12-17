@@ -489,27 +489,14 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         notificationService.notifyCreatedOrder(order);
 
-        checkIfOrderIsNotPayedAndSendEmailAsync(order, sumToPayInCoins);
-
         if (dto.isShouldBePaid()) {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPayInCoins);
             String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckoutResponse(paymentRequestDto));
+            notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
             return getPaymentRequestDto(order, link);
         } else {
             return getPaymentRequestDto(order, "");
         }
-    }
-
-    /**
-     * Asynchronously checks if the order is not paid and sends an email
-     * notification.
-     *
-     * @param order           the {@link Order} that is being checked
-     * @param sumToPayInCoins the sum to pay in coins for the order
-     */
-    @Async
-    public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, long sumToPayInCoins) {
-        notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
     }
 
     private List<Integer> getBagIds(List<BagDto> dto) {
