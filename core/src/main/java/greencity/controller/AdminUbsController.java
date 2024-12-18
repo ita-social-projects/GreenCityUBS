@@ -8,6 +8,7 @@ import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.dto.violation.UserViolationsWithUserName;
 import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
@@ -269,5 +270,19 @@ public class AdminUbsController {
         @RequestParam boolean value) {
         bigOrderTableServiceView.changeIsFreezeStatus(uuid, value);
         return ResponseEntity.status(HttpStatus.OK).body(HttpStatus.OK);
+    }
+
+    @Operation(summary = "Add chat link to user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_CLIENTS_PAGE', authentication)")
+    @PatchMapping("/addChatLink")
+    public ResponseEntity<HttpStatus> addChatLink(@RequestBody @Valid ChatLinkDto chatLink) {
+        ordersAdminsPageService.addChatLinkToUser(chatLink);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

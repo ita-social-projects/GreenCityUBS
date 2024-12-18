@@ -82,4 +82,7 @@ public class User {
 
     @Column(name = "date_of_registration")
     private LocalDate dateOfRegistration;
+
+    @Column(name = "chat_link")
+    private String chatLink;
 }
