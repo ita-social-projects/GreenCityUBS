@@ -14,7 +14,8 @@ import jakarta.persistence.*;
 @NoArgsConstructor
 @Builder
 public class TableColumnWidthForEmployee {
-    private static final Integer DEFAULT_WIDTH = 120;
+    private static final Integer DEFAULT_WIDTH = 165;
+    private static final Integer DEFAULT_WIDTH_FOR_WASTE = 106;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,11 +27,11 @@ public class TableColumnWidthForEmployee {
     @Column
     private Integer amountDue = DEFAULT_WIDTH;
     @Column(name = "mixed_waste_120l")
-    private Integer mixedWaste120L = DEFAULT_WIDTH;
+    private Integer mixedWaste120L = DEFAULT_WIDTH_FOR_WASTE;
     @Column(name = "textile_waste_60l")
-    private Integer textileWaste60L = DEFAULT_WIDTH;
+    private Integer textileWaste60L = DEFAULT_WIDTH_FOR_WASTE;
     @Column(name = "textile_waste_20l")
-    private Integer textileWaste20L = DEFAULT_WIDTH;
+    private Integer textileWaste20L = DEFAULT_WIDTH_FOR_WASTE;
     @Column
     private Integer blockedBy = DEFAULT_WIDTH;
     @Column
