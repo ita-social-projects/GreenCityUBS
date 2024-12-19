@@ -19,6 +19,7 @@ import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentType;
+import greencity.enums.BonusReason;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.CertificateRepository;
@@ -186,7 +187,7 @@ public class PaymentServiceImpl implements PaymentService {
                 Long possibleBonusesRefundAmount =
                     Long.valueOf(order.getPointsToUse()) + PaymentUtil.calculatePaidAmount(order);
                 validateRefundAmount(refundDto.getAmount(), possibleBonusesRefundAmount);
-                refundPaymentsInBonus(order, employeeEmail, refundDto.getAmount());
+                refundPaymentsInBonus(order, employeeEmail, refundDto.getAmount(), BonusReason.RETURN_OVERPAY);
             } else if (refundDto.isReturnMoney()) {
                 validateRefundAmount(refundDto.getAmount(), PaymentUtil.calculatePaidAmount(order));
                 refundPaymentsInMoney(order, employeeEmail, refundDto.getAmount());
@@ -199,7 +200,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new BadRequestException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
         }
         if (refundDto.isReturnBonuses()) {
-            refundPaymentsInBonus(order, employeeEmail);
+            refundPaymentsInBonus(order, employeeEmail, BonusReason.REFUND_CANCELED_ORDER);
         } else if (refundDto.isReturnMoney()) {
             Long paidAmount = PaymentUtil.calculatePaidAmount(order);
             refundPaymentsInMoney(order, employeeEmail, paidAmount);
@@ -248,21 +249,21 @@ public class PaymentServiceImpl implements PaymentService {
         eventService.saveEvent(OrderHistory.CANCELED_ORDER_MONEY_REFUND, employeeEmail, order);
     }
 
-    private void refundPaymentsInBonus(Order order, String email) {
+    private void refundPaymentsInBonus(Order order, String email, BonusReason reason) {
         CounterOrderDetailsDto prices =
             PaymentUtil.getPriceDetails(order.getId(), orderRepository, orderBagService, certificateRepository);
         Long overpaymentInCoins =
             PaymentUtil.calculateOverpayment(order,
                 PaymentUtil.convertBillsIntoCoins(PaymentUtil.setTotalPrice(prices)));
-        refundPaymentsInBonus(order, email, overpaymentInCoins);
+        refundPaymentsInBonus(order, email, overpaymentInCoins, reason);
     }
 
-    private void refundPaymentsInBonus(Order order, String email, Long amount) {
+    private void refundPaymentsInBonus(Order order, String email, Long amount, BonusReason reason) {
         checkOverpayment(amount);
         User currentUser = order.getUser();
         order.getPayment().add(
             buildPaymentForRefund(-amount, ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG, order));
-        transferPointsToUser(order, currentUser, amount);
+        transferPointsToUser(order, currentUser, amount, reason);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
         orderRepository.save(order);
         userRepository.save(currentUser);
@@ -299,7 +300,7 @@ public class PaymentServiceImpl implements PaymentService {
             .build();
     }
 
-    private void transferPointsToUser(Order order, User user, long pointsInCoins) {
+    private void transferPointsToUser(Order order, User user, long pointsInCoins, BonusReason reason) {
         int uahPoints = PaymentUtil.convertCoinsIntoBills(pointsInCoins).intValue();
         user.setCurrentPoints(user.getCurrentPoints() + uahPoints);
 
@@ -310,6 +311,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .amount(uahPoints)
                 .date(LocalDateTime.now())
                 .order(order)
+                .reason(reason)
                 .build());
         notificationService.notifyBonuses(order, (long) uahPoints);
     }
