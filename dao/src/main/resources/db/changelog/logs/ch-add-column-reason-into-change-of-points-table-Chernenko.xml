@@ -6,9 +6,17 @@
 
     <changeSet id="2024-12-19-add-column-reason" author="Chernenko Vitaliy">
         <addColumn tableName="change_of_points">
-            <column name="reason" type="VARCHAR(50)">
+            <column name="reason" type="VARCHAR(50)" defaultValue="REFUND_CANCELED_ORDER">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+    </changeSet>
+
+    <changeSet id="2024-12-19-update-reason-values" author="Chernenko Vitaliy">
+        <sql>
+            UPDATE change_of_points
+            SET reason = 'REFUND_CANCELED_ORDER'
+            WHERE reason IS NULL;
+        </sql>
     </changeSet>
 </databaseChangeLog>
