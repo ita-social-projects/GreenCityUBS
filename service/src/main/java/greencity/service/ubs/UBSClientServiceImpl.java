@@ -457,7 +457,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         Integer userPoints) {
         var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
             .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
-            .collect(toList());
+            .sorted(Comparator.comparing(BagTranslationDto::getCapacity).reversed())
+            .toList();
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
     }
 

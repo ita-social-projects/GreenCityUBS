@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="update-column_width_for_employee" author="Kizerov Dmytro">
+        <sql>
+            update column_width_for_employee
+            set address = 165,
+                amount_due = 165,
+                blocked_by = 165,
+                city = 165,
+                client_email = 165,
+                client_name = 165,
+                client_phone = 165,
+                comment_for_order_by_client = 165,
+                comment_to_address_for_client = 165,
+                comments_for_order = 165,
+                date_of_export = 165,
+                district = 165,
+                general_discount = 165,
+                order_id = 165,
+                id_order_from_shop = 165,
+                order_certificate_code = 165,
+                order_date = 165,
+                order_payment_status = 165,
+                order_status = 165,
+                payment_date = 165,
+                receiving_status = 165,
+                region = 165,
+                responsible_caller = 165,
+                responsible_driver = 165,
+                responsible_logic_man = 165,
+                responsible_navigator = 165,
+                sender_email = 165,
+                sender_name = 165,
+                sender_phone = 165,
+                time_of_export = 165,
+                total_order_sum = 165,
+                total_payment = 165,
+                violations_amount = 165,
+                mixed_waste_120l = 106,
+                textile_waste_60l = 106,
+                textile_waste_20l = 106;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
