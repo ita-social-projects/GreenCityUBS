@@ -1,10 +1,9 @@
 package greencity.service.ubs;
 
+import greencity.ModelUtils;
 import greencity.dto.order.UserWithSomeOrderDetailDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.entity.user.employee.Employee;
 import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
@@ -12,8 +11,6 @@ import greencity.repository.EmployeeRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
 import jakarta.persistence.EntityNotFoundException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -46,12 +43,12 @@ class ValuesForUserTableServiceImplTest {
     private static final String TEST_EMAIL = "test@example.com";
 
     @Test
-    void getAllFieldsShouldReturnPageableDtoWhenDataIsValid() {
+    void getAllFieldsShouldReturnPageableDtoWhenDataIsValidTest() {
         Long employeeId = 1L;
         List<Long> tariffsInfoIds = List.of(2L, 3L);
         List<Long> userIds = List.of(4L, 5L, 4L, 5L);
-        User user1 = createTestUser(4L, "John", "Doe", "john.doe@example.com", "+380123456789");
-        User user2 = createTestUser(5L, "Jane", "Smith", "jane.smith@example.com", "+380987654321");
+        User user1 = ModelUtils.createTestUser(4L, "John", "Doe", "john.doe@example.com", "+380123456789");
+        User user2 = ModelUtils.createTestUser(5L, "Jane", "Smith", "jane.smith@example.com", "+380987654321");
         Page<User> mockPage = new PageImpl<>(List.of(user1, user2), PageRequest.of(0, 2), 2);
 
         CustomerPage page = new CustomerPage(0, 2);
@@ -60,7 +57,7 @@ class ValuesForUserTableServiceImplTest {
         UserFilterCriteria filterCriteria = new UserFilterCriteria();
 
         Mockito.when(employeeRepository.findByEmail(TEST_EMAIL))
-            .thenReturn(Optional.of(createTestEmployee(employeeId)));
+            .thenReturn(Optional.of(ModelUtils.createTestEmployee(employeeId)));
         Mockito.when(employeeRepository.findTariffsInfoForEmployee(employeeId))
             .thenReturn(tariffsInfoIds);
         Mockito.when(userRepository.getAllUsersByTariffsInfoId(Mockito.anyLong()))
@@ -89,7 +86,7 @@ class ValuesForUserTableServiceImplTest {
     }
 
     @Test
-    void getAllFieldsShouldThrowExceptionWhenEmployeeNotFound() {
+    void getAllFieldsShouldThrowExceptionWhenEmployeeNotFoundTest() {
         Mockito.when(employeeRepository.findByEmail(TEST_EMAIL))
             .thenReturn(Optional.empty());
 
@@ -104,32 +101,5 @@ class ValuesForUserTableServiceImplTest {
 
         Mockito.verify(employeeRepository).findByEmail(TEST_EMAIL);
         Mockito.verifyNoInteractions(userRepository, userTableRepo);
-    }
-
-    private User createTestUser(Long id, String firstName, String lastName, String email, String phone) {
-        User user = new User();
-        user.setId(id);
-        user.setRecipientName(firstName);
-        user.setRecipientSurname(lastName);
-        user.setRecipientEmail(email);
-        user.setRecipientPhone(phone);
-        user.setDateOfRegistration(LocalDate.now());
-        user.setOrders(List.of(createTestOrder()));
-        user.setCurrentPoints(100);
-        user.setViolations(1);
-        return user;
-    }
-
-    private Order createTestOrder() {
-        Order order = new Order();
-        order.setOrderDate(LocalDateTime.now().minusDays(1));
-        return order;
-    }
-
-    private Employee createTestEmployee(Long id) {
-        Employee employee = new Employee();
-        employee.setId(id);
-        employee.setEmail(TEST_EMAIL);
-        return employee;
     }
 }
