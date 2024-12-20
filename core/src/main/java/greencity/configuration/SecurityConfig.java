@@ -197,7 +197,8 @@ public class SecurityConfig {
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     SUPER_ADMIN_LINK + "/deactivateCourier/{id}",
-                    SUPER_ADMIN_LINK + "/switchTariffStatus/{tariffId}")
+                    SUPER_ADMIN_LINK + "/switchTariffStatus/{tariffId}",
+                    UBS_MANAG_LINK + "/addChatLink")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     UBS_MANAG_LINK + "/update-order-page-admin-info/{id}",

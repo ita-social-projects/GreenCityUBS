@@ -5675,4 +5675,31 @@ public class ModelUtils {
             .newValue("Test comment")
             .build();
     }
+
+    public static User createTestUser(Long id, String firstName, String lastName, String email, String phone) {
+        User user = new User();
+        user.setId(id);
+        user.setRecipientName(firstName);
+        user.setRecipientSurname(lastName);
+        user.setRecipientEmail(email);
+        user.setRecipientPhone(phone);
+        user.setDateOfRegistration(LocalDate.now());
+        user.setOrders(List.of(createTestOrder()));
+        user.setCurrentPoints(100);
+        user.setViolations(1);
+        return user;
+    }
+
+    public static Order createTestOrder() {
+        Order order = new Order();
+        order.setOrderDate(LocalDateTime.now().minusDays(1));
+        return order;
+    }
+
+    public static Employee createTestEmployee(Long id) {
+        Employee employee = new Employee();
+        employee.setId(id);
+        employee.setEmail("test@example.com");
+        return employee;
+    }
 }
