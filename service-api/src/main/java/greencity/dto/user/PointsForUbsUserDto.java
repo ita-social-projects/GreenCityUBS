@@ -16,9 +16,10 @@ import java.time.LocalDateTime;
 @ToString
 @Builder
 @EqualsAndHashCode
-
 public class PointsForUbsUserDto {
     private LocalDateTime dateOfEnrollment;
     private Long numberOfOrder;
     private Integer amount;
+    private String reasonUa;
+    private String reasonEn;
 }
