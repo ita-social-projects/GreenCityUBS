@@ -96,6 +96,7 @@ import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentType;
 import greencity.enums.TariffStatus;
+import greencity.enums.BonusReason;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
@@ -924,6 +925,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .date(order.getOrderDate())
                 .user(currentUser)
                 .order(order)
+                .reason(BonusReason.DEBIT_PAYMENT)
                 .build());
         }
         userRepository.save(currentUser);
