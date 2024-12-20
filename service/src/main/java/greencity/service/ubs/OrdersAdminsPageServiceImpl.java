@@ -14,6 +14,7 @@ import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnDTO;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
@@ -89,6 +90,7 @@ import static greencity.constant.ErrorMessage.ORDER_STATUS_INVALID;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static greencity.constant.OrderHistory.UBS_ADMIN;
 import static java.util.Objects.isNull;
@@ -445,6 +447,17 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return regionRepository.findAllRegionsWithCitiesAndDistricts().stream()
             .map(this::toRegionInfoDto)
             .toList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addChatLinkToUser(ChatLinkDto chatLinkDto) {
+        User user = userRepository.findById(chatLinkDto.userId())
+            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        user.setChatLink(chatLinkDto.link());
+        userRepository.save(user);
     }
 
     private RegionInfoDto toRegionInfoDto(Region region) {

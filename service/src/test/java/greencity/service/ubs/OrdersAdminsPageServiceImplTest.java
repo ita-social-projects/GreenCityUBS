@@ -9,6 +9,7 @@ import greencity.dto.location.api.RegionInfoDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.entity.order.Event;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.ubs.OrderAddress;
@@ -1354,5 +1355,16 @@ class OrdersAdminsPageServiceImplTest {
 
         verify(employeeRepository).findByEmail(anyString());
         verify(orderRepository).findById(anyLong());
+    }
+
+    @Test
+    void addChatLinkToUserTest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getUser()));
+
+        ordersAdminsPageService
+            .addChatLinkToUser(new ChatLinkDto(1L, "https://my.binotel.ua/f/chat/#/visitor/21269249.12893974"));
+
+        verify(userRepository).findById(anyLong());
+        verify(userRepository).save(any(User.class));
     }
 }
