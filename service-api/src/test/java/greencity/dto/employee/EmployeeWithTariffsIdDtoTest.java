@@ -2,17 +2,19 @@ package greencity.dto.employee;
 
 import greencity.ModelUtils;
 import greencity.dto.tariff.TariffWithChatAccess;
-import lombok.SneakyThrows;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import lombok.SneakyThrows;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EmployeeWithTariffsIdDtoTest {
@@ -74,31 +76,50 @@ class EmployeeWithTariffsIdDtoTest {
 
     private static Stream<Arguments> provideFieldsAndValidValues() {
         return Stream.of(
-            Arguments.of("FirstName", "LastName"),
-            Arguments.of("firstName", "lastName"),
+            Arguments.of("Олександр", "Петро"),
+            Arguments.of("Іван", "Єгор"),
             Arguments.of("Лук'ян", "Їгор"),
-            Arguments.of("Петро1", "ІЄгор1"),
-            Arguments.of("Лук'ян+", "Єгор+"),
-            Arguments.of("Лук'ян-", "Єгор-"),
-            Arguments.of("Лук'ян ", "Єгор "),
+            Arguments.of("Петро", "І Єгор"),
+            Arguments.of("Лук'ян+", "Єгор"),
+            Arguments.of("Лук'ян-", "Єгор"),
+            Arguments.of("Лук'ян ", "Єгор"),
             Arguments.of("Лук'ян.н", "Єгор.р"),
             Arguments.of("Петро", "Ґгор"),
-            Arguments.of("лук'ян", "їєґгор"));
+            Arguments.of("лук'ян", "їєґгор"),
+            Arguments.of("Олександра", "Петрівна"),
+            Arguments.of("Іванна", "Єгорівна"),
+            Arguments.of("Лук'яна", "Їгорівна"),
+            Arguments.of("Петра", "І Єгорівна"),
+            Arguments.of("Лук'яна+", "Єгорівна"),
+            Arguments.of("Лук'яна-", "Єгорівна"),
+            Arguments.of("Лук'яна ", "Єгорівна"),
+            Arguments.of("Ivan", "ABC.р"),
+            Arguments.of("Ivan", "Ivanov"),
+            Arguments.of("Ivan", "Doe"));
     }
 
     private static Stream<Arguments> provideFieldsAndInvalidValues() {
         return Stream.of(
-            Arguments.of("", "", ""),
-            Arguments.of(null, null, "mail.com"),
+            Arguments.of("ъван", "ъегор", "mail.com"),
+            Arguments.of("ыван", "ыегор", "mail.com"),
+            Arguments.of("ёван", "ёегор", "mail.com"),
+            Arguments.of("эван", "эегор", "mail.com"),
+            Arguments.of("ъванъ", "ъегоръ", "mail.com"),
+            Arguments.of("ываны", "ыегоры", "mail.com"),
+            Arguments.of("ёванё", "ёегорё", "mail.com"),
+            Arguments.of("эванэ", "эегорэ", "mail.com"),
+            Arguments.of("ъванъы", "ъегоръы", "mail.com"),
+            Arguments.of("ываныё", "ыегорыё", "mail.com"),
+            Arguments.of("ёванёэ", "ёегорёэ", "mail.com"),
+            Arguments.of("эванэъ", "эегорэъ", "mail.com"),
+            Arguments.of(null, null, "invalid_email"),
+            Arguments.of("Олексій--", "ъгорович", "mail@.com"),
+            Arguments.of("І.в.ан..", "!Іван", "mail.com@"),
+            Arguments.of("Іван--Івано", "..", "mail..com"),
+            Arguments.of("Коп''ютер", "@Петрович", "mail.com."),
+            Arguments.of("", "", "mail@com"),
+            Arguments.of("1234ван", "і!!", "mail@.com.au"),
             Arguments.of(null, null, null),
-            Arguments.of(" ", " ", ""),
-            Arguments.of(".", ".", "."),
-            Arguments.of("T.", "T.", "T."),
-            Arguments.of("T..", "T..", "T.."),
-            Arguments.of("T...", "T...", "T..."),
-            Arguments.of("T--", "T--", "T--"),
-            Arguments.of("T---", "T---", "T---"),
-            Arguments.of("''", "''", "''"),
-            Arguments.of("Ttttttttttttttttttttttttttttttt", "Ttttttttttttttttttttttttttttttt", "mail@"));
+            Arguments.of("iv!an", "Иван''", "mail@.au"));
     }
 }

@@ -1,6 +1,5 @@
 package greencity.mapping.tariff;
 
-import greencity.constant.AppConstant;
 import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
@@ -9,7 +8,9 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<TariffsInfo, GetTariffInfoForEmployeeDto> {
@@ -18,10 +19,10 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
         RegionDto regionDto = source.getTariffLocations().stream().map(
             tariffLocation -> RegionDto.builder()
                 .regionId(tariffLocation.getLocation().getRegion().getId())
-                .nameUk(tariffLocation.getLocation().getRegion().getNameUk())
-                .nameEn(tariffLocation.getLocation().getRegion().getNameEn())
+                .nameUk(tariffLocation.getLocation().getRegion().getUkrName())
+                .nameEn(tariffLocation.getLocation().getRegion().getEnName())
                 .build())
-            .findFirst().orElse(getDefaultRegionDto());
+            .collect(Collectors.toList()).get(0);
 
         List<LocationsDtos> locationsDtos = source.getTariffLocations().stream()
             .map(tariffLocation -> LocationsDtos.builder()
@@ -29,7 +30,7 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .nameUk(tariffLocation.getLocation().getNameUk())
                 .nameEn(tariffLocation.getLocation().getNameEn())
                 .build())
-            .toList();
+            .collect(Collectors.toList());
 
         List<GetReceivingStationDto> getReceivingStationDtos = source.getReceivingStationList()
             .stream()
@@ -37,7 +38,7 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .stationId(receivingStation.getId())
                 .name(receivingStation.getName())
                 .build())
-            .toList();
+            .collect(Collectors.toList());
 
         return GetTariffInfoForEmployeeDto.builder()
             .id(source.getId())
@@ -48,14 +49,6 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
                 .id(source.getCourier().getId())
                 .nameEn(source.getCourier().getNameEn())
                 .nameUk(source.getCourier().getNameUk()).build())
-            .build();
-    }
-
-    private RegionDto getDefaultRegionDto() {
-        return RegionDto.builder()
-            .nameEn(AppConstant.UNKNOWN_ENG)
-            .nameUk(AppConstant.UNKNOWN_UA)
-            .regionId(0L)
             .build();
     }
 }

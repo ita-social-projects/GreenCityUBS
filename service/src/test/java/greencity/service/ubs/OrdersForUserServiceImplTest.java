@@ -18,8 +18,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
 import java.util.List;
 import java.util.stream.Stream;
+
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,7 +42,7 @@ class OrdersForUserServiceImplTest {
         Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), column);
         when(ordersForUserRepository.getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L))
             .thenReturn(Page.empty());
-        when(userRepository.getReferenceById(anyLong())).thenReturn(ModelUtils.getUser());
+        when(userRepository.getOne(anyLong())).thenReturn(ModelUtils.getUser());
         ordersForUserService.getAllOrders(PageRequest.of(1, 1), 1L, sortingOrder, column);
 
         verify(ordersForUserRepository).getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L);
@@ -63,13 +65,13 @@ class OrdersForUserServiceImplTest {
 
         when(ordersForUserRepository.getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L))
             .thenReturn(page);
-        when(userRepository.getReferenceById(anyLong())).thenReturn(ModelUtils.getUser());
+        when(userRepository.getOne(anyLong())).thenReturn(ModelUtils.getUser());
 
         ordersForUserService.getAllOrders(PageRequest.of(1, 1),
             1L, SortingOrder.DESC, "payment_amount");
 
         verify(ordersForUserRepository).getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L);
-        verify(userRepository).getReferenceById(anyLong());
+        verify(userRepository).getOne(anyLong());
     }
 
     @Test
@@ -82,12 +84,12 @@ class OrdersForUserServiceImplTest {
 
         when(ordersForUserRepository.getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L))
             .thenReturn(page);
-        when(userRepository.getReferenceById(anyLong())).thenReturn(ModelUtils.getUser());
+        when(userRepository.getOne(anyLong())).thenReturn(ModelUtils.getUser());
 
         ordersForUserService.getAllOrders(PageRequest.of(1, 1),
             1L, SortingOrder.DESC, "payment_amount");
 
         verify(ordersForUserRepository).getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L);
-        verify(userRepository).getReferenceById(anyLong());
+        verify(userRepository).getOne(anyLong());
     }
 }

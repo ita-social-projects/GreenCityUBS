@@ -3,10 +3,12 @@ package greencity.annotations;
 import greencity.validators.LanguageValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import static greencity.constant.ValidationConstant.SELECT_CORRECT_LANGUAGE;
 
 @Constraint(validatedBy = LanguageValidator.class)
@@ -14,7 +16,7 @@ import static greencity.constant.ValidationConstant.SELECT_CORRECT_LANGUAGE;
 @Target(ElementType.PARAMETER)
 public @interface ValidLanguage {
     /**
-     * Defines the message that will be showed when the input data is not valid.
+     * Defines the message that will be shown when the input data is not valid.
      *
      * @return message
      */

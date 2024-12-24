@@ -4,6 +4,7 @@ import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 import java.util.Optional;
 
 @Repository
@@ -20,7 +21,6 @@ public interface ViberBotRepository extends JpaRepository<ViberBot, Long> {
      *
      * @param user {@link User}.
      * @return {@link Optional} {@link ViberBot}.
-     *
      * @author Julia Seti
      */
     Optional<ViberBot> findByUser(User user);

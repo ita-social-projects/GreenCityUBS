@@ -4,13 +4,12 @@ import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.enums.LocationStatus;
 import greencity.enums.TariffStatus;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 import jakarta.persistence.EntityManager;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 @Repository
-@RequiredArgsConstructor
 public class DeactivateChosenEntityRepository {
     private final EntityManager entityManager;
     private static final String REGION_ID = "regionId";
@@ -19,6 +18,13 @@ public class DeactivateChosenEntityRepository {
     private static final String COURIER_ID = "courierId";
     private static final String STATIONS_ID = "stationsId";
     private static final String TARIFFS_ID = "tariffsId";
+
+    /**
+     * Constructor to initialize EntityManager.
+     */
+    public DeactivateChosenEntityRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     /**
      * Method that deactivate tariffs and cities for list of regions id.

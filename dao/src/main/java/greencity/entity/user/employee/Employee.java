@@ -1,32 +1,15 @@
 package greencity.entity.user.employee;
 
-import greencity.entity.TariffsInfoRecievingEmployee;
+import greencity.entity.TariffsInfoReceivingEmployee;
+import greencity.entity.order.Order;
 import greencity.entity.order.Service;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.enums.EmployeeStatus;
-import greencity.entity.order.Order;
-import greencity.entity.order.TariffsInfo;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.Cascade;
+
 import java.util.List;
 import java.util.Set;
 
@@ -36,8 +19,8 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = {"employeePosition", "employeeOrderPositions", "orders", "tariffs",
-    "createdServices", "editedServices"})
+@EqualsAndHashCode(exclude = {"employeePosition", "employeeOrderPositions", "orders", "tariffs", "createdServices",
+    "editedServices"})
 @Table(name = "employees")
 public class Employee {
     @Id
@@ -74,7 +57,7 @@ public class Employee {
     private Set<Position> employeePosition;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TariffsInfoRecievingEmployee> tariffsInfoReceivingEmployees;
+    private List<TariffsInfoReceivingEmployee> tariffsInfoReceivingEmployees;
 
     @OneToMany(mappedBy = "creator")
     private List<TariffsInfo> tariffs;

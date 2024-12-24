@@ -1,20 +1,11 @@
 package greencity.entity.user.ubs;
 
 import greencity.entity.coords.Coordinates;
-import greencity.entity.user.Region;
 import greencity.entity.user.User;
-import greencity.entity.user.locations.City;
-import greencity.entity.user.locations.District;
 import greencity.enums.AddressStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
@@ -85,16 +76,4 @@ public class Address {
 
     @Column(nullable = false)
     private String districtEn;
-
-    @ManyToOne
-    @JoinColumn(name = "region_id")
-    private Region regionId;
-
-    @ManyToOne
-    @JoinColumn(name = "city_id")
-    private City cityId;
-
-    @ManyToOne
-    @JoinColumn(name = "district_id")
-    private District districtId;
 }

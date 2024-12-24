@@ -2,8 +2,10 @@ package greencity.filters;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+
 import java.util.Arrays;
 import java.util.List;
+
 import static java.util.Collections.emptyList;
 
 @Converter

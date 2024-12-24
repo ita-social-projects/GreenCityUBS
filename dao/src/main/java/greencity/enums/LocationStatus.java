@@ -1,5 +1,6 @@
 package greencity.enums;
 
 public enum LocationStatus {
-    ACTIVE, DEACTIVATED
+    ACTIVE,
+    DEACTIVATED
 }

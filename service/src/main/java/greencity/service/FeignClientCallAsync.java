@@ -5,6 +5,7 @@ import greencity.dto.user.UserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 

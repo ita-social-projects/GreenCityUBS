@@ -1,12 +1,7 @@
 package greencity.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+
 import java.util.List;
 
 @Getter
@@ -20,5 +15,5 @@ public class AllActiveLocationsDto {
     private Long regionId;
     private String nameUk;
     private String nameEn;
-    private List<LocationWithTariffInfoDto> locations;
+    private List<LocationsDtos> locations;
 }

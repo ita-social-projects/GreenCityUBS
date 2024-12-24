@@ -1,7 +1,7 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
@@ -10,13 +10,14 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.courier.AddingReceivingStationDto;
+import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.LocationCreateDto;
-import greencity.dto.service.ServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -31,6 +32,7 @@ import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import lombok.SneakyThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,15 +48,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
+
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
@@ -88,7 +90,9 @@ class SuperAdminControllerTest {
     @InjectMocks
     SuperAdminController superAdminController;
 
-    private static final String ubsLink = "/ubs/superAdmin";
+    private static final ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
+
+    private static final String UBS_SUPER_ADMIN_LINK = "/ubs/superAdmin";
 
     private final Principal principal = getUuid();
 
@@ -109,13 +113,13 @@ class SuperAdminControllerTest {
     void createTariffServiceTest() throws Exception {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto responseDto = ModelUtils.getGetTariffServiceDto();
-        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestDtoJSON = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         when(superAdminService.addTariffService(1L, dto, uuid)).thenReturn(responseDto);
 
-        mockMvc.perform(post(ubsLink + "/{tariffId}/createTariffService", 1L)
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/{tariffId}/createTariffService", 1L)
             .principal(principal)
             .param("uuid", uuid)
             .param("tariffId", "1")
@@ -131,14 +135,14 @@ class SuperAdminControllerTest {
     @Test
     void createTariffServiceNotFoundException() throws Exception {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
-        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestDtoJSON = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         when(superAdminService.addTariffService(anyLong(), any(TariffServiceDto.class), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND));
 
-        mockMvc.perform(post(ubsLink + "/{tariffId}/createTariffService", 1L)
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/{tariffId}/createTariffService", 1L)
             .principal(principal)
             .param("uuid", uuid)
             .param("tariffId", "1")
@@ -156,7 +160,7 @@ class SuperAdminControllerTest {
 
     @Test
     void getTariffService() throws Exception {
-        mockMvc.perform(get(ubsLink + "/{tariffId}/getTariffService", 1L)
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/{tariffId}/getTariffService", 1L)
             .principal(principal)
             .param("tariffId", "1L"))
             .andExpect(status().isOk())
@@ -171,7 +175,7 @@ class SuperAdminControllerTest {
         when(superAdminService.getTariffService(1L))
             .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND));
 
-        mockMvc.perform(get(ubsLink + "/{tariffId}/getTariffService", 1L)
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/{tariffId}/getTariffService", 1L)
             .principal(principal)
             .param("tariffId", "1L"))
             .andExpect(status().isNotFound())
@@ -185,7 +189,7 @@ class SuperAdminControllerTest {
 
     @Test
     void deleteTariffService() throws Exception {
-        mockMvc.perform(delete(ubsLink + "/deleteTariffService/" + 1L))
+        mockMvc.perform(delete(UBS_SUPER_ADMIN_LINK + "/deleteTariffService/" + 1L))
             .andExpect(status().isOk());
         verify(superAdminService).deleteTariffService(1);
         verifyNoMoreInteractions(superAdminService);
@@ -196,7 +200,7 @@ class SuperAdminControllerTest {
         doThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND))
             .when(superAdminService).deleteTariffService(1);
 
-        mockMvc.perform(delete(ubsLink + "/deleteTariffService/" + 1L))
+        mockMvc.perform(delete(UBS_SUPER_ADMIN_LINK + "/deleteTariffService/" + 1L))
             .andExpect(status().isNotFound())
             .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
@@ -210,13 +214,13 @@ class SuperAdminControllerTest {
     void editTariffService() throws Exception {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto responseDto = ModelUtils.getGetTariffServiceDto();
-        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestDtoJSON = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         when(superAdminService.editTariffService(dto, 1, uuid)).thenReturn(responseDto);
 
-        mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/editTariffService/" + 1L)
             .content(requestDtoJSON)
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal)
@@ -232,14 +236,14 @@ class SuperAdminControllerTest {
     @Test
     void editTariffServiceNotFoundException() throws Exception {
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
-        String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestDtoJSON = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         when(superAdminService.editTariffService(dto, 1, uuid))
             .thenThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
 
-        mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/editTariffService/" + 1L)
             .content(requestDtoJSON)
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal)
@@ -257,12 +261,12 @@ class SuperAdminControllerTest {
     @Test
     void createService() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
 
-        mockMvc.perform(post(ubsLink + "/{tariffId}/createService", 1L)
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/{tariffId}/createService", 1L)
             .principal(principal)
             .param("uuid", uuid)
             .param("tariffId", "1")
@@ -277,14 +281,14 @@ class SuperAdminControllerTest {
     @Test
     void createServiceIfServiceAlreadyExistsException() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         when(superAdminService.addService(anyLong(), any(ServiceDto.class), anyString()))
             .thenThrow(new ServiceAlreadyExistsException(ErrorMessage.SERVICE_ALREADY_EXISTS));
 
-        mockMvc.perform(post(ubsLink + "/{tariffId}/createService", 1L)
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/{tariffId}/createService", 1L)
             .principal(principal)
             .param("uuid", uuid)
             .param("tariffId", "1")
@@ -303,14 +307,14 @@ class SuperAdminControllerTest {
     @Test
     void createServiceIfEmployeeNotFoundException() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         when(superAdminService.addService(anyLong(), any(ServiceDto.class), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND));
 
-        mockMvc.perform(post(ubsLink + "/{tariffId}/createService", 1L)
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/{tariffId}/createService", 1L)
             .principal(principal)
             .param("uuid", uuid)
             .param("tariffId", "1")
@@ -329,14 +333,14 @@ class SuperAdminControllerTest {
     @Test
     void createServiceIfTariffNotFoundException() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         when(superAdminService.addService(anyLong(), any(ServiceDto.class), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND));
 
-        mockMvc.perform(post(ubsLink + "/{tariffId}/createService", 1L)
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/{tariffId}/createService", 1L)
             .principal(principal)
             .param("uuid", uuid)
             .param("tariffId", "1")
@@ -358,7 +362,7 @@ class SuperAdminControllerTest {
 
         when(superAdminService.getService(1L)).thenReturn(dto);
 
-        mockMvc.perform(get(ubsLink + "/{tariffId}/getService", 1L)
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/{tariffId}/getService", 1L)
             .principal(principal)
             .param("tariffId", "1L"))
             .andExpect(status().isOk())
@@ -372,7 +376,7 @@ class SuperAdminControllerTest {
     void getServiceIfServiceNotExists() throws Exception {
         when(superAdminService.getService(1L)).thenReturn(null);
 
-        mockMvc.perform(get(ubsLink + "/{tariffId}/getService", 1L)
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/{tariffId}/getService", 1L)
             .principal(principal)
             .param("tariffId", "1L"))
             .andExpect(status().isOk())
@@ -388,7 +392,7 @@ class SuperAdminControllerTest {
         when(superAdminService.getService(tariffId))
             .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
 
-        mockMvc.perform(get(ubsLink + "/{tariffId}/getService", tariffId)
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/{tariffId}/getService", tariffId)
             .principal(principal)
             .param("tariffId", "1L"))
             .andExpect(status().isNotFound())
@@ -403,13 +407,12 @@ class SuperAdminControllerTest {
     @Test
     void editService() throws Exception {
         GetServiceDto dto = ModelUtils.getGetServiceDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
 
-        mockMvc.perform(put(ubsLink + "/editService/{id}", 1L)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/editService/{id}", 1L)
             .principal(principal)
             .param("uuid", uuid)
             .param("id", "1")
@@ -424,7 +427,7 @@ class SuperAdminControllerTest {
     @Test
     void editServiceIfServiceNotFoundException() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
         long id = 1L;
 
@@ -432,7 +435,7 @@ class SuperAdminControllerTest {
         when(superAdminService.editService(anyLong(), any(ServiceDto.class), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
 
-        mockMvc.perform(put(ubsLink + "/editService/{id}", id)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/editService/{id}", id)
             .principal(principal)
             .param("uuid", uuid)
             .param("id", "1")
@@ -451,14 +454,14 @@ class SuperAdminControllerTest {
     @Test
     void editServiceIfEmployeeNotFoundException() throws Exception {
         ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         when(superAdminService.editService(anyLong(), any(ServiceDto.class), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND));
 
-        mockMvc.perform(put(ubsLink + "/editService/{id}", 1L)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/editService/{id}", 1L)
             .principal(principal)
             .param("uuid", uuid)
             .param("id", "1")
@@ -476,7 +479,7 @@ class SuperAdminControllerTest {
 
     @Test
     void deleteService() throws Exception {
-        mockMvc.perform(delete(ubsLink + "/deleteService/" + 1L)
+        mockMvc.perform(delete(UBS_SUPER_ADMIN_LINK + "/deleteService/" + 1L)
             .principal(principal)
             .param("id", "1L"))
             .andExpect(status().isOk());
@@ -491,7 +494,7 @@ class SuperAdminControllerTest {
         doThrow(new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id))
             .when(superAdminService).deleteService(id);
 
-        mockMvc.perform(delete(ubsLink + "/deleteService/" + 1L)
+        mockMvc.perform(delete(UBS_SUPER_ADMIN_LINK + "/deleteService/" + 1L)
             .principal(principal)
             .param("id", "1L"))
             .andExpect(status().isNotFound())
@@ -505,7 +508,7 @@ class SuperAdminControllerTest {
 
     @Test
     void getLocations() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getLocations")).andExpect(status().isOk());
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/getLocations")).andExpect(status().isOk());
 
         verify(superAdminService).getAllLocation();
         verifyNoMoreInteractions(superAdminService);
@@ -513,7 +516,7 @@ class SuperAdminControllerTest {
 
     @Test
     void getActiveLocations() throws Exception {
-        mockMvc.perform(get((ubsLink + "/getActiveLocations"))).andExpect(status().isOk());
+        mockMvc.perform(get((UBS_SUPER_ADMIN_LINK + "/getActiveLocations"))).andExpect(status().isOk());
 
         verify(superAdminService).getLocationsByStatus(LocationStatus.ACTIVE);
         verifyNoMoreInteractions(superAdminService);
@@ -527,7 +530,7 @@ class SuperAdminControllerTest {
             .when(superAdminService)
             .getLocationsByStatus(LocationStatus.ACTIVE);
 
-        mockMvc.perform(get(ubsLink + "/getActiveLocations")
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/getActiveLocations")
             .principal(principal))
             .andExpect(status().isNotFound())
             .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
@@ -540,7 +543,8 @@ class SuperAdminControllerTest {
 
     @Test
     void getDeactivatedLocationsTest() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getDeactivatedLocations").principal(principal)).andExpect(status().isOk());
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/getDeactivatedLocations").principal(principal))
+            .andExpect(status().isOk());
 
         verify(superAdminService).getLocationsByStatus(LocationStatus.DEACTIVATED);
         verifyNoMoreInteractions(superAdminService);
@@ -554,7 +558,7 @@ class SuperAdminControllerTest {
             .when(superAdminService)
             .getLocationsByStatus(LocationStatus.DEACTIVATED);
 
-        mockMvc.perform(get(ubsLink + "/getDeactivatedLocations")
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/getDeactivatedLocations")
             .principal(principal))
             .andExpect(status().isNotFound())
             .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()))
@@ -567,16 +571,15 @@ class SuperAdminControllerTest {
 
     @Test
     void getAllCouriers() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getCouriers")).andExpect(status().isOk());
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/getCouriers")).andExpect(status().isOk());
     }
 
     @Test
     void addLocation() throws Exception {
         List<LocationCreateDto> dto = ModelUtils.getLocationCreateDtoList();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestJson = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(post(ubsLink + "/addLocations").principal(principal)
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/addLocations").principal(principal)
             .content(requestJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
@@ -584,18 +587,18 @@ class SuperAdminControllerTest {
 
     @Test
     void deleteLocationTest() throws Exception {
-        mockMvc.perform(delete(ubsLink + "/deleteLocation/" + 1L).principal(principal)).andExpect(status().isOk());
+        mockMvc.perform(delete(UBS_SUPER_ADMIN_LINK + "/deleteLocation/" + 1L).principal(principal))
+            .andExpect(status().isOk());
     }
 
     @Test
     void addLocationInterceptLocationAlreadyCreatedException() throws Exception {
         List<LocationCreateDto> dto = ModelUtils.getLocationCreateDtoList();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestJson = objectMapper.writeValueAsString(dto);
 
         Mockito.doThrow(BadRequestException.class).when(superAdminService).addLocation(dto);
 
-        mockMvc.perform(post(ubsLink + "/addLocations").principal(principal)
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/addLocations").principal(principal)
             .content(requestJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
@@ -603,16 +606,15 @@ class SuperAdminControllerTest {
 
     @Test
     void activateException() throws Exception {
-        mockMvc.perform(patch(ubsLink + "/activeLocations/" + 1L)).andExpect(status().isOk());
+        mockMvc.perform(patch(UBS_SUPER_ADMIN_LINK + "/activeLocations/" + 1L)).andExpect(status().isOk());
     }
 
     @Test
     void createCourierTest() throws Exception {
         CreateCourierDto dto = ModelUtils.getCreateCourierDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(post(ubsLink + "/createCourier")
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/createCourier")
             .principal(principal)
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
@@ -622,7 +624,6 @@ class SuperAdminControllerTest {
     @Test
     void createCourierIfCourierAlreadyExistsException() throws Exception {
         CreateCourierDto dto = ModelUtils.getCreateCourierDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
@@ -630,14 +631,14 @@ class SuperAdminControllerTest {
         Mockito.when(superAdminService.createCourier(dto, uuid))
             .thenThrow(new CourierAlreadyExists(ErrorMessage.COURIER_ALREADY_EXISTS));
 
-        mockMvc.perform(post(ubsLink + "/createCourier")
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/createCourier")
             .principal(principal)
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
             .andExpect(result -> assertInstanceOf(CourierAlreadyExists.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.COURIER_ALREADY_EXISTS,
-                result.getResolvedException().getMessage()));
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
         Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
         Mockito.verify(superAdminService).createCourier(dto, uuid);
@@ -647,7 +648,6 @@ class SuperAdminControllerTest {
     @Test
     void addNewTariffIfTariffAlreadyExistsException() throws Exception {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
@@ -655,14 +655,14 @@ class SuperAdminControllerTest {
         Mockito.when(superAdminService.addNewTariff(dto, uuid))
             .thenThrow(new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS));
 
-        mockMvc.perform(post(ubsLink + "/add-new-tariff")
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/add-new-tariff")
             .principal(principal)
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isConflict())
             .andExpect(result -> assertInstanceOf(TariffAlreadyExistsException.class, result.getResolvedException()))
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_IS_ALREADY_EXISTS,
-                result.getResolvedException().getMessage()));
+                Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
         Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
         Mockito.verify(superAdminService).addNewTariff(dto, uuid);
@@ -672,9 +672,8 @@ class SuperAdminControllerTest {
     @Test
     void createReceivingStation() throws Exception {
         AddingReceivingStationDto dto = AddingReceivingStationDto.builder().name("Qqq-qqq").build();
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
-        mockMvc.perform(post(ubsLink + "/create-receiving-station")
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/create-receiving-station")
             .principal(principal)
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
@@ -684,10 +683,9 @@ class SuperAdminControllerTest {
     @Test
     void updateReceivingStation() throws Exception {
         ReceivingStationDto dto = getReceivingStationDto();
-        ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(put(ubsLink + "/update-receiving-station")
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/update-receiving-station")
             .principal(principal)
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
@@ -699,16 +697,19 @@ class SuperAdminControllerTest {
     @Test
     @SneakyThrows
     void updateCourierTest() {
+        List<CourierTranslationDto> dtoList = List.of(CourierTranslationDto.builder()
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build());
         CourierUpdateDto dto = CourierUpdateDto.builder()
             .courierId(1L)
             .nameEn("Test")
             .nameEn("Тест")
             .build();
 
-        ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(put(ubsLink + "/update-courier")
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/update-courier")
             .principal(principal)
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
@@ -719,14 +720,14 @@ class SuperAdminControllerTest {
 
     @Test
     void getAllReceivingStation() throws Exception {
-        mockMvc.perform(get(ubsLink + "/get-all-receiving-station")
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/get-all-receiving-station")
             .principal(principal)).andExpect(status().isOk());
         verify(superAdminService, times(1)).getAllReceivingStations();
     }
 
     @Test
     void deleteReceivingStation() throws Exception {
-        mockMvc.perform(delete(ubsLink + "/delete-receiving-station" + "/1").principal(principal))
+        mockMvc.perform(delete(UBS_SUPER_ADMIN_LINK + "/delete-receiving-station" + "/1").principal(principal))
             .andExpect(status().isOk());
         verify(superAdminService, times(1)).deleteReceivingStation(1L);
     }
@@ -735,14 +736,12 @@ class SuperAdminControllerTest {
     void getAllTariffsInfoTest() throws Exception {
         GetTariffsInfoDto getTariffsInfoDto = ModelUtils.getAllTariffsInfoDto();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
         String result = objectMapper.writeValueAsString(getTariffsInfoDto);
 
         Mockito.when(superAdminService.getAllTariffsInfo(TariffsInfoFilterCriteria.builder().build()))
             .thenReturn(List.of(getTariffsInfoDto));
 
-        mockMvc.perform(get(ubsLink + "/tariffs")
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/tariffs")
             .content(result)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -752,8 +751,7 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void addNewTariffTest() {
         var dto = ModelUtils.getAddNewTariffDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        mockMvc.perform(post(ubsLink + "/add-new-tariff")
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/add-new-tariff")
             .content(objectMapper.writeValueAsString(dto))
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal))
@@ -764,9 +762,9 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void editTariffTest() {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
-        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        String requestDto = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(put(ubsLink + "/editTariffInfo/{id}", 1L)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/editTariffInfo/{id}", 1L)
             .content(requestDto)
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal)
@@ -780,11 +778,11 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void editTariffThrowBadRequestException() {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
-        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        String requestDto = objectMapper.writeValueAsString(dto);
         doThrow(new BadRequestException(ErrorMessage.LOCATIONS_BELONG_TO_DIFFERENT_REGIONS))
             .when(superAdminService).editTariff(1L, dto);
 
-        mockMvc.perform(put(ubsLink + "/editTariffInfo/{id}", 1L)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/editTariffInfo/{id}", 1L)
             .content(requestDto)
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal)
@@ -800,11 +798,11 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void editTariffThrowNotFoundException() {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
-        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        String requestDto = objectMapper.writeValueAsString(dto);
         doThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND))
             .when(superAdminService).editTariff(1L, dto);
 
-        mockMvc.perform(put(ubsLink + "/editTariffInfo/{id}", 1L)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/editTariffInfo/{id}", 1L)
             .content(requestDto)
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal)
@@ -820,11 +818,11 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void editTariffThrowTariffAlreadyExistsException() {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
-        String requestDto = new ObjectMapper().writeValueAsString(dto);
+        String requestDto = objectMapper.writeValueAsString(dto);
         doThrow(new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS))
             .when(superAdminService).editTariff(1L, dto);
 
-        mockMvc.perform(put(ubsLink + "/editTariffInfo/{id}", 1L)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/editTariffInfo/{id}", 1L)
             .content(requestDto)
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal)
@@ -839,8 +837,7 @@ class SuperAdminControllerTest {
     @Test
     void checkIfTariffExistsTest() throws Exception {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        mockMvc.perform(post(ubsLink + "/check-if-tariff-exists")
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/check-if-tariff-exists")
             .content(objectMapper.writeValueAsString(dto))
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal))
@@ -851,8 +848,8 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void setLimitsForTariffTest() {
         SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();
-        String requestJSON = new ObjectMapper().writeValueAsString(dto);
-        mockMvc.perform(put(ubsLink + "/setTariffLimits/{tariffId}", 1L)
+        String requestJSON = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}", 1L)
             .principal(principal)
             .content(requestJSON)
             .param("tariffId", "1")
@@ -866,12 +863,12 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void setLimitsForTariffThrowBadRequestException() {
         SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();
-        String requestJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestJSON = objectMapper.writeValueAsString(dto);
 
         doThrow(new BadRequestException(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY))
             .when(superAdminService).setTariffLimits(anyLong(), any(SetTariffLimitsDto.class));
 
-        mockMvc.perform(put(ubsLink + "/setTariffLimits/{tariffId}", 1L)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}", 1L)
             .principal(principal)
             .content(requestJSON)
             .param("tariffId", "1")
@@ -888,12 +885,12 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void setLimitsForTariffThrowNotFoundException() {
         SetTariffLimitsDto dto = ModelUtils.setTariffLimitsWithAmountOfBags();
-        String requestJSON = new ObjectMapper().writeValueAsString(dto);
+        String requestJSON = objectMapper.writeValueAsString(dto);
 
         doThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L))
             .when(superAdminService).setTariffLimits(anyLong(), any(SetTariffLimitsDto.class));
 
-        mockMvc.perform(put(ubsLink + "/setTariffLimits/{tariffId}", 1L)
+        mockMvc.perform(put(UBS_SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}", 1L)
             .principal(principal)
             .content(requestJSON)
             .param("tariffId", "1")
@@ -909,7 +906,7 @@ class SuperAdminControllerTest {
     @Test
     @SneakyThrows
     void getTariffLimitsTest() {
-        mockMvc.perform(get(ubsLink + "/getTariffLimits/{tariffId}", 1L)
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/getTariffLimits/{tariffId}", 1L)
             .principal(principal)
             .param("tariffId", "1L"))
             .andExpect(status().isOk())
@@ -923,7 +920,7 @@ class SuperAdminControllerTest {
     void getTariffLimitsThrowNotFoundException() {
         when(superAdminService.getTariffLimits(1L))
             .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L));
-        mockMvc.perform(get(ubsLink + "/getTariffLimits/{tariffId}", 1L)
+        mockMvc.perform(get(UBS_SUPER_ADMIN_LINK + "/getTariffLimits/{tariffId}", 1L)
             .principal(principal)
             .param("tariffId", "1"))
             .andExpect(status().isNotFound())
@@ -937,7 +934,7 @@ class SuperAdminControllerTest {
     @Test
     @SneakyThrows
     void switchTariffStatus() {
-        mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
+        mockMvc.perform(patch(UBS_SUPER_ADMIN_LINK + "/switchTariffStatus/{tariffId}", 1L)
             .principal(principal)
             .param("tariffId", "1L")
             .param("status", "Active"))
@@ -952,7 +949,7 @@ class SuperAdminControllerTest {
         doThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + 1L))
             .when(superAdminService).switchTariffStatus(1L, "Active");
 
-        mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
+        mockMvc.perform(patch(UBS_SUPER_ADMIN_LINK + "/switchTariffStatus/{tariffId}", 1L)
             .principal(principal)
             .param("tariffId", "1L")
             .param("status", "Active")
@@ -971,7 +968,7 @@ class SuperAdminControllerTest {
         doThrow(new BadRequestException(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_BAGS))
             .when(superAdminService).switchTariffStatus(1L, "Active");
 
-        mockMvc.perform(patch(ubsLink + "/switchTariffStatus/{tariffId}", 1L)
+        mockMvc.perform(patch(UBS_SUPER_ADMIN_LINK + "/switchTariffStatus/{tariffId}", 1L)
             .principal(principal)
             .param("tariffId", "1L")
             .param("status", "Active"))
@@ -985,7 +982,7 @@ class SuperAdminControllerTest {
 
     @Test
     void switchActivationStatusByChosenParamsBadRequest() throws Exception {
-        mockMvc.perform(post(ubsLink + "/deactivate"))
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/deactivate"))
             .andExpect(status().isBadRequest());
     }
 
@@ -1003,7 +1000,7 @@ class SuperAdminControllerTest {
             .activationStatus("Deactivated")
             .build();
 
-        mockMvc.perform(post(ubsLink + "/deactivate")
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/deactivate")
             .param("regionsIds", "1")
             .param("status", "Deactivated")).andExpect(status().isOk());
         verify(superAdminService).switchActivationStatusByChosenParams(details);
@@ -1023,7 +1020,7 @@ class SuperAdminControllerTest {
             .activationStatus("Active")
             .build();
 
-        mockMvc.perform(post(ubsLink + "/deactivate")
+        mockMvc.perform(post(UBS_SUPER_ADMIN_LINK + "/deactivate")
             .param("regionsIds", "1")
             .param("status", "Active")).andExpect(status().isOk());
         verify(superAdminService).switchActivationStatusByChosenParams(details);
@@ -1031,7 +1028,7 @@ class SuperAdminControllerTest {
 
     @Test
     void deactivateCourier() throws Exception {
-        mockMvc.perform(patch(ubsLink + "/deactivateCourier/{id}", 1L)).andExpect(status().isOk());
+        mockMvc.perform(patch(UBS_SUPER_ADMIN_LINK + "/deactivateCourier/{id}", 1L)).andExpect(status().isOk());
         verify(superAdminService).deactivateCourier(1L);
     }
 }

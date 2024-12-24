@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +31,7 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      * @param id the ID of the order
      * @return a list of order bags matching the bag ID
      */
-    @Query(value = "SELECT OBM.* FROM ORDER_BAG_MAPPING as OBM "
+    @Query(value = "SELECT   * FROM ORDER_BAG_MAPPING as OBM "
         + "where OBM.BAG_ID = :bagId", nativeQuery = true)
     List<OrderBag> findOrderBagsByBagId(@Param("bagId") Integer id);
 
@@ -40,7 +41,7 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      * @param id the ID of the order
      * @return a list of order bags matching the order ID
      */
-    @Query(value = "SELECT OBM.* FROM ORDER_BAG_MAPPING as OBM "
+    @Query(value = "SELECT   * FROM ORDER_BAG_MAPPING as OBM "
         + "where OBM.ORDER_ID = :orderId", nativeQuery = true)
     List<OrderBag> findOrderBagsByOrderId(@Param("orderId") Long id);
 
@@ -63,6 +64,15 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
     void updateAllByBagIdForUnpaidOrders(Integer bagId, Integer capacity, Long price, String name, String nameEng);
 
     /**
+     * method returns all OrderBags by bag id.
+     *
+     * @param bagId {@link Integer} bag id
+     * @return {@link List} of {@link OrderBag}
+     * @author Oksana Spodaryk
+     */
+    List<OrderBag> findAllByBagId(Integer bagId);
+
+    /**
      * Method returns OrderBags quantity by bag id and order id. It prioritizes the
      * following quantities in descending order: 1. Exported Quantity: If all
      * OrderBags have the 'exportedQuantity' attribute set, the method will return
@@ -73,33 +83,13 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
      *
      * @param bagId   {@link Integer} bag id
      * @param orderId {@link Long} order id
-     *
      * @return {@link Optional} of {@link Integer} returns actual bags' amount
      * @author Olena Sotnik
      */
-    @Query(value = "SELECT COALESCE(obm.exported_quantity, obm.confirmed_quantity, obm.amount) "
+    @Query(value = "SELECT COALESCE(MAX(obm.exported_quantity), MAX(obm.confirmed_quantity), MAX(obm.amount), 0) "
         + "FROM order_bag_mapping AS obm "
         + "WHERE obm.order_id = :orderId "
         + "AND obm.bag_id = :bagId", nativeQuery = true)
     Optional<Integer> getAmountOfOrderBagsByOrderIdAndBagId(@Param("orderId") Long orderId,
         @Param("bagId") Integer bagId);
-
-    /**
-     * Deletes all order bags associated with the given order ID from the
-     * ORDER_BAG_MAPPING table.
-     *
-     * @param orderId The ID of the order for which all associated order bags should
-     *                be deleted.
-     */
-    @Modifying
-    void deleteAllByOrderId(Long orderId);
-
-    /**
-     * Finds all order bags associated with the given order ID.
-     *
-     * @param orderId The ID of the order for which all associated order bags should
-     *                be returned.
-     * @return A list of order bags associated with the given order ID.
-     */
-    List<OrderBag> findAllByOrderId(Long orderId);
 }

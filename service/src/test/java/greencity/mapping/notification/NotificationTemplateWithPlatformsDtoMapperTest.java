@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -16,11 +17,11 @@ class NotificationTemplateWithPlatformsDtoMapperTest {
     @Test
     void convert() {
         var notification = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
-        var platform = notification.getNotificationPlatforms().getFirst();
+        var platform = notification.getNotificationPlatforms().get(0);
 
         var dto = notificationTemplateWithPlatformsDtoMapper.convert(notification);
         var mainInfoDto = dto.getNotificationTemplateMainInfoDto();
-        var platformDto = dto.getPlatforms().getFirst();
+        var platformDto = dto.getPlatforms().get(0);
 
         assertEquals(notification.getNotificationType(), mainInfoDto.getType());
         assertEquals(notification.getTrigger(), mainInfoDto.getTrigger());
@@ -33,8 +34,6 @@ class NotificationTemplateWithPlatformsDtoMapperTest {
         assertEquals(notification.getTitle(), mainInfoDto.getTitle());
         assertEquals(notification.getTitleEng(), mainInfoDto.getTitleEng());
         assertEquals(notification.getNotificationStatus(), mainInfoDto.getNotificationStatus());
-        assertEquals(notification.getUserCategory().getDescription(), mainInfoDto.getUserCategoryDescription());
-        assertEquals(notification.getUserCategory().getDescriptionEng(), mainInfoDto.getUserCategoryDescriptionEng());
 
         assertEquals(platform.getId(), platformDto.getId());
         assertEquals(platform.getNotificationReceiverType(), platformDto.getReceiverType());

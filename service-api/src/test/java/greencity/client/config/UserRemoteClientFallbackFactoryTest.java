@@ -1,18 +1,19 @@
 package greencity.client.config;
 
 import greencity.client.UserRemoteClient;
-import greencity.dto.notification.ScheduledEmailMessage;
-import greencity.dto.user.DeactivateUserRequestDto;
-import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeePositionsDto;
+import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.notification.NotificationDto;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -54,10 +55,7 @@ class UserRemoteClientFallbackFactoryTest {
 
     @Test
     void markUserDeactivated() {
-        DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
-            .reason("test")
-            .build();
-        assertThrows(RemoteServerUnavailableException.class, () -> client.markUserDeactivated(USER_UUID, request));
+        assertThrows(RemoteServerUnavailableException.class, () -> client.markUserDeactivated(USER_UUID));
     }
 
     @Test
@@ -67,19 +65,20 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
+    void getPositionsOfLoginEmployee() {
+        assertThrows(RemoteServerUnavailableException.class,
+            () -> client.getEmployeeLoginPositionNames(USER_EMAIL));
+    }
+
+    @Test
     void getPasswordStatus() {
         assertThrows(RemoteServerUnavailableException.class, () -> client.getPasswordStatus());
     }
 
     @Test
-    void sendScheduledEmailNotification() {
-        ScheduledEmailMessage dto = ScheduledEmailMessage.builder().email(USER_EMAIL).build();
-        assertDoesNotThrow(() -> client.sendScheduledEmailNotification(dto));
-    }
-
-    @Test
-    void findUserLanguageByUuid() {
-        assertDoesNotThrow(() -> client.findUserLanguageByUuid(USER_UUID));
+    void sendEmailNotification() {
+        NotificationDto dto = NotificationDto.builder().build();
+        assertDoesNotThrow(() -> client.sendEmailNotification(dto, USER_EMAIL));
     }
 
     @Test
@@ -95,6 +94,12 @@ class UserRemoteClientFallbackFactoryTest {
 
     @Test
     void signUpEmployee() {
+        EmployeeSignUpDto dto = EmployeeSignUpDto.builder().build();
+        assertThrows(RemoteServerUnavailableException.class, () -> client.signUpEmployee(dto));
+    }
+
+    @Test
+    void signUpEmployeeError() {
         EmployeeSignUpDto dto = EmployeeSignUpDto.builder().build();
         assertThrows(RemoteServerUnavailableException.class, () -> client.signUpEmployee(dto));
     }

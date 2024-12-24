@@ -1,15 +1,15 @@
 package greencity.repository;
 
-import greencity.enums.OrderPaymentStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.enums.OrderStatus;
+import greencity.enums.OrderPaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +23,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @return list of {@link Order}.
      */
     @Query("select o from Address a "
-        + "inner join UBSuser u "
+        + "inner join UBSUser u "
         + "on a.id = u.orderAddress.id "
         + "inner join Order o "
         + "on o.ubsUser.id = u.id "
@@ -38,7 +38,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      *
      * @return list of {@link Order}.
      */
-    @Query("select o from Address a inner join UBSuser u on a.id = u.orderAddress.id "
+    @Query("select o from Address a inner join UBSUser u on a.id = u.orderAddress.id "
         + "inner join Order o on u = o.ubsUser "
         + "where o.orderStatus = 'PAID' and a.coordinates is not null")
     List<Order> undeliveredAddresses();
@@ -48,7 +48,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      *
      * @return list of {@link Order}.
      */
-    @Query(value = "SELECT O.* FROM ORDERS O "
+    @Query(value = "SELECT * FROM ORDERS O "
         + "JOIN ORDER_BAG_MAPPING OBM "
         + "ON O.ID = OBM.ORDER_ID "
         + "WHERE O.ID = :OrderId "
@@ -60,16 +60,67 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      *
      * @return a {@link List} of {@link Order}
      */
-    @Query(nativeQuery = true, value = "SELECT orders.* FROM orders "
+    @Query(nativeQuery = true, value = "SELECT * FROM orders "
         + "INNER JOIN ubs_user ON orders.ubs_user_id = ubs_user.id "
         + "INNER JOIN users ON ubs_user.users_id = users.id "
         + "WHERE users.uuid = :uuid")
     List<Order> getAllOrdersOfUser(@Param(value = "uuid") String uuid);
 
     /**
-     * Method that returns all orders by its {@link OrderPaymentStatus}.
+     * Method that returns all orders by it's {@link OrderPaymentStatus}.
      */
     List<Order> findAllByOrderPaymentStatus(OrderPaymentStatus orderPaymentStatus);
+
+    /**
+     * Method changes order_status for all not blocked orders.
+     *
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET ORDER_STATUS = :order_status WHERE employee_id = :employee_id",
+        nativeQuery = true)
+    void changeStatusForAllOrders(@Param("order_status") String status, @Param("employee_id") Long employeeId);
+
+    /**
+     * Method changes date_of_export for all not blocked orders.
+     *
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET DATE_OF_EXPORT = :date_of_export WHERE employee_id = :employee_id",
+        nativeQuery = true)
+    void changeDateOfExportForAllOrders(@Param("date_of_export") LocalDate date, @Param("employee_id") Long employeeId);
+
+    /**
+     * Method changes deliver_from for all not blocked orders.
+     *
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET DELIVER_FROM = :deliver_from WHERE employee_id = :employee_id",
+        nativeQuery = true)
+    void changeDeliverFromForAllOrders(@Param("deliver_from") LocalDateTime time,
+        @Param("employee_id") Long employeeId);
+
+    /**
+     * Method changes deliver_to for all not blocked orders.
+     *
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET DELIVER_TO = :deliver_to WHERE employee_id = :employee_id", nativeQuery = true)
+    void changeDeliverToForAllOrders(@Param("deliver_to") LocalDateTime time, @Param("employee_id") Long employeeId);
+
+    /**
+     * Method changes receiving_station for all not blocked orders.
+     *
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET RECEIVING_STATION_ID = :receiving_station WHERE employee_id = :employee_id",
+        nativeQuery = true)
+    void changeReceivingStationForAllOrders(@Param("receiving_station") Long stationId,
+        @Param("employee_id") Long employeeId);
 
     /**
      * Method sets employee_id and makes blocked_status 'true' for all not blocked
@@ -78,11 +129,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(
-        value = "UPDATE ORDERS SET EMPLOYEE_ID = :employee_id,"
-            + "BLOCKED = TRUE, BLOCKED_AT = :blocked_at WHERE BLOCKED = FALSE",
+    @Query(value = "UPDATE ORDERS SET EMPLOYEE_ID = :employee_id, BLOCKED = TRUE WHERE BLOCKED = FALSE",
         nativeQuery = true)
-    void setBlockedEmployeeForAllOrders(@Param("employee_id") Long id, @Param("blocked_at") LocalDateTime blockedAt);
+    void setBlockedEmployeeForAllOrders(@Param("employee_id") Long id);
 
     /**
      * Method unblocks all orders. Needs some improvement.
@@ -90,11 +139,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(
-        value = "UPDATE ORDERS SET BLOCKED = FALSE, EMPLOYEE_ID = NULL,"
-            + "BLOCKED_AT = NULL WHERE employee_id = :employee_id",
+    @Query(value = "UPDATE ORDERS SET BLOCKED = FALSE, EMPLOYEE_ID = NULL WHERE employee_id = :employee_id",
         nativeQuery = true)
     void unblockAllOrders(@Param("employee_id") Long employeeId);
+
+    /**
+     * Method gets user order by order id.
+     *
+     * @author Max Boiarchuk
+     */
+    Optional<Order> findUserById(@Param(value = "orderId") Long orderId);
 
     /**
      * Method for getting last order of user by user's uuid if such order exists.
@@ -104,7 +158,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Yurii Fedorko
      */
     @Query(nativeQuery = true,
-        value = "SELECT o.* FROM orders o "
+        value = "SELECT * FROM orders o "
             + "INNER JOIN users u ON o.users_id = u.id "
             + "WHERE u.uuid = :user_uuid "
             + "ORDER BY o.order_date DESC "
@@ -145,6 +199,41 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     void updateOrderPointsToUse(Long orderId, int pointsToUse);
 
     /**
+     * Method sets order cancellation comment by order's id.
+     *
+     * @param orderId             - order's ID
+     * @param cancellationComment - order cancellation comment to set
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+        value = "UPDATE orders SET cancellation_comment = :cancellationComment WHERE id = :orderId")
+    void updateCancelingComment(Long orderId, String cancellationComment);
+
+    /**
+     * Method sets admin comment for order by order id.
+     *
+     * @param orderId      - order's ID
+     * @param adminComment - admin comment to set
+     */
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE Order o SET o.adminComment =:adminComment WHERE o.id =:orderId")
+    void updateAdminComment(Long orderId, String adminComment);
+
+    /**
+     * Method sets order cancellation reason by order's id.
+     *
+     * @param orderId            - order's ID
+     * @param cancellationReason - order cancellation reason to set
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+        value = "UPDATE orders SET cancellation_reason = :cancellationReason WHERE id = :orderId")
+    void updateCancelingReason(Long orderId, String cancellationReason);
+
+    /**
      * Method update orders status from actual status to expected status by specific
      * date.
      *
@@ -166,90 +255,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * method returns all unpaid orders that contain a bag with id.
      */
-    @Query(value = "select o from Order o "
-        + "join fetch OrderBag obm on o.id = obm.order.id "
-        + "join fetch Bag b on obm.bag.id = b.id "
-        + "where obm.bag.id = :bagId and o.orderPaymentStatus = 'UNPAID'")
+    @Query(nativeQuery = true,
+        value = "select * from orders o "
+            + "left join order_bag_mapping obm on o.id = obm.order_id "
+            + "where obm.bag_id = :bagId and o.order_payment_status = 'UNPAID'")
     List<Order> findAllUnpaidOrdersByBagId(Integer bagId);
-
-    /**
-     * method returns all unpaid orders that contain a bag with id.
-     */
-    @Query(value = "select o from Order o "
-        + "join fetch o.ubsUser "
-        + "join fetch OrderBag obm on o.id = obm.order.id "
-        + "where obm.bag.id = :bagId and o.orderPaymentStatus = 'UNPAID'")
-    List<Order> findAllUnpaidOrdersWithUsersByBagId(Integer bagId);
 
     /**
      * method returns all orders that contain a bag with id.
      */
     @Query(nativeQuery = true,
-        value = "select o.* from orders o "
+        value = "select * from orders o "
             + "left join order_bag_mapping obm on o.id = obm.order_id "
             + "where obm.bag_id = :bagId")
     List<Order> findAllByBagId(Integer bagId);
-
-    /**
-     * Method retrieves orders by order status and order payment status.
-     *
-     * @param orderStatus   - status of the order.
-     * @param paymentStatus - payment status of the order.
-     */
-    List<Order> findAllByOrderStatusAndOrderPaymentStatus(OrderStatus orderStatus, OrderPaymentStatus paymentStatus);
-
-    /**
-     * Method retrieves orders by order status join events.
-     *
-     * @param orderStatus - status of the order.
-     */
-    @Query("select o from Order o "
-        + "left join fetch o.events e WHERE o.orderStatus = :orderStatus")
-    List<Order> findAllByOrderStatusWithEvents(@Param("orderStatus") OrderStatus orderStatus);
-
-    /**
-     * Method retrieves orders by event names join events.
-     *
-     * @param eventNames - names of events which are related to the order.
-     */
-    @Query("select o from Order o "
-        + "inner join fetch o.events e WHERE e.eventName IN (:eventNames)")
-    List<Order> findAllWithEventsByEventNames(@Param("eventNames") String... eventNames);
-
-    /**
-     * Method retrieves orders by order payment status join events.
-     *
-     * @param orderStatus - payment status of the orders.
-     */
-    @Query("select o from Order o "
-        + "left join fetch o.events e WHERE o.orderPaymentStatus = :orderStatus")
-    List<Order> findAllByOrderPaymentStatusWithEvents(@Param("orderStatus") OrderPaymentStatus orderStatus);
-
-    /**
-     * Method retrieves orders by order payment statuses and order statuses join
-     * events.
-     *
-     * @param paymentStatuses - list of payment statues of the order.
-     * @param orderStatuses   - list of order statues.
-     */
-    @Query("select o from Order o "
-        + "inner join fetch o.events e "
-        + "WHERE o.orderStatus in (:orderStatuses) AND o.orderPaymentStatus in (:paymentStatuses)")
-    List<Order> findAllByPaymentStatusesAndOrderStatuses(
-        @Param("paymentStatuses") List<OrderPaymentStatus> paymentStatuses,
-        @Param("orderStatuses") List<OrderStatus> orderStatuses);
-
-    /**
-     * Method to unblock orders that have been blocked for more than 5 minutes.
-     *
-     * @param expirationTime the cutoff time for unblocking orders.
-     */
-    @Modifying
-    @Transactional
-    @Query("UPDATE Order o SET o.blocked = false, o.blockedByEmployee = NULL,"
-        + "o.blockedAt = NULL WHERE o.blockedAt < :expirationTime")
-    void unlockExpiredOrders(@Param("expirationTime") LocalDateTime expirationTime);
-
-    List<Order> findAllByOrderStatusNotAndOrderPaymentStatus(OrderStatus orderStatus,
-        OrderPaymentStatus orderPaymentStatus);
 }

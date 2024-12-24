@@ -1,12 +1,13 @@
 package greencity.mapping.employee;
 
 import greencity.dto.employee.AddEmployeeDto;
-import greencity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
+import greencity.enums.EmployeeStatus;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
+
 import java.util.stream.Collectors;
 
 /**

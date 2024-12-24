@@ -5,7 +5,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.user.ubs.UBSUser;
 import greencity.enums.CancellationReason;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -18,7 +18,6 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,17 +25,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
-import lombok.AccessLevel;
+import org.hibernate.annotations.Cascade;
 import org.springframework.util.CollectionUtils;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -52,26 +52,27 @@ import java.util.Set;
 @Builder
 @Table(name = "orders")
 @EqualsAndHashCode(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
-    "changeOfPointsList", "blockedByEmployee", "certificates", "payment",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 @ToString(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
-    "changeOfPointsList", "blockedByEmployee", "certificates", "payment",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order")
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private List<UserNotification> userNotifications;
 
     @ManyToOne
     @JoinColumn(name = "users_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "ubs_user_id")
-    private UBSuser ubsUser;
+    private UBSUser ubsUser;
 
     @Column(name = "order_date")
     private LocalDateTime orderDate;
@@ -81,12 +82,9 @@ public class Order {
 
     private boolean blocked;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee blockedByEmployee;
-
-    @Column(name = "blocked_at", columnDefinition = "TIMESTAMP")
-    private LocalDateTime blockedAt;
 
     @ElementCollection
     @CollectionTable(name = "order_bag_mapping",
@@ -120,7 +118,8 @@ public class Order {
     @Column(name = "points_to_use", columnDefinition = "int default 0")
     private Integer pointsToUse;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order")
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<Certificate> certificates;
 
     @Column(nullable = false, name = "order_status", length = 15)
@@ -131,7 +130,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderPaymentStatus orderPaymentStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "receiving_station_id")
     private ReceivingStation receivingStation;
 
@@ -150,10 +149,12 @@ public class Order {
     @Column(name = "additional_order")
     private Set<String> additionalOrders;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @OneToMany(mappedBy = "order")
     private List<Payment> payment;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order")
+    @Cascade(org.hibernate.annotations.CascadeType.MERGE)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
@@ -172,7 +173,7 @@ public class Order {
     @Column(name = "counter_order_payment_id")
     private Long counterOrderPaymentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private TariffsInfo tariffsInfo;
 
     @Column(name = "sum_total_amount_without_discounts")
@@ -186,13 +187,11 @@ public class Order {
 
     @OneToMany(
         mappedBy = "order",
-        cascade = CascadeType.ALL)
+        cascade = CascadeType.ALL,
+        orphanRemoval = true)
     @Setter(AccessLevel.PRIVATE)
     @Builder.Default
     private List<OrderBag> orderBags = new ArrayList<>();
-
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    private Refund refund;
 
     /**
      * Updates the list of order bags associated with this order. This method

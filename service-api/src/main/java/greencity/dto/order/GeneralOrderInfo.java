@@ -2,13 +2,8 @@ package greencity.dto.order;
 
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,5 +26,4 @@ public class GeneralOrderInfo {
     private String orderPaymentStatusName;
     private String orderPaymentStatusNameEng;
     private String adminComment;
-    private boolean blocked;
 }

@@ -17,7 +17,7 @@ public class ViberController {
     private final ViberService viberService;
 
     /**
-     * The method sets the URL of the Viberr bot to which Viber requests will be
+     * The method sets the URL of the Viber bot to which Viber requests will be
      * sent.
      *
      * @return {@link String} - which contains the status of success or failure.
@@ -38,7 +38,7 @@ public class ViberController {
     }
 
     /**
-     * The method receives all requestss from Viberr.
+     * The method receives all requests from Viber.
      *
      * @param callbackDto - contains all the necessary data.
      */

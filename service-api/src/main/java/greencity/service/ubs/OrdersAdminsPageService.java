@@ -1,27 +1,19 @@
 package greencity.service.ubs;
 
-import greencity.dto.location.api.RegionInfoDto;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
-import greencity.dto.user.ChatLinkDto;
 import greencity.entity.user.employee.Employee;
+
 import java.util.List;
 
 public interface OrdersAdminsPageService {
     /**
-     * Retrieves parameters needed to build a table for displaying orders on the
-     * admin's page. This method provides a {@link TableParamsDto} that contains the
-     * necessary parameters for constructing the orders table. It takes into account
-     * the administrator's UUID.
+     * Method that return parameters for building table on admin's page.
      *
-     * @param userId the UUID of the administrator, which identifies the admin user.
-     *               This value should be a valid UUID string.
-     * @return a {@link TableParamsDto} object containing the parameters required
-     *         for building the orders table. The returned object will be populated
-     *         based on the provided userId.
+     * @param userId of {@link String} administrator's uuId;
      * @author Liubomyr Pater
      */
     TableParamsDto getParametersForOrdersTable(String userId);
@@ -122,27 +114,4 @@ public interface OrdersAdminsPageService {
      * @author Oleh Kulbaba
      */
     void saveColumnWidthForEmployee(ColumnWidthDto columnWidthDto, String userUuid);
-
-    /**
-     * Retrieves a list of {@link RegionInfoDto} objects containing information
-     * about all regions, including their cities and districts. This method fetches
-     * all regions along with their associated cities and districts from the
-     * repository. Each region is mapped to a {@link RegionInfoDto}, which includes
-     * the region's details and a list of {@link CityInfoDto} objects for its
-     * cities. Each city includes details and a list of {@link DistrictInfoDto}
-     * objects for its districts. The result is cached to improve performance on
-     * subsequent requests.
-     *
-     * @return a {@link List} of {@link RegionInfoDto} objects representing all
-     *         regions, cities, and districts in the system
-     */
-    List<RegionInfoDto> getAllLocationsInfo();
-
-    /**
-     * Adds a chat link to a user.
-     *
-     * @param chatLinkDto the chat link to add
-     * @author Kizerov Dmytro
-     */
-    void addChatLinkToUser(ChatLinkDto chatLinkDto);
 }

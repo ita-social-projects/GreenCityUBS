@@ -1,6 +1,7 @@
 package greencity.enums;
 
 import org.junit.jupiter.api.Test;
+
 import java.util.EnumSet;
 import java.util.Set;
 

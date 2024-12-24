@@ -12,5 +12,6 @@ import org.springframework.context.annotation.Configuration;
 public class RedirectionConfigProp {
     private String userServerAddress;
     private String greenCityClient;
-    private String resultWayForPayUrl;
+    private String resultUrlFondy;
+    private String resultUrlFondyPersonalCabinet;
 }

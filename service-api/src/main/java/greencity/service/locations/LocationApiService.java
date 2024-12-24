@@ -4,8 +4,9 @@ import greencity.dto.location.api.LocationDto;
 import greencity.exceptions.NotFoundException;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
+
 import java.net.URI;
-import java.util.List;
+import java.util.*;
 
 @Service
 @EnableCaching

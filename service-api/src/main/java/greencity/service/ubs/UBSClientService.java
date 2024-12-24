@@ -2,20 +2,6 @@ package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDto;
-import greencity.dto.TariffInfoByLocationDto;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.order.PaymentSystemResponse;
-import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
@@ -25,8 +11,20 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.MakeOrderAgainDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.PaymentWayForPayRequestDto;
+import greencity.dto.payment.FondyPaymentResponse;
+import greencity.dto.payment.PaymentRequestDto;
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
@@ -38,13 +36,15 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.user.User;
-import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.OrderStatus;
+import greencity.exceptions.payment.PaymentLinkException;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
+
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import org.springframework.transaction.annotation.Transactional;
 
 public interface UBSClientService {
     /**
@@ -92,7 +92,7 @@ public interface UBSClientService {
      * @return {@link CertificateDto} which contains status.
      * @author Oleh Bilonizhka
      */
-    CertificateDto checkCertificate(String code, String userUuid);
+    CertificateDto checkCertificate(String code);
 
     /**
      * Methods saves all entered by user data to database.
@@ -100,11 +100,20 @@ public interface UBSClientService {
      * @param dto     {@link OrderResponseDto} user entered data;
      * @param uuid    current {@link User}'s uuid;
      * @param orderId {@link Long} order id;
-     * @return {@link PaymentWayForPayRequestDto} which contains data to pay order
-     *         out.
+     * @return {@link PaymentRequestDto} which contains data to pay order out.
      * @author Oleh Bilonizhka
      */
-    PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
+    FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
+
+    /**
+     * Method get status of order from db by id.
+     *
+     * @param orderId {@link Long} order id;
+     * @param uuid    current {@link User}'s uuid;
+     * @return - payment status
+     * @author Vadym Makitra
+     */
+    FondyPaymentResponse getPaymentResponseFromFondy(Long orderId, String uuid);
 
     /**
      * Methods return list of all user addresses.
@@ -149,6 +158,16 @@ public interface UBSClientService {
     OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid);
 
     /**
+     * Method creates the same order again if order's status is ON_THE_ROUTE,
+     * CONFIRMED or DONE.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link MakeOrderAgainDto} that contains client's order;
+     * @author Danylko Mykola
+     */
+    MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId);
+
+    /**
      * Method that returns info about all orders for specified userID.
      *
      * @param uuid current {@link User}'s uuid;
@@ -190,7 +209,7 @@ public interface UBSClientService {
      * @return {@link UbsCustomersDto};
      * @author Rusanovscaia Nadejda
      */
-    UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String userUuid);
+    UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String email);
 
     /**
      * Method creates ubs user profile if it does not exist.
@@ -235,12 +254,11 @@ public interface UBSClientService {
     /**
      * Method that mark user as DEACTIVATED.
      *
-     * @param uuid    {@link String} current user uuid.
-     * @param request {@link DeactivateUserRequestDto} information for deactivation.
+     * @param id {@link Long}
      *
      * @author Liubomyr Bratakh
      */
-    void markUserAsDeactivated(String uuid, DeactivateUserRequestDto request);
+    void markUserAsDeactivated(Long id);
 
     /**
      * Method returns cancellation reason and comment.
@@ -272,6 +290,21 @@ public interface UBSClientService {
      * @author Max Boyarchuk
      */
     void deleteOrder(String uuid, Long id);
+
+    /**
+     * Method return link with Fondy payment .
+     *
+     * @param dto - current OrderFondyClientDto dto.
+     * @author Max Boiarchuk
+     */
+    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws PaymentLinkException;
+
+    /**
+     * Method validates received payment client response.
+     *
+     * @param dto {@link PaymentResponseDto} - response order data.
+     */
+    void validatePaymentClient(PaymentResponseDto dto);
 
     /**
      * Methods returns current user's bonus points.
@@ -309,10 +342,10 @@ public interface UBSClientService {
      *
      * @param courierId  - id of courier
      * @param locationId - id of location
-     * @return {@link TariffInfoByLocationDto}
+     * @return {@link OrderCourierPopUpDto}
      * @author Anton Bondar
      */
-    TariffInfoByLocationDto getTariffInfoForLocation(Long courierId, Long locationId);
+    OrderCourierPopUpDto getTariffInfoForLocation(Long courierId, Long locationId);
 
     /**
      * Method for getting info about tariff by order's id.
@@ -341,6 +374,15 @@ public interface UBSClientService {
     PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email);
 
     /**
+     * Method that gets information about login employee`s positions.
+     *
+     * @param email {@link String} - employee email.
+     * @return List of {@link String} - list of employee`s positions.
+     * @author Anton Bondar
+     */
+    List<String> getEmployeeLoginPositionNames(String email);
+
+    /**
      * Method updates Authority for {@link User}.
      *
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
@@ -365,17 +407,7 @@ public interface UBSClientService {
      *
      * @return {@link DistrictDto}
      */
-
     List<DistrictDto> getAllDistricts(String region, String city);
-
-    /**
-     * Method to generate payment link.
-     *
-     * @param userUuid current {@link User} uuid.
-     * @param dto      order information.
-     * @return {@link PaymentSystemResponse} payment link and order id.
-     */
-    PaymentSystemResponse processOrder(String userUuid, OrderWayForPayClientDto dto);
 
     /**
      * Checks if a tariff exists by its ID.
@@ -398,7 +430,7 @@ public interface UBSClientService {
      * @param locationId The ID of the location for which to retrieve the tariff ID.
      * @return The tariff ID associated with the specified location ID.
      */
-    List<Long> getTariffIdByLocationId(Long locationId);
+    Long getTariffIdByLocationId(Long locationId);
 
     /**
      * Retrieves all active locations by courier id.
@@ -408,30 +440,4 @@ public interface UBSClientService {
      * @return List of all locations.
      */
     List<LocationsDto> getAllLocationsByCourierId(Long courierId);
-
-    /**
-     * Validates the payment response received from MonoBank. This method checks the
-     * integrity and validity of the payment details contained in the response to
-     * ensure it meets the required criteria for processing.
-     *
-     * @param response the response object received from MonoBank containing payment
-     *                 details such as transaction ID, status, and amount.
-     */
-    void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response);
-
-    /**
-     * Method updates order address fields.
-     *
-     * @param orderAddressDtoUpdate the DTO that contains required data for address
-     *                              update.
-     * @return {@link OrderAddress} updated order's address.
-     */
-    OrderAddress updateOrderAddress(OrderAddressExportDetailsDtoUpdate orderAddressDtoUpdate);
-
-    /**
-     * Retrieves all districts in Kyiv.
-     *
-     * @return List of all districts in Kyiv.
-     */
-    List<DistrictDto> getAllDistrictsForKyiv();
 }

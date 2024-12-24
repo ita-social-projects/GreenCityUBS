@@ -28,14 +28,18 @@ import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
+import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
+import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
+import greencity.entity.order.Refund;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -49,11 +53,9 @@ import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.BagRepository;
-import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
-import greencity.repository.EventRepository;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
@@ -69,12 +71,12 @@ import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -90,6 +92,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -120,8 +124,8 @@ import static greencity.ModelUtils.TEST_ORDER_DETAILS_INFO_DTO_LIST;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
 import static greencity.ModelUtils.TEST_USER;
 import static greencity.ModelUtils.UPDATE_ORDER_PAGE_ADMIN_DTO;
+import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getAdminCommentDto;
-import static greencity.ModelUtils.getAdminEmployee;
 import static greencity.ModelUtils.getBagInfoDto;
 import static greencity.ModelUtils.getBaglist;
 import static greencity.ModelUtils.getCertificateList;
@@ -131,10 +135,10 @@ import static greencity.ModelUtils.getExportDetailsRequest;
 import static greencity.ModelUtils.getExportDetailsRequestToday;
 import static greencity.ModelUtils.getFormedOrder;
 import static greencity.ModelUtils.getInfoPayment;
-import static greencity.ModelUtils.getLocation;
+import static greencity.ModelUtils.getManualPayment;
+import static greencity.ModelUtils.getManualPaymentRequestDto;
 import static greencity.ModelUtils.getOrder;
 import static greencity.ModelUtils.getOrderAddress;
-import static greencity.ModelUtils.getOrderBag;
 import static greencity.ModelUtils.getOrderDoneByUser;
 import static greencity.ModelUtils.getOrderExportDetails;
 import static greencity.ModelUtils.getOrderExportDetailsWithDeliverFromTo;
@@ -148,19 +152,19 @@ import static greencity.ModelUtils.getOrderStatusPaymentTranslations;
 import static greencity.ModelUtils.getOrderStatusTranslation;
 import static greencity.ModelUtils.getOrderStatusTranslations;
 import static greencity.ModelUtils.getOrderUserFirst;
-import static greencity.ModelUtils.getOrderWithPaymentStatus;
+import static greencity.ModelUtils.getOrderWithoutPayment;
 import static greencity.ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto;
 import static greencity.ModelUtils.getOrdersStatusCanceledDto;
 import static greencity.ModelUtils.getOrdersStatusConfirmedDto;
 import static greencity.ModelUtils.getOrdersStatusDoneDto;
-import static greencity.ModelUtils.getOrdersStatusFormedDto;
 import static greencity.ModelUtils.getOrdersStatusFormedDto2;
+import static greencity.ModelUtils.getOrdersStatusFormedDto;
 import static greencity.ModelUtils.getOrdersStatusNotTakenOutDto;
 import static greencity.ModelUtils.getOrdersStatusOnThe_RouteDto;
 import static greencity.ModelUtils.getPayment;
-import static greencity.ModelUtils.getPaymentTableInfoDto;
 import static greencity.ModelUtils.getReceivingList;
 import static greencity.ModelUtils.getReceivingStation;
+import static greencity.ModelUtils.getRefund;
 import static greencity.ModelUtils.getService;
 import static greencity.ModelUtils.getStatusTranslation;
 import static greencity.ModelUtils.getTariffsInfo;
@@ -169,10 +173,11 @@ import static greencity.ModelUtils.getTestOrderDetailStatusRequestDto;
 import static greencity.ModelUtils.getTestUser;
 import static greencity.ModelUtils.updateAllOrderPageDto;
 import static greencity.ModelUtils.updateOrderPageAdminDto;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -182,6 +187,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -189,13 +195,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementServiceImplTest {
-    @Mock(strictness = Mock.Strictness.LENIENT)
+    @Mock(lenient = true)
     OrderAddressRepository orderAddressRepository;
-
     @Mock
     private FileService fileService;
 
-    @Mock(strictness = Mock.Strictness.LENIENT)
+    @Mock(lenient = true)
     OrderRepository orderRepository;
 
     @Mock
@@ -204,7 +209,7 @@ class UBSManagementServiceImplTest {
     @Mock
     CertificateRepository certificateRepository;
 
-    @Mock(strictness = Mock.Strictness.LENIENT)
+    @Mock(lenient = true)
     private ModelMapper modelMapper;
 
     @Mock
@@ -228,7 +233,7 @@ class UBSManagementServiceImplTest {
     @Mock
     private UserRemoteClient userRemoteClient;
 
-    @Mock(strictness = Mock.Strictness.LENIENT)
+    @Mock(lenient = true)
     private NotificationServiceImpl notificationService;
     @Mock
     private ObjectMapper objectMapper;
@@ -252,6 +257,9 @@ class UBSManagementServiceImplTest {
     private UBSClientServiceImpl ubsClientService;
 
     @Mock
+    private UBSManagementServiceImpl ubsManagementServiceMock;
+
+    @Mock
     private ServiceRepository serviceRepository;
 
     @Mock
@@ -269,14 +277,6 @@ class UBSManagementServiceImplTest {
     private OrderBagService orderBagService;
     @Mock
     private OrderBagRepository orderBagRepository;
-    @Mock
-    private OrderLockService orderLockService;
-    @Mock
-    private PaymentService paymentService;
-    @Mock
-    private EventRepository eventRepository;
-    @Mock
-    private BigOrderTableRepository bigOrderTableRepository;
 
     @Test
     void getAllCertificates() {
@@ -284,13 +284,13 @@ class UBSManagementServiceImplTest {
             PageRequest.of(0, 5, Sort.by(Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
         CertificateDtoForSearching certificateDtoForSearching = ModelUtils.getCertificateDtoForSearching();
         List<Certificate> certificates =
-            Collections.singletonList(ModelUtils.getActiveCertificateWith10Points());
+            Collections.singletonList(ModelUtils.getCertificate());
         List<CertificateDtoForSearching> certificateDtoForSearchings =
             Collections.singletonList(certificateDtoForSearching);
         PageableDto<CertificateDtoForSearching> certificateDtoForSearchingPageableDto =
             new PageableDto<>(certificateDtoForSearchings, certificateDtoForSearchings.size(), 0, 1);
         Page<Certificate> certificates1 = new PageImpl<>(certificates, pageable, certificates.size());
-        when(modelMapper.map(certificates.getFirst(), CertificateDtoForSearching.class))
+        when(modelMapper.map(certificates.get(0), CertificateDtoForSearching.class))
             .thenReturn(certificateDtoForSearching);
         when(certificateRepository.findAll(pageable)).thenReturn(certificates1);
         PageableDto<CertificateDtoForSearching> actual =
@@ -309,7 +309,6 @@ class UBSManagementServiceImplTest {
         Order order = getOrder();
         ReadAddressByOrderDto readAddressByOrderDto = ModelUtils.getReadAddressByOrderDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderAddressRepository.findByOrderId(anyLong())).thenReturn(Optional.of(getOrderAddress()));
         when(ubsManagementService.getAddressByOrderId(1L)).thenReturn(readAddressByOrderDto);
         Assertions.assertNotNull(order);
     }
@@ -372,12 +371,367 @@ class UBSManagementServiceImplTest {
         Assertions.assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderExportDetails(100L));
     }
 
+    @ParameterizedTest
+    @MethodSource("provideManualPaymentRequestDto")
+    void saveNewManualPayment(ManualPaymentRequestDto paymentDetails, MultipartFile image) {
+        User user = getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        Payment payment = getManualPayment();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, image, "test@gmail.com");
+
+        verify(eventService, times(1))
+            .save("Додано оплату №1", "Петро  Петренко", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    private static Stream<Arguments> provideManualPaymentRequestDto() {
+        return Stream.of(Arguments.of(ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
+            Arguments.of(ManualPaymentRequestDto.builder()
+                .settlementdate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
+                Mockito.mock(MultipartFile.class)));
+    }
+
+    @Test
+    void checkDeleteManualPayment() {
+        Employee employee = getEmployee();
+        Order order = getFormedOrder();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
+        doNothing().when(paymentRepository).deletePaymentById(1L);
+        doNothing().when(fileService).delete("");
+        doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + getManualPayment().getPaymentId(),
+            employee.getFirstName() + "  " + employee.getLastName(),
+            getOrder());
+        ubsManagementService.deleteManualPayment(1L, "abc");
+        verify(paymentRepository, times(1)).findById(1L);
+        verify(paymentRepository, times(1)).deletePaymentById(1L);
+    }
+
+    @Test
+    void checkUpdateManualPayment() {
+        Employee employee = getEmployee();
+        Order order = getFormedOrder();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
+        when(paymentRepository.save(any())).thenReturn(getManualPayment());
+        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
+            employee.getFirstName() + "  " + employee.getLastName(),
+            getOrder());
+        ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
+        verify(paymentRepository, times(1)).findById(1L);
+        verify(paymentRepository, times(1)).save(any());
+        verify(eventService, times(2)).save(any(), any(), any());
+        verify(fileService, times(0)).delete(null);
+    }
+
+    @Test
+    void saveNewManualPaymentWithZeroAmount() {
+        User user = getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = getFormedOrder();
+        order.setPointsToUse(0);
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        Payment payment = getManualPayment();
+        payment.setAmount(0L);
+        order.setPayment(singletonList(payment));
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(0L).receiptLink("link").paymentId("1").build();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(any(), any(), any());
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(employeeRepository, times(2)).findByEmail(anyString());
+        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
+            "Петро  Петренко", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void saveNewManualPaymentWithHalfPaidAmount() {
+        User user = getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = getFormedOrder();
+        order.setPointsToUse(0);
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+        Payment payment = getManualPayment();
+        payment.setAmount(50_00L);
+        order.setPayment(singletonList(payment));
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(50_00L).receiptLink("link").paymentId("1").build();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(any(), any(), any());
+        when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
+
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+
+        verify(employeeRepository, times(2)).findByEmail(anyString());
+        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
+            "Петро  Петренко", order);
+        verify(eventService, times(1))
+            .save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void saveNewManualPaymentWithPaidAmount() {
+        User user = getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        Payment payment = getManualPayment();
+        payment.setAmount(500_00L);
+        order.setPayment(singletonList(payment));
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500_00L).receiptLink("link").paymentId("1").build();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(any(), any(), any());
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(employeeRepository, times(2)).findByEmail(anyString());
+        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
+            "Петро  Петренко", order);
+        verify(eventService, times(1))
+            .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void saveNewManualPaymentWithPaidOrder() {
+        User user = getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        Payment payment = getManualPayment();
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(eventService, times(1))
+            .save("Додано оплату №1", "Петро  Петренко", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void saveNewManualPaymentWithPartiallyPaidOrder() {
+        User user = getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+        Payment payment = getManualPayment();
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(200L).receiptLink("link").paymentId("1").build();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(eventService, times(1))
+            .save("Додано оплату №1", "Петро  Петренко", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void saveNewManualPaymentWithUnpaidOrder() {
+        User user = getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        Payment payment = getManualPayment();
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(eventService, times(1))
+            .save("Додано оплату №1", "Петро  Петренко", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void saveNewManualPaymentWithPaymentRefundedOrder() {
+        User user = getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
+        Payment payment = getManualPayment();
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com");
+        verify(eventService, times(1))
+            .save("Додано оплату №1", "Петро  Петренко", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
+    }
+
+    @Test
+    void checkUpdateManualPaymentWithImage() {
+        Employee employee = getEmployee();
+        Order order = ModelUtils.getFormedHalfPaidOrder();
+        employee.setFirstName("Yuriy");
+        employee.setLastName("Gerasum");
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        MockMultipartFile file = new MockMultipartFile("manualPaymentDto",
+            "", "application/json", "random Bytes".getBytes());
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
+        when(paymentRepository.save(any())).thenReturn(getManualPayment());
+        when(fileService.upload(file)).thenReturn("path");
+        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum",
+            getOrder());
+        ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), file, "abc");
+        verify(paymentRepository, times(1)).findById(1L);
+        verify(paymentRepository, times(1)).save(any());
+        verify(eventService, times(2)).save(any(), any(), any());
+    }
+
+    @Test
+    void checkManualPaymentNotFound() {
+        Employee employee = getEmployee();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
+        ManualPaymentRequestDto manualPaymentRequestDto = getManualPaymentRequestDto();
+        when(paymentRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class,
+            () -> ubsManagementService.updateManualPayment(1L, manualPaymentRequestDto, null, "abc"));
+        verify(paymentRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void checkGetPaymentInfo() {
+        Order order = getOrder();
+        order.setOrderStatus(OrderStatus.DONE);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 800.).getOverpayment());
+        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getPaidAmount());
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getUnPaidAmount());
+        verify(orderRepository, times(3)).findById(order.getId());
+    }
+
+    @Test
+    void checkGetPaymentInfoIfOrderStatusIsCanceled() {
+        Order order = getOrder();
+        order.setOrderStatus(OrderStatus.CANCELED);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 800.).getOverpayment());
+        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getPaidAmount());
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100.).getUnPaidAmount());
+        verify(orderRepository, times(3)).findById(order.getId());
+    }
+
+    @Test
+    void checkGetPaymentInfoIfSumToPayIsNull() {
+        Order order = getOrder();
+        order.setOrderStatus(OrderStatus.DONE);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertEquals(900L, ubsManagementService.getPaymentInfo(order.getId(), null).getOverpayment());
+        verify(orderRepository).findById(order.getId());
+    }
+
     @Test
     void updateOrderDetailStatusThrowException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrder()));
         OrderDetailStatusRequestDto requestDto = getTestOrderDetailStatusRequestDto();
         assertThrows(NotFoundException.class,
-                () -> ubsManagementService.updateOrderDetailStatusById(1L, requestDto, "uuid"));
+            () -> ubsManagementService.updateOrderDetailStatusById(1L, requestDto, "uuid"));
         verify(orderRepository).findById(1L);
     }
 
@@ -386,7 +740,7 @@ class UBSManagementServiceImplTest {
         User user = getTestUser();
         user.setRecipientName("Петро");
         user.setRecipientSurname("Петренко");
-        Order order = user.getOrders().getFirst();
+        Order order = user.getOrders().get(0);
         order.setOrderDate((LocalDateTime.of(2021, 5, 15, 10, 20, 5)));
 
         List<Payment> payment = new ArrayList<>();
@@ -403,28 +757,35 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto expectedObject = ModelUtils.getTestOrderDetailStatusDto();
         OrderDetailStatusDto producedObject = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
-        assertEquals(expectedObject, producedObject);
-
+        assertEquals(expectedObject.getOrderStatus(), producedObject.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObject.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObject.getDate());
         testOrderDetail.setOrderStatus(OrderStatus.FORMED.toString());
         expectedObject.setOrderStatus(OrderStatus.FORMED.toString());
         OrderDetailStatusDto producedObjectAdjustment = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject, producedObjectAdjustment);
+        assertEquals(expectedObject.getOrderStatus(), producedObjectAdjustment.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectAdjustment.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectAdjustment.getDate());
 
         testOrderDetail.setOrderStatus(OrderStatus.ADJUSTMENT.toString());
         expectedObject.setOrderStatus(OrderStatus.ADJUSTMENT.toString());
         OrderDetailStatusDto producedObjectConfirmed = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject, producedObjectConfirmed);
+        assertEquals(expectedObject.getOrderStatus(), producedObjectConfirmed.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectConfirmed.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectConfirmed.getDate());
 
         testOrderDetail.setOrderStatus(OrderStatus.CONFIRMED.toString());
         expectedObject.setOrderStatus(OrderStatus.CONFIRMED.toString());
         OrderDetailStatusDto producedObjectNotTakenOut = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject, producedObjectNotTakenOut);
+        assertEquals(expectedObject.getOrderStatus(), producedObjectNotTakenOut.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectNotTakenOut.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectNotTakenOut.getDate());
 
         testOrderDetail.setCancellationReason("MOVING_OUT");
         testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
@@ -432,7 +793,9 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto producedObjectCancelled = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject, producedObjectCancelled);
+        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectCancelled.getDate());
         assertEquals(700, order.getPointsToUse());
 
         order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
@@ -441,7 +804,9 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto producedObjectDone = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject, producedObjectDone);
+        assertEquals(expectedObject.getOrderStatus(), producedObjectDone.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectDone.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectDone.getDate());
 
         order.setPointsToUse(0);
         order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
@@ -450,7 +815,9 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto producedObjectCancelled2 = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject, producedObjectCancelled2);
+        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled2.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled2.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectCancelled2.getDate());
         assertEquals(0, order.getPointsToUse());
 
         order.setOrderStatus(OrderStatus.ADJUSTMENT);
@@ -459,15 +826,19 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusDto producedObjectBroughtItHimself = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject, producedObjectBroughtItHimself);
+        assertEquals(expectedObject.getOrderStatus(), producedObjectBroughtItHimself.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectBroughtItHimself.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectBroughtItHimself.getDate());
 
-        order.setCertificates(Set.of(ModelUtils.getActiveCertificateWith10Points()));
+        order.setCertificates(Set.of(ModelUtils.getCertificate()));
         testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
         expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
         OrderDetailStatusDto producedObjectCancelled3 = ubsManagementService
             .updateOrderDetailStatusById(order.getId(), testOrderDetail, "test@gmail.com");
 
-        assertEquals(expectedObject, producedObjectCancelled3);
+        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled3.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled3.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectCancelled3.getDate());
         assertEquals(0, order.getPointsToUse());
 
         verify(eventService, times(1))
@@ -489,7 +860,7 @@ class UBSManagementServiceImplTest {
         User user = getTestUser();
         user.setRecipientName("Петро");
         user.setRecipientSurname("Петренко");
-        Order order = user.getOrders().getFirst();
+        Order order = user.getOrders().get(0);
         order.setOrderDate((LocalDateTime.now()));
 
         List<Payment> payment = new ArrayList<>();
@@ -593,26 +964,25 @@ class UBSManagementServiceImplTest {
         Order order = getOrder();
         OrderAddress orderAddress = getOrderAddress();
         orderAddress.setId(1L);
-        orderAddress.setLocation(getLocation());
         OrderAddressExportDetailsDtoUpdate dtoUpdate = ModelUtils.getOrderAddressExportDetailsDtoUpdate();
-        OrderAddress updatedOrderAddress = getOrderAddress();
-        updatedOrderAddress.setCity("Updated");
+        when(orderAddressRepository.findById(dtoUpdate.getAddressId())).thenReturn(Optional.of(orderAddress));
 
-        when(orderAddressRepository.findById(dtoUpdate.getId())).thenReturn(Optional.of(orderAddress));
-        when(ubsClientService.updateOrderAddress(any())).thenReturn(updatedOrderAddress);
-        when(orderAddressRepository.save(orderAddress)).thenReturn(updatedOrderAddress);
-        when(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class))
-            .thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
+        when(orderAddressRepository.save(orderAddress)).thenReturn(orderAddress);
+        when(modelMapper.map(orderAddress, OrderAddressDtoResponse.class)).thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
         Optional<OrderAddressDtoResponse> actual =
             ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, order, "test@gmail.com");
         assertEquals(Optional.of(TEST_ORDER_ADDRESS_DTO_RESPONSE), actual);
 
-        verify(orderAddressRepository).findById(dtoUpdate.getId());
-        verify(orderAddressRepository).save(updatedOrderAddress);
-        verify(eventService).saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, "test@gmail.com", order);
-        verify(modelMapper).map(updatedOrderAddress, OrderAddressDtoResponse.class);
-        assertEquals(1L, updatedOrderAddress.getLocation().getId());
-        assertEquals(1L, updatedOrderAddress.getId());
+        verify(orderAddressRepository).findById(dtoUpdate.getAddressId());
+        verify(orderAddressRepository).save(orderAddress);
+        verify(modelMapper).map(orderAddress, OrderAddressDtoResponse.class);
+    }
+
+    @Test
+    void testUpdateAddressThrowsOrderNotFoundException() {
+        Order order = getOrder();
+        assertThrows(NotFoundException.class,
+            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, order, "abc"));
     }
 
     @Test
@@ -642,7 +1012,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-                () -> ubsManagementService.getOrderDetailStatus(1L));
+            () -> ubsManagementService.getOrderDetailStatus(1L));
     }
 
     @Test
@@ -651,7 +1021,7 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.findAllByOrderId(1)).thenReturn(Collections.emptyList());
 
         assertThrows(NotFoundException.class,
-                () -> ubsManagementService.getOrderDetailStatus(1L));
+            () -> ubsManagementService.getOrderDetailStatus(1L));
     }
 
     @Test
@@ -697,12 +1067,12 @@ class UBSManagementServiceImplTest {
     @Test
     void testGetOrderExportDetailsReceivingStationNotFoundExceptionThrown() {
         when(orderRepository.findById(1L))
-                .thenReturn(Optional.of(getOrder()));
+            .thenReturn(Optional.of(getOrder()));
         List<ReceivingStation> receivingStations = new ArrayList<>();
         when(receivingStationRepository.findAll())
-                .thenReturn(receivingStations);
+            .thenReturn(receivingStations);
         assertThrows(NotFoundException.class,
-                () -> ubsManagementService.getOrderExportDetails(1L));
+            () -> ubsManagementService.getOrderExportDetails(1L));
     }
 
     @Test
@@ -710,7 +1080,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-                () -> ubsManagementService.getOrderDetails(1L, "ua"));
+            () -> ubsManagementService.getOrderDetails(1L, "ua"));
     }
 
     @Test
@@ -756,9 +1126,9 @@ class UBSManagementServiceImplTest {
     void testGetAdditionalBagsInfo() {
         when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(TEST_USER));
         when(bagRepository.getAdditionalBagInfo(1L, TEST_USER.getRecipientEmail()))
-                .thenReturn(TEST_MAP_ADDITIONAL_BAG_LIST);
+            .thenReturn(TEST_MAP_ADDITIONAL_BAG_LIST);
         when(objectMapper.convertValue(any(), eq(AdditionalBagInfoDto.class)))
-                .thenReturn(TEST_ADDITIONAL_BAG_INFO_DTO);
+            .thenReturn(TEST_ADDITIONAL_BAG_INFO_DTO);
 
         List<AdditionalBagInfoDto> actual = ubsManagementService.getAdditionalBagsInfo(1L);
 
@@ -774,7 +1144,7 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-                () -> ubsManagementService.getAdditionalBagsInfo(1L));
+            () -> ubsManagementService.getAdditionalBagsInfo(1L));
     }
 
     @Test
@@ -782,10 +1152,17 @@ class UBSManagementServiceImplTest {
         Order order = getOrdersStatusDoneDto();
 
         when(bagRepository.findCapacityById(1)).thenReturn(1);
+//<<<<<<< HEAD
         doNothing().when(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+////        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+//=======
+//        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+//        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+//        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBag1list());
+//>>>>>>> dev
         when(paymentRepository.selectSumPaid(1L)).thenReturn(5000L);
 
         ubsManagementService.setOrderDetail(order,
@@ -801,7 +1178,7 @@ class UBSManagementServiceImplTest {
     void testSetOrderDetailNeedToChangeStatusToHalfPaid() {
         Order order = getOrdersStatusDoneDto();
         when(bagRepository.findCapacityById(1)).thenReturn(1);
-
+//<<<<<<< HEAD
         doNothing().when(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
@@ -810,7 +1187,13 @@ class UBSManagementServiceImplTest {
         when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
 
         doNothing().when(orderRepository).updateOrderPaymentStatus(1L, OrderPaymentStatus.HALF_PAID.name());
-        doNothing().when(eventService).saveEvent(anyString(), anyString(), any());
+//=======
+//
+//        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+//        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+//        when(bagRepository.findBagsByOrderId(1L)).thenReturn(getBag1list());
+//        when(paymentRepository.selectSumPaid(1L)).thenReturn(5000L);
+//>>>>>>> dev
 
         ubsManagementService.setOrderDetail(order,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -819,7 +1202,6 @@ class UBSManagementServiceImplTest {
         verify(bagRepository, times(2)).findCapacityById(1);
         verify(orderRepository).getOrderDetails(1L);
         verify(paymentRepository, times(2)).selectSumPaid(1L);
-        verify(eventService, times(2)).saveEvent(anyString(), anyString(), any());
     }
 
     @Test
@@ -830,6 +1212,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+//        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
         when(paymentRepository.selectSumPaid(1L)).thenReturn(null);
         doNothing().when(orderRepository).updateOrderPaymentStatus(1L, OrderPaymentStatus.UNPAID.name());
         when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
@@ -868,7 +1251,14 @@ class UBSManagementServiceImplTest {
         Order order = getOrder();
         Order orderDetailDto = getOrdersStatusFormedDto();
 
+        Bag tariffBagDto = ModelUtils.getTariffBag();
+        List<Bag> bagList = getBaglist();
+//<<<<<<< HEAD
+//        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(orderDto));
+//=======
+
         when(bagRepository.findCapacityById(1)).thenReturn(1);
+//>>>>>>> dev
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(orderDetailDto));
         when(paymentRepository.selectSumPaid(1L)).thenReturn(0L);
         when(orderRepository.findSumOfCertificatesByOrderId(1L)).thenReturn(0L);
@@ -888,8 +1278,7 @@ class UBSManagementServiceImplTest {
     void testSetOrderDetailIfPaidAndPriceLessThanDiscount() {
         Order order = ModelUtils.getOrdersStatusAdjustmentDto2();
 
-        when(certificateRepository.findCertificate(order.getId()))
-            .thenReturn(List.of(ModelUtils.getActiveCertificateWith600Points()));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(List.of(ModelUtils.getCertificate2()));
         when(orderRepository.findSumOfCertificatesByOrderId(order.getId())).thenReturn(600L);
         when(orderRepository.getOrderDetails(1L))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto2()));
@@ -897,7 +1286,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.setOrderDetail(order,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc");
-        verify(certificateRepository).save(ModelUtils.getActiveCertificateWith600Points().setPoints(0));
+        verify(certificateRepository).save(ModelUtils.getCertificate2().setPoints(0));
         verify(userRepository).updateUserCurrentPoints(1L, 100);
         verify(orderRepository).updateOrderPointsToUse(1L, 0);
     }
@@ -906,11 +1295,11 @@ class UBSManagementServiceImplTest {
     void testSetOrderDetailIfPaidAndPriceLessThanPaidSum() {
         Order order = ModelUtils.getOrdersStatusAdjustmentDto2();
         when(paymentRepository.selectSumPaid(order.getId())).thenReturn(10000L);
-        when(certificateRepository.findCertificate(order.getId()))
-            .thenReturn(List.of(ModelUtils.getActiveCertificateWith600Points()));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(List.of(ModelUtils.getCertificate2()));
         when(orderRepository.findSumOfCertificatesByOrderId(order.getId())).thenReturn(600L);
         when(orderRepository.getOrderDetails(1L))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto2()));
+//        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.setOrderDetail(order,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -927,15 +1316,15 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusConfirmedDto()));
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
-                .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+            .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
         Order order = getOrdersStatusConfirmedDto();
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
 
         ubsManagementService.setOrderDetail(order,
-                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
-                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-                "test@gmail.com");
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "test@gmail.com");
 
         verify(bagRepository, times(2)).findCapacityById(1);
         verify(orderRepository).getOrderDetails(1L);
@@ -1088,6 +1477,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
+//        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
 
         ubsManagementService.setOrderDetail(order,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1096,6 +1486,16 @@ class UBSManagementServiceImplTest {
 
         verify(bagRepository, times(2)).findCapacityById(1);
         verify(orderRepository).getOrderDetails(1L);
+    }
+
+    @Test
+    void setOrderDetailExceptionTest() {
+        Order order = getOrder();
+        Map<Integer, Integer> confirm = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed();
+        Map<Integer, Integer> exported = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported();
+
+        assertThrows(NotFoundException.class,
+            () -> ubsManagementService.setOrderDetail(order, confirm, exported, "test@gmail.com"));
     }
 
     @Test
@@ -1148,7 +1548,7 @@ class UBSManagementServiceImplTest {
 
         EcoNumberDto ecoNumberDto = getEcoNumberDto();
         assertThrows(NotFoundException.class,
-                () -> ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, 1L, "abc"));
+            () -> ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, 1L, "abc"));
         verify(orderRepository).findById(1L);
     }
 
@@ -1159,7 +1559,7 @@ class UBSManagementServiceImplTest {
         EcoNumberDto ecoNumberDto = getEcoNumberDto();
         ecoNumberDto.setEcoNumber(new HashSet<>(List.of("1234a")));
         assertThrows(BadRequestException.class,
-                () -> ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, 1L, "abc"));
+            () -> ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, 1L, "abc"));
         verify(orderRepository).findById(1L);
     }
 
@@ -1168,7 +1568,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         AdminCommentDto adminCommentDto = getAdminCommentDto();
         assertThrows(NotFoundException.class,
-                () -> ubsManagementService.saveAdminCommentToOrder(adminCommentDto, "abc"));
+            () -> ubsManagementService.saveAdminCommentToOrder(adminCommentDto, "abc"));
         verify(orderRepository).findById(1L);
     }
 
@@ -1212,8 +1612,8 @@ class UBSManagementServiceImplTest {
         when(ubsClientService.updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(),
             "test@gmail.com")).thenReturn(ModelUtils.getUbsCustomersDto());
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
-        updateOrderPageAdminDto.setAddressExportDetailsDto(null);
         updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
+        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -1235,6 +1635,7 @@ class UBSManagementServiceImplTest {
 
         verify(ubsClientService).updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "test@gmail.com");
 
+        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
         verify(receivingStationRepository).findById(1L);
         verify(orderRepository).getOrderDetails(1L);
@@ -1257,8 +1658,8 @@ class UBSManagementServiceImplTest {
         updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
         updateOrderPageAdminDto.setUbsCourierSum(50.);
         updateOrderPageAdminDto.setWriteOffStationSum(100.);
-        updateOrderPageAdminDto.setAddressExportDetailsDto(null);
 
+        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -1278,6 +1679,7 @@ class UBSManagementServiceImplTest {
 
         verify(ubsClientService).updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "test@gmail.com");
 
+        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
         verify(receivingStationRepository).findById(1L);
         verify(orderRepository).getOrderDetails(1L);
@@ -1308,6 +1710,39 @@ class UBSManagementServiceImplTest {
         verify(paymentRepository).findAllByOrderId(1L);
         verify(receivingStationRepository).findAll();
         verify(employeeOrderPositionRepository).findAllByOrderId(1L);
+    }
+
+    @Test
+    void updateOrderAdminPageInfoWithStatusCanceledTest() {
+        Order order = getOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        order.setOrderStatus(OrderStatus.CANCELED);
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDtoWithStatusCanceled();
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en",
+                "test@gmail.com"));
+
+        assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, OrderStatus.CANCELED), exception.getMessage());
+
+        verify(orderRepository, never()).save(any(Order.class));
+    }
+
+    @Test
+    void updateOrderAdminPageInfoWithStatusDoneTest() {
+        Order order = getOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
+        order.setOrderStatus(OrderStatus.DONE);
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDtoWithStatusCanceled();
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en",
+                "test@gmail.com"));
+
+        assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, OrderStatus.DONE), exception.getMessage());
+        verify(orderRepository, never()).save(any(Order.class));
     }
 
     @Test
@@ -1458,6 +1893,20 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void getOrderSumDetailsForCanceledPaidOrder() {
+        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
+        Order order = ModelUtils.getCanceledPaidOrder();
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+
+        doNothing().when(notificationService).notifyPaidOrder(order);
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
+        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
+    }
+
+    @Test
     void getOrderSumDetailsForCanceledPaidOrderWithBags() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getCanceledPaidOrder();
@@ -1475,6 +1924,20 @@ class UBSManagementServiceImplTest {
     void getOrderSumDetailsForAdjustmentPaidOrder() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getAdjustmentPaidOrder();
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+
+        doNothing().when(notificationService).notifyPaidOrder(order);
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
+        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
+    }
+
+    @Test
+    void getOrderSumDetailsForFormedHalfPaidOrder() {
+        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
+        Order order = ModelUtils.getFormedHalfPaidOrder();
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 
@@ -1530,11 +1993,11 @@ class UBSManagementServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(orderBagRepository.findAllByOrderId(1L)).thenReturn(List.of(getOrderBag()));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
         when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
-        when(modelMapper.map(getOrderBag(), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
@@ -1544,21 +2007,51 @@ class UBSManagementServiceImplTest {
         when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-        when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
 
         ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
 
-        verify(orderBagRepository).findAllByOrderId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(certificateRepository).findCertificate(1L);
-        verify(orderRepository, times(3)).findById(1L);
+        verify(orderRepository, times(5)).findById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
-        verify(modelMapper).map(getOrderBag(), BagInfoDto.class);
+        verify(modelMapper).map(getBaglist().get(0), BagInfoDto.class);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6L);
         verify(orderPaymentStatusTranslationRepository).getById(1L);
         verify(receivingStationRepository).findAll();
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
         verify(orderStatusTranslationRepository).findAllBy();
         verify(orderPaymentStatusTranslationRepository).getAllBy();
+    }
+
+    @Test
+    void saveNewManualPaymentWhenImageNotNull() {
+        User user = getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        Order order = getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        Payment payment = getManualPayment();
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, Mockito.mock(MultipartFile.class),
+            "test@gmail.com");
+
+        verify(eventService, times(1))
+            .save("Замовлення Оплачено", "Система", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1L);
+        verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
     }
 
     @Test
@@ -1574,9 +2067,9 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
-        when(orderBagRepository.findAllByOrderId(1L)).thenReturn(List.of(getOrderBag()));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
-        when(modelMapper.map(getOrderBag(), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
@@ -1584,18 +2077,17 @@ class UBSManagementServiceImplTest {
             .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-        when(modelMapper.map(getOrderForGetOrderStatusData2Test().getPayment().getFirst(), PaymentInfoDto.class))
+        when(modelMapper.map(getOrderForGetOrderStatusData2Test().getPayment().get(0), PaymentInfoDto.class))
             .thenReturn(getInfoPayment());
-        when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
 
         ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
 
         verify(orderRepository).getOrderDetails(1L);
-        verify(orderBagRepository).findAllByOrderId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(certificateRepository).findCertificate(1L);
-        verify(orderRepository, times(3)).findById(1L);
+        verify(orderRepository, times(5)).findById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
-        verify(modelMapper).map(getOrderBag(), BagInfoDto.class);
+        verify(modelMapper).map(getBaglist().get(0), BagInfoDto.class);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6L);
         verify(orderPaymentStatusTranslationRepository).getById(1L);
         verify(receivingStationRepository).findAll();
@@ -1615,10 +2107,10 @@ class UBSManagementServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(orderBagRepository.findAllByOrderId(1L)).thenReturn(List.of(getOrderBag()));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
-        when(modelMapper.map(getOrderBag(), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
@@ -1626,15 +2118,14 @@ class UBSManagementServiceImplTest {
             .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-        when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
 
         ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
 
         verify(orderRepository).getOrderDetails(1L);
-        verify(orderBagRepository).findAllByOrderId(1L);
-        verify(orderRepository, times(3)).findById(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
+        verify(orderRepository, times(5)).findById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
-        verify(modelMapper).map(getOrderBag(), BagInfoDto.class);
+        verify(modelMapper).map(getBaglist().get(0), BagInfoDto.class);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6L);
         verify(orderPaymentStatusTranslationRepository).getById(1L);
         verify(receivingStationRepository).findAll();
@@ -1653,24 +2144,23 @@ class UBSManagementServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(orderBagRepository.findAllByOrderId(1L)).thenReturn(List.of(getOrderBag()));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
-        when(modelMapper.map(getOrderBag(), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
             .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-        when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
 
         ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
 
         verify(orderRepository).getOrderDetails(1L);
-        verify(orderBagRepository).findAllByOrderId(1L);
-        verify(orderRepository, times(3)).findById(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
+        verify(orderRepository, times(5)).findById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
-        verify(modelMapper).map(getOrderBag(), BagInfoDto.class);
+        verify(modelMapper).map(getBaglist().get(0), BagInfoDto.class);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6L);
         verify(orderPaymentStatusTranslationRepository).getById(1L);
         verify(receivingStationRepository).findAll();
@@ -1692,8 +2182,7 @@ class UBSManagementServiceImplTest {
         when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
-        when(modelMapper.map(getBaglist().getFirst(), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
@@ -1769,6 +2258,72 @@ class UBSManagementServiceImplTest {
 
         verify(orderRepository).findById(1L);
         verify(receivingStationRepository).findAll();
+    }
+
+    @Test
+    void getPaymentInfo() {
+        Order order = getOrder();
+        order.setOrderStatus(OrderStatus.DONE);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        PaymentInfoDto paymentInfo = getInfoPayment();
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(modelMapper.map(any(), eq(PaymentInfoDto.class))).thenReturn(paymentInfo);
+
+        assertEquals(ModelUtils.getPaymentTableInfoDto(), ubsManagementService.getPaymentInfo(order.getId(), 100.));
+    }
+
+    @Test
+    void getPaymentInfoWithoutPayment() {
+        Order order = getOrderWithoutPayment();
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        assertEquals(ModelUtils.getPaymentTableInfoDto2(), ubsManagementService.getPaymentInfo(order.getId(), 100.));
+    }
+
+    @Test
+    void getPaymentInfoExceptionTest() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class,
+            () -> ubsManagementService.getPaymentInfo(1L, 100.));
+    }
+
+    @Test
+    void updateManualPayment() {
+        Employee employee = getEmployee();
+        Order order = getOrderUserFirst();
+        Payment payment = getPayment();
+        ManualPaymentRequestDto requestDto = getManualPaymentRequestDto();
+        requestDto.setImagePath("");
+        payment.setImagePath("abc");
+        MockMultipartFile file = new MockMultipartFile("manualPaymentDto",
+            "", "application/json", "random Bytes".getBytes());
+
+        when(employeeRepository.findByUuid(employee.getUuid())).thenReturn(Optional.of(employee));
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+        when(paymentRepository.save(any())).thenReturn(payment);
+        when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.of(order));
+
+        ubsManagementService.updateManualPayment(payment.getId(), requestDto, file, employee.getUuid());
+
+        verify(paymentRepository).save(any(Payment.class));
+        verify(eventService, times(2)).save(any(), any(), any());
+    }
+
+    @Test
+    void updateManualPaymentUserNotFoundExceptionTest() {
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.empty());
+        assertThrows(EntityNotFoundException.class,
+            () -> ubsManagementService.updateManualPayment(1L, null, null, "abc"));
+    }
+
+    @Test
+    void updateManualPaymentPaymentNotFoundExceptionTest() {
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.of(getEmployee()));
+        when(paymentRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class,
+            () -> ubsManagementService.updateManualPayment(1L, null, null, "abc"));
     }
 
     @Test
@@ -1862,6 +2417,14 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void checkGetPaymentInfoWhenPaymentsWithCertificatesAndPointsSmallerThanSumToPay() {
+        Order order = getOrder();
+        order.setOrderStatus(OrderStatus.DONE);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 1100.).getOverpayment());
+    }
+
+    @Test
     void testAddPointsToUserWhenCurrentPointIsNull() {
         User user = getTestUser();
         user.setUuid(userRemoteClient.findUuidByEmail(user.getRecipientEmail()));
@@ -1899,10 +2462,10 @@ class UBSManagementServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(orderBagRepository.findAllByOrderId(1L)).thenReturn(List.of(getOrderBag()));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
         when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
-        when(modelMapper.map(getOrderBag(), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
@@ -1914,14 +2477,13 @@ class UBSManagementServiceImplTest {
 
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-        when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
         ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
 
         verify(orderRepository).getOrderDetails(1L);
-        verify(orderBagRepository).findAllByOrderId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(certificateRepository).findCertificate(1L);
-        verify(orderRepository, times(3)).findById(1L);
-        verify(modelMapper).map(getOrderBag(), BagInfoDto.class);
+        verify(orderRepository, times(5)).findById(1L);
+        verify(modelMapper).map(getBaglist().get(0), BagInfoDto.class);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6L);
         verify(orderPaymentStatusTranslationRepository).getById(
             1L);
@@ -1944,10 +2506,10 @@ class UBSManagementServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(orderBagRepository.findAllByOrderId(1L)).thenReturn(List.of(getOrderBag()));
+        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
         when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
-        when(modelMapper.map(getBaglist().getFirst(), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
@@ -1963,15 +2525,14 @@ class UBSManagementServiceImplTest {
 
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-        when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
 
         ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
 
         verify(orderRepository).getOrderDetails(1L);
-        verify(orderBagRepository).findAllByOrderId(1L);
+        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
         verify(certificateRepository).findCertificate(1L);
-        verify(orderRepository, times(3)).findById(1L);
-        verify(modelMapper).map(getOrderBag(), BagInfoDto.class);
+        verify(orderRepository, times(5)).findById(1L);
+        verify(modelMapper).map(getBaglist().get(0), BagInfoDto.class);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6L);
         verify(orderPaymentStatusTranslationRepository).getById(
             1L);
@@ -1981,9 +2542,137 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void deleteManualPaymentTest() {
+        Payment payment = getManualPayment();
+        Employee employee = getEmployee();
+        Order order = getFormedOrder();
+
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+
+        ubsManagementService.deleteManualPayment(1L, "abc");
+
+        verify(employeeRepository).findByUuid("abc");
+        verify(paymentRepository).findById(1L);
+        verify(paymentRepository).deletePaymentById(1L);
+        verify(fileService).delete(payment.getImagePath());
+        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
+
+    }
+
+    @Test
+    void deleteManualTestWithoutImage() {
+        Payment payment = getManualPayment();
+        Employee employee = getEmployee();
+        Order order = getFormedOrder();
+        payment.setImagePath(null);
+
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+
+        ubsManagementService.deleteManualPayment(1L, "abc");
+
+        verify(employeeRepository).findByUuid("abc");
+        verify(paymentRepository).findById(1L);
+        verify(paymentRepository).deletePaymentById(1L);
+        verify(fileService, times(0)).delete(payment.getImagePath());
+        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
+    }
+
+    @Test
+    void deleteManualTestWithoutUser() {
+        when(employeeRepository.findByUuid("uuid25")).thenReturn(Optional.empty());
+        EntityNotFoundException ex =
+            assertThrows(EntityNotFoundException.class, () -> ubsManagementService.deleteManualPayment(1L, "uuid25"));
+        assertEquals(EMPLOYEE_NOT_FOUND, ex.getMessage());
+    }
+
+    @Test
+    void deleteManualTestWithoutPayment() {
+        Employee employee = getEmployee();
+        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
+        when(paymentRepository.findById(25L)).thenReturn(Optional.empty());
+        assertThrows(ResponseStatusException.class, () -> ubsManagementService.deleteManualPayment(25L, "abc"));
+    }
+
+    @Test
+    void addBonusesToUserTest() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        User user = order.getUser();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+
+        ubsManagementService.addBonusesToUser(getAddBonusesToUserDto(), 1L, employee.getEmail());
+
+        verify(orderRepository).findById(1L);
+        verify(orderRepository).save(order);
+        verify(userRepository).save(user);
+        verify(notificationService).notifyBonuses(order, 900L);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
+    }
+
+    @Test
+    void addBonusesToUserIfOrderStatusIsCanceled() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.CANCELED);
+        User user = order.getUser();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+//        when(orderBagService.findAllBagsByOrderId(1L)).thenReturn(getBaglist());
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+
+        ubsManagementService.addBonusesToUser(getAddBonusesToUserDto(), 1L, employee.getEmail());
+
+        verify(orderRepository).findById(1L);
+        verify(orderRepository).save(order);
+        verify(userRepository).save(user);
+        verify(notificationService).notifyBonuses(order, 200L);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
+    }
+
+    @Test
+    void addBonusesToUserWithoutExportedBagsTest() {
+        Order order = ModelUtils.getOrderWithoutExportedBags();
+        User user = order.getUser();
+        Employee employee = getEmployee();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+
+        ubsManagementService.addBonusesToUser(getAddBonusesToUserDto(), 1L, employee.getEmail());
+
+        verify(orderRepository).findById(1L);
+        verify(orderRepository).save(order);
+        verify(userRepository).save(user);
+        verify(notificationService).notifyBonuses(order, 300L);
+        verify(eventService).saveEvent(OrderHistory.ADDED_BONUSES, employee.getEmail(), order);
+    }
+
+    @Test
+    void addBonusesToUserWithNoOverpaymentTest() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        String email = getEmployee().getEmail();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+        when(orderBagService.findAllBagsInOrderBagsList(anyList())).thenReturn(ModelUtils.TEST_BAG_LIST2);
+
+        AddBonusesToUserDto addBonusesToUserDto = getAddBonusesToUserDto();
+        assertThrows(BadRequestException.class,
+            () -> ubsManagementService.addBonusesToUser(addBonusesToUserDto, 1L, email));
+    }
+
+    @Test
     void checkEmployeeForOrderTest() {
         User user = getTestUser();
-        Order order = user.getOrders().getFirst();
+        Order order = user.getOrders().get(0);
         order.setOrderStatus(OrderStatus.CANCELED).setTariffsInfo(getTariffsInfo());
         Employee employee = getEmployee();
         List<Long> tariffsInfoIds = new ArrayList<>();
@@ -2013,7 +2702,7 @@ class UBSManagementServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("provideOrdersWithDifferentInitialExportDetailsForUpdateOrderExportDetails")
-    void updateOrderExportDetailsSettingForDifferentInitialExportDetailsTest(Order order) {
+    void updateOrderExportDetailsSettingForDifferentInitialExportDetailsTest(Order order, String expectedHistoryEvent) {
         Employee employee = getEmployee();
         List<ReceivingStation> receivingStations = List.of(getReceivingStation());
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
@@ -2130,6 +2819,32 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void getNotTakenOrderReasonWithoutOrderTest() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> ubsManagementService.getNotTakenOrderReason(1L));
+        verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void saveNewManualPaymentWithoutLinkAndImageTest() {
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .settlementdate("02-08-2021").amount(500L).paymentId("1").build();
+        assertThrows(BadRequestException.class,
+            () -> ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "test@gmail.com"));
+    }
+
+    @Test
+    void saveOrderIdForRefundTest() {
+        Order order = getOrder();
+        Refund refund = getRefund(order.getId());
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(refundRepository.save(refund)).thenReturn(refund);
+        ubsManagementService.saveOrderIdForRefund(1L);
+        verify(orderRepository).findById(1L);
+        verify(refundRepository).save(refund);
+    }
+
+    @Test
     void saveOrderIdForRefundThrowsNotFoundExceptionTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> ubsManagementService.getNotTakenOrderReason(1L));
@@ -2139,7 +2854,6 @@ class UBSManagementServiceImplTest {
     @Test
     void updateOrderAdminPageInfoAndSaveReasonTest() {
         var dto = updateOrderPageAdminDto();
-        dto.setAddressExportDetailsDto(null);
         MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
 
         Order order = getOrder();
@@ -2155,6 +2869,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
 
+        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -2168,6 +2883,7 @@ class UBSManagementServiceImplTest {
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
         verify(paymentRepository).findAllByOrderId(1L);
 
+        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
 
         verify(receivingStationRepository).findById(1L);
@@ -2177,7 +2893,7 @@ class UBSManagementServiceImplTest {
     void updateOrderAdminPageInfoAndSaveReasonTest_OrderPaid() {
         var dto = updateOrderPageAdminDto();
         MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
-        dto.setAddressExportDetailsDto(null);
+
         Order order = getOrder();
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
@@ -2190,6 +2906,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
 
+        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -2203,6 +2920,7 @@ class UBSManagementServiceImplTest {
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
         verify(paymentRepository).findAllByOrderId(1L);
 
+        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
 
         verify(receivingStationRepository).findById(1L);
@@ -2212,7 +2930,7 @@ class UBSManagementServiceImplTest {
     void updateOrderAdminPageInfoAndSaveReasonTest_OrderPaidAndUpdate() {
         var dto = updateOrderPageAdminDto();
         MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
-        dto.setAddressExportDetailsDto(null);
+
         Order order = getOrder();
         order.setPointsToUse(-10000);
         TariffsInfo tariffsInfo = getTariffsInfo();
@@ -2226,6 +2944,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
 
+        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -2239,6 +2958,7 @@ class UBSManagementServiceImplTest {
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
         verify(paymentRepository).findAllByOrderId(1L);
 
+        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
 
         verify(receivingStationRepository).findById(1L);
@@ -2248,7 +2968,7 @@ class UBSManagementServiceImplTest {
     void updateOrderAdminPageInfoAndSaveReasonTest_OrderUnPaidAndUpdate() {
         var dto = updateOrderPageAdminDto();
         MockMultipartFile[] multipartFiles = new MockMultipartFile[0];
-        dto.setAddressExportDetailsDto(null);
+
         Order order = getOrder();
         order.setPointsToUse(-10000);
         TariffsInfo tariffsInfo = getTariffsInfo();
@@ -2262,6 +2982,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
 
+        when(orderAddressRepository.findById(1L)).thenReturn(Optional.of(getOrderAddress()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         var receivingStation = getReceivingStation();
@@ -2275,134 +2996,10 @@ class UBSManagementServiceImplTest {
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
         verify(paymentRepository).findAllByOrderId(1L);
 
+        verify(orderAddressRepository).findById(1L);
         verify(receivingStationRepository).findAll();
 
         verify(receivingStationRepository).findById(1L);
     }
 
-    @Test
-    void getOrderStatusDataTestIfEmployeeIsNotAdmin() {
-        Order order = getOrderForGetOrderStatusData2Test();
-        BagInfoDto bagInfoDto = getBagInfoDto();
-        TariffsInfo tariffsInfo = getTariffsInfo();
-        order.setTariffsInfo(tariffsInfo);
-        Employee employee = getEmployee();
-
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
-        when(modelMapper.map(getOrderBag(), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(orderBagRepository.findAllByOrderId(1L)).thenReturn(List.of(getOrderBag()));
-        when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
-        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(Optional.ofNullable(getStatusTranslation()));
-        when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
-        when(orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
-        when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
-        when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
-        when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-        when(positionRepository.findAllIdsFromNames(any())).thenReturn(List.of(6L, 7L));
-        when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
-
-        order.setBlocked(false);
-        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
-
-        verify(orderLockService, times(0)).lockOrder(order, employee);
-
-        order.setBlocked(true);
-        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
-
-        verify(orderLockService, times(0)).lockOrder(order, employee);
-    }
-
-    @Test
-    void getOrderStatusDataTestIfEmployeeIsAdmin() {
-        Order order = getOrderForGetOrderStatusData2Test();
-        BagInfoDto bagInfoDto = getBagInfoDto();
-        TariffsInfo tariffsInfo = getTariffsInfo();
-        order.setTariffsInfo(tariffsInfo);
-        Employee employee = getAdminEmployee();
-
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
-        when(modelMapper.map(getOrderBag(), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(orderBagRepository.findAllByOrderId(1L)).thenReturn(List.of(getOrderBag()));
-        when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
-        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(Optional.ofNullable(getStatusTranslation()));
-        when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
-        when(orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
-        when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
-        when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
-        when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-        when(positionRepository.findAllIdsFromNames(any())).thenReturn(List.of(6L, 7L));
-        when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
-
-        order.setBlocked(true);
-        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
-
-        verify(orderLockService, times(0)).lockOrder(order, employee);
-    }
-
-    @Test
-    void checkIfOrderStatusIsFormedToCanceledTest() {
-        Long orderId = 1L;
-        when(eventRepository.wasOrderStatusChangedFromFormedToCanceled(orderId)).thenReturn(true);
-        assertTrue(ubsManagementService.checkIfOrderStatusIsFormedToCanceled(orderId));
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = OrderPaymentStatus.class, names = {"HALF_PAID", "UNPAID", "PAYMENT_REFUNDED"})
-    void getOrderStatusDataTestIfOrderWasUnpaid(OrderPaymentStatus paymentStatus) {
-        Order order = getOrderWithPaymentStatus(paymentStatus);
-        BagInfoDto bagInfoDto = getBagInfoDto();
-        TariffsInfo tariffsInfo = getTariffsInfo();
-        order.setTariffsInfo(tariffsInfo);
-        Employee employee = getEmployee();
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(anyLong(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(getBaglist());
-        when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
-        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
-            .thenReturn(Optional.ofNullable(getStatusTranslation()));
-        when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
-        when(
-            orderPaymentStatusTranslationRepository.getById(anyLong()))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
-        when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-        when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
-
-        ubsManagementService.getOrderStatusData(1L, "test@gmail.com");
-
-        verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
-        verify(certificateRepository).findCertificate(1L);
-        verify(orderRepository, times(3)).findById(1L);
-        verify(serviceRepository).findServiceByTariffsInfoId(1L);
-        verify(modelMapper).map(getBaglist().getFirst(), BagInfoDto.class);
-        verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6L);
-        verify(orderPaymentStatusTranslationRepository).getById(anyLong());
-        verify(receivingStationRepository).findAll();
-        verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
-        verify(orderStatusTranslationRepository).findAllBy();
-        verify(orderPaymentStatusTranslationRepository).getAllBy();
-    }
 }

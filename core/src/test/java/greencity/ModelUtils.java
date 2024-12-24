@@ -14,16 +14,12 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
-import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.RegionTranslationDto;
-import greencity.dto.notification.AddNotificationPlatformDto;
-import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateMainInfoDto;
-import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.order.AdminCommentDto;
@@ -34,15 +30,13 @@ import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
-import greencity.dto.order.OrderWayForPayClientDto;
+import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
-import greencity.dto.payment.monobank.PaymentInfo;
+import greencity.dto.position.PositionDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
@@ -50,18 +44,18 @@ import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
-import greencity.dto.useragreement.UserAgreementDetailDto;
-import greencity.dto.useragreement.UserAgreementDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.user.ubs.Address;
+import greencity.enums.AddressStatus;
 import greencity.enums.CancellationReason;
 import greencity.enums.CourierLimit;
-import greencity.enums.MonoBankStatuses;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationTime;
@@ -69,9 +63,8 @@ import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.PaymentSystem;
-import greencity.enums.UserCategory;
 import org.springframework.http.HttpStatus;
+
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -82,9 +75,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static greencity.enums.NotificationReceiverType.EMAIL;
-import static greencity.enums.NotificationReceiverType.MOBILE;
-import static greencity.enums.NotificationReceiverType.SITE;
 import static greencity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
@@ -118,28 +108,22 @@ public class ModelUtils {
                 .build())
             .addressId(1L)
             .locationId(1L)
-            .paymentSystem(PaymentSystem.WAY_FOR_PAY)
             .build();
     }
 
     public static OrderAddressDtoRequest getOrderAddressDtoRequest() {
         return OrderAddressDtoRequest.builder()
             .id(0L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Городоцька")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .region("Lvivskiy")
             .actual(false)
-            .districtEn("Shevchenkivskyi")
-            .district("Шевченківський")
-            .regionEn("Kyiv Oblast")
-            .region("Київська область")
-            .houseNumber("25B")
-            .entranceNumber("3")
-            .houseCorpus("2A")
-            .addressComment("Next to the park")
-            .placeId("ChIJp0lN2HIRkEARuJ1pl_yMcc0")
-            .coordinates(new CoordinatesDto(50.4501, 30.5234))
-            .city("Київ")
-            .cityEn("Kyiv")
-            .street("Хрещатик")
-            .streetEn("Khreshchatyk")
+            .placeId("place_id")
             .build();
     }
 
@@ -257,6 +241,14 @@ public class ModelUtils {
             .build();
     }
 
+    public static PositionDto getPositionDto() {
+        return PositionDto.builder()
+            .id(1L)
+            .name("Водій")
+            .nameEn("Driver")
+            .build();
+    }
+
     public static ReceivingStationDto getReceivingStationDto() {
         return ReceivingStationDto.builder()
             .id(1L)
@@ -275,6 +267,29 @@ public class ModelUtils {
             .violationLevel(MAJOR)
             .description("violation1")
             .violationDate(localdatetime)
+            .build();
+    }
+
+    public static Address address() {
+        List<Long> id = addressDto().stream().map(AddressDto::getId).toList();
+        List<String> city = addressDto().stream().map(AddressDto::getCity).toList();
+        List<String> street = addressDto().stream().map(AddressDto::getStreet).toList();
+        List<String> district = addressDto().stream().map(AddressDto::getDistrict).toList();
+        List<String> houseNumber = addressDto().stream().map(AddressDto::getHouseNumber).toList();
+        List<String> entranceNumber = addressDto().stream().map(AddressDto::getEntranceNumber).toList();
+        List<String> houseCorpus = addressDto().stream().map(AddressDto::getHouseCorpus).toList();
+        List<Boolean> actual = addressDto().stream().map(AddressDto::getActual).toList();
+        return Address.builder()
+            .id(id.getFirst())
+            .city(String.valueOf(city))
+            .district(String.valueOf(district))
+            .street(String.valueOf(street))
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .entranceNumber(String.valueOf(entranceNumber))
+            .houseNumber(String.valueOf(houseNumber))
+            .houseCorpus(String.valueOf(houseCorpus))
+            .actual(Boolean.valueOf(String.valueOf(actual)))
+            .addressStatus(AddressStatus.DELETED)
             .build();
     }
 
@@ -358,8 +373,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderWayForPayClientDto getOrderWayForPayClientDto() {
-        return OrderWayForPayClientDto.builder()
+    public static OrderFondyClientDto getOrderFondyClientDto() {
+        return OrderFondyClientDto.builder()
             .orderId(1L)
             .pointsToUse(100)
             .certificates(Collections.emptySet())
@@ -413,20 +428,9 @@ public class ModelUtils {
 
     public static NotificationTemplateWithPlatformsUpdateDto getNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
-            .notificationTemplateUpdateInfo(getNotificationTemplateUpdateInfoDto())
+            .notificationTemplateMainInfoDto(getNotificationTemplateMainInfoDto())
             .platforms(List.of(
                 getNotificationPlatformDto(NotificationReceiverType.SITE)))
-            .build();
-    }
-
-    public static NotificationTemplateUpdateInfoDto getNotificationTemplateUpdateInfoDto() {
-        return NotificationTemplateUpdateInfoDto.builder()
-            .type(NotificationType.UNPAID_ORDER)
-            .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
-            .time(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
-            .schedule("0 0 18 * * ?")
-            .title("Неопачене замовлення")
-            .titleEng("Unpaid order")
             .build();
     }
 
@@ -483,6 +487,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static AddBonusesToUserDto getAddBonusesToUserDto() {
+        return AddBonusesToUserDto.builder()
+            .paymentId("5")
+            .receiptLink("test")
+            .settlementdate("test")
+            .amount(500L)
+            .build();
+    }
+
     public static GetTariffsInfoDto getAllTariffsInfoDto() {
         return GetTariffsInfoDto.builder()
             .cardId(1L)
@@ -523,20 +536,20 @@ public class ModelUtils {
 
     public static CreateAddressRequestDto getAddressRequestDto() {
         return CreateAddressRequestDto.builder()
-            .districtEn("Shevchenkivskyi")
-            .district("Шевченківський")
-            .regionEn("Kyiv Oblast")
-            .region("Київська область")
-            .houseNumber("25B")
+            .addressComment("fdsfs")
+            .searchAddress("fake address")
+            .district("fdsfds")
+            .districtEn("dsadsad")
+            .region("regdsad")
+            .regionEn("regdsaden")
+            .houseNumber("1")
+            .houseCorpus("2")
             .entranceNumber("3")
-            .houseCorpus("2A")
-            .addressComment("Next to the park")
-            .placeId("ChIJp0lN2HIRkEARuJ1pl_yMcc0")
-            .coordinates(new CoordinatesDto(50.4501, 30.5234))
-            .city("Київ")
-            .cityEn("Kyiv")
-            .street("Хрещатик")
-            .streetEn("Khreshchatyk")
+            .placeId("place_id")
+            .city("city")
+            .cityEn("cityEn")
+            .street("street")
+            .streetEn("streetEn")
             .build();
     }
 
@@ -576,94 +589,6 @@ public class ModelUtils {
                 .orderStatus("NOT_TAKEN_OUT")
                 .build())
             .notTakenOutReason("not taken out")
-            .build();
-    }
-
-    public static AddNotificationTemplateWithPlatformsDto getAddNotificationTemplateWithPlatforms() {
-        return AddNotificationTemplateWithPlatformsDto.builder()
-            .schedule("0 0 18 * * ?")
-            .title("Title")
-            .titleEng("TitleEng")
-            .userCategory(UserCategory.ALL_USERS)
-            .platforms(List.of(
-                getAddNotificationPlatform(SITE),
-                getAddNotificationPlatform(EMAIL),
-                getAddNotificationPlatform(MOBILE)))
-            .build();
-    }
-
-    public static AddNotificationPlatformDto getAddNotificationPlatform(
-        NotificationReceiverType receiverType) {
-        return AddNotificationPlatformDto.builder()
-            .body("Body")
-            .bodyEng("BodyEng")
-            .notificationReceiverType(receiverType)
-            .build();
-    }
-
-    public static PaymentResponseDto getPaymentResponseDto() {
-        PaymentResponseDto dto = new PaymentResponseDto();
-        dto.setMerchantAccount("merchant123");
-        dto.setOrderReference("order456");
-        dto.setMerchantSignature("signature123");
-        dto.setAmount("100.00");
-        dto.setCurrency("USD");
-        dto.setAuthCode("auth123");
-        dto.setEmail("test@mail.com");
-        dto.setPhone("+1234567890");
-        dto.setCreatedDate("2023-07-19T12:00:00");
-        dto.setProcessingDate("2023-07-19T12:05:00");
-        dto.setCardPan("4111111111111111");
-        dto.setCardType("VISA");
-        dto.setIssuerBankCountry("USA");
-        dto.setIssuerBankName("Bank of America");
-        dto.setRecToken("token123");
-        dto.setTransactionStatus("approved");
-        dto.setReason("None");
-        dto.setReasonCode("00");
-        dto.setFee("1.00");
-        dto.setPaymentSystem("card");
-        dto.setAcquirerBankName("Chase");
-        return dto;
-    }
-
-    public static final String TEST_AGREEMENT_TEXT_UA = "Текст угоди українською";
-    public static final String TEST_AGREEMENT_TEXT_EN = "Agreement text in English";
-
-    public static UserAgreementDto getUserAgreementDto() {
-        return UserAgreementDto.builder()
-            .textUa(TEST_AGREEMENT_TEXT_UA)
-            .textEn(TEST_AGREEMENT_TEXT_EN)
-            .build();
-    }
-
-    public static UserAgreementDetailDto getUserAgreementDetailDto() {
-        return UserAgreementDetailDto.builder()
-            .id(1L)
-            .textUa(TEST_AGREEMENT_TEXT_UA)
-            .textEn(TEST_AGREEMENT_TEXT_EN)
-            .createdAt(LocalDateTime.now().minusDays(1))
-            .build();
-    }
-
-    public static MonoBankPaymentResponseDto getMonoBankPaymentResponseDto() {
-        return MonoBankPaymentResponseDto.builder()
-            .invoiceId("testInvoice")
-            .status(MonoBankStatuses.CREATED.getName())
-            .failureReason("")
-            .errorCode("8")
-            .amount(1000)
-            .currency(980)
-            .createdDate(LocalDateTime.now().toString())
-            .modifiedDate(LocalDateTime.now().plusHours(1).toString())
-            .orderReference("11_11_11")
-            .paymentInfo(PaymentInfo.builder()
-                .cardNumber("4490XXXXXXXX4456")
-                .terminal("")
-                .paymentSystem(PaymentSystem.MONOBANK.name())
-                .paymentMethod("VISA")
-                .fee(0)
-                .build())
             .build();
     }
 }
