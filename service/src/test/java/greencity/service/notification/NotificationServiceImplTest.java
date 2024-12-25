@@ -293,7 +293,7 @@ class NotificationServiceImplTest {
 
             assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(mockUserNotification.getOrder(),
                 amountToPay.longValue(), PaymentSystemResponse.builder()
-                            .orderId(1L).link(paymentLink).build()));
+                    .orderId(1L).link(paymentLink).build()));
 
             verify(userNotificationRepository).save(any(UserNotification.class));
             verify(notificationParameterRepository).saveAll(any());
