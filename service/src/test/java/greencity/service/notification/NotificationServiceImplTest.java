@@ -6,6 +6,7 @@ import greencity.config.InternalUrlConfigProp;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Event;
 import greencity.enums.NotificationTrigger;
@@ -277,25 +278,26 @@ class NotificationServiceImplTest {
             verify(notificationParameterRepository).saveAll(Set.of(orderNumber));
         }
 
-//        @Test
-//        void notifyUnpaidOrderPermanentlyTest() {
-//            String orderUrl = getUnpaidOrderUrl();
-//
-//            Double amountToPay = 10000.0;
-//            when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
-//            when(mockUserNotification.getOrder()).thenReturn(mockOrder);
-//            when(internalUrlConfigProp.getOrderUrl()).thenReturn(orderUrl);
-//            when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(mockUserNotification);
-//            when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
-//                return new ArrayList<>(invocation.getArgument(0));
-//            });
-//
-//            assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(mockUserNotification.getOrder(),
-//                amountToPay.longValue()));
-//
-//            verify(userNotificationRepository).save(any(UserNotification.class));
-//            verify(notificationParameterRepository).saveAll(any());
-//        }
+        @Test
+        void notifyUnpaidOrderPermanentlyTest() {
+            String orderUrl = getUnpaidOrderUrl();
+
+            Double amountToPay = 10000.0;
+            String paymentLink = "https://pay.monobank.ua/2412255Qb57omFE7dAjC";
+            when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
+            when(mockUserNotification.getOrder()).thenReturn(mockOrder);
+            when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(mockUserNotification);
+            when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
+                return new ArrayList<>(invocation.getArgument(0));
+            });
+
+            assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(mockUserNotification.getOrder(),
+                amountToPay.longValue(), PaymentSystemResponse.builder()
+                            .orderId(1L).link(paymentLink).build()));
+
+            verify(userNotificationRepository).save(any(UserNotification.class));
+            verify(notificationParameterRepository).saveAll(any());
+        }
 
         @Test
         void testNotifyCourierItineraryFormed() {
