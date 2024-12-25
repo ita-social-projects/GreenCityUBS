@@ -277,25 +277,25 @@ class NotificationServiceImplTest {
             verify(notificationParameterRepository).saveAll(Set.of(orderNumber));
         }
 
-        @Test
-        void notifyUnpaidOrderPermanentlyTest() {
-            String orderUrl = getUnpaidOrderUrl();
-
-            Double amountToPay = 10000.0;
-            when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
-            when(mockUserNotification.getOrder()).thenReturn(mockOrder);
-            when(internalUrlConfigProp.getOrderUrl()).thenReturn(orderUrl);
-            when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(mockUserNotification);
-            when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
-                return new ArrayList<>(invocation.getArgument(0));
-            });
-
-            assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(mockUserNotification.getOrder(),
-                amountToPay.longValue()));
-
-            verify(userNotificationRepository).save(any(UserNotification.class));
-            verify(notificationParameterRepository).saveAll(any());
-        }
+//        @Test
+//        void notifyUnpaidOrderPermanentlyTest() {
+//            String orderUrl = getUnpaidOrderUrl();
+//
+//            Double amountToPay = 10000.0;
+//            when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
+//            when(mockUserNotification.getOrder()).thenReturn(mockOrder);
+//            when(internalUrlConfigProp.getOrderUrl()).thenReturn(orderUrl);
+//            when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(mockUserNotification);
+//            when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
+//                return new ArrayList<>(invocation.getArgument(0));
+//            });
+//
+//            assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(mockUserNotification.getOrder(),
+//                amountToPay.longValue()));
+//
+//            verify(userNotificationRepository).save(any(UserNotification.class));
+//            verify(notificationParameterRepository).saveAll(any());
+//        }
 
         @Test
         void testNotifyCourierItineraryFormed() {

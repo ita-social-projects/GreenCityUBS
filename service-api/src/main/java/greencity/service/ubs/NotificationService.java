@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
@@ -238,10 +239,11 @@ public interface NotificationService {
      * Notify user that order has unpaid status when it was created and not paid.
      * This method is used one time when user create new order.
      *
-     * @param order    the order to send notification for
-     * @param sumToPay the sum to pay
+     * @param order                 the order to send notification for
+     * @param sumToPay              the sum to pay
+     * @param paymentSystemResponse payment system response with link to pay order
      *
      * @author Vladyslav Haliara
      */
-    void notifyUnpaidOrderPermanently(Order order, Long sumToPay);
+    void notifyUnpaidOrderPermanently(Order order, Long sumToPay, PaymentSystemResponse paymentSystemResponse);
 }

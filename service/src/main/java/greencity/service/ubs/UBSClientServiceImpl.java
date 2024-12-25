@@ -577,8 +577,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+        PaymentSystemResponse paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
 
-        checkIfOrderIsNotPayedAndSendEmailAsync(order, sumToPayInCoins);
+        checkIfOrderIsNotPayedAndSendEmailAsync(order, sumToPayInCoins, paymentSystemResponse);
 
         notificationService.notifyCreatedOrder(order);
 
@@ -586,12 +587,13 @@ public class UBSClientServiceImpl implements UBSClientService {
             return getPaymentRequestDto(order, "");
         }
 
-        return processPayment(dto, order, sumToPayInCoins, currentUser);
+        return paymentSystemResponse;
     }
 
     @Async
-    public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins) {
-        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
+    public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins,
+        PaymentSystemResponse paymentSystemResponse) {
+        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,

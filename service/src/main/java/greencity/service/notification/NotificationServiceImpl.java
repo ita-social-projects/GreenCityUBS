@@ -6,6 +6,7 @@ import greencity.constant.OrderHistory;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.order.Bag;
@@ -68,6 +69,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER;
@@ -131,8 +133,29 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order,
-        Double amountToPay) {
+    private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, Double amountToPay,
+        Supplier<String> payButtonLink) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        parameters.add(NotificationParameter.builder()
+            .key(AMOUNT_TO_PAY_KEY)
+            .value(String.format("%.2f", amountToPay))
+            .build());
+
+        parameters.add(NotificationParameter.builder()
+            .key(ORDER_NUMBER_KEY)
+            .value(order.getId().toString())
+            .build());
+
+        parameters.add(NotificationParameter.builder()
+            .key(PAY_BUTTON)
+            .value(payButtonLink.get())
+            .build());
+
+        return parameters;
+    }
+
+    private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, Double amountToPay) {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         parameters.add(NotificationParameter.builder()
@@ -789,11 +812,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyUnpaidOrderPermanently(Order order, Long amountToPay) {
+    public void notifyUnpaidOrderPermanently(Order order, Long amountToPay,
+        PaymentSystemResponse paymentSystemResponse) {
         boolean isOrderPayed = order.getOrderPaymentStatus() == OrderPaymentStatus.PAID;
         if (!isOrderPayed) {
             Double amount = amountToPay.doubleValue() / PERCENTAGE_DIVISOR;
-            Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amount);
+            Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order,
+                amount, () -> paymentSystemResponse.link());
             fillAndSendNotification(parameters, order, NotificationType.UNPAID_ORDER);
         }
     }
