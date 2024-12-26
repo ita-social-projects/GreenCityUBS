@@ -34,4 +34,6 @@ public class UserWithSomeOrderDetailDto {
     private int violation;
     @JsonProperty("currentPoints")
     private String userBonuses;
+    @JsonProperty("chatLink")
+    private String chatLink;
 }

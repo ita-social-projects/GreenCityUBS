@@ -5,6 +5,7 @@ import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.entity.user.employee.Employee;
 
 import java.util.List;
@@ -114,4 +115,12 @@ public interface OrdersAdminsPageService {
      * @author Oleh Kulbaba
      */
     void saveColumnWidthForEmployee(ColumnWidthDto columnWidthDto, String userUuid);
+
+    /**
+     * Adds a chat link to a user.
+     *
+     * @param chatLinkDto the chat link to add
+     * @author Kizerov Dmytro
+     */
+    void addChatLinkToUser(ChatLinkDto chatLinkDto);
 }

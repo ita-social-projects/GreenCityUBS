@@ -8,6 +8,7 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.entity.order.Event;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.ubs.Address;
@@ -96,6 +97,7 @@ class OrdersAdminsPageServiceImplTest {
     private static final String ADDRESS_COMMENT = "commentToAddressForClient";
     private static final String CLIENT_COMMENT = "commentForOrderByClient";
     private static final String ORDER_COMMENT = "commentsForOrder";
+    private static final String CHAT_LINK = "https://my.binotel.ua/f/chat/#/visitor/21269249.12893974";
 
     @Test
     void getParametersForOrdersExceptionTable() {
@@ -1340,5 +1342,35 @@ class OrdersAdminsPageServiceImplTest {
 
         verify(employeeRepository).findByEmail(anyString());
         verify(orderRepository).findById(anyLong());
+    }
+
+    @Test
+    void addChatLinkToUserTest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getUser()));
+
+        ordersAdminsPageService
+            .addChatLinkToUser(ModelUtils.getChatLinkDto(CHAT_LINK));
+
+        verify(userRepository).findById(anyLong());
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void addChatLinkToUserWithNotExistingUserTest() {
+        ChatLinkDto chatLinkDto = ModelUtils.getChatLinkDto(CHAT_LINK);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> ordersAdminsPageService.addChatLinkToUser(chatLinkDto));
+    }
+
+    @Test
+    void addChatLinkToUserWithEmptyLinkTest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getUser()));
+
+        ordersAdminsPageService.addChatLinkToUser(ModelUtils.getChatLinkDto(""));
+
+        verify(userRepository).findById(anyLong());
+        verify(userRepository).save(any(User.class));
     }
 }
