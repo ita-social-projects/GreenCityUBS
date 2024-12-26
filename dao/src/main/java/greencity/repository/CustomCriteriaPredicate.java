@@ -2,12 +2,11 @@ package greencity.repository;
 
 import greencity.entity.order.BigOrderTableViews;
 import greencity.filters.DateFilter;
+import org.springframework.stereotype.Component;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

@@ -7,18 +7,17 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
 import greencity.exceptions.http.RemoteServerUnavailableException;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
@@ -33,7 +32,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
 
             @Override
             public Optional<UserVO> findNotDeactivatedByEmail(String email) {
-                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email, throwable);
+                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + "{}", email, throwable);
                 return Optional.empty();
             }
 
@@ -49,7 +48,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void markUserDeactivated(String uuid) {
+            public void markUserDeactivated(String uuid, DeactivateUserRequestDto request) {
                 throw new RemoteServerUnavailableException(ErrorMessage.USER_HAS_NOT_BEEN_DEACTIVATED, throwable);
             }
 
@@ -59,8 +58,14 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void sendEmailNotification(NotificationDto notification, String email) {
+            public void sendScheduledEmailNotification(ScheduledEmailMessage notification) {
                 log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
+            }
+
+            @Override
+            public String findUserLanguageByUuid(String uuid) {
+                log.error(ErrorMessage.COULD_NOT_RETRIEVE_USER_LANGUAGE, throwable);
+                return "en";
             }
 
             @Override
@@ -71,13 +76,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
 
             @Override
             public PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email) {
-                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email, throwable);
-                throw new RemoteServerUnavailableException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST, throwable);
-            }
-
-            @Override
-            public List<String> getEmployeeLoginPositionNames(String email) {
-                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email);
+                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + "{}", email, throwable);
                 throw new RemoteServerUnavailableException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST, throwable);
             }
 

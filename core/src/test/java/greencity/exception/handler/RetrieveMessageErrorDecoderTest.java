@@ -1,20 +1,18 @@
 package greencity.exception.handler;
 
-import feign.Response;
-import greencity.exceptions.BadRequestException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
-
+import feign.Response;
+import greencity.exceptions.BadRequestException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class RetrieveMessageErrorDecoderTest {
     private final RetrieveMessageErrorDecoder decoder = new RetrieveMessageErrorDecoder();

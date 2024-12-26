@@ -1,5 +1,6 @@
 package greencity.enums;
 
 public enum PaymentSystem {
-    FONDY
+    MONOBANK,
+    WAY_FOR_PAY
 }

@@ -16,14 +16,12 @@ public class PointsForUbsUserDtoMapper extends AbstractConverter<ChangeOfPoints,
 
     @Override
     protected PointsForUbsUserDto convert(ChangeOfPoints changeOfPoints) {
-        Long numberOfOrder = null;
-        if (changeOfPoints.getOrder() != null) {
-            numberOfOrder = changeOfPoints.getOrder().getId();
-        }
         return PointsForUbsUserDto.builder()
             .dateOfEnrollment(changeOfPoints.getDate())
             .amount(changeOfPoints.getAmount())
-            .numberOfOrder(numberOfOrder)
+            .numberOfOrder(changeOfPoints.getOrder().getId())
+            .reasonUa(changeOfPoints.getReason().getDescriptionUa())
+            .reasonEn(changeOfPoints.getReason().getDescriptionEn())
             .build();
     }
 }

@@ -2,9 +2,7 @@ package greencity.dto.user;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
 import java.lang.reflect.Field;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserProfileUpdateDtoTest {
@@ -17,7 +15,7 @@ class UserProfileUpdateDtoTest {
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"John Doe", "абвгґіїьяюєёАБВГҐІЇЬЯЮЄЁ-ʼ'`ʹ", "John-Doe", "John Doe12", "John Doe 12", "Johnʼ'`ʹDoe",
+        strings = {"John Doe", "Лук'ян", "John-Doe", "John Doe12", "John Doe 12", "van Gogh",
             "ValidNameWithMaxLengthEquals30"})
     void testValidRecipientName(String name) throws NoSuchFieldException {
         checkRegexPattern("recipientName", name, true);
@@ -32,7 +30,7 @@ class UserProfileUpdateDtoTest {
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"John Doe", "абвгґіїьяюєёАБВГҐІЇЬЯЮЄЁ-ʼ'`ʹ", "John-Doe", "John Doe12", "John Doe 12", "Johnʼ'`ʹDoe",
+        strings = {"John Doe", "Лук'ян", "John-Doe", "John Doe12", "John Doe 12", "van Gogh",
             "ValidNameWithMaxLengthEquals30"})
     void testValidRecipientSurname(String name) throws NoSuchFieldException {
         checkRegexPattern("recipientSurname", name, true);

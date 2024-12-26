@@ -5,8 +5,12 @@ import greencity.dto.bag.BagMappingDto;
 import greencity.dto.bag.BagTransDto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import java.util.List;
 
 @Getter

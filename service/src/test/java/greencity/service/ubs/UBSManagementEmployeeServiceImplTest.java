@@ -4,11 +4,13 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.dto.tariff.TariffWithChatAccess;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
@@ -16,12 +18,13 @@ import greencity.enums.EmployeeStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.TariffsInfoRepository;
+import greencity.repository.EmployeeCriteriaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,26 +32,36 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static greencity.ModelUtils.getAddEmployeeDto;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getEmployeeDto;
+import static greencity.ModelUtils.getEmployeeDtoWithoutPositionsAndTariffsForGetAllMethod;
+import static greencity.ModelUtils.getEmployeeFilterViewListForOneEmployeeWithDifferentPositions;
+import static greencity.ModelUtils.getEmployeeForUpdateEmailCheck;
+import static greencity.ModelUtils.getEmployeeListForGetAllMethod;
+import static greencity.ModelUtils.getEmployeeWithTariffsIdDto;
+import static greencity.ModelUtils.getPosition;
+import static greencity.ModelUtils.getPositionDto;
+import static greencity.ModelUtils.getTariffsInfo;
+import static greencity.ModelUtils.getTariffInfo;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementEmployeeServiceImplTest {
@@ -73,17 +86,17 @@ class UBSManagementEmployeeServiceImplTest {
     void saveEmployeeTest() {
         Employee employee = getEmployee();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        dto.setTariffs(List.of(TariffWithChatAccess.builder().tariffId(1L).hasChat(false).build()));
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
 
         when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
-        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(repository.save(any())).thenReturn(employee);
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         employeeService.save(dto, file);
 
         verify(repository, times(1)).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
-        verify(modelMapper, times(2)).map(any(), any());
         verify(repository, times(1)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
     }
@@ -152,14 +165,12 @@ class UBSManagementEmployeeServiceImplTest {
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
 
         when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
-        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(repository.save(any())).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         employeeService.save(dto, null);
 
         verify(repository, times(1))
             .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
-        verify(modelMapper, times(2)).map(any(), any());
         verify(repository, times(1)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
     }
@@ -181,6 +192,7 @@ class UBSManagementEmployeeServiceImplTest {
         verify(repository).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
     }
 
+    @Test
     void findAllTest() {
         var employeePage = new EmployeePage();
         var employeeFilterCriteria = new EmployeeFilterCriteria();
@@ -190,7 +202,7 @@ class UBSManagementEmployeeServiceImplTest {
             getEmployeeFilterViewListForOneEmployeeWithDifferentPositions(employeeId, tariffsInfoId);
         var expectedGetEmployeeDto = getEmployeeDtoWithoutPositionsAndTariffsForGetAllMethod();
         var expectedEmployeesList = getEmployeeListForGetAllMethod();
-        var firstElement = employeeFilterViews.get(0);
+        var firstElement = employeeFilterViews.getFirst();
 
         when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
             .thenReturn(employeeFilterViews);
@@ -200,13 +212,13 @@ class UBSManagementEmployeeServiceImplTest {
 
         var getPageableDtoGetEmployeeDto =
             employeeService.findAll(employeePage, employeeFilterCriteria);
-        var actualGetEmployeeDto = getPageableDtoGetEmployeeDto.getPage().get(0);
+        var actualGetEmployeeDto = getPageableDtoGetEmployeeDto.getPage().getFirst();
 
         assertEquals(expectedGetEmployeeDto, actualGetEmployeeDto);
         assertEquals(expectedGetEmployeeDto.getId(), actualGetEmployeeDto.getId());
         assertEquals(expectedGetEmployeeDto.getEmail(), actualGetEmployeeDto.getEmail());
         verify(employeeCriteriaRepository).findAll(employeePage, employeeFilterCriteria);
-        verify(modelMapper, times(1)).map(employeeFilterViews.get(0), GetEmployeeDto.class);
+        verify(modelMapper, times(1)).map(employeeFilterViews.getFirst(), GetEmployeeDto.class);
         verify(repository).findAll();
     }
 
@@ -215,6 +227,7 @@ class UBSManagementEmployeeServiceImplTest {
         Employee employee = getEmployeeForUpdateEmailCheck();
         Employee retrievedEmployee = getEmployeeForUpdateEmailCheck();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        dto.setTariffs(List.of(TariffWithChatAccess.builder().tariffId(1L).hasChat(false).build()));
         Position position = getPosition();
 
         MockMultipartFile file = new MockMultipartFile("employeeDto",
@@ -222,6 +235,7 @@ class UBSManagementEmployeeServiceImplTest {
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
         when(repository.save(any())).thenReturn(employee);
         doNothing().when(fileService).delete(retrievedEmployee.getImagePath());
         when(repository.findById(anyLong())).thenReturn(Optional.of(retrievedEmployee));
@@ -229,7 +243,7 @@ class UBSManagementEmployeeServiceImplTest {
 
         verify(modelMapper, times(2)).map(any(), any());
         verify(repository).save(any());
-        verify(fileService).delete(eq(retrievedEmployee.getImagePath()));
+        verify(fileService).delete(retrievedEmployee.getImagePath());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
         verify(repository, times(2)).findById(anyLong());
     }
@@ -505,5 +519,54 @@ class UBSManagementEmployeeServiceImplTest {
         assertEquals(1, dtos.size());
         verify(modelMapper, times(1)).map(any(), any());
         verify(tariffsInfoRepository).findAll();
+    }
+
+    @Test
+    void getEmployeesByTariffIdTest() {
+        Employee employee = new Employee();
+        employee.setEmail("test@example.com");
+        EmployeeWithTariffsDto employeeDto = new EmployeeWithTariffsDto();
+        Long tariffId = 1L;
+        List<Employee> employees = List.of(employee);
+
+        when(repository.selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId)).thenReturn(employees);
+        when(modelMapper.map(employee, EmployeeWithTariffsDto.class)).thenReturn(employeeDto);
+
+        List<EmployeeWithTariffsDto> result = employeeService.getEmployeesByTariffId(tariffId);
+
+        assertEquals(1, result.size());
+
+        verify(repository, times(1)).selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId);
+        verify(modelMapper, times(1)).map(employee, EmployeeWithTariffsDto.class);
+    }
+
+    @Test
+    void getEmployeeByEmailTest() {
+        Employee employee = new Employee();
+        employee.setEmail("test@example.com");
+        EmployeeWithTariffsDto employeeDto = new EmployeeWithTariffsDto();
+        String email = "test@example.com";
+
+        when(repository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(modelMapper.map(employee, EmployeeWithTariffsDto.class)).thenReturn(employeeDto);
+
+        EmployeeWithTariffsDto result = employeeService.getEmployeeByEmail(email);
+
+        assertNotNull(result);
+
+        verify(repository, times(1)).findByEmail(email);
+        verify(modelMapper, times(1)).map(employee, EmployeeWithTariffsDto.class);
+    }
+
+    @Test
+    void getEmployeeByEmailNotFoundTest() {
+        String email = "nonexistent@example.com";
+
+        when(repository.findByEmail(email)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> employeeService.getEmployeeByEmail(email));
+
+        verify(repository, times(1)).findByEmail(email);
+        verify(modelMapper, times(0)).map(any(Employee.class), eq(EmployeeWithTariffsDto.class));
     }
 }

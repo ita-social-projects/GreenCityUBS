@@ -4,8 +4,8 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.pageble.PageableDto;
-import greencity.entity.order.Certificate;
 import greencity.enums.CertificateStatus;
+import greencity.entity.order.Certificate;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.filters.CertificateFilterCriteria;
@@ -15,11 +15,10 @@ import greencity.repository.CertificateRepository;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXIST;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
 
 @org.springframework.stereotype.Service
 @Data

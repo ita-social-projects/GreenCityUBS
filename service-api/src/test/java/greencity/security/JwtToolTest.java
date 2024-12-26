@@ -2,28 +2,25 @@ package greencity.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import jakarta.servlet.http.HttpServletRequest;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import javax.crypto.SecretKey;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import javax.crypto.SecretKey;
-
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class JwtToolTest {
@@ -31,18 +28,17 @@ class JwtToolTest {
     private HttpServletRequest mockHttpServletRequest;
 
     private JwtTool jwtTool;
-    private static final SecretKey secretKey = Jwts.SIG.HS512.key().build();
-    private static final String keyString = Encoders.BASE64.encode(secretKey.getEncoded());
 
     @BeforeEach
     public void setup() {
-        jwtTool = new JwtTool(keyString);
+        jwtTool = new JwtTool();
+        ReflectionTestUtils.setField(jwtTool, "accessTokenKey", "secret-refresh-token-key-bigger-key");
     }
 
     @Test
     void testGetAccessTokenKey() {
         String accessTokenKey = jwtTool.getAccessTokenKey();
-        assertEquals(keyString, accessTokenKey);
+        assertEquals("secret-refresh-token-key-bigger-key", accessTokenKey);
     }
 
     @Test
@@ -65,46 +61,39 @@ class JwtToolTest {
     void testCreateAccessToken() {
         String email = "test@example.com";
         int ttl = 60;
-
         String accessToken = jwtTool.createAccessToken(email, ttl);
+        SecretKey key = Keys.hmacShaKeyFor(jwtTool.getAccessTokenKey().getBytes());
         assertNotNull(accessToken);
 
-        byte[] keyBytes = Decoders.BASE64.decode(jwtTool.getAccessTokenKey());
-        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
-
-        Claims claims = Jwts.parser()
-            .verifyWith(secretKey)
-            .build()
-            .parseSignedClaims(accessToken)
-            .getPayload();
+        Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(accessToken).getPayload();
 
         // Verify the subject (email) claim
         assertEquals(email, claims.getSubject());
 
         // Verify the role claim
-        @SuppressWarnings("unchecked")
         List<String> roles = (List<String>) claims.get("role");
         assertEquals(Arrays.asList("ROLE_USER", "ROLE_ADMIN"), roles);
 
         // Verify the expiration time
         Date expiration = claims.getExpiration();
-
-        Instant expirationInstant = expiration.toInstant();
-        Instant adjustedInstant = expirationInstant.minus(ttl, ChronoUnit.MINUTES);
-
-        Date expectedExpiration = Date.from(adjustedInstant);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(expiration);
+        calendar.add(Calendar.MINUTE, -ttl);
+        Date expectedExpiration = calendar.getTime();
         assertEquals(expectedExpiration, claims.getIssuedAt());
     }
 
     @Test
     void testGetAuthoritiesFromToken() {
-        String accessToken = Jwts.builder()
-            .subject("test@example.com")
-            .claim("employee_authorities", Arrays.asList("ROLE_USER", "ROLE_ADMIN"))
-            .signWith(secretKey)
-            .compact();
+        final String accessToken = jwtTool.createAccessToken("test@example.com", 60);
+        SecretKey key = Keys.hmacShaKeyFor(jwtTool.getAccessTokenKey().getBytes());
 
-        List<String> authorities = jwtTool.getAuthoritiesFromToken(accessToken);
+        @SuppressWarnings({"unchecked, rawtype"})
+        List<String> authorities = (List<String>) Jwts.parser()
+            .verifyWith(key).build()
+            .parseSignedClaims(accessToken)
+            .getPayload()
+            .get("role");
         List<String> expectedAuthorities = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
         assertEquals(expectedAuthorities, authorities);
     }

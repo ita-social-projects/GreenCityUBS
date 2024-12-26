@@ -7,7 +7,6 @@ import greencity.dto.location.RegionTranslationDto;
 import greencity.entity.user.Region;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,8 +32,8 @@ public class FindAllInfoAboutLocationDtoMapper extends AbstractConverter<Region,
             .collect(Collectors.toList());
 
         List<RegionTranslationDto> regionTranslationDtoList = List.of(
-            RegionTranslationDto.builder().regionName(source.getUkrName()).languageCode(UALangCode).build(),
-            RegionTranslationDto.builder().regionName(source.getEnName()).languageCode(ENLangCode).build());
+            RegionTranslationDto.builder().regionName(source.getNameUk()).languageCode(UALangCode).build(),
+            RegionTranslationDto.builder().regionName(source.getNameEn()).languageCode(ENLangCode).build());
 
         return LocationInfoDto.builder()
             .regionId(source.getId())

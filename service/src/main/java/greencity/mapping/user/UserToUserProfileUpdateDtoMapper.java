@@ -8,20 +8,19 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.service.locations.LocationApiService;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.AbstractConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, UserProfileUpdateDto> {
     /**
      * Service for getting districts in city.
      */
-    @Autowired
-    private LocationApiService locationApiService;
+    private final LocationApiService locationApiService;
 
     /**
      * Method convert {@link User} to {@link UserProfileUpdateDto}.
@@ -31,7 +30,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     @Override
     protected UserProfileUpdateDto convert(User user) {
         List<AddressDto> addressDtoList = user.getAddresses().stream()
-            .filter(obj -> obj.getActual())
+            .filter(Address::getActual)
             .map(this::createAddressDto)
             .collect(Collectors.toList());
 

@@ -1,7 +1,6 @@
 package greencity.repository;
 
 import greencity.entity.parameters.CustomTableView;
-import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,8 +23,7 @@ public interface CustomTableViewRepo extends JpaRepository<CustomTableView, Inte
      * @return CustomTableView entity
      * @author Sikhovskiy Rostyslav
      */
-    @NonNull
-    CustomTableView save(@NonNull CustomTableView customTableView);
+    CustomTableView save(CustomTableView customTableView);
 
     /**
      * Method to check if exists CustomTableView with current Uuid.

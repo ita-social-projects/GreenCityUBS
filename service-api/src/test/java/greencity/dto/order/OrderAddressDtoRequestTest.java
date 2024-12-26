@@ -1,17 +1,16 @@
 package greencity.dto.order;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
+import greencity.dto.location.CoordinatesDto;
 import lombok.SneakyThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import java.util.Set;
 import java.util.stream.Stream;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OrderAddressDtoRequestTest {
@@ -26,6 +25,11 @@ class OrderAddressDtoRequestTest {
             .district("district")
             .districtEn("districtEn")
             .houseNumber("1")
+            .placeId("test")
+            .coordinates(CoordinatesDto.builder()
+                .latitude(1D)
+                .longitude(1D)
+                .build())
             .city("city")
             .cityEn("cityEn")
             .street(street)
@@ -51,6 +55,11 @@ class OrderAddressDtoRequestTest {
             .district("district")
             .districtEn("districtEn")
             .houseNumber("1")
+            .placeId("test")
+            .coordinates(CoordinatesDto.builder()
+                .latitude(1D)
+                .longitude(1D)
+                .build())
             .city("city")
             .cityEn("cityEn")
             .street(street)

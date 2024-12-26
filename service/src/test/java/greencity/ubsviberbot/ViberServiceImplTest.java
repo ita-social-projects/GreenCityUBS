@@ -25,9 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
-
 import java.util.Optional;
-
 import static greencity.enums.NotificationReceiverType.MOBILE;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -116,7 +114,7 @@ class ViberServiceImplTest {
         SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
             .receiver(notification.getUser().getViberBot().getChatId())
             .type(MessageType.text)
-            .text(template.getTitle() + "\n\n" + template.getNotificationPlatforms().get(0).getBody())
+            .text(template.getTitle() + "\n\n" + template.getNotificationPlatforms().getFirst().getBody())
             .build();
 
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
@@ -162,7 +160,7 @@ class ViberServiceImplTest {
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
-            .thenReturn(Optional.of(template));
+                    .thenReturn(Optional.of(template));
         when(viberClient.sendMessage(any())).thenThrow(new RuntimeException());
 
         assertThrows(MessageWasNotSent.class, () -> viberService.sendNotification(notification, MOBILE, 0L));
@@ -194,15 +192,17 @@ class ViberServiceImplTest {
         when(viberClient.getAccountInfo()).thenReturn(noWebhookResponse);
         viberService.init();
 
-        ResponseEntity<String> wrongWebhookResponse = ResponseEntity.ok().body("{\n" +
-            "\"webhook\":\"https://wrong.webhook.com\"\n" +
-            "}");
+        ResponseEntity<String> wrongWebhookResponse = ResponseEntity.ok().body("""
+            {
+            "webhook":"https://wrong.webhook.com"
+            }""");
         when(viberClient.getAccountInfo()).thenReturn(wrongWebhookResponse);
         viberService.init();
 
-        ResponseEntity<String> rightWebhookResponse = ResponseEntity.ok().body("{\n" +
-            "\"webhook\":\"https://right.webhook.com\"\n" +
-            "}");
+        ResponseEntity<String> rightWebhookResponse = ResponseEntity.ok().body("""
+            {
+            "webhook":"https://right.webhook.com"
+            }""");
         when(viberClient.getAccountInfo()).thenReturn(rightWebhookResponse);
         viberService.init();
 
@@ -213,13 +213,13 @@ class ViberServiceImplTest {
     void isEnabled() {
         assertFalse(viberService.isEnabled(null));
 
-        User user = new User();
-        assertFalse(viberService.isEnabled(user));
+        User newUser = new User();
+        assertFalse(viberService.isEnabled(newUser));
 
-        user.setViberBot(new ViberBot(1L, "123", false, user));
-        assertFalse(viberService.isEnabled(user));
+        newUser.setViberBot(new ViberBot(1L, "123", false, newUser));
+        assertFalse(viberService.isEnabled(newUser));
 
-        user.getViberBot().setIsNotify(true);
-        assertTrue(viberService.isEnabled(user));
+        newUser.getViberBot().setIsNotify(true);
+        assertTrue(viberService.isEnabled(newUser));
     }
 }

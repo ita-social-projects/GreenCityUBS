@@ -1,8 +1,7 @@
 package greencity.dto.position;
 
-import lombok.Builder;
 import lombok.Data;
-
+import lombok.Builder;
 import java.util.List;
 
 @Builder

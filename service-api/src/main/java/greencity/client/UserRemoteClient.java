@@ -6,21 +6,20 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
+import java.util.Optional;
+import java.util.Set;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Client for getting info about {@link User} from GreenCityUser server.
@@ -83,22 +82,12 @@ public interface UserRemoteClient {
     PositionAuthoritiesDto getPositionsAndRelatedAuthorities(@RequestParam String email);
 
     /**
-     * Gets information about login employee`s positions.
-     *
-     * @param email {@link String} - user's email.
-     * @return List of {@link String} - list of employee`s positions.
-     * @author Anton Bondar
-     */
-    @GetMapping("/user/get-employee-login-positions")
-    List<String> getEmployeeLoginPositionNames(@RequestParam String email);
-
-    /**
      * Changes userStatus to "DEACTIVATED" by UUID.
      *
-     * @param uuid {@link User}'s UUID.
+     * @param uuid {@link User}'s uuid.
      */
-    @PutMapping("/user/markUserAsDeactivated")
-    void markUserDeactivated(@RequestParam(UUID) String uuid);
+    @PutMapping("/user/deactivate")
+    void markUserDeactivated(@RequestParam(UUID) String uuid, @RequestBody DeactivateUserRequestDto request);
 
     /**
      * Gets current user's password status.
@@ -111,11 +100,19 @@ public interface UserRemoteClient {
     /**
      * Sends an email notification for user.
      *
-     * @param notification {@link NotificationDto} - notification details.
-     * @param email        {@link String} user's email.
+     * @param notification {@link ScheduledEmailMessage} - notification details.
      */
-    @PostMapping("/email/notification")
-    void sendEmailNotification(NotificationDto notification, @RequestParam(EMAIL) String email);
+    @PostMapping("/email/scheduled/notification")
+    void sendScheduledEmailNotification(@RequestBody ScheduledEmailMessage notification);
+
+    /**
+     * Get user language by uuid.
+     *
+     * @param uuid user uuid.
+     * @return user language.
+     */
+    @GetMapping("/user/findUserLanguageByUuid")
+    String findUserLanguageByUuid(@RequestParam(UUID) String uuid);
 
     /**
      * Get information about all employee's authorities.

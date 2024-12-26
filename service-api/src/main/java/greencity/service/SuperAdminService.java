@@ -22,7 +22,6 @@ import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
 import greencity.enums.LocationStatus;
 import greencity.filters.TariffsInfoFilterCriteria;
-
 import java.util.List;
 
 public interface SuperAdminService {

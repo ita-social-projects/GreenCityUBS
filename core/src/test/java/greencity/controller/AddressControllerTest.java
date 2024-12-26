@@ -9,22 +9,26 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.service.ubs.UBSClientService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
 import static greencity.ModelUtils.getPrincipal;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -32,25 +36,28 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class AddressControllerTest {
-    private static final String UBS_LINK = "/ubs";
-    private static final String RANDOM_UUID = UUID.randomUUID().toString();
 
-    private static final MockMvc mockMvc;
-    private static final UBSClientService ubsClientService;
-    private static final UserRemoteClient userRemoteClient;
-    private static final AddressController addressController;
+    private static final String ubsLink = "/ubs";
+
+    private MockMvc mockMvc;
+
+    @Mock
+    private UBSClientService ubsClientService;
+
+    @Mock
+    private UserRemoteClient userRemoteClient;
+
+    @InjectMocks
+    private AddressController addressController;
 
     private final Principal principal = getPrincipal();
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    static {
-        ubsClientService = mock(UBSClientService.class);
-        userRemoteClient = mock(UserRemoteClient.class);
-        addressController = new AddressController(ubsClientService);
-
-        mockMvc = MockMvcBuilders.standaloneSetup(addressController)
+    @BeforeEach
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.standaloneSetup(addressController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRemoteClient))
             .build();
@@ -58,9 +65,9 @@ class AddressControllerTest {
 
     @Test
     void getAllAddressesForCurrentUser() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
-        mockMvc.perform(get(UBS_LINK + "/findAll-order-address")
+        mockMvc.perform(get(ubsLink + "/findAll-order-address")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -70,41 +77,41 @@ class AddressControllerTest {
 
     @Test
     void saveAddressForOrder() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
         CreateAddressRequestDto dto = ModelUtils.getAddressRequestDto();
 
-        String createAddressRequestDto = OBJECT_MAPPER.writeValueAsString(dto);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String createAddressRequestDto = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(post(UBS_LINK + "/save-order-address")
+        mockMvc.perform(post(ubsLink + "/save-order-address")
             .content(createAddressRequestDto)
             .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
-        verify(ubsClientService).saveCurrentAddressForOrder(any(), eq(RANDOM_UUID));
+        verify(ubsClientService).saveCurrentAddressForOrder(any(), eq("35467585763t4sfgchjfuyetf"));
     }
 
     @Test
     void updateAddressForOrder() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(RANDOM_UUID);
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
         OrderAddressDtoRequest dto = ModelUtils.getOrderAddressDtoRequest();
 
-        String orderAddressDtoRequest = OBJECT_MAPPER.writeValueAsString(dto);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderAddressDtoRequest = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(put(UBS_LINK + "/update-order-address")
+        mockMvc.perform(put(ubsLink + "/update-order-address")
             .content(orderAddressDtoRequest)
             .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-        verify(ubsClientService).updateCurrentAddressForOrder(any(), eq(RANDOM_UUID));
+        verify(ubsClientService).updateCurrentAddressForOrder(any(), eq("35467585763t4sfgchjfuyetf"));
     }
 
     @Test
     void deleteOrderAddress() throws Exception {
-        mockMvc.perform(delete(UBS_LINK + "/order-addresses/{id}", 1L)
+        mockMvc.perform(delete(ubsLink + "/order-addresses/{id}", 1L)
             .principal(principal))
             .andExpect(status().isOk());
     }
@@ -112,11 +119,11 @@ class AddressControllerTest {
     @Test
     void makeAddressActual() throws Exception {
         Long addressId = 1L;
-        String uuid = RANDOM_UUID;
+        String uuid = "35467585763t4sfgchjfuyetf";
 
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(uuid);
 
-        mockMvc.perform(patch(UBS_LINK + "/makeAddressActual/{addressId}", addressId)
+        mockMvc.perform(patch(ubsLink + "/makeAddressActual/{addressId}", addressId)
             .principal(principal))
             .andExpect(status().isOk());
 
@@ -127,12 +134,9 @@ class AddressControllerTest {
     void getAllDistrictsForRegionAndCity() throws Exception {
         String region = "Львівська";
         String city = "Львів";
-        List<DistrictDto> mockLocationDtoList = List.of(DistrictDto.builder()
-            .nameUa("Львів")
-            .nameEn("Lviv")
-            .build());
+        List<DistrictDto> mockLocationDtoList = new ArrayList<>();
         when(ubsClientService.getAllDistricts(region, city)).thenReturn(mockLocationDtoList);
-        mockMvc.perform(get(UBS_LINK + "/get-all-districts")
+        mockMvc.perform(get(ubsLink + "/get-all-districts")
             .param("region", region)
             .param("city", city)
             .principal(principal)
@@ -142,4 +146,10 @@ class AddressControllerTest {
         verify(ubsClientService).getAllDistricts(region, city);
     }
 
+    @Test
+    void getAllDistrictsForKyiv() throws Exception {
+        mockMvc.perform(get(ubsLink + "/districts-for-kyiv")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
 }

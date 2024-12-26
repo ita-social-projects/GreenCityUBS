@@ -1,11 +1,9 @@
 package greencity.dto.user;
 
 import greencity.annotations.ValidPhoneNumber;
+import greencity.constant.ValidationConstant;
 import greencity.dto.address.AddressDto;
 import greencity.util.Bot;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -14,7 +12,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
-
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 
 @Getter
@@ -26,16 +26,16 @@ import java.util.List;
 @EqualsAndHashCode
 public class UserProfileDto {
     @NotBlank
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String recipientName;
     @NotBlank
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z\\s-'.]{1,30}")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String recipientSurname;
     @NotBlank
-    @Email
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String recipientEmail;
     @NotBlank
-    @Email
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String alternateEmail;
     @NotBlank
     @ValidPhoneNumber

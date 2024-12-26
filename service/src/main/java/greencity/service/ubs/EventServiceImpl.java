@@ -7,25 +7,24 @@ import greencity.entity.user.employee.Employee;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 
 @Service
-@Data
+@RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EmployeeRepository employeeRepository;
@@ -125,6 +124,8 @@ public class EventServiceImpl implements EventService {
         eventNameToEngMap.put(OrderHistory.ORDER_HALF_PAID, OrderHistory.ORDER_HALF_PAID_ENG);
         eventNameToEngMap.put(OrderHistory.ADD_ADMIN_COMMENT, OrderHistory.ADD_ADMIN_COMMENT_ENG);
         eventNameToEngMap.put(OrderHistory.DELETE_VIOLATION, OrderHistory.DELETE_VIOLATION_ENG);
+        eventNameToEngMap.put(OrderHistory.CANCELED_ORDER_MONEY_REFUND, OrderHistory.CANCELED_ORDER_MONEY_REFUND_ENG);
+        eventNameToEngMap.put(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_ENG);
     }
 
     private static String getEventNameEng(String eventName) {

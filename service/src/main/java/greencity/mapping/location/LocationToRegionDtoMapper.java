@@ -11,8 +11,8 @@ public class LocationToRegionDtoMapper extends AbstractConverter<Location, Regio
     public RegionDto convert(Location sourse) {
         return RegionDto.builder()
             .regionId(sourse.getRegion().getId())
-            .nameUk(sourse.getRegion().getUkrName())
-            .nameEn(sourse.getRegion().getEnName())
+            .nameUk(sourse.getRegion().getNameUk())
+            .nameEn(sourse.getRegion().getNameEn())
             .build();
     }
 }

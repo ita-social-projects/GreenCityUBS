@@ -26,10 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.Set;
-
 import static greencity.enums.NotificationReceiverType.MOBILE;
 
 @Service
@@ -137,8 +135,10 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
         SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
             .receiver(receiverId)
             .type(MessageType.text)
-            .text("Привіт!\nЦе UbsBot!\n"
-                + "Надішли будь який символ для того щоб підписатись на бота і отримувати сповіщення.")
+            .text("""
+                Привіт!
+                Це UbsBot!
+                Надішли будь який символ для того щоб підписатись на бота і отримувати сповіщення.""")
             .build();
         sendMessageToUser(sendMessageToUserDto);
     }

@@ -1,11 +1,11 @@
 package greencity.entity.table;
 
 import greencity.entity.user.employee.Employee;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "column_width_for_employee")
@@ -14,7 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class TableColumnWidthForEmployee {
-    private static final Integer DEFAULT_WIDTH = 120;
+    private static final Integer DEFAULT_WIDTH = 165;
+    private static final Integer DEFAULT_WIDTH_FOR_WASTE = 106;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +26,12 @@ public class TableColumnWidthForEmployee {
     private Integer address = DEFAULT_WIDTH;
     @Column
     private Integer amountDue = DEFAULT_WIDTH;
-    @Column
-    private Integer bagsAmount = DEFAULT_WIDTH;
+    @Column(name = "mixed_waste_120l")
+    private Integer mixedWaste120L = DEFAULT_WIDTH_FOR_WASTE;
+    @Column(name = "textile_waste_60l")
+    private Integer textileWaste60L = DEFAULT_WIDTH_FOR_WASTE;
+    @Column(name = "textile_waste_20l")
+    private Integer textileWaste20L = DEFAULT_WIDTH_FOR_WASTE;
     @Column
     private Integer blockedBy = DEFAULT_WIDTH;
     @Column
@@ -89,6 +94,8 @@ public class TableColumnWidthForEmployee {
     private Integer totalPayment = DEFAULT_WIDTH;
     @Column
     private Integer violationsAmount = DEFAULT_WIDTH;
+    @Column
+    private boolean isTableFreeze = Boolean.FALSE;
 
     /**
      * Constructor with default width for all columns.

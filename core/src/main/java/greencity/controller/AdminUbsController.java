@@ -1,11 +1,14 @@
 package greencity.controller;
 
-import greencity.annotations.*;
+import greencity.annotations.ApiPageable;
+import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
+import greencity.dto.location.api.RegionInfoDto;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.dto.violation.UserViolationsWithUserName;
 import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
@@ -14,11 +17,14 @@ import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersForUserService;
 import greencity.service.ubs.ValuesForUserTableService;
 import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.manager.BigOrderTableServiceView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +33,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.security.Principal;
 import java.util.List;
 
@@ -39,6 +44,7 @@ public class AdminUbsController {
     private final ValuesForUserTableService valuesForUserTable;
     private final OrdersForUserService ordersForUserService;
     private final ViolationService violationService;
+    private final BigOrderTableServiceView bigOrderTableServiceView;
 
     /**
      * Controller for obtaining all users that made at least one order.
@@ -48,15 +54,16 @@ public class AdminUbsController {
      * @author Stepan Tehlivets.
      */
     @Operation(summary = "Get users for the table")
-    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
-    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
-    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
-    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_CLIENTS_PAGE', authentication)")
     @GetMapping("/usersAll")
     public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(CustomerPage page,
-        String columnName,
-        Principal principal,
+        String columnName, Principal principal,
         @RequestParam SortingOrder sortingOrder,
         UserFilterCriteria userFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -70,14 +77,17 @@ public class AdminUbsController {
      * @author Liubomyr Pater
      */
     @Operation(summary = "Get all parameters for building table of orders")
-    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
-    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
-    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
-    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
     @GetMapping("/tableParams")
     public ResponseEntity<TableParamsDto> getTableParameters(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getParametersForOrdersTable(userUuid));
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ordersAdminsPageService.getParametersForOrdersTable(userUuid));
     }
 
     /**
@@ -87,10 +97,12 @@ public class AdminUbsController {
      * @author Oleh Kulbaba
      */
     @Operation(summary = "Get width of columns for order table")
-    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
-    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
-    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
-    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @GetMapping("/orderTableColumnsWidth")
     public ResponseEntity<ColumnWidthDto> getTableColumnWidthForCurrentUser(
@@ -106,10 +118,12 @@ public class AdminUbsController {
      * @author Oleh Kulbaba
      */
     @Operation(summary = "Edit width of columns for order table")
-    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
-    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
-    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
-    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @PutMapping("/orderTableColumnsWidth")
     public ResponseEntity<HttpStatus> saveTableColumnWidthForCurrentUser(
@@ -125,10 +139,14 @@ public class AdminUbsController {
      * @author Liubomyr Pater
      */
     @Operation(summary = "Save changes in orders")
-    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-        content = @Content(schema = @Schema(implementation = PageableDto.class)))
-    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
-    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PutMapping("/changingOrder")
     public ResponseEntity<List<Long>> saveNewValueFromOrdersTable(
         @Parameter(hidden = true) HttpServletRequest request,
@@ -146,10 +164,13 @@ public class AdminUbsController {
      * @author Liubomyr Pater
      */
     @Operation(summary = "Block orders for changing by another users")
-    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-        content = @Content(schema = @Schema(implementation = PageableDto.class)))
-    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
-    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
     @PutMapping("/blockOrders")
     public ResponseEntity<List<BlockedOrderDto>> blockOrders(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
@@ -164,10 +185,13 @@ public class AdminUbsController {
      * @author Liubomyr Pater
      */
     @Operation(summary = "Block orders for changing by another users")
-    @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-        content = @Content(schema = @Schema(implementation = PageableDto.class)))
-    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
-    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
     @PutMapping("/unblockOrders")
     public ResponseEntity<List<Long>> unblockOrders(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
@@ -183,10 +207,12 @@ public class AdminUbsController {
      * @author Roman Sulymka.
      */
     @Operation(summary = "Get users for the table")
-    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
-    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
-    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
-    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
     @GetMapping("/{userId}/ordersAll")
     public ResponseEntity<UserWithOrdersDto> getAllOrdersForUser(
         @Parameter(hidden = true) Pageable page, @PathVariable Long userId,
@@ -202,10 +228,12 @@ public class AdminUbsController {
      * @author Roman Sulymka and Max Bohonko.
      */
     @Operation(summary = "Get user's violations")
-    @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
-    @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
-    @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
-    @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
     @ApiPageable
     @GetMapping("/{userId}/violationsAll")
     public ResponseEntity<UserViolationsWithUserName> getAllViolationsByUser(
@@ -214,5 +242,47 @@ public class AdminUbsController {
         @RequestParam SortingOrder sortingOrder) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(violationService.getAllViolations(page, userId, columnName, sortingOrder));
+    }
+
+    @Operation(summary = "Get all information about regions, his cities and districts")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content)
+    })
+    @GetMapping("/locations-details")
+    public ResponseEntity<List<RegionInfoDto>> getAllInformationForLocations() {
+        return ResponseEntity.ok(ordersAdminsPageService.getAllLocationsInfo());
+    }
+
+    @Operation(summary = "sets a isTableFreeze value for tableColumnWidthForEmployee entity")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "isTableFreeze is successfully updated",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
+        @ApiResponse(
+            responseCode = "404",
+            description = HttpStatuses.NOT_FOUND,
+            content = @Content)
+    })
+    @PutMapping("/saveOrderTableColumnsWidthIsFreeze")
+    public ResponseEntity<HttpStatus> saveIsFreeze(@CurrentUserUuid String uuid,
+        @RequestParam boolean value) {
+        bigOrderTableServiceView.changeIsFreezeStatus(uuid, value);
+        return ResponseEntity.status(HttpStatus.OK).body(HttpStatus.OK);
+    }
+
+    @Operation(summary = "Add chat link to user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_CLIENTS_PAGE', authentication)")
+    @PatchMapping("/addChatLink")
+    public ResponseEntity<HttpStatus> addChatLink(@RequestBody @Valid ChatLinkDto chatLink) {
+        ordersAdminsPageService.addChatLinkToUser(chatLink);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

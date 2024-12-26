@@ -3,16 +3,16 @@ package greencity.service.ubs;
 import greencity.constant.AppConstant;
 import greencity.dto.order.UserOrdersDto;
 import greencity.dto.order.UserWithOrdersDto;
+import greencity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.enums.SortingOrder;
-import greencity.repository.*;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +49,7 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
     }
 
     private String getUsername(Long userID) {
-        User currentUser = userRepository.getOne(userID);
+        User currentUser = userRepository.getReferenceById(userID);
         return currentUser.getRecipientName() + " " + currentUser.getRecipientSurname();
     }
 }
