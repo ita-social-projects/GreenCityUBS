@@ -11,6 +11,7 @@ import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnDTO;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -79,6 +80,7 @@ import static greencity.constant.ErrorMessage.ORDER_STATUS_INVALID;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static greencity.constant.OrderHistory.UBS_ADMIN;
 import static java.util.Objects.isNull;
@@ -453,6 +455,17 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     tableColumnWidthForEmployeeRepository.save(tableColumnWidthForEmployee);
                 });
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addChatLinkToUser(ChatLinkDto chatLinkDto) {
+        User user = userRepository.findById(chatLinkDto.getUserId())
+            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        user.setChatLink(chatLinkDto.getLink());
+        userRepository.save(user);
     }
 
     private enum ColumnNameToPosition {

@@ -102,6 +102,7 @@ import greencity.dto.service.TariffServiceDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.tariff.*;
 import greencity.dto.user.AddBonusesToUserDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -5378,5 +5379,36 @@ public class ModelUtils {
             .orderIdsList(List.of(1L))
             .newValue("Test comment")
             .build();
+    }
+
+    public static User createTestUser(Long id, String firstName, String lastName, String email, String phone) {
+        User user = new User();
+        user.setId(id);
+        user.setRecipientName(firstName);
+        user.setRecipientSurname(lastName);
+        user.setRecipientEmail(email);
+        user.setRecipientPhone(phone);
+        user.setDateOfRegistration(LocalDate.now());
+        user.setOrders(List.of(createTestOrder()));
+        user.setCurrentPoints(100);
+        user.setViolations(1);
+        return user;
+    }
+
+    public static Order createTestOrder() {
+        Order order = new Order();
+        order.setOrderDate(LocalDateTime.now().minusDays(1));
+        return order;
+    }
+
+    public static Employee createTestEmployee(Long id) {
+        Employee employee = new Employee();
+        employee.setId(id);
+        employee.setEmail("test@example.com");
+        return employee;
+    }
+
+    public static ChatLinkDto getChatLinkDto(String link) {
+        return new ChatLinkDto(1L, link);
     }
 }

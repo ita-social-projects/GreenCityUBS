@@ -6,6 +6,7 @@ import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.dto.violation.UserViolationsWithUserName;
 import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
@@ -224,5 +225,26 @@ public class AdminUbsController {
         @RequestParam SortingOrder sortingOrder) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(violationService.getAllViolations(page, userId, columnName, sortingOrder));
+    }
+
+    /**
+     * Controller for adding chat link to user.
+     *
+     * @param chatLinkDto {@link ChatLinkDto} with chat link and user id.
+     * @return {@link ResponseEntity} with {@link HttpStatus} OK.
+     * @author Kizerov Dmytro.
+     */
+    @ApiOperation("Add chat link to user")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_CLIENTS_PAGE', authentication)")
+    @PatchMapping("/addChatLink")
+    public ResponseEntity<HttpStatus> addChatLink(@RequestBody @Valid ChatLinkDto chatLinkDto) {
+        ordersAdminsPageService.addChatLinkToUser(chatLinkDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

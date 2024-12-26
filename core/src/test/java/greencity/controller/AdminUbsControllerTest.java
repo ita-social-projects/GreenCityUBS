@@ -8,6 +8,7 @@ import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.service.ubs.OrdersAdminsPageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -140,6 +142,17 @@ class AdminUbsControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)
             .content(json))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void addChatLinkTest() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(patch(management + "/addChatLink")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper
+                .writeValueAsString(new ChatLinkDto(1L, "https://my.binotel.ua/f/chat/#/visitor/21269249.12893974"))))
             .andExpect(status().isOk());
     }
 }

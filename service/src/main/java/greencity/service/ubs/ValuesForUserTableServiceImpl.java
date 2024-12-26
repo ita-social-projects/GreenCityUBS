@@ -9,6 +9,7 @@ import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import greencity.repository.*;
 import greencity.repository.UserTableRepo;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -89,6 +90,9 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
             allFieldsFromTableDto
                 .setLastOrderDate(optional
                     .get().getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
+        }
+        if (Objects.nonNull(u.getChatLink())) {
+            allFieldsFromTableDto.setChatLink(u.getChatLink());
         }
         return allFieldsFromTableDto;
     }
