@@ -113,6 +113,7 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -5701,5 +5702,9 @@ public class ModelUtils {
         employee.setId(id);
         employee.setEmail("test@example.com");
         return employee;
+    }
+
+    public static ChatLinkDto getChatLinkDto(String link) {
+        return new ChatLinkDto(1L, link);
     }
 }
