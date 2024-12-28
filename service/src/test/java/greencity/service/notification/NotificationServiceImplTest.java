@@ -129,6 +129,7 @@ class NotificationServiceImplTest {
     private static final String END_TIME_KEY = "endTime";
     private static final String PHONE_NUMBER_KEY = "phoneNumber";
     private static final String CUSTOMER = "customerName";
+    private static final String PAYMENT_LINK = "https://pay.monobank.ua/2412255Qb57omFE7dAjC";
 
     @Mock
     private OrderRepository orderRepository;
@@ -281,9 +282,8 @@ class NotificationServiceImplTest {
         @Test
         void notifyUnpaidOrderPermanentlyTest() {
             String orderUrl = getUnpaidOrderUrl();
-
             Double amountToPay = 10000.0;
-            String paymentLink = "https://pay.monobank.ua/2412255Qb57omFE7dAjC";
+
             when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
             when(mockUserNotification.getOrder()).thenReturn(mockOrder);
             when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(mockUserNotification);
@@ -293,7 +293,7 @@ class NotificationServiceImplTest {
 
             assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(mockUserNotification.getOrder(),
                 amountToPay.longValue(), PaymentSystemResponse.builder()
-                    .orderId(1L).link(paymentLink).build()));
+                    .orderId(1L).link(PAYMENT_LINK).build()));
 
             verify(userNotificationRepository).save(any(UserNotification.class));
             verify(notificationParameterRepository).saveAll(any());
@@ -1133,7 +1133,6 @@ class NotificationServiceImplTest {
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
         Set<NotificationParameter> parameters = new HashSet<>();
-
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.ORDER_STATUS_CHANGED);
         notification.setUser(user);
@@ -1142,8 +1141,7 @@ class NotificationServiceImplTest {
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
-
-        notificationService.notifyUnpaidOrder(order);
+        notificationService.notifyUnpaidOrder(order, PAYMENT_LINK);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());
@@ -1173,7 +1171,7 @@ class NotificationServiceImplTest {
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
-        notificationService.notifyUnpaidOrder(order);
+        notificationService.notifyUnpaidOrder(order,PAYMENT_LINK);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());
@@ -1205,7 +1203,7 @@ class NotificationServiceImplTest {
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
-        notificationService.notifyUnpaidOrder(order);
+        notificationService.notifyUnpaidOrder(order, PAYMENT_LINK);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());

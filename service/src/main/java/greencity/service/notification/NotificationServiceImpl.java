@@ -69,7 +69,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER;
@@ -126,15 +125,32 @@ public class NotificationServiceImpl implements NotificationService {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
                 Double amountToPay = getAmountToPay(order);
+                String paymentLink = String.valueOf(getPaymentLink(order));
                 Set<NotificationParameter> notificationParameters =
-                    initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
+                    initialiseNotificationParametersForUnpaidOrder(order, amountToPay, paymentLink);
                 fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
             }
         }
     }
 
+    private Optional<String> getPaymentLink(Order order){
+        Optional<UserNotification> userNotification = userNotificationRepository.findUserNotificationByOrder(order);
+        if (userNotification.isPresent()) {
+            Optional<Set<NotificationParameter>> notificationParameters =
+                    notificationParameterRepository.findNotificationParameterByUserNotification(userNotification.get());
+            if (notificationParameters.isPresent()){
+                return  notificationParameters.get().stream()
+                        .filter(param -> "payButton".equals(param.getKey()))
+                        .map(NotificationParameter::getValue)
+                        .findFirst();
+
+            }
+        }
+        return Optional.empty();
+    }
+
     private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, Double amountToPay,
-        Supplier<String> payButtonLink) {
+                                                                                      String payButtonLink) {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         parameters.add(NotificationParameter.builder()
@@ -149,7 +165,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         parameters.add(NotificationParameter.builder()
             .key(PAY_BUTTON)
-            .value(payButtonLink.get())
+            .value(payButtonLink)
             .build());
 
         return parameters;
@@ -266,9 +282,9 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyUnpaidOrder(Order order) {
+    public void notifyUnpaidOrder(Order order, String paymentLink) {
         Double amountToPay = getAmountToPay(order);
-        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
+        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay, paymentLink);
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()
@@ -818,7 +834,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (!isOrderPayed) {
             Double amount = amountToPay.doubleValue() / PERCENTAGE_DIVISOR;
             Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order,
-                amount, () -> paymentSystemResponse.link());
+                amount, paymentSystemResponse.link());
             fillAndSendNotification(parameters, order, NotificationType.UNPAID_ORDER);
         }
     }

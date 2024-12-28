@@ -37,6 +37,7 @@ import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderPaymentStatusesTranslationDto;
 import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrderStatusesTranslationDto;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
@@ -45,6 +46,8 @@ import greencity.dto.position.PositionDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
+import greencity.entity.notifications.NotificationParameter;
+import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Certificate;
@@ -74,6 +77,7 @@ import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
+import greencity.repository.NotificationParameterRepository;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
@@ -85,6 +89,7 @@ import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
 import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
@@ -170,6 +175,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     static final String FORMAT_DATE = "dd-MM-yyyy";
     private final UBSClientService ubsClientService;
     private final OrderBagRepository orderBagRepository;
+    private final UserNotificationRepository userNotificationRepository;
+    private final NotificationParameterRepository notificationParameterRepository;
 
     /**
      * {@inheritDoc}
@@ -1287,8 +1294,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
         if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-            notificationService.notifyUnpaidOrder(order);
+            Optional<UserNotification> userNotification = userNotificationRepository.findUserNotificationByOrder(order);
+
+            if (userNotification.isPresent()) {
+                Optional<Set<NotificationParameter>> notificationParameters =
+                        notificationParameterRepository.findNotificationParameterByUserNotification(userNotification.get());
+                if (notificationParameters.isPresent()) {
+                    Optional<String> paymentLink = notificationParameters.get().stream()
+                            .filter(param -> "payButton".equals(param.getKey()))
+                            .map(NotificationParameter::getValue)
+                            .findFirst();
+
+                    notificationService.notifyUnpaidOrder(order, paymentLink.orElse(null));
+                }
+            }
         }
+
     }
 
     /**
