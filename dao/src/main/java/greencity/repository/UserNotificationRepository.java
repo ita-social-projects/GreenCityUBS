@@ -92,7 +92,6 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      */
     boolean existsByIdAndUserIdAndIsDeletedFalse(Long notificationId, Long userId);
 
-
     /**
      * Finds a {@link UserNotification} by the given {@link Order}.
      *
@@ -101,4 +100,4 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      *         if no notification for the given order was found
      */
     Optional<UserNotification> findUserNotificationByOrder(Order order);
- }
+}

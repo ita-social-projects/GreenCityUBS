@@ -133,24 +133,23 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private Optional<String> getPaymentLink(Order order){
+    private Optional<String> getPaymentLink(Order order) {
         Optional<UserNotification> userNotification = userNotificationRepository.findUserNotificationByOrder(order);
         if (userNotification.isPresent()) {
             Optional<Set<NotificationParameter>> notificationParameters =
-                    notificationParameterRepository.findNotificationParameterByUserNotification(userNotification.get());
-            if (notificationParameters.isPresent()){
-                return  notificationParameters.get().stream()
-                        .filter(param -> "payButton".equals(param.getKey()))
-                        .map(NotificationParameter::getValue)
-                        .findFirst();
-
+                notificationParameterRepository.findNotificationParameterByUserNotification(userNotification.get());
+            if (notificationParameters.isPresent()) {
+                return notificationParameters.get().stream()
+                    .filter(param -> "payButton".equals(param.getKey()))
+                    .map(NotificationParameter::getValue)
+                    .findFirst();
             }
         }
         return Optional.empty();
     }
 
     private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order, Double amountToPay,
-                                                                                      String payButtonLink) {
+        String payButtonLink) {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         parameters.add(NotificationParameter.builder()
@@ -284,7 +283,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyUnpaidOrder(Order order, String paymentLink) {
         Double amountToPay = getAmountToPay(order);
-        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay, paymentLink);
+        Set<NotificationParameter> parameters =
+            initialiseNotificationParametersForUnpaidOrder(order, amountToPay, paymentLink);
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()

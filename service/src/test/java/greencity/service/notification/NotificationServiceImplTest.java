@@ -1171,7 +1171,7 @@ class NotificationServiceImplTest {
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
-        notificationService.notifyUnpaidOrder(order,PAYMENT_LINK);
+        notificationService.notifyUnpaidOrder(order, PAYMENT_LINK);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());

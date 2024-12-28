@@ -163,8 +163,8 @@ public interface NotificationService {
     /**
      * Method sends messages by e-mail/notification that order is unpaid.
      *
-     * @param order of {@link Order} Order which status was changed
-     * @param  paymentLink payment link
+     * @param order       of {@link Order} Order which status was changed
+     * @param paymentLink payment link
      * @author Vladyslav Haliara
      */
     void notifyUnpaidOrder(Order order, String paymentLink);

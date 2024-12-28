@@ -1298,18 +1298,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
             if (userNotification.isPresent()) {
                 Optional<Set<NotificationParameter>> notificationParameters =
-                        notificationParameterRepository.findNotificationParameterByUserNotification(userNotification.get());
+                    notificationParameterRepository.findNotificationParameterByUserNotification(userNotification.get());
                 if (notificationParameters.isPresent()) {
                     Optional<String> paymentLink = notificationParameters.get().stream()
-                            .filter(param -> "payButton".equals(param.getKey()))
-                            .map(NotificationParameter::getValue)
-                            .findFirst();
+                        .filter(param -> "payButton".equals(param.getKey()))
+                        .map(NotificationParameter::getValue)
+                        .findFirst();
 
                     notificationService.notifyUnpaidOrder(order, paymentLink.orElse(null));
                 }
             }
         }
-
     }
 
     /**
