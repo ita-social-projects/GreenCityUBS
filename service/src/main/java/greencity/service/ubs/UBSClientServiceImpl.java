@@ -86,6 +86,7 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.BagStatus;
+import greencity.enums.BonusReason;
 import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -96,7 +97,6 @@ import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentType;
 import greencity.enums.TariffStatus;
-import greencity.enums.BonusReason;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
@@ -105,6 +105,7 @@ import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
+import greencity.notificator.UnpaidOrderNotificator;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -150,6 +151,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -172,6 +174,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+
+
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
@@ -265,6 +269,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final DistrictRepository districtRepository;
     private final MonoBankClient monoBankClient;
     private final NotificationServiceImpl notificationServiceImpl;
+    private final UnpaidOrderNotificator unpaidOrderNotificator;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
@@ -586,14 +591,22 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, "");
         }
-
         return paymentSystemResponse;
     }
+
 
     @Async
     public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins,
         PaymentSystemResponse paymentSystemResponse) {
         notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
+    }
+    public void triggerNotifyUnpaidOrderPermanently(){
+        try {
+            Thread.sleep(3000);
+            notificationServiceImpl.notifyUnpaidOrders();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,

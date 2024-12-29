@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserNotificationRepository extends JpaRepository<UserNotification, Long> {
@@ -92,12 +93,5 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      */
     boolean existsByIdAndUserIdAndIsDeletedFalse(Long notificationId, Long userId);
 
-    /**
-     * Finds a {@link UserNotification} by the given {@link Order}.
-     *
-     * @param order the order to search for
-     * @return an optional containing the found notification, or an empty optional
-     *         if no notification for the given order was found
-     */
-    Optional<UserNotification> findUserNotificationByOrder(Order order);
+    Optional<UserNotification> findUserNotificationByOrderAndNotificationType(Order order, NotificationType notificationType);
 }

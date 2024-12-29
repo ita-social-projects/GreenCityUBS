@@ -65,6 +65,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.CancellationReason;
+import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -1294,7 +1295,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
         if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-            Optional<UserNotification> userNotification = userNotificationRepository.findUserNotificationByOrder(order);
+            Optional<UserNotification> userNotification = userNotificationRepository.findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
 
             if (userNotification.isPresent()) {
                 Optional<Set<NotificationParameter>> notificationParameters =
