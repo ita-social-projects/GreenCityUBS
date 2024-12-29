@@ -1305,7 +1305,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         .findFirst()))
                 .ifPresent(paymentLink -> notificationService.notifyUnpaidOrder(order, paymentLink));
         }
-
     }
 
     /**
