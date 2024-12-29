@@ -1295,15 +1295,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
         if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-            userNotificationRepository.findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER)
-                    .flatMap(userNotification ->
-                            notificationParameterRepository.findNotificationParameterByUserNotification(userNotification)
-                                    .flatMap(params ->
-                                            params.stream()
-                                                    .filter(param -> PAY_BUTTON.equals(param.getKey()))
-                                                    .map(NotificationParameter::getValue)
-                                                    .findFirst()))
-                    .ifPresent(paymentLink -> notificationService.notifyUnpaidOrder(order, paymentLink));
+            userNotificationRepository
+                .findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER)
+                .flatMap(userNotification -> notificationParameterRepository
+                    .findNotificationParameterByUserNotification(userNotification)
+                    .flatMap(params -> params.stream()
+                        .filter(param -> PAY_BUTTON.equals(param.getKey()))
+                        .map(NotificationParameter::getValue)
+                        .findFirst()))
+                .ifPresent(paymentLink -> notificationService.notifyUnpaidOrder(order, paymentLink));
         }
 
     }
