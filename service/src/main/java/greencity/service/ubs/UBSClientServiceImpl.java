@@ -597,15 +597,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
     }
 
-    public void triggerNotifyUnpaidOrderPermanently() {
-        try {
-            Thread.sleep(3000);
-            notificationServiceImpl.notifyUnpaidOrders();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,
         User currentUser) {
         return switch (dto.getPaymentSystem()) {
