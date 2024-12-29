@@ -151,7 +151,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -174,8 +173,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-
-
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
@@ -594,13 +591,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         return paymentSystemResponse;
     }
 
-
     @Async
     public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins,
         PaymentSystemResponse paymentSystemResponse) {
         notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
     }
-    public void triggerNotifyUnpaidOrderPermanently(){
+
+    public void triggerNotifyUnpaidOrderPermanently() {
         try {
             Thread.sleep(3000);
             notificationServiceImpl.notifyUnpaidOrders();

@@ -126,9 +126,9 @@ public class NotificationServiceImpl implements NotificationService {
                 userNotification.setUser(order.getUser());
                 Double amountToPay = getAmountToPay(order);
                 Optional<String> paymentLink = getPaymentLink(order);
-                if (paymentLink.isPresent()){
+                if (paymentLink.isPresent()) {
                     Set<NotificationParameter> notificationParameters =
-                            initialiseNotificationParametersForUnpaidOrder(order, amountToPay, paymentLink.get());
+                        initialiseNotificationParametersForUnpaidOrder(order, amountToPay, paymentLink.get());
                     fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
                 }
             }

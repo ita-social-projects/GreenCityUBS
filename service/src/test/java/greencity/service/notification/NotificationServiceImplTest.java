@@ -232,18 +232,27 @@ class NotificationServiceImplTest {
             created.setNotificationTime(LocalDateTime.now(fixedClock));
             created.setUser(getUser());
             created.setId(1L);
+            created.setOrder(orders.get(0));
 
             when(userNotificationRepository.save(any())).thenReturn(created);
 
-            List<NotificationParameter> notificationParameters = List.of(
+            Set<NotificationParameter> notificationParameters = Set.of(
                 NotificationParameter.builder().id(1L)
                     .userNotification(created).key("orderNumber")
                     .value(orders.getFirst().getId().toString()).build(),
                 NotificationParameter.builder().id(2L)
                     .userNotification(created).key("amountToPay")
-                    .value("10000").build());
-
-            when(notificationParameterRepository.saveAll(any())).thenReturn(notificationParameters);
+                    .value("10000").build(),
+                NotificationParameter.builder().id(3L)
+                    .userNotification(created).key("payButton")
+                    .value(PAYMENT_LINK).build());
+            List<NotificationParameter> notificationParameterList = new ArrayList<>(notificationParameters);
+            when(notificationParameterRepository.saveAll(any())).thenReturn(notificationParameterList);
+            when(userNotificationRepository.findUserNotificationByOrderAndNotificationType(any(Order.class),
+                any(NotificationType.class))).thenReturn(Optional.of(created));
+            when(notificationParameterRepository
+                .findNotificationParameterByUserNotification(any(UserNotification.class)))
+                .thenReturn(Optional.of(notificationParameters));
 
             notificationService.notifyUnpaidOrders();
 

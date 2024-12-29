@@ -154,8 +154,9 @@ public class NotificationController {
         notificationService.deleteNotification(notificationId, userUuid);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
     @GetMapping("/triggerNotifyUnpaidOrder")
-    public ResponseEntity<HttpStatuses> triggerNotifyUnpaidOrder(){
+    public ResponseEntity<HttpStatuses> triggerNotifyUnpaidOrder() {
         ubsClientService.triggerNotifyUnpaidOrderPermanently();
         return ResponseEntity.status(HttpStatus.OK).build();
     }
