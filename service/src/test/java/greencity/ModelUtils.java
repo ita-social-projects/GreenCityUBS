@@ -2861,6 +2861,12 @@ public class ModelUtils {
             .build();
     }
 
+    public static Set<NotificationParameter> getNotificationParameterSet() {
+        Set<NotificationParameter> parameters = new HashSet<>();
+        parameters.add(NotificationParameter.builder().key("payButton").value("https://pay.monobank.ua/api").build());
+        return parameters;
+    }
+
     private static Set<NotificationParameter> createNotificationParameterSet2() {
         Set<NotificationParameter> parameters = new HashSet<>();
 

@@ -1295,7 +1295,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
         if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-            Optional<UserNotification> userNotification = userNotificationRepository.findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
+            Optional<UserNotification> userNotification = userNotificationRepository
+                .findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
 
             if (userNotification.isPresent()) {
                 Optional<Set<NotificationParameter>> notificationParameters =

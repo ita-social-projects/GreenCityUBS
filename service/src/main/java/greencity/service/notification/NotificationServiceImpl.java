@@ -121,22 +121,23 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyUnpaidOrders() {
         for (Order order : orderRepository.findAllByOrderStatusNotAndOrderPaymentStatus(OrderStatus.CANCELED,
             OrderPaymentStatus.UNPAID)) {
-//            if (checkIfOrderNeedsNewNotification(order, NotificationType.UNPAID_ORDER)) {
+            if (checkIfOrderNeedsNewNotification(order, NotificationType.UNPAID_ORDER)) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
                 Double amountToPay = getAmountToPay(order);
                 Optional<String> paymentLink = getPaymentLink(order);
-                if (paymentLink.isPresent()) {
+                if (paymentLink.isPresent()){
                     Set<NotificationParameter> notificationParameters =
                             initialiseNotificationParametersForUnpaidOrder(order, amountToPay, paymentLink.get());
                     fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
                 }
-//            }
+            }
         }
     }
 
     private Optional<String> getPaymentLink(Order order) {
-        Optional<UserNotification> userNotification = userNotificationRepository.findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
+        Optional<UserNotification> userNotification = userNotificationRepository
+            .findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
         if (userNotification.isPresent()) {
             Optional<Set<NotificationParameter>> notificationParameters =
                 notificationParameterRepository.findNotificationParameterByUserNotification(userNotification.get());
