@@ -231,6 +231,7 @@ import static java.util.stream.Collectors.toMap;
 public class UBSClientServiceImpl implements UBSClientService {
     private static final Long CITY_ID_KIEV = 3L;
     private static final String KYIV_CITY = "Kyiv City";
+    private static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSUserRepository ubsUserRepository;
@@ -632,6 +633,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .build())
             .redirectUrl(monoBankRedirectionUrl)
             .webHookUrl(monoBankPaymentRedirectUrl)
+            .validity(VALIDITY_DURATION_TEN_DAYS)
             .build();
     }
 
