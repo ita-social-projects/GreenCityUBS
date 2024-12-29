@@ -36,7 +36,6 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
-import greencity.dto.payment.monobank.CheckoutResponseFromMonoBank;
 import greencity.dto.payment.monobank.MonoBankPaymentRequestDto;
 import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.position.PositionAuthoritiesDto;

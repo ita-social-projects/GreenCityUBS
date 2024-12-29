@@ -143,7 +143,7 @@ public class NotificationServiceImpl implements NotificationService {
                 notificationParameterRepository.findNotificationParameterByUserNotification(userNotification.get());
             if (notificationParameters.isPresent()) {
                 return notificationParameters.get().stream()
-                    .filter(param -> "payButton".equals(param.getKey()))
+                    .filter(param -> PAY_BUTTON.equals(param.getKey()))
                     .map(NotificationParameter::getValue)
                     .findFirst();
             }

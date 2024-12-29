@@ -290,7 +290,6 @@ class NotificationServiceImplTest {
 
         @Test
         void notifyUnpaidOrderPermanentlyTest() {
-            String orderUrl = getUnpaidOrderUrl();
             Double amountToPay = 10000.0;
 
             when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);

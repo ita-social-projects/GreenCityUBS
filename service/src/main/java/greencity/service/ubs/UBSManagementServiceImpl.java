@@ -37,7 +37,6 @@ import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderPaymentStatusesTranslationDto;
 import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrderStatusesTranslationDto;
-import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
@@ -178,6 +177,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderBagRepository orderBagRepository;
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
+    private static final String PAY_BUTTON = "payButton";
 
     /**
      * {@inheritDoc}
@@ -1295,22 +1295,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
         if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-            Optional<UserNotification> userNotification = userNotificationRepository
-                .findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
-
-            if (userNotification.isPresent()) {
-                Optional<Set<NotificationParameter>> notificationParameters =
-                    notificationParameterRepository.findNotificationParameterByUserNotification(userNotification.get());
-                if (notificationParameters.isPresent()) {
-                    Optional<String> paymentLink = notificationParameters.get().stream()
-                        .filter(param -> "payButton".equals(param.getKey()))
-                        .map(NotificationParameter::getValue)
-                        .findFirst();
-
-                    notificationService.notifyUnpaidOrder(order, paymentLink.orElse(null));
-                }
-            }
+            userNotificationRepository.findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER)
+                    .flatMap(userNotification ->
+                            notificationParameterRepository.findNotificationParameterByUserNotification(userNotification)
+                                    .flatMap(params ->
+                                            params.stream()
+                                                    .filter(param -> PAY_BUTTON.equals(param.getKey()))
+                                                    .map(NotificationParameter::getValue)
+                                                    .findFirst()))
+                    .ifPresent(paymentLink -> notificationService.notifyUnpaidOrder(order, paymentLink));
         }
+
     }
 
     /**
