@@ -83,7 +83,6 @@ import static greencity.ModelUtils.TEST_USER_NOTIFICATION_5;
 import static greencity.ModelUtils.TEST_USER_NOTIFICATION_6;
 import static greencity.ModelUtils.TEST_USER_NOTIFICATION_7;
 import static greencity.ModelUtils.TEST_VIOLATION;
-import static greencity.ModelUtils.getUnpaidOrderUrl;
 import static greencity.ModelUtils.getNotifyInternallyFormedOrder;
 import static greencity.ModelUtils.createUserNotificationForViolationWithParameters;
 import static greencity.ModelUtils.createViolationNotificationDto;

@@ -46,7 +46,6 @@ import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.notifications.NotificationParameter;
-import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Certificate;
