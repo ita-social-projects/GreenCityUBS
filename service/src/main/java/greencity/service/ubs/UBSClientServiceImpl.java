@@ -147,7 +147,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -581,21 +580,14 @@ public class UBSClientServiceImpl implements UBSClientService {
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
         PaymentSystemResponse paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
-
-        checkIfOrderIsNotPayedAndSendEmailAsync(order, sumToPayInCoins, paymentSystemResponse);
-
         notificationService.notifyCreatedOrder(order);
+
+        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
 
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, "");
         }
         return paymentSystemResponse;
-    }
-
-    @Async
-    public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins,
-        PaymentSystemResponse paymentSystemResponse) {
-        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,

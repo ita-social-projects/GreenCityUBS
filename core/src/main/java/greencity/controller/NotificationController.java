@@ -9,7 +9,6 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.service.ubs.NotificationService;
-import greencity.service.ubs.UBSClientServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,7 +33,6 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class NotificationController {
     private final NotificationService notificationService;
-    private final UBSClientServiceImpl ubsClientService;
 
     /**
      * Controller return body of the notification and set status - is read.
