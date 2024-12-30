@@ -42,4 +42,6 @@ public class PaymentWayForPayRequestDto {
     private List<Integer> productCount;
     @JsonProperty("merchantSignature")
     private String signature;
+    @JsonProperty("orderTimeout")
+    private Integer orderTimeout;
 }

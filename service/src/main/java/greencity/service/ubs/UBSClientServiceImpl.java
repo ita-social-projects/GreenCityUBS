@@ -1267,6 +1267,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDate(instant.getEpochSecond())
             .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
             .currency("UAH")
+            .orderTimeout(VALIDITY_DURATION_TEN_DAYS)
             .productName(order.getOrderBags().stream()
                 .filter(bag -> bag.getAmount() != 0)
                 .map(orderBag -> orderBag.getName().trim())
