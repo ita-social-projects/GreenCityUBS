@@ -94,11 +94,30 @@ public class NotificationServiceImpl implements NotificationService {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
                 Double amountToPay = getAmountToPay(order);
-                Set<NotificationParameter> notificationParameters =
-                    initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
-                fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
+                Optional<String> paymentLink = getPaymentLink(order);
+                if (paymentLink.isPresent()) {
+                    Set<NotificationParameter> notificationParameters =
+                        initialiseNotificationParametersForUnpaidOrder(order, amountToPay, paymentLink.get());
+                    fillAndSendNotification(notificationParameters, order, NotificationType.UNPAID_ORDER);
+                }
             }
         }
+    }
+
+    Optional<String> getPaymentLink(Order order) {
+        Optional<UserNotification> userNotification = userNotificationRepository
+            .findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
+        if (userNotification.isPresent()) {
+            Optional<Set<NotificationParameter>> notificationParameters = notificationParameterRepository
+                .findNotificationParameterByUserNotification(userNotification.get());
+            if (notificationParameters.isPresent()) {
+                return notificationParameters.get().stream()
+                    .filter(param -> PAY_BUTTON.equals(param.getKey()))
+                    .map(NotificationParameter::getValue)
+                    .findFirst();
+            }
+        }
+        return Optional.empty();
     }
 
     private boolean checkIfUnpaidOrderNeedsNewNotification(Order order, Optional<UserNotification> lastNotification) {
@@ -128,6 +147,28 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.add(NotificationParameter.builder()
             .key(PAY_BUTTON)
             .value(internalUrlConfigProp.getOrderUrl() + order.getId())
+            .build());
+
+        return parameters;
+    }
+
+    private Set<NotificationParameter> initialiseNotificationParametersForUnpaidOrder(Order order,
+        Double amountToPay, String paymentLink) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        parameters.add(NotificationParameter.builder()
+            .key(AMOUNT_TO_PAY_KEY)
+            .value(String.format("%.2f", amountToPay))
+            .build());
+
+        parameters.add(NotificationParameter.builder()
+            .key(ORDER_NUMBER_KEY)
+            .value(order.getId().toString())
+            .build());
+
+        parameters.add(NotificationParameter.builder()
+            .key(PAY_BUTTON)
+            .value(paymentLink)
             .build());
 
         return parameters;
@@ -209,9 +250,10 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyUnpaidOrder(Order order) {
+    public void notifyUnpaidOrder(Order order, String paymentLink) {
         Double amountToPay = getAmountToPay(order);
-        Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
+        Set<NotificationParameter> parameters =
+            initialiseNotificationParametersForUnpaidOrder(order, amountToPay, paymentLink);
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()
@@ -523,11 +565,13 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifyUnpaidOrderPermanently(Order order, Long amountToPay) {
+    public void notifyUnpaidOrderPermanently(Order order, Long amountToPay,
+        String paymentLink) {
         boolean isOrderPayed = order.getOrderPaymentStatus() == OrderPaymentStatus.PAID;
         if (!isOrderPayed) {
             Double amount = amountToPay.doubleValue() / PERCENTAGE_DIVISOR;
-            Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amount);
+            Set<NotificationParameter> parameters =
+                initialiseNotificationParametersForUnpaidOrder(order, amount, paymentLink);
             fillAndSendNotification(parameters, order, NotificationType.UNPAID_ORDER);
         }
     }

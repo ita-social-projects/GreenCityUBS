@@ -30,7 +30,7 @@ import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.PaymentSystemOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
@@ -270,6 +270,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String KYIV_EN = "Kyiv";
     private static final String KYIV_UA = "місто Київ";
     private static final String LANGUAGE_EN = "en";
+    private static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
 
     @Override
     @Transactional
@@ -460,7 +461,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
+    public PaymentSystemOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
         final User currentUser = userRepository.findByUuid(uuid);
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
         List<OrderBag> bagsOrdered = new ArrayList<>();
@@ -491,7 +492,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (dto.isShouldBePaid()) {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPayInCoins);
             String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckoutResponse(paymentRequestDto));
-            notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
+            notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins, link);
             return getPaymentRequestDto(order, link);
         } else {
             return getPaymentRequestDto(order, "");
@@ -528,8 +529,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private FondyOrderResponse getPaymentRequestDto(Order order, String link) {
-        return FondyOrderResponse.builder()
+    private PaymentSystemOrderResponse getPaymentRequestDto(Order order, String link) {
+        return PaymentSystemOrderResponse.builder()
             .orderId(order.getId())
             .link(link)
             .build();
@@ -1174,6 +1175,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .serviceUrl(resultUrlFondy)
             .orderDate(instant.getEpochSecond())
             .currency("UAH")
+            .orderTimeout(VALIDITY_DURATION_TEN_DAYS)
             .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
             .productName(order.getOrderBags().stream()
                 .filter(bag -> bag.getAmount() != 0)
@@ -1531,7 +1533,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) {
+    public PaymentSystemOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) {
         Order order = findByIdOrderForClient(dto);
         checkIsOrderPaid(order.getOrderPaymentStatus());
         User currentUser = findByIdUserForClient(uuid);

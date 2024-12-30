@@ -8,7 +8,7 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode
 @Builder
-public class FondyOrderResponse {
+public class PaymentSystemOrderResponse {
     private Long orderId;
     private String link;
 }

@@ -12,7 +12,7 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.PaymentSystemOrderResponse;
 import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
@@ -102,7 +102,7 @@ public interface UBSClientService {
      * @return {@link PaymentRequestDto} which contains data to pay order out.
      * @author Oleh Bilonizhka
      */
-    FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
+    PaymentSystemOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
      * Method get status of order from db by id.
@@ -296,7 +296,8 @@ public interface UBSClientService {
      * @param dto - current OrderFondyClientDto dto.
      * @author Max Boiarchuk
      */
-    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws PaymentLinkException;
+    PaymentSystemOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid)
+        throws PaymentLinkException;
 
     /**
      * Method validates received payment client response.
