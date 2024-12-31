@@ -30,7 +30,7 @@ import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.PaymentSystemOrderResponse;
+import greencity.dto.order.WayForPayPaymentResponse;
 import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderCancellationReasonDto;
@@ -461,7 +461,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public PaymentSystemOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
+    public WayForPayPaymentResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
         final User currentUser = userRepository.findByUuid(uuid);
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
         List<OrderBag> bagsOrdered = new ArrayList<>();
@@ -529,8 +529,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private PaymentSystemOrderResponse getPaymentRequestDto(Order order, String link) {
-        return PaymentSystemOrderResponse.builder()
+    private WayForPayPaymentResponse getPaymentRequestDto(Order order, String link) {
+        return WayForPayPaymentResponse.builder()
             .orderId(order.getId())
             .link(link)
             .build();
@@ -1533,7 +1533,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public PaymentSystemOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) {
+    public WayForPayPaymentResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) {
         Order order = findByIdOrderForClient(dto);
         checkIsOrderPaid(order.getOrderPaymentStatus());
         User currentUser = findByIdUserForClient(uuid);
