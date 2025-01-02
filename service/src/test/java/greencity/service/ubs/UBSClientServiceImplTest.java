@@ -1138,7 +1138,7 @@ class UBSClientServiceImplTest {
                 f.set(ubsService, "1");
             }
         }
-
+        Optional<Order> optionalOrder = Optional.of(order);
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
@@ -1146,10 +1146,13 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(certificateRepository.findById(anyString())).thenReturn(Optional.of(certificate));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
-        when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(orderRepository.findById(any()))
+            .thenReturn(optionalOrder.get().getId() != null ? optionalOrder : Optional.empty());
+        when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
+            .thenReturn(getCheckoutResponseFromMonoBank());
 
-        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", order.getId());
         Assertions.assertNotNull(result);
 
     }
@@ -1440,7 +1443,9 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+        when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
+            .thenReturn(getCheckoutResponseFromMonoBank());
 
         PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
         Assertions.assertNotNull(result);
@@ -1450,7 +1455,7 @@ class UBSClientServiceImplTest {
             .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
         verify(ubsUserRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(dto.getPersonalData(), UBSuser.class);
-        verify(orderRepository, times(1)).findById(anyLong());
+        verify(orderRepository, times(2)).findById(anyLong());
     }
 
     @Test
@@ -2961,6 +2966,7 @@ class UBSClientServiceImplTest {
                 f.set(ubsService, "1");
             }
         }
+        Optional<Order> optionalOrder = Optional.of(order);
         TariffsInfo tariffsInfo = getTariffsInfo();
         bag.setTariffsInfo(tariffsInfo);
         tariffsInfo.setBags(List.of(bag));
@@ -2973,11 +2979,14 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
-        when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(modelMapper.map(address, OrderAddress.class)).thenReturn(orderAddress);
+        when(orderRepository.findById(anyLong()))
+            .thenReturn(optionalOrder.get().getId() == null ? Optional.empty() : optionalOrder);
+        when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
+            .thenReturn(getCheckoutResponseFromMonoBank());
 
-        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", order.getId());
         Assertions.assertNotNull(result);
     }
 

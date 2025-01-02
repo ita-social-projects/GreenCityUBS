@@ -86,6 +86,7 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.BagStatus;
+import greencity.enums.BonusReason;
 import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -96,7 +97,6 @@ import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentType;
 import greencity.enums.TariffStatus;
-import greencity.enums.BonusReason;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
@@ -105,6 +105,7 @@ import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
+import greencity.notificator.UnpaidOrderNotificator;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -146,7 +147,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -230,6 +230,7 @@ import static java.util.stream.Collectors.toMap;
 public class UBSClientServiceImpl implements UBSClientService {
     private static final Long CITY_ID_KIEV = 3L;
     private static final String KYIV_CITY = "Kyiv City";
+    private static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSUserRepository ubsUserRepository;
@@ -265,6 +266,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final DistrictRepository districtRepository;
     private final MonoBankClient monoBankClient;
     private final NotificationServiceImpl notificationServiceImpl;
+    private final UnpaidOrderNotificator unpaidOrderNotificator;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
@@ -577,21 +579,15 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-
-        checkIfOrderIsNotPayedAndSendEmailAsync(order, sumToPayInCoins);
-
+        PaymentSystemResponse paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
         notificationService.notifyCreatedOrder(order);
+
+        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
 
         if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, "");
         }
-
-        return processPayment(dto, order, sumToPayInCoins, currentUser);
-    }
-
-    @Async
-    public void checkIfOrderIsNotPayedAndSendEmailAsync(Order order, Long sumToPayInCoins) {
-        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins);
+        return paymentSystemResponse;
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,
@@ -629,6 +625,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .build())
             .redirectUrl(monoBankRedirectionUrl)
             .webHookUrl(monoBankPaymentRedirectUrl)
+            .validity(VALIDITY_DURATION_TEN_DAYS)
             .build();
     }
 
@@ -1270,6 +1267,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDate(instant.getEpochSecond())
             .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
             .currency("UAH")
+            .orderTimeout(VALIDITY_DURATION_TEN_DAYS)
             .productName(order.getOrderBags().stream()
                 .filter(bag -> bag.getAmount() != 0)
                 .map(orderBag -> orderBag.getName().trim())

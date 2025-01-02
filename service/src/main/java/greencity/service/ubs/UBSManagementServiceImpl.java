@@ -45,6 +45,7 @@ import greencity.dto.position.PositionDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
+import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Certificate;
@@ -62,6 +63,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.CancellationReason;
+import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -74,6 +76,7 @@ import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
+import greencity.repository.NotificationParameterRepository;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
@@ -85,6 +88,7 @@ import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
 import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
@@ -170,6 +174,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     static final String FORMAT_DATE = "dd-MM-yyyy";
     private final UBSClientService ubsClientService;
     private final OrderBagRepository orderBagRepository;
+    private final UserNotificationRepository userNotificationRepository;
+    private final NotificationParameterRepository notificationParameterRepository;
+    private static final String PAY_BUTTON = "payButton";
 
     /**
      * {@inheritDoc}
@@ -1287,7 +1294,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
         if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-            notificationService.notifyUnpaidOrder(order);
+            userNotificationRepository
+                .findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER)
+                .flatMap(userNotification -> notificationParameterRepository
+                    .findNotificationParameterByUserNotification(userNotification)
+                    .flatMap(params -> params.stream()
+                        .filter(param -> PAY_BUTTON.equals(param.getKey()))
+                        .map(NotificationParameter::getValue)
+                        .findFirst()))
+                .ifPresent(paymentLink -> notificationService.notifyUnpaidOrder(order, paymentLink));
         }
     }
 
