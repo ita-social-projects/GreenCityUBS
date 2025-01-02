@@ -8,5 +8,6 @@ public record MonoBankPaymentRequestDto(
     Integer amount,
     @JsonProperty("merchantPaymInfo") MerchantPaymentInfo merchantPaymentInfo,
     String redirectUrl,
-    String webHookUrl) {
+    String webHookUrl,
+    Integer validity) {
 }

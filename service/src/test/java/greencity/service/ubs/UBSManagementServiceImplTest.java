@@ -43,6 +43,7 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.OrderAddress;
+import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.SortingOrder;
@@ -54,6 +55,7 @@ import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
+import greencity.repository.NotificationParameterRepository;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
@@ -66,6 +68,7 @@ import greencity.repository.ReceivingStationRepository;
 import greencity.repository.RefundRepository;
 import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
@@ -132,6 +135,7 @@ import static greencity.ModelUtils.getExportDetailsRequestToday;
 import static greencity.ModelUtils.getFormedOrder;
 import static greencity.ModelUtils.getInfoPayment;
 import static greencity.ModelUtils.getLocation;
+import static greencity.ModelUtils.getNotificationParameterSet;
 import static greencity.ModelUtils.getOrder;
 import static greencity.ModelUtils.getOrderAddress;
 import static greencity.ModelUtils.getOrderBag;
@@ -167,6 +171,7 @@ import static greencity.ModelUtils.getTariffsInfo;
 import static greencity.ModelUtils.getTestDetailsOrderInfoDto;
 import static greencity.ModelUtils.getTestOrderDetailStatusRequestDto;
 import static greencity.ModelUtils.getTestUser;
+import static greencity.ModelUtils.getUserNotificationForUnpaidOrder;
 import static greencity.ModelUtils.updateAllOrderPageDto;
 import static greencity.ModelUtils.updateOrderPageAdminDto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -277,6 +282,10 @@ class UBSManagementServiceImplTest {
     private EventRepository eventRepository;
     @Mock
     private BigOrderTableRepository bigOrderTableRepository;
+    @Mock
+    private UserNotificationRepository userNotificationRepository;
+    @Mock
+    private NotificationParameterRepository notificationParameterRepository;
 
     @Test
     void getAllCertificates() {
@@ -1299,6 +1308,10 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.findAllByOrderId(1L)).thenReturn(List.of(getPayment()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
         when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(List.of(employeeOrderPosition));
+        when(userNotificationRepository.findUserNotificationByOrderAndNotificationType(order,
+            NotificationType.UNPAID_ORDER)).thenReturn(Optional.of(getUserNotificationForUnpaidOrder()));
+        when(notificationParameterRepository.findNotificationParameterByUserNotification(any()))
+            .thenReturn(Optional.of(getNotificationParameterSet()));
 
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, order, "en", "test@gmail.com");
 

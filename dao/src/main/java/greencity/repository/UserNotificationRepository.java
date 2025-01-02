@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.order.Order;
 import greencity.enums.NotificationType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
@@ -90,4 +91,14 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      *         false otherwise
      */
     boolean existsByIdAndUserIdAndIsDeletedFalse(Long notificationId, Long userId);
+
+    /**
+     * Finds a {@link UserNotification} by the given {@link Order}.
+     *
+     * @param order the order to search for
+     * @return an optional containing the found notification, or an empty optional
+     *         if no notification for the given order was found
+     */
+    Optional<UserNotification> findUserNotificationByOrderAndNotificationType(Order order,
+        NotificationType notificationType);
 }
