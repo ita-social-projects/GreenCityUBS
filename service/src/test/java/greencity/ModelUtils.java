@@ -3888,6 +3888,7 @@ public class ModelUtils {
             .setMixedWaste120L("3")
             .setTextileWaste60L("-")
             .setTextileWaste20L("-")
+            .setOtherPackages("-")
             .setTotalOrderSum(500.)
             .setOrderCertificateCode("5489-2789")
             .setGeneralDiscount(100L)
@@ -3923,6 +3924,7 @@ public class ModelUtils {
             .setMixedWaste120L("-")
             .setTextileWaste60L("-")
             .setTextileWaste20L("-")
+            .setOtherPackages("-")
             .setAddress(new SenderLocation().setEn(null).setUa(null));
     }
 

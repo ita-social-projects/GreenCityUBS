@@ -32,6 +32,7 @@ public class BigOrderTableDTO {
     private String mixedWaste120L;
     private String textileWaste60L;
     private String textileWaste20L;
+    private String otherPackages;
     private Double totalOrderSum;
     private String orderCertificateCode;
     private Long generalDiscount;

@@ -47,6 +47,8 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
                 .filter(value -> value != 0)
                 .map(String::valueOf)
                 .orElse("-"))
+            .setOtherPackages(Optional.ofNullable(bigViews.getOtherPackages())
+                .orElse("-"))
             .setTotalOrderSum(convertCoinsIntoBills(bigViews.getTotalOrderSum()))
             .setOrderCertificateCode(bigViews.getOrderCertificateCode())
             .setGeneralDiscount(bigViews.getGeneralDiscount())

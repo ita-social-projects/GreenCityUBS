@@ -262,5 +262,8 @@
     <include file="db/changelog/logs/2024-11-28-change-add-column-isTableFreeze-to-column_width_for_employee-Warded120.xml"/>
     <include file="db/changelog/logs/2024-12-18-update-column_width_for_employee-Kizerov.xml"/>
     <include file="db/changelog/logs/ch-add-column-reason-into-change-of-points-table-Chernenko.xml"/>
-    <include file="db/changelog/logs/2024-12-18-add-new-column-to-user-table-Kizerov.xml"/>   
+    <include file="db/changelog/logs/2024-12-18-add-new-column-to-user-table-Kizerov.xml"/>
+    <include file="db/changelog/logs/add-other-packages-to-column_width_for_employee-table.xml"/>
+    <include file="db/changelog/logs/add-new-column-to-big_order_table-view.xml"/>
+    <include file="db/changelog/logs/update-custom_table_view-table.xml"/>
 </databaseChangeLog>
