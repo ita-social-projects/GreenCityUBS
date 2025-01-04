@@ -9,11 +9,10 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.LocationsDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.WayForPayPaymentResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
-import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.user.UBSuserNotFoundException;
@@ -178,7 +177,7 @@ class OrderControllerTest {
         OrderDetailStatusDto orderDetailStatusDto = getUnpaidOrderDetailStatusDto();
         orderDetailStatusDto.setOrderStatus(OrderStatus.FORMED.name());
 
-        FondyOrderResponse resultObject = FondyOrderResponse.builder()
+        WayForPayPaymentResponse resultObject = WayForPayPaymentResponse.builder()
             .orderId(orderId)
             .link("Link")
             .build();

@@ -14,19 +14,17 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.WayForPayPaymentResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.FondyPaymentResponse;
-import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserVO;
-import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -181,7 +179,7 @@ public class OrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping(value = {"/processOrder", "/processOrder/{id}"})
-    public ResponseEntity<FondyOrderResponse> processOrder(
+    public ResponseEntity<WayForPayPaymentResponse> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
         @Valid @PathVariable("id") Optional<Long> id) {

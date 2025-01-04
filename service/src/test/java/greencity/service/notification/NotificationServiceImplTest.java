@@ -24,6 +24,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
 import greencity.service.ubs.OrderBagService;
+import greencity.service.ubs.UBSManagementServiceImpl;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -95,6 +96,11 @@ class NotificationServiceImplTest {
     @Mock
     private UserNotification mockUserNotification;
 
+    @Mock
+    private UBSManagementServiceImpl ubsManagementService;
+
+    private static final String PAYMENT_LINK = "https://pay.monobank.ua/2412255Qb57omFE7dAjC";
+
     @Nested
     class ClockNotification {
         @BeforeEach
@@ -154,18 +160,28 @@ class NotificationServiceImplTest {
             created.setNotificationTime(LocalDateTime.now(fixedClock));
             created.setUser(getUser());
             created.setId(1L);
+            created.setOrder(orders.get(0));
 
             when(userNotificationRepository.save(any())).thenReturn(created);
 
-            List<NotificationParameter> notificationParameters = List.of(
+            Set<NotificationParameter> notificationParameters = Set.of(
                 NotificationParameter.builder().id(1L)
                     .userNotification(created).key("orderNumber")
                     .value(orders.get(0).getId().toString()).build(),
                 NotificationParameter.builder().id(2L)
                     .userNotification(created).key("amountToPay")
-                    .value("10000").build());
+                    .value("10000").build(),
+                NotificationParameter.builder().id(3L)
+                    .userNotification(created).key("payButton")
+                    .value(PAYMENT_LINK).build());
+            List<NotificationParameter> notificationParameterList = new ArrayList<>(notificationParameters);
 
-            when(notificationParameterRepository.saveAll(any())).thenReturn(notificationParameters);
+            when(notificationParameterRepository.saveAll(any())).thenReturn(notificationParameterList);
+            when(userNotificationRepository.findUserNotificationByOrderAndNotificationType(any(Order.class),
+                any(NotificationType.class))).thenReturn(Optional.of(created));
+            when(notificationParameterRepository
+                .findNotificationParameterByUserNotification(any(UserNotification.class)))
+                    .thenReturn(Optional.of(notificationParameters));
 
             notificationService.notifyUnpaidOrders();
 
@@ -281,19 +297,18 @@ class NotificationServiceImplTest {
 
         @Test
         void notifyUnpaidOrderPermanentlyTest() {
-            String orderUrl = getUnpaidOrderUrl();
+            String paymentLink = "https://secure.wayforpay.com/invoice/12345";
 
             Double amountToPay = 10000.0;
             when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
             when(mockUserNotification.getOrder()).thenReturn(mockOrder);
-            when(internalUrlConfigProp.getOrderUrl()).thenReturn(orderUrl);
             when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(mockUserNotification);
             when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
                 return new ArrayList<>(invocation.getArgument(0));
             });
 
             assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(mockUserNotification.getOrder(),
-                amountToPay.longValue()));
+                amountToPay.longValue(), paymentLink));
 
             verify(userNotificationRepository).save(any(UserNotification.class));
             verify(notificationParameterRepository).saveAll(any());
@@ -553,6 +568,7 @@ class NotificationServiceImplTest {
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
         Set<NotificationParameter> parameters = new HashSet<>();
+        String paymentLink = "https://secure.wayforpay.com/invoice/12345";
 
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.ORDER_STATUS_CHANGED);
@@ -563,7 +579,7 @@ class NotificationServiceImplTest {
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
-        notificationService.notifyUnpaidOrder(order);
+        notificationService.notifyUnpaidOrder(order, paymentLink);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());
@@ -584,6 +600,7 @@ class NotificationServiceImplTest {
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
         Set<NotificationParameter> parameters = new HashSet<>();
+        String paymentLink = "https://secure.wayforpay.com/invoice/12345";
 
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
@@ -593,7 +610,7 @@ class NotificationServiceImplTest {
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
-        notificationService.notifyUnpaidOrder(order);
+        notificationService.notifyUnpaidOrder(order, paymentLink);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());
@@ -615,6 +632,7 @@ class NotificationServiceImplTest {
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
         Set<NotificationParameter> parameters = new HashSet<>();
+        String paymentLink = "https://secure.wayforpay.com/invoice/12345";
 
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
@@ -625,7 +643,7 @@ class NotificationServiceImplTest {
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
-        notificationService.notifyUnpaidOrder(order);
+        notificationService.notifyUnpaidOrder(order, paymentLink);
 
         verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(any());

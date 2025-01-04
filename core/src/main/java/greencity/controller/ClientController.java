@@ -4,7 +4,7 @@ import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
-import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.WayForPayPaymentResponse;
 import greencity.dto.order.MakeOrderAgainDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
@@ -117,7 +117,7 @@ public class ClientController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processOrderFondy")
-    public ResponseEntity<FondyOrderResponse> processOrderFondy(
+    public ResponseEntity<WayForPayPaymentResponse> processOrderFondy(
         @Valid @RequestBody OrderFondyClientDto dto,
         @ApiIgnore @CurrentUserUuid String userUuid) throws PaymentLinkException {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClient(dto, userUuid));

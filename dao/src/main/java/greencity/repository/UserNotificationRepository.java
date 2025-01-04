@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.order.Order;
 import greencity.enums.NotificationType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
@@ -47,4 +48,17 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
         + "WHERE CAST(notification_time AS DATE) > :dateOfLastNotification AND "
         + "notification_type = :type")
     List<Long> getUserIdByDateOfLastNotificationAndNotificationType(LocalDate dateOfLastNotification, String type);
+
+    /**
+     * Method that returns notification by {@link Order} and
+     * {@link NotificationType}.
+     *
+     * @param order            the {@link Order}.
+     * @param notificationType the {@link NotificationType}.
+     * @return {@link Optional} of {@link UserNotification}.
+     *
+     * @author Vladyslav Haliara.
+     */
+    Optional<UserNotification> findUserNotificationByOrderAndNotificationType(Order order,
+        NotificationType notificationType);
 }

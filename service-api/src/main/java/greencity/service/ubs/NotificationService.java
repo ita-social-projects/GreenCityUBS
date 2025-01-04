@@ -96,10 +96,11 @@ public interface NotificationService {
     /**
      * Method sends messages by e-mail/notification that order is unpaid.
      *
-     * @param order of {@link Order} Order which status was changed
+     * @param order       of {@link Order} Order which status was changed
+     * @param paymentLink of {@link String} Payment link
      * @author Oleh Kulbaba
      */
-    void notifyUnpaidOrder(Order order);
+    void notifyUnpaidOrder(Order order, String paymentLink);
 
     /**
      * Notifies the customer that the order status has been changed to "Brought by
@@ -145,8 +146,10 @@ public interface NotificationService {
      *
      * @param order       the order to send notification for
      * @param amountToPay the sum to pay
+     * @param paymentLink the payment link
      *
      * @author Vladyslav Haliara
      */
-    void notifyUnpaidOrderPermanently(Order order, Long amountToPay);
+    void notifyUnpaidOrderPermanently(Order order, Long amountToPay,
+        String paymentLink);
 }
