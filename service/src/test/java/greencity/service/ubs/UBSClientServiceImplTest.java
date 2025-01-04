@@ -48,6 +48,8 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.notifications.NotificationParameter;
+import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Event;
@@ -69,6 +71,7 @@ import greencity.enums.AddressStatus;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
 import greencity.enums.LocationStatus;
+import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -90,6 +93,7 @@ import greencity.repository.DistrictRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
+import greencity.repository.NotificationParameterRepository;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
@@ -102,6 +106,7 @@ import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.TelegramBotRepository;
 import greencity.repository.UBSUserRepository;
+import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
@@ -187,6 +192,8 @@ import static greencity.ModelUtils.getGeocodingResultWithKyivRegion;
 import static greencity.ModelUtils.getLocation;
 import static greencity.ModelUtils.getMaximumAmountOfAddresses;
 import static greencity.ModelUtils.getMonoBankPaymentResponseDto;
+import static greencity.ModelUtils.getNotificationParameterSet;
+import static greencity.ModelUtils.getNotificationPaymentLink;
 import static greencity.ModelUtils.getOrder;
 import static greencity.ModelUtils.getOrder2;
 import static greencity.ModelUtils.getOrderCount;
@@ -226,6 +233,7 @@ import static greencity.ModelUtils.getUsedCertificateWith600Points;
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getUserForCreate;
 import static greencity.ModelUtils.getUserInfoDto;
+import static greencity.ModelUtils.getUserNotificationForUnpaidOrder;
 import static greencity.ModelUtils.getUserPointsAndAllBagsDto;
 import static greencity.ModelUtils.getUserProfileCreateDto;
 import static greencity.ModelUtils.getUserProfileUpdateDto;
@@ -396,6 +404,12 @@ class UBSClientServiceImplTest {
 
     @Mock
     private NotificationServiceImpl notificationServiceImpl;
+
+    @Mock
+    private UserNotificationRepository userNotificationRepository;
+
+    @Mock
+    private NotificationParameterRepository notificationParameterRepository;
 
     @Value("${greencity.monobank.token}")
     private String token;
@@ -3791,6 +3805,12 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(expectedOrder));
         when(encryptionUtil.formResponseSignature(any(PaymentResponseWayForPay.class), eq(wayForPaySecret)))
             .thenReturn("signature");
+        when(userNotificationRepository.findUserNotificationByOrderAndNotificationType(any(Order.class),
+            any(NotificationType.class)))
+            .thenReturn(Optional.ofNullable(getUserNotificationForUnpaidOrder()));
+        when(notificationParameterRepository
+            .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString()))
+            .thenReturn(getNotificationPaymentLink());
 
         PaymentResponseWayForPay result = ubsClientService.validatePayment(response);
 
@@ -3801,6 +3821,10 @@ class UBSClientServiceImplTest {
 
         verify(orderRepository).findById(1L);
         verify(encryptionUtil).formResponseSignature(any(PaymentResponseWayForPay.class), eq(wayForPaySecret));
+        verify(userNotificationRepository)
+            .findUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
+        verify(notificationParameterRepository)
+            .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString());
     }
 
     @Test
@@ -4241,6 +4265,12 @@ class UBSClientServiceImplTest {
         Order order = getOrder();
 
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(userNotificationRepository.findUserNotificationByOrderAndNotificationType(any(Order.class),
+            any(NotificationType.class)))
+            .thenReturn(Optional.ofNullable(getUserNotificationForUnpaidOrder()));
+        when(notificationParameterRepository
+            .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString()))
+            .thenReturn(getNotificationPaymentLink());
 
         ubsClientService.validatePaymentFromMonoBank(response);
 
@@ -4248,6 +4278,10 @@ class UBSClientServiceImplTest {
         verify(paymentRepository).save(any());
         verify(orderRepository).save(any());
         verify(eventService, times(2)).save(anyString(), anyString(), any());
+        verify(userNotificationRepository)
+            .findUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
+        verify(notificationParameterRepository)
+            .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString());
     }
 
     @ParameterizedTest
