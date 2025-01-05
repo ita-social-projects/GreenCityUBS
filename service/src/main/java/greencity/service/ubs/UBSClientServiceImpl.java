@@ -63,6 +63,8 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.notifications.NotificationParameter;
+import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
@@ -92,6 +94,7 @@ import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
 import greencity.enums.LocationStatus;
 import greencity.enums.MonoBankStatuses;
+import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -115,6 +118,7 @@ import greencity.repository.DistrictRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
+import greencity.repository.NotificationParameterRepository;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
@@ -127,6 +131,7 @@ import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.TelegramBotRepository;
 import greencity.repository.UBSUserRepository;
+import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.DistanceCalculationUtils;
@@ -231,6 +236,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final Long CITY_ID_KIEV = 3L;
     private static final String KYIV_CITY = "Kyiv City";
     private static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
+    private static final String PAY_BUTTON = "payButton";
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSUserRepository ubsUserRepository;
@@ -267,6 +273,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final MonoBankClient monoBankClient;
     private final NotificationServiceImpl notificationServiceImpl;
     private final UnpaidOrderNotificator unpaidOrderNotificator;
+    private final UserNotificationRepository userNotificationRepository;
+    private final NotificationParameterRepository notificationParameterRepository;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
@@ -1689,6 +1697,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderPayment.setOrder(order);
+            removePaymentLinkForOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
             eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
@@ -2178,6 +2187,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             case SUCCESS -> {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.PAID, OrderPaymentStatus.PAID);
                 logPaymentEvent(order, payment.getPaymentId());
+                removePaymentLinkForOrder(order);
             }
             case REVERSED -> {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
@@ -2211,5 +2221,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void logPaymentEvent(Order order, String paymentId) {
         eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + paymentId, OrderHistory.SYSTEM, order);
+    }
+
+    private void removePaymentLinkForOrder(Order order) {
+        Optional<UserNotification> userNotification = userNotificationRepository
+            .findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
+        if (userNotification.isPresent()) {
+            Optional<NotificationParameter> notificationParameter = notificationParameterRepository
+                .findNotificationParameterByUserNotificationAndKey(userNotification.get(), PAY_BUTTON);
+            notificationParameter.ifPresent(notificationParameterRepository::delete);
+        }
     }
 }

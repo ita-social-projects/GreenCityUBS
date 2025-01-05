@@ -2868,6 +2868,11 @@ public class ModelUtils {
         return parameters;
     }
 
+    public static Optional<NotificationParameter> getNotificationPaymentLink() {
+        return Optional
+            .ofNullable(NotificationParameter.builder().key("payButton").value("https://pay.monobank.ua/api").build());
+    }
+
     private static Set<NotificationParameter> createNotificationParameterSet2() {
         Set<NotificationParameter> parameters = new HashSet<>();
 

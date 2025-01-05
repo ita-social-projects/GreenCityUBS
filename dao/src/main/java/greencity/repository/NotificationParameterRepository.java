@@ -10,4 +10,7 @@ import java.util.Set;
 @Repository
 public interface NotificationParameterRepository extends JpaRepository<NotificationParameter, Long> {
     Optional<Set<NotificationParameter>> findNotificationParameterByUserNotification(UserNotification userNotification);
+
+    Optional<NotificationParameter> findNotificationParameterByUserNotificationAndKey(UserNotification userNotification,
+        String key);
 }
