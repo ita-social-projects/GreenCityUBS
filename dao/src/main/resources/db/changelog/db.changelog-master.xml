@@ -266,4 +266,5 @@
     <include file="db/changelog/logs/add-other-packages-to-column_width_for_employee-table.xml"/>
     <include file="db/changelog/logs/add-new-column-to-big_order_table-view.xml"/>
     <include file="db/changelog/logs/update-custom_table_view-table.xml"/>
+    <include file="db/changelog/logs/update-logic-to-fill-other-packages-column.xml"/>
 </databaseChangeLog>
