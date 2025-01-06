@@ -45,6 +45,8 @@ public class BigOrderTableViews {
     private Long textileWaste60;
     @Column(name = "textile_waste_20")
     private Long textileWaste20;
+    @Column(name = "other_packages")
+    private String otherPackages;
     private Long totalOrderSum;
     private String orderCertificateCode;
     private Long generalDiscount;

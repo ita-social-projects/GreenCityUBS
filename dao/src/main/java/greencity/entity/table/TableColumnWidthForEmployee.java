@@ -32,6 +32,8 @@ public class TableColumnWidthForEmployee {
     private Integer textileWaste60L = DEFAULT_WIDTH_FOR_WASTE;
     @Column(name = "textile_waste_20l")
     private Integer textileWaste20L = DEFAULT_WIDTH_FOR_WASTE;
+    @Column(name = "other_packages")
+    private Integer otherPackages = DEFAULT_WIDTH_FOR_WASTE;
     @Column
     private Integer blockedBy = DEFAULT_WIDTH;
     @Column
