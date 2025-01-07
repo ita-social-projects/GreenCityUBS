@@ -56,6 +56,7 @@ reviews:
         - Test coverage of edge cases
         - Clear test naming and documentation
         - Be more lenient with code style and minor optimisations
+        - Check for test method naming convention featureTestScenario (https://github.com/ita-social-projects/GreenCity/wiki/Naming-Conventions)
   abort_on_close: true
   auto_review:
     enabled: true
