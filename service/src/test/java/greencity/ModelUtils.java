@@ -85,6 +85,7 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OtherPackages;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.SenderLocation;
@@ -3893,7 +3894,7 @@ public class ModelUtils {
             .setMixedWaste120L("3")
             .setTextileWaste60L("-")
             .setTextileWaste20L("-")
-            .setOtherPackages("-")
+            .setOtherPackages(new OtherPackages("-", "-"))
             .setTotalOrderSum(500.)
             .setOrderCertificateCode("5489-2789")
             .setGeneralDiscount(100L)
@@ -3929,7 +3930,7 @@ public class ModelUtils {
             .setMixedWaste120L("-")
             .setTextileWaste60L("-")
             .setTextileWaste20L("-")
-            .setOtherPackages("-")
+            .setOtherPackages(new OtherPackages("-", "-"))
             .setAddress(new SenderLocation().setEn(null).setUa(null));
     }
 
