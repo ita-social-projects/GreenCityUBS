@@ -26,6 +26,11 @@ reviews:
     - '!**/.git/**'
     - '!**/*.mod'
     - '!**/*.sum'
+    - '!**/node_modules/**'
+    - '!**/dist/**'
+    - '!**/build/**'
+    - '!**/*.min.js'
+    - '!**/*.min.css'
   path_instructions:
     - path: /**/src/main/**/*.java
       instructions: >-
