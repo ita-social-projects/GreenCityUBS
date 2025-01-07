@@ -2,6 +2,7 @@ package greencity.mapping.order;
 
 import greencity.constant.AppConstant;
 import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.order.OtherPackages;
 import greencity.dto.order.SenderLocation;
 import greencity.entity.order.BigOrderTableViews;
 import java.util.Optional;
@@ -47,8 +48,11 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
                 .filter(value -> value != 0)
                 .map(String::valueOf)
                 .orElse("-"))
-            .setOtherPackages(Optional.ofNullable(bigViews.getOtherPackages())
-                .orElse("-"))
+            .setOtherPackages(new OtherPackages(
+                Optional.ofNullable(bigViews.getOtherPackages())
+                    .orElse("-"),
+                Optional.ofNullable(bigViews.getOtherPackagesEng())
+                    .orElse("-")))
             .setTotalOrderSum(convertCoinsIntoBills(bigViews.getTotalOrderSum()))
             .setOrderCertificateCode(bigViews.getOrderCertificateCode())
             .setGeneralDiscount(bigViews.getGeneralDiscount())
