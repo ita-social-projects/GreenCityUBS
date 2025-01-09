@@ -4,7 +4,7 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class AppConstant {
-    public static final String UKRAINE_TIMEZONE = "Europe/Kiev";
+    public static final String UKRAINE_TIMEZONE = "Europe/Kyiv";
     public static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
     public static final String ENROLLMENT_TO_THE_BONUS_ACCOUNT = "Зарахування на бонусний рахунок";
     public static final String ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG = "Enrollment to the bonus account";
