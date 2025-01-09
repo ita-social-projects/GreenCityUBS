@@ -4,11 +4,8 @@ import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.notification.SenderInfoDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -30,8 +27,6 @@ public class OrdersDataForUserDto {
     private Double paidAmount;
     private Double orderFullPrice;
     private Double amountBeforePayment;
-    private Double refundedBonuses;
-    private Double refundedMoney;
     private List<BagForUserDto> bags;
     private String orderComment;
     private Double bonuses;

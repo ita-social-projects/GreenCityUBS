@@ -1,7 +1,10 @@
 package greencity.exceptions.user;
 
-import lombok.experimental.StandardException;
-
-@StandardException
 public class UserNotFoundException extends RuntimeException {
+    /**
+     * Constructor.
+     */
+    public UserNotFoundException(String message) {
+        super(message);
+    }
 }

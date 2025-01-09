@@ -3,22 +3,23 @@ package greencity.dto.address;
 import greencity.dto.location.api.DistrictDto;
 import lombok.Builder;
 import lombok.Data;
+
 import java.util.List;
 
 @Builder
 @Data
 public class AddressExportDetailsDto {
-    private Long id;
-    private String city;
-    private String cityEn;
-    private String district;
-    private String districtEn;
-    private String region;
-    private String regionEn;
-    private String entranceNumber;
-    private String houseCorpus;
-    private String houseNumber;
-    private String street;
-    private String streetEn;
+    private Long addressId;
+    private String addressCity;
+    private String addressCityEng;
+    private String addressDistrict;
+    private String addressDistrictEng;
+    private String addressRegion;
+    private String addressRegionEng;
+    private String addressEntranceNumber;
+    private String addressHouseCorpus;
+    private String addressHouseNumber;
+    private String addressStreet;
+    private String addressStreetEng;
     private List<DistrictDto> addressRegionDistrictList;
 }

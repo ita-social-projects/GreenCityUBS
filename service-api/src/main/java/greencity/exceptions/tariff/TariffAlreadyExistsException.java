@@ -1,7 +1,12 @@
 package greencity.exceptions.tariff;
 
-import lombok.experimental.StandardException;
-
-@StandardException
 public class TariffAlreadyExistsException extends RuntimeException {
+    /**
+     * Constructor with message.
+     *
+     * @param message message, that explains cause of the exception.
+     */
+    public TariffAlreadyExistsException(String message) {
+        super(message);
+    }
 }

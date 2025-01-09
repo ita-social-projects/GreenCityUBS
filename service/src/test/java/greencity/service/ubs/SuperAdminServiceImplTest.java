@@ -31,11 +31,11 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.BagStatus;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.StationStatus;
 import greencity.enums.TariffStatus;
-import greencity.enums.BagStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -44,9 +44,20 @@ import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
-import greencity.repository.*;
+import greencity.repository.BagRepository;
+import greencity.repository.CourierRepository;
+import greencity.repository.DeactivateChosenEntityRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.ServiceRepository;
+import greencity.repository.TariffLocationRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -56,27 +67,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Arrays;
-import java.util.Optional;
-import java.util.Map;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
-import static greencity.ModelUtils.TEST_USER;
-import static greencity.ModelUtils.getAllTariffsInfoDto;
-import static greencity.ModelUtils.getBag2;
-import static greencity.ModelUtils.getCourier;
-import static greencity.ModelUtils.getCourierDto;
-import static greencity.ModelUtils.getCourierDtoList;
-import static greencity.ModelUtils.getDeactivatedCourier;
-import static greencity.ModelUtils.getEmployee;
-import static greencity.ModelUtils.getOrderBag;
-import static greencity.ModelUtils.getReceivingStation;
-import static greencity.ModelUtils.getReceivingStationDto;
+
+import static greencity.ModelUtils.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -127,10 +136,6 @@ class SuperAdminServiceImplTest {
     private OrderRepository orderRepository;
     @Mock
     private OrderBagService orderBagService;
-    @Mock
-    private OrderAddressRepository orderAddressRepository;
-    @Mock
-    private NotificationService notificationService;
 
     @AfterEach
     void afterEach() {
@@ -153,7 +158,7 @@ class SuperAdminServiceImplTest {
     @Test
     void addTariffServiceTest() {
         Bag bag = ModelUtils.getNewBag();
-        Employee employee = getEmployee();
+        Employee employee = ModelUtils.getEmployee();
         String uuid = UUID.randomUUID().toString();
         TariffServiceDto dto = ModelUtils.TariffServiceDto();
         GetTariffServiceDto responseDto = ModelUtils.getGetTariffServiceDto();
@@ -211,13 +216,13 @@ class SuperAdminServiceImplTest {
 
         when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(bags);
-        when(modelMapper.map(bags.getFirst(), GetTariffServiceDto.class)).thenReturn(dto);
+        when(modelMapper.map(bags.get(0), GetTariffServiceDto.class)).thenReturn(dto);
 
         superAdminService.getTariffService(1);
 
         verify(tariffsInfoRepository).existsById(1L);
         verify(bagRepository).findAllActiveBagsByTariffsInfoId(1L);
-        verify(modelMapper).map(bags.getFirst(), GetTariffServiceDto.class);
+        verify(modelMapper).map(bags.get(0), GetTariffServiceDto.class);
     }
 
     @Test
@@ -251,13 +256,13 @@ class SuperAdminServiceImplTest {
         Bag bagDeleted = ModelUtils.getBagDeleted();
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
         Order order = ModelUtils.getOrder();
-        order.updateWithNewOrderBags(Arrays.asList(getOrderBag(), ModelUtils.getOrderBag2()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag2()));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bagDeleted);
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag, getBag2()));
-        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(List.of(order));
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
         when(orderBagService
-            .getActualBagsAmountForOrder(Arrays.asList(getOrderBag(), ModelUtils.getOrderBag2())))
+            .getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag2())))
             .thenReturn(ModelUtils.getAmount());
         when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
 
@@ -285,14 +290,14 @@ class SuperAdminServiceImplTest {
         Bag bagDeleted = ModelUtils.getBagDeleted();
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
         Order order = ModelUtils.getOrder();
-        order.updateWithNewOrderBags(Collections.singletonList(getOrderBag()));
+        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag()));
         Map<Integer, Integer> hashMap = new HashMap<>();
         hashMap.put(1, 1);
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
         when(bagRepository.save(bag)).thenReturn(bagDeleted);
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(bag));
-        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(List.of(order));
-        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(getOrderBag())))
+        when(orderRepository.findAllByBagId(bag.getId())).thenReturn(Arrays.asList(order));
+        when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
             .thenReturn(hashMap);
         when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(Collections.singletonList(getOrderBag()));
         assertEquals(BagStatus.ACTIVE, bag.getStatus());
@@ -309,12 +314,12 @@ class SuperAdminServiceImplTest {
     void deleteTariffServiceWhenTariffBagsListIsEmpty() {
         Bag bag = ModelUtils.getBag();
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
-        when(orderBagRepository.findOrderBagsByBagId(any())).thenReturn(new ArrayList<>());
+
         superAdminService.deleteTariffService(1);
 
         verify(orderBagRepository).findOrderBagsByBagId(any());
         verify(bagRepository).findActiveBagById(1);
-        verify(bagRepository).deleteById(any());
+        verify(bagRepository).deleteBagById(any());
 
     }
 
@@ -353,12 +358,12 @@ class SuperAdminServiceImplTest {
     void editTariffServiceWithUnpaidOrder() {
         Bag bag = ModelUtils.getBag();
         Bag editedBag = ModelUtils.getEditedBag();
-        Employee employee = getEmployee();
+        Employee employee = ModelUtils.getEmployee();
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
         Order order = ModelUtils.getOrder();
         String uuid = UUID.randomUUID().toString();
-        order.updateWithNewOrderBags(List.of(getOrderBag()));
+        order.updateWithNewOrderBags(List.of(ModelUtils.getOrderBag()));
 
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
@@ -368,10 +373,9 @@ class SuperAdminServiceImplTest {
         doNothing().when(orderBagRepository)
             .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(List.of(order));
-        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(getOrderBag())))
-            .thenReturn(ModelUtils.getAmount());
-        doNothing().when(notificationService).notifyAllOrdersWithIncreasedTariffPrice(any());
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
+        when(orderBagService.getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag())))
+            .thenReturn(ModelUtils.getAmount());
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 
@@ -383,7 +387,6 @@ class SuperAdminServiceImplTest {
         verify(orderBagRepository)
             .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         verify(orderRepository).findAllUnpaidOrdersByBagId(1);
-        verify(notificationService).notifyAllOrdersWithIncreasedTariffPrice(any());
         verify(orderRepository).saveAll(anyList());
     }
 
@@ -391,7 +394,7 @@ class SuperAdminServiceImplTest {
     void editTariffServiceWithUnpaidOrderAndBagConfirmedAmount() {
         Bag bag = ModelUtils.getBag();
         Bag editedBag = ModelUtils.getEditedBag();
-        Employee employee = getEmployee();
+        Employee employee = ModelUtils.getEmployee();
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
         Order order = ModelUtils.getOrder();
@@ -405,11 +408,10 @@ class SuperAdminServiceImplTest {
         doNothing().when(orderBagRepository)
             .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(List.of(order));
-        when(orderBagService
-            .getActualBagsAmountForOrder(Collections.singletonList(getOrderBag().setConfirmedQuantity(2))))
-            .thenReturn(ModelUtils.getAmount());
-        doNothing().when(notificationService).notifyAllOrdersWithIncreasedTariffPrice(any());
         when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
+        when(orderBagService
+            .getActualBagsAmountForOrder(Arrays.asList(ModelUtils.getOrderBag().setConfirmedQuantity(2))))
+            .thenReturn(ModelUtils.getAmount());
 
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 
@@ -421,7 +423,6 @@ class SuperAdminServiceImplTest {
         verify(orderBagRepository)
             .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         verify(orderRepository).findAllUnpaidOrdersByBagId(1);
-        verify(notificationService).notifyAllOrdersWithIncreasedTariffPrice(any());
         verify(orderRepository).saveAll(anyList());
     }
 
@@ -429,7 +430,7 @@ class SuperAdminServiceImplTest {
     void editTariffServiceWithUnpaidOrderAndBagExportedAmount() {
         Bag bag = ModelUtils.getBag();
         Bag editedBag = ModelUtils.getEditedBag();
-        Employee employee = getEmployee();
+        Employee employee = ModelUtils.getEmployee();
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
         Order order = ModelUtils.getOrder();
@@ -443,12 +444,11 @@ class SuperAdminServiceImplTest {
         doNothing().when(orderBagRepository)
             .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         when(orderRepository.findAllUnpaidOrdersByBagId(1)).thenReturn(List.of(order));
+        when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
         when(orderBagService.getActualBagsAmountForOrder(
-            Collections.singletonList(getOrderBag().setExportedQuantity(2).setConfirmedQuantity(2))))
+            Arrays.asList(ModelUtils.getOrderBag().setExportedQuantity(2).setConfirmedQuantity(2))))
             .thenReturn(ModelUtils.getAmount());
 
-        when(orderRepository.saveAll(List.of(order))).thenReturn(List.of(order));
-        doNothing().when(notificationService).notifyAllOrdersWithIncreasedTariffPrice(any());
         GetTariffServiceDto actual = superAdminService.editTariffService(dto, 1, uuid);
 
         assertEquals(editedDto, actual);
@@ -461,7 +461,6 @@ class SuperAdminServiceImplTest {
         verify(orderBagRepository)
             .updateAllByBagIdForUnpaidOrders(1, 20, 150_00L, "Бавовняна сумка", null);
         verify(orderRepository).findAllUnpaidOrdersByBagId(1);
-        verify(notificationService).notifyAllOrdersWithIncreasedTariffPrice(any());
         verify(orderRepository).saveAll(anyList());
     }
 
@@ -469,7 +468,7 @@ class SuperAdminServiceImplTest {
     void editTariffServiceWithoutUnpaidOrder() {
         Bag bag = ModelUtils.getBag();
         Bag editedBag = ModelUtils.getEditedBag();
-        Employee employee = getEmployee();
+        Employee employee = ModelUtils.getEmployee();
         TariffServiceDto dto = ModelUtils.getTariffServiceDto();
         GetTariffServiceDto editedDto = ModelUtils.getGetTariffServiceDto();
         String uuid = UUID.randomUUID().toString();
@@ -603,7 +602,7 @@ class SuperAdminServiceImplTest {
     @Test
     void editService() {
         Service service = ModelUtils.getEditedService();
-        Employee employee = getEmployee();
+        Employee employee = ModelUtils.getEmployee();
         ServiceDto dto = ModelUtils.getServiceDto();
         GetServiceDto getServiceDto = ModelUtils.getGetServiceDto();
         String uuid = UUID.randomUUID().toString();
@@ -658,7 +657,7 @@ class SuperAdminServiceImplTest {
     void addService() {
         Service createdService = ModelUtils.getService();
         Service service = ModelUtils.getNewService();
-        Employee employee = getEmployee();
+        Employee employee = ModelUtils.getEmployee();
         ServiceDto serviceDto = ModelUtils.getServiceDto();
         GetServiceDto getServiceDto = ModelUtils.getGetServiceDto();
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
@@ -733,11 +732,11 @@ class SuperAdminServiceImplTest {
     void getAllLocationTest() {
         List<Region> regionList = ModelUtils.getAllRegion();
 
-        when(regionRepository.findAllWithNotDeletedLocations()).thenReturn(regionList);
+        when(regionRepository.findAll()).thenReturn(regionList);
 
         superAdminService.getAllLocation();
 
-        verify(regionRepository).findAllWithNotDeletedLocations();
+        verify(regionRepository).findAll();
         regionList.forEach(region -> verify(modelMapper).map(region, LocationInfoDto.class));
     }
 
@@ -745,12 +744,12 @@ class SuperAdminServiceImplTest {
     void getLocationsByStatusTest() {
         List<Region> regionList = ModelUtils.getAllRegion();
 
-        when(regionRepository.findAllWithLocationsByLocationStatus(LocationStatus.ACTIVE))
+        when(regionRepository.findAllByLocationsLocationStatus(LocationStatus.ACTIVE))
             .thenReturn(Optional.of(regionList));
 
         var result = superAdminService.getLocationsByStatus(LocationStatus.ACTIVE);
 
-        verify(regionRepository).findAllWithLocationsByLocationStatus(LocationStatus.ACTIVE);
+        verify(regionRepository).findAllByLocationsLocationStatus(LocationStatus.ACTIVE);
         regionList.forEach(region -> verify(modelMapper).map(region, LocationInfoDto.class));
         verify(modelMapper, times(regionList.size())).map(any(Region.class), eq(LocationInfoDto.class));
         assertEquals(regionList.size(), result.size());
@@ -758,7 +757,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void getLocationsByStatusNotFoundExceptionTest() {
-        when(regionRepository.findAllWithLocationsByLocationStatus(LocationStatus.ACTIVE))
+        when(regionRepository.findAllByLocationsLocationStatus(LocationStatus.ACTIVE))
             .thenReturn(Optional.empty());
 
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
@@ -767,7 +766,7 @@ class SuperAdminServiceImplTest {
         assertEquals(String.format(ErrorMessage.REGIONS_NOT_FOUND_BY_LOCATION_STATUS, LocationStatus.ACTIVE.name()),
             notFoundException.getMessage());
 
-        verify(regionRepository).findAllWithLocationsByLocationStatus(LocationStatus.ACTIVE);
+        verify(regionRepository).findAllByLocationsLocationStatus(LocationStatus.ACTIVE);
     }
 
     @Test
@@ -775,12 +774,12 @@ class SuperAdminServiceImplTest {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Region region = ModelUtils.getRegion();
 
-        when(regionRepository.findRegionByNameEnOrNameUk("Kyiv region", "Київська область"))
+        when(regionRepository.findRegionByEnNameAndUkrName("Kyiv region", "Київська область"))
             .thenReturn(Optional.of(region));
 
         superAdminService.addLocation(locationCreateDtoList);
 
-        verify(regionRepository).findRegionByNameEnOrNameUk("Kyiv region", "Київська область");
+        verify(regionRepository).findRegionByEnNameAndUkrName("Kyiv region", "Київська область");
         verify(locationRepository).findLocationByNameAndRegionId(anyString(), anyString(), anyLong());
         verify(locationRepository).save(any(Location.class));
     }
@@ -789,53 +788,45 @@ class SuperAdminServiceImplTest {
     void addLocationCreateNewRegionTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Location location = ModelUtils.getLocationForCreateRegion();
-        when(regionRepository.findRegionByNameEnOrNameUk("Kyiv region", "Київська область"))
+        when(regionRepository.findRegionByEnNameAndUkrName("Kyiv region", "Київська область"))
             .thenReturn(Optional.empty());
         when(regionRepository.save(any())).thenReturn(ModelUtils.getRegion());
         superAdminService.addLocation(locationCreateDtoList);
         verify(locationRepository).findLocationByNameAndRegionId("Київ", "Kyiv", 1L);
-        verify(regionRepository).findRegionByNameEnOrNameUk("Kyiv region", "Київська область");
+        verify(regionRepository).findRegionByEnNameAndUkrName("Kyiv region", "Київська область");
         verify(locationRepository).save(location);
     }
 
     @Test
     void deleteLocationTest() {
         Location location = ModelUtils.getLocationDto();
-
-        when(orderAddressRepository.existsByLocation(location)).thenReturn(false);
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        location
+            .setTariffLocations(Set.of(TariffLocation.builder().location(Location.builder().id(2L).build()).build()));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         superAdminService.deleteLocation(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
         verify(locationRepository).delete(any(Location.class));
-        verify(orderAddressRepository).existsByLocation(any(Location.class));
     }
 
     @Test
-    void deleteLocationAssignedToTarificTest() {
+    void deleteLocationThrowsBadRequestExceptionTest() {
         Location location = ModelUtils.getLocationDto();
-        location.setIsDeleted(false);
-
-        when(orderAddressRepository.existsByLocation(location)).thenReturn(true);
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
-        when(locationRepository.save(location)).thenReturn(location);
-
-        assertDoesNotThrow(() -> superAdminService.deleteLocation(1L));
-        assertTrue(location.getIsDeleted());
-
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
-        verify(locationRepository).save(location);
-        verify(orderAddressRepository).existsByLocation(any(Location.class));
+        location
+            .setTariffLocations(Set.of(TariffLocation.builder().location(Location.builder().id(1L).build()).build()));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        assertThrows(BadRequestException.class, () -> superAdminService.deleteLocation(1L));
+        verify(locationRepository).findById(1L);
     }
 
     @Test
     void activateLocation() {
         Location location = ModelUtils.getLocationDto();
 
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
 
         superAdminService.activateLocation(1L);
 
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
         verify(locationRepository).save(location);
     }
 
@@ -843,7 +834,7 @@ class SuperAdminServiceImplTest {
     void addLocationThrowLocationAlreadyCreatedExceptionTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Location location = ModelUtils.getLocation();
-        when(regionRepository.findRegionByNameEnOrNameUk("Kyiv region", "Київська область"))
+        when(regionRepository.findRegionByEnNameAndUkrName("Kyiv region", "Київська область"))
             .thenReturn(Optional.of(ModelUtils.getRegion()));
         when(locationRepository.findLocationByNameAndRegionId("Київ", "Kyiv", 1L)).thenReturn(Optional.of(location));
         assertThrows(NotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
@@ -854,16 +845,15 @@ class SuperAdminServiceImplTest {
     @Test
     void activateLocationExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.activateLocation(1L));
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(anyLong());
+        verify(locationRepository).findById(anyLong());
     }
 
     @Test
     void activateLocationException2Test() {
         Location location = ModelUtils.getLocationDto();
         location.setLocationStatus(LocationStatus.ACTIVE);
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         assertThrows(BadRequestException.class, () -> superAdminService.activateLocation(1L));
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
     }
 
     @Test
@@ -906,7 +896,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void createCourier() {
-        Courier courier = getCourier();
+        Courier courier = ModelUtils.getCourier();
         courier.setId(null);
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
 
@@ -919,7 +909,7 @@ class SuperAdminServiceImplTest {
         when(modelMapper.map(any(), eq(CreateCourierDto.class))).thenReturn(createCourierDto);
 
         assertEquals(createCourierDto,
-            superAdminService.createCourier(createCourierDto, TEST_USER.getUuid()));
+            superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
 
         verify(courierRepository).save(any());
         verify(modelMapper).map(any(), eq(CreateCourierDto.class));
@@ -927,10 +917,10 @@ class SuperAdminServiceImplTest {
 
     @Test
     void createCourierAlreadyExists() {
-        Courier courier = getCourier();
+        Courier courier = ModelUtils.getCourier();
         courier.setId(null);
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
-        String uuid = TEST_USER.getUuid();
+        String uuid = ModelUtils.TEST_USER.getUuid();
 
         when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(getEmployee()));
         when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
@@ -1065,9 +1055,9 @@ class SuperAdminServiceImplTest {
     void updateReceivingStation() {
         ReceivingStationDto stationDto = getReceivingStationDto();
 
-        when(receivingStationRepository.findById(anyLong())).thenReturn(Optional.of(getReceivingStation()));
-        when(receivingStationRepository.save(any())).thenReturn(getReceivingStation());
-        when(modelMapper.map(any(), eq(ReceivingStationDto.class))).thenReturn(getReceivingStationDto());
+        when(receivingStationRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getReceivingStation()));
+        when(receivingStationRepository.save(any())).thenReturn(ModelUtils.getReceivingStation());
+        when(modelMapper.map(any(), eq(ReceivingStationDto.class))).thenReturn(ModelUtils.getReceivingStationDto());
 
         superAdminService.updateReceivingStation(stationDto);
 
@@ -1121,7 +1111,7 @@ class SuperAdminServiceImplTest {
             .thenReturn(ModelUtils.getLocationList());
         when(employeeRepository.findByUuid(any())).thenReturn(Optional.ofNullable(getEmployee()));
         when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
-        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(getCourier()));
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(Collections.emptyList());
         when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
@@ -1139,7 +1129,7 @@ class SuperAdminServiceImplTest {
     void addNewTariffThrowsExceptionWhenListOfLocationsIsEmptyTest() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
 
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier()));
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
         when(employeeRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.ofNullable(getEmployee()));
         when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -1168,7 +1158,7 @@ class SuperAdminServiceImplTest {
             .id(1L)
             .location(ModelUtils.getLocation())
             .build();
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier()));
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(dto.getCourierId(),
             dto.getLocationIdList())).thenReturn(List.of(tariffLocation));
 
@@ -1186,7 +1176,7 @@ class SuperAdminServiceImplTest {
     void addNewTariffThrowsExceptionWhenCourierHasStatusDeactivated() {
         AddNewTariffDto addNewTariffDto = ModelUtils.getAddNewTariffDto();
         String userUUID = "35467585763t4sfgchjfuyetf";
-        Courier courier = getDeactivatedCourier();
+        Courier courier = ModelUtils.getDeactivatedCourier();
 
         // Mock the necessary dependencies
         when(courierRepository.findById(addNewTariffDto.getCourierId())).thenReturn(Optional.of(courier));
@@ -1206,7 +1196,7 @@ class SuperAdminServiceImplTest {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         dto.setReceivingStationsIdList(null);
 
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier()));
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
         when(employeeRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.ofNullable(getEmployee()));
         when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -1228,7 +1218,7 @@ class SuperAdminServiceImplTest {
     @Test
     void addNewTariffThrowsException2() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
-        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(getCourier()));
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
         assertThrows(NotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
         verify(courierRepository).findById(anyLong());
@@ -1251,13 +1241,13 @@ class SuperAdminServiceImplTest {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
-        ReceivingStation receivingStation = getReceivingStation();
+        ReceivingStation receivingStation = ModelUtils.getReceivingStation();
         Location location = ModelUtils.getLocation();
         Courier courier = getCourier();
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
@@ -1269,7 +1259,7 @@ class SuperAdminServiceImplTest {
         superAdminService.editTariff(1L, dto);
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
         verify(tariffsLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
@@ -1283,14 +1273,14 @@ class SuperAdminServiceImplTest {
         EditTariffDto dto = ModelUtils.getEditTariffDto();
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
-        ReceivingStation receivingStation = getReceivingStation();
+        ReceivingStation receivingStation = ModelUtils.getReceivingStation();
         Location location = ModelUtils.getLocation();
         List<TariffLocation> tariffLocations = ModelUtils.getTariffLocationList();
         Courier courier = getCourier();
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
@@ -1303,7 +1293,7 @@ class SuperAdminServiceImplTest {
         superAdminService.editTariff(1L, dto);
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
         verify(tariffsLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
@@ -1329,13 +1319,13 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.empty());
+        when(locationRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.editTariff(1L, dto));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
     }
 
     @Test
@@ -1345,15 +1335,15 @@ class SuperAdminServiceImplTest {
         List<Location> locations = ModelUtils.getLocationList2();
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(locations.get(0)));
-        when(locationRepository.findByIdAndIsDeletedIsFalse(2L)).thenReturn(Optional.of(locations.get(1)));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(locations.get(0)));
+        when(locationRepository.findById(2L)).thenReturn(Optional.of(locations.get(1)));
 
         assertThrows(BadRequestException.class,
             () -> superAdminService.editTariff(1L, dto));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(2L);
+        verify(locationRepository).findById(1L);
+        verify(locationRepository).findById(2L);
     }
 
     @Test
@@ -1366,7 +1356,7 @@ class SuperAdminServiceImplTest {
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
 
@@ -1374,7 +1364,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.editTariff(1L, dto));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(courierRepository).findById(1L);
     }
@@ -1389,7 +1379,7 @@ class SuperAdminServiceImplTest {
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.empty());
@@ -1398,7 +1388,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.editTariff(1L, dto));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
         verify(courierRepository).findById(1L);
@@ -1410,7 +1400,7 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         Location location = ModelUtils.getLocation();
 
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(courierRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -1419,7 +1409,7 @@ class SuperAdminServiceImplTest {
 
         verify(tariffsInfoRepository).findById(1L);
         verify(courierRepository).findById(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
     }
 
     @Test
@@ -1429,8 +1419,9 @@ class SuperAdminServiceImplTest {
         Location location = ModelUtils.getLocation();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
 
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.empty());
@@ -1439,7 +1430,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.editTariff(1L, dto));
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
     }
@@ -1451,7 +1442,7 @@ class SuperAdminServiceImplTest {
         Location location = ModelUtils.getLocation();
         Courier courier = getDeactivatedCourier();
 
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
 
@@ -1460,7 +1451,7 @@ class SuperAdminServiceImplTest {
 
         verify(tariffsInfoRepository).findById(1L);
         verify(courierRepository).findById(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
     }
 
     @Test
@@ -1469,12 +1460,12 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         Location location = ModelUtils.getLocation();
         TariffLocation tariffLocation = ModelUtils.getTariffLocation();
-        ReceivingStation receivingStation = getReceivingStation();
+        ReceivingStation receivingStation = ModelUtils.getReceivingStation();
         Courier courier = getCourier();
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
@@ -1486,7 +1477,7 @@ class SuperAdminServiceImplTest {
         superAdminService.editTariff(1L, dto);
 
         verify(tariffsInfoRepository).findById(1L);
-        verify(locationRepository).findByIdAndIsDeletedIsFalse(1L);
+        verify(locationRepository).findById(1L);
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findById(1L);
         verify(tariffsLocationRepository).findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location);
@@ -1813,15 +1804,13 @@ class SuperAdminServiceImplTest {
     @Test
     void switchTariffStatusFromWhenCourierDeactivatedThrowBadRequestException() {
         TariffsInfo tariffInfo = ModelUtils.getTariffsInfoDeactivated();
-        tariffInfo.setCourier(getDeactivatedCourier());
+        tariffInfo.setCourier(ModelUtils.getDeactivatedCourier());
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffInfo));
 
         Throwable t = assertThrows(BadRequestException.class,
             () -> superAdminService.switchTariffStatus(1L, "Active"));
-        assertEquals(String.format(
-            "%s%s",
-            ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER,
+        assertEquals(String.format(ErrorMessage.TARIFF_ACTIVATION_RESTRICTION_DUE_TO_DEACTIVATED_COURIER +
             tariffInfo.getCourier().getId()),
             t.getMessage());
 
@@ -1989,8 +1978,8 @@ class SuperAdminServiceImplTest {
         DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithStatusActive();
         details.setActivationStatus("Active");
         Location location = ModelUtils.getLocation();
-        Courier courier = getCourier();
-        ReceivingStation receivingStation = getReceivingStation();
+        Courier courier = ModelUtils.getCourier();
+        ReceivingStation receivingStation = ModelUtils.getReceivingStation();
 
         when(deactivateTariffsForChosenParamRepository.isRegionsExists(anyList())).thenReturn(true);
         when(locationRepository.findLocationByIdAndRegionId(1L, 1L)).thenReturn(Optional.of(location));
@@ -2238,7 +2227,7 @@ class SuperAdminServiceImplTest {
     void switchCourierStatusToActive() {
         DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourier();
         details.setActivationStatus("Active");
-        Courier courier = getCourier();
+        Courier courier = ModelUtils.getCourier();
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(courierRepository.save(courier)).thenReturn(courier);
@@ -2283,8 +2272,8 @@ class SuperAdminServiceImplTest {
     void switchReceivingStationsStatusToActive() {
         DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithReceivingStations();
         details.setActivationStatus("Active");
-        ReceivingStation receivingStation1 = getReceivingStation();
-        ReceivingStation receivingStation2 = getReceivingStation();
+        ReceivingStation receivingStation1 = ModelUtils.getReceivingStation();
+        ReceivingStation receivingStation2 = ModelUtils.getReceivingStation();
         receivingStation2.setId(12L);
 
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation1));

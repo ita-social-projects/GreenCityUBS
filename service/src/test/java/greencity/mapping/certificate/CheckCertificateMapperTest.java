@@ -3,6 +3,7 @@ package greencity.mapping.certificate;
 import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDto;
 import greencity.entity.order.Certificate;
+import greencity.mapping.certificate.CheckCertificateMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +17,7 @@ class CheckCertificateMapperTest {
 
     @Test
     void convert() {
-        Certificate certificate = ModelUtils.getActiveCertificateWith10Points();
+        Certificate certificate = ModelUtils.getCertificate();
         CertificateDto certificateDto = checkCertificateMapper.convert(certificate);
 
         Assertions.assertEquals(certificate.getCode(), certificateDto.getCode());

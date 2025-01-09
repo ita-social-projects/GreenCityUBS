@@ -2,6 +2,7 @@ package greencity.exception.handler;
 
 import lombok.Data;
 import org.springframework.validation.FieldError;
+
 import java.io.Serializable;
 
 /**
@@ -20,5 +21,13 @@ public class ValidationExceptionDto implements Serializable {
     public ValidationExceptionDto(FieldError error) {
         this.name = error.getField();
         this.message = error.getDefaultMessage();
+    }
+
+    /**
+     * Constructor.
+     */
+    public ValidationExceptionDto(String name, String message) {
+        this.name = name;
+        this.message = message;
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -14,10 +15,9 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      * {@inheritDoc}
      */
     @Query(nativeQuery = true,
-        value = "select l.* FROM locations as l "
+        value = "select * FROM locations as l "
             + "WHERE l.region_id = :regionId AND (l.name_en = :locationNameEn "
-            + "OR l.name_uk = :locationNameUk) "
-            + "AND l.is_deleted = false")
+            + "OR l.name_uk = :locationNameUk)")
     Optional<Location> findLocationByNameAndRegionId(@Param("locationNameUk") String locationNameUk,
         @Param("locationNameEn") String locationNameEn,
         @Param("regionId") Long regionId);
@@ -30,7 +30,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      * @author Anton Bondar
      */
     @Query(nativeQuery = true,
-        value = "SELECT l.* FROM locations AS l "
+        value = "SELECT * FROM locations AS l "
             + "INNER JOIN tariffs_locations AS m ON l.id = m.location_id "
             + "JOIN tariffs_info AS t ON t.id = m.tariffs_info_id "
             + "JOIN courier AS c ON c.id = t.courier_id "
@@ -38,8 +38,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             + "AND t.tariff_status = 'ACTIVE' "
             + "AND m.location_status = 'ACTIVE' "
             + "AND c.courier_status = 'ACTIVE' "
-            + "AND c.id = :courierId "
-            + "AND l.is_deleted = false")
+            + "AND c.id = :courierId")
     List<Location> findAllActiveLocationsByCourierId(@Param("courierId") Long courierId);
 
     /**
@@ -53,8 +52,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     @Query(nativeQuery = true,
         value = "SELECT * from locations "
             + "WHERE region_id = :regionId "
-            + "AND id IN :locIds "
-            + "AND is_deleted = false")
+            + "AND id IN :locIds")
     List<Location> findAllByIdAndRegionId(@Param("locIds") List<Long> locIds, @Param("regionId") Long regionId);
 
     /**
@@ -68,8 +66,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     @Query(nativeQuery = true,
         value = "SELECT * from locations "
             + "WHERE region_id = :regionId "
-            + "AND id = :locationId "
-            + "AND is_deleted = false")
+            + "AND id = :locationId")
     Optional<Location> findLocationByIdAndRegionId(@Param("locationId") Long locationId,
         @Param("regionId") Long regionId);
 
@@ -82,38 +79,8 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      */
     @Query(nativeQuery = true,
         value = "SELECT * from locations "
-            + "WHERE region_id = :regionId "
-            + "AND is_deleted = false")
+            + "WHERE region_id = :regionId")
     List<Location> findLocationsByRegionId(@Param("regionId") Long regionId);
-
-    /**
-     * Method for not deleted location by id.
-     *
-     * @param locationId {@link Long} - id of location
-     * @return optional of {@link Location}
-     * @author Denys Ryhal
-     */
-    Optional<Location> findByIdAndIsDeletedIsFalse(Long locationId);
-
-    /**
-     * Method for getting city name by locationId and addressId.
-     *
-     * @param addressId  {@link Long} - id of address
-     * @param locationId {@link Long} - id of location
-     *
-     * @return {@link Optional} of {@link String} - returns name of city in English
-     *         if location city and address city names match
-     * @author Olena Sotnik
-     */
-    @Query(nativeQuery = true,
-        value = "SELECT a.city_en from locations AS l "
-            + "JOIN address AS a "
-            + "ON a.city_en = l.name_en "
-            + "WHERE a.id = :addressId "
-            + "AND l.id = :locationId "
-            + "GROUP BY a.city_en")
-    Optional<String> findAddressAndLocationNamesMatch(@Param("locationId") Long locationId,
-        @Param("addressId") Long addressId);
 
     /**
      * Method for getting all active locations.
@@ -122,11 +89,4 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      */
     @Query("SELECT l FROM Location l WHERE l.locationStatus = 'ACTIVE'")
     List<Location> findAllActiveLocations();
-
-    @Query(nativeQuery = true,
-        value = "SELECT l.* FROM locations l "
-            + "JOIN tariffs_locations tl ON l.id = tl.location_id "
-            + "JOIN tariffs_info ti ON ti.id = tl.tariffs_info_id "
-            + "WHERE ti.id = :tariffInfoId")
-    Optional<Location> findLocationByTariffInfoId(Long tariffInfoId);
 }

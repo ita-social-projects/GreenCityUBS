@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
 import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -20,14 +22,11 @@ class TableColumnWidthForEmployeeTest {
     }
 
     static Stream<Arguments> testArguments() {
-        int defaultWidth = 165;
-        int defaultWidthForWaste = 106;
+        int defaultWidth = 120;
         return Stream.of(
             Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getAddress()),
             Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getAmountDue()),
-            Arguments.of(defaultWidthForWaste, TABLE_COLUMN_WIDTH.getMixedWaste120L()),
-            Arguments.of(defaultWidthForWaste, TABLE_COLUMN_WIDTH.getTextileWaste60L()),
-            Arguments.of(defaultWidthForWaste, TABLE_COLUMN_WIDTH.getTextileWaste20L()),
+            Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getBagsAmount()),
             Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getBlockedBy()),
             Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getCity()),
             Arguments.of(defaultWidth, TABLE_COLUMN_WIDTH.getClientEmail()),

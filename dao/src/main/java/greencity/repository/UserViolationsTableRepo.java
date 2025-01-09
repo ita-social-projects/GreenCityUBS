@@ -1,23 +1,15 @@
 package greencity.repository;
 
-import greencity.enums.SortingOrder;
 import greencity.entity.user.Violation;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Repository;
+import greencity.enums.SortingOrder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.*;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
+
 import static java.util.Objects.nonNull;
 
 @Repository
@@ -68,16 +60,11 @@ public class UserViolationsTableRepo {
         Expression<?> sortBy = violationRoot.get("violationDate");
 
         if (nonNull(column)) {
-            switch (column) {
-                case "orderId":
-                    sortBy = violationRoot.get("order").get("id");
-                    break;
-                case "violationLevel":
-                    sortBy = violationRoot.get("violationLevel");
-                    break;
-                default:
-                    sortBy = violationRoot.get("violationDate");
-            }
+            sortBy = switch (column) {
+                case "orderId" -> violationRoot.get("order").get("id");
+                case "violationLevel" -> violationRoot.get("violationLevel");
+                default -> violationRoot.get("violationDate");
+            };
         }
         if (sortingOrder.equals(SortingOrder.DESC)) {
             criteriaQuery.orderBy(criteriaBuilder.desc(sortBy));

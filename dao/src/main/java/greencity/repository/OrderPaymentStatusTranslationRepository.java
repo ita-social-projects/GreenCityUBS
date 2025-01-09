@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +35,6 @@ public interface OrderPaymentStatusTranslationRepository
      * This is method which is find order payment status.
      *
      * @return {@link String}.
-     *
      * @author Yuriy Bahlay.
      */
     OrderPaymentStatusTranslation getById(Long id);

@@ -1,10 +1,11 @@
 package greencity.mapping.certificate;
 
 import greencity.dto.certificate.CertificateDtoForAdding;
-import greencity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
+import greencity.enums.CertificateStatus;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
 
 @Component

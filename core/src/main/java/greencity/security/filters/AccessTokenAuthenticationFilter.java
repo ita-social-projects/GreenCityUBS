@@ -4,7 +4,10 @@ import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
 import greencity.service.FeignClientCallAsync;
 import io.jsonwebtoken.ExpiredJwtException;
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -12,10 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -26,11 +26,20 @@ import java.util.Optional;
  * @version 1.0
  */
 @Slf4j
-@RequiredArgsConstructor
 public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTool jwtTool;
     private final AuthenticationManager authenticationManager;
     private final FeignClientCallAsync userRemoteClient;
+
+    /**
+     * Constructor.
+     */
+    public AccessTokenAuthenticationFilter(JwtTool jwtTool, AuthenticationManager authenticationManager,
+        FeignClientCallAsync userRemoteClient) {
+        this.jwtTool = jwtTool;
+        this.authenticationManager = authenticationManager;
+        this.userRemoteClient = userRemoteClient;
+    }
 
     private String extractToken(HttpServletRequest request) {
         return jwtTool.getTokenFromHttpServletRequest(request);

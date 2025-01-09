@@ -2,92 +2,98 @@ package greencity.security.providers;
 
 import greencity.security.JwtTool;
 import io.jsonwebtoken.ExpiredJwtException;
-import org.junit.jupiter.api.Assertions;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.io.Encoders;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import javax.crypto.SecretKey;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Yurii Koval
  */
-@ExtendWith(MockitoExtension.class)
 class JwtAuthenticationProviderTest {
-
-    enum Role {
+    private enum Role {
         ROLE_ADMIN
     }
 
-    private final Role expectedRole = Role.ROLE_ADMIN;
+    private static final Role expectedRole = Role.ROLE_ADMIN;
 
-    @Mock
-    JwtTool jwtTool;
-
-    @InjectMocks
     private JwtAuthenticationProvider jwtAuthenticationProvider;
+    private static final String EXPECTED_EMAIL = "qqq@email.com";
+    private static final SecretKey secretKey = Jwts.SIG.HS512.key().build();
+
+    @BeforeEach
+    public void setUp() {
+        JwtTool jwtTool = mock(JwtTool.class);
+        jwtAuthenticationProvider = new JwtAuthenticationProvider(jwtTool);
+
+        final String keyString = Encoders.BASE64.encode(secretKey.getEncoded());
+        when(jwtTool.getAccessTokenKey()).thenReturn(keyString);
+    }
 
     @Test
     void authenticateWithValidAccessToken() {
-        final String accessToken = """
-            eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJxcXFAZW1haWwuY29tIiwicm9sZSI6WyJST0xFX0FE\
-            TUlOIl0sImlhdCI6MTY1NDYzNjc2OSwiZXhwIjo2MTY1NDYzNjcwOX0.ajLrWu7MNoXWlPRWi\
-            LD9d7vDzScqx8-9eBl3ZlYlspQ\
-            """;
-        when(jwtTool.getAccessTokenKey()).thenReturn("12312312312312312312312312312312312");
+        String accessToken = Jwts.builder()
+            .signWith(secretKey)
+            .subject(EXPECTED_EMAIL)
+            .issuedAt(Date.from(Instant.now()))
+            .expiration(Date.from(Instant.now().plus(30, ChronoUnit.DAYS)))
+            .claim("role", List.of(expectedRole)).compact();
         Authentication authentication = new UsernamePasswordAuthenticationToken(
             accessToken,
             null);
         Authentication actual = jwtAuthenticationProvider.authenticate(authentication);
-        final String expectedEmail = "qqq@email.com";
-        assertEquals(expectedEmail, actual.getPrincipal());
+
+        assertEquals(EXPECTED_EMAIL, actual.getPrincipal());
         assertEquals(
             Stream.of(expectedRole)
                 .map(Role::toString)
                 .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList()),
+                .toList(),
             actual.getAuthorities());
         assertEquals(Collections.emptyList(), actual.getCredentials());
     }
 
     @Test
     void authenticateWithExpiredAccessToken() {
-        when(jwtTool.getAccessTokenKey()).thenReturn("12312312312312312312312312312312312");
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                """
-                    eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJxcXFAZW1haWwuY29tIiwicm9sZSI6WyJST0xF\
-                    X0FETUlOIl0sImlhdCI6MTY1NDYzNjc2OSwiZXhwIjoxNjU0NjM2NzcwfQ.pnNNTOtgKp\
-                    ZBdfX2XXtXBscmAOFVuk1aLbU0hH3SwQ4\
-                    """,
-            null);
-        Assertions
-            .assertThrows(ExpiredJwtException.class,
-                () -> jwtAuthenticationProvider.authenticate(authentication));
+        String accessToken = Jwts.builder()
+            .signWith(secretKey)
+            .subject(EXPECTED_EMAIL)
+            .issuedAt(Date.from(Instant.now().minus(30, ChronoUnit.DAYS)))
+            .expiration(Date.from(Instant.now().minus(24, ChronoUnit.DAYS)))
+            .claim("role", List.of(expectedRole)).compact();
+        Authentication authentication = new UsernamePasswordAuthenticationToken(accessToken, null);
+
+        assertThrows(ExpiredJwtException.class,
+            () -> jwtAuthenticationProvider.authenticate(authentication));
     }
 
     @Test
     void authenticateWithMalformedAccessToken() {
-        when(jwtTool.getAccessTokenKey()).thenReturn("123123123");
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                """
-                    Malformed\
-                    .eyJzdWIiOiJ0ZXN0QGdtYWlsLmNvbSIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE1Nz\
-                    U4Mzk3OTMsImV4cCI6MTU3NTg0MDY5M30\
-                    .DYna1ycZd7eaUBrXKGzYvEMwcybe7l5YiliOR-LfyRw\
-                    """,
+            "Malformed"
+                + ".eyJzdWIiOiJ0ZXN0QGdtYWlsLmNvbSIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE1Nz"
+                + "U4Mzk3OTMsImV4cCI6MTU3NTg0MDY5M30"
+                + ".DYna1ycZd7eaUBrXKGzYvEMwcybe7l5YiliOR-LfyRw",
             null);
-        Assertions
-            .assertThrows(Exception.class,
-                () -> jwtAuthenticationProvider.authenticate(authentication));
+
+        assertThrows(MalformedJwtException.class,
+            () -> jwtAuthenticationProvider.authenticate(authentication));
     }
 
     @Test

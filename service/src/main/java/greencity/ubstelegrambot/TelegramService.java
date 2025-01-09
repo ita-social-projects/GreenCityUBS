@@ -6,6 +6,7 @@ import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationType;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notification.AbstractNotificationProvider;
@@ -13,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
 import java.util.Objects;
+
 import static greencity.enums.NotificationReceiverType.MOBILE;
 
 @Service

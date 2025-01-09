@@ -1,8 +1,8 @@
 package greencity.service.ubs;
 
 import greencity.dto.employee.EmployeeWithTariffsDto;
-import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
+import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
@@ -10,6 +10,7 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 public interface UBSManagementEmployeeService {

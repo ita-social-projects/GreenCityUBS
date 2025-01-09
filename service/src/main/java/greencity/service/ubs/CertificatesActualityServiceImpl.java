@@ -1,14 +1,14 @@
 package greencity.service.ubs;
 
 import greencity.repository.CertificateRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class CertificatesActualityServiceImpl implements CertificatesActualityService {
-    private final CertificateRepository certificateRepository;
+    @Autowired
+    CertificateRepository certificateRepository;
 
     /**
      * Method update certificates status to expired instead of Active or New in case

@@ -1,34 +1,20 @@
 package greencity.entity.user;
 
-import greencity.entity.user.locations.BaseEntityForEnAndUkNames;
-import greencity.entity.user.locations.City;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.FetchType;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.List;
-import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @Table(name = "regions")
 @EqualsAndHashCode(exclude = {"locations"})
-@ToString(exclude = {"locations", "cities"})
+@ToString(exclude = {"locations"})
 @Entity
-public class Region extends BaseEntityForEnAndUkNames {
+public class Region {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,6 +22,9 @@ public class Region extends BaseEntityForEnAndUkNames {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "region")
     private List<Location> locations;
 
-    @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "region", fetch = FetchType.LAZY)
-    private List<City> cities;
+    @Column(name = "name_uk")
+    private String ukrName;
+
+    @Column(name = "name_en")
+    private String enName;
 }

@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.filters.DateFilter;
 import greencity.filters.OrderSearchCriteria;
+
 import java.util.Map;
 import java.util.function.Function;
 
@@ -28,10 +29,7 @@ public class OrderFilterDataProvider {
         "responsibleCallerId", OrderSearchCriteria::getResponsibleCallerId,
         "responsibleLogicManId", OrderSearchCriteria::getResponsibleLogicManId,
         "responsibleNavigatorId", OrderSearchCriteria::getResponsibleNavigatorId,
-        "responsibleDriverId", OrderSearchCriteria::getResponsibleDriverId,
-        "regionId", OrderSearchCriteria::getRegionId,
-        "cityId", OrderSearchCriteria::getCityId,
-        "districtId", OrderSearchCriteria::getDistrictId);
+        "responsibleDriverId", OrderSearchCriteria::getResponsibleDriverId);
 
     Map<String, Function<OrderSearchCriteria, Enum<?>[]>> getFiltersEnum() {
         return FILTERS_ENUM_MAP;

@@ -13,17 +13,11 @@ import lombok.Data;
 import lombok.NonNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
-import static greencity.constant.ErrorMessage.INVALID_DISTANCE_AMOUNT;
-import static greencity.constant.ErrorMessage.INVALID_LITRES_AMOUNT;
-import static greencity.constant.ErrorMessage.NO_SUCH_COORDINATES;
-import static greencity.constant.ErrorMessage.UNDELIVERED_ORDERS_NOT_FOUND;
+
+import static greencity.constant.ErrorMessage.*;
 
 @Service
 @Data
@@ -94,10 +88,10 @@ public class CoordinateServiceImpl implements CoordinateService {
      */
     private void checkIfSpecifiedLitresAndDistancesAreValid(double distance, int litres) {
         if (distance < 0 || distance > 20) {
-            throw new BadRequestException(INVALID_DISTANCE_AMOUNT);
+            throw new BadRequestException(INAVALID_DISTANCE_AMOUNT);
         }
         if (litres < 0 || litres > 10000) {
-            throw new BadRequestException(INVALID_LITRES_AMOUNT);
+            throw new BadRequestException(INAVALID_LITRES_AMOUNT);
         }
     }
 
@@ -150,7 +144,7 @@ public class CoordinateServiceImpl implements CoordinateService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return set of {@link Coordinates} - start coordinates with it is
+     * @return list of {@link Coordinates} - start coordinates with it's
      *         distant @relatives.
      * @author Oleh Bilonizhka
      */

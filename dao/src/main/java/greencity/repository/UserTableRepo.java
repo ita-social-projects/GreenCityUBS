@@ -1,29 +1,21 @@
 package greencity.repository;
 
-import greencity.enums.SortingOrder;
 import greencity.entity.user.User;
+import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import static java.util.Objects.nonNull;
 
 @Repository
@@ -43,6 +35,7 @@ public class UserTableRepo {
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
      */
+
     public UserTableRepo(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -98,8 +91,7 @@ public class UserTableRepo {
     }
 
     private Predicate getPredicateForWhereOr(Root<User> userRoot, List<Long> usId) {
-        List<Predicate> predicateList = new ArrayList<>();
-        predicateList.addAll(userTariffsInfoFiltering(usId, userRoot));
+        List<Predicate> predicateList = new ArrayList<>(userTariffsInfoFiltering(usId, userRoot));
         return criteriaBuilder.or(predicateList.toArray(new Predicate[0]));
     }
 

@@ -2,16 +2,18 @@ package greencity.dto.address;
 
 import greencity.dto.location.api.DistrictDto;
 import greencity.entity.coords.Coordinates;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+
 import java.io.Serializable;
 import java.util.List;
+
 import static greencity.constant.ValidationConstant.CH_EN;
 import static greencity.constant.ValidationConstant.CH_NUM;
 import static greencity.constant.ValidationConstant.CH_UA;

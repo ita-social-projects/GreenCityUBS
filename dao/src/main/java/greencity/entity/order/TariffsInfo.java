@@ -1,32 +1,13 @@
 package greencity.entity.order;
 
-import greencity.entity.TariffsInfoRecievingEmployee;
+import greencity.entity.TariffsInfoReceivingEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierLimit;
 import greencity.enums.TariffStatus;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -60,7 +41,7 @@ public class TariffsInfo {
     private Set<ReceivingStation> receivingStationList;
 
     @OneToMany(mappedBy = "tariffsInfo")
-    private List<TariffsInfoRecievingEmployee> employeeAssoc;
+    private List<TariffsInfoReceivingEmployee> employeeAssoc;
 
     @Column
     @Enumerated(EnumType.STRING)

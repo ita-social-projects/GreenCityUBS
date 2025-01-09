@@ -3,22 +3,24 @@ package greencity.service.ubs;
 import greencity.entity.order.Bag;
 import greencity.entity.order.OrderBag;
 import greencity.repository.OrderBagRepository;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import static greencity.ModelUtils.getOrderBag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static greencity.ModelUtils.getBag;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static greencity.ModelUtils.getBag2;
+import static greencity.ModelUtils.getBag;
 import static greencity.ModelUtils.getOrderBag2;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static greencity.ModelUtils.getOrderBag;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 

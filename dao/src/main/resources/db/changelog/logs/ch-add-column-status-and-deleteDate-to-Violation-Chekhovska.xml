@@ -5,6 +5,14 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="add-column-status-and-deleteDate-to-Violation" author="MarynaChekhovska">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="violations_description_mapping" columnName="violation_status"/>
+            </not>
+            <not>
+                <columnExists tableName="violations_description_mapping" columnName="delete_date"/>
+            </not>
+        </preConditions>
         <addColumn tableName="violations_description_mapping">
             <column name="violation_status" type="VARCHAR(15)" defaultValue="ACTIVE">
                 <constraints nullable="false"/>
