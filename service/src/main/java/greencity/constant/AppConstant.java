@@ -6,6 +6,8 @@ public final class AppConstant {
     private AppConstant() {
     }
 
+    public static final String UKRAINE_TIMEZONE = "Europe/Kyiv";
+    public static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
     public static final String ENROLLMENT_TO_THE_BONUS_ACCOUNT = "Зарахування на бонусний рахунок";
     public static final String PAYMENT_REFUND = "Повернення коштів";
     public static final String ubsLink = "/ubs/userProfile";
@@ -16,6 +18,7 @@ public final class AppConstant {
     public static final String ADMIN_LINK = "/admin";
     public static final String ADMIN_EMPL_LINK = "/admin/ubs-employee";
     public static final String SUPER_ADMIN_LINK = "/ubs/superAdmin";
+    public static final String COMMIT_INFO = "/commit-info";
     public static final String ADMIN = "ADMIN";
     public static final String USER = "USER";
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";

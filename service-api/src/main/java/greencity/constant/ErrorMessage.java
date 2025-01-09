@@ -174,6 +174,11 @@ public final class ErrorMessage {
     public static final String INVALID_DELIVERY_TIME_FORMAT =
         "Invalid time format. Expected format is yyyy-MM-dd'T'HH:mm:ss.SSS";
     public static final String ORDER_STATUS_INVALID = "Order with ID %d cannot be updated due to its current status.";
+    public static final String WARNING_GIT_DIRECTORY_NOT_FOUND =
+        "WARNING: .git directory not found. Git commit info will be unavailable.";
+    public static final String GIT_REPOSITORY_NOT_INITIALIZED =
+        "Git repository not initialized. Commit info is unavailable.";
+    public static final String FAILED_TO_FETCH_COMMIT_INFO = "Failed to fetch commit info due to I/O error: ";
 
     /**
      * Constructor.
