@@ -3,20 +3,20 @@ package greencity.dto.user;
 import greencity.annotations.ValidPhoneNumber;
 import greencity.constant.ValidationConstant;
 import greencity.dto.address.AddressDto;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import java.io.Serializable;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import java.io.Serializable;
-import java.util.List;
 
 @Getter
 @Setter
@@ -39,8 +39,8 @@ public class UserProfileUpdateDto implements Serializable {
     private String recipientPhone;
     @Valid
     private List<AddressDto> addressDto;
-    @NonNull
+    @NotNull
     private Boolean telegramIsNotify;
-    @NonNull
+    @NotNull
     private Boolean viberIsNotify;
 }

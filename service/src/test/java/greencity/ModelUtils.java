@@ -1795,6 +1795,9 @@ public class ModelUtils {
             .cityEn("Boiarka")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
+            .cityId(getCity())
+            .regionId(getRegion())
+            .districtId(getDistrict())
             .build();
     }
 
