@@ -2,6 +2,7 @@ package greencity.exception.handler;
 
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
@@ -193,6 +194,25 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public final ResponseEntity<Object> handleEntityNotFoundException(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
+    /**
+     * Method intercepts exception {@link ResourceNotFoundException}.
+     *
+     * @param ex      Exception that should be intercepted.
+     * @param request Contains details about the occurred exception.
+     * @return {@code ResponseEntity} which contains the HTTP status and body with
+     *         the exception message.
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public final ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex,
+        WebRequest request) {
+        log.error(ex.getMessage(), ex);
+
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        exceptionResponse.setMessage(ex.getMessage());
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
 }
