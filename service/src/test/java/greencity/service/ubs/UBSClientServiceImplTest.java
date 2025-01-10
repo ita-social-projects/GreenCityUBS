@@ -62,6 +62,8 @@ import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.locations.City;
+import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -82,6 +84,7 @@ import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
+import greencity.mapping.location.AddressRequestDtoToBaseEntityMapper;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
@@ -172,6 +175,11 @@ import static greencity.ModelUtils.getAddress;
 import static greencity.ModelUtils.getAddressDtoResponse;
 import static greencity.ModelUtils.getAddressRequestDto;
 import static greencity.ModelUtils.getAddressRequestDto2;
+import static greencity.ModelUtils.getAddressRequestDtoReflection;
+import static greencity.ModelUtils.getAddressRequestDtoReflection2;
+import static greencity.ModelUtils.getAddressRequestDtoReflection3;
+import static greencity.ModelUtils.getAddressRequestDtoReflection4;
+import static greencity.ModelUtils.getAddressRequestDtoReflection5;
 import static greencity.ModelUtils.getAddressRequestToSaveDto;
 import static greencity.ModelUtils.getAddressWithKyivRegionToSaveRequestDto;
 import static greencity.ModelUtils.getBag;
@@ -202,11 +210,6 @@ import static greencity.ModelUtils.getOrderDetails;
 import static greencity.ModelUtils.getOrderDetailsWithoutSender;
 import static greencity.ModelUtils.getOrderPaymentDetailDto;
 import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
-import static greencity.ModelUtils.getAddressRequestDtoReflection;
-import static greencity.ModelUtils.getAddressRequestDtoReflection2;
-import static greencity.ModelUtils.getAddressRequestDtoReflection3;
-import static greencity.ModelUtils.getAddressRequestDtoReflection4;
-import static greencity.ModelUtils.getAddressRequestDtoReflection5;
 import static greencity.ModelUtils.getOrderResponseDto;
 import static greencity.ModelUtils.getOrderStatusTranslation;
 import static greencity.ModelUtils.getOrderTest;
@@ -416,6 +419,9 @@ class UBSClientServiceImplTest {
 
     @Mock
     private NotificationParameterRepository notificationParameterRepository;
+
+    @Mock
+    private AddressRequestDtoToBaseEntityMapper addressMapper;
 
     @Value("${greencity.monobank.token}")
     private String token;
@@ -4434,5 +4440,35 @@ class UBSClientServiceImplTest {
 
         boolean result6 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address5);
         assertTrue(result6);
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithNoExistingAddressTest() throws Exception {
+        Method setLocations = UBSClientServiceImpl.class.getDeclaredMethod("setLocations",
+            CreateAddressRequestDto.class, Address.class);
+        setLocations.setAccessible(true);
+
+        Address address = getAddress();
+        CreateAddressRequestDto dto = getAddressRequestToSaveDto();
+
+        when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString()))
+            .thenReturn(Optional.of(getRegion()));
+        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.empty());
+        when(addressMapper.convert(any(), eq(City.class))).thenReturn(getCity());
+        when(cityRepository.save(any())).thenReturn(getCity());
+        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.empty());
+        when(addressMapper.convert(any(), eq(District.class))).thenReturn(getDistrict());
+
+        setLocations.invoke(ubsClientService, dto, address);
+
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
+        verify(addressMapper).convert(any(), eq(City.class));
+        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
+        verify(addressMapper).convert(any(), eq(District.class));
+        verify(cityRepository).save(any());
+        verify(districtRepository).save(any());
     }
 }
