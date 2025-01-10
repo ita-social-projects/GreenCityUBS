@@ -4341,7 +4341,11 @@ class UBSClientServiceImplTest {
     @Test
     void updateCurrentAddressForOrderWithInvalidUserTest() {
         when(userRepository.findByUuid(anyString())).thenReturn(null);
-        assertThrows(NotFoundException.class, () -> ubsService.updateCurrentAddressForOrder(null, USER_UUID));
+
+        assertThrows(NotFoundException.class,
+            () -> ubsService.updateCurrentAddressForOrder(null, USER_UUID));
+
+        verify(userRepository).findByUuid(anyString());
     }
 
     @Test
@@ -4365,5 +4369,33 @@ class UBSClientServiceImplTest {
         verify(addressRepository).findAllByUserId(anyLong());
         verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
         verify(addressRepository).save(any());
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithNoExistingRegionTest() {
+        OrderAddressDtoRequest dtoRequest = getTestOrderAddressDtoRequest2();
+        User user = getUser();
+        Address address = getAddress(1L)
+            .setUser(user)
+            .setAddressStatus(AddressStatus.DELETED);
+        CreateAddressRequestDto dto = getAddressRequestDto();
+
+        when(userRepository.findByUuid(anyString())).thenReturn(user);
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(addressRepository.findAllByUserId(anyLong())).thenReturn(List.of(address));
+        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(getAddress());
+        when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString()))
+            .thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class,
+            () -> ubsClientService.updateCurrentAddressForOrder(dtoRequest, USER_UUID));
+
+        verify(userRepository).findByUuid(anyString());
+        verify(addressRepository).findById(anyLong());
+        verify(addressRepository).findAllByUserId(anyLong());
+        verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
+        verify(modelMapper).map(any(), eq(Address.class));
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
     }
 }
