@@ -116,6 +116,7 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -201,6 +202,11 @@ import static greencity.ModelUtils.getOrderDetails;
 import static greencity.ModelUtils.getOrderDetailsWithoutSender;
 import static greencity.ModelUtils.getOrderPaymentDetailDto;
 import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
+import static greencity.ModelUtils.getAddressRequestDtoReflection;
+import static greencity.ModelUtils.getAddressRequestDtoReflection2;
+import static greencity.ModelUtils.getAddressRequestDtoReflection3;
+import static greencity.ModelUtils.getAddressRequestDtoReflection4;
+import static greencity.ModelUtils.getAddressRequestDtoReflection5;
 import static greencity.ModelUtils.getOrderResponseDto;
 import static greencity.ModelUtils.getOrderStatusTranslation;
 import static greencity.ModelUtils.getOrderTest;
@@ -4397,5 +4403,36 @@ class UBSClientServiceImplTest {
         verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
         verify(modelMapper).map(any(), eq(Address.class));
         verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+    }
+
+    @Test
+    void testAreAddressesEqual() throws Exception {
+        Method areAddressesEqualMethod = UBSClientServiceImpl.class.getDeclaredMethod("areAddressesEqual",
+            CreateAddressRequestDto.class, CreateAddressRequestDto.class);
+        areAddressesEqualMethod.setAccessible(true);
+
+        CreateAddressRequestDto address1 = getAddressRequestDtoReflection();
+        CreateAddressRequestDto address2 = getAddressRequestDtoReflection2();
+        CreateAddressRequestDto address3 = getAddressRequestDtoReflection3();
+        CreateAddressRequestDto address4 = getAddressRequestDtoReflection4();
+        CreateAddressRequestDto address5 = getAddressRequestDtoReflection5();
+
+        boolean result1 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address2);
+        assertTrue(result1);
+
+        boolean result2 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address3);
+        assertFalse(result2);
+
+        boolean result3 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, null);
+        assertFalse(result3);
+
+        boolean result4 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, null, null);
+        assertFalse(result4);
+
+        boolean result5 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address4);
+        assertFalse(result5);
+
+        boolean result6 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address5);
+        assertTrue(result6);
     }
 }

@@ -5758,4 +5758,74 @@ public class ModelUtils {
             .build();
 
     }
+
+    public static CreateAddressRequestDto getAddressRequestDtoReflection() {
+        return CreateAddressRequestDto.builder()
+            .region("Region")
+            .regionEn("RegionEn")
+            .city("City")
+            .cityEn("CityEn")
+            .district("District")
+            .districtEn("DistrictEn")
+            .houseNumber("1")
+            .entranceNumber("2")
+            .houseCorpus("A")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDtoReflection2() {
+        return CreateAddressRequestDto.builder()
+            .region("Region")
+            .regionEn("RegionEn")
+            .city("City")
+            .cityEn("CityEn")
+            .district("District")
+            .districtEn("DistrictEn")
+            .houseNumber("1")
+            .entranceNumber("2")
+            .houseCorpus("A")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDtoReflection3() {
+        return CreateAddressRequestDto.builder()
+            .region("DifferentRegion")
+            .regionEn("DifferentRegionEn")
+            .city("DifferentCity")
+            .cityEn("DifferentCityEn")
+            .district("DifferentDistrict")
+            .districtEn("DifferentDistrictEn")
+            .houseNumber("1")
+            .entranceNumber("2")
+            .houseCorpus("A")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDtoReflection4() {
+        return CreateAddressRequestDto.builder()
+            .region("DifferentRegion")
+            .regionEn("DifferentRegionEn")
+            .city("DifferentCity")
+            .cityEn("DifferentCityEn")
+            .district("District")
+            .districtEn("DistrictEn")
+            .houseNumber("1")
+            .entranceNumber("2")
+            .houseCorpus("A")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDtoReflection5() {
+        return CreateAddressRequestDto.builder()
+            .region(null)
+            .regionEn("RegionEn")
+            .city(null)
+            .cityEn("CityEn")
+            .district(null)
+            .districtEn("DistrictEn")
+            .houseNumber("1")
+            .entranceNumber("2")
+            .houseCorpus("A")
+            .build();
+    }
 }
