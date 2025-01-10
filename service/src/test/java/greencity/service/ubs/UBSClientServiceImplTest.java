@@ -170,6 +170,7 @@ import static greencity.ModelUtils.getActiveCertificateWith10Points;
 import static greencity.ModelUtils.getAddress;
 import static greencity.ModelUtils.getAddressDtoResponse;
 import static greencity.ModelUtils.getAddressRequestDto;
+import static greencity.ModelUtils.getAddressRequestDto2;
 import static greencity.ModelUtils.getAddressRequestToSaveDto;
 import static greencity.ModelUtils.getAddressWithKyivRegionToSaveRequestDto;
 import static greencity.ModelUtils.getBag;
@@ -220,6 +221,7 @@ import static greencity.ModelUtils.getTariffsForLocationDto;
 import static greencity.ModelUtils.getTariffsInfo;
 import static greencity.ModelUtils.getTelegramBotNotifyTrue;
 import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
+import static greencity.ModelUtils.getTestOrderAddressDtoRequest2;
 import static greencity.ModelUtils.getTestOrderAddressDtoRequestWithNullPlaceId;
 import static greencity.ModelUtils.getTestOrderAddressLocationDto;
 import static greencity.ModelUtils.getTestUser;
@@ -411,6 +413,7 @@ class UBSClientServiceImplTest {
 
     @Value("${greencity.monobank.token}")
     private String token;
+    private static final String USER_UUID = "uuid";
 
     @Test
     void testGetAllDistricts() {
@@ -4333,5 +4336,34 @@ class UBSClientServiceImplTest {
         ubsClientService.getAllDistrictsForKyiv();
 
         verify(districtRepository).findAllByCityId(anyLong());
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithInvalidUserTest() {
+        when(userRepository.findByUuid(anyString())).thenReturn(null);
+        assertThrows(NotFoundException.class, () -> ubsService.updateCurrentAddressForOrder(null, USER_UUID));
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithExistingDeletedAddressTest() {
+        OrderAddressDtoRequest dtoRequest = getTestOrderAddressDtoRequest2();
+        User user = getUser();
+        Address address = getAddress(1L)
+            .setUser(user)
+            .setAddressStatus(AddressStatus.DELETED);
+        CreateAddressRequestDto dto = getAddressRequestDto2();
+
+        when(userRepository.findByUuid(anyString())).thenReturn(user);
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(addressRepository.findAllByUserId(anyLong())).thenReturn(List.of(address));
+        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
+
+        ubsClientService.updateCurrentAddressForOrder(dtoRequest, USER_UUID);
+
+        verify(userRepository, times(2)).findByUuid(anyString());
+        verify(addressRepository).findById(anyLong());
+        verify(addressRepository).findAllByUserId(anyLong());
+        verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
+        verify(addressRepository).save(any());
     }
 }

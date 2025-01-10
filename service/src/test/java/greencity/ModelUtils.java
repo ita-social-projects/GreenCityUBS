@@ -5724,4 +5724,38 @@ public class ModelUtils {
     public static ChatLinkDto getChatLinkDto(String link) {
         return new ChatLinkDto(1L, link);
     }
+
+    public static CreateAddressRequestDto getAddressRequestDto2() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("Address Comment")
+            .district("Distinct")
+            .districtEn("DistinctEng")
+            .region("Вінницька")
+            .regionEn("RegionEng")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .city("Вінниця")
+            .cityEn("CityEng")
+            .placeId("place_id")
+            .build();
+    }
+
+    public static OrderAddressDtoRequest getTestOrderAddressDtoRequest2() {
+        return OrderAddressDtoRequest.builder()
+            .id(1L)
+            .district("Distinct")
+            .districtEn("DistinctEng")
+            .region("Вінницька")
+            .regionEn("RegionEng")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .city("Вінниця")
+            .cityEn("CityEng")
+            .placeId("place_id")
+            .coordinates(new CoordinatesDto(50.5555555d, 50.5555555d))
+            .build();
+
+    }
 }

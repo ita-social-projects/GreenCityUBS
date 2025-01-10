@@ -67,6 +67,9 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     }
 
     private List<DistrictDto> getAllDistricts(Address address) {
+        if (address == null || address.getCityId() == null) {
+            return List.of();
+        }
         return districtRepository.findAllByCityId(address.getCityId().getId()).stream()
             .map(this::getDistrictDto)
             .toList();
