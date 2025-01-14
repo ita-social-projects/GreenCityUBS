@@ -1795,6 +1795,9 @@ public class ModelUtils {
             .cityEn("Boiarka")
             .streetEn("StreetEng")
             .districtEn("DistinctEng")
+            .cityId(getCity())
+            .regionId(getRegion())
+            .districtId(getDistrict())
             .build();
     }
 
@@ -5720,5 +5723,109 @@ public class ModelUtils {
 
     public static ChatLinkDto getChatLinkDto(String link) {
         return new ChatLinkDto(1L, link);
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDto2() {
+        return CreateAddressRequestDto.builder()
+            .addressComment("Address Comment")
+            .district("Distinct")
+            .districtEn("DistinctEng")
+            .region("Вінницька")
+            .regionEn("RegionEng")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .city("Вінниця")
+            .cityEn("CityEng")
+            .placeId("place_id")
+            .build();
+    }
+
+    public static OrderAddressDtoRequest getTestOrderAddressDtoRequest2() {
+        return OrderAddressDtoRequest.builder()
+            .id(1L)
+            .district("Distinct")
+            .districtEn("DistinctEng")
+            .region("Вінницька")
+            .regionEn("RegionEng")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .city("Вінниця")
+            .cityEn("CityEng")
+            .placeId("place_id")
+            .coordinates(new CoordinatesDto(50.5555555d, 50.5555555d))
+            .build();
+
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDtoReflection() {
+        return CreateAddressRequestDto.builder()
+            .region("Region")
+            .regionEn("RegionEn")
+            .city("City")
+            .cityEn("CityEn")
+            .district("District")
+            .districtEn("DistrictEn")
+            .houseNumber("1")
+            .entranceNumber("2")
+            .houseCorpus("A")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDtoReflection2() {
+        return CreateAddressRequestDto.builder()
+            .region("Region")
+            .regionEn("RegionEn")
+            .city("City")
+            .cityEn("CityEn")
+            .district("District")
+            .districtEn("DistrictEn")
+            .houseNumber("1")
+            .entranceNumber("2")
+            .houseCorpus("A")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDtoReflection3() {
+        return CreateAddressRequestDto.builder()
+            .region("DifferentRegion")
+            .regionEn("DifferentRegionEn")
+            .city("DifferentCity")
+            .cityEn("DifferentCityEn")
+            .district("DifferentDistrict")
+            .districtEn("DifferentDistrictEn")
+            .houseNumber("1")
+            .entranceNumber("2")
+            .houseCorpus("A")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDtoReflection4() {
+        return CreateAddressRequestDto.builder()
+            .region("DifferentRegion")
+            .regionEn("DifferentRegionEn")
+            .city("DifferentCity")
+            .cityEn("DifferentCityEn")
+            .district("District")
+            .districtEn("DistrictEn")
+            .houseNumber("1")
+            .entranceNumber("2")
+            .houseCorpus("A")
+            .build();
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDtoReflection5() {
+        return CreateAddressRequestDto.builder()
+            .region(null)
+            .regionEn("RegionEn")
+            .city(null)
+            .cityEn("CityEn")
+            .district(null)
+            .districtEn("DistrictEn")
+            .houseNumber("1")
+            .entranceNumber("2")
+            .houseCorpus("A")
+            .build();
     }
 }

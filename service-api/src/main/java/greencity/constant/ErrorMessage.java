@@ -184,4 +184,6 @@ public class ErrorMessage {
     public static final String TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND =
         "Table column width by employee id not found";
     public static final String ORDER_STATUS_INVALID = "Order with ID %d cannot be updated due to its current status.";
+    public static final String MAPPER_ERROR = "Data mapping error occurred. Please verify the input.";
+    public static final String UNSUPPORTED_TYPE = "Unsupported target type: ";
 }
