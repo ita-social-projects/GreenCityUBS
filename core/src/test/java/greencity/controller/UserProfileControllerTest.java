@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.exception.handler.CustomExceptionHandler;
@@ -24,22 +25,20 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-
 import java.security.Principal;
 import java.util.List;
-
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getUserProfileCreateDto;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class UserProfileControllerTest {
-    private static final String DEACTIVATE_USER_LINK = "/user/markUserAsDeactivated";
+    private static final String deactivateUser = "/user/markUserAsDeactivated";
 
     private MockMvc mockMvc;
 
@@ -55,9 +54,8 @@ class UserProfileControllerTest {
     @Mock
     private Validator mockValidator;
 
-    private static final Principal PRINCIPAL = getPrincipal();
-    private static final ErrorAttributes ERROR_ATTRIBUTES = new DefaultErrorAttributes();
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private Principal principal = getPrincipal();
+    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
 
     @BeforeEach
     void setup() {
@@ -65,7 +63,7 @@ class UserProfileControllerTest {
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRemoteClient))
-            .setControllerAdvice(new CustomExceptionHandler(ERROR_ATTRIBUTES))
+            .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .setValidator(mockValidator)
             .build();
     }
@@ -76,34 +74,41 @@ class UserProfileControllerTest {
         List<AddressDto> addressDto = ModelUtils.addressDto();
         userProfileDto.setAddressDto(addressDto);
 
-        String responseJSON = OBJECT_MAPPER.writeValueAsString(userProfileDto);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(userProfileDto);
 
-        mockMvc.perform(put(AppConstant.UBS_USER_PROFILE_LINK + "/user/update")
+        mockMvc.perform(put(AppConstant.ubsLink + "/user/update")
             .content(responseJSON)
-            .principal(PRINCIPAL)
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
     @Test
     void getProfileData() throws Exception {
-        mockMvc.perform(get(AppConstant.UBS_USER_PROFILE_LINK + "/user/getUserProfile")
-            .principal(PRINCIPAL)
+        mockMvc.perform(get(AppConstant.ubsLink + "/user/getUserProfile")
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
     @Test
     void deactivateUser() throws Exception {
-        mockMvc.perform(put(AppConstant.UBS_USER_PROFILE_LINK + DEACTIVATE_USER_LINK + "?id=5"))
+        ObjectMapper mapper = new ObjectMapper();
+        DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
+            .reason("test")
+            .build();
+        mockMvc.perform(put(AppConstant.ubsLink + deactivateUser)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(request)))
             .andExpect(status().isOk());
-        verify(ubsClientService).markUserAsDeactivated(5L);
     }
 
     @Test
     void createUserProfile() throws Exception {
-        String content = OBJECT_MAPPER.writeValueAsString(getUserProfileCreateDto());
-        mockMvc.perform(post(AppConstant.UBS_USER_PROFILE_LINK + "/user/create")
+        ObjectMapper objectMapper = new ObjectMapper();
+        String content = objectMapper.writeValueAsString(getUserProfileCreateDto());
+        mockMvc.perform(post(AppConstant.ubsLink + "/user/create")
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());

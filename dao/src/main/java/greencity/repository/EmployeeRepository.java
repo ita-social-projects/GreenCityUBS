@@ -1,14 +1,12 @@
 package greencity.repository;
 
 import greencity.entity.user.employee.Employee;
-import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -26,46 +24,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * @return list of {@link Employee}
      * @author Mykola Danylko
      */
-    @NonNull
-    Page<Employee> findAll(@NonNull Pageable pageable);
-
-    /**
-     * Method checks if employee with phoneNumber already exists.
-     *
-     * @param phoneNumber {@link String}
-     * @return {@link Boolean}
-     * @author Mykola Danylko
-     */
-    boolean existsByPhoneNumber(String phoneNumber);
-
-    /**
-     * Method checks if employee with email already exists.
-     *
-     * @param email {@link String}
-     * @return {@link Boolean}
-     * @author Mykola Danylko
-     */
-    boolean existsByEmail(String email);
-
-    /**
-     * Method checks if employee exists with phoneNumber and id.
-     *
-     * @param phoneNumber {@link String}
-     * @param id          {@link Long}
-     * @return {@link Boolean}
-     * @author Mykola Danylko
-     */
-    boolean existsByPhoneNumberAndId(String phoneNumber, Long id);
-
-    /**
-     * Method checks if employee exists with email and id.
-     *
-     * @param email {@link String}
-     * @param id    {@link Long}
-     * @return {@link Boolean}
-     * @author Mykola Danylko
-     */
-    Boolean existsByEmailAndId(String email, Long id);
+    Page<Employee> findAll(Pageable pageable);
 
     /**
      * Method that return list of Employee by an email except with current id.
@@ -85,25 +44,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * @author Bohdan Fedorkiv
      */
     List<Employee> findAllByEmployeePositionId(Long positionId);
-
-    /**
-     * Method find employee by his firstName and lastName.
-     *
-     * @param firstName {@link String}
-     * @param lastName  {@link String}
-     * @return {@link Optional}of{@link Employee}
-     * @author Bohdan Fedorkiv
-     */
-    Optional<Employee> findByFirstNameAndLastName(String firstName, String lastName);
-
-    /**
-     * Method find current position for Employee.
-     *
-     * @param employeeId {@link Long}.
-     * @return {@link Optional} of {@link Long}.
-     * @author Yuriy Bahlay.
-     */
-    Optional<Long> findPositionById(Long employeeId);
 
     /**
      * Method find employee by his email.

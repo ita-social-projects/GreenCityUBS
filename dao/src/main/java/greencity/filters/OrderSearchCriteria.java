@@ -13,6 +13,9 @@ public class OrderSearchCriteria {
     private Long[] responsibleDriverId;
     private Long[] responsibleNavigatorId;
     private Long[] responsibleLogicManId;
+    private Long[] regionId;
+    private Long[] cityId;
+    private Long[] districtId;
     private DateFilter orderDate;
     private DateFilter deliveryDate;
     private DateFilter paymentDate;

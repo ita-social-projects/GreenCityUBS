@@ -1,6 +1,5 @@
 package greencity.dto.bag;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -9,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import jakarta.validation.constraints.NotNull;
 
 @Getter
 @Setter

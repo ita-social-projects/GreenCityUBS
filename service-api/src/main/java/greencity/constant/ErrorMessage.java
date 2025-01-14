@@ -1,6 +1,9 @@
 package greencity.constant;
 
-public final class ErrorMessage {
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
+public class ErrorMessage {
     public static final String CERTIFICATE_EXIST = "Certificate with this code is already exist";
     public static final String CERTIFICATE_NOT_FOUND_BY_CODE = "Certificate does not exist by this code: ";
     public static final String CERTIFICATE_EXPIRED = "Certificate expired by this code: ";
@@ -13,10 +16,12 @@ public final class ErrorMessage {
     public static final String TOO_MANY_CERTIFICATES = "Too many certificates was entered.";
     public static final String THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST =
         "The set of user data does not exist with id: ";
-    public static final String INAVALID_DISTANCE_AMOUNT = "The distance should be between 0 and 20 km.";
+    public static final String INVALID_DISTANCE_AMOUNT = "The distance should be between 0 and 20 km.";
     public static final String NO_SUCH_COORDINATES = "There are no any order with coordinates: ";
-    public static final String INAVALID_LITRES_AMOUNT = "The amount of litres should be between 0 and 10.000 litres.";
+    public static final String INVALID_LITRES_AMOUNT = "The amount of litres should be between 0 and 10.000 litres.";
     public static final String NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER = "Not found address with such id: ";
+    public static final String NOT_FOUND_ADDRESS_BY_CITY_AND_COUNTRY =
+        "Not found address in current city and country: ";
     public static final String NOT_FOUND_ADDRESS_BY_PLACE_ID = "Not found address with such place id: ";
     public static final String UNDELIVERED_ORDERS_NOT_FOUND = "There are no any undelivered orders found.";
     public static final String PAYMENT_VALIDATION_ERROR = "The received payment data is not valid.";
@@ -31,13 +36,10 @@ public final class ErrorMessage {
     public static final String RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST = "Recipient with current id does not exist.";
     public static final String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
     public static final String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Address not found for order by id: ";
-    public static final String BAD_ORDER_STATUS_REQUEST = "Incorrect order status: ";
     public static final String ORDER_STATUS_NOT_FOUND = "Order status not found";
     public static final String ORDER_PAYMENT_STATUS_NOT_FOUND = "Order payment status not found";
     public static final String FILE_NOT_SAVED = "File hasn't been saved";
-
     public static final String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
-    public static final String EMPLOYEE_NOT_FOUND_BY_EMAIL = "Employee with current id doesn't exist: ";
     public static final String EMPLOYEE_WITH_UUID_NOT_FOUND = "Employee with current uuid doesn't exist: ";
     public static final String ACTIVE_EMPLOYEE_WITH_CURRENT_EMAIL_ALREADY_EXISTS =
         "Active employee with this email already exists: ";
@@ -47,7 +49,6 @@ public final class ErrorMessage {
     public static final String POSITION_NOT_FOUND = "Position doesn't exist";
     public static final String RECEIVING_STATION_ALREADY_EXISTS = "Receiving station already exists: ";
     public static final String RECEIVING_STATION_NOT_FOUND_BY_ID = "Receiving station with current id doesn't exist: ";
-    public static final String REGION_NOT_FOUND_BY_ID = "Region with current id doesn't exist: ";
     public static final String RECEIVING_STATION_NOT_FOUND = "Receiving station doesn't exist.";
     public static final String EMPLOYEES_ASSIGNED_POSITION = "There are employees assigned to this position.";
     public static final String EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED = "Employee was not successfully saved";
@@ -55,7 +56,6 @@ public final class ErrorMessage {
     public static final String CANNOT_DELETE_DEFAULT_IMAGE = "You can't delete default image.";
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
-    public static final String ADDRESS_NOT_FOUND = "Address not found";
     public static final String NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE =
         "Not found locations on level: %s, and by code: %s";
     public static final String VALUE_CAN_NOT_BE_NULL_OR_EMPTY = "The value parameter cannot be null or empty";
@@ -74,6 +74,8 @@ public final class ErrorMessage {
     public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
     public static final String INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION =
         "Cannot add a violation to order with this status: ";
+    public static final String INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND =
+        "Money refund cannot be processed";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
     public static final String NOT_ENOUGH_BAGS_EXCEPTION = "Not enough bags, minimal amount is: ";
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
@@ -101,7 +103,10 @@ public final class ErrorMessage {
     public static final String INCORRECT_ECO_NUMBER = "Incorrect format of Eco number";
     public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";
     public static final String CANNOT_ACCESS_PAYMENT_STATUS = "Cannot access another user's payment status";
-    public static final String USER_HAS_NO_OVERPAYMENT = "This user has no overpayment";
+    public static final String ORDER_HAS_NO_OVERPAYMENT = "This order has no overpayment";
+    public static final String INVALID_REQUESTED_REFUND_AMOUNT = "Invalid requested refund amount";
+    public static final String CANNOT_REFUND_MONEY =
+        "Money refund cannot be processed more than once for the same order";
     public static final String CANNOT_DELETE_ADDRESS = "Cannot delete another user's address";
     public static final String CANNOT_DELETE_ALREADY_DELETED_ADDRESS =
         "Cannot delete an address that has already been deleted.";
@@ -129,9 +134,6 @@ public final class ErrorMessage {
     public static final String EMPLOYEE_WAS_NOT_UPDATED = "Employee was not updated";
     public static final String TOO_MUCH_POINTS_FOR_ORDER = "Too much points for order, maximum amount: ";
     public static final String TARIFF_FOR_ORDER_NOT_EXIST = "Could not find tariff for order with id: ";
-    public static final String USE_ONLY_ENGLISH_LETTERS = "use only English letters";
-    public static final String USE_ONLY_UKRAINIAN_LETTERS = "use only Ukrainian letters";
-    public static final String CITY_NAME_CHARACTER_LIMIT = "A minimum of 3 to a maximum of 40 characters are allowed";
     public static final String CANNOT_ACCESS_ORDER_FOR_EMPLOYEE = "Cannot access order with id: ";
     public static final String NUMBER_OF_ADDRESSES_EXCEEDED = "Number of addresses reached maximum";
     public static final String TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY =
@@ -156,8 +158,6 @@ public final class ErrorMessage {
         + "or Deactivated.";
     public static final String UNRESOLVABLE_ACTIVATION_STATUS = "Unresolvable activation status. Please choose Active "
         + "or Deactivated.";
-    public static final String COLUMN_WIDTH_INFO_NOT_FOUND =
-        "There is no saved column width configuration for current employee";
     public static final String DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER =
         "Date of export not specified for the order with ID: ";
     public static final String EMPTY_ORDERS_ID_COLLECTION = "Request should contain at least one order ID";
@@ -165,21 +165,25 @@ public final class ErrorMessage {
     public static final String REGIONS_NOT_FOUND_BY_LOCATION_STATUS =
         "Regions containing locations with a status: %s, not found";
     public static final String ORDER_CAN_NOT_BE_UPDATED = "An order with the status: %s, can not be updated";
-    public static final String INVALID_URL = "Invalid URL: ";
-    public static final String LOCATION_CAN_NOT_BE_DELETED =
-        "Such location cannot be deleted as it is linked to the tariff";
-    public static final String BAGS_QUANTITY_NOT_FOUND_MESSAGE = "Bags quantity not found by current orderId "
-        + "and bagId.";
+    public static final String EMPLOYEE_NOT_FOUND_BY_EMAIL = "Employee with current id doesn't exist: ";
+    public static final String ORDER_DOES_NOT_BELONG_TO_USER = "This order does not belong to user";
+    public static final String WRONG_SIGNATURE_USED = "This signature is invalid: ";
+    public static final String TEMPLATE_DOES_NOT_CONTAIN_ALL_PLATFORMS =
+        "This template does not contain messages for all platforms: ";
+    public static final String PREDEFINED_NOTIFICATION_CANNOT_BE_DELETED =
+        "Predefined notification template cannot be deleted.";
     public static final String TARIFF_NOT_FOUND_BY_LOCATION_ID = "Tariff with location id: %d not found";
-    public static final String WARNING_GIT_DIRECTORY_NOT_FOUND =
-        "WARNING: .git directory not found. Git commit info will be unavailable.";
-    public static final String GIT_REPOSITORY_NOT_INITIALIZED =
-        "Git repository not initialized. Commit info is unavailable.";
-    public static final String FAILED_TO_FETCH_COMMIT_INFO = "Failed to fetch commit info due to I/O error: ";
-
-    /**
-     * Constructor.
-     */
-    private ErrorMessage() {
-    }
+    public static final String USER_AGREEMENT_NOT_FOUND_BY_ID = "User Agreement with ID %d not found";
+    public static final String REFUND_CONFLICT_MONEY_AND_BONUSES =
+        "A refund cannot be processed with both money and bonuses at the same time";
+    public static final String TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST =
+        "Could not find tariff information for bags with IDs %s at location with id: %d";
+    public static final String COULD_NOT_RETRIEVE_USER_LANGUAGE = "Could not retrieve user language";
+    public static final String CANNOT_CHANGE_ORDER_TABLE_VIEW =
+        "You can't change order table view when table is frozen";
+    public static final String TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND =
+        "Table column width by employee id not found";
+    public static final String ORDER_STATUS_INVALID = "Order with ID %d cannot be updated due to its current status.";
+    public static final String MAPPER_ERROR = "Data mapping error occurred. Please verify the input.";
+    public static final String UNSUPPORTED_TYPE = "Unsupported target type: ";
 }

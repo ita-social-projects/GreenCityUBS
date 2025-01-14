@@ -2,16 +2,18 @@ package greencity.configuration;
 
 import greencity.client.UserRemoteClient;
 import greencity.converters.UserArgumentResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-
 import java.time.Clock;
 import java.util.List;
 import java.util.Locale;
@@ -20,11 +22,9 @@ import java.util.concurrent.Executors;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-    private final UserRemoteClient userRemoteClient;
-
-    public WebMvcConfig(@Lazy UserRemoteClient userRemoteClient) {
-        this.userRemoteClient = userRemoteClient;
-    }
+    @Lazy
+    @Autowired
+    private UserRemoteClient userRemoteClient;
 
     /**
      * Method to get single threaded executor.
@@ -59,6 +59,18 @@ public class WebMvcConfig implements WebMvcConfigurer {
         LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
         lci.setParamName("lang");
         return lci;
+    }
+
+    /**
+     * Method that returns MultipartResolver as CommonsMultipartyResolver has been
+     * superseded by StandardServletMultipartResolver after migration to SpringBoot
+     * 3.1.5.
+     *
+     * @return {@link MultipartResolver}
+     */
+    @Bean
+    public MultipartResolver multipartResolver() {
+        return new StandardServletMultipartResolver();
     }
 
     @Override

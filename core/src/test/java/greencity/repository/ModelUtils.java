@@ -1,37 +1,112 @@
 package greencity.repository;
 
 import greencity.entity.coords.Coordinates;
+import greencity.entity.user.Region;
+import greencity.entity.user.locations.City;
+import greencity.entity.user.locations.District;
+import greencity.enums.AddressStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSUser;
-import greencity.enums.AddressStatus;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
+import greencity.entity.user.ubs.UBSuser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public class ModelUtils {
-    public static User getUser() {
-        return User.builder()
-            .uuid(UUID.randomUUID().toString())
-            .orders(getOrderList())
-            .currentPoints(0)
-            .recipientName("Ivan")
-            .recipientSurname("Ivanov")
-            .recipientEmail("ivan@gmail.com")
-            .recipientPhone("+380981099667")
-            .violations(0)
+    public static Region getKyivRegion() {
+        return Region.builder()
+            .id(100L)
+            .nameEn("Kyiv Oblast")
+            .nameUk("Київська область")
+            .build();
+    }
+
+    public static Region getLvivRegion() {
+        return Region.builder()
+            .id(101L)
+            .nameUk("Львівська область")
+            .nameEn("Lviv Oblast")
+            .build();
+    }
+
+    public static Region getOdesaRegion() {
+        return Region.builder()
+            .id(102L)
+            .nameUk("Одеська область")
+            .nameEn("Odessa Oblast")
+            .build();
+    }
+
+    public static City getKyivCity() {
+        return City.builder()
+            .id(100L)
+            .nameUk("Київ")
+            .nameEn("Kyiv")
+            .region(getKyivRegion())
+            .build();
+    }
+
+    public static City getLvivCity() {
+        return City.builder()
+            .id(101L)
+            .nameUk("Львів")
+            .nameEn("Lviv")
+            .region(getLvivRegion())
+            .build();
+    }
+
+    public static City getOdesaCity() {
+        return City.builder()
+            .id(102L)
+            .nameUk("Одеса")
+            .nameEn("Odessa")
+            .region(getOdesaRegion())
+            .build();
+    }
+
+    public static District getShevchenkivskyiDistrict() {
+        return District.builder()
+            .id(100L)
+            .nameUk("Шевченківський")
+            .nameEn("Shevchenkivskyi")
+            .city(getKyivCity())
+            .build();
+    }
+
+    public static District getPrimorskyiDistrict() {
+        return District.builder()
+            .id(101L)
+            .nameUk("Приморський")
+            .nameEn("Primorskyi")
+            .city(getOdesaCity())
+            .build();
+    }
+
+    public static District getHalychskyiDistrict() {
+        return District.builder()
+            .id(102L)
+            .nameUk("Галицький")
+            .nameEn("Halychskyi")
+            .city(getLvivCity())
+            .build();
+    }
+
+    public static District getPodilskyiDistrict() {
+        return District.builder()
+            .id(103L)
+            .nameUk("Подільський")
+            .nameEn("Podilskyi")
+            .city(getKyivCity())
             .build();
     }
 
@@ -41,25 +116,10 @@ public class ModelUtils {
             .orderStatus(OrderStatus.FORMED)
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .user(User.builder().id(1L).build())
-            .ubsUser(UBSUser.builder().id(1L).build())
+            .ubsUser(UBSuser.builder().id(1L).build())
             .orderDate(LocalDateTime.now())
             .build());
         return orderList;
-    }
-
-    public static List<User> getUsers() {
-        List<User> users = new ArrayList<>();
-        users.add(User.builder()
-            .uuid(UUID.randomUUID().toString())
-            .orders(getOrderList())
-            .currentPoints(0)
-            .recipientName("Ivan")
-            .recipientSurname("Ivanov")
-            .recipientEmail("ivan@gmail.com")
-            .recipientPhone("+380981099667")
-            .violations(0)
-            .build());
-        return users;
     }
 
     public static Address getAddress() {
@@ -82,6 +142,9 @@ public class ModelUtils {
             .regionEn("Kyiv region")
             .streetEn("Bohdana Khmelnytskoho Street")
             .districtEn("Shevchenkivskyi")
+            .regionId(getKyivRegion())
+            .cityId(getKyivCity())
+            .districtId(getShevchenkivskyiDistrict())
             .build();
     }
 
@@ -108,7 +171,9 @@ public class ModelUtils {
             .districtEn("Primorskyi")
             .addressEn("Deribasivska 33, b.- , e.4")
             .commentToAddressForClient("Коментар до адреси 5")
-            .bagAmount("120л - 1шт; 60л - 1шт; 20л - 1шт")
+            .mixedWaste120(1L)
+            .textileWaste60(1L)
+            .textileWaste20(1L)
             .totalOrderSum(600L)
             .orderCertificateCode(null)
             .generalDiscount(0L)
@@ -132,6 +197,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(102L)
+            .cityId(102L)
+            .districtId(101L)
             .build();
     }
 
@@ -158,7 +226,9 @@ public class ModelUtils {
             .districtEn("Shevchenkivskyi")
             .addressEn("Khreshchatyk 27, b.- , e.1")
             .commentToAddressForClient("Коментар до адреси 2")
-            .bagAmount("120л - 2шт; 60л - 5шт; 20л - 1шт")
+            .mixedWaste120(2L)
+            .textileWaste60(5L)
+            .textileWaste20(1L)
             .totalOrderSum(1050L)
             .orderCertificateCode(null)
             .generalDiscount(0L)
@@ -182,6 +252,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(100L)
             .build();
     }
 
@@ -208,7 +281,9 @@ public class ModelUtils {
             .districtEn("Halychskyi")
             .addressEn("Krushelnytska Street 10, b.- , e.2")
             .commentToAddressForClient("Коментар до адреси 4")
-            .bagAmount("20л - 4шт")
+            .mixedWaste120(0L)
+            .textileWaste60(0L)
+            .textileWaste20(4L)
             .totalOrderSum(1200L)
             .orderCertificateCode(null)
             .generalDiscount(0L)
@@ -232,6 +307,9 @@ public class ModelUtils {
             .isBlocked(true)
             .blockedBy("Abu, Dabi")
             .tariffsInfoId(1L)
+            .regionId(101L)
+            .cityId(101L)
+            .districtId(102L)
             .build();
     }
 
@@ -258,7 +336,9 @@ public class ModelUtils {
             .districtEn("Podilskyi")
             .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
             .commentToAddressForClient("Коментар до адреси 1")
-            .bagAmount("20л - 2шт")
+            .mixedWaste120(0L)
+            .textileWaste60(0L)
+            .textileWaste20(2L)
             .totalOrderSum(600L)
             .orderCertificateCode(null)
             .generalDiscount(0L)
@@ -282,6 +362,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 
@@ -308,7 +391,9 @@ public class ModelUtils {
             .districtEn("Shevchenkivskyi")
             .addressEn("Khreshchatyk 27, b.- , e.1")
             .commentToAddressForClient("Коментар до адреси 2")
-            .bagAmount("20л - 2шт")
+            .mixedWaste120(0L)
+            .textileWaste60(0L)
+            .textileWaste20(2L)
             .totalOrderSum(600L)
             .orderCertificateCode("3003-1992")
             .generalDiscount(500L)
@@ -332,6 +417,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(100L)
             .build();
     }
 
@@ -358,7 +446,9 @@ public class ModelUtils {
             .districtEn("Shevchenkivskyi")
             .addressEn("Rynok Square 5, b.А, e.3")
             .commentToAddressForClient("Коментар до адреси 3")
-            .bagAmount("120л - 5шт; 60л - 5шт; 20л - 5шт")
+            .mixedWaste120(5L)
+            .textileWaste60(5L)
+            .textileWaste20(5L)
             .totalOrderSum(3000L)
             .orderCertificateCode("3113-3113, 3113-3114")
             .generalDiscount(2000L)
@@ -382,6 +472,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(101L)
+            .cityId(101L)
+            .districtId(104L)
             .build();
     }
 
@@ -408,7 +501,9 @@ public class ModelUtils {
             .districtEn("Podilskyi")
             .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
             .commentToAddressForClient("Коментар до адреси 1")
-            .bagAmount("120л - 1шт; 60л - 1шт; 20л - 1шт")
+            .mixedWaste120(1L)
+            .textileWaste60(1L)
+            .textileWaste20(1L)
             .totalOrderSum(600L)
             .orderCertificateCode(null)
             .generalDiscount(0L)
@@ -432,6 +527,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 
@@ -458,7 +556,9 @@ public class ModelUtils {
             .districtEn("Shevchenkivskyi")
             .addressEn("Rynok Square 5, b.А, e.3")
             .commentToAddressForClient("Коментар до адреси 3")
-            .bagAmount("120л - 2шт; 60л - 1шт; 20л - 1шт")
+            .mixedWaste120(2L)
+            .textileWaste60(1L)
+            .textileWaste20(1L)
             .totalOrderSum(850L)
             .orderCertificateCode(null)
             .generalDiscount(0L)
@@ -482,6 +582,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(101L)
+            .cityId(101L)
+            .districtId(104L)
             .build();
     }
 
@@ -508,7 +611,9 @@ public class ModelUtils {
             .districtEn("Podilskyi")
             .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
             .commentToAddressForClient("Коментар до адреси 1")
-            .bagAmount("120л - 6шт; 60л - 6шт; 20л - 8шт")
+            .mixedWaste120(6L)
+            .textileWaste60(6L)
+            .textileWaste20(8L)
             .totalOrderSum(4200L)
             .orderCertificateCode("7777-7777, 1212-1212, 1111-2222")
             .generalDiscount(2050L)
@@ -532,6 +637,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 
@@ -558,7 +666,9 @@ public class ModelUtils {
             .districtEn("Podilskyi")
             .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
             .commentToAddressForClient("Коментар до адреси 1")
-            .bagAmount("120л - 1шт; 60л - 2шт; 20л - 1шт")
+            .mixedWaste120(1L)
+            .textileWaste60(2L)
+            .textileWaste20(1L)
             .totalOrderSum(650L)
             .orderCertificateCode(null)
             .generalDiscount(0L)
@@ -582,6 +692,9 @@ public class ModelUtils {
             .isBlocked(true)
             .blockedBy("Abu, Dabi")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 
@@ -608,7 +721,9 @@ public class ModelUtils {
             .districtEn("Podilskyi")
             .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
             .commentToAddressForClient("Коментар до адреси 1")
-            .bagAmount("120л - 1шт; 60л - 2шт; 20л - 1шт")
+            .mixedWaste120(1L)
+            .textileWaste60(2L)
+            .textileWaste20(1L)
             .totalOrderSum(650L)
             .orderCertificateCode(null)
             .generalDiscount(0L)
@@ -632,6 +747,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 
@@ -658,7 +776,9 @@ public class ModelUtils {
             .districtEn("Podilskyi")
             .addressEn("Velyka Vasylkivska 14, b.Б, e.2")
             .commentToAddressForClient("Коментар до адреси 1")
-            .bagAmount("120л - 20шт; 60л - 30шт; 20л - 50шт")
+            .mixedWaste120(20L)
+            .textileWaste60(30L)
+            .textileWaste20(50L)
             .totalOrderSum(5000L)
             .orderCertificateCode(null)
             .generalDiscount(0L)
@@ -682,6 +802,9 @@ public class ModelUtils {
             .isBlocked(false)
             .blockedBy("")
             .tariffsInfoId(1L)
+            .regionId(100L)
+            .cityId(100L)
+            .districtId(103L)
             .build();
     }
 

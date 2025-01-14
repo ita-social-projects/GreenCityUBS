@@ -2,10 +2,11 @@ package greencity.service.ubs;
 
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
+import greencity.enums.UserCategory;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
@@ -24,11 +25,12 @@ public interface NotificationService {
     void notifyPaidOrder(Order order);
 
     /**
-     * Method that creates notification for paid order from PaymentResponseDto.
+     * Method that creates notifications for all orders with status
+     * COURIER_ITINERARY_FORMED.
      *
-     * @author Danylo Hlynskyi
+     * @author Denys Ryhal
      */
-    void notifyPaidOrder(PaymentResponseDto dto);
+    void notifyAllCourierItineraryFormed();
 
     /**
      * Method that creates notification for courier.
@@ -80,6 +82,63 @@ public interface NotificationService {
     void notifyDeleteViolation(Long orderId);
 
     /**
+     * Method that creates notifications for all orders with status
+     * CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllCanceledViolations();
+
+    /**
+     * Method that creates notifications for all orders with status
+     * CHANGED_IN_RULE_VIOLATION_STATUS.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllChangedViolations();
+
+    /**
+     * Method that creates notifications for all orders with status
+     * VIOLATION_THE_RULES.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllAddedViolations();
+
+    /**
+     * Method that creates notifications for all orders with status
+     * DONE_OR_CANCELED_UNPAID_ORDER.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllDoneOrCanceledUnpaidOrders();
+
+    /**
+     * Method that creates notifications for all orders with status
+     * ORDER_STATUS_CHANGED.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllChangedOrderStatuses();
+
+    /**
+     * Method that creates notifications for all orders with status UNPAID_PACKAGE.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyUnpaidPackages();
+
+    /**
+     * Method that creates notifications for all orders with status
+     * HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllHalfPaidOrdersWithStatusBroughtByHimself();
+
+    void notifyCustom(Long templateUuid, UserCategory userCategory);
+
+    /**
      * Method that creates notification for inactive users.
      *
      * @author Ann Sakhno
@@ -94,12 +153,21 @@ public interface NotificationService {
     void notifyAllHalfPaidPackages();
 
     /**
+     * Method that creates notification for unpaid orders which tariff price was
+     * increased.
+     *
+     * @author Denys Ryhal
+     */
+    void notifyAllOrdersWithIncreasedTariffPrice(Integer bagId);
+
+    /**
      * Method sends messages by e-mail/notification that order is unpaid.
      *
-     * @param order of {@link Order} Order which status was changed
-     * @author Oleh Kulbaba
+     * @param order       of {@link Order} Order which status was changed
+     * @param paymentLink payment link
+     * @author Vladyslav Haliara
      */
-    void notifyUnpaidOrder(Order order);
+    void notifyUnpaidOrder(Order order, String paymentLink);
 
     /**
      * Notifies the customer that the order status has been changed to "Brought by
@@ -136,6 +204,47 @@ public interface NotificationService {
      * Notifies that a new order has been created.
      *
      * @param order the created order
+     *
+     * @author Kizerov Dmytro
      */
     void notifyCreatedOrder(Order order);
+
+    /**
+     * Method to mark specific UserNotification as read.
+     *
+     * @param notificationId id of userNotification, that should be marked
+     *
+     * @author Roman Kasarab
+     */
+    void viewNotification(Long notificationId, String userUuid);
+
+    /**
+     * Method to mark specific UserNotification as unread.
+     *
+     * @param notificationId id of userNotification, that should be marked
+     *
+     * @author Roman Kasarab
+     */
+    void unreadNotification(Long notificationId, String userUuid);
+
+    /**
+     * Method to delete specific Notification.
+     *
+     * @param notificationId id of notification, that should be deleted
+     * @param userUuid       user
+     * @author Roman Kasarab
+     */
+    void deleteNotification(Long notificationId, String userUuid);
+
+    /**
+     * Notify user that order has unpaid status when it was created and not paid.
+     * This method is used one time when user create new order.
+     *
+     * @param order                 the order to send notification for
+     * @param sumToPay              the sum to pay
+     * @param paymentSystemResponse payment system response with link to pay order
+     *
+     * @author Vladyslav Haliara
+     */
+    void notifyUnpaidOrderPermanently(Order order, Long sumToPay, PaymentSystemResponse paymentSystemResponse);
 }

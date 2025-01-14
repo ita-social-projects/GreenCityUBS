@@ -3,21 +3,20 @@ package greencity.repository;
 import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.Expression;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.stream.Collectors;
 import static greencity.enums.EmployeeStatus.employeeStatusExist;
 import static java.util.Arrays.stream;
 
@@ -162,7 +161,7 @@ public class EmployeeCriteriaRepository {
         List<Expression<String>> toUpperCaseExpressions) {
         return stream(searchLine.split("\\s+"))
             .map(searchArgument -> mapSearchArgumentToPredicate(searchArgument, toUpperCaseExpressions))
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private List<Expression<String>> extractPossibleExpressionsForSearchLineFiltering(
@@ -188,6 +187,6 @@ public class EmployeeCriteriaRepository {
     }
 
     private boolean isStringNotNullAndNotEmpty(String str) {
-        return str != null && !str.isEmpty();
+        return str != null && str.length() > 0;
     }
 }

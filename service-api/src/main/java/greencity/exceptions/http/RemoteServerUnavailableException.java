@@ -1,25 +1,10 @@
 package greencity.exceptions.http;
 
+import lombok.experimental.StandardException;
+
 /**
  * Exception thrown when remote server did not respond.
  */
+@StandardException
 public class RemoteServerUnavailableException extends RuntimeException {
-    /**
-     * Constructor.
-     *
-     * @param message {@link String} - exception message.
-     * @param cause   {@link Throwable} - cause of exception.
-     */
-    public RemoteServerUnavailableException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param message {@link String} - exception message.
-     */
-    public RemoteServerUnavailableException(String message) {
-        super(message);
-    }
 }

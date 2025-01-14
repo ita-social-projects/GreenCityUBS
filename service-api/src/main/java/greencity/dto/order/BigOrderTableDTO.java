@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @JsonSerialize
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@EqualsAndHashCode
 public class BigOrderTableDTO {
     private Long id;
     private String orderStatus;
@@ -27,7 +29,10 @@ public class BigOrderTableDTO {
     private SenderLocation district;
     private SenderLocation address;
     private String commentToAddressForClient;
-    private String bagsAmount;
+    private String mixedWaste120L;
+    private String textileWaste60L;
+    private String textileWaste20L;
+    private OtherPackages otherPackages;
     private Double totalOrderSum;
     private String orderCertificateCode;
     private Long generalDiscount;

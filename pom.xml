@@ -13,7 +13,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.2</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
     <groupId>com.greencity</groupId>
     <artifactId>ubs</artifactId>
@@ -22,379 +22,41 @@
     <description>Demo project for UBS</description>
 
     <properties>
-        <!-- SYSTEM -->
+        <modelmapper.version>3.0.0</modelmapper.version>
+        <lombok.version>1.18.30</lombok.version>
+        <liquibase.version>4.25.0</liquibase.version>
+        <commons-dbcp2.version>2.10.0</commons-dbcp2.version>
+        <commons-io.version>2.15.1</commons-io.version>
+        <spring-security.version>6.1.5</spring-security.version>
+        <spring-cloud.version>2023.0.0</spring-cloud.version>
+        <test.containers.version>1.19.3</test.containers.version>
+        <junit.version>4.13.2</junit.version>
+        <jjwt.version>0.12.3</jjwt.version>
+        <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
+        <net.java.dev.jna.version>5.13.0</net.java.dev.jna.version>
+        <cloudstorage.version>2.29.1</cloudstorage.version>
         <java.version>21</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-
-        <!-- DEPENDENCIES -->
-
-        <!-- testing -->
-        <junit-jupiter.version>5.11.3</junit-jupiter.version>
-        <mockito-core.version>5.14.2</mockito-core.version>
-        <mockito-junit-jupiter.version>${mockito-core.version}</mockito-junit-jupiter.version>
-        <test.containers.version>1.20.4</test.containers.version>
-        <assertj.core.version>3.26.3</assertj.core.version>
-
-        <modelmapper.version>3.2.1</modelmapper.version>
-        <spring.cloud.release.train>2023.0.4</spring.cloud.release.train> <!-- latest is 2024.0.0 but for SB 3.4.0 -->
-        <jjwt.version>0.12.6</jjwt.version>
-        <google-guava.version>33.3.1-jre</google-guava.version>
-        <springdoc.openapi.version>2.5.0</springdoc.openapi.version> <!-- latest is 2.7.0 but for SB 3.4.0 -->
-        <libphonenumber.version>8.12.24</libphonenumber.version> <!-- 8.13.51 -->
-
-        <google.maps.version>2.0.0</google.maps.version> <!-- 2.2.0 -->
-        <telegrambot.version>6.9.7.1</telegrambot.version>
-        <postgresql.version>42.7.4</postgresql.version>
-        <json.version>20240303</json.version>
-        <viberbot.version>1.0.11</viberbot.version>
-        <jna.version>4.5.2</jna.version> <!-- 5.15.0 -->
-        <jsoup.version>1.13.1</jsoup.version> <!-- 1.18.3 -->
-        <azure.storage.blob.version>12.29.0</azure.storage.blob.version>
-        <liqpay-sdk.version>0.8-SNAPSHOT</liqpay-sdk.version>
-        <lombok.version>1.18.36</lombok.version>
-        <jackson.version>2.18.2</jackson.version>
-        <spring.cloud.netflix.hystrix.version>2.2.10.RELEASE</spring.cloud.netflix.hystrix.version>
-        <org.eclipse.jgit.version>7.1.0.202411261347-r</org.eclipse.jgit.version>
-
-        <commons-fileupload.version>1.5</commons-fileupload.version>
-        <commons-io.version>2.18.0</commons-io.version>
-        <commons-text.version>1.12.0</commons-text.version>
-        <commons-collections.version>4.4</commons-collections.version>
-        <commons-codec.version>1.17.1</commons-codec.version>
-
-        <!-- PLUGINS -->
-        <maven.formatter.version>2.24.1</maven.formatter.version>
-        <maven.surefire.version>3.5.2</maven.surefire.version>
-        <maven.checkstyle.version>3.6.0</maven.checkstyle.version>
-        <maven.compiler.version>3.13.0</maven.compiler.version>
-        <jacoco.version>0.8.12</jacoco.version>
-        <spring.boot.plugin.version>3.4.0</spring.boot.plugin.version>
-        <azure.webapp.plugin.version>2.13.0</azure.webapp.plugin.version>
-        <liquibase.plugin.version>4.30.0</liquibase.plugin.version>
-
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.surefire.plugin.version>3.2.2</maven.surefire.plugin.version>
+        <checkstyle-maven-plugin.version>3.3.1</checkstyle-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.exclusions>**/configuration/*</sonar.exclusions>
+        <sonar.coverage.exclusions>**/config/*,**/entity/*,**/exceptions/*</sonar.coverage.exclusions>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- spring cloud BOM -->
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring.cloud.release.train}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <!-- other modules -->
-            <dependency>
-                <groupId>com.greencity</groupId>
-                <artifactId>service-api</artifactId>
-                <version>${project.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.greencity</groupId>
-                <artifactId>service</artifactId>
-                <version>${project.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.greencity</groupId>
-                <artifactId>dao</artifactId>
-                <version>${project.version}</version>
-                <scope>compile</scope>
-            </dependency>
-
-            <!-- swagger -->
-            <dependency>
-                <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-                <version>${springdoc.openapi.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
-            </dependency>
-
-            <!-- jwt -->
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt</artifactId>
-                <version>${jjwt.version}</version>
-            </dependency>
-
-            <!-- json -->
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>${json.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.jaxrs</groupId>
-                <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <!-- XML -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <!-- mapper -->
-            <dependency>
-                <groupId>org.modelmapper</groupId>
-                <artifactId>modelmapper</artifactId>
-                <version>${modelmapper.version}</version>
-            </dependency>
-
-            <!-- tests -->
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
-                <version>${junit-jupiter.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-params</artifactId>
-                <version>${junit-jupiter.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito-junit-jupiter.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-junit-jupiter</artifactId>
-                <version>${mockito-junit-jupiter.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertj.core.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <!-- telegrambot -->
-            <dependency>
-                <groupId>org.telegram</groupId>
-                <artifactId>telegrambots-spring-boot-starter</artifactId>
-                <version>${telegrambot.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.module</groupId>
-                        <artifactId>jackson-module-jaxb-annotations</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.viber</groupId>
-                <artifactId>viber-bot</artifactId>
-                <version>${viberbot.version}</version>
-            </dependency>
-
-            <!-- postgresql -->
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${postgresql.version}</version>
-                <scope>runtime</scope>
-            </dependency>
-
-            <!-- testcontainters -->
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${test.containers.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>junit-jupiter</artifactId>
-                <version>${test.containers.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>net.java.dev.jna</groupId>
-                <artifactId>jna</artifactId>
-                <version>${jna.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${google-guava.version}</version>
-            </dependency>
-
-            <!-- html parsing -->
-            <dependency>
-                <groupId>org.jsoup</groupId>
-                <artifactId>jsoup</artifactId>
-                <version>${jsoup.version}</version>
-            </dependency>
-
-            <!-- file upload -->
-            <dependency>
-                <groupId>com.azure</groupId>
-                <artifactId>azure-storage-blob</artifactId>
-                <version>${azure.storage.blob.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${commons-io.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-fileupload</groupId>
-                <artifactId>commons-fileupload</artifactId>
-                <version>${commons-fileupload.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-text</artifactId>
-                <version>${commons-text.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-collections4</artifactId>
-                <version>${commons-collections.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>${commons-codec.version}</version>
-            </dependency>
-
-            <!--liqPay API-->
-            <dependency>
-                <groupId>com.liqpay</groupId>
-                <artifactId>liqpay-sdk</artifactId>
-                <version>${liqpay-sdk.version}</version>
-            </dependency>
-
-            <!-- libphonenumber -->
-            <dependency>
-                <groupId>com.googlecode.libphonenumber</groupId>
-                <artifactId>libphonenumber</artifactId>
-                <version>${libphonenumber.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.google.maps</groupId>
-                <artifactId>google-maps-services</artifactId>
-                <version>${google.maps.version}</version>
-            </dependency>
-
-            <!-- netflix-hystrix -->
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
-                <version>${spring.cloud.netflix.hystrix.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>${lombok.version}</version>
-                <scope>compile</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <version>${liquibase.plugin.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-core</artifactId>
-                <version>${liquibase.plugin.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jgit</groupId>
-                <artifactId>org.eclipse.jgit</artifactId>
-                <version>${org.eclipse.jgit.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring.boot.plugin.version}</version>
-                </plugin>
-
-                <plugin>
-                    <groupId>com.microsoft.azure</groupId>
-                    <artifactId>azure-webapp-maven-plugin</artifactId>
-                    <version>${azure.webapp.plugin.version}</version>
-                    <configuration>
-                        <schemaVersion>V2</schemaVersion>
-                        <resourceGroup>GreenCity</resourceGroup>
-                        <appName>greencityubs</appName>
-                        <pricingTier>B1</pricingTier>
-                        <region>centralus</region>
-                        <runtime>
-                            <os>linux</os>
-                            <javaVersion>jre11</javaVersion>
-                            <webContainer>jre11</webContainer>
-                        </runtime>
-                        <deployment>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/target</directory>
-                                    <includes>
-                                        <include>*.jar</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </deployment>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
+                <version>${jacoco-maven-plugin.version}</version>
                 <configuration>
                     <excludes>
                         <exclude>**/configuration/*</exclude>
@@ -419,15 +81,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven.surefire.version}</version>
+                <version>${maven-surefire-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
-                <version>${maven.formatter.version}</version>
+                <version>${formatter-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <phase>validate</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>
@@ -440,7 +101,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${maven.checkstyle.version}</version>
+                <version>${checkstyle-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>check</id>
@@ -452,20 +113,6 @@
                 </executions>
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.version}</version>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>

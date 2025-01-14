@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="update-address-city-id" author="Kizerov Dmytro">
+        <sql>
+            UPDATE address a
+            SET city_id = c.id
+            from (
+            SELECT id, name_uk, region_id
+            FROM cities
+            ) c
+            WHERE c.name_uk = a.city and a.region_id = c.region_id;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

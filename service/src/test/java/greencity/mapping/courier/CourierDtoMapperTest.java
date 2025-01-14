@@ -8,9 +8,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.LocalDate;
-
 import static greencity.ModelUtils.getEmployee;
 import static greencity.enums.CourierStatus.ACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;

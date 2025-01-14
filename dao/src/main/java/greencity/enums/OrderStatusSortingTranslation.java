@@ -2,7 +2,6 @@ package greencity.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;

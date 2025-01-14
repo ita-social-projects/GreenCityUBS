@@ -3,7 +3,6 @@ package greencity.repository;
 import greencity.entity.order.Courier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
 
 public interface CourierRepository extends JpaRepository<Courier, Long> {
@@ -20,6 +19,7 @@ public interface CourierRepository extends JpaRepository<Courier, Long> {
      * Method for getting all active couriers.
      *
      * @return list of {@link Courier}
+     *
      * @author Anton Bondar
      */
     @Query(value = "SELECT c FROM Courier c WHERE c.courierStatus = 'ACTIVE'")

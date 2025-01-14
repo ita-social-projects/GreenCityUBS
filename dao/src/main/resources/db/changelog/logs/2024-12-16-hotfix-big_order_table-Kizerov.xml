@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="hotfix-big_order_table" author="Kizerov Dmytro">
+        <sql>
+            UPDATE custom_table_view
+            SET titles = 'select,id,orderStatus,orderPaymentStatus,orderDate,paymentDate,commentsForOrder,clientName,clientPhone,clientEmail,senderName,senderPhone,senderEmail,violationsAmount,region,city,district,address,commentToAddressForClient,mixedWaste120L,textileWaste60L,textileWaste20L,totalOrderSum,orderCertificateCode,generalDiscount,amountDue,commentForOrderByClient,totalPayment,dateOfExport,timeOfExport,idOrderFromShop,receivingStation,responsibleCaller,responsibleLogicMan,responsibleDriver,responsibleNavigator,blockedBy';
+        </sql>
+        <sql>
+            UPDATE column_width_for_employee
+            SET mixed_waste_120l = 120,
+                textile_waste_60l = 120,
+                textile_waste_20l = 120;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

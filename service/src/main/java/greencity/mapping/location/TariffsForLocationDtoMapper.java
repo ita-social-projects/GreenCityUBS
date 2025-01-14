@@ -8,7 +8,6 @@ import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Region;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.stream.Collectors;
 
 @Component
@@ -18,8 +17,8 @@ public class TariffsForLocationDtoMapper extends AbstractConverter<TariffsInfo, 
         Region region = source.getTariffLocations() != null
             ? source.getTariffLocations().iterator().next().getLocation().getRegion()
             : null;
-        RegionDto regionDto = region != null ? RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName())
-            .nameUk(region.getUkrName()).build() : null;
+        RegionDto regionDto = region != null ? RegionDto.builder().regionId(region.getId()).nameEn(region.getNameEn())
+            .nameUk(region.getNameUk()).build() : null;
 
         return TariffsForLocationDto.builder()
             .regionDto(regionDto)

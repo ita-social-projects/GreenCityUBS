@@ -2,7 +2,6 @@ package greencity.mapping.employeefilterview;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static greencity.ModelUtils.getEmployeeFilterView;
 import static greencity.ModelUtils.getLocationsDtos;
 import static org.junit.jupiter.api.Assertions.assertEquals;

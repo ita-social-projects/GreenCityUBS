@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="change-add-column-isTableFreeze-to-column_width_for_employee-Warded120" author="Warded120">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="column_width_for_employee" columnName="is_table_freeze"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="column_width_for_employee">
+            <column name="is_table_freeze" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

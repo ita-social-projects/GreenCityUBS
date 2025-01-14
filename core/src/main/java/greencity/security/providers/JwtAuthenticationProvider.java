@@ -3,35 +3,26 @@ package greencity.security.providers;
 import greencity.security.JwtTool;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
+import javax.crypto.SecretKey;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.crypto.SecretKey;
 
 /**
  * Class that provides authentication logic.
  *
  * @author Yurii Koval
- * @version 2.0
+ * @version 1.1
  */
+@RequiredArgsConstructor
 public class JwtAuthenticationProvider implements AuthenticationProvider {
     private final JwtTool jwtTool;
-
-    /**
-     * Constructor.
-     *
-     * @param jwtTool {@link JwtTool}
-     */
-    public JwtAuthenticationProvider(JwtTool jwtTool) {
-        this.jwtTool = jwtTool;
-    }
 
     /**
      * Method that provide authentication.
@@ -44,27 +35,23 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
      *                                               represent a Claims JWS
      * @throws io.jsonwebtoken.MalformedJwtException if the string is not a valid
      *                                               JWS
+     * @throws io.jsonwebtoken.SignatureException    if the JWS signature validation
+     *                                               fails
      */
     @Override
     public Authentication authenticate(Authentication authentication) {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtTool.getAccessTokenKey());
-        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
-
+        SecretKey key = Keys.hmacShaKeyFor(jwtTool.getAccessTokenKey().getBytes());
         String email = Jwts.parser()
-            .verifyWith(secretKey)
-            .build()
+            .verifyWith(key).build()
             .parseSignedClaims(authentication.getName())
             .getPayload()
             .getSubject();
-
         @SuppressWarnings({"unchecked, rawtype"})
         List<String> role = (List<String>) Jwts.parser()
-            .verifyWith(secretKey)
-            .build()
+            .verifyWith(key).build()
             .parseSignedClaims(authentication.getName())
             .getPayload()
             .get("role");
-
         return new UsernamePasswordAuthenticationToken(
             email,
             role.contains("ROLE_UBS_EMPLOYEE")

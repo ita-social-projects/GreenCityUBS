@@ -9,9 +9,9 @@ import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import jakarta.annotation.PostConstruct;
 
 @RequiredArgsConstructor
 @Getter

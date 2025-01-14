@@ -4,6 +4,7 @@ import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
@@ -22,30 +23,17 @@ import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.ManualPaymentResponseDto;
-import greencity.dto.payment.PaymentTableInfoDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.order.Order;
 import greencity.enums.SortingOrder;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UBSManagementService {
-    /**
-     * Method returns payment info.
-     *
-     * @return {@link PaymentTableInfoDto};
-     * @author Struk Nazar
-     */
-    PaymentTableInfoDto getPaymentInfo(long orderId, Double sumToPay);
-
     /**
      * Method returns all certificates.
      *
@@ -186,43 +174,6 @@ public interface UBSManagementService {
     List<AdditionalBagInfoDto> getAdditionalBagsInfo(Long orderId);
 
     /**
-     * Method that saves manual payment and returns response with required fields.
-     *
-     * @param orderId           of {@link Long} order id;
-     * @param paymentRequestDto of {@link ManualPaymentRequestDto} manual payment
-     *                          request dto;
-     * @param image             {@link MultipartFile} image of receipt.
-     * @param email             {@link String}.
-     * @return {@link ManualPaymentResponseDto }
-     * @author Denys Kisliak
-     */
-    ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image, String email);
-
-    /**
-     * Method that deletes manual payment.
-     *
-     * @param paymentId of {@link Long} payment id;
-     * @param uuid      {@link String}.
-     * @author Denys Kisliak
-     */
-    void deleteManualPayment(Long paymentId, String uuid);
-
-    /**
-     * Method that updates manual payment and returns response with required fields.
-     *
-     * @param paymentId         of {@link Long} payment id;
-     * @param paymentRequestDto of {@link ManualPaymentRequestDto} manual payment
-     *                          request dto;
-     * @param image             {@link MultipartFile} image of receipt.
-     * @param uuid              {@link String}.
-     * @return {@link ManualPaymentResponseDto }
-     * @author Denys Kisliak
-     */
-    ManualPaymentResponseDto updateManualPayment(Long paymentId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image, String uuid);
-
-    /**
      * Method that return all employees by position.
      *
      * @author Bohdan Fedorkiv
@@ -277,7 +228,8 @@ public interface UBSManagementService {
      *
      * @author Anton Bondar.
      */
-    void updateOrderAdminPageInfoAndSaveReason(Long orderId, UpdateOrderPageAdminDto updateOrderPageAdminDto,
+    BigOrderTableDTO updateOrderAdminPageInfoAndSaveReason(Long orderId,
+        UpdateOrderPageAdminDto updateOrderPageAdminDto,
         String language, String email, MultipartFile[] images);
 
     /**
@@ -301,17 +253,6 @@ public interface UBSManagementService {
      * @author Max Boiarchuk.
      */
     void updateAllOrderAdminPageInfo(UpdateAllOrderPageDto updateAllOrderPageDto, String email, String lang);
-
-    /**
-     * Method that add bonuses to user.
-     *
-     * @param addBonusesToUserDto {@link AddBonusesToUserDto}.
-     * @param orderId             {@link Long}.
-     * @param email               {@link String}.
-     *
-     * @author Pavlo Hural.
-     */
-    AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId, String email);
 
     /**
      * Method returns employee's access status to order.
@@ -352,11 +293,13 @@ public interface UBSManagementService {
     NotTakenOrderReasonDto getNotTakenOrderReason(Long orderId);
 
     /**
-     * Method saves order ID of order for which we need to make a refund.
+     * Method returns {@code true} if the order status was changed from
+     * {@code FORMED} to {@code CANCELED}.
      *
-     * @param orderId {@link Long}.
+     * @param orderId {@link Long} the ID of the order.
+     * @return {@link Boolean}
      *
-     * @author Anton Bondar.
+     * @author Volodymyr Lukovskyi
      */
-    void saveOrderIdForRefund(Long orderId);
+    Boolean checkIfOrderStatusIsFormedToCanceled(Long orderId);
 }

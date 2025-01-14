@@ -2,8 +2,13 @@ package greencity.dto.order;
 
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
-import lombok.*;
-
+import greencity.dto.refund.RefundDto;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import java.util.List;
 
 @Getter
@@ -23,4 +28,5 @@ public class UpdateOrderPageAdminDto {
     private Double writeOffStationSum;
     private Double ubsCourierSum;
     private String notTakenOutReason;
+    private RefundDto refundDto;
 }

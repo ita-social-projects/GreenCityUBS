@@ -2,14 +2,19 @@ package greencity.dto.order;
 
 import greencity.dto.bag.BagDto;
 import greencity.dto.user.PersonalDataDto;
+import greencity.enums.PaymentSystem;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.validator.constraints.Length;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.*;
-import org.hibernate.validator.constraints.Length;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +40,7 @@ public class OrderResponseDto implements Serializable {
     private Set<@Pattern(regexp = "(\\d{4}-\\d{4})|(^$)",
         message = "This certificate code is not valid") String> certificates;
 
-    private Set<@Pattern(regexp = "\\d{4,10}") String> additionalOrders;
+    private Set<@Pattern(regexp = "\\d{1,8}") String> additionalOrders;
 
     @Length(max = 255)
     private String orderComment;
@@ -48,4 +53,6 @@ public class OrderResponseDto implements Serializable {
 
     @NotNull
     private Long locationId;
+
+    private PaymentSystem paymentSystem;
 }

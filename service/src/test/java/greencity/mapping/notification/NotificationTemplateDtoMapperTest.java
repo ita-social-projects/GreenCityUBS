@@ -1,12 +1,10 @@
 package greencity.mapping.notification;
 
 import greencity.ModelUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,5 +32,7 @@ class NotificationTemplateDtoMapperTest {
         assertEquals(notification.getTitle(), mainInfoDto.getTitle());
         assertEquals(notification.getTitleEng(), mainInfoDto.getTitleEng());
         assertEquals(notification.getNotificationStatus(), mainInfoDto.getNotificationStatus());
+        assertEquals(notification.getUserCategory().getDescription(), mainInfoDto.getUserCategoryDescription());
+        assertEquals(notification.getUserCategory().getDescriptionEng(), mainInfoDto.getUserCategoryDescriptionEng());
     }
 }

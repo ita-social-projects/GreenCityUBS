@@ -2,8 +2,8 @@ package greencity.mapping.user;
 
 import greencity.dto.address.AddressDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.user.ubs.Address;
 import greencity.enums.AddressStatus;
+import greencity.entity.user.ubs.Address;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 

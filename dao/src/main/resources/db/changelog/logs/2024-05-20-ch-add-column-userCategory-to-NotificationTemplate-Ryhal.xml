@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2024-05-20-ch-add-column-userCategory-to-NotificationTemplate-Ryhal" author="Denys Ryhal">
+        <addColumn tableName="notification_templates">
+            <column name="user_category" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

@@ -5,8 +5,7 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.order.OrderBagDto;
-import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,10 +18,7 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import java.security.Principal;
-import java.util.Locale;
-
 import static greencity.ModelUtils.getUuid;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -31,10 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class ClientControllerTest {
-    private static final String UBS_CLIENT_LINK = "/ubs/client";
-    private static final String MAKE_ORDER_AGAIN_LINK = "/make-order-again";
-    private static final String ORDER_PAYMENT_DETAIL_LINK = "/order-payment-detail/";
-    private static final String USERS_POINTS_TO_USE_LINK = "/users-pointsToUse";
+    private static final String ubsLink = "/ubs/client";
+    private static final String getOrderPaymentDetailLink = "/order-payment-detail/";
+    private static final String getAllPointsForUser = "/users-pointsToUse";
     private MockMvc mockMvc;
 
     @Mock
@@ -46,37 +41,19 @@ class ClientControllerTest {
     @InjectMocks
     ClientController clientController;
 
-    private static final Principal PRINCIPAL = getUuid();
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private Principal principal = getUuid();
 
     @BeforeEach
     void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(clientController)
+        this.mockMvc = MockMvcBuilders.standaloneSetup(clientController)
             .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
             .build();
     }
 
     @Test
-    void makeOrderAgain() throws Exception {
-        OrderBagDto dto = OrderBagDto.builder()
-            .id(1)
-            .amount(3)
-            .build();
-        String responseJSON = OBJECT_MAPPER.writeValueAsString(dto);
-
-        mockMvc.perform(post(UBS_CLIENT_LINK + "/" + 1L + MAKE_ORDER_AGAIN_LINK)
-            .principal(PRINCIPAL)
-            .content(responseJSON)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService, times(1)).makeOrderAgain(Locale.ENGLISH, 1L);
-    }
-
-    @Test
     void getOrderPaymentDetail() throws Exception {
-        mockMvc.perform(get(UBS_CLIENT_LINK + ORDER_PAYMENT_DETAIL_LINK + 1L)
-            .principal(PRINCIPAL)
+        mockMvc.perform(get(ubsLink + getOrderPaymentDetailLink + 1L)
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
@@ -85,8 +62,8 @@ class ClientControllerTest {
 
     @Test
     void getAllPointsForUserTest() throws Exception {
-        mockMvc.perform(get(UBS_CLIENT_LINK + USERS_POINTS_TO_USE_LINK)
-            .principal(PRINCIPAL)
+        this.mockMvc.perform(get(ubsLink + getAllPointsForUser)
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
@@ -99,42 +76,43 @@ class ClientControllerTest {
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
             .build();
 
-        mockMvc.perform(get(UBS_CLIENT_LINK + "/user-orders", 1)
-            .principal(PRINCIPAL)
+        this.mockMvc.perform(get(ubsLink + "/user-orders", 1)
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
     @Test
     void getDataForOrderTest() throws Exception {
-        mockMvc.perform(get(UBS_CLIENT_LINK + "/user-order/{id}", 1)
-            .principal(PRINCIPAL)
+        this.mockMvc.perform(get(ubsLink + "/user-order/{id}", 1)
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
     @Test
     void deleteOrderTest() throws Exception {
-        mockMvc.perform(delete(UBS_CLIENT_LINK + "/delete-order/{id}", 1)
-            .principal(PRINCIPAL)
+        this.mockMvc.perform(delete(ubsLink + "/delete-order/{id}", 1)
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }
 
     @Test
-    void processOrderFondy() throws Exception {
-        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
-        String dtoJson = OBJECT_MAPPER.writeValueAsString(dto);
+    void processOrder() throws Exception {
+        OrderWayForPayClientDto dto = ModelUtils.getOrderWayForPayClientDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String dtoJson = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(post(UBS_CLIENT_LINK + "/processOrderFondy")
+        this.mockMvc.perform(post(ubsLink + "/processOrder")
             .contentType(MediaType.APPLICATION_JSON)
-            .principal(PRINCIPAL)
+            .principal(principal)
             .content(dtoJson))
             .andExpect(status().isOk());
     }
 
     @Test
     void getUserBonusesTest() throws Exception {
-        mockMvc.perform(get(UBS_CLIENT_LINK + "/user-bonuses")
-            .principal(PRINCIPAL)).andExpect(status().isOk());
+        this.mockMvc.perform(get(ubsLink + "/user-bonuses")
+            .principal(principal)).andExpect(status().isOk());
     }
 }

@@ -1,6 +1,5 @@
 package greencity.client.config;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import feign.hystrix.FallbackFactory;
 import greencity.client.ViberClient;
 import greencity.constant.ErrorMessage;
