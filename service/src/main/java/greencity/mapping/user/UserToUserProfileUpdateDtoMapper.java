@@ -27,7 +27,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     @Override
     protected UserProfileUpdateDto convert(User user) {
         List<AddressDto> addressDtoList = user.getAddresses().stream()
-            .filter(address -> !AddressStatus.DELETED.equals(address.getAddressStatus()))
+            .filter(address -> AddressStatus.DELETED != address.getAddressStatus())
             .map(this::createAddressDto)
             .toList();
 
