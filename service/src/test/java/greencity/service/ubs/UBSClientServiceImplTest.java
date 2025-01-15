@@ -4380,7 +4380,7 @@ class UBSClientServiceImplTest {
         verify(addressRepository).findById(anyLong());
         verify(addressRepository).findAllByUserId(anyLong());
         verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
-        verify(addressRepository).save(any());
+        verify(addressRepository, times(2)).save(any());
     }
 
     @Test

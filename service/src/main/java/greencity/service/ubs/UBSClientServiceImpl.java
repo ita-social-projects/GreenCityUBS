@@ -834,8 +834,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
             addressRepo.save(newAddress);
         } else {
+            address.setAddressStatus(AddressStatus.DELETED);
             addressIfExist.setAddressStatus(AddressStatus.NEW);
             addressRepo.save(addressIfExist);
+            addressRepo.save(address);
         }
         return findAllAddressesForCurrentOrder(uuid);
     }
