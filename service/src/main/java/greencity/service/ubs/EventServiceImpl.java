@@ -126,6 +126,7 @@ public class EventServiceImpl implements EventService {
         eventNameToEngMap.put(OrderHistory.DELETE_VIOLATION, OrderHistory.DELETE_VIOLATION_ENG);
         eventNameToEngMap.put(OrderHistory.CANCELED_ORDER_MONEY_REFUND, OrderHistory.CANCELED_ORDER_MONEY_REFUND_ENG);
         eventNameToEngMap.put(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_ENG);
+        eventNameToEngMap.put(OrderHistory.SET_EXPORT_DETAILS, OrderHistory.SET_EXPORT_DETAILS_ENG);
     }
 
     private static String getEventNameEng(String eventName) {

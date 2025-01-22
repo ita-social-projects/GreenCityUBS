@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Arrays;
 import java.util.Optional;
+import static greencity.ModelUtils.getOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -31,7 +32,7 @@ class EventServiceImplTest {
 
     @Test
     void testEventSave() {
-        Order order = ModelUtils.getOrder();
+        Order order = getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
@@ -41,7 +42,7 @@ class EventServiceImplTest {
 
     @Test
     void saveEmptyEventTest() {
-        Order order = ModelUtils.getOrder();
+        Order order = getOrder();
         eventService.save("", "admin", order);
         verify(eventRepository, times(0)).save(any());
     }
@@ -50,7 +51,7 @@ class EventServiceImplTest {
     void testSaveEventEng() {
         String eventAuthorSystem = "Система";
         String eventAuthorClient = "Клієнт";
-        Order order = ModelUtils.getOrder();
+        Order order = getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
@@ -75,7 +76,7 @@ class EventServiceImplTest {
     @Test
     void testGetEventNameEngWithDate() {
         String eventAuthorSystem = "Система";
-        Order order = ModelUtils.getOrder();
+        Order order = getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
@@ -98,7 +99,7 @@ class EventServiceImplTest {
     @Test
     void testSaveEventEngWithUserName() {
         String userName = "Test";
-        Order order = ModelUtils.getOrder();
+        Order order = getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
@@ -133,12 +134,28 @@ class EventServiceImplTest {
 
     @Test
     void testSaveEvent() {
-        Order order = ModelUtils.getOrder();
+        Order order = getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(ModelUtils.TEST_EMPLOYEE));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
         eventService.saveEvent("Замовлення оплаченно", "email", order);
+        verify(eventRepository, times(1)).save(any());
+    }
+
+    @Test
+    void eventNameToEngMapTest() {
+        String eventAuthor = "UBS ADMIN";
+        Order order = getOrder();
+
+        order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0), ModelUtils.getListOfEvents().get(1)));
+        when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
+
+        eventService.save(OrderHistory.SET_EXPORT_DETAILS_ENG, eventAuthor, order);
+
+        assertEquals("Installed export details.", OrderHistory.SET_EXPORT_DETAILS_ENG);
+        assertEquals("Встановлено деталі вивезення.", OrderHistory.SET_EXPORT_DETAILS);
+
         verify(eventRepository, times(1)).save(any());
     }
 }
