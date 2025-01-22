@@ -1,7 +1,5 @@
 package greencity.config;
 
-import greencity.repository.TelegramBotRepository;
-import greencity.repository.UserRepository;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.service.TelegramService;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,10 +17,8 @@ public class TelegramBotConfig {
     private String botToken;
 
     @Bean
-    public UBSTelegramBot ubsTelegramBot(UserRepository userRepository,
-        TelegramBotRepository telegramBotRepository, TelegramService telegramService) {
-        return new UBSTelegramBot(botToken, botName, botToken,
-            userRepository, telegramBotRepository, telegramService);
+    public UBSTelegramBot ubsTelegramBot(TelegramService telegramService) {
+        return new UBSTelegramBot(botToken, botName, botToken, telegramService);
     }
 
     @Bean

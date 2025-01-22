@@ -20,7 +20,7 @@ public class TelegramService {
         String uuId = message.getText().replace("/start", "").trim();
         User user = userRepository.findUserByUuid(uuId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-        user.setTelegramBot(getTelegramBot(user, Long.valueOf(message.getChatId())));
+        user.setTelegramBot(getTelegramBot(user, message.getChatId()));
         userRepository.save(user);
     }
 
@@ -32,7 +32,7 @@ public class TelegramService {
                 .user(user)
                 .isNotify(true)
                 .build();
-        } else if (!telegramBot.getIsNotify().booleanValue()) {
+        } else if (!telegramBot.getIsNotify()) {
             telegramBot.setIsNotify(true);
         }
         return telegramBotRepository.save(telegramBot);

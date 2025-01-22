@@ -23,7 +23,7 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     private final TelegramService telegramService;
 
     public UBSTelegramBot(String botToken, String botName, String token,
-        UserRepository userRepository, TelegramBotRepository telegramBotRepository, TelegramService telegramService) {
+        TelegramService telegramService) {
         super(botToken);
         this.botName = botName;
         this.botToken = token;
@@ -47,9 +47,8 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
             }
         } else if (update.hasMessage() && update.getMessage().getText().startsWith("/help")) {
             var message = update.getMessage();
-            var sendMessage = MessageFactory.createHelpMessage(message.getChatId().toString());
             try {
-                execute(sendMessage);
+                execute(MessageFactory.createHelpMessage(message.getChatId().toString()));
             } catch (TelegramApiException e) {
                 throw new MessageWasNotSent(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT);
             }
