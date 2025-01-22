@@ -1,4 +1,4 @@
-package greencity.ubstelegrambot;
+package greencity.ubstelegrambot.service;
 
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
@@ -9,6 +9,7 @@ import greencity.enums.NotificationReceiverType;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notification.AbstractNotificationProvider;
+import greencity.ubstelegrambot.UBSTelegramBot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,16 +19,15 @@ import static greencity.enums.NotificationReceiverType.MOBILE;
 
 @Service
 @Slf4j
-public class TelegramService extends AbstractNotificationProvider {
+public class TelegramNotificationService extends AbstractNotificationProvider {
     private final UBSTelegramBot ubsTelegramBot;
-
     private static final NotificationReceiverType notificationType = MOBILE;
 
     /**
      * Constructor with super() call.
      */
     @Autowired
-    public TelegramService(UBSTelegramBot ubsTelegramBot,
+    public TelegramNotificationService(UBSTelegramBot ubsTelegramBot,
         UserRemoteClient userRemoteClient,
         NotificationTemplateRepository templateRepository) {
         super(userRemoteClient, templateRepository, notificationType);

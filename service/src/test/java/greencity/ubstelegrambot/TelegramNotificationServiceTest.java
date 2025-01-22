@@ -11,6 +11,7 @@ import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
+import greencity.ubstelegrambot.service.TelegramNotificationService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
 
 @ExtendWith(MockitoExtension.class)
-class TelegramServiceTest {
+class TelegramNotificationServiceTest {
 
     @Mock
     private UserRemoteClient userRemoteClient;
@@ -41,7 +42,7 @@ class TelegramServiceTest {
     private UBSTelegramBot ubsTelegramBot;
 
     @InjectMocks
-    private TelegramService telegramService;
+    private TelegramNotificationService telegramService;
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
         .telegramBot(TelegramBot.builder().id(1L).chatId(1L).isNotify(true).build())
         .build();
