@@ -3818,9 +3818,9 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(expectedOrder));
         when(encryptionUtil.formResponseSignature(any(PaymentResponseWayForPay.class), eq(wayForPaySecret)))
             .thenReturn("signature");
-        when(userNotificationRepository.findUserNotificationByOrderAndNotificationType(any(Order.class),
+        when(userNotificationRepository.findAllUserNotificationByOrderAndNotificationType(any(Order.class),
             any(NotificationType.class)))
-            .thenReturn(Optional.ofNullable(getUserNotificationForUnpaidOrder()));
+            .thenReturn(List.of(getUserNotificationForUnpaidOrder()));
         when(notificationParameterRepository
             .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString()))
             .thenReturn(getNotificationPaymentLink());
@@ -3835,7 +3835,7 @@ class UBSClientServiceImplTest {
         verify(orderRepository).findById(1L);
         verify(encryptionUtil).formResponseSignature(any(PaymentResponseWayForPay.class), eq(wayForPaySecret));
         verify(userNotificationRepository)
-            .findUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
+            .findAllUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
         verify(notificationParameterRepository)
             .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString());
     }
@@ -4278,9 +4278,9 @@ class UBSClientServiceImplTest {
         Order order = getOrder();
 
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(userNotificationRepository.findUserNotificationByOrderAndNotificationType(any(Order.class),
+        when(userNotificationRepository.findAllUserNotificationByOrderAndNotificationType(any(Order.class),
             any(NotificationType.class)))
-            .thenReturn(Optional.ofNullable(getUserNotificationForUnpaidOrder()));
+            .thenReturn(List.of(getUserNotificationForUnpaidOrder()));
         when(notificationParameterRepository
             .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString()))
             .thenReturn(getNotificationPaymentLink());
@@ -4292,7 +4292,7 @@ class UBSClientServiceImplTest {
         verify(orderRepository).save(any());
         verify(eventService, times(2)).save(anyString(), anyString(), any());
         verify(userNotificationRepository)
-            .findUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
+            .findAllUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
         verify(notificationParameterRepository)
             .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString());
     }
