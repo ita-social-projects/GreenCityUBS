@@ -2244,12 +2244,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void removePaymentLinkForOrder(Order order) {
-        Optional<UserNotification> userNotification = userNotificationRepository
-            .findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
-        if (userNotification.isPresent()) {
-            Optional<NotificationParameter> notificationParameter = notificationParameterRepository
-                .findNotificationParameterByUserNotificationAndKey(userNotification.get(), PAY_BUTTON);
-            notificationParameter.ifPresent(notificationParameterRepository::delete);
+        List<UserNotification> userNotification = userNotificationRepository
+            .findAllUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
+        if (!userNotification.isEmpty()) {
+            userNotification.stream()
+                .map(notification -> notificationParameterRepository
+                    .findNotificationParameterByUserNotificationAndKey(notification, PAY_BUTTON))
+                .forEach(parameter -> parameter.ifPresent(notificationParameterRepository::delete));
         }
     }
 }
