@@ -39,6 +39,7 @@
         <telegram.version>5.0.1</telegram.version>
         <test.containers.version>1.20.4</test.containers.version>
         <org.eclipse.jgit.version>5.13.3.202401111512-r</org.eclipse.jgit.version>
+        <telegrambot.version>5.4.0.1</telegrambot.version>
     </properties>
 
 

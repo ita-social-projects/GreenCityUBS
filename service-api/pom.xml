@@ -167,6 +167,13 @@
             <artifactId>feign-hystrix</artifactId>
             <version>${feign-core.version}</version>
         </dependency>
+        <!-- telegrambot -->
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-spring-boot-starter</artifactId>
+            <version>${telegrambot.version}</version>
+        </dependency>
+
     </dependencies>
 
 </project>

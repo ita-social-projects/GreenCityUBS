@@ -6,7 +6,6 @@ import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
-import greencity.enums.NotificationType;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notification.AbstractNotificationProvider;
@@ -21,7 +20,7 @@ import static greencity.enums.NotificationReceiverType.MOBILE;
 
 @Service
 @Slf4j
-public class TelegramService extends AbstractNotificationProvider {
+public class TelegramNotificationService extends AbstractNotificationProvider {
     private final UBSTelegramBot ubsTelegramBot;
 
     private static final NotificationReceiverType notificationType = MOBILE;
@@ -30,7 +29,7 @@ public class TelegramService extends AbstractNotificationProvider {
      * Constructor with super() call.
      */
     @Autowired
-    public TelegramService(UBSTelegramBot ubsTelegramBot,
+    public TelegramNotificationService(UBSTelegramBot ubsTelegramBot,
         UserRemoteClient userRemoteClient,
         NotificationTemplateRepository templateRepository) {
         super(userRemoteClient, templateRepository, notificationType);

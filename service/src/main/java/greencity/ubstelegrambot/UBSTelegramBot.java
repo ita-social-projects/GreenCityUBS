@@ -1,14 +1,7 @@
 package greencity.ubstelegrambot;
 
 import greencity.constant.AppConstant;
-import greencity.constant.ErrorMessage;
-import greencity.entity.telegram.UnknownTelegramUser;
-import greencity.entity.telegram.TelegramBot;
-import greencity.entity.user.User;
-import greencity.exceptions.NotFoundException;
-import greencity.repository.UnknownTelegramUserRepository;
-import greencity.repository.TelegramBotRepository;
-import greencity.repository.UserRepository;
+import greencity.service.ubs.TelegramService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +9,6 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -25,9 +17,7 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     private String botName;
     @Value("${greencity.bots.ubs-bot-token}")
     private String botToken;
-    private final UserRepository userRepository;
-    private final TelegramBotRepository telegramBotRepository;
-    private final UnknownTelegramUserRepository unknownTelegramUserRepository;
+    private final TelegramService telegramService;
     private final TelegramExecutor executor;
 
     @Override
@@ -44,65 +34,18 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
         if (message.hasText() && message.getText().startsWith(AppConstant.TELEGRAM_START_COMMAND)) {
-            String uuId = message.getText().replace(AppConstant.TELEGRAM_START_COMMAND, "").trim();
+            final String uuId = message.getText().replace(AppConstant.TELEGRAM_START_COMMAND, "").trim();
             final Long tgUserId = message.getFrom().getId();
 
             if (uuId.isEmpty()) {
-                Optional<TelegramBot> registeredUserBot = telegramBotRepository.findByChatId(tgUserId);
-                if (registeredUserBot.isPresent()) {
-                    executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
-                    return;
-                }
-
-                Optional<UnknownTelegramUser> unknownSavedUserBot = unknownTelegramUserRepository.findById(tgUserId);
-                if (unknownSavedUserBot.isPresent()) {
-                    executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
-                    return;
-                }
-
-                UnknownTelegramUser unknownTelegramUser = UnknownTelegramUser.builder()
-                    .id(update.getMessage().getFrom().getId())
-                    .firstName(update.getMessage().getFrom().getFirstName())
-                    .lastName(update.getMessage().getFrom().getLastName())
-                    .userName(update.getMessage().getFrom().getUserName())
-                    .build();
-                unknownTelegramUserRepository.save(unknownTelegramUser);
+                telegramService.handleUnknownTelegramUser(update);
                 executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
                 return;
             }
 
-            User user = userRepository.findUserByUuid(uuId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-            Optional<UnknownTelegramUser> unknownSavedTelegramUser = unknownTelegramUserRepository.findById(tgUserId);
-            if (unknownSavedTelegramUser.isPresent()) {
-                unknownTelegramUserRepository.delete(unknownSavedTelegramUser.get());
-                telegramBotRepository.save(getTelegramBot(user, tgUserId));
-                executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
-                return;
-            }
-
-            Optional<TelegramBot> registeredUserBot = telegramBotRepository.findByChatId(tgUserId);
-            if (registeredUserBot.isEmpty()) {
-                telegramBotRepository.save(getTelegramBot(user, tgUserId));
-                executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
-                return;
-            } else {
-                executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
-            }
+            telegramService.handleAuthorizedUser(uuId, tgUserId);
+            executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
+            return;
         }
-    }
-
-    private TelegramBot getTelegramBot(User user, Long chatId) {
-        TelegramBot telegramBot = user.getTelegramBot();
-        if (telegramBot == null) {
-            telegramBot = TelegramBot.builder()
-                .chatId(chatId)
-                .user(user)
-                .isNotify(true)
-                .build();
-        } else if (!telegramBot.getIsNotify().booleanValue()) {
-            telegramBot.setIsNotify(true);
-        }
-        return telegramBotRepository.save(telegramBot);
     }
 }
