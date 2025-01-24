@@ -15,7 +15,7 @@ public interface TelegramBotRepository extends CrudRepository<TelegramBot, Long>
      * @param chatId {@link Long}.
      * @return {@link TelegramBot}.
      */
-    TelegramBot findByChatId(Long chatId);
+    Optional<TelegramBot> findByChatId(Long chatId);
 
     /**
      * The method finds telegram bot by user and chat id and isNotify.

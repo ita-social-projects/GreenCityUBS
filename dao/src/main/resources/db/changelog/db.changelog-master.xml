@@ -238,4 +238,5 @@
     <include file="db/changelog/logs/2024-12-14-update-custom_table_view-and-column_width_for_employee-Kizerov.xml"/>
     <include file="db/changelog/logs/2024-12-17-update-column_width_for_employee.xml"/>
     <include file="db/changelog/logs/2024-12-26-add-new-column-to-user-table-Kizerov.xml"/>
+    <include file="/db/changelog/logs/ch-create-table-unknown-telegram-user-Chernenko.xml"/>
 </databaseChangeLog>
