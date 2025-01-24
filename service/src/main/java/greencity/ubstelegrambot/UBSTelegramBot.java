@@ -6,16 +6,14 @@ import greencity.entity.telegram.UnknownTelegramUser;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.bots.MessageWasNotSent;
-import greencity.exceptions.bots.TelegramBotAlreadyConnected;
 import greencity.repository.UnknownTelegramUserRepository;
 import greencity.repository.TelegramBotRepository;
 import greencity.repository.UserRepository;
+import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.Optional;
@@ -30,6 +28,7 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     private final UserRepository userRepository;
     private final TelegramBotRepository telegramBotRepository;
     private final UnknownTelegramUserRepository unknownTelegramUserRepository;
+    private final TelegramExecutor executor;
 
     @Override
     public String getBotUsername() {
@@ -44,20 +43,20 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
-        if (message.getText().startsWith(AppConstant.TELEGRAM_START_COMMAND)) {
+        if (message.hasText() && message.getText().startsWith(AppConstant.TELEGRAM_START_COMMAND)) {
             String uuId = message.getText().replace(AppConstant.TELEGRAM_START_COMMAND, "").trim();
             final Long tgUserId = message.getFrom().getId();
 
             if (uuId.isEmpty()) {
                 Optional<TelegramBot> registeredUserBot = telegramBotRepository.findByChatId(tgUserId);
                 if (registeredUserBot.isPresent()) {
-                    welcomeUser(tgUserId.toString());
+                    executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
                     return;
                 }
 
                 Optional<UnknownTelegramUser> unknownSavedUserBot = unknownTelegramUserRepository.findById(tgUserId);
                 if (unknownSavedUserBot.isPresent()) {
-                    welcomeUser(tgUserId.toString());
+                    executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
                     return;
                 }
 
@@ -68,7 +67,7 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
                         .userName(update.getMessage().getFrom().getUserName())
                         .build();
                 unknownTelegramUserRepository.save(unknownTelegramUser);
-                welcomeUser(tgUserId.toString());
+                executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
                 return;
             }
 
@@ -78,17 +77,17 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
             if (unknownSavedTelegramUser.isPresent()) {
                 unknownTelegramUserRepository.delete(unknownSavedTelegramUser.get());
                 telegramBotRepository.save(getTelegramBot(user, tgUserId));
-                welcomeUser(tgUserId.toString());
+                executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
                 return;
             }
 
             Optional<TelegramBot> registeredUserBot = telegramBotRepository.findByChatId(tgUserId);
             if (registeredUserBot.isEmpty()) {
                 telegramBotRepository.save(getTelegramBot(user, tgUserId));
-                welcomeUser(tgUserId.toString());
+                executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
                 return;
             } else {
-                throw new TelegramBotAlreadyConnected(ErrorMessage.THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT);
+                executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
             }
         }
     }
@@ -105,15 +104,5 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
             telegramBot.setIsNotify(true);
         }
         return telegramBotRepository.save(telegramBot);
-    }
-
-    private void welcomeUser(String chatId) {
-        SendMessage sendMessage =
-                new SendMessage(chatId, AppConstant.TELEGRAM_GREETING_MESSAGE);
-        try {
-            execute(sendMessage);
-        } catch (Exception e) {
-            throw new MessageWasNotSent(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT);
-        }
     }
 }
