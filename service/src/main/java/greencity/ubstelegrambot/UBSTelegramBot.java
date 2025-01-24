@@ -61,18 +61,18 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
                 }
 
                 UnknownTelegramUser unknownTelegramUser = UnknownTelegramUser.builder()
-                        .id(update.getMessage().getFrom().getId())
-                        .firstName(update.getMessage().getFrom().getFirstName())
-                        .lastName(update.getMessage().getFrom().getLastName())
-                        .userName(update.getMessage().getFrom().getUserName())
-                        .build();
+                    .id(update.getMessage().getFrom().getId())
+                    .firstName(update.getMessage().getFrom().getFirstName())
+                    .lastName(update.getMessage().getFrom().getLastName())
+                    .userName(update.getMessage().getFrom().getUserName())
+                    .build();
                 unknownTelegramUserRepository.save(unknownTelegramUser);
                 executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
                 return;
             }
 
             User user = userRepository.findUserByUuid(uuId)
-                    .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
             Optional<UnknownTelegramUser> unknownSavedTelegramUser = unknownTelegramUserRepository.findById(tgUserId);
             if (unknownSavedTelegramUser.isPresent()) {
                 unknownTelegramUserRepository.delete(unknownSavedTelegramUser.get());
@@ -96,10 +96,10 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
         TelegramBot telegramBot = user.getTelegramBot();
         if (telegramBot == null) {
             telegramBot = TelegramBot.builder()
-                    .chatId(chatId)
-                    .user(user)
-                    .isNotify(true)
-                    .build();
+                .chatId(chatId)
+                .user(user)
+                .isNotify(true)
+                .build();
         } else if (!telegramBot.getIsNotify().booleanValue()) {
             telegramBot.setIsNotify(true);
         }

@@ -28,6 +28,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UBSTelegramBotTest {
+    final Long tgUserId = 12345L;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -39,8 +40,6 @@ class UBSTelegramBotTest {
 
     @InjectMocks
     private UBSTelegramBot ubsTelegramBot;
-
-
 
     @Test
     void getBotUsernameTest() {
@@ -54,43 +53,24 @@ class UBSTelegramBotTest {
 
     @Test
     public void onUpdateReceivedWithStartCommandAndUnknownUserThatWasRegisteredBeforeTest() throws Exception {
-        final Long tgUserId = 12345L;
-        Update update = new Update();
-        Message message = new Message();
-        Chat chat = new Chat();
-        chat.setId(tgUserId);
-        org.telegram.telegrambots.meta.api.objects.User from = mock(org.telegram.telegrambots.meta.api.objects.User.class);
-        message.setFrom(from);
-        message.setText(AppConstant.TELEGRAM_START_COMMAND);
-        message.setChat(chat);
-        update.setMessage(message);
+        Update update = createUpdate(tgUserId, AppConstant.TELEGRAM_START_COMMAND);
         TelegramBot telegramBot = new TelegramBot();
 
-        when(message.getFrom().getId()).thenReturn(tgUserId);
+        when(update.getMessage().getFrom().getId()).thenReturn(tgUserId);
         when(telegramBotRepository.findByChatId(tgUserId)).thenReturn(Optional.of(telegramBot));
         doNothing().when(executor).executeCommand(any(TelegramLongPollingBot.class), any(SendMessage.class));
 
         ubsTelegramBot.onUpdateReceived(update);
-
 
         verify(telegramBotRepository, times(1)).findByChatId(tgUserId);
     }
 
     @Test
     public void onUpdateReceivedWithStartCommandAndUnknownUserThatAlreadyUsingBotTest() throws Exception {
-        final Long tgUserId = 12345L;
-        Update update = new Update();
-        Message message = new Message();
-        Chat chat = new Chat();
-        chat.setId(tgUserId);
-        org.telegram.telegrambots.meta.api.objects.User from = mock(org.telegram.telegrambots.meta.api.objects.User.class);
-        message.setFrom(from);
-        message.setText(AppConstant.TELEGRAM_START_COMMAND);
-        message.setChat(chat);
-        update.setMessage(message);
+        Update update = createUpdate(tgUserId, AppConstant.TELEGRAM_START_COMMAND);
         UnknownTelegramUser unknownTelegramUser = new UnknownTelegramUser();
 
-        when(message.getFrom().getId()).thenReturn(tgUserId);
+        when(update.getMessage().getFrom().getId()).thenReturn(tgUserId);
         when(unknownTelegramUserRepository.findById(tgUserId)).thenReturn(Optional.of(unknownTelegramUser));
         doNothing().when(executor).executeCommand(any(TelegramLongPollingBot.class), any(SendMessage.class));
 
@@ -101,18 +81,9 @@ class UBSTelegramBotTest {
 
     @Test
     public void onUpdateReceivedWithStartCommandAndUnknownUserFirstTimeJoinBotTest() throws Exception {
-        final Long tgUserId = 12345L;
-        Update update = new Update();
-        Message message = new Message();
-        Chat chat = new Chat();
-        chat.setId(tgUserId);
-        org.telegram.telegrambots.meta.api.objects.User from = mock(org.telegram.telegrambots.meta.api.objects.User.class);
-        message.setFrom(from);
-        message.setText(AppConstant.TELEGRAM_START_COMMAND);
-        message.setChat(chat);
-        update.setMessage(message);
+        Update update = createUpdate(tgUserId, AppConstant.TELEGRAM_START_COMMAND);
 
-        when(message.getFrom().getId()).thenReturn(tgUserId);
+        when(update.getMessage().getFrom().getId()).thenReturn(tgUserId);
         doNothing().when(executor).executeCommand(any(TelegramLongPollingBot.class), any(SendMessage.class));
 
         ubsTelegramBot.onUpdateReceived(update);
@@ -121,23 +92,13 @@ class UBSTelegramBotTest {
     }
 
     @Test
-    public void onUpdateReceivedWithStartCommandAndUnknownUserWhoWasRegisteredBeforeTest() throws Exception {
-        final Long tgUserId = 12345L;
+    public void onUpdateReceivedWithStartCommandAndUnknownUserWhoWasRegisteredBeforeTest() {
         String uuId = UUID.randomUUID().toString();
-        Update update = new Update();
-        Message message = new Message();
-        Chat chat = new Chat();
-        chat.setId(tgUserId);
-        org.telegram.telegrambots.meta.api.objects.User from = mock(org.telegram.telegrambots.meta.api.objects.User.class);
-        message.setFrom(from);
-        message.setText(AppConstant.TELEGRAM_START_COMMAND + " " + uuId);
-        message.setChat(chat);
-        update.setMessage(message);
+        Update update = createUpdate(tgUserId, AppConstant.TELEGRAM_START_COMMAND + " " + uuId);
         User user = ModelUtils.getUser();
         UnknownTelegramUser unknownSavedTelegramUser = new UnknownTelegramUser();
 
-
-        when(message.getFrom().getId()).thenReturn(tgUserId);
+        when(update.getMessage().getFrom().getId()).thenReturn(tgUserId);
         when(userRepository.findUserByUuid(uuId)).thenReturn(Optional.of(user));
         when(unknownTelegramUserRepository.findById(tgUserId)).thenReturn(Optional.of(unknownSavedTelegramUser));
         doNothing().when(executor).executeCommand(any(TelegramLongPollingBot.class), any(SendMessage.class));
@@ -150,21 +111,11 @@ class UBSTelegramBotTest {
 
     @Test
     public void onUpdateReceivedWithStartCommandAndAuthorizedUserStartedBotTest() throws Exception {
-        final Long tgUserId = 12345L;
         String uuId = UUID.randomUUID().toString();
-        Update update = new Update();
-        Message message = new Message();
-        Chat chat = new Chat();
-        chat.setId(tgUserId);
-        org.telegram.telegrambots.meta.api.objects.User from = mock(org.telegram.telegrambots.meta.api.objects.User.class);
-        message.setFrom(from);
-        message.setText(AppConstant.TELEGRAM_START_COMMAND + " " + uuId);
-        message.setChat(chat);
-        update.setMessage(message);
+        Update update = createUpdate(tgUserId, AppConstant.TELEGRAM_START_COMMAND + " " + uuId);
         User user = ModelUtils.getUserWithBotNotifyFalse();
 
-
-        when(message.getFrom().getId()).thenReturn(tgUserId);
+        when(update.getMessage().getFrom().getId()).thenReturn(tgUserId);
         when(userRepository.findUserByUuid(uuId)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByChatId(tgUserId)).thenReturn(Optional.empty());
         doNothing().when(executor).executeCommand(any(TelegramLongPollingBot.class), any(SendMessage.class));
@@ -178,22 +129,12 @@ class UBSTelegramBotTest {
 
     @Test
     public void onUpdateReceivedWithStartCommandAndAuthorizedUserThatAlreadyJoinedTest() throws Exception {
-        final Long tgUserId = 12345L;
         String uuId = UUID.randomUUID().toString();
-        Update update = new Update();
-        Message message = new Message();
-        Chat chat = new Chat();
-        chat.setId(tgUserId);
-        org.telegram.telegrambots.meta.api.objects.User from = mock(org.telegram.telegrambots.meta.api.objects.User.class);
-        message.setFrom(from);
-        message.setText(AppConstant.TELEGRAM_START_COMMAND + " " + uuId);
-        message.setChat(chat);
-        update.setMessage(message);
+        Update update = createUpdate(tgUserId, AppConstant.TELEGRAM_START_COMMAND + " " + uuId);
         User user = ModelUtils.getUserWithBotNotifyFalse();
         TelegramBot telegramBot = new TelegramBot();
 
-
-        when(message.getFrom().getId()).thenReturn(tgUserId);
+        when(update.getMessage().getFrom().getId()).thenReturn(tgUserId);
         when(userRepository.findUserByUuid(uuId)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByChatId(tgUserId)).thenReturn(Optional.of(telegramBot));
         doNothing().when(executor).executeCommand(any(TelegramLongPollingBot.class), any(SendMessage.class));
@@ -206,24 +147,30 @@ class UBSTelegramBotTest {
 
     @Test
     public void onUpdateReceivedWithStartCommandAndWithInvalidUserUuIdTest() throws Exception {
-        final Long tgUserId = 12345L;
         String uuId = UUID.randomUUID().toString();
+        Update update = createUpdate(tgUserId, AppConstant.TELEGRAM_START_COMMAND + " " + uuId);
+
+        when(update.getMessage().getFrom().getId()).thenReturn(tgUserId);
+        when(userRepository.findUserByUuid(uuId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> ubsTelegramBot.onUpdateReceived(update));
+
+        verify(userRepository, times(1)).findUserByUuid(uuId);
+    }
+
+    private Update createUpdate(Long tgUserId, String messageText) {
         Update update = new Update();
         Message message = new Message();
         Chat chat = new Chat();
         chat.setId(tgUserId);
-        org.telegram.telegrambots.meta.api.objects.User from = mock(org.telegram.telegrambots.meta.api.objects.User.class);
+        org.telegram.telegrambots.meta.api.objects.User from =
+            mock(org.telegram.telegrambots.meta.api.objects.User.class);
         message.setFrom(from);
-        message.setText(AppConstant.TELEGRAM_START_COMMAND + " " + uuId);
+        message.setText(messageText);
         message.setChat(chat);
         update.setMessage(message);
 
-        when(message.getFrom().getId()).thenReturn(tgUserId);
-        when(userRepository.findUserByUuid(uuId)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class,
-                () -> ubsTelegramBot.onUpdateReceived(update));
-
-        verify(userRepository, times(1)).findUserByUuid(uuId);
+        return update;
     }
 }
