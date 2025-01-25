@@ -113,12 +113,6 @@
             <artifactId>commons-fileupload</artifactId>
             <version>${commons-fileupload.version}</version>
         </dependency>
-        <!-- telegrambot -->
-        <dependency>
-            <groupId>org.telegram</groupId>
-            <artifactId>telegrambots-spring-boot-starter</artifactId>
-            <version>${telegrambot.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.viber</groupId>
             <artifactId>viber-bot</artifactId>

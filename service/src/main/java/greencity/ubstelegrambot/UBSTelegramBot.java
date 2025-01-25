@@ -39,12 +39,12 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
 
             if (uuId.isEmpty()) {
                 telegramService.handleUnknownTelegramUser(update);
-                executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
+                executor.executeCommand(this, MessageFactory.createWelcomeMessage(tgUserId.toString()));
                 return;
             }
 
             telegramService.handleAuthorizedUser(uuId, tgUserId);
-            executor.executeCommand(this, MessageFactory.creatWelcomeMessage(tgUserId.toString()));
+            executor.executeCommand(this, MessageFactory.createWelcomeMessage(tgUserId.toString()));
             return;
         }
     }

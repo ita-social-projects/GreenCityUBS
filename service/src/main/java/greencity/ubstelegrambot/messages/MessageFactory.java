@@ -11,8 +11,10 @@ public class MessageFactory {
      * Method for creating welcome SendMessage for TelegramLongPollingBot.
      *
      * @param chatId {@link String} is telegram chat id.
+     *
+     * @return {@link SendMessage} configured with the welcome message.
      */
-    public static SendMessage creatWelcomeMessage(String chatId) {
+    public static SendMessage createWelcomeMessage(String chatId) {
         return SendMessage
             .builder()
             .chatId(chatId)
