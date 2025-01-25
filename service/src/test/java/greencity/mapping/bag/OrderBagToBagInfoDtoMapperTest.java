@@ -2,6 +2,7 @@ package greencity.mapping.bag;
 
 import greencity.dto.bag.BagInfoDto;
 import greencity.entity.order.OrderBag;
+import greencity.exceptions.BadRequestException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static greencity.ModelUtils.getOrderBag;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class OrderBagToBagInfoDtoMapperTest {
@@ -17,7 +19,7 @@ class OrderBagToBagInfoDtoMapperTest {
     private OrderBagToBagInfoDtoMapper mapper;
 
     @Test
-    void convert() {
+    void convertTest() {
         OrderBag orderBag = getOrderBag();
 
         BagInfoDto result = mapper.convert(orderBag);
@@ -28,5 +30,18 @@ class OrderBagToBagInfoDtoMapperTest {
         assertEquals(orderBag.getCapacity(), result.getCapacity(), "Capacity should match");
         assertEquals(orderBag.getName(), result.getName(), "Name should match");
         assertEquals(orderBag.getNameEng(), result.getNameEng(), "NameEng should match");
+    }
+
+    @Test
+    void convertNullSourceTest() {
+        OrderBag orderBag = null;
+        assertThrows(BadRequestException.class, () -> mapper.convert(orderBag));
+    }
+
+    @Test
+    void convertNullBagTest() {
+        OrderBag orderBag = getOrderBag();
+        orderBag.setBag(null);
+        assertThrows(BadRequestException.class, () -> mapper.convert(orderBag));
     }
 }
