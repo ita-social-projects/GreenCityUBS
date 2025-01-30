@@ -4,6 +4,8 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class AppConstant {
+    public static final String UKRAINE_TIMEZONE = "Europe/Kyiv";
+    public static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
     public static final String ENROLLMENT_TO_THE_BONUS_ACCOUNT = "Зарахування на бонусний рахунок";
     public static final String ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG = "Enrollment to the bonus account";
     public static final String PAYMENT_REFUND = "Повернення коштів";
@@ -22,6 +24,7 @@ public class AppConstant {
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";
     public static final String UBS_EMPLOYEE_WITH_PREFIX = "ROLE_UBS_EMPLOYEE";
     public static final String USER_WITH_PREFIX = "ROLE_USER";
+    public static final String COMMIT_INFO = "/commit-info";
     public static final Integer TWO_DECIMALS_AFTER_POINT_IN_CURRENCY = 2;
     public static final Integer NO_DECIMALS_AFTER_POINT_IN_CURRENCY = 0;
 

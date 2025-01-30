@@ -184,6 +184,11 @@ public class ErrorMessage {
     public static final String TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND =
         "Table column width by employee id not found";
     public static final String ORDER_STATUS_INVALID = "Order with ID %d cannot be updated due to its current status.";
+    public static final String WARNING_GIT_DIRECTORY_NOT_FOUND =
+        "WARNING: .git directory not found. Git commit info will be unavailable.";
+    public static final String GIT_REPOSITORY_NOT_INITIALIZED =
+        "Git repository not initialized. Commit info is unavailable.";
+    public static final String FAILED_TO_FETCH_COMMIT_INFO = "Failed to fetch commit info due to I/O error: ";
     public static final String MAPPER_ERROR = "Data mapping error occurred. Please verify the input.";
     public static final String UNSUPPORTED_TYPE = "Unsupported target type: ";
 }
