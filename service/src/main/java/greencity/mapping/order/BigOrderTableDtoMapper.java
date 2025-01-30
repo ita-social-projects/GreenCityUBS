@@ -2,6 +2,7 @@ package greencity.mapping.order;
 
 import greencity.constant.AppConstant;
 import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.order.OtherPackages;
 import greencity.dto.order.SenderLocation;
 import greencity.entity.order.BigOrderTableViews;
 import java.util.Optional;
@@ -13,6 +14,8 @@ import static java.util.Objects.nonNull;
 
 @Component
 public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews, BigOrderTableDTO> {
+    private static final String DEFAULT_VALUE = "-";
+
     @Override
     protected BigOrderTableDTO convert(BigOrderTableViews bigViews) {
         return new BigOrderTableDTO()
@@ -38,17 +41,20 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
             .setMixedWaste120L(Optional.ofNullable(bigViews.getMixedWaste120())
                 .filter(value -> value != 0)
                 .map(String::valueOf)
-                .orElse("-"))
+                .orElse(DEFAULT_VALUE))
             .setTextileWaste60L(Optional.ofNullable(bigViews.getTextileWaste60())
                 .filter(value -> value != 0)
                 .map(String::valueOf)
-                .orElse("-"))
+                .orElse(DEFAULT_VALUE))
             .setTextileWaste20L(Optional.ofNullable(bigViews.getTextileWaste20())
                 .filter(value -> value != 0)
                 .map(String::valueOf)
-                .orElse("-"))
-            .setOtherPackages(Optional.ofNullable(bigViews.getOtherPackages())
-                .orElse("-"))
+                .orElse(DEFAULT_VALUE))
+            .setOtherPackages(new OtherPackages(
+                Optional.ofNullable(bigViews.getOtherPackages())
+                    .orElse(DEFAULT_VALUE),
+                Optional.ofNullable(bigViews.getOtherPackagesEng())
+                    .orElse(DEFAULT_VALUE)))
             .setTotalOrderSum(convertCoinsIntoBills(bigViews.getTotalOrderSum()))
             .setOrderCertificateCode(bigViews.getOrderCertificateCode())
             .setGeneralDiscount(bigViews.getGeneralDiscount())

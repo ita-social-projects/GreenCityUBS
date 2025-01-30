@@ -189,4 +189,6 @@ public class ErrorMessage {
     public static final String GIT_REPOSITORY_NOT_INITIALIZED =
         "Git repository not initialized. Commit info is unavailable.";
     public static final String FAILED_TO_FETCH_COMMIT_INFO = "Failed to fetch commit info due to I/O error: ";
+    public static final String MAPPER_ERROR = "Data mapping error occurred. Please verify the input.";
+    public static final String UNSUPPORTED_TYPE = "Unsupported target type: ";
 }

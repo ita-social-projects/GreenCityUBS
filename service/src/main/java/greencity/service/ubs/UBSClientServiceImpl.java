@@ -107,6 +107,7 @@ import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
+import greencity.mapping.location.AddressRequestDtoToBaseEntityMapper;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.notificator.UnpaidOrderNotificator;
 import greencity.repository.AddressRepository;
@@ -144,17 +145,6 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.json.JSONObject;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -177,6 +167,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.json.JSONObject;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
@@ -275,6 +276,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final UnpaidOrderNotificator unpaidOrderNotificator;
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
+    private final AddressRequestDtoToBaseEntityMapper baseEntityMapper;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
@@ -805,13 +807,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     public OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest addressRequestDto,
         String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        Address address = addressRepo.findById(addressRequestDto.getId())
-            .orElseThrow(() -> new NotFoundException(
-                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressRequestDto.getId()));
 
         if (Objects.isNull(currentUser)) {
             throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
         }
+
+        Address address = addressRepo.findById(addressRequestDto.getId())
+            .orElseThrow(() -> new NotFoundException(
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressRequestDto.getId()));
 
         if (!address.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
@@ -831,8 +834,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
             addressRepo.save(newAddress);
         } else {
+            address.setAddressStatus(AddressStatus.DELETED);
             addressIfExist.setAddressStatus(AddressStatus.NEW);
             addressRepo.save(addressIfExist);
+            addressRepo.save(address);
         }
         return findAllAddressesForCurrentOrder(uuid);
     }
@@ -852,7 +857,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             if (optionalCity.isPresent()) {
                 city = optionalCity.get();
             } else {
-                city = modelMapper.map(addressRequestDto, City.class);
+                city = baseEntityMapper.convert(addressRequestDto, City.class);
                 city.setRegion(optionalRegion.get());
                 city = cityRepository.save(city);
             }
@@ -865,7 +870,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             if (optionalDistrict.isPresent()) {
                 address.setDistrictId(optionalDistrict.get());
             } else {
-                District district = modelMapper.map(addressRequestDto, District.class);
+                District district = baseEntityMapper.convert(addressRequestDto, District.class);
                 district.setCity(city);
                 District savedDistrict = districtRepository.save(district);
                 address.setDistrictId(savedDistrict);
@@ -890,10 +895,25 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Optional<Address> deletedAddress = addresses.stream()
             .filter(address -> AddressStatus.DELETED.equals(address.getAddressStatus()))
-            .filter(address -> modelMapper.map(address, CreateAddressRequestDto.class).equals(addressRequestDto))
+            .filter(address -> areAddressesEqual(modelMapper.map(address, CreateAddressRequestDto.class),
+                addressRequestDto))
             .findFirst();
 
         return deletedAddress.orElse(null);
+    }
+
+    private boolean areAddressesEqual(CreateAddressRequestDto a, CreateAddressRequestDto b) {
+        if (a == null || b == null) {
+            return false;
+        }
+
+        return (Objects.equals(a.getRegion(), b.getRegion()) || Objects.equals(a.getRegionEn(), b.getRegionEn()))
+            && (Objects.equals(a.getCity(), b.getCity()) || Objects.equals(a.getCityEn(), b.getCityEn()))
+            && (Objects.equals(a.getDistrict(), b.getDistrict())
+                || Objects.equals(a.getDistrictEn(), b.getDistrictEn()))
+            && Objects.equals(a.getHouseNumber(), b.getHouseNumber())
+            && Objects.equals(a.getEntranceNumber(), b.getEntranceNumber())
+            && Objects.equals(a.getHouseCorpus(), b.getHouseCorpus());
     }
 
     /**
@@ -2224,12 +2244,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void removePaymentLinkForOrder(Order order) {
-        Optional<UserNotification> userNotification = userNotificationRepository
-            .findUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
-        if (userNotification.isPresent()) {
-            Optional<NotificationParameter> notificationParameter = notificationParameterRepository
-                .findNotificationParameterByUserNotificationAndKey(userNotification.get(), PAY_BUTTON);
-            notificationParameter.ifPresent(notificationParameterRepository::delete);
+        List<UserNotification> userNotification = userNotificationRepository
+            .findAllUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
+        if (!userNotification.isEmpty()) {
+            userNotification.stream()
+                .map(notification -> notificationParameterRepository
+                    .findNotificationParameterByUserNotificationAndKey(notification, PAY_BUTTON))
+                .forEach(parameter -> parameter.ifPresent(notificationParameterRepository::delete));
         }
     }
 }

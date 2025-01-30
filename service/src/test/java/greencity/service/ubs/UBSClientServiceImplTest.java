@@ -62,6 +62,8 @@ import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.locations.City;
+import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -82,6 +84,7 @@ import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
+import greencity.mapping.location.AddressRequestDtoToBaseEntityMapper;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
@@ -116,6 +119,7 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,6 +174,12 @@ import static greencity.ModelUtils.getActiveCertificateWith10Points;
 import static greencity.ModelUtils.getAddress;
 import static greencity.ModelUtils.getAddressDtoResponse;
 import static greencity.ModelUtils.getAddressRequestDto;
+import static greencity.ModelUtils.getAddressRequestDto2;
+import static greencity.ModelUtils.getAddressRequestDtoReflection;
+import static greencity.ModelUtils.getAddressRequestDtoReflection2;
+import static greencity.ModelUtils.getAddressRequestDtoReflection3;
+import static greencity.ModelUtils.getAddressRequestDtoReflection4;
+import static greencity.ModelUtils.getAddressRequestDtoReflection5;
 import static greencity.ModelUtils.getAddressRequestToSaveDto;
 import static greencity.ModelUtils.getAddressWithKyivRegionToSaveRequestDto;
 import static greencity.ModelUtils.getBag;
@@ -220,6 +230,7 @@ import static greencity.ModelUtils.getTariffsForLocationDto;
 import static greencity.ModelUtils.getTariffsInfo;
 import static greencity.ModelUtils.getTelegramBotNotifyTrue;
 import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
+import static greencity.ModelUtils.getTestOrderAddressDtoRequest2;
 import static greencity.ModelUtils.getTestOrderAddressDtoRequestWithNullPlaceId;
 import static greencity.ModelUtils.getTestOrderAddressLocationDto;
 import static greencity.ModelUtils.getTestUser;
@@ -409,8 +420,12 @@ class UBSClientServiceImplTest {
     @Mock
     private NotificationParameterRepository notificationParameterRepository;
 
+    @Mock
+    private AddressRequestDtoToBaseEntityMapper addressMapper;
+
     @Value("${greencity.monobank.token}")
     private String token;
+    private static final String USER_UUID = "uuid";
 
     @Test
     void testGetAllDistricts() {
@@ -3803,9 +3818,9 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(expectedOrder));
         when(encryptionUtil.formResponseSignature(any(PaymentResponseWayForPay.class), eq(wayForPaySecret)))
             .thenReturn("signature");
-        when(userNotificationRepository.findUserNotificationByOrderAndNotificationType(any(Order.class),
+        when(userNotificationRepository.findAllUserNotificationByOrderAndNotificationType(any(Order.class),
             any(NotificationType.class)))
-            .thenReturn(Optional.ofNullable(getUserNotificationForUnpaidOrder()));
+            .thenReturn(List.of(getUserNotificationForUnpaidOrder()));
         when(notificationParameterRepository
             .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString()))
             .thenReturn(getNotificationPaymentLink());
@@ -3820,7 +3835,7 @@ class UBSClientServiceImplTest {
         verify(orderRepository).findById(1L);
         verify(encryptionUtil).formResponseSignature(any(PaymentResponseWayForPay.class), eq(wayForPaySecret));
         verify(userNotificationRepository)
-            .findUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
+            .findAllUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
         verify(notificationParameterRepository)
             .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString());
     }
@@ -4263,9 +4278,9 @@ class UBSClientServiceImplTest {
         Order order = getOrder();
 
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(userNotificationRepository.findUserNotificationByOrderAndNotificationType(any(Order.class),
+        when(userNotificationRepository.findAllUserNotificationByOrderAndNotificationType(any(Order.class),
             any(NotificationType.class)))
-            .thenReturn(Optional.ofNullable(getUserNotificationForUnpaidOrder()));
+            .thenReturn(List.of(getUserNotificationForUnpaidOrder()));
         when(notificationParameterRepository
             .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString()))
             .thenReturn(getNotificationPaymentLink());
@@ -4277,7 +4292,7 @@ class UBSClientServiceImplTest {
         verify(orderRepository).save(any());
         verify(eventService, times(2)).save(anyString(), anyString(), any());
         verify(userNotificationRepository)
-            .findUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
+            .findAllUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
         verify(notificationParameterRepository)
             .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString());
     }
@@ -4333,5 +4348,127 @@ class UBSClientServiceImplTest {
         ubsClientService.getAllDistrictsForKyiv();
 
         verify(districtRepository).findAllByCityId(anyLong());
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithInvalidUserTest() {
+        when(userRepository.findByUuid(anyString())).thenReturn(null);
+
+        assertThrows(NotFoundException.class,
+            () -> ubsService.updateCurrentAddressForOrder(null, USER_UUID));
+
+        verify(userRepository).findByUuid(anyString());
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithExistingDeletedAddressTest() {
+        OrderAddressDtoRequest dtoRequest = getTestOrderAddressDtoRequest2();
+        User user = getUser();
+        Address address = getAddress(1L)
+            .setUser(user)
+            .setAddressStatus(AddressStatus.DELETED);
+        CreateAddressRequestDto dto = getAddressRequestDto2();
+
+        when(userRepository.findByUuid(anyString())).thenReturn(user);
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(addressRepository.findAllByUserId(anyLong())).thenReturn(List.of(address));
+        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
+
+        ubsClientService.updateCurrentAddressForOrder(dtoRequest, USER_UUID);
+
+        verify(userRepository, times(2)).findByUuid(anyString());
+        verify(addressRepository).findById(anyLong());
+        verify(addressRepository).findAllByUserId(anyLong());
+        verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
+        verify(addressRepository, times(2)).save(any());
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithNoExistingRegionTest() {
+        OrderAddressDtoRequest dtoRequest = getTestOrderAddressDtoRequest2();
+        User user = getUser();
+        Address address = getAddress(1L)
+            .setUser(user)
+            .setAddressStatus(AddressStatus.DELETED);
+        CreateAddressRequestDto dto = getAddressRequestDto();
+
+        when(userRepository.findByUuid(anyString())).thenReturn(user);
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(addressRepository.findAllByUserId(anyLong())).thenReturn(List.of(address));
+        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(getAddress());
+        when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString()))
+            .thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class,
+            () -> ubsClientService.updateCurrentAddressForOrder(dtoRequest, USER_UUID));
+
+        verify(userRepository).findByUuid(anyString());
+        verify(addressRepository).findById(anyLong());
+        verify(addressRepository).findAllByUserId(anyLong());
+        verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
+        verify(modelMapper).map(any(), eq(Address.class));
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+    }
+
+    @Test
+    void testAreAddressesEqual() throws Exception {
+        Method areAddressesEqualMethod = UBSClientServiceImpl.class.getDeclaredMethod("areAddressesEqual",
+            CreateAddressRequestDto.class, CreateAddressRequestDto.class);
+        areAddressesEqualMethod.setAccessible(true);
+
+        CreateAddressRequestDto address1 = getAddressRequestDtoReflection();
+        CreateAddressRequestDto address2 = getAddressRequestDtoReflection2();
+        CreateAddressRequestDto address3 = getAddressRequestDtoReflection3();
+        CreateAddressRequestDto address4 = getAddressRequestDtoReflection4();
+        CreateAddressRequestDto address5 = getAddressRequestDtoReflection5();
+
+        boolean result1 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address2);
+        assertTrue(result1);
+
+        boolean result2 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address3);
+        assertFalse(result2);
+
+        boolean result3 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, null);
+        assertFalse(result3);
+
+        boolean result4 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, null, null);
+        assertFalse(result4);
+
+        boolean result5 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address4);
+        assertFalse(result5);
+
+        boolean result6 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address5);
+        assertTrue(result6);
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithNoExistingAddressTest() throws Exception {
+        Method setLocations = UBSClientServiceImpl.class.getDeclaredMethod("setLocations",
+            CreateAddressRequestDto.class, Address.class);
+        setLocations.setAccessible(true);
+
+        Address address = getAddress();
+        CreateAddressRequestDto dto = getAddressRequestToSaveDto();
+
+        when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString()))
+            .thenReturn(Optional.of(getRegion()));
+        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.empty());
+        when(addressMapper.convert(any(), eq(City.class))).thenReturn(getCity());
+        when(cityRepository.save(any())).thenReturn(getCity());
+        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.empty());
+        when(addressMapper.convert(any(), eq(District.class))).thenReturn(getDistrict());
+
+        setLocations.invoke(ubsClientService, dto, address);
+
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
+        verify(addressMapper).convert(any(), eq(City.class));
+        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
+        verify(addressMapper).convert(any(), eq(District.class));
+        verify(cityRepository).save(any());
+        verify(districtRepository).save(any());
     }
 }
