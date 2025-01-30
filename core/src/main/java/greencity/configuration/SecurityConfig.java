@@ -38,6 +38,7 @@ import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import static greencity.constant.AppConstant.COMMIT_INFO;
 
 @Configuration
 @EnableWebSecurity
@@ -100,7 +101,8 @@ public class SecurityConfig {
                     UBS_LINK + "/locationsByCourier/{courierId}",
                     UBS_LINK + "/tariffs/{locationId}",
                     USER_AGREEMENT_LINK + "/latest",
-                    UBS_LINK + "/districts-for-kyiv")
+                    UBS_LINK + "/districts-for-kyiv",
+                    COMMIT_INFO)
                 .permitAll()
                 .requestMatchers(HttpMethod.POST,
                     UBS_LINK + "/userProfile/user/create")
