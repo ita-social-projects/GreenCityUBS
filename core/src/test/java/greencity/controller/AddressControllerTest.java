@@ -6,7 +6,6 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.service.ubs.UBSClientService;
@@ -26,7 +25,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import static greencity.ModelUtils.getPrincipal;
-import static greencity.ModelUtils.getUpdateAddressDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -169,5 +167,7 @@ class AddressControllerTest {
             .content(mapper.writeValueAsString(updateAddressDto))
             .principal(principal))
             .andExpect(status().isOk());
+
+        verify(managementService).addressUpdate(any(), eq(principal.getName()));
     }
 }
