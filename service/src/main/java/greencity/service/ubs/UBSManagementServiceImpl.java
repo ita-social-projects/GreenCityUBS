@@ -885,6 +885,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
+    @Transactional
     public void addressUpdate(UpdateAddressDto addressDto, String email) {
         Order order = orderRepository.findById(addressDto.getOrderId())
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + addressDto.getOrderId()));
