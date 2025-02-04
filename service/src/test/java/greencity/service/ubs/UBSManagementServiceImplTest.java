@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.constant.OrderHistory;
+import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagMappingDto;
@@ -171,6 +172,7 @@ import static greencity.ModelUtils.getTariffsInfo;
 import static greencity.ModelUtils.getTestDetailsOrderInfoDto;
 import static greencity.ModelUtils.getTestOrderDetailStatusRequestDto;
 import static greencity.ModelUtils.getTestUser;
+import static greencity.ModelUtils.getUpdateAddressDto;
 import static greencity.ModelUtils.getUserNotificationForUnpaidOrder;
 import static greencity.ModelUtils.updateAllOrderPageDto;
 import static greencity.ModelUtils.updateOrderPageAdminDto;
@@ -2417,5 +2419,30 @@ class UBSManagementServiceImplTest {
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
         verify(orderStatusTranslationRepository).findAllBy();
         verify(orderPaymentStatusTranslationRepository).getAllBy();
+    }
+
+    @Test
+    void updateAddressTest() {
+        UpdateAddressDto updateAddressDto = getUpdateAddressDto();
+        String email = "test@email.com";
+        OrderAddressDtoResponse response = OrderAddressDtoResponse.builder()
+            .entranceNumber("1")
+            .build();
+        OrderAddress orderAddress = getOrderAddress();
+
+        when(orderRepository.findById(updateAddressDto.getOrderId())).thenReturn(Optional.of(getOrder()));
+        when(orderAddressRepository.findById(anyLong())).thenReturn(Optional.of(orderAddress));
+        when(ubsClientService.updateOrderAddress(any(OrderAddressExportDetailsDtoUpdate.class)))
+            .thenReturn(orderAddress);
+        when(modelMapper.map(orderAddress, OrderAddressDtoResponse.class)).thenReturn(response);
+
+        ubsManagementService.addressUpdate(updateAddressDto, email);
+
+        verify(orderRepository).findById(updateAddressDto.getOrderId());
+        verify(orderAddressRepository).findById(anyLong());
+        verify(ubsClientService).updateOrderAddress(any(OrderAddressExportDetailsDtoUpdate.class));
+        verify(modelMapper).map(orderAddress, OrderAddressDtoResponse.class);
+        verify(orderAddressRepository).save(any(OrderAddress.class));
+        verify(eventService).saveEvent(anyString(), anyString(), any(Order.class));
     }
 }

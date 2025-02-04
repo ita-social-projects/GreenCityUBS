@@ -6,9 +6,11 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.UBSManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +26,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import static greencity.ModelUtils.getPrincipal;
+import static greencity.ModelUtils.getUpdateAddressDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,6 +52,9 @@ class AddressControllerTest {
 
     @Mock
     private UserRemoteClient userRemoteClient;
+
+    @Mock
+    private UBSManagementService managementService;
 
     @InjectMocks
     private AddressController addressController;
@@ -150,6 +156,18 @@ class AddressControllerTest {
     void getAllDistrictsForKyiv() throws Exception {
         mockMvc.perform(get(ubsLink + "/districts-for-kyiv")
             .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void updateAddressTest() throws Exception {
+        var updateAddressDto = ModelUtils.getUpdateAddressDto();
+        var mapper = new ObjectMapper();
+
+        mockMvc.perform(patch(ubsLink + "/update-address")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(updateAddressDto))
+            .principal(principal))
             .andExpect(status().isOk());
     }
 }

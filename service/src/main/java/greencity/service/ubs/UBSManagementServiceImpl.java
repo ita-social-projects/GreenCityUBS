@@ -6,6 +6,7 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.address.AddressExportDetailsDto;
+import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagMappingDto;
@@ -124,6 +125,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ID;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
@@ -257,7 +259,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
         String email) {
         OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
-            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId()));
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ID + dtoUpdate.getId()));
         OrderAddress updatedOrderAddress = ubsClientService.updateOrderAddress(dtoUpdate);
         mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress, dtoUpdate.getAddressComment());
         orderAddressRepository.save(updatedOrderAddress);
@@ -880,6 +882,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public Boolean checkIfOrderStatusIsFormedToCanceled(Long orderId) {
         return eventRepository.wasOrderStatusChangedFromFormedToCanceled(orderId);
+    }
+
+    @Override
+    public void addressUpdate(UpdateAddressDto addressDto, String email) {
+        Order order = orderRepository.findById(addressDto.getOrderId())
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + addressDto.getOrderId()));
+        updateAddress(addressDto.getOrderAddressExportDetails(), order, email);
     }
 
     private void verifyPaidWithBonuses(Order order, String email) {
