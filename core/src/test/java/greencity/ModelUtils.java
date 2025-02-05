@@ -4,6 +4,7 @@ import greencity.configuration.RedirectionConfigProp;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagLimitDto;
 import greencity.dto.courier.CourierDto;
@@ -31,6 +32,7 @@ import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
@@ -664,6 +666,29 @@ public class ModelUtils {
                 .paymentMethod("VISA")
                 .fee(0)
                 .build())
+            .build();
+    }
+
+    public static UpdateAddressDto getUpdateAddressDto() {
+        OrderAddressExportDetailsDtoUpdate orderAddressDetails = OrderAddressExportDetailsDtoUpdate.builder()
+            .id(1L)
+            .district("Деснянський район")
+            .districtEn("Desnyans'kyi District")
+            .street("вулиця Шевченка")
+            .streetEn("Shevchenka Street")
+            .houseCorpus("2")
+            .entranceNumber("1")
+            .houseNumber("34")
+            .city("Київ")
+            .cityEn("Kyiv")
+            .region("місто Київ")
+            .regionEn("Kyiv city")
+            .addressComment("Test comment for address №1")
+            .build();
+
+        return UpdateAddressDto.builder()
+            .orderAddressExportDetails(orderAddressDetails)
+            .orderId(1L)
             .build();
     }
 }

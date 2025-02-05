@@ -9,6 +9,7 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.UBSManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +50,9 @@ class AddressControllerTest {
 
     @Mock
     private UserRemoteClient userRemoteClient;
+
+    @Mock
+    private UBSManagementService managementService;
 
     @InjectMocks
     private AddressController addressController;
@@ -152,4 +156,19 @@ class AddressControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void updateAddressTest() throws Exception {
+        var updateAddressDto = ModelUtils.getUpdateAddressDto();
+        var mapper = new ObjectMapper();
+
+        mockMvc.perform(patch(ubsLink + "/update-address")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(updateAddressDto))
+            .principal(principal))
+            .andExpect(status().isOk());
+
+        verify(managementService).addressUpdate(any(), eq(principal.getName()));
+    }
+
 }

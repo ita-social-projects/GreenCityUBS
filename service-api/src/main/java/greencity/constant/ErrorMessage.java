@@ -191,4 +191,5 @@ public class ErrorMessage {
     public static final String FAILED_TO_FETCH_COMMIT_INFO = "Failed to fetch commit info due to I/O error: ";
     public static final String MAPPER_ERROR = "Data mapping error occurred. Please verify the input.";
     public static final String UNSUPPORTED_TYPE = "Unsupported target type: ";
+    public static final String NOT_FOUND_ADDRESS_BY_ID = "Address with ID %d not found";
 }
