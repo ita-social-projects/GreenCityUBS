@@ -259,7 +259,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
         String email) {
         OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
-            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ID + dtoUpdate.getId()));
+            .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ADDRESS_BY_ID, dtoUpdate.getId())));
         OrderAddress updatedOrderAddress = ubsClientService.updateOrderAddress(dtoUpdate);
         mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress, dtoUpdate.getAddressComment());
         orderAddressRepository.save(updatedOrderAddress);

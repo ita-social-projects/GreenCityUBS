@@ -1,6 +1,7 @@
 package greencity.dto.address;
 
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.Setter;
 @Builder
 public class UpdateAddressDto {
     @NotNull
+    @Valid
     private OrderAddressExportDetailsDtoUpdate orderAddressExportDetails;
     @NotNull
     @Min(1)

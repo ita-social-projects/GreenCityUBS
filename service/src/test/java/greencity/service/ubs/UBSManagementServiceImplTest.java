@@ -2445,4 +2445,16 @@ class UBSManagementServiceImplTest {
         verify(orderAddressRepository).save(any(OrderAddress.class));
         verify(eventService).saveEvent(anyString(), anyString(), any(Order.class));
     }
+
+    @Test
+    void updateAddressTestIfOrderNotFoundTest() {
+        UpdateAddressDto updateAddressDto = getUpdateAddressDto();
+        String email = "test@email.com";
+
+        when(orderRepository.findById(updateAddressDto.getOrderId())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> ubsManagementService.addressUpdate(updateAddressDto, email));
+
+        verify(orderRepository).findById(updateAddressDto.getOrderId());
+    }
 }

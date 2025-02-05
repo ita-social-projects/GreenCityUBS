@@ -170,4 +170,5 @@ class AddressControllerTest {
 
         verify(managementService).addressUpdate(any(), eq(principal.getName()));
     }
+
 }
