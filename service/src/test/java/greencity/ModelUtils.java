@@ -16,6 +16,7 @@ import greencity.dto.RegionDto;
 import greencity.dto.TariffInfoDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
@@ -5826,6 +5827,29 @@ public class ModelUtils {
             .houseNumber("1")
             .entranceNumber("2")
             .houseCorpus("A")
+            .build();
+    }
+
+    public static UpdateAddressDto getUpdateAddressDto() {
+        OrderAddressExportDetailsDtoUpdate orderAddressDetails = OrderAddressExportDetailsDtoUpdate.builder()
+            .id(1L)
+            .district("Деснянський район")
+            .districtEn("Desnyans'kyi District")
+            .street("вулиця Шевченка")
+            .streetEn("Shevchenka Street")
+            .houseCorpus("2")
+            .entranceNumber("1")
+            .houseNumber("34")
+            .city("Київ")
+            .cityEn("Kyiv")
+            .region("місто Київ")
+            .regionEn("Kyiv city")
+            .addressComment("Test comment for address №1")
+            .build();
+
+        return UpdateAddressDto.builder()
+            .orderAddressExportDetails(orderAddressDetails)
+            .orderId(1L)
             .build();
     }
 }

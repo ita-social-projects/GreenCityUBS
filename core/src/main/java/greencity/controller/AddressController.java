@@ -6,11 +6,13 @@ import greencity.annotations.ValidUpdateAddress;
 import greencity.constants.HttpStatuses;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.user.UserVO;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.UBSManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -18,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +45,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AddressController {
     private final UBSClientService ubsClientService;
+    private final UBSManagementService ubsManagementService;
 
     /**
      * Controller for getting all addresses for current order.
@@ -194,5 +198,21 @@ public class AddressController {
     @GetMapping("/districts-for-kyiv")
     public ResponseEntity<List<DistrictDto>> getAllDistrictsForKyiv() {
         return ResponseEntity.ok(ubsClientService.getAllDistrictsForKyiv());
+    }
+
+    @Operation(summary = "Update address for current order",
+        description = "Update address for current order on big order table")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @PatchMapping("/update-address")
+    public ResponseEntity<Void> updateAddress(@RequestBody @Valid UpdateAddressDto addressDto,
+        @Parameter(hidden = true) Principal principal) {
+        ubsManagementService.addressUpdate(addressDto, principal.getName());
+        return ResponseEntity.ok().build();
     }
 }
