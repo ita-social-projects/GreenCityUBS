@@ -34,9 +34,9 @@ public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     @Length(min = 3, max = 40)
     @NotNull
     private String streetEn;
-    @Length(min = 1, max = 4)
+    @Length(max = 4)
     private String houseCorpus;
-    @Length(min = 1, max = 4)
+    @Length(max = 4)
     private String entranceNumber;
     @Length(max = 10)
     private String houseNumber;
