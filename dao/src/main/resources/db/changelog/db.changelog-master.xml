@@ -269,5 +269,4 @@
     <include file="db/changelog/logs/update-logic-to-fill-other-packages-column.xml"/>
     <include file="db/changelog/logs/add-other_packages_eng-column-to-big_order_table-view.xml"/>
     <include file="db/changelog/logs/ch-update-values-in-notification-platforms-table-Chernenko.xml"/>
-    <include file="db/changelog/logs/2025-02-07-edit-order-addresses-Kizerov.xml"/>
 </databaseChangeLog>

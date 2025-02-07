@@ -23,15 +23,15 @@ public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     @Min(1)
     private Long id;
     @NotBlank
-    @Length(min = 2, max = 75)
+    @Length(min = 2, max = 30)
     private String district;
     @NotBlank
-    @Length(min = 2, max = 75)
+    @Length(min = 2, max = 30)
     private String districtEn;
-    @Length(min = 3, max = 75)
+    @Length(min = 3, max = 50)
     @NotNull
     private String street;
-    @Length(min = 3, max = 75)
+    @Length(min = 3, max = 50)
     @NotNull
     private String streetEn;
     @Length(max = 4)
@@ -40,13 +40,13 @@ public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     private String entranceNumber;
     @Length(max = 10)
     private String houseNumber;
-    @Length(min = 2, max = 75)
+    @Length(min = 2, max = 30)
     private String city;
-    @Length(min = 2, max = 75)
+    @Length(min = 2, max = 30)
     private String cityEn;
-    @Length(min = 2, max = 75)
+    @Length(min = 2, max = 30)
     private String region;
-    @Length(min = 2, max = 75)
+    @Length(min = 2, max = 30)
     private String regionEn;
     @Length(max = 255)
     private String addressComment;
