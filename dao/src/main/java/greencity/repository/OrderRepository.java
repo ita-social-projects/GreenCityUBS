@@ -178,7 +178,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(value = "select o from Order o "
         + "join fetch o.ubsUser "
         + "join fetch OrderBag obm on o.id = obm.order.id "
-        + "where obm.bag.id = :bagId and o.orderPaymentStatus = 'UNPAID'")
+        + "where obm.bag.id = :bagId and o.orderPaymentStatus = 'UNPAID' and o.orderStatus <> 'CANCELED'")
     List<Order> findAllUnpaidOrdersWithUsersByBagId(Integer bagId);
 
     /**
