@@ -8,6 +8,7 @@ import greencity.repository.OrderAddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ public class AddressServiceImpl implements AddressService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional(readOnly = true)
     public UpdateAddressDto getAddressForOrder(Long orderId) {
         OrderAddress orderAddress = orderAddressRepository.findByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
