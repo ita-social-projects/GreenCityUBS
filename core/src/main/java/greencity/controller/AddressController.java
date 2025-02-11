@@ -11,6 +11,7 @@ import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.user.UserVO;
+import greencity.service.ubs.AddressService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,6 +47,7 @@ import java.util.List;
 public class AddressController {
     private final UBSClientService ubsClientService;
     private final UBSManagementService ubsManagementService;
+    private final AddressService addressService;
 
     /**
      * Controller for getting all addresses for current order.
@@ -200,6 +202,14 @@ public class AddressController {
         return ResponseEntity.ok(ubsClientService.getAllDistrictsForKyiv());
     }
 
+    /**
+     * Update address for current order. This endpoint updates a users address for
+     * their current order. The address is updated on the big order table.
+     *
+     * @param addressDto The updated address information.
+     * @param principal  The user principal.
+     * @return HTTP status of 200 if the update was successful.
+     */
     @Operation(summary = "Update address for current order",
         description = "Update address for current order on big order table")
     @ApiResponses(value = {
@@ -214,5 +224,24 @@ public class AddressController {
         @Parameter(hidden = true) Principal principal) {
         ubsManagementService.addressUpdate(addressDto, principal.getName());
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Retrieves the address for an order with the given id.
+     *
+     * @param orderId The id of the order
+     * @return The address for the order
+     */
+    @Operation(summary = "Get address for order",
+        description = "Get address for order for given order id")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @GetMapping("/get-address-for-order/{orderId}")
+    public ResponseEntity<UpdateAddressDto> getAddressForOrder(@PathVariable Long orderId) {
+        return ResponseEntity.ok(addressService.getAddressForOrder(orderId));
     }
 }
