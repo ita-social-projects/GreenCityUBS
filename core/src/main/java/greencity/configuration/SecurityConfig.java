@@ -147,7 +147,8 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/**",
                     USER_AGREEMENT_LINK,
                     USER_AGREEMENT_LINK + "/{id}",
-                    UBS_MANAG_LINK + "/locations-details")
+                    UBS_MANAG_LINK + "/locations-details",
+                    UBS_LINK + "/get-address-for-order/{orderId}")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     UBS_MANAG_LINK + "/addCertificate",

@@ -8,6 +8,7 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.service.ubs.AddressService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +54,9 @@ class AddressControllerTest {
 
     @Mock
     private UBSManagementService managementService;
+
+    @Mock
+    private AddressService addressService;
 
     @InjectMocks
     private AddressController addressController;
@@ -171,4 +175,12 @@ class AddressControllerTest {
         verify(managementService).addressUpdate(any(), eq(principal.getName()));
     }
 
+    @Test
+    void getAddressForOrderTest() throws Exception {
+        mockMvc.perform(get(ubsLink + "/get-address-for-order/{id}", 1L)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(addressService).getAddressForOrder(1L);
+    }
 }

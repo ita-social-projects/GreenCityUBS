@@ -5852,4 +5852,22 @@ public class ModelUtils {
             .orderId(1L)
             .build();
     }
+
+    public static OrderAddress getOrderAddress1() {
+        return OrderAddress.builder()
+            .id(1L)
+            .district("Деснянський район")
+            .districtEn("Desnyans'kyi District")
+            .street("вулиця Шевченка")
+            .streetEn("Shevchenka Street")
+            .houseCorpus("2")
+            .entranceNumber("1")
+            .houseNumber("34")
+            .city("Київ")
+            .cityEn("Kyiv")
+            .region("місто Київ")
+            .regionEn("Kyiv city")
+            .addressComment("Test comment for address №1")
+            .build();
+    }
 }
