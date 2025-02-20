@@ -469,7 +469,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return RegionInfoDto.builder()
             .id(region.getId())
             .nameEn(region.getNameEn())
-            .nameUk(region.getNameUk())
+            .nameUa(region.getNameUk())
             .cities(toCityInfoDto(region.getCities()))
             .build();
     }
@@ -488,7 +488,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private CityInfoDto toCityInfoDto(City city) {
         return CityInfoDto.builder()
             .id(city.getId())
-            .nameUk(city.getNameUk())
+            .nameUa(city.getNameUk())
             .nameEn(city.getNameEn())
             .regionId(city.getRegion().getId())
             .districts(toDistrictInfoDto(city.getDistricts()))
@@ -510,7 +510,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return DistrictInfoDto.builder()
             .id(district.getId())
             .nameEn(district.getNameEn())
-            .nameUk(district.getNameUk())
+            .nameUa(district.getNameUk())
             .cityId(district.getCity().getId())
             .build();
     }

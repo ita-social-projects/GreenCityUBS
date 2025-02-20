@@ -12,5 +12,5 @@ import lombok.experimental.SuperBuilder;
 public class BaseLocationsClass {
     private Long id;
     private String nameEn;
-    private String nameUk;
+    private String nameUa;
 }
