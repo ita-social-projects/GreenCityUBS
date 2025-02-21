@@ -590,7 +590,7 @@ public class ManagementOrderController {
     @Operation(summary = "Returns the total number of orders.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = OrderCountDto.class)))),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
     })
