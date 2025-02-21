@@ -1,6 +1,7 @@
 package greencity.dto.order;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Data
 @AllArgsConstructor
