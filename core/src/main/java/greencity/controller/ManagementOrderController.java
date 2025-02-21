@@ -19,6 +19,7 @@ import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.GroupedOrderDto;
 import greencity.dto.order.NotTakenOrderReasonDto;
 import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderCountDto;
 import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
@@ -578,6 +579,24 @@ public class ManagementOrderController {
     public ResponseEntity<List<OrderInfoDto>> getAllDataForOrder(
         @PathVariable("uuid") String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getOrdersForUser(uuid));
+    }
+
+    /**
+     * Endpoint for getting total amount of orders.
+     *
+     * @return {@link List OrderCountDto}.
+     * @author Chernenko Vitaliy
+     */
+    @Operation(summary = "Returns the total number of orders.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+    })
+    @GetMapping("/orders/count")
+    public ResponseEntity<OrderCountDto> getOrdersCount() {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getTotalNumberOfOrders());
     }
 
     /**

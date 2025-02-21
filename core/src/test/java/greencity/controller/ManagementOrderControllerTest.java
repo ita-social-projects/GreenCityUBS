@@ -213,6 +213,15 @@ class ManagementOrderControllerTest {
     }
 
     @Test
+    void getOrdersTotalAmountTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/orders/count")
+            .principal(principal))
+            .andExpect(status().isOk());
+
+        verify(ubsManagementService, times(1)).getTotalNumberOfOrders();
+    }
+
+    @Test
     void getDataForOrderStatusPageTest() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/get-data-for-order/{id}", 1L)
             .principal(principal));

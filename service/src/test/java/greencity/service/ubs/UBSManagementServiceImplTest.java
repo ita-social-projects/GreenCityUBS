@@ -13,6 +13,7 @@ import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.CounterOrderDetailsDto;
+import greencity.dto.order.OrderCountDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
@@ -663,6 +664,17 @@ class UBSManagementServiceImplTest {
 
         assertThrows(NotFoundException.class,
                 () -> ubsManagementService.getOrderDetailStatus(1L));
+    }
+
+    @Test
+    void getTotalNumberOfOrdersTest() {
+        when(orderRepository.count()).thenReturn(10L);
+
+        OrderCountDto result = ubsManagementService.getTotalNumberOfOrders();
+
+        assertEquals(result.getOrderCount(), 10L);
+
+        verify(orderRepository, times(1)).count();
     }
 
     @Test
