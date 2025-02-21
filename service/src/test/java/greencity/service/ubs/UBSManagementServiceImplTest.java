@@ -668,11 +668,12 @@ class UBSManagementServiceImplTest {
 
     @Test
     void getTotalNumberOfOrdersTest() {
-        when(orderRepository.count()).thenReturn(10L);
+        final long expectedTotalNumberOfOrders = 10L;
+        when(orderRepository.count()).thenReturn(expectedTotalNumberOfOrders);
 
         OrderCountDto result = ubsManagementService.getTotalNumberOfOrders();
 
-        assertEquals(result.getOrderCount(), 10L);
+        assertEquals(expectedTotalNumberOfOrders, result.getOrderCount());
 
         verify(orderRepository, times(1)).count();
     }
