@@ -301,7 +301,6 @@ class UBSClientServiceImplTest {
 
     @Mock
     private UBSUserRepository ubsUserRepository;
-
     @Mock
     private ModelMapper modelMapper;
 
@@ -423,6 +422,9 @@ class UBSClientServiceImplTest {
     @Mock
     private AddressRequestDtoToBaseEntityMapper addressMapper;
 
+    @Mock
+    private AddressService addressService;
+
     @Value("${greencity.monobank.token}")
     private String token;
     private static final String USER_UUID = "uuid";
@@ -438,7 +440,7 @@ class UBSClientServiceImplTest {
         when(locationApiService.getAllDistrictsInCityByNames(anyString(), anyString())).thenReturn(locationDtos);
         when(modelMapper.map(any(LocationDto.class), eq(DistrictDto.class))).thenAnswer(i -> new DistrictDto());
 
-        List<DistrictDto> results = ubsClientService.getAllDistricts("region", "city");
+        List<DistrictDto> results = addressService.getAllDistricts("region", "city");
 
         assertEquals(districtDtos.size(), results.size());
         verify(locationApiService, times(1)).getAllDistrictsInCityByNames(anyString(), anyString());
@@ -1893,7 +1895,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         doReturn(new OrderWithAddressesResponseDto())
-            .when(ubsClientServiceSpy).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+            .when(addressService).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         when(userRepository.save(user)).thenReturn(user);
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
 
@@ -1913,7 +1915,7 @@ class UBSClientServiceImplTest {
         verify(viberBotRepository).findByUser(user);
         verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
         verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
-        verify(ubsClientServiceSpy, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+        verify(addressService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         verify(userRepository).save(user);
         verify(modelMapper).map(user, UserProfileUpdateDto.class);
     }
@@ -1951,7 +1953,7 @@ class UBSClientServiceImplTest {
         when(viberBotRepository.findByUser(user)).thenReturn(Optional.of(viberBot));
         when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
-        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientServiceSpy)
+        doReturn(new OrderWithAddressesResponseDto()).when(addressService)
             .updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         when(userRepository.save(user)).thenReturn(user);
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
@@ -1963,7 +1965,7 @@ class UBSClientServiceImplTest {
         verify(viberBotRepository).findByUser(user);
         verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
         verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
-        verify(ubsClientServiceSpy, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+        verify(addressService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         verify(userRepository).save(user);
         verify(modelMapper).map(user, UserProfileUpdateDto.class);
     }
@@ -1984,7 +1986,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         doReturn(new OrderWithAddressesResponseDto())
-            .when(ubsClientServiceSpy).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+            .when(addressService).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         when(userRepository.save(user)).thenReturn(user);
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
 
@@ -1997,7 +1999,7 @@ class UBSClientServiceImplTest {
         verify(viberBotRepository).findByUser(user);
         verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
         verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
-        verify(ubsClientServiceSpy, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+        verify(addressService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         verify(userRepository).save(user);
         verify(modelMapper).map(user, UserProfileUpdateDto.class);
     }
@@ -2051,7 +2053,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(addresses.get(0), AddressDto.class)).thenReturn(testAddressesDto.get(0));
         when(modelMapper.map(addresses.get(1), AddressDto.class)).thenReturn(testAddressesDto.get(1));
 
-        OrderWithAddressesResponseDto actual = ubsService.findAllAddressesForCurrentOrder(uuid);
+        OrderWithAddressesResponseDto actual = addressService.findAllAddressesForCurrentOrder(uuid);
 
         assertEquals(actual, expected);
         verify(userRepository, times(1)).findByUuid(uuid);
@@ -2112,7 +2114,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressDto);
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
-            ubsService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
+                addressService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
 
         assertEquals(getAddressDtoResponse(), actualWithSearchAddress);
         assertEquals(createAddressRequestToSaveDto.getDistrict(),
@@ -2156,7 +2158,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithKyivRegionDto());
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
-            ubsService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
+                addressService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
 
         assertEquals(KYIV_REGION_EN, actualWithSearchAddress.getAddressList().getFirst().getRegionEn());
 
@@ -2194,7 +2196,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithKyivRegionDto());
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
-            ubsService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
+                addressService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
 
         assertEquals(KYIV_REGION_UA, actualWithSearchAddress.getAddressList().getFirst().getRegion());
 
@@ -2232,7 +2234,7 @@ class UBSClientServiceImplTest {
         dtoRequest.setPlaceId(null);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
+            () -> addressService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
 
         assertEquals(ADDRESS_ALREADY_EXISTS, exception.getMessage());
 
@@ -2252,7 +2254,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
+            () -> addressService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
 
         assertEquals(ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED, exception.getMessage());
     }
@@ -2292,7 +2294,7 @@ class UBSClientServiceImplTest {
             .thenReturn(addressDto);
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
-            ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+                addressService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
 
         assertEquals(getAddressDtoResponse(), actualWithSearchAddress);
         assertEquals(updateAddressRequestDto.getDistrict(),
@@ -2301,7 +2303,7 @@ class UBSClientServiceImplTest {
             actualWithSearchAddress.getAddressList().getFirst().getDistrictEn());
 
         OrderWithAddressesResponseDto actualWithoutSearchAddress =
-            ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+                addressService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
 
         assertEquals(getAddressDtoResponse(), actualWithoutSearchAddress);
 
@@ -2339,7 +2341,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.save(addresses.getFirst())).thenReturn(addresses.getFirst());
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
-            ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+                addressService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
 
         assertEquals(OrderWithAddressesResponseDto.builder().addressList(Collections.emptyList()).build(),
             actualWithSearchAddress);
@@ -2372,7 +2374,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
+            () -> addressService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
 
         assertEquals(ADDRESS_ALREADY_EXISTS, exception.getMessage());
     }
@@ -2394,7 +2396,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(updateAddressRequestDto.getId())).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
+            () -> addressService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
 
         assertEquals(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + updateAddressRequestDto.getId(), exception.getMessage());
     }
@@ -2420,7 +2422,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class,
-            () -> ubsService.updateCurrentAddressForOrder(dtoRequest, uuid));
+            () -> addressService.updateCurrentAddressForOrder(dtoRequest, uuid));
 
         assertEquals(CANNOT_ACCESS_PERSONAL_INFO, exception.getMessage());
     }
@@ -2443,9 +2445,9 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
         when(addressRepository.findAnyByUserIdAndAddressStatusNotDeleted(user.getId()))
             .thenReturn(Optional.of(secondAddress));
-        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientServiceSpy).findAllAddressesForCurrentOrder(uuid);
+        doReturn(new OrderWithAddressesResponseDto()).when(addressService).findAllAddressesForCurrentOrder(uuid);
 
-        ubsClientServiceSpy.deleteCurrentAddressForOrder(firstAddressId, uuid);
+        addressService.deleteCurrentAddressForOrder(firstAddressId, uuid);
 
         Assertions.assertFalse(firstAddress.getActual());
         assertEquals(AddressStatus.DELETED, firstAddress.getAddressStatus());
@@ -2453,7 +2455,7 @@ class UBSClientServiceImplTest {
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository).findAnyByUserIdAndAddressStatusNotDeleted(user.getId());
-        verify(ubsClientServiceSpy).findAllAddressesForCurrentOrder(uuid);
+        verify(addressService).findAllAddressesForCurrentOrder(uuid);
     }
 
     @Test
@@ -2469,15 +2471,15 @@ class UBSClientServiceImplTest {
 
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
 
-        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientServiceSpy).findAllAddressesForCurrentOrder(uuid);
+        doReturn(new OrderWithAddressesResponseDto()).when(addressService).findAllAddressesForCurrentOrder(uuid);
 
-        ubsClientServiceSpy.deleteCurrentAddressForOrder(firstAddressId, uuid);
+        addressService.deleteCurrentAddressForOrder(firstAddressId, uuid);
 
         assertEquals(AddressStatus.DELETED, firstAddress.getAddressStatus());
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository, times(0)).findAnyByUserIdAndAddressStatusNotDeleted(anyLong());
-        verify(ubsClientServiceSpy).findAllAddressesForCurrentOrder(uuid);
+        verify(addressService).findAllAddressesForCurrentOrder(uuid);
     }
 
     @Test
@@ -2489,13 +2491,13 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(addressId)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> ubsClientServiceSpy.deleteCurrentAddressForOrder(addressId, "qwe"));
+            () -> addressService.deleteCurrentAddressForOrder(addressId, "qwe"));
 
         assertEquals(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId, exception.getMessage());
 
         verify(addressRepository).findById(addressId);
         verify(addressRepository, times(0)).findAnyByUserIdAndAddressStatusNotDeleted(anyLong());
-        verify(ubsClientServiceSpy, times(0)).findAllAddressesForCurrentOrder(anyString());
+        verify(addressService, times(0)).findAllAddressesForCurrentOrder(anyString());
     }
 
     @Test
@@ -2512,13 +2514,13 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class,
-            () -> ubsClientServiceSpy.deleteCurrentAddressForOrder(firstAddressId, uuid));
+            () -> addressService.deleteCurrentAddressForOrder(firstAddressId, uuid));
 
         assertEquals(CANNOT_DELETE_ADDRESS, exception.getMessage());
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository, times(0)).findAnyByUserIdAndAddressStatusNotDeleted(anyLong());
-        verify(ubsClientServiceSpy, times(0)).findAllAddressesForCurrentOrder(anyString());
+        verify(addressService, times(0)).findAllAddressesForCurrentOrder(anyString());
     }
 
     @Test
@@ -2536,13 +2538,13 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> ubsClientServiceSpy.deleteCurrentAddressForOrder(firstAddressId, uuid));
+            () -> addressService.deleteCurrentAddressForOrder(firstAddressId, uuid));
 
         assertEquals(CANNOT_DELETE_ALREADY_DELETED_ADDRESS, exception.getMessage());
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository, times(0)).findAnyByUserIdAndAddressStatusNotDeleted(anyLong());
-        verify(ubsClientServiceSpy, times(0)).findAllAddressesForCurrentOrder(anyString());
+        verify(addressService, times(0)).findAllAddressesForCurrentOrder(anyString());
     }
 
     @Test
@@ -2559,16 +2561,16 @@ class UBSClientServiceImplTest {
 
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
         when(addressRepository.findAnyByUserIdAndAddressStatusNotDeleted(user.getId())).thenReturn(Optional.empty());
-        doReturn(new OrderWithAddressesResponseDto()).when(ubsClientServiceSpy).findAllAddressesForCurrentOrder(uuid);
+        doReturn(new OrderWithAddressesResponseDto()).when(addressService).findAllAddressesForCurrentOrder(uuid);
 
-        ubsClientServiceSpy.deleteCurrentAddressForOrder(firstAddressId, uuid);
+        addressService.deleteCurrentAddressForOrder(firstAddressId, uuid);
 
         Assertions.assertFalse(firstAddress.getActual());
         assertEquals(AddressStatus.DELETED, firstAddress.getAddressStatus());
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository).findAnyByUserIdAndAddressStatusNotDeleted(user.getId());
-        verify(ubsClientServiceSpy).findAllAddressesForCurrentOrder(uuid);
+        verify(addressService).findAllAddressesForCurrentOrder(uuid);
     }
 
     @Test
@@ -2587,7 +2589,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
         when(addressRepository.findByUserIdAndActualTrue(user.getId())).thenReturn(Optional.of(secondAddress));
 
-        ubsService.makeAddressActual(firstAddressId, uuid);
+        addressService.makeAddressActual(firstAddressId, uuid);
 
         Assertions.assertTrue(firstAddress.getActual());
         assertFalse(secondAddress.getActual());
@@ -2610,7 +2612,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findByUserIdAndActualTrue(user.getId())).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> ubsService.makeAddressActual(firstAddressId, uuid));
+            () -> addressService.makeAddressActual(firstAddressId, uuid));
 
         assertEquals(ACTUAL_ADDRESS_NOT_FOUND, exception.getMessage());
 
@@ -2631,7 +2633,7 @@ class UBSClientServiceImplTest {
 
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
 
-        ubsService.makeAddressActual(firstAddressId, uuid);
+        addressService.makeAddressActual(firstAddressId, uuid);
 
         Assertions.assertTrue(firstAddress.getActual());
 
@@ -2649,7 +2651,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> ubsService.makeAddressActual(firstAddressId, uuid));
+            () -> addressService.makeAddressActual(firstAddressId, uuid));
 
         assertEquals(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + firstAddressId, exception.getMessage());
 
@@ -2674,7 +2676,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class,
-            () -> ubsService.makeAddressActual(firstAddressId, uuid));
+            () -> addressService.makeAddressActual(firstAddressId, uuid));
 
         assertEquals(CANNOT_ACCESS_PERSONAL_INFO, exception.getMessage());
 
@@ -2697,7 +2699,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> ubsService.makeAddressActual(firstAddressId, uuid));
+            () -> addressService.makeAddressActual(firstAddressId, uuid));
 
         assertEquals(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS, exception.getMessage());
 
@@ -4334,7 +4336,7 @@ class UBSClientServiceImplTest {
         when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.of(getDistrict()));
 
-        ubsService.updateOrderAddress(TEST_ORDER_ADDRESS_DTO_UPDATE);
+        addressService.updateOrderAddress(TEST_ORDER_ADDRESS_DTO_UPDATE);
 
         verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
         verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
@@ -4345,7 +4347,7 @@ class UBSClientServiceImplTest {
     void getAllDistrictsForKyivTest() {
         when(districtRepository.findAllByCityId(anyLong())).thenReturn(List.of(getDistrict()));
 
-        ubsClientService.getAllDistrictsForKyiv();
+        addressService.getAllDistrictsForKyiv();
 
         verify(districtRepository).findAllByCityId(anyLong());
     }
@@ -4355,7 +4357,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(anyString())).thenReturn(null);
 
         assertThrows(NotFoundException.class,
-            () -> ubsService.updateCurrentAddressForOrder(null, USER_UUID));
+            () -> addressService.updateCurrentAddressForOrder(null, USER_UUID));
 
         verify(userRepository).findByUuid(anyString());
     }
@@ -4374,7 +4376,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findAllByUserId(anyLong())).thenReturn(List.of(address));
         when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
 
-        ubsClientService.updateCurrentAddressForOrder(dtoRequest, USER_UUID);
+        addressService.updateCurrentAddressForOrder(dtoRequest, USER_UUID);
 
         verify(userRepository, times(2)).findByUuid(anyString());
         verify(addressRepository).findById(anyLong());
@@ -4401,7 +4403,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.empty());
 
         assertThrows(BadRequestException.class,
-            () -> ubsClientService.updateCurrentAddressForOrder(dtoRequest, USER_UUID));
+            () -> addressService.updateCurrentAddressForOrder(dtoRequest, USER_UUID));
 
         verify(userRepository).findByUuid(anyString());
         verify(addressRepository).findById(anyLong());

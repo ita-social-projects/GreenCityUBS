@@ -25,7 +25,6 @@ import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderStatusPageDto;
-import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
@@ -353,28 +352,6 @@ public class ManagementOrderController {
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(bigOrderTableService.getCustomTableParameters(uuid));
-    }
-
-    /**
-     * Controller read address by order id.
-     *
-     * @param id {@link Long}.
-     * @return {@link HttpStatus} - http status.
-     * @author Orest Mahdziak
-     */
-    @Operation(summary = "Get address by order id")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = ReadAddressByOrderDto.class))),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @GetMapping("/read-address-order/{id}")
-    public ResponseEntity<ReadAddressByOrderDto> getAddressByOrderId(
-        @Valid @PathVariable("id") Long id) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getAddressByOrderId(id));
     }
 
     /**

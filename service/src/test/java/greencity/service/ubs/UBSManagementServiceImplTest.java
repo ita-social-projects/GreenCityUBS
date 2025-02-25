@@ -203,6 +203,9 @@ class UBSManagementServiceImplTest {
     @Mock
     private FileService fileService;
 
+    @Mock
+    private AddressService addressService;
+
     @Mock(strictness = Mock.Strictness.LENIENT)
     OrderRepository orderRepository;
 
@@ -313,7 +316,7 @@ class UBSManagementServiceImplTest {
     @Test
     void checkOrderNotFound() {
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.getAddressByOrderId(10000000L));
+            () -> addressService.getAddressByOrderId(10000000L));
     }
 
     @Test
@@ -322,7 +325,7 @@ class UBSManagementServiceImplTest {
         ReadAddressByOrderDto readAddressByOrderDto = ModelUtils.getReadAddressByOrderDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderAddressRepository.findByOrderId(anyLong())).thenReturn(Optional.of(getOrderAddress()));
-        when(ubsManagementService.getAddressByOrderId(1L)).thenReturn(readAddressByOrderDto);
+        when(addressService.getAddressByOrderId(1L)).thenReturn(readAddressByOrderDto);
         Assertions.assertNotNull(order);
     }
 
@@ -611,12 +614,12 @@ class UBSManagementServiceImplTest {
         updatedOrderAddress.setCity("Updated");
 
         when(orderAddressRepository.findById(dtoUpdate.getId())).thenReturn(Optional.of(orderAddress));
-        when(ubsClientService.updateOrderAddress(any())).thenReturn(updatedOrderAddress);
+        when(addressService.updateOrderAddress(any())).thenReturn(updatedOrderAddress);
         when(orderAddressRepository.save(orderAddress)).thenReturn(updatedOrderAddress);
         when(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class))
             .thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
         Optional<OrderAddressDtoResponse> actual =
-            ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, order, "test@gmail.com");
+                addressService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, order, "test@gmail.com");
         assertEquals(Optional.of(TEST_ORDER_ADDRESS_DTO_RESPONSE), actual);
 
         verify(orderAddressRepository).findById(dtoUpdate.getId());
@@ -631,7 +634,7 @@ class UBSManagementServiceImplTest {
     void testUpdateAddressThrowsNotFoundOrderAddressException() {
         Order order = getOrder();
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, order, "abc"));
+            () -> addressService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, order, "abc"));
     }
 
     @Test
@@ -2445,15 +2448,15 @@ class UBSManagementServiceImplTest {
 
         when(orderRepository.findById(updateAddressDto.getOrderId())).thenReturn(Optional.of(getOrder()));
         when(orderAddressRepository.findById(anyLong())).thenReturn(Optional.of(orderAddress));
-        when(ubsClientService.updateOrderAddress(any(OrderAddressExportDetailsDtoUpdate.class)))
+        when(addressService.updateOrderAddress(any(OrderAddressExportDetailsDtoUpdate.class)))
             .thenReturn(orderAddress);
         when(modelMapper.map(orderAddress, OrderAddressDtoResponse.class)).thenReturn(response);
 
-        ubsManagementService.addressUpdate(updateAddressDto, email);
+        addressService.addressUpdate(updateAddressDto, email);
 
         verify(orderRepository).findById(updateAddressDto.getOrderId());
         verify(orderAddressRepository).findById(anyLong());
-        verify(ubsClientService).updateOrderAddress(any(OrderAddressExportDetailsDtoUpdate.class));
+        verify(addressService).updateOrderAddress(any(OrderAddressExportDetailsDtoUpdate.class));
         verify(modelMapper).map(orderAddress, OrderAddressDtoResponse.class);
         verify(orderAddressRepository).save(any(OrderAddress.class));
         verify(eventService).saveEvent(anyString(), anyString(), any(Order.class));
@@ -2466,7 +2469,7 @@ class UBSManagementServiceImplTest {
 
         when(orderRepository.findById(updateAddressDto.getOrderId())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> ubsManagementService.addressUpdate(updateAddressDto, email));
+        assertThrows(NotFoundException.class, () -> addressService.addressUpdate(updateAddressDto, email));
 
         verify(orderRepository).findById(updateAddressDto.getOrderId());
     }

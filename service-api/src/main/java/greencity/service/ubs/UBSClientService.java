@@ -1,16 +1,12 @@
 package greencity.service.ubs;
 
-import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDto;
 import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
@@ -18,13 +14,11 @@ import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
-import greencity.dto.address.AddressDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.location.api.DistrictDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
@@ -38,12 +32,13 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.user.User;
-import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.OrderStatus;
 import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import org.springframework.transaction.annotation.Transactional;
 
 public interface UBSClientService {
@@ -101,52 +96,10 @@ public interface UBSClientService {
      * @param uuid    current {@link User}'s uuid;
      * @param orderId {@link Long} order id;
      * @return {@link PaymentWayForPayRequestDto} which contains data to pay order
-     *         out.
+     * out.
      * @author Oleh Bilonizhka
      */
     PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
-
-    /**
-     * Methods return list of all user addresses.
-     *
-     * @param uuid current {@link User}'s uuid;
-     * @return {@link OrderWithAddressesResponseDto} that contains address list
-     * @author Veremchuk Zakhar
-     */
-    OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid);
-
-    /**
-     * Method that save address for current user.
-     *
-     * @param requestDto {@link CreateAddressRequestDto} information about address;
-     * @param uuid       current {@link User}'s uuid;
-     * @return {@link OrderAddressDtoRequest} contains all information needed for
-     *         save address;
-     * @author Veremchuk Zakhar
-     */
-    OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto requestDto, String uuid);
-
-    /**
-     * Method that update address for current user (if placeId is null updates only
-     * addressComment).
-     *
-     * @param requestDto {@link OrderAddressDtoRequest} information about address;
-     * @param uuid       current {@link User}'s uuid;
-     * @return {@link OrderAddressDtoRequest} contains all information needed for
-     *         update address;
-     * @author Oleg Postolovskyi
-     */
-    OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest requestDto, String uuid);
-
-    /**
-     * Method that delete user address.
-     *
-     * @param addressId of {@link Long} address id;
-     * @param uuid      current {@link User}'s uuid;
-     * @return {@link OrderWithAddressesResponseDto} that contains address list;
-     * @author Veremchuk Zakhar
-     */
-    OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid);
 
     /**
      * Method that returns info about all orders for specified userID.
@@ -208,7 +161,7 @@ public interface UBSClientService {
      * @param uuid current {@link String} user`s uuid;
      * @param dto  user`s date {@link UserProfileDto} user;
      * @return {@link UserProfileDto} contains all information needed for updating
-     *         user;
+     * user;
      * @author Liubomyr Bratakh.
      */
     UserProfileUpdateDto updateProfileData(String uuid, UserProfileUpdateDto dto);
@@ -227,7 +180,7 @@ public interface UBSClientService {
      *
      * @param orderId {@link Long}
      * @return {@link OrderPaymentDetailDto} dto that contain information about
-     *         order payment.
+     * order payment.
      * @author Mykola Danylko
      */
     OrderPaymentDetailDto getOrderPaymentDetail(Long orderId);
@@ -237,7 +190,6 @@ public interface UBSClientService {
      *
      * @param uuid    {@link String} current user uuid.
      * @param request {@link DeactivateUserRequestDto} information for deactivation.
-     *
      * @author Liubomyr Bratakh
      */
     void markUserAsDeactivated(String uuid, DeactivateUserRequestDto request);
@@ -248,8 +200,7 @@ public interface UBSClientService {
      * @param orderId {@link Long};
      * @param uuid    current {@link User}'s uuid;
      * @return {@link OrderCancellationReasonDto} dto that contains cancellation
-     *         reason and comment;
-     *
+     * reason and comment;
      * @author Oleksandr Khomiakov
      */
     OrderCancellationReasonDto getOrderCancellationReason(Long orderId, String uuid);
@@ -299,7 +250,6 @@ public interface UBSClientService {
      * Method for getting all active couriers.
      *
      * @return list of {@link CourierDto}
-     *
      * @author Anton Bondar
      */
     List<CourierDto> getAllActiveCouriers();
@@ -346,27 +296,6 @@ public interface UBSClientService {
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
      */
     void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
-
-    /**
-     * Makes an address actual (default) for a given user, identified by his UUID.
-     *
-     * @param addressId - the ID of the address to make the default
-     * @param uuid      - the UUID of the user whose address is being updated
-     *
-     * @return an {@link AddressDto} object representing the updated address
-     */
-    AddressDto makeAddressActual(Long addressId, String uuid);
-
-    /**
-     * Method gets all districts in city.
-     *
-     * @param region - name of region
-     * @param city   - name of city
-     *
-     * @return {@link DistrictDto}
-     */
-
-    List<DistrictDto> getAllDistricts(String region, String city);
 
     /**
      * Method to generate payment link.
@@ -418,20 +347,4 @@ public interface UBSClientService {
      *                 details such as transaction ID, status, and amount.
      */
     void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response);
-
-    /**
-     * Method updates order address fields.
-     *
-     * @param orderAddressDtoUpdate the DTO that contains required data for address
-     *                              update.
-     * @return {@link OrderAddress} updated order's address.
-     */
-    OrderAddress updateOrderAddress(OrderAddressExportDetailsDtoUpdate orderAddressDtoUpdate);
-
-    /**
-     * Retrieves all districts in Kyiv.
-     *
-     * @return List of all districts in Kyiv.
-     */
-    List<DistrictDto> getAllDistrictsForKyiv();
 }
