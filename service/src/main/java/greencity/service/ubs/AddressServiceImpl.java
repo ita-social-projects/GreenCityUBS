@@ -100,14 +100,10 @@ public class AddressServiceImpl implements AddressService {
         if (addresses.size() == MAXIMUM_NUMBER_OF_ADDRESSES) {
             throw new BadRequestException(NUMBER_OF_ADDRESSES_EXCEEDED);
         }
-
         Address addressIfExist = checkIfAddressExist(currentUser.getId(), addressRequestDto);
-
         if (addressIfExist == null) {
             Address address = modelMapper.map(addressRequestDto, Address.class);
-
             setLocations(addressRequestDto, address);
-
             address.setAddressStatus(AddressStatus.NEW);
             address.setUser(currentUser);
             address.setActual(addresses.isEmpty());
@@ -278,7 +274,6 @@ public class AddressServiceImpl implements AddressService {
     private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
         Optional<Region> optionalRegion =
                 regionRepository.findRegionByNameEnOrNameUk(address.getRegionEn(), address.getRegion());
-
         if (optionalRegion.isPresent()) {
             address.setRegionId(optionalRegion.get());
 
@@ -299,11 +294,14 @@ public class AddressServiceImpl implements AddressService {
 
             Optional<District> optionalDistrict = districtRepository
                     .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getDistrictEn(), address.getDistrict());
-
             if (optionalDistrict.isPresent()) {
                 address.setDistrictId(optionalDistrict.get());
             } else {
-                District district = baseEntityMapper.convert(addressRequestDto, District.class);
+                District district =
+                        District.builder()
+                                .nameUk(addressRequestDto.getDistrict())
+                                .nameEn(addressRequestDto.getDistrictEn())
+                                .build();
                 district.setCity(city);
                 District savedDistrict = districtRepository.save(district);
                 address.setDistrictId(savedDistrict);
@@ -315,7 +313,6 @@ public class AddressServiceImpl implements AddressService {
 
     private <T extends CreateAddressRequestDto> Address checkIfAddressExist(Long userId, T addressRequestDto) {
         List<Address> addresses = addressRepo.findAllByUserId(userId);
-
         boolean exist = addresses.stream()
                 .filter(address -> !address.getAddressStatus().equals(AddressStatus.DELETED))
                 .map(address -> modelMapper.map(address, CreateAddressRequestDto.class))
@@ -325,7 +322,6 @@ public class AddressServiceImpl implements AddressService {
         if (exist) {
             throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
         }
-
         Optional<Address> deletedAddress = addresses.stream()
                 .filter(address -> AddressStatus.DELETED.equals(address.getAddressStatus()))
                 .filter(address -> areAddressesEqual(modelMapper.map(address, CreateAddressRequestDto.class),

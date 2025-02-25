@@ -1679,6 +1679,7 @@ public class ModelUtils {
             .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
             .district("Zaliznuchnuy")
             .city("Lviv")
+            .addressStatus(AddressStatus.NEW)
             .actual(false)
             .build());
         list.add(Address.builder().id(2L)
@@ -1689,6 +1690,7 @@ public class ModelUtils {
             .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
             .district("Zaliznuchnuy")
             .city("Lviv")
+            .addressStatus(AddressStatus.DELETED)
             .actual(false)
             .build());
         return list;
