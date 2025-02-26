@@ -179,4 +179,10 @@ class AddressControllerTest {
 
         verify(addressService).getAddressForOrder(1L);
     }
+
+    @Test
+    void getAddressByOrder() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/read-address-order/{id}", 1L))
+            .andExpect(status().isOk());
+    }
 }

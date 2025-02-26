@@ -46,8 +46,6 @@ import java.util.List;
 @Validated
 @RequiredArgsConstructor
 public class AddressController {
-    private final UBSClientService ubsClientService;
-    private final UBSManagementService ubsManagementService;
     private final AddressService addressService;
 
     /**
