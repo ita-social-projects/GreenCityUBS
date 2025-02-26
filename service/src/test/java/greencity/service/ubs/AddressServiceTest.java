@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.Collections;
 
 import greencity.service.locations.LocationApiService;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -212,16 +213,16 @@ class AddressServiceTest {
         List<Address> addresses = ModelUtils.addressList();
         Region region = ModelUtils.getRegion();
         when(userRepository.findByUuid(anyString())).thenReturn(user);
-        when(addressRepository.findAllNonDeletedAddressesByUserId(eq(user.getId()))).thenReturn(addresses);
+        when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
         when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString())).thenReturn(Optional.of(region));
-        when(addressRepository.findAllByUserId(eq(user.getId()))).thenReturn(addresses);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
         when(mapper.map(any(Address.class), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
         when(mapper.map(createAddressRequestDto, CreateAddressRequestDto.class))
             .thenReturn(createAddressRequestDto1);
         addressService.saveCurrentAddressForOrder(createAddressRequestDto, user.getUuid());
         verify(userRepository, times(2)).findByUuid(anyString());
-        verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(eq(user.getId()));
-        verify(addressRepository, times(1)).findAllByUserId(eq(user.getId()));
+        verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
+        verify(addressRepository, times(1)).findAllByUserId(user.getId());
     }
 
     @Test
@@ -231,14 +232,17 @@ class AddressServiceTest {
         List<Address> addresses = ModelUtils.addressList();
         Region region = ModelUtils.getRegion();
         when(userRepository.findByUuid(anyString())).thenReturn(user);
-        when(addressRepository.findAllNonDeletedAddressesByUserId(eq(user.getId()))).thenReturn(addresses);
+        when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
         when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString())).thenReturn(Optional.of(region));
-        when(addressRepository.findAllByUserId(eq(user.getId()))).thenReturn(addresses);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
         when(mapper.map(any(Address.class), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
         when(mapper.map(createAddressRequestDto, CreateAddressRequestDto.class))
             .thenReturn(createAddressRequestDto);
-        assertThrows(BadRequestException.class,
-            () -> addressService.saveCurrentAddressForOrder(createAddressRequestDto, user.getUuid()));
+        try {
+            addressService.saveCurrentAddressForOrder(createAddressRequestDto, user.getUuid());
+            fail("Exception a BadRequestException to be thrown");
+        } catch (BadRequestException ignored) {
+        }
     }
 
     @Test
