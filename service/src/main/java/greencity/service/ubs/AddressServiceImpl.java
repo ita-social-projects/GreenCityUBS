@@ -7,7 +7,11 @@ import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
-import greencity.dto.order.*;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.entity.order.Order;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -20,7 +24,13 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.mapping.location.AddressRequestDtoToBaseEntityMapper;
-import greencity.repository.*;
+import greencity.repository.AddressRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.DistrictRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.CityRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.OrderRepository;
 import greencity.service.locations.LocationApiService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -89,7 +99,7 @@ public class AddressServiceImpl implements AddressService {
      * {@inheritDoc}
      */
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto addressRequestDto,
         String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
@@ -147,7 +157,7 @@ public class AddressServiceImpl implements AddressService {
      * {@inheritDoc}
      */
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public AddressDto makeAddressActual(Long addressId, String uuid) {
         Address currentAddress = addressRepo.findById(addressId).orElseThrow(
             () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
@@ -204,7 +214,7 @@ public class AddressServiceImpl implements AddressService {
      * {@inheritDoc}
      */
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest addressRequestDto,
         String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
@@ -247,7 +257,7 @@ public class AddressServiceImpl implements AddressService {
      * {@inheritDoc}
      */
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid) {
         Address address = addressRepo.findById(addressId).orElseThrow(
             () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));

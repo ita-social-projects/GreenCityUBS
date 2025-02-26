@@ -13,8 +13,6 @@ import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.user.UserVO;
 import greencity.service.ubs.AddressService;
-import greencity.service.ubs.UBSClientService;
-import greencity.service.ubs.UBSManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
