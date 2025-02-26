@@ -8,7 +8,6 @@ import greencity.dto.order.*;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +48,7 @@ public interface AddressService {
      * @param requestDto {@link CreateAddressRequestDto} information about address;
      * @param uuid       current {@link User}'s uuid;
      * @return {@link OrderAddressDtoRequest} contains all information needed for
-     * save address;
+     *         save address;
      * @author Veremchuk Zakhar
      */
     OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto requestDto, String uuid);
@@ -64,7 +63,7 @@ public interface AddressService {
      * @author Mahdziak Orest
      */
     Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
-                                                    String email);
+        String email);
 
     /**
      * Makes an address actual (default) for a given user, identified by his UUID.
@@ -99,7 +98,7 @@ public interface AddressService {
      * @param requestDto {@link OrderAddressDtoRequest} information about address;
      * @param uuid       current {@link User}'s uuid;
      * @return {@link OrderAddressDtoRequest} contains all information needed for
-     * update address;
+     *         update address;
      * @author Oleg Postolovskyi
      */
     OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest requestDto, String uuid);

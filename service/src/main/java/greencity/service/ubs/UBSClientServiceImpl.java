@@ -1352,7 +1352,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             userProfileUpdateDto.getViberIsNotify());
         userProfileUpdateDto.getAddressDto().stream()
             .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
-            .forEach(addressRequestDto ->  addressService.updateCurrentAddressForOrder(addressRequestDto, uuid));
+            .forEach(addressRequestDto -> addressService.updateCurrentAddressForOrder(addressRequestDto, uuid));
         User savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserProfileUpdateDto.class);
     }

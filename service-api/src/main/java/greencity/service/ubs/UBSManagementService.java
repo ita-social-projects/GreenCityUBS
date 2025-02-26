@@ -25,10 +25,8 @@ import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.order.Order;
 import greencity.enums.SortingOrder;
-
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,7 +38,7 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page, String columnName,
-                                                               SortingOrder sortingOrder);
+        SortingOrder sortingOrder);
 
     /**
      * Method add some points to UserUBS by email.
@@ -53,7 +51,7 @@ public interface UBSManagementService {
      * Method returns all users violations.
      *
      * @return {@link ViolationsInfoDto} count of Users violations with order id
-     * descriptions.
+     *         descriptions.
      * @author Nazar Struk
      */
     ViolationsInfoDto getAllUserViolations(String email);
@@ -71,7 +69,7 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     void setOrderDetail(Order order,
-                        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String email);
+        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String email);
 
     /**
      * Method that count sum order.
@@ -211,8 +209,8 @@ public interface UBSManagementService {
      * @author Anton Bondar.
      */
     BigOrderTableDTO updateOrderAdminPageInfoAndSaveReason(Long orderId,
-                                                           UpdateOrderPageAdminDto updateOrderPageAdminDto,
-                                                           String language, String email, MultipartFile[] images);
+        UpdateOrderPageAdminDto updateOrderPageAdminDto,
+        String language, String email, MultipartFile[] images);
 
     /**
      * This is method which is updates admin page info for order.
@@ -223,7 +221,7 @@ public interface UBSManagementService {
      * @author Yuriy Bahlay.
      */
     void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageAdminDto, Order order, String lang,
-                                  String email);
+        String email);
 
     /**
      * This is method which is updates admin page info for all order.
@@ -278,5 +276,4 @@ public interface UBSManagementService {
      * @author Volodymyr Lukovskyi
      */
     Boolean checkIfOrderStatusIsFormedToCanceled(Long orderId);
-
 }

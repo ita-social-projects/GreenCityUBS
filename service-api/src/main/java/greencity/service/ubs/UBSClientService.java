@@ -34,11 +34,9 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import org.springframework.transaction.annotation.Transactional;
 
 public interface UBSClientService {
@@ -96,7 +94,7 @@ public interface UBSClientService {
      * @param uuid    current {@link User}'s uuid;
      * @param orderId {@link Long} order id;
      * @return {@link PaymentWayForPayRequestDto} which contains data to pay order
-     * out.
+     *         out.
      * @author Oleh Bilonizhka
      */
     PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
@@ -161,7 +159,7 @@ public interface UBSClientService {
      * @param uuid current {@link String} user`s uuid;
      * @param dto  user`s date {@link UserProfileDto} user;
      * @return {@link UserProfileDto} contains all information needed for updating
-     * user;
+     *         user;
      * @author Liubomyr Bratakh.
      */
     UserProfileUpdateDto updateProfileData(String uuid, UserProfileUpdateDto dto);
@@ -180,7 +178,7 @@ public interface UBSClientService {
      *
      * @param orderId {@link Long}
      * @return {@link OrderPaymentDetailDto} dto that contain information about
-     * order payment.
+     *         order payment.
      * @author Mykola Danylko
      */
     OrderPaymentDetailDto getOrderPaymentDetail(Long orderId);
@@ -200,7 +198,7 @@ public interface UBSClientService {
      * @param orderId {@link Long};
      * @param uuid    current {@link User}'s uuid;
      * @return {@link OrderCancellationReasonDto} dto that contains cancellation
-     * reason and comment;
+     *         reason and comment;
      * @author Oleksandr Khomiakov
      */
     OrderCancellationReasonDto getOrderCancellationReason(Long orderId, String uuid);

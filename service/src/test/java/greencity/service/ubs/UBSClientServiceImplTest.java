@@ -148,8 +148,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import static greencity.ModelUtils.KYIV_REGION_EN;
-import static greencity.ModelUtils.KYIV_REGION_UA;
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
 import static greencity.ModelUtils.TEST_CREATE_ADDRESS_DTO;
 import static greencity.ModelUtils.TEST_EMAIL;
@@ -159,13 +157,11 @@ import static greencity.ModelUtils.TEST_UUID;
 import static greencity.ModelUtils.addressDtoList;
 import static greencity.ModelUtils.addressDtoListWithNullPlaceId;
 import static greencity.ModelUtils.addressList;
-import static greencity.ModelUtils.addressWithKyivRegionDto;
 import static greencity.ModelUtils.bagDto;
 import static greencity.ModelUtils.botList;
 import static greencity.ModelUtils.createCertificateDto;
 import static greencity.ModelUtils.getActiveCertificateWith10Points;
 import static greencity.ModelUtils.getAddress;
-import static greencity.ModelUtils.getAddressWithKyivRegionToSaveRequestDto;
 import static greencity.ModelUtils.getBag;
 import static greencity.ModelUtils.getBag1list;
 import static greencity.ModelUtils.getBagForOrder;
@@ -221,7 +217,6 @@ import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
 import static greencity.ModelUtils.getUbsUsers;
 import static greencity.ModelUtils.getUsedCertificateWith600Points;
 import static greencity.ModelUtils.getUser;
-import static greencity.ModelUtils.getUserForCreate;
 import static greencity.ModelUtils.getUserInfoDto;
 import static greencity.ModelUtils.getUserNotificationForUnpaidOrder;
 import static greencity.ModelUtils.getUserPointsAndAllBagsDto;
@@ -1989,104 +1984,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void saveCurrentAddressForOrderForAddressesBelongToKyivEnTest() {
-        User user = getUserForCreate();
-        List<Address> addresses = user.getAddresses();
-        addresses.getFirst().setActual(false);
-        addresses.getFirst().setAddressStatus(AddressStatus.NEW);
-
-        String uuid = user.getUuid();
-        CreateAddressRequestDto createAddressRequestToSaveDto = getAddressWithKyivRegionToSaveRequestDto();
-        Address addressToSave = getAddress();
-
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
-        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
-            .thenReturn(Optional.of(getCity()));
-        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
-            .thenReturn(Optional.of(getDistrict()));
-
-        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
-        when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithKyivRegionDto());
-
-        OrderWithAddressesResponseDto actualWithSearchAddress =
-                addressService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
-
-        assertEquals(KYIV_REGION_EN, actualWithSearchAddress.getAddressList().getFirst().getRegionEn());
-
-        verify(userRepository, times(2)).findByUuid(user.getUuid());
-        verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
-
-        verify(modelMapper, times(1)).map(any(), eq(Address.class));
-        verify(modelMapper).map(any(), eq(Address.class));
-        verify(modelMapper).map(addresses.getFirst(), AddressDto.class);
-        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
-        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
-        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
-        verify(addressRepository).save(addressToSave);
-    }
-
-    @Test
-    void saveCurrentAddressForOrderForAddressesBelongToKyivUaTest() {
-        User user = getUserForCreate();
-        List<Address> addresses = user.getAddresses();
-        addresses.getFirst().setActual(false);
-        addresses.getFirst().setAddressStatus(AddressStatus.NEW);
-
-        String uuid = user.getUuid();
-        CreateAddressRequestDto createAddressRequestToSaveDto = getAddressWithKyivRegionToSaveRequestDto();
-        Address addressToSave = getAddress();
-
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
-        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
-            .thenReturn(Optional.of(getCity()));
-        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
-            .thenReturn(Optional.of(getDistrict()));
-        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
-        when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithKyivRegionDto());
-
-        OrderWithAddressesResponseDto actualWithSearchAddress =
-                addressService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
-
-        assertEquals(KYIV_REGION_UA, actualWithSearchAddress.getAddressList().getFirst().getRegion());
-
-        verify(userRepository, times(2)).findByUuid(user.getUuid());
-        verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
-
-        verify(modelMapper, times(1)).map(any(), eq(Address.class));
-        verify(modelMapper).map(any(), eq(Address.class));
-        verify(modelMapper).map(addresses.getFirst(), AddressDto.class);
-        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
-        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
-        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
-        verify(addressRepository).save(addressToSave);
-    }
-
-    @Test
-    void testMakeAddressActualWhenAddressIsAlreadyActual() {
-        Long firstAddressId = 1L;
-        User user = getUser();
-        String uuid = user.getUuid();
-        Address firstAddress = getAddress();
-        firstAddress.setId(firstAddressId);
-        firstAddress.setUser(user);
-        firstAddress.setActual(true);
-
-        when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
-
-        addressService.makeAddressActual(firstAddressId, uuid);
-
-        Assertions.assertTrue(firstAddress.getActual());
-
-        verify(addressRepository).findById(firstAddressId);
-        verify(addressRepository, times(0)).findByUserIdAndActualTrue(anyLong());
-        verify(modelMapper).map(firstAddress, AddressDto.class);
-    }
-
-    @Test
     void getOrderPaymentDetail() {
         Order order = getOrder();
         Certificate certificate = getActiveCertificateWith10Points();
@@ -3699,25 +3596,5 @@ class UBSClientServiceImplTest {
 
         assertThrows(BadRequestException.class,
             () -> ubsClientService.validatePaymentFromMonoBank(response));
-    }
-
-    @Test
-    void testUpdateOrderAddress() {
-        Address addressToSave = getAddress();
-
-        when(modelMapper.map(TEST_ORDER_ADDRESS_DTO_UPDATE, CreateAddressRequestDto.class))
-            .thenReturn(TEST_CREATE_ADDRESS_DTO);
-        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
-        when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
-        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
-            .thenReturn(Optional.of(getCity()));
-        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
-            .thenReturn(Optional.of(getDistrict()));
-
-        addressService.updateOrderAddress(TEST_ORDER_ADDRESS_DTO_UPDATE);
-
-        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
-        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
-        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
     }
 }

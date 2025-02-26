@@ -26,12 +26,10 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import static greencity.constant.ErrorMessage.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -61,7 +59,7 @@ public class AddressServiceImpl implements AddressService {
     @Transactional(readOnly = true)
     public UpdateAddressDto getAddressForOrder(Long orderId) {
         OrderAddress orderAddress = orderAddressRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
         UpdateAddressDto addressDto = modelMapper.map(orderAddress, UpdateAddressDto.class);
         addressDto.setOrderId(orderId);
         return addressDto;
@@ -73,7 +71,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public OrderAddress updateOrderAddress(OrderAddressExportDetailsDtoUpdate orderAddressDtoUpdate) {
         CreateAddressRequestDto createAddressRequestDto =
-                modelMapper.map(orderAddressDtoUpdate, CreateAddressRequestDto.class);
+            modelMapper.map(orderAddressDtoUpdate, CreateAddressRequestDto.class);
         Address address = modelMapper.map(orderAddressDtoUpdate, Address.class);
         setLocations(createAddressRequestDto, address);
         return modelMapper.map(address, OrderAddress.class);
@@ -83,7 +81,7 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public void addressUpdate(UpdateAddressDto addressDto, String email) {
         Order order = orderRepository.findById(addressDto.getOrderId())
-                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + addressDto.getOrderId()));
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + addressDto.getOrderId()));
         updateAddress(addressDto.getOrderAddressExportDetails(), order, email);
     }
 
@@ -93,7 +91,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @jakarta.transaction.Transactional
     public OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto addressRequestDto,
-                                                                    String uuid) {
+        String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
@@ -125,7 +123,7 @@ public class AddressServiceImpl implements AddressService {
             throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
         }
         OrderAddress orderAddress = orderAddressRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
         return modelMapper.map(orderAddress, ReadAddressByOrderDto.class);
     }
 
@@ -135,16 +133,15 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional
     public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
-                                                           String email) {
+        String email) {
         OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ADDRESS_BY_ID, dtoUpdate.getId())));
+            .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ADDRESS_BY_ID, dtoUpdate.getId())));
         OrderAddress updatedOrderAddress = updateOrderAddress(dtoUpdate);
         mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress, dtoUpdate.getAddressComment());
         orderAddressRepository.save(updatedOrderAddress);
         eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
         return Optional.of(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class));
     }
-
 
     /**
      * {@inheritDoc}
@@ -153,7 +150,7 @@ public class AddressServiceImpl implements AddressService {
     @jakarta.transaction.Transactional
     public AddressDto makeAddressActual(Long addressId, String uuid) {
         Address currentAddress = addressRepo.findById(addressId).orElseThrow(
-                () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+            () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
 
         if (!currentAddress.getUser().getUuid().equals(uuid)) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
@@ -165,7 +162,7 @@ public class AddressServiceImpl implements AddressService {
 
         if (Boolean.FALSE.equals(currentAddress.getActual())) {
             Address address = addressRepo.findByUserIdAndActualTrue(currentAddress.getUser().getId()).orElseThrow(
-                    () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
+                () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
             address.setActual(false);
             currentAddress.setActual(true);
         }
@@ -180,7 +177,7 @@ public class AddressServiceImpl implements AddressService {
     public List<DistrictDto> getAllDistricts(String region, String city) {
         List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
         return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
-                .collect(toList());
+            .collect(toList());
     }
 
     /**
@@ -189,18 +186,18 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public List<DistrictDto> getAllDistrictsForKyiv() {
         return districtRepository.findAllByCityId(CITY_ID_KIEV).stream()
-                .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn()))
-                .collect(toMap(
-                        District::getNameUk,
-                        district -> district,
-                        (existing, replacement) -> existing))
-                .values()
-                .stream()
-                .map(district -> DistrictDto.builder()
-                        .nameUa(district.getNameUk())
-                        .nameEn(district.getNameEn())
-                        .build())
-                .toList();
+            .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn()))
+            .collect(toMap(
+                District::getNameUk,
+                district -> district,
+                (existing, replacement) -> existing))
+            .values()
+            .stream()
+            .map(district -> DistrictDto.builder()
+                .nameUa(district.getNameUk())
+                .nameEn(district.getNameEn())
+                .build())
+            .toList();
     }
 
     /**
@@ -209,7 +206,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @jakarta.transaction.Transactional
     public OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest addressRequestDto,
-                                                                      String uuid) {
+        String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
 
         if (Objects.isNull(currentUser)) {
@@ -217,8 +214,8 @@ public class AddressServiceImpl implements AddressService {
         }
 
         Address address = addressRepo.findById(addressRequestDto.getId())
-                .orElseThrow(() -> new NotFoundException(
-                        NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressRequestDto.getId()));
+            .orElseThrow(() -> new NotFoundException(
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressRequestDto.getId()));
 
         if (!address.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
@@ -253,7 +250,7 @@ public class AddressServiceImpl implements AddressService {
     @jakarta.transaction.Transactional
     public OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid) {
         Address address = addressRepo.findById(addressId).orElseThrow(
-                () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+            () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
         if (!Objects.equals(address.getUser().getUuid(), uuid)) {
             throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
         }
@@ -265,7 +262,7 @@ public class AddressServiceImpl implements AddressService {
         if (Boolean.TRUE.equals(address.getActual())) {
             address.setActual(false);
             addressRepo.findAnyByUserIdAndAddressStatusNotDeleted(address.getUser().getId())
-                    .ifPresent(newActualAddress -> newActualAddress.setActual(true));
+                .ifPresent(newActualAddress -> newActualAddress.setActual(true));
         }
 
         return findAllAddressesForCurrentOrder(uuid);
@@ -273,13 +270,13 @@ public class AddressServiceImpl implements AddressService {
 
     private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
         Optional<Region> optionalRegion =
-                regionRepository.findRegionByNameEnOrNameUk(address.getRegionEn(), address.getRegion());
+            regionRepository.findRegionByNameEnOrNameUk(address.getRegionEn(), address.getRegion());
         if (optionalRegion.isPresent()) {
             address.setRegionId(optionalRegion.get());
 
             Optional<City> optionalCity = cityRepository
-                    .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getCity(),
-                            address.getCityEn());
+                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getCity(),
+                    address.getCityEn());
 
             City city;
             if (optionalCity.isPresent()) {
@@ -293,15 +290,15 @@ public class AddressServiceImpl implements AddressService {
             address.setCityId(city);
 
             Optional<District> optionalDistrict = districtRepository
-                    .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getDistrictEn(), address.getDistrict());
+                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getDistrictEn(), address.getDistrict());
             if (optionalDistrict.isPresent()) {
                 address.setDistrictId(optionalDistrict.get());
             } else {
                 District district =
-                        District.builder()
-                                .nameUk(addressRequestDto.getDistrict())
-                                .nameEn(addressRequestDto.getDistrictEn())
-                                .build();
+                    District.builder()
+                        .nameUk(addressRequestDto.getDistrict())
+                        .nameEn(addressRequestDto.getDistrictEn())
+                        .build();
                 district.setCity(city);
                 District savedDistrict = districtRepository.save(district);
                 address.setDistrictId(savedDistrict);
@@ -314,19 +311,19 @@ public class AddressServiceImpl implements AddressService {
     private <T extends CreateAddressRequestDto> Address checkIfAddressExist(Long userId, T addressRequestDto) {
         List<Address> addresses = addressRepo.findAllByUserId(userId);
         boolean exist = addresses.stream()
-                .filter(address -> !address.getAddressStatus().equals(AddressStatus.DELETED))
-                .map(address -> modelMapper.map(address, CreateAddressRequestDto.class))
-                .anyMatch(
-                        addressDto -> addressDto.equals(modelMapper.map(addressRequestDto, CreateAddressRequestDto.class)));
+            .filter(address -> !address.getAddressStatus().equals(AddressStatus.DELETED))
+            .map(address -> modelMapper.map(address, CreateAddressRequestDto.class))
+            .anyMatch(
+                addressDto -> addressDto.equals(modelMapper.map(addressRequestDto, CreateAddressRequestDto.class)));
 
         if (exist) {
             throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
         }
         Optional<Address> deletedAddress = addresses.stream()
-                .filter(address -> AddressStatus.DELETED.equals(address.getAddressStatus()))
-                .filter(address -> areAddressesEqual(modelMapper.map(address, CreateAddressRequestDto.class),
-                        addressRequestDto))
-                .findFirst();
+            .filter(address -> AddressStatus.DELETED.equals(address.getAddressStatus()))
+            .filter(address -> areAddressesEqual(modelMapper.map(address, CreateAddressRequestDto.class),
+                addressRequestDto))
+            .findFirst();
 
         return deletedAddress.orElse(null);
     }
@@ -337,12 +334,12 @@ public class AddressServiceImpl implements AddressService {
         }
 
         return (Objects.equals(a.getRegion(), b.getRegion()) || Objects.equals(a.getRegionEn(), b.getRegionEn()))
-                && (Objects.equals(a.getCity(), b.getCity()) || Objects.equals(a.getCityEn(), b.getCityEn()))
-                && (Objects.equals(a.getDistrict(), b.getDistrict())
+            && (Objects.equals(a.getCity(), b.getCity()) || Objects.equals(a.getCityEn(), b.getCityEn()))
+            && (Objects.equals(a.getDistrict(), b.getDistrict())
                 || Objects.equals(a.getDistrictEn(), b.getDistrictEn()))
-                && Objects.equals(a.getHouseNumber(), b.getHouseNumber())
-                && Objects.equals(a.getEntranceNumber(), b.getEntranceNumber())
-                && Objects.equals(a.getHouseCorpus(), b.getHouseCorpus());
+            && Objects.equals(a.getHouseNumber(), b.getHouseNumber())
+            && Objects.equals(a.getEntranceNumber(), b.getEntranceNumber())
+            && Objects.equals(a.getHouseCorpus(), b.getHouseCorpus());
     }
 
     /**
@@ -352,15 +349,15 @@ public class AddressServiceImpl implements AddressService {
     public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
         Long id = userRepository.findByUuid(uuid).getId();
         List<AddressDto> addressDtoList = addressRepo.findAllNonDeletedAddressesByUserId(id)
-                .stream()
-                .sorted(Comparator.comparing(Address::getId))
-                .map(u -> modelMapper.map(u, AddressDto.class))
-                .toList();
+            .stream()
+            .sorted(Comparator.comparing(Address::getId))
+            .map(u -> modelMapper.map(u, AddressDto.class))
+            .toList();
         return new OrderWithAddressesResponseDto(addressDtoList);
     }
 
     private void mapUpdatedOrderAddressFields(OrderAddress orderAddress, OrderAddress updatedOrderAddress,
-                                              String comment) {
+        String comment) {
         updatedOrderAddress.setLocation(orderAddress.getLocation());
         updatedOrderAddress.setId(orderAddress.getId());
         updatedOrderAddress.setActual(orderAddress.getActual());
