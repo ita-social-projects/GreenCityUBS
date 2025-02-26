@@ -34,6 +34,7 @@ import greencity.repository.CityRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.OrderRepository;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Arrays;
@@ -41,7 +42,6 @@ import java.util.Optional;
 import java.util.Collections;
 
 import greencity.service.locations.LocationApiService;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -226,7 +226,7 @@ class AddressServiceTest {
     }
 
     @Test
-    void saveCurrentAddressForOrderIfAddressExistsTest() {
+    void saveCurrentAddressForOrderIfAddressExistsTest() throws Exception {
         User user = ModelUtils.getUser();
         CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
         List<Address> addresses = ModelUtils.addressList();
@@ -238,11 +238,12 @@ class AddressServiceTest {
         when(mapper.map(any(Address.class), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
         when(mapper.map(createAddressRequestDto, CreateAddressRequestDto.class))
             .thenReturn(createAddressRequestDto);
-        try {
-            addressService.saveCurrentAddressForOrder(createAddressRequestDto, user.getUuid());
-            fail("Exception a BadRequestException to be thrown");
-        } catch (BadRequestException ignored) {
-        }
+        Method method = AddressServiceImpl.class.getDeclaredMethod("checkIfAddressExist", Long.class,
+            CreateAddressRequestDto.class);
+        method.setAccessible(true);
+        InvocationTargetException exception = assertThrows(InvocationTargetException.class,
+            () -> method.invoke(addressService, 1L, createAddressRequestDto));
+        assertInstanceOf(BadRequestException.class, exception.getCause());
     }
 
     @Test
