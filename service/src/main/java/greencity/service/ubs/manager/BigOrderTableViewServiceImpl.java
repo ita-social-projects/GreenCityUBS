@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
+import greencity.dto.order.OrderCountDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
@@ -102,6 +103,15 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
             throw new EntityNotFoundException(TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND);
         }
         throw new EntityNotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND);
+    }
+
+    @Override
+    public OrderCountDto getTotalNumberOfOrdersByEmployee(String email) {
+        Long employeeId = employeeRepository.findByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
+        List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
+
+        return new OrderCountDto(bigOrderTableRepository.getOrdersCountByTariffs(tariffsInfoIds));
     }
 
     private CustomTableViewDto castTableViewToDto(String titles) {

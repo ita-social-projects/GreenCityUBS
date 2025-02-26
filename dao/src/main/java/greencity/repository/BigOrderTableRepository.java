@@ -91,6 +91,23 @@ public class BigOrderTableRepository {
             .orElse(null);
     }
 
+    /**
+     * Method returns total number of orders by list of tariffs.
+     *
+     * @param tariffsInfoIds {@link List} list of tariff ids.
+     * @return the total number of orders, represented as a {@code long}.
+     */
+    public long getOrdersCountByTariffs(List<Long> tariffsInfoIds) {
+        var countQuery = criteriaBuilder.createQuery(Long.class);
+        var countOrderRoot = countQuery.from(BigOrderTableViews.class);
+        var predicates = new ArrayList<Predicate>();
+
+        getPredicateByTariffsInfoId(predicates, tariffsInfoIds, countOrderRoot);
+        var countPredicate = criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+        countQuery.select(criteriaBuilder.count(countOrderRoot)).where(countPredicate);
+        return entityManager.createQuery(countQuery).getSingleResult();
+    }
+
     private Predicate getPredicate(OrderSearchCriteria sc, Root<BigOrderTableViews> orderRoot,
         List<Long> tariffsInfoIds) {
         var predicates = new ArrayList<Predicate>();

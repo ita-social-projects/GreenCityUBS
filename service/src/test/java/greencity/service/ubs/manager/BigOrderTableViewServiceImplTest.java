@@ -29,12 +29,19 @@ import java.util.Optional;
 import static greencity.ModelUtils.getEmployee;
 import static greencity.ModelUtils.getTestTableColumnWidth;
 import static greencity.ModelUtils.getTestTableColumnWidthWithIsTableFreezeTrue;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
-class BigOrderTableServiceImplTest {
+class BigOrderTableViewServiceImplTest {
+    private static final String USER_EMAIL = "test@gmail.com";
+    private static final String NOT_EXISTS_USER_EMAIL = "not_exists_email@some.com";
     @InjectMocks
     private BigOrderTableViewServiceImpl bigOrderTableService;
     @Mock
@@ -54,13 +61,13 @@ class BigOrderTableServiceImplTest {
         var orderSearchCriteria = getOrderSearchCriteria();
         Optional<Employee> employee = Optional.of(getEmployee());
         List<Long> tariffsInfoIds = new ArrayList<>();
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(employee);
+        when(employeeRepository.findByEmail(USER_EMAIL)).thenReturn(employee);
         UserVO userVO = new UserVO().setLanguageVO(new LanguageVO(null, "eng"));
-        when(userRemoteClient.findNotDeactivatedByEmail("test@gmail.com")).thenReturn(Optional.of(userVO));
+        when(userRemoteClient.findNotDeactivatedByEmail(USER_EMAIL)).thenReturn(Optional.of(userVO));
         when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria, tariffsInfoIds, "eng"))
             .thenReturn(Page.empty());
 
-        bigOrderTableService.getOrders(orderPage, orderSearchCriteria, "test@gmail.com");
+        bigOrderTableService.getOrders(orderPage, orderSearchCriteria, USER_EMAIL);
 
         verify(bigOrderTableRepository).findAll(orderPage, orderSearchCriteria, tariffsInfoIds, "eng");
     }
@@ -97,7 +104,7 @@ class BigOrderTableServiceImplTest {
         when(tableColumnWidthForEmployeeRepository.findByEmployeeId(getEmployee().getId()))
             .thenReturn(Optional.ofNullable(getTestTableColumnWidthWithIsTableFreezeTrue()));
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
             () -> bigOrderTableService.changeOrderTableView(uuid, "titles1,titles2"),
             "should throw BadRequestException");
 
@@ -163,7 +170,7 @@ class BigOrderTableServiceImplTest {
         String nonExistUuid = "Non_Exist";
         when(employeeRepository.findByUuid(nonExistUuid)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(
+        assertThrows(
             EntityNotFoundException.class,
             () -> bigOrderTableService.changeIsFreezeStatus(nonExistUuid, true),
             "Should throw EntityNotFoundException");
@@ -181,7 +188,7 @@ class BigOrderTableServiceImplTest {
         when(tableColumnWidthForEmployeeRepository.findByEmployeeId(getEmployee().getId()))
             .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(
+        assertThrows(
             EntityNotFoundException.class,
             () -> bigOrderTableService.changeIsFreezeStatus(uuid, true),
             "Should throw EntityNotFoundException");
@@ -189,6 +196,34 @@ class BigOrderTableServiceImplTest {
         verify(employeeRepository).findByUuid(uuid);
         verify(tableColumnWidthForEmployeeRepository, times(1)).findByEmployeeId(getEmployee().getId());
 
+    }
+
+    @Test
+    void getTotalNumberOfOrdersByEmployeeWithValidEmailTest() {
+        Employee employee = ModelUtils.getEmployee();
+        List<Long> tariffsInfoIds = List.of(1L, 2L, 3L);
+        when(employeeRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(employee));
+        when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
+        when(bigOrderTableRepository.getOrdersCountByTariffs(tariffsInfoIds)).thenReturn(10L);
+
+        bigOrderTableService.getTotalNumberOfOrdersByEmployee(USER_EMAIL);
+
+        verify(employeeRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(employeeRepository, times(1)).findTariffsInfoForEmployee(employee.getId());
+        verify(bigOrderTableRepository, times(1)).getOrdersCountByTariffs(tariffsInfoIds);
+    }
+
+    @Test
+    void getTotalNumberOfOrdersByEmployeeWithNotValidEmailTest() {
+        when(employeeRepository.findByEmail(NOT_EXISTS_USER_EMAIL))
+            .thenThrow(new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+
+        assertThrows(EntityNotFoundException.class,
+            () -> bigOrderTableService.getTotalNumberOfOrdersByEmployee(NOT_EXISTS_USER_EMAIL));
+
+        verify(employeeRepository, times(1)).findByEmail(anyString());
+        verify(employeeRepository, times(0)).findTariffsInfoForEmployee(anyLong());
+        verify(bigOrderTableRepository, times(0)).getOrdersCountByTariffs(anyList());
     }
 
     private OrderPage getOrderPage() {
