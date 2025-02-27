@@ -29,6 +29,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/insert.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
@@ -340,7 +342,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
             Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(false));
-        Assertions.assertTrue(isListCorrectlySorted);
+        assertTrue(isListCorrectlySorted);
     }
 
     @Test
@@ -351,7 +353,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
             Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(true));
-        Assertions.assertTrue(isListCorrectlySorted);
+        assertTrue(isListCorrectlySorted);
     }
 
     @Test
@@ -455,7 +457,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
             Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(false));
-        Assertions.assertTrue(isListCorrectlySorted);
+        assertTrue(isListCorrectlySorted);
     }
 
     @Test
@@ -466,7 +468,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
             Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(true));
-        Assertions.assertTrue(isListCorrectlySorted);
+        assertTrue(isListCorrectlySorted);
     }
 
     @Test
@@ -483,6 +485,15 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             bigOrderTableRepository.findAll(DEFAULT_ORDER_PAGE_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
                 .getContent();
         Assertions.assertEquals(expectedValue, actualValue);
+    }
+
+    @Test
+    void getOrdersCountByTariffsTest() {
+        List<Long> tariffsInfoIds = List.of(1L, 2L, 3L);
+
+        long result = bigOrderTableRepository.getOrdersCountByTariffs(tariffsInfoIds);
+
+        assertTrue(result > 0);
     }
 
     private Comparator<BigOrderTableViews> orderStatusTranslationComparator(boolean descending) {

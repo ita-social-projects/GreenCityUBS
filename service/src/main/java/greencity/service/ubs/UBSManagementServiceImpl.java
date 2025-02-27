@@ -30,7 +30,6 @@ import greencity.dto.order.NotTakenOrderReasonDto;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderCountDto;
 import greencity.dto.order.OrderDetailDto;
 import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
@@ -819,14 +818,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             throw new NotFoundException(PAYMENT_NOT_FOUND + id);
         }
         return buildStatuses(order, payment.getFirst());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public OrderCountDto getTotalNumberOfOrders() {
-        return new OrderCountDto(orderRepository.count());
     }
 
     /**

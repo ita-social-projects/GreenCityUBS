@@ -17,7 +17,6 @@ import greencity.filters.CertificatePage;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.PaymentService;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
@@ -76,9 +75,6 @@ class ManagementOrderControllerTest {
 
     @Mock
     CertificateService certificateService;
-
-    @Mock
-    UBSClientService ubsClientService;
 
     @Mock
     private Validator mockValidator;
@@ -218,7 +214,7 @@ class ManagementOrderControllerTest {
             .principal(principal))
             .andExpect(status().isOk());
 
-        verify(ubsManagementService, times(1)).getTotalNumberOfOrders();
+        verify(bigOrderTableServiceView, times(1)).getTotalNumberOfOrdersByEmployee(principal.getName());
     }
 
     @Test
