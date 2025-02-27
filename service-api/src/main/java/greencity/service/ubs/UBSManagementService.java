@@ -7,7 +7,6 @@ import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
-import greencity.dto.order.OrderCountDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
@@ -132,15 +131,6 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     OrderDetailStatusDto getOrderDetailStatus(Long id);
-
-    /**
-     * Method that returns total number of orders.
-     *
-     * @return {@link Long}.
-     *
-     * @author Chernenko Vitaliy
-     */
-    OrderCountDto getTotalNumberOfOrders();
 
     /**
      * Method that update order and payment status by id.
