@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.experimental.SuperBuilder;
+import java.util.Objects;
 import static greencity.constant.ValidationConstant.STREET_REGEXP;
 import static greencity.constant.ValidationConstant.STREET_VALIDATION_MESSAGE;
 
@@ -75,4 +76,18 @@ public class CreateAddressRequestDto {
     @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
     @NotEmpty(message = notEmptyValidationMessage)
     private String streetEn;
+
+    public boolean areAddressesEqual(CreateAddressRequestDto otherAddress) {
+        if (otherAddress == null) {
+            return false;
+        }
+        return (Objects.equals(region, otherAddress.getRegion())
+            || Objects.equals(regionEn, otherAddress.getRegionEn()))
+            && (Objects.equals(city, otherAddress.getCity()) || Objects.equals(cityEn, otherAddress.getCityEn()))
+            && (Objects.equals(district, otherAddress.getDistrict())
+                || Objects.equals(districtEn, otherAddress.getDistrictEn()))
+            && Objects.equals(houseNumber, otherAddress.getHouseNumber())
+            && Objects.equals(entranceNumber, otherAddress.getEntranceNumber())
+            && Objects.equals(houseCorpus, otherAddress.getHouseCorpus());
+    }
 }

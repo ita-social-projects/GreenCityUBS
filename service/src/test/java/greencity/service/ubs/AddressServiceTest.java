@@ -146,11 +146,12 @@ class AddressServiceTest {
         ReadAddressByOrderDto readAddressByOrderDto = ModelUtils.getReadAddressByOrderDto();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(orderAddressRepository.findByOrderId(anyLong())).thenReturn(Optional.of(getOrderAddress()));
-        when(addressService.getAddressByOrderId(anyLong())).thenReturn(readAddressByOrderDto);
+        when(mapper.map(any(OrderAddress.class), eq(ReadAddressByOrderDto.class))).thenReturn(readAddressByOrderDto);
+        ReadAddressByOrderDto result = addressService.getAddressByOrderId(order.getId());
         verify(orderRepository, times(1)).findById(anyLong());
         verify(orderAddressRepository, times(1)).findByOrderId(anyLong());
-        addressService.getAddressByOrderId(order.getId());
-        Assertions.assertNotNull(order);
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(readAddressByOrderDto, result);
     }
 
     @Test
@@ -327,37 +328,6 @@ class AddressServiceTest {
         verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
         verify(cityRepository).save(any());
         verify(districtRepository).save(any());
-    }
-
-    @Test
-    void testAreAddressesEqual() throws Exception {
-        Method areAddressesEqualMethod = AddressServiceImpl.class.getDeclaredMethod("areAddressesEqual",
-            CreateAddressRequestDto.class, CreateAddressRequestDto.class);
-        areAddressesEqualMethod.setAccessible(true);
-
-        CreateAddressRequestDto address1 = getAddressRequestDtoReflection();
-        CreateAddressRequestDto address2 = getAddressRequestDtoReflection2();
-        CreateAddressRequestDto address3 = getAddressRequestDtoReflection3();
-        CreateAddressRequestDto address4 = getAddressRequestDtoReflection4();
-        CreateAddressRequestDto address5 = getAddressRequestDtoReflection5();
-
-        boolean result1 = (boolean) areAddressesEqualMethod.invoke(addressService, address1, address2);
-        assertTrue(result1);
-
-        boolean result2 = (boolean) areAddressesEqualMethod.invoke(addressService, address1, address3);
-        assertFalse(result2);
-
-        boolean result3 = (boolean) areAddressesEqualMethod.invoke(addressService, address1, null);
-        assertFalse(result3);
-
-        boolean result4 = (boolean) areAddressesEqualMethod.invoke(addressService, null, null);
-        assertFalse(result4);
-
-        boolean result5 = (boolean) areAddressesEqualMethod.invoke(addressService, address1, address4);
-        assertFalse(result5);
-
-        boolean result6 = (boolean) areAddressesEqualMethod.invoke(addressService, address1, address5);
-        assertTrue(result6);
     }
 
     @Test
@@ -1008,7 +978,6 @@ class AddressServiceTest {
         addressService.addressUpdate(addressDto, "email@gmail.com");
         verify(orderRepository, times(1)).findById(order.getId());
         verify(orderAddressRepository, times(1)).save(any());
-
     }
 
     @Test

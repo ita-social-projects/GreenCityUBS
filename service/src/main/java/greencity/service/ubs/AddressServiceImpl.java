@@ -331,25 +331,11 @@ public class AddressServiceImpl implements AddressService {
         }
         Optional<Address> deletedAddress = addresses.stream()
             .filter(address -> AddressStatus.DELETED.equals(address.getAddressStatus()))
-            .filter(address -> areAddressesEqual(modelMapper.map(address, CreateAddressRequestDto.class),
-                addressRequestDto))
+            .filter(address -> addressRequestDto
+                .areAddressesEqual((modelMapper.map(address, CreateAddressRequestDto.class))))
             .findFirst();
 
         return deletedAddress.orElse(null);
-    }
-
-    private boolean areAddressesEqual(CreateAddressRequestDto a, CreateAddressRequestDto b) {
-        if (a == null || b == null) {
-            return false;
-        }
-
-        return (Objects.equals(a.getRegion(), b.getRegion()) || Objects.equals(a.getRegionEn(), b.getRegionEn()))
-            && (Objects.equals(a.getCity(), b.getCity()) || Objects.equals(a.getCityEn(), b.getCityEn()))
-            && (Objects.equals(a.getDistrict(), b.getDistrict())
-                || Objects.equals(a.getDistrictEn(), b.getDistrictEn()))
-            && Objects.equals(a.getHouseNumber(), b.getHouseNumber())
-            && Objects.equals(a.getEntranceNumber(), b.getEntranceNumber())
-            && Objects.equals(a.getHouseCorpus(), b.getHouseCorpus());
     }
 
     /**
