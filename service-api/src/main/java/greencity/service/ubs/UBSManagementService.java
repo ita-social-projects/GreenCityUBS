@@ -1,6 +1,5 @@
 package greencity.service.ubs;
 
-import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
@@ -303,17 +302,4 @@ public interface UBSManagementService {
      * @author Volodymyr Lukovskyi
      */
     Boolean checkIfOrderStatusIsFormedToCanceled(Long orderId);
-
-    /**
-     * Method updates order address. This method updates order address. It takes
-     * {@link UpdateAddressDto} as an argument and updates the order address in the
-     * database. It also checks if the address exists and if the user is authorized
-     * to update the address.
-     *
-     * @param addressDto {@link UpdateAddressDto}
-     * @param email      {@link String} the user's email
-     *
-     * @author Kizerov Dmytro
-     */
-    void addressUpdate(UpdateAddressDto addressDto, String email);
 }
