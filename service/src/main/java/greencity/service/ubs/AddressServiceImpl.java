@@ -108,17 +108,18 @@ public class AddressServiceImpl implements AddressService {
         if (addresses.size() == MAXIMUM_NUMBER_OF_ADDRESSES) {
             throw new BadRequestException(NUMBER_OF_ADDRESSES_EXCEEDED);
         }
-        Address addressIfExist = checkIfAddressExist(currentUser.getId(), addressRequestDto);
-        if (addressIfExist == null) {
+        Optional<Address> addressIfExist = checkIfAddressExist(currentUser.getId(), addressRequestDto);
+        if (addressIfExist.isPresent()) {
+            Address existingAddress = addressIfExist.get();
+            existingAddress.setAddressStatus(AddressStatus.NEW);
+            addressRepo.save(existingAddress);
+        } else {
             Address address = modelMapper.map(addressRequestDto, Address.class);
             setLocations(addressRequestDto, address);
             address.setAddressStatus(AddressStatus.NEW);
             address.setUser(currentUser);
             address.setActual(addresses.isEmpty());
             addressRepo.save(address);
-        } else {
-            addressIfExist.setAddressStatus(AddressStatus.NEW);
-            addressRepo.save(addressIfExist);
         }
         return findAllAddressesForCurrentOrder(uuid);
     }
@@ -231,9 +232,9 @@ public class AddressServiceImpl implements AddressService {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
 
-        Address addressIfExist = checkIfAddressExist(currentUser.getId(), addressRequestDto);
+        Optional<Address> addressIfExist = checkIfAddressExist(currentUser.getId(), addressRequestDto);
 
-        if (addressIfExist == null) {
+        if (addressIfExist.isEmpty()) {
             Address newAddress = modelMapper.map(addressRequestDto, Address.class);
 
             setLocations(addressRequestDto, newAddress);
@@ -246,8 +247,9 @@ public class AddressServiceImpl implements AddressService {
             addressRepo.save(newAddress);
         } else {
             address.setAddressStatus(AddressStatus.DELETED);
-            addressIfExist.setAddressStatus(AddressStatus.NEW);
-            addressRepo.save(addressIfExist);
+            Address existingAddress = addressIfExist.get();
+            existingAddress.setAddressStatus(AddressStatus.NEW);
+            addressRepo.save(existingAddress);
             addressRepo.save(address);
         }
         return findAllAddressesForCurrentOrder(uuid);
@@ -318,7 +320,8 @@ public class AddressServiceImpl implements AddressService {
         }
     }
 
-    private <T extends CreateAddressRequestDto> Address checkIfAddressExist(Long userId, T addressRequestDto) {
+    private <T extends CreateAddressRequestDto> Optional<Address> checkIfAddressExist(Long userId,
+        T addressRequestDto) {
         List<Address> addresses = addressRepo.findAllByUserId(userId);
         boolean exist = addresses.stream()
             .filter(address -> !address.getAddressStatus().equals(AddressStatus.DELETED))
@@ -329,13 +332,12 @@ public class AddressServiceImpl implements AddressService {
         if (exist) {
             throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
         }
-        Optional<Address> deletedAddress = addresses.stream()
+
+        return addresses.stream()
             .filter(address -> AddressStatus.DELETED.equals(address.getAddressStatus()))
             .filter(address -> addressRequestDto
                 .areAddressesEqual((modelMapper.map(address, CreateAddressRequestDto.class))))
             .findFirst();
-
-        return deletedAddress.orElse(null);
     }
 
     /**
