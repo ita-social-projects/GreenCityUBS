@@ -15,11 +15,10 @@ import greencity.repository.CertificateRepository;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXIST;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
 
 @org.springframework.stereotype.Service
 @Data

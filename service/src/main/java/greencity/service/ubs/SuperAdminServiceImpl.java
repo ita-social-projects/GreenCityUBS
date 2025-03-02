@@ -23,6 +23,7 @@ import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
@@ -63,12 +64,12 @@ import greencity.repository.ServiceRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
+import greencity.repository.OrderAddressRepository;
 import greencity.service.SuperAdminService;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -123,6 +124,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final OrderBagRepository orderBagRepository;
     private final OrderRepository orderRepository;
     private final OrderBagService orderBagService;
+    private final OrderAddressRepository orderAddressRepository;
+    private final NotificationService notificationService;
 
     @Override
     public GetTariffServiceDto addTariffService(long tariffId, TariffServiceDto dto, String employeeUuid) {
@@ -157,7 +160,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void deleteTariffService(Integer bagId) {
         Bag bag = tryToFindBagById(bagId);
         if (CollectionUtils.isEmpty(orderBagRepository.findOrderBagsByBagId(bagId))) {
-            bagRepository.deleteBagById(bagId);
+            bagRepository.deleteById(bagId);
         } else {
             bag.setStatus(BagStatus.DELETED);
             bagRepository.save(bag);
@@ -201,36 +204,22 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public GetTariffServiceDto editTariffService(TariffServiceDto dto, Integer bagId, String employeeUuid) {
         Bag bag = tryToFindBagById(bagId);
-        Employee employee = tryToFindEmployeeByUuid(employeeUuid);
-        updateTariffService(dto, bag);
-        bag.setEditedBy(employee);
+        boolean isPriceChanged = checkIsPriceOfTariffWasChanged(dto, bag);
+        updateTariffService(dto, bag, employeeUuid);
+        updateOrdersBags(bagId, bag);
 
-        orderBagRepository.updateAllByBagIdForUnpaidOrders(
-            bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
-
-        List<Order> orders = orderRepository.findAllUnpaidOrdersByBagId(bagId);
-        if (CollectionUtils.isNotEmpty(orders)) {
-            orders.forEach(it -> updateOrderSumToPay(it, bag));
-            orderRepository.saveAll(orders);
+        if (isPriceChanged) {
+            updateAmountToPay(bagId, bag);
         }
         return modelMapper.map(bagRepository.save(bag), GetTariffServiceDto.class);
     }
 
-    private void updateOrderSumToPay(Order order, Bag bag) {
-        Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
-        Long sumToPayInCoins = order.getOrderBags().stream()
-            .map(orderBag -> amount.get(orderBag.getBag().getId()) * getBagPrice(orderBag, bag))
-            .reduce(0L, Long::sum);
-        order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
+    private boolean checkIsPriceOfTariffWasChanged(TariffServiceDto dto, Bag bag) {
+        return !Objects.equals(convertBillsIntoCoins(dto.getCommission()), bag.getCommission())
+            || !Objects.equals(convertBillsIntoCoins(dto.getPrice()), bag.getPrice());
     }
 
-    private Long getBagPrice(OrderBag orderBag, Bag bag) {
-        return bag.getId().equals(orderBag.getBag().getId())
-            ? bag.getFullPrice()
-            : orderBag.getPrice();
-    }
-
-    private void updateTariffService(TariffServiceDto dto, Bag bag) {
+    private void updateTariffService(TariffServiceDto dto, Bag bag, String employeeUuid) {
         bag.setCapacity(dto.getCapacity());
         bag.setPrice(convertBillsIntoCoins(dto.getPrice()));
         bag.setCommission(convertBillsIntoCoins(dto.getCommission()));
@@ -240,6 +229,40 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setDescription(dto.getDescription());
         bag.setDescriptionEng(dto.getDescriptionEng());
         bag.setEditedAt(LocalDate.now());
+        bag.setEditedBy(tryToFindEmployeeByUuid(employeeUuid));
+    }
+
+    private void updateOrdersBags(Integer bagId, Bag bag) {
+        orderBagRepository.updateAllByBagIdForUnpaidOrders(
+            bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
+    }
+
+    private void updateAmountToPay(Integer bagId, Bag bag) {
+        List<Order> orders = orderRepository.findAllUnpaidOrdersByBagId(bagId);
+        updateAmountToPayForOrders(orders, bag);
+        notificationService.notifyAllOrdersWithIncreasedTariffPrice(bagId);
+    }
+
+    private void updateAmountToPayForOrders(List<Order> orders, Bag bag) {
+        if (CollectionUtils.isNotEmpty(orders)) {
+            orders.forEach(it -> updateOrderSumToPay(it, bag));
+            orderRepository.saveAll(orders);
+        }
+    }
+
+    private void updateOrderSumToPay(Order order, Bag bag) {
+        Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
+        Long sumToPayInCoins = order.getOrderBags().stream()
+            .map(orderBag -> amount.get(orderBag.getBag().getId()) * getBagPrice(orderBag, bag))
+            .reduce(0L, Long::sum);
+
+        order.setSumTotalAmountWithoutDiscounts(sumToPayInCoins);
+    }
+
+    private Long getBagPrice(OrderBag orderBag, Bag bag) {
+        return bag.getId().equals(orderBag.getBag().getId())
+            ? bag.getFullPrice()
+            : orderBag.getPrice();
     }
 
     private Long convertBillsIntoCoins(Double bills) {
@@ -271,6 +294,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (serviceRepository.findServiceByTariffsInfoId(tariffId).isEmpty()) {
             Employee employee = tryToFindEmployeeByUuid(employeeUuid);
             Service service = modelMapper.map(dto, Service.class);
+            Long amountInCoins = PaymentUtil.convertBillsIntoCoins(dto.getPrice());
+            service.setPrice(amountInCoins);
             service.setCreatedBy(employee);
             service.setCreatedAt(LocalDate.now());
             service.setTariffsInfo(tariffsInfo);
@@ -325,7 +350,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public List<LocationInfoDto> getAllLocation() {
-        return regionRepository.findAll().stream()
+        return regionRepository.findAllWithNotDeletedLocations().stream()
             .map(i -> modelMapper.map(i, LocationInfoDto.class))
             .collect(Collectors.toList());
     }
@@ -333,7 +358,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<LocationInfoDto> getLocationsByStatus(LocationStatus locationStatus) {
         List<Region> regionWithDeactivatedLocations = regionRepository
-            .findAllByLocationsLocationStatus(locationStatus)
+            .findAllWithLocationsByLocationStatus(locationStatus)
             .orElseThrow(() -> new NotFoundException(
                 String.format(ErrorMessage.REGIONS_NOT_FOUND_BY_LOCATION_STATUS, locationStatus.name())));
         return regionWithDeactivatedLocations.stream()
@@ -354,10 +379,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public void deleteLocation(Long id) {
         Location location = tryToFindLocationById(id);
-        if (location.getTariffLocations().stream().anyMatch(tl -> tl.getLocation().getId().equals(id))) {
-            throw new BadRequestException(ErrorMessage.LOCATION_CAN_NOT_BE_DELETED);
+        if (orderAddressRepository.existsByLocation(location)) {
+            location.setIsDeleted(true);
+            locationRepository.save(location);
+        } else {
+            locationRepository.delete(location);
         }
-        locationRepository.delete(location);
     }
 
     private Location createNewLocation(LocationCreateDto dto, Region region) {
@@ -386,7 +413,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         if (location.isPresent()) {
             throw new NotFoundException("The location with name: "
-                + dto.get(0).getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
+                + dto.getFirst().getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
         }
     }
 
@@ -400,7 +427,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
 
-        Region region = regionRepository.findRegionByEnNameAndUkrName(enName, ukName).orElse(null);
+        Region region = regionRepository.findRegionByNameEnOrNameUk(enName, ukName).orElse(null);
 
         if (null == region) {
             region = createRegionWithTranslation(dto);
@@ -489,8 +516,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         String enName = getRegionTranslation(dto, "en");
         String uaName = getRegionTranslation(dto, "ua");
         return Region.builder()
-            .enName(enName)
-            .ukrName(uaName)
+            .nameEn(enName)
+            .nameUk(uaName)
             .build();
     }
 
@@ -503,7 +530,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Location tryToFindLocationById(Long id) {
-        return locationRepository.findById(id).orElseThrow(
+        return locationRepository.findByIdAndIsDeletedIsFalse(id).orElseThrow(
             () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID + id));
     }
 
@@ -600,7 +627,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 .collect(Collectors.toSet());
         List<Long> existingLocationsIds =
             tariffLocationSet.stream().map(tariffLocation -> tariffLocation.getLocation().getId())
-                .collect(Collectors.toList());
+                .toList();
         idListToCheck.removeAll(existingLocationsIds);
         tariffsInfo.setTariffLocations(tariffLocationSet);
         tariffsLocationRepository.saveAll(tariffLocationSet);
@@ -634,7 +661,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void setEmployeeTariffInfos(Employee employee, TariffsInfo tariffsInfo) {
-        // TODO: fix that
+        if (employee.getTariffsInfoReceivingEmployees() == null) {
+            employee.setTariffsInfoReceivingEmployees(new ArrayList<>());
+        }
+        List<TariffsInfoRecievingEmployee> tariffsInfoRecievingEmployees = employee.getTariffsInfoReceivingEmployees();
+        tariffsInfoRecievingEmployees.add(TariffsInfoRecievingEmployee.builder()
+            .employee(employee)
+            .tariffsInfo(tariffsInfo)
+            .hasChat(false)
+            .build());
+        employee.setTariffsInfoReceivingEmployees(tariffsInfoRecievingEmployees);
     }
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {

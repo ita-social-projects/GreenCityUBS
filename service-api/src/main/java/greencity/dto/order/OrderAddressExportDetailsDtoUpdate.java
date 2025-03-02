@@ -1,12 +1,16 @@
 package greencity.dto.order;
 
-import lombok.*;
-import org.hibernate.validator.constraints.Length;
-
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
@@ -17,33 +21,33 @@ import java.io.Serializable;
 public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     @NotNull
     @Min(1)
-    private Long addressId;
+    private Long id;
     @NotBlank
-    @Length(max = 30)
-    private String addressDistrict;
+    @Length(min = 2, max = 75)
+    private String district;
     @NotBlank
-    @Length(max = 30)
-    private String addressDistrictEng;
-    @Length(min = 3, max = 40)
+    @Length(min = 2, max = 75)
+    private String districtEn;
+    @Length(min = 3, max = 75)
     @NotNull
-    private String addressStreet;
-    @Length(min = 3, max = 40)
+    private String street;
+    @Length(min = 3, max = 75)
     @NotNull
-    private String addressStreetEng;
-    @Length(min = 1, max = 4)
-    private String addressHouseCorpus;
-    @Length(min = 1, max = 4)
-    private String addressEntranceNumber;
+    private String streetEn;
+    @Length(max = 4)
+    private String houseCorpus;
+    @Length(max = 4)
+    private String entranceNumber;
     @Length(max = 10)
-    private String addressHouseNumber;
-    @Length(max = 15)
-    private String addressCity;
-    @Length(max = 15)
-    private String addressCityEng;
-    @Length(max = 15)
-    private String addressRegion;
-    @Length(max = 15)
-    private String addressRegionEng;
-    @Length(min = 10, max = 255)
+    private String houseNumber;
+    @Length(min = 2, max = 75)
+    private String city;
+    @Length(min = 2, max = 75)
+    private String cityEn;
+    @Length(min = 2, max = 75)
+    private String region;
+    @Length(min = 2, max = 75)
+    private String regionEn;
+    @Length(max = 255)
     private String addressComment;
 }

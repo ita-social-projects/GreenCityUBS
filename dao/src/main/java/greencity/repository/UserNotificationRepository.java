@@ -7,9 +7,10 @@ import greencity.entity.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +22,7 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      *
      * @return list of {@link UserNotification}.
      */
-    Page<UserNotification> findAllByUser(User user, Pageable pageable);
+    Page<UserNotification> findAllByUserAndIsDeletedFalse(User user, Pageable pageable);
 
     /**
      * The method returns last notification by {@link NotificationType} and orderId.
@@ -50,15 +51,67 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
     List<Long> getUserIdByDateOfLastNotificationAndNotificationType(LocalDate dateOfLastNotification, String type);
 
     /**
-     * Method that returns notification by {@link Order} and
-     * {@link NotificationType}.
+     * Changes {@link UserNotification} `read` as true.
      *
-     * @param order            the {@link Order}.
-     * @param notificationType the {@link NotificationType}.
-     * @return {@link Optional} of {@link UserNotification}.
+     * @param notificationId to change
+     */
+    @Transactional
+    @Modifying
+    @Query("UPDATE UserNotification n SET n.read = true WHERE n.id = :notificationId")
+    void markNotificationAsViewed(Long notificationId);
+
+    /**
+     * Changes {@link UserNotification} `viewed` as false.
      *
-     * @author Vladyslav Haliara.
+     * @param notificationId to change
+     */
+    @Transactional
+    @Modifying
+    @Query("UPDATE UserNotification n SET n.read = false WHERE n.id = :notificationId")
+    void markNotificationAsNotViewed(Long notificationId);
+
+    /**
+     * Method to delete specific Notification.
+     *
+     * @param notificationId id of searched Notification
+     * @param userId         id of user
+     */
+    @Transactional
+    @Modifying
+    @Query("UPDATE UserNotification n SET n.isDeleted = true, n.read = true "
+        + "WHERE n.id = :notificationId and n.user.id = :userId")
+    void markAsDeletedUserNotificationByIdAndUserId(Long notificationId, Long userId);
+
+    /**
+     * Checks if a notification with the specified ID exists for the specified user.
+     *
+     * @param notificationId the ID of the notification to check
+     * @param userId         the ID of the user for whom the notification belongs
+     * @return true if the notification with the specified ID exists for the user,
+     *         false otherwise
+     */
+    boolean existsByIdAndUserIdAndIsDeletedFalse(Long notificationId, Long userId);
+
+    /**
+     * Finds a {@link UserNotification} by the given {@link Order}.
+     *
+     * @param order the order to search for
+     * @return an optional containing the found notification, or an empty optional
+     *         if no notification for the given order was found
      */
     Optional<UserNotification> findUserNotificationByOrderAndNotificationType(Order order,
+        NotificationType notificationType);
+
+    /**
+     * Finds all {@link UserNotification} entities associated with a given
+     * {@link Order} and {@link NotificationType}.
+     *
+     * @param order            the order associated with the notifications to be
+     *                         retrieved
+     * @param notificationType the type of notifications to be retrieved
+     * @return a list of {@link UserNotification} entities matching the specified
+     *         order and notification type
+     */
+    List<UserNotification> findAllUserNotificationByOrderAndNotificationType(Order order,
         NotificationType notificationType);
 }

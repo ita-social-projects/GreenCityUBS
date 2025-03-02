@@ -1,12 +1,7 @@
 package greencity.exceptions.courier;
 
+import lombok.experimental.StandardException;
+
+@StandardException
 public class CourierAlreadyExists extends RuntimeException {
-    /**
-     * Constructor with message.
-     *
-     * @param message message, that explains cause of the exception.
-     */
-    public CourierAlreadyExists(String message) {
-        super(message);
-    }
 }

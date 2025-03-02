@@ -1,21 +1,12 @@
 package greencity.dto.user;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class ChatLinkDto {
-    private Long userId;
-    @Length(max = 255)
-    @NotNull
-    @Pattern(regexp = "^$|^https://my.binotel.ua.*", message = "Link must start with 'https://my.binotel.ua'")
-    private String link;
+public record ChatLinkDto(
+    Long userId,
+    @JsonProperty("link") @Length(max = 255) @NotNull @Pattern(regexp = "^$|^https://my.binotel.ua.*",
+        message = "Link must start with 'https://my.binotel.ua'") String link) {
 }

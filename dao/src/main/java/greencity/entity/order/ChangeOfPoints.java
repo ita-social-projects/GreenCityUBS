@@ -1,9 +1,22 @@
 package greencity.entity.order;
 
 import greencity.entity.user.User;
-import lombok.*;
-
-import javax.persistence.*;
+import greencity.enums.BonusReason;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,4 +44,8 @@ public class ChangeOfPoints {
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
+    @Column(nullable = false, name = "reason", length = 50)
+    @Enumerated(EnumType.STRING)
+    private BonusReason reason;
 }

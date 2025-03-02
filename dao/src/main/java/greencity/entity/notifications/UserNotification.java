@@ -3,14 +3,25 @@ package greencity.entity.notifications;
 import greencity.enums.NotificationType;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.Builder;
 import org.hibernate.annotations.Cascade;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -19,11 +30,12 @@ import java.util.Set;
 
 @Data
 @EqualsAndHashCode(exclude = {"order", "user", "parameters", "notificationTime"})
+@ToString(exclude = {"order", "user", "parameters", "notificationTime"})
 @Entity
-@Table(name = "user_notifications")
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Table(name = "user_notifications")
 public class UserNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,14 +56,20 @@ public class UserNotification {
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 
+    @Column(name = "template_id", columnDefinition = "bigint")
+    private Long templateId;
+
     @OneToMany(mappedBy = "userNotification")
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<NotificationParameter> parameters = new HashSet<>();
 
     @Column(name = "notification_time")
-    private LocalDateTime notificationTime = getCurentLocalTime();
+    private LocalDateTime notificationTime = getCurrentLocalTime();
 
-    private static LocalDateTime getCurentLocalTime() {
+    @Column(name = "is_deleted", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isDeleted = false;
+
+    private static LocalDateTime getCurrentLocalTime() {
         return ZonedDateTime.now(ZoneId.of("Europe/Kiev")).toLocalDateTime();
     }
 }

@@ -5,7 +5,6 @@ import greencity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 
 @Component

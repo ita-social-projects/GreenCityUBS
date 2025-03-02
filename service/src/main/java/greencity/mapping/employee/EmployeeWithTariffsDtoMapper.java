@@ -12,7 +12,6 @@ import greencity.entity.user.employee.Employee;
 import greencity.enums.EmployeeStatus;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.stream.Collectors;
 
 @Component
@@ -43,10 +42,10 @@ public class EmployeeWithTariffsDtoMapper extends AbstractConverter<Employee, Em
                     .region(getTariffs.getTariffsInfo().getTariffLocations().stream().map(
                         tariffLocation -> RegionDto.builder()
                             .regionId(tariffLocation.getLocation().getRegion().getId())
-                            .nameUk(tariffLocation.getLocation().getRegion().getUkrName())
-                            .nameEn(tariffLocation.getLocation().getRegion().getEnName())
+                            .nameUk(tariffLocation.getLocation().getRegion().getNameUk())
+                            .nameEn(tariffLocation.getLocation().getRegion().getNameEn())
                             .build())
-                        .collect(Collectors.toList()).get(0))
+                        .toList().getFirst())
                     .locationsDtos(getTariffs.getTariffsInfo().getTariffLocations().stream()
                         .map(tariffLocation -> LocationsDtos.builder()
                             .locationId(tariffLocation.getLocation().getId())

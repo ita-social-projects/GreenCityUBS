@@ -5,8 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -16,7 +15,7 @@ import java.util.List;
 @Builder
 public class NotificationTemplateWithPlatformsUpdateDto {
     @NotNull
-    private NotificationTemplateMainInfoDto notificationTemplateMainInfoDto;
+    private NotificationTemplateUpdateInfoDto notificationTemplateUpdateInfo;
     @NotNull
     private List<NotificationPlatformDto> platforms;
 }

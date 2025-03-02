@@ -6,11 +6,10 @@ import greencity.dto.location.api.LocationDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
 import greencity.service.locations.LocationApiService;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,12 +18,9 @@ import java.util.stream.Collectors;
  * {@link AddressDto}.
  */
 @Component
+@RequiredArgsConstructor
 public class AddressToAddressDtoMapper extends AbstractConverter<Address, AddressDto> {
-    /**
-     * Service for getting districts in city.
-     */
-    @Autowired
-    private LocationApiService locationApiService;
+    private final LocationApiService locationApiService;
 
     /**
      * Method convert {@link Address} to {@link AddressDto}.

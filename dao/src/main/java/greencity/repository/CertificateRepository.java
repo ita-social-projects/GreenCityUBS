@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Set;
 
@@ -40,17 +39,28 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @author Orest Mahdziak
      */
 
-    @Query(value = "SELECT * FROM ORDERS AS O JOIN CERTIFICATE AS C "
-        + "ON O.ID = C.ORDER_ID WHERE O.ID = :idOrder", nativeQuery = true)
+    @Query(
+        value = "SELECT c.code, "
+            + "c.status, "
+            + "c.expiration_date, "
+            + "c.points, "
+            + "c.order_id, "
+            + "c.creation_date, "
+            + "c.date_of_use, "
+            + "c.initial_points_value FROM ORDERS AS O JOIN CERTIFICATE AS C "
+            + "ON O.ID = C.ORDER_ID WHERE O.ID = :idOrder",
+        nativeQuery = true)
     List<Certificate> findCertificate(@Param("idOrder") Long idOrder);
 
     /**
      * The query for get all Certificate.
      *
-     * @param code is list Certificate
+     * @param codes is list Certificate
      * @return set of {@link Certificate}
      */
-    Set<Certificate> findAllByCodeAndCertificateStatus(List<String> code, CertificateStatus status);
+    @Query("SELECT c FROM Certificate c WHERE c.code IN :codes AND c.certificateStatus = :status")
+    Set<Certificate> findByCodeInAndCertificateStatus(@Param("codes") List<String> codes,
+        @Param("status") CertificateStatus status);
 
     /**
      * Method to check if certificate is already exist by code.

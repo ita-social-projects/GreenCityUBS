@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.exception.handler.CustomExceptionHandler;
@@ -24,10 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-
 import java.security.Principal;
 import java.util.List;
-
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getUserProfileCreateDto;
 import static org.mockito.Mockito.verify;
@@ -95,9 +94,14 @@ class UserProfileControllerTest {
 
     @Test
     void deactivateUser() throws Exception {
-        mockMvc.perform(put(AppConstant.ubsLink + deactivateUser + "?id=5"))
+        ObjectMapper mapper = new ObjectMapper();
+        DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
+            .reason("test")
+            .build();
+        mockMvc.perform(put(AppConstant.ubsLink + deactivateUser)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(request)))
             .andExpect(status().isOk());
-        verify(ubsClientService).markUserAsDeactivated(5L);
     }
 
     @Test

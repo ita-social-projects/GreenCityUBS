@@ -1,21 +1,26 @@
 package greencity.exception.handler;
 
 import greencity.exceptions.BadRequestException;
-import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.ResourceNotFoundException;
+import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
+import greencity.exceptions.notification.IncorrectTemplateException;
+import greencity.exceptions.notification.TemplateDeleteException;
 import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
+import greencity.exceptions.address.AddressNotWithinLocationAreaException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,8 +28,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +43,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Method interceptor exception {@link BadRequestException},
      * {@link ConstraintViolationException}, {@link MappingException},
-     * {@link CourierAlreadyExists}.
+     * {@link CourierAlreadyExists}, {@link IncorrectTemplateException},
+     * {@link TemplateDeleteException}.
      *
      * @param request contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
@@ -50,7 +55,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ConstraintViolationException.class,
         MappingException.class,
         CourierAlreadyExists.class,
-        ServiceAlreadyExistsException.class
+        ServiceAlreadyExistsException.class,
+        IncorrectTemplateException.class,
+        TemplateDeleteException.class
     })
     public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
@@ -69,8 +76,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-        HttpHeaders headers, HttpStatus status,
-        WebRequest request) {
+        HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
@@ -78,8 +84,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-        HttpHeaders headers, HttpStatus status,
-        WebRequest request) {
+        HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         List<ValidationExceptionDto> collect =
             ex.getBindingResult().getFieldErrors().stream()
                 .map(ValidationExceptionDto::new)
@@ -89,7 +94,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private Map<String, Object> getErrorAttributes(WebRequest webRequest) {
-        return new HashMap<>(errorAttributes.getErrorAttributes(webRequest, true));
+        return new HashMap<>(errorAttributes.getErrorAttributes(webRequest,
+            ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE)));
     }
 
     /**
@@ -124,34 +130,17 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Method interceptor exception {@link FoundException}.
-     *
-     * @param ex         Exception which should be intercepted.
-     * @param webRequest contain detail about occur exception.
-     * @return ResponseEntity which contain http status and body with message of
-     *         exception.
-     */
-    @ExceptionHandler({FoundException.class})
-    public final ResponseEntity<Object> handleFoundException(FoundException ex,
-        WebRequest webRequest) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(webRequest));
-        log.trace(ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponse);
-    }
-
-    /**
      * Method interceptor exception {@link AccessDeniedException}.
      *
-     * @param ex      Exception which should be intercepted.
      * @param request contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
      *         exception.
      */
-    @ExceptionHandler(AccessDeniedException.class)
-    public final ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex,
-        WebRequest request) {
+    @ExceptionHandler({AccessDeniedException.class,
+        org.springframework.security.access.AccessDeniedException.class})
+    public final ResponseEntity<Object> handleAccessDeniedException(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
-        log.trace(ex.getMessage(), ex);
+        log.trace(exceptionResponse.getMessage(), exceptionResponse.getTrace());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
     }
 
@@ -177,6 +166,35 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleTariffAlreadyExistsException(WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
+    }
+
+    /**
+     * Exception handler for {@link AddressNotWithinLocationAreaException} This
+     * method handles exceptions related to an address not being within a valid
+     * location area or an invalid address. It captures the error details from the
+     * {@link WebRequest}, wraps them in an {@link ExceptionResponse}, and returns a
+     * {@code 400 Bad Request} HTTP status along with the error message.
+     *
+     * @param request {@link WebRequest} containing the details of the error.
+     * @return {@link ResponseEntity} containing the {@link ExceptionResponse} with
+     *         the error attributes and a {@code 400 Bad Request} status.
+     */
+    @ExceptionHandler(AddressNotWithinLocationAreaException.class)
+    public final ResponseEntity<Object> handleAddressNotWithinLocationAreaException(WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    /**
+     * Exception handler for {@link EntityNotFoundException}.
+     *
+     * @param request {@link WebRequest} with error details.
+     * @return {@link ResponseEntity} with http status and exception message.
+     */
+    @ExceptionHandler(EntityNotFoundException.class)
+    public final ResponseEntity<Object> handleEntityNotFoundException(WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
 
     /**

@@ -2,11 +2,9 @@ package greencity.repository;
 
 import greencity.entity.order.Bag;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,7 +13,7 @@ import java.util.Optional;
 public interface BagRepository extends JpaRepository<Bag, Integer> {
     /**
      * This is method which find capacity by id.
-     * 
+     *
      * @param bagId {@link Integer}.
      * @return {@link Integer}.
      * @author Yuriy Bahlay.
@@ -44,7 +42,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
 
     /**
      * method, that returns {@link Bag}'s info.
-     * 
+     *
      * @param orderId order id {@link Long}
      * @author Nazar Struk
      * @author José Castellanos
@@ -64,7 +62,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author José Castellanos
      */
     @Query(nativeQuery = true,
-        value = "SELECT * FROM order_bag_mapping AS obm JOIN bag AS b ON obm.bag_id = b.id "
+        value = "SELECT obm.* FROM order_bag_mapping AS obm JOIN bag AS b ON obm.bag_id = b.id "
             + "WHERE obm.order_id = :orderId")
     List<Bag> findAllByOrder(@Param("orderId") Long orderId);
 
@@ -91,14 +89,4 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         value = "SELECT * FROM bag "
             + "WHERE tariffs_info_id = :tariffInfoId AND status = 'ACTIVE'")
     List<Bag> findAllActiveBagsByTariffsInfoId(Long tariffInfoId);
-
-    /**
-     * Method for deleting of active {@link Bag} by bag id.
-     *
-     * @param bagId {@link Integer} bag id
-     * @author Olena Sotnik
-     */
-    @Modifying
-    @Query(value = "DELETE FROM bag AS b WHERE b.id = :bagId", nativeQuery = true)
-    void deleteBagById(@Param("bagId") Integer bagId);
 }

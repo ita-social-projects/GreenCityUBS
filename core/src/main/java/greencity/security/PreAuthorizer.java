@@ -1,9 +1,9 @@
 package greencity.security;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import java.util.List;
 
 @Component(value = "preAuthorizer")
 @Slf4j

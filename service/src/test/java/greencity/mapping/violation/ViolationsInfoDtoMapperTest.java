@@ -2,12 +2,10 @@ package greencity.mapping.violation;
 
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.user.User;
-import greencity.mapping.violation.ViolationsInfoDtoMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)

@@ -22,7 +22,6 @@ import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
 import greencity.enums.LocationStatus;
 import greencity.filters.TariffsInfoFilterCriteria;
-
 import java.util.List;
 
 public interface SuperAdminService {
@@ -40,7 +39,7 @@ public interface SuperAdminService {
 
     /**
      * Method return All Tariff Service by Tariff id.
-     * 
+     *
      * @param id {@link Long} - selected tariff id.
      * @return {@link List} of {@link GetTariffServiceDto} - returned list of Tariff
      *         Service.

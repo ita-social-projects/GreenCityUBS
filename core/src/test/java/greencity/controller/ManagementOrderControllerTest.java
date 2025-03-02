@@ -10,17 +10,18 @@ import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
-import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.PaymentService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
+import java.security.Principal;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,10 +38,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
-import java.security.Principal;
-import java.util.Optional;
-
-import static greencity.ModelUtils.getAddBonusesToUserDto;
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getRequestDto;
 import static greencity.ModelUtils.getUpdateOrderPageAdminDto;
@@ -57,6 +54,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,9 +77,6 @@ class ManagementOrderControllerTest {
     CertificateService certificateService;
 
     @Mock
-    UBSClientService ubsClientService;
-
-    @Mock
     private Validator mockValidator;
 
     @InjectMocks
@@ -90,41 +85,17 @@ class ManagementOrderControllerTest {
     @Mock
     BigOrderTableServiceView bigOrderTableServiceView;
 
+    @Mock
+    PaymentService paymentService;
+
     private final Principal principal = getUuid();
 
-    public static final String contentForaddingcontroller = "{\n"
-        + " \"code\": \"1111-2222\",\n" +
-        " \"monthCount\": 8,\n" +
-        " \"points\": 100\n"
-        + "}";
-
-    public static final String contentForUpdatingController = "{\n"
-        + " \"district\": \"test\",\n"
-        + " \"street\": \"test\",\n"
-        + " \"houseCorpus\": \"4\",\n"
-        + " \"entranceNumber\": \"2\",\n"
-        + " \"houseNumber\": \"1\"\n"
-        + "}";
-
-    public static final String contentForUpdatingOrderDetailController = "[\n"
-        + "{\n"
-        + "\"amount\": 0,\n"
-        + "\"bagId\": 0,\n"
-        + "\"confirmedQuantity\": 0,\n"
-        + "\"exportedQuantity\": 0,\n"
-        + "\"orderId\": 0\n"
-        + "}\n"
-        + "]";
-
-    public static final String contentForUpdatingEmployeeByOrderController = "{\n"
-        + "\"employeeOrderPositionDTOS\": [\n"
-        + "{\n"
-        + "\"name\": \"Alisson Becker\",\n"
-        + "\"positionId\": 1\n"
-        + "}\n"
-        + "],\n"
-        + "\"orderId\": 8\n"
-        + "}";
+    public static final String contentForaddingcontroller = """
+        {
+         "code": "1111-2222",
+         "monthCount": 8,
+         "points": 100
+        }""";
 
     @BeforeEach
     void setup() {
@@ -238,6 +209,15 @@ class ManagementOrderControllerTest {
     }
 
     @Test
+    void getOrdersTotalAmountTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/orders/count")
+            .principal(principal))
+            .andExpect(status().isOk());
+
+        verify(bigOrderTableServiceView, times(1)).getTotalNumberOfOrdersByEmployee(principal.getName());
+    }
+
+    @Test
     void getDataForOrderStatusPageTest() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/get-data-for-order/{id}", 1L)
             .principal(principal));
@@ -288,7 +268,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void deleteManualPayment() throws Exception {
-        mockMvc.perform(delete(ubsLink + "/delete-manual-payment/{id}", 1l))
+        mockMvc.perform(delete(ubsLink + "/delete-manual-payment/{id}", 1L))
             .andExpect(status().isOk()).andDo(print());
     }
 
@@ -301,7 +281,7 @@ class ManagementOrderControllerTest {
             "", "application/json", responseJSON.getBytes());
 
         MockMultipartHttpServletRequestBuilder builder =
-            multipart(ubsLink + "/update-manual-payment/{id}", 1l);
+            multipart(ubsLink + "/update-manual-payment/{id}", 1L);
         builder.with(request -> {
             request.setMethod("PUT");
             return request;
@@ -445,28 +425,14 @@ class ManagementOrderControllerTest {
     void getUpdateAllOrderPageAdminInfoTest() throws Exception {
         UpdateAllOrderPageDto dto = ModelUtils.getUpdateAllOrderPageDto();
         ObjectMapper objectMapper = new ObjectMapper();
-        String JsonDto = objectMapper.writeValueAsString(dto);
+        String jsonDto = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(ubsLink + "/all-order-page-admin-info")
-            .content(JsonDto)
+            .content(jsonDto)
             .principal(principal)
             .param("lang", "ua")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
-    }
-
-    @Test
-    void addPaymentDiscountTest() throws Exception {
-        AddBonusesToUserDto addBonusesToUserDto = getAddBonusesToUserDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonDto = objectMapper.writeValueAsString(addBonusesToUserDto);
-
-        mockMvc.perform(post(ubsLink + "/add-bonuses-user/{id}", 1L)
-            .content(jsonDto)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
-
     }
 
     @Test
@@ -481,12 +447,6 @@ class ManagementOrderControllerTest {
         this.mockMvc.perform(get(ubsLink + "/get-not-taken-order-reason/{id}", 1L))
             .andExpect(status().isOk());
         verify(ubsManagementService).getNotTakenOrderReason(1L);
-    }
-
-    @Test
-    void saveOrderIdForRefundTest() throws Exception {
-        mockMvc.perform(post(ubsLink + "/save-order-for-refund/{orderId}", 1L)
-            .principal(principal)).andExpect(status().isCreated());
     }
 
     @Test
@@ -514,5 +474,16 @@ class ManagementOrderControllerTest {
                 .principal(principal)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void checkIfOrderStatusIsFormedToCanceledTest() throws Exception {
+        Long orderId = 1L;
+        when(ubsManagementService.checkIfOrderStatusIsFormedToCanceled(orderId)).thenReturn(true);
+        mockMvc.perform(get(ubsLink + "/check-status-transition/formed-to-canceled/{id}", orderId)
+            .contentType(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk())
+            .andExpect(content().string("<Boolean>true</Boolean>"));
+        verify(ubsManagementService).checkIfOrderStatusIsFormedToCanceled(orderId);
     }
 }

@@ -10,28 +10,21 @@ import greencity.filters.UserFilterCriteria;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class ValuesForUserTableServiceImplTest {
@@ -63,36 +56,38 @@ class ValuesForUserTableServiceImplTest {
         SortingOrder sortingOrder = SortingOrder.ASC;
         UserFilterCriteria filterCriteria = new UserFilterCriteria();
 
-        when(employeeRepository.findByEmail(TEST_EMAIL))
+        Mockito.when(employeeRepository.findByEmail(TEST_EMAIL))
             .thenReturn(Optional.of(ModelUtils.createTestEmployee(employeeId)));
-        when(employeeRepository.findTariffsInfoForEmployee(employeeId))
+        Mockito.when(employeeRepository.findTariffsInfoForEmployee(employeeId))
             .thenReturn(tariffsInfoIds);
-        when(userRepository.getAllUsersByTariffsInfoId(anyLong()))
+        Mockito.when(userRepository.getAllUsersByTariffsInfoId(Mockito.anyLong()))
             .thenReturn(List.of(4L, 5L));
-        when(userTableRepo.findAll(
-            eq(filterCriteria),
-            eq(columnName),
-            eq(sortingOrder),
-            eq(page),
-            anyList()))
-                .thenReturn(mockPage);
+        Mockito.when(userTableRepo.findAll(
+            Mockito.eq(filterCriteria),
+            Mockito.eq(columnName),
+            Mockito.eq(sortingOrder),
+            Mockito.eq(page),
+            Mockito.anyList()))
+            .thenReturn(mockPage);
 
         PageableDto<UserWithSomeOrderDetailDto> result =
             service.getAllFields(page, columnName, sortingOrder, filterCriteria, TEST_EMAIL);
 
-        assertNotNull(result);
-        assertEquals(2, result.getPage().size());
-
-        verify(employeeRepository).findByEmail(TEST_EMAIL);
-        verify(employeeRepository).findTariffsInfoForEmployee(employeeId);
-        verify(userRepository, times(tariffsInfoIds.size()))
-            .getAllUsersByTariffsInfoId(anyLong());
-        verify(userTableRepo).findAll(filterCriteria, columnName, sortingOrder, page, userIds);
+        assertThat(result).isNotNull();
+        assertThat(result.getPage()).hasSize(2);
+        assertThat(result.getPage())
+            .extracting("clientName")
+            .containsExactly("John Doe", "Jane Smith");
+        Mockito.verify(employeeRepository).findByEmail(TEST_EMAIL);
+        Mockito.verify(employeeRepository).findTariffsInfoForEmployee(employeeId);
+        Mockito.verify(userRepository, Mockito.times(tariffsInfoIds.size()))
+            .getAllUsersByTariffsInfoId(Mockito.anyLong());
+        Mockito.verify(userTableRepo).findAll(filterCriteria, columnName, sortingOrder, page, userIds);
     }
 
     @Test
     void getAllFieldsShouldThrowExceptionWhenEmployeeNotFoundTest() {
-        when(employeeRepository.findByEmail(TEST_EMAIL))
+        Mockito.when(employeeRepository.findByEmail(TEST_EMAIL))
             .thenReturn(Optional.empty());
 
         CustomerPage page = new CustomerPage(0, 2);
@@ -100,10 +95,11 @@ class ValuesForUserTableServiceImplTest {
         SortingOrder sortingOrder = SortingOrder.ASC;
         UserFilterCriteria filterCriteria = new UserFilterCriteria();
 
-        assertThrows(EntityNotFoundException.class,
-            () -> service.getAllFields(page, columnName, sortingOrder, filterCriteria, TEST_EMAIL));
+        assertThatThrownBy(() -> service.getAllFields(page, columnName, sortingOrder, filterCriteria, TEST_EMAIL))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessage("Employee with current id doesn't exist: ");
 
-        verify(employeeRepository).findByEmail(TEST_EMAIL);
-        verifyNoInteractions(userRepository, userTableRepo);
+        Mockito.verify(employeeRepository).findByEmail(TEST_EMAIL);
+        Mockito.verifyNoInteractions(userRepository, userTableRepo);
     }
 }

@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
 @Repository
@@ -22,14 +21,6 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
      * This method deletes payment by id.
      */
     void deletePaymentById(Long paymentId);
-
-    /**
-     * This method finds all payments by order.
-     *
-     * @param order {@link Order}
-     * @return {@link List} of {@link Payment}
-     */
-    List<Payment> findAllByOrder(Order order);
 
     /**
      * Method return total paid sum made by order.

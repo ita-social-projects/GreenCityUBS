@@ -9,18 +9,22 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.LocationsDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.WayForPayPaymentResponse;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.repository.OrderRepository;
-import greencity.repository.UBSuserRepository;
+import greencity.repository.UBSUserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
+import jakarta.servlet.ServletException;
+import java.util.Arrays;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,20 +39,15 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.util.NestedServletException;
-
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.List;
-
 import static greencity.ModelUtils.getPrincipal;
-import static greencity.ModelUtils.getRedirectionConfig;
 import static greencity.ModelUtils.getUbsCustomersDto;
 import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
 import static greencity.ModelUtils.getUserInfoDto;
 import static greencity.ModelUtils.getUnpaidOrderDetailStatusDto;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -89,9 +88,12 @@ class OrderControllerTest {
     OrderController orderController;
 
     @Mock
-    private UBSuserRepository ubSuserRepository;
+    RedirectionConfigProp prop;
 
-    private Principal principal = getPrincipal();
+    @Mock
+    private UBSUserRepository ubSuserRepository;
+
+    private final Principal principal = getPrincipal();
 
     @BeforeEach
     void setup() {
@@ -103,8 +105,6 @@ class OrderControllerTest {
 
     @Test
     void getCurrentUserPointsByTariffAndLocationId() throws Exception {
-        ;
-
         mockMvc.perform(get(ubsLink + "/order-details-for-tariff")
             .principal(principal)
             .param("tariffId", "1")
@@ -131,9 +131,11 @@ class OrderControllerTest {
 
     @Test
     void checkIfCertificateAvailable() throws Exception {
-        mockMvc.perform(get(ubsLink + "/certificate/{code}", "qwefds"))
+        String certificateCode = "1111-1111";
+        mockMvc.perform(get(ubsLink + "/certificate/{code}", certificateCode)
+            .principal(principal))
             .andExpect(status().isOk());
-        verify(ubsClientService).checkCertificate("qwefds");
+        verify(ubsClientService).checkCertificate(certificateCode, null);
     }
 
     @Test
@@ -177,7 +179,7 @@ class OrderControllerTest {
         OrderDetailStatusDto orderDetailStatusDto = getUnpaidOrderDetailStatusDto();
         orderDetailStatusDto.setOrderStatus(OrderStatus.FORMED.name());
 
-        WayForPayPaymentResponse resultObject = WayForPayPaymentResponse.builder()
+        PaymentSystemResponse resultObject = PaymentSystemResponse.builder()
             .orderId(orderId)
             .link("Link")
             .build();
@@ -274,23 +276,21 @@ class OrderControllerTest {
     }
 
     @Test
-    void updatesRecipientsInfoWithOutUser() throws Exception {
+    void updatesRecipientsInfoWithOutUser() {
         ObjectMapper objectMapper = new ObjectMapper();
         UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
 
         when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null))
             .thenThrow(UBSuserNotFoundException.class);
 
-        NestedServletException exception =
-            assertThrows(NestedServletException.class, () -> {
-                mockMvc.perform(put(ubsLink + "/update-recipients-data")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
-                    .principal(principal))
-                    .andExpect(status().isBadRequest());
-            });
+        ServletException exception =
+            assertThrows(ServletException.class, () -> mockMvc.perform(put(ubsLink + "/update-recipients-data")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
+                .principal(principal))
+                .andExpect(status().isBadRequest()));
 
-        assertTrue(exception.getCause() instanceof UBSuserNotFoundException);
+        assertInstanceOf(UBSuserNotFoundException.class, exception.getCause());
         verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null);
     }
 
@@ -317,14 +317,19 @@ class OrderControllerTest {
     }
 
     @Test
-    void getFondyStatusPayment2() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getFondyStatus/{orderId}", 1)
-            .principal(principal))
-            .andExpect(status().isOk());
-    }
+    void receivePaymentTest() throws Exception {
+        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String paymentResponseJson = objectMapper.writeValueAsString(dto);
 
-    @Mock
-    RedirectionConfigProp redirectionConfigProp;
+        setRedirectionConfigProp();
+
+        mockMvc.perform(post(ubsLink + "/receivePayment")
+            .content(paymentResponseJson)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is3xxRedirection());
+    }
 
     @Test
     @SneakyThrows
@@ -386,7 +391,7 @@ class OrderControllerTest {
     @Test
     void getTariffIdByLocationIdTest() throws Exception {
         Long locationId = 1L;
-        Long tariffId = 2L;
+        List<Long> tariffId = List.of(2L);
         when(ubsClientService.getTariffIdByLocationId(locationId)).thenReturn(tariffId);
 
         mockMvc.perform(get(ubsLink + "/tariffs/{locationId}", locationId)
@@ -399,20 +404,31 @@ class OrderControllerTest {
 
     @Test
     void getAllLocationsByCourierIdTest() throws Exception {
-        Long courierId = 1L;
+        Long id = 1L;
         List<LocationsDto> locationsDtoList = Arrays.asList(new LocationsDto(), new LocationsDto());
-        when(ubsClientService.getAllLocationsByCourierId(courierId)).thenReturn(locationsDtoList);
+        when(ubsClientService.getAllLocationsByCourierId(id)).thenReturn(locationsDtoList);
 
-        mockMvc.perform(get(ubsLink + "/locationsByCourier/{courierId}", courierId)
+        mockMvc.perform(get(ubsLink + "/locationsByCourier/" + id)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
 
-        verify(ubsClientService).getAllLocationsByCourierId(courierId);
+        verify(ubsClientService).getAllLocationsByCourierId(id);
+    }
+
+    @Test
+    void receivePaymentFromMonoBankTest() throws Exception {
+        MonoBankPaymentResponseDto responseDto = ModelUtils.getMonoBankPaymentResponseDto();
+
+        mockMvc.perform(post(ubsLink + "/monobank/payments")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(new ObjectMapper().writeValueAsString(responseDto)));
+
+        verify(ubsClientService).validatePaymentFromMonoBank(responseDto);
     }
 
     private void setRedirectionConfigProp() {
-        RedirectionConfigProp redirectionConfigProp = getRedirectionConfig();
+        RedirectionConfigProp redirectionConfigProp = ModelUtils.getRedirectionConfig();
 
         Arrays.stream(OrderController.class.getDeclaredFields())
             .filter(field -> field.getName().equals("redirectionConfigProp"))

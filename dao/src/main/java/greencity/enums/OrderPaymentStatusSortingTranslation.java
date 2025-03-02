@@ -2,7 +2,6 @@ package greencity.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
@@ -22,8 +21,8 @@ public enum OrderPaymentStatusSortingTranslation implements SortingTranslation<O
         Collections.unmodifiableSet(EnumSet.allOf(OrderPaymentStatusSortingTranslation.class));
 
     /**
-     * Method returns order status translations sorted in ascending order according
-     * to the Ukrainian alphabet.
+     * Method returns order payment status translations sorted in ascending order
+     * according to the Ukrainian alphabet.
      *
      * @return {@link Set} of {@link OrderPaymentStatusSortingTranslation}
      */

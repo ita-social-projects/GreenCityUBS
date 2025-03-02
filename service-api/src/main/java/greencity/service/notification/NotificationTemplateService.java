@@ -1,5 +1,6 @@
 package greencity.service.notification;
 
+import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
@@ -34,4 +35,19 @@ public interface NotificationTemplateService {
      * @author Safarov Renat
      */
     void changeNotificationStatusById(Long id, String status);
+
+    /**
+     * Method that creates new notification template with required platforms.
+     *
+     * @author Denys Ryhal
+     */
+    void createNotificationTemplate(AddNotificationTemplateWithPlatformsDto notificationTemplateDto);
+
+    /**
+     * Method that removes notification template if this template is not with type
+     * CUSTOM.
+     *
+     * @author Denys Ryhal
+     */
+    void removeNotificationTemplate(Long id);
 }

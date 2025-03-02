@@ -33,7 +33,7 @@ public enum OrderStatus {
     /**
      * Method for getting a value of orderStatus, which is used for translating
      * order status to different languages.
-     * 
+     *
      * @return {@link int} orderStatus value.
      */
     public int getNumValue() {
@@ -57,7 +57,7 @@ public enum OrderStatus {
 
     /**
      * Method for checking if desired status is possible to use with current status.
-     * 
+     *
      * @param desiredStatus {@link String}.
      * @return boolean.
      */

@@ -5,8 +5,7 @@ import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
-
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "column_width_for_employee")
@@ -15,7 +14,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 public class TableColumnWidthForEmployee {
-    private static final Integer DEFAULT_WIDTH = 120;
+    private static final Integer DEFAULT_WIDTH = 165;
+    private static final Integer DEFAULT_WIDTH_FOR_WASTE = 106;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,11 +27,13 @@ public class TableColumnWidthForEmployee {
     @Column
     private Integer amountDue = DEFAULT_WIDTH;
     @Column(name = "mixed_waste_120l")
-    private Integer mixedWaste120L = DEFAULT_WIDTH;
+    private Integer mixedWaste120L = DEFAULT_WIDTH_FOR_WASTE;
     @Column(name = "textile_waste_60l")
-    private Integer textileWaste60L = DEFAULT_WIDTH;
+    private Integer textileWaste60L = DEFAULT_WIDTH_FOR_WASTE;
     @Column(name = "textile_waste_20l")
-    private Integer textileWaste20L = DEFAULT_WIDTH;
+    private Integer textileWaste20L = DEFAULT_WIDTH_FOR_WASTE;
+    @Column(name = "other_packages")
+    private Integer otherPackages = DEFAULT_WIDTH_FOR_WASTE;
     @Column
     private Integer blockedBy = DEFAULT_WIDTH;
     @Column
@@ -94,6 +96,8 @@ public class TableColumnWidthForEmployee {
     private Integer totalPayment = DEFAULT_WIDTH;
     @Column
     private Integer violationsAmount = DEFAULT_WIDTH;
+    @Column
+    private boolean isTableFreeze = Boolean.FALSE;
 
     /**
      * Constructor with default width for all columns.

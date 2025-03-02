@@ -3,12 +3,17 @@ package greencity.entity;
 import greencity.TariffsInfoRecievingEmployeeId;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
 
 @Data
 @Entity

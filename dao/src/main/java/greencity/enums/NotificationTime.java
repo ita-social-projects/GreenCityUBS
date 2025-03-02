@@ -10,7 +10,7 @@ public enum NotificationTime {
                 "Одразу",
                 "Immediately"),
     TWO_MONTHS_AFTER_LAST_ORDER(
-                                "Система щодня перевіряє BD і надсилає повідомленну",
+                                "Система щодня перевіряє BD і надсилає повідомлення",
                                 "System checks BD d2 months ago"),
     AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID(
                                              "Система перевіряє BD щодня о 18.00 і відправляє повідомлення, "

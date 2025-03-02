@@ -5,9 +5,28 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierLimit;
 import greencity.enums.TariffStatus;
-import lombok.*;
-
-import javax.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -19,8 +38,8 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders", "employees", "creator"})
-@EqualsAndHashCode(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders", "employees",
+@ToString(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders", "creator"})
+@EqualsAndHashCode(exclude = {"service", "bags", "receivingStationList", "tariffLocations", "orders",
     "courier", "creator"})
 
 public class TariffsInfo {

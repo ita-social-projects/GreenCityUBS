@@ -1,9 +1,11 @@
 package greencity.entity.coords;
 
-import lombok.*;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 @Data
@@ -12,8 +14,8 @@ import java.io.Serializable;
 @Builder
 @Embeddable
 public class Coordinates implements Serializable {
-    @Column(nullable = true)
+    @Column
     private double latitude;
-    @Column(nullable = true)
+    @Column
     private double longitude;
 }

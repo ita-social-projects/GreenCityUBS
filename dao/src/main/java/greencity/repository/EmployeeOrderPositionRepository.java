@@ -7,10 +7,8 @@ import greencity.entity.user.employee.Position;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Repository
@@ -23,26 +21,6 @@ public interface EmployeeOrderPositionRepository extends CrudRepository<Employee
      * @author Bohdan Fedorkiv
      */
     List<EmployeeOrderPosition> findAllByOrderId(Long orderId);
-
-    /**
-     * Method find current position for Employee in EmployeeOrderPosition table.
-     *
-     * @param employeeId {@link Long}.
-     * @return {@link Long}.
-     * @author Yuriy Bahlay.
-     */
-    Long findByEmployeeId(Long employeeId);
-
-    /**
-     * Method verify if Employee already assigned for current Order.
-     *
-     * @param orderId    {@link Long}.
-     * @param employeeId {@link Long}.
-     * @return {@link Boolean}.
-     * @author Yuriy Bahlay.
-     */
-    boolean existsByOrderIdAndEmployeeId(@Param("orderId") Long orderId,
-        @Param("employeeId") Long employeeId);
 
     /**
      * Method update OrderEmployeePosition.

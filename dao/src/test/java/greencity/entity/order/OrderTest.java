@@ -1,10 +1,8 @@
 package greencity.entity.order;
 
 import org.junit.jupiter.api.Test;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -103,8 +101,8 @@ class OrderTest {
             OrderBag.builder().id(2L).build(),
             OrderBag.builder().id(3L).build()));
         order.updateWithNewOrderBags(bags);
-        order.removeOrderBag(bags.get(0));
-        bags.remove(bags.get(0));
+        order.removeOrderBag(bags.getFirst());
+        bags.remove(bags.getFirst());
 
         assertSame(previous, order.getOrderBags());
         assertNotSame(bags, order.getOrderBags());

@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,10 +22,12 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      * @author Yurii Fedorko
      */
     @Query(nativeQuery = true,
-        value = "SELECT * FROM tariffs_info as t "
+        value = "SELECT t.* FROM tariffs_info as t "
             + "INNER JOIN tariffs_locations as m "
             + "on t.id = m.tariffs_info_id "
-            + "WHERE t.courier_id = :courierId AND m.location_id = :locationId")
+            + "INNER JOIN locations l on m.location_id = l.id "
+            + "WHERE t.courier_id = :courierId AND m.location_id = :locationId "
+            + "AND l.is_deleted = false")
     Optional<TariffsInfo> findTariffsInfoLimitsByCourierIdAndLocationId(@Param("courierId") Long courierId,
         @Param("locationId") Long locationId);
 
@@ -62,7 +63,8 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
         + " inner join tariffs_locations tl on ti.id = tl.tariffs_info_id"
         + " inner join locations l on tl.id = tl.location_id"
         + " where l.region_id = :regionId and"
-        + " rs.id in(:stationsIds)")
+        + " rs.id in(:stationsIds)"
+        + " and l.is_deleted = false")
     void deactivateTariffsByRegionAndReceivingStations(Long regionId, List<Long> stationsIds);
 
     /**
@@ -82,6 +84,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
         + " inner join tariffs_locations tl on ti.id = tl.tariffs_info_id"
         + " inner join locations l on tl.id = tl.location_id"
         + " where l.region_id = :regionId and"
+        + " l.is_deleted = false and"
         + " tl.location_id in (:citiesIds) and"
         + " ti.courier_id = :courierId")
     void deactivateTariffsByCourierAndRegionAndCities(Long regionId, List<Long> citiesIds, Long courierId);
@@ -103,35 +106,25 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
         + " inner join tariffs_locations tl on ti.id = tl.tariffs_info_id"
         + " inner join locations l on tl.id = tl.location_id"
         + " where l.region_id = :regionId and"
+        + " l.is_deleted = false and"
         + " rs.id in(:stationsIds) and"
         + " ti.courier_id = :courierId")
     void deactivateTariffsByCourierAndRegionAndReceivingStations(Long regionId, List<Long> stationsIds, Long courierId);
 
     /**
-     * Method for getting set of tariffs.
-     *
-     * @param id - list of tariffIds.
-     * @return - set of tariffs.
-     * @author - Nikita Korzh.
-     */
-    Set<TariffsInfo> findTariffsInfosByIdIsIn(List<Long> id);
-
-    /**
-     * method, that returns {@link Set} of {@link TariffsInfo} by bag ids.
+     * Method, that returns {@link Set} of {@link TariffsInfo} by bag ids.
      *
      * @param bagIds {@link List} of {@link Integer} list of bag ids.
      * @return {@link Optional} of {@link TariffsInfo}.
      * @author Julia Seti
      */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM tariffs_info ti "
-            + "JOIN tariffs_locations tl "
-            + "ON ti.id = tl.tariffs_info_id "
-            + "WHERE tl.location_id = :locationId "
-            + "AND ti.id IN (SELECT DISTINCT b.tariffs_info_id "
-            + "FROM bag b "
-            + "WHERE b.id IN :bagIds)")
-
+    @Query("SELECT DISTINCT ti "
+        + "FROM TariffsInfo ti "
+        + "JOIN ti.tariffLocations tl "
+        + "JOIN Bag b ON ti.id = b.tariffsInfo.id "
+        + "WHERE tl.location.id = :locationId "
+        + "AND b.id IN :bagIds "
+        + "AND tl.location.isDeleted = false")
     Optional<TariffsInfo> findTariffsInfoByBagIdAndLocationId(
         @Param("bagIds") List<Integer> bagIds, @Param("locationId") Long locationId);
 
@@ -145,9 +138,17 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      */
 
     @Query(nativeQuery = true,
-        value = "SELECT * FROM tariff_infos_receiving_employee_mapping te "
-            + "LEFT JOIN tariffs_info ti on ti.id = te.tariffs_info_id "
-            + "LEFT JOIN employees e on te.employee_id = e.id "
+        value = "SELECT ti.id, ti.tariff_status, "
+            + "ti.creator_id, "
+            + "ti.created_at, "
+            + "ti.courier_limits, "
+            + "ti.courier_id, "
+            + "ti.limit_description, "
+            + "ti.min, "
+            + "ti.max "
+            + "FROM tariff_infos_receiving_employee_mapping te "
+            + "LEFT JOIN tariffs_info ti ON ti.id = te.tariffs_info_id "
+            + "LEFT JOIN employees e ON te.employee_id = e.id "
             + "WHERE ti.id = :tariffId AND e.id = :employeeId")
     Optional<TariffsInfo> findTariffsInfoByIdForEmployee(Long tariffId, Long employeeId);
 
@@ -161,7 +162,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
     @Query(nativeQuery = true,
         value = "SELECT tariffs_info_id FROM tariffs_locations "
             + "WHERE location_id = :locationId")
-    Optional<Long> findTariffIdByLocationId(Long locationId);
+    Optional<List<Long>> findTariffIdByLocationId(Long locationId);
 
     /**
      * Retrieves the tariff ID associated with the specified location ID and courier
@@ -182,4 +183,24 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
             + "AND c.courier_status = 'ACTIVE' "
             + "AND c.id = :courierId ")
     Optional<Long> findTariffIdByLocationIdAndCourierId(Long locationId, Long courierId);
+
+    /**
+     * Retrieves the tariff associated with the specified location ID and courier
+     * ID.
+     *
+     * @param locationId The ID of the location to retrieve the tariff ID for.
+     * @param courierId  The ID of the courier to retrieve the tariff ID for.
+     * @return An Optional containing the tariff ID if found, otherwise an empty
+     *         Optional.
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT ti.* FROM tariffs_info ti "
+            + "JOIN tariffs_locations tl ON ti.id = tl.tariffs_info_id "
+            + "JOIN courier c ON c.id = ti.courier_id "
+            + "WHERE tl.location_id = :locationId "
+            + "AND tl.location_status = 'ACTIVE' "
+            + "AND ti.tariff_status = 'ACTIVE'"
+            + "AND c.courier_status = 'ACTIVE' "
+            + "AND c.id = :courierId ")
+    Optional<TariffsInfo> findTariffInfoByLocationIdAndCourierId(Long locationId, Long courierId);
 }

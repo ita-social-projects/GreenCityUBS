@@ -6,20 +6,22 @@ import greencity.enums.OrderStatusSortingTranslation;
 import greencity.enums.SortingTranslation;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.*;
+import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
 import static java.util.Objects.nonNull;
 
 @Repository
@@ -31,6 +33,7 @@ public class BigOrderTableRepository {
     private static final String ORDER_STATUS = "orderStatus";
     private static final String ORDER_PAYMENT_STATUS = "orderPaymentStatus";
     private static final String UKRAINIAN_LANGUAGE = "ua";
+    private static final int NULL_SORT_ORDER = 99;
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -46,7 +49,7 @@ public class BigOrderTableRepository {
     /**
      * Method returns Page of BigOrderTableViews with orders and additional info
      * related to order.
-     * 
+     *
      * @return Page
      * @author Kuzbyt Maksym
      */
@@ -68,9 +71,41 @@ public class BigOrderTableRepository {
 
         var sort = Sort.by(orderPage.getSortDirection(), orderPage.getSortBy());
         var pageable = PageRequest.of(orderPage.getPageNumber(), orderPage.getPageSize(), sort);
-        var ordersCount = getOrdersCount(predicate);
+        var ordersCount = getOrdersCount(searchCriteria, tariffsInfoIds);
 
         return new PageImpl<>(resultList, pageable, ordersCount);
+    }
+
+    public BigOrderTableViews findSingleOrderById(Long orderId) {
+        var criteriaQuery = criteriaBuilder.createQuery(BigOrderTableViews.class);
+        var orderRoot = criteriaQuery.from(BigOrderTableViews.class);
+
+        var predicate = criteriaBuilder.equal(orderRoot.get("id"), orderId);
+        criteriaQuery.select(orderRoot).where(predicate);
+
+        var typedQuery = entityManager.createQuery(criteriaQuery);
+        typedQuery.setMaxResults(1);
+
+        return typedQuery.getResultStream()
+            .findFirst()
+            .orElse(null);
+    }
+
+    /**
+     * Method returns total number of orders by list of tariffs.
+     *
+     * @param tariffsInfoIds {@link List} list of tariff ids.
+     * @return the total number of orders, represented as a {@code long}.
+     */
+    public long getOrdersCountByTariffs(List<Long> tariffsInfoIds) {
+        var countQuery = criteriaBuilder.createQuery(Long.class);
+        var countOrderRoot = countQuery.from(BigOrderTableViews.class);
+        var predicates = new ArrayList<Predicate>();
+
+        getPredicateByTariffsInfoId(predicates, tariffsInfoIds, countOrderRoot);
+        var countPredicate = criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+        countQuery.select(criteriaBuilder.count(countOrderRoot)).where(countPredicate);
+        return entityManager.createQuery(countQuery).getSingleResult();
     }
 
     private Predicate getPredicate(OrderSearchCriteria sc, Root<BigOrderTableViews> orderRoot,
@@ -146,10 +181,11 @@ public class BigOrderTableRepository {
         }
     }
 
-    private long getOrdersCount(Predicate predicate) {
+    private long getOrdersCount(OrderSearchCriteria searchCriteria, List<Long> tariffsInfoIds) {
         var countQuery = criteriaBuilder.createQuery(Long.class);
         var countOrderRoot = countQuery.from(BigOrderTableViews.class);
-        countQuery.select(criteriaBuilder.count(countOrderRoot)).where(predicate);
+        var countPredicate = getPredicate(searchCriteria, countOrderRoot, tariffsInfoIds);
+        countQuery.select(criteriaBuilder.count(countOrderRoot)).where(countPredicate);
         return entityManager.createQuery(countQuery).getSingleResult();
     }
 
@@ -195,6 +231,8 @@ public class BigOrderTableRepository {
         sortOrderList.forEach(status -> selectCase.when(
             criteriaBuilder.equal(root.get(orderPage.getSortBy()), status.name()),
             status.getSortOrder()));
+
+        selectCase.when(criteriaBuilder.isNull(root.get(orderPage.getSortBy())), NULL_SORT_ORDER);
 
         Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
         applySortingCriteria(orderPage, cq, sortOrder);

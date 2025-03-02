@@ -5,7 +5,7 @@ import greencity.exceptions.NotFoundException;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 import java.net.URI;
-import java.util.*;
+import java.util.List;
 
 @Service
 @EnableCaching

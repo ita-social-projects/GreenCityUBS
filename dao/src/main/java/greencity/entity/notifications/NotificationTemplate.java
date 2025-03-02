@@ -1,9 +1,30 @@
 package greencity.entity.notifications;
 
-import greencity.enums.*;
-import lombok.*;
+import greencity.enums.NotificationStatus;
+import greencity.enums.NotificationTime;
+import greencity.enums.NotificationTrigger;
+import greencity.enums.NotificationType;
+import greencity.enums.UserCategory;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.OneToMany;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +49,7 @@ public class NotificationTemplate {
         fetch = FetchType.LAZY,
         orphanRemoval = true)
     @Setter(AccessLevel.PRIVATE)
+    @Builder.Default
     private List<NotificationPlatform> notificationPlatforms = new ArrayList<>();
 
     @Column(nullable = false, name = "notification_type")
@@ -37,6 +59,10 @@ public class NotificationTemplate {
     @Column(nullable = false, name = "trigger")
     @Enumerated(EnumType.STRING)
     private NotificationTrigger trigger;
+
+    @Column(name = "user_category")
+    @Enumerated(EnumType.STRING)
+    private UserCategory userCategory;
 
     @Column(nullable = false, name = "time")
     @Enumerated(EnumType.STRING)
@@ -55,29 +81,12 @@ public class NotificationTemplate {
     @Column(name = "title_eng")
     private String titleEng;
 
-    /**
-     * helper method, that allows to save NotificationPlatform entity in database
-     * correctly.
-     *
-     * @param platform notification platform for NotificationTemplate
-     *                 {@link NotificationPlatform}
-     * @author Safarov Renat
-     */
-    public void addNotificationPlatform(NotificationPlatform platform) {
-        platform.setNotificationTemplate(this);
-        notificationPlatforms.add(platform);
-    }
+    @Builder.Default
+    @Column(name = "is_schedule_update_forbidden", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean isScheduleUpdateForbidden = false;
 
-    /**
-     * helper method, that allows to remove NotificationPlatform entity from
-     * database correctly.
-     *
-     * @param platform notification platform for NotificationTemplate
-     *                 {@link NotificationPlatform}
-     * @author Safarov Renat
-     */
-    public void removeNotificationPlatform(NotificationPlatform platform) {
-        platform.setNotificationTemplate(null);
-        notificationPlatforms.remove(platform);
+    public void addPlatforms(List<NotificationPlatform> notificationPlatforms) {
+        notificationPlatforms.forEach(platform -> platform.setNotificationTemplate(this));
+        this.notificationPlatforms.addAll(notificationPlatforms);
     }
 }

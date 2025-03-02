@@ -5,7 +5,6 @@ import greencity.dto.bag.BagForUserDto;
 import greencity.entity.order.OrderBag;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 
 @Component

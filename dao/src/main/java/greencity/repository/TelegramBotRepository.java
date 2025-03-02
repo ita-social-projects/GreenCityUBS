@@ -4,19 +4,10 @@ import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 
 @Repository
 public interface TelegramBotRepository extends CrudRepository<TelegramBot, Long> {
-    /**
-     * The method finds telegram bot by chatId.
-     *
-     * @param chatId {@link Long}.
-     * @return {@link TelegramBot}.
-     */
-    TelegramBot findByChatId(Long chatId);
-
     /**
      * The method finds telegram bot by user and chat id and isNotify.
      *

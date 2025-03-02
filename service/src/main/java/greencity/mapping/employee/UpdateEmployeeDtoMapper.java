@@ -3,10 +3,8 @@ package greencity.mapping.employee;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
-import greencity.entity.order.TariffsInfo;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
