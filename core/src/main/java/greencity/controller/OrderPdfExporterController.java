@@ -3,7 +3,7 @@ package greencity.controller;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
-import greencity.service.FileExporterService;
+import greencity.service.ubs.PdfExporterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Slf4j
 public class OrderPdfExporterController {
-    FileExporterService fileExporterService;
+    private final PdfExporterService pdfExporterService;
 
 
     @Operation(summary = "Returns PDF file with requested order.")
@@ -39,7 +39,7 @@ public class OrderPdfExporterController {
     public ResponseEntity<Resource> exportOrderPdf(@Parameter(hidden = true) @CurrentUserUuid String userUuid,
                                                    @Parameter @RequestParam Long orderId,
                                                    @Parameter @RequestParam @ValidLanguage Locale locale) {
-        Resource resource = fileExporterService.export(orderId, locale, userUuid);
+        Resource resource = pdfExporterService.exportById(orderId, locale, userUuid);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/pdf"));
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=order_details_%d_%s_%s.pdf"
