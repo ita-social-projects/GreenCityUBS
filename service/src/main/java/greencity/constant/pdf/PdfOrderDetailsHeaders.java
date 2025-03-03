@@ -1,10 +1,8 @@
 package greencity.constant.pdf;
 
-
 import greencity.constant.AppConstant;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -15,11 +13,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public enum PdfOrderDetailsHeaders {
     ORDER_NUMBER("№", "#"),
-    ORDER_DATE("Дата замовлення","Order date"),
+    ORDER_DATE("Дата замовлення", "Order date"),
     PAYMENT_DATE("Дата оплати", "Payment date"),
     ORDER_STATUS("Статус замовлення", "Order status"),
     PAYMENT_STATUS("Статус оплати", "Payment status"),
-    PAYMENT_AMOUNT("Сума замовлення",  "Payment amount"),
+    PAYMENT_AMOUNT("Сума замовлення", "Payment amount"),
     AMOUNT_DUE("Сума до оплати", "Amount-due");
 
     private final String nameUa;
@@ -31,9 +29,10 @@ public enum PdfOrderDetailsHeaders {
         }
         return headerName.nameUa;
     }
+
     public static List<String> getAllByLocale(Locale locale) {
         return Arrays.stream(PdfOrderDetailsHeaders.values())
-                .map(value -> getByLocale(value, locale))
-                .collect(Collectors.toList());
+            .map(value -> getByLocale(value, locale))
+            .collect(Collectors.toList());
     }
 }

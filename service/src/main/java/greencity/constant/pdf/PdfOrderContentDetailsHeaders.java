@@ -3,7 +3,6 @@ package greencity.constant.pdf;
 import greencity.constant.AppConstant;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -28,9 +27,10 @@ public enum PdfOrderContentDetailsHeaders {
         }
         return headerName.nameUa;
     }
+
     public static List<String> getAllByLocale(Locale locale) {
         return Arrays.stream(PdfOrderContentDetailsHeaders.values())
-                .map(value -> getByLocale(value, locale))
-                .collect(Collectors.toList());
+            .map(value -> getByLocale(value, locale))
+            .collect(Collectors.toList());
     }
 }

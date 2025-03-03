@@ -224,7 +224,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @return {@link ResponseEntity} with http status and exception message.
      */
     @ExceptionHandler(PdfFileExportingException.class)
-    public final ResponseEntity<ExceptionResponse> handlePdfFileExportingException(PdfFileExportingException e, WebRequest request) {
+    public final ResponseEntity<ExceptionResponse> handlePdfFileExportingException(PdfFileExportingException e,
+        WebRequest request) {
         log.error(e.getMessage(), e);
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);

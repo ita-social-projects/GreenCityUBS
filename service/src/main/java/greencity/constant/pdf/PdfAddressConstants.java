@@ -3,7 +3,6 @@ package greencity.constant.pdf;
 import greencity.constant.AppConstant;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
 import java.util.Locale;
 import java.util.Objects;
 

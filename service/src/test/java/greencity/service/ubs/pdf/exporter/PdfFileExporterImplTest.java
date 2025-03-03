@@ -1,51 +1,75 @@
 package greencity.service.ubs.pdf.exporter;
 
-import com.lowagie.text.pdf.PdfWriter;
-import greencity.service.ubs.UBSClientService;
+import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.parser.PdfTextExtractor;
+import greencity.ModelUtils;
+import greencity.constant.AppConstant;
+import greencity.dto.order.OrdersDataForUserDto;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.Test;
+import java.io.IOException;
+import java.util.Locale;
 
-import java.io.ByteArrayOutputStream;
-
-@ExtendWith(MockitoExtension.class)
 class PdfFileExporterImplTest {
-
-    @Mock
-    private PdfWriter pdfWriter;
-    @Mock
-    private UBSClientService ubsClientService;
-    @InjectMocks
-    private PdfFileExporterImpl pdfFileExporterService;
-
-    private ByteArrayOutputStream outputStream;
+    private PdfFileExporterImpl pdfFileExporter;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        outputStream = new ByteArrayOutputStream();
+        pdfFileExporter = new PdfFileExporterImpl();
     }
 
-//    @Test
-//    void testExportPdfSuccess() throws IOException, DocumentException {
-//        OrdersDataForUserDto orderToExport = ModelUtils.getOrdersDataForUserDto();
-//        Locale locale = Locale.ENGLISH;
-//        when(ubsClientService.getOrderForUser(anyString(), anyLong())).thenReturn(orderToExport);
-//        assertNotNull(resource);
-//        assertTrue(resource.contentLength() > 0);
-//    }
+    @Test
+    void exportValidEnPdf() throws IOException {
+        OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDto();
+        byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.ENGLISH);
+        PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(new PdfReader(pdfBytes));
+        String pdfText = pdfTextExtractor.getTextFromPage(1, true);
+        assertTrue(pdfText.contains("Order details"));
+        assertTrue(pdfText.contains("Comment to the order"));
+        assertTrue(pdfText.contains("Sender"));
+        assertTrue(pdfText.contains(orderData.getSender().getSenderEmail()));
+        assertTrue(pdfText.contains(orderData.getSender().getSenderPhone()));
+        assertTrue(pdfText.contains(String.join(" ",
+            orderData.getSender().getSenderName(),
+            orderData.getSender().getSenderSurname())));
+        assertTrue(pdfText.contains("The address of export of the ordered services"));
+        assertTrue(pdfText.contains(orderData.getOrderStatusEng()));
+        assertTrue(pdfText.contains("#"));
+        assertTrue(pdfText.contains(orderData.getPaymentStatusEng()));
+        assertTrue(pdfText.contains("Order date"));
+        assertTrue(pdfText.contains(orderData.getBags().get(0).getServiceEng()));
+    }
 
-//    @Test
-//    void testExportPdfThrowsException() {
-//        OrdersDataForUserDto orderToExport = ModelUtils.getOrdersDataForUserDto();
-//        Locale locale = Locale.ENGLISH;
-//        when(ubsClientService.getOrderForUser(anyString(), anyLong())).thenReturn(orderToExport);
-//        PdfFileExporterServiceImpl faultyExporter = spy(pdfFileExporterService);
-//        doThrow(new IOException("Test exception")).when(faultyExporter).export(anyLong(), any(Locale.class), anyString());
-//
-//        assertThrows(PdfFileExportingException.class, () -> faultyExporter.export(anyLong(), any(Locale.class), anyString()));
-//    }
+    @Test
+    void exportValidUaPdf() throws IOException {
+        OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDto();
+        byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.of(AppConstant.LOCALE_UA_NAME));
+        PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(new PdfReader(pdfBytes));
+        String pdfText = pdfTextExtractor.getTextFromPage(1, true);
+        assertTrue(pdfText.contains("Деталі замовлення"));
+        assertTrue(pdfText.contains("Коментар до замовлення"));
+        assertTrue(pdfText.contains("Відправник"));
+        assertTrue(pdfText.contains(orderData.getSender().getSenderEmail()));
+        assertTrue(pdfText.contains(orderData.getSender().getSenderPhone()));
+        assertTrue(pdfText.contains(String.join(" ",
+            orderData.getSender().getSenderName(),
+            orderData.getSender().getSenderSurname())));
+        assertTrue(pdfText.contains("Адреса вивезення відходів"));
+        assertTrue(pdfText.contains(orderData.getOrderStatus()));
+        assertTrue(pdfText.contains("№"));
+        assertTrue(pdfText.contains(orderData.getPaymentStatus()));
+        assertTrue(pdfText.contains("Дата оплати"));
+        assertTrue(pdfText.contains(orderData.getBags().getFirst().getService()));
+    }
+
+    @Test
+    void exportPdfWithEmptyComment() throws IOException {
+        OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDtoWithNullComment();
+        byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.of(AppConstant.LOCALE_UA_NAME));
+        PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(new PdfReader(pdfBytes));
+        String pdfText = pdfTextExtractor.getTextFromPage(1, true);
+        assertFalse(pdfText.contains("Коментар до замовлення"));
+    }
 }

@@ -3,14 +3,13 @@ package greencity.constant.pdf;
 import greencity.constant.AppConstant;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
 import java.util.Locale;
 import java.util.Objects;
 
 @Getter
 @RequiredArgsConstructor
 public enum PdfUnitsOfMeasurement {
-    VOLUME(" л"," l"),
+    VOLUME(" л", " l"),
     UNITS(" шт.", " pc."),
     CURRENCY(" грн", " UAH");
 

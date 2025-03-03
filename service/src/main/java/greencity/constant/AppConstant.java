@@ -14,7 +14,7 @@ public class AppConstant {
     public static final String DEFAULT_IMAGE =
         "https://csb10032000a548f571.blob.core.windows.net/allfiles/90370622-3311-4ff1-9462-20cc98a64d1ddefault_image.jpg";
     public static final String UBS_LINK = "/ubs";
-    public static final String UBS_EXPORT = UBS_LINK + "/export";
+    public static final String UBS_EXPORT = UBS_LINK + "/order/pdf/export";
     public static final String UBS_MANAG_LINK = "/ubs/management";
     public static final String ADMIN_LINK = "/admin";
     public static final String ADMIN_EMPL_LINK = "/admin/ubs-employee";
