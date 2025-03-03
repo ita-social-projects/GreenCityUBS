@@ -5,6 +5,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
+import greencity.exceptions.files.PdfFileExportingException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import greencity.exceptions.notification.IncorrectTemplateException;
@@ -214,5 +215,18 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         exceptionResponse.setMessage(ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
+    /**
+     * Exception handler for {@link PdfFileExportingException}.
+     *
+     * @param request {@link WebRequest} with error details.
+     * @return {@link ResponseEntity} with http status and exception message.
+     */
+    @ExceptionHandler(PdfFileExportingException.class)
+    public final ResponseEntity<ExceptionResponse> handlePdfFileExportingException(PdfFileExportingException e, WebRequest request) {
+        log.error(e.getMessage(), e);
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
     }
 }

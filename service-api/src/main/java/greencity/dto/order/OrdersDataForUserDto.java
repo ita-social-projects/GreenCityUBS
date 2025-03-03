@@ -4,11 +4,8 @@ import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.notification.SenderInfoDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-
+@ToString
 public class OrdersDataForUserDto {
     private Long id;
     private LocalDateTime dateForm;
