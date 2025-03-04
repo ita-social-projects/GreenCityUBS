@@ -24,10 +24,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.locations.City;
 import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.CancellationReason;
-import greencity.enums.EditType;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
+import greencity.enums.*;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
@@ -697,6 +694,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
             .amount(pointsToReturn)
             .date(LocalDateTime.now())
+            .reason(BonusReason.REFUND_CANCELED_ORDER)
             .user(user)
             .order(order)
             .build();
