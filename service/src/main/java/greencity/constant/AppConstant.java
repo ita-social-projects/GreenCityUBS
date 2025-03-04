@@ -19,6 +19,7 @@ public class AppConstant {
     public static final String ADMIN_EMPL_LINK = "/admin/ubs-employee";
     public static final String SUPER_ADMIN_LINK = "/ubs/superAdmin";
     public static final String USER_AGREEMENT_LINK = "/user-agreement";
+    public static final String UBS_EXPORT = UBS_LINK + "/order/pdf/export";
     public static final String ADMIN = "ADMIN";
     public static final String USER = "USER";
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";
@@ -36,4 +37,7 @@ public class AppConstant {
 
     public static final String UNKNOWN_ENG = "Unknown";
     public static final String UNKNOWN_UA = "Невідомо";
+
+    public static final String LOCALE_UA_NAME = "ua";
+    public static final String LOCALE_ENG_NAME = "en";
 }
