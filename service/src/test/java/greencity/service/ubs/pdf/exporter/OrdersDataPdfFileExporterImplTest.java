@@ -12,12 +12,12 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Locale;
 
-class PdfFileExporterImplTest {
-    private PdfFileExporterImpl pdfFileExporter;
+class OrdersDataPdfFileExporterImplTest {
+    private OrdersDataPdfFileExporterImpl pdfFileExporter;
 
     @BeforeEach
     void setUp() {
-        pdfFileExporter = new PdfFileExporterImpl();
+        pdfFileExporter = new OrdersDataPdfFileExporterImpl();
     }
 
     @Test
@@ -39,7 +39,7 @@ class PdfFileExporterImplTest {
         assertTrue(pdfText.contains("#"));
         assertTrue(pdfText.contains(orderData.getPaymentStatusEng()));
         assertTrue(pdfText.contains("Order date"));
-        assertTrue(pdfText.contains(orderData.getBags().get(0).getServiceEng()));
+        assertTrue(pdfText.contains(orderData.getBags().getFirst().getServiceEng()));
     }
 
     @Test

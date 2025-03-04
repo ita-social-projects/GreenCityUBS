@@ -12,7 +12,6 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.draw.LineSeparator;
-import greencity.constant.PdfExportingConstants;
 import greencity.constant.pdf.PdfAddressConstants;
 import greencity.constant.pdf.PdfFileHeaders;
 import greencity.constant.pdf.PdfUnitsOfMeasurement;
@@ -27,21 +26,13 @@ import org.springframework.stereotype.Service;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import static greencity.constant.AppConstant.LOCALE_ENG_NAME;
 import static greencity.constant.AppConstant.LOCALE_UA_NAME;
 import static greencity.constant.ErrorMessage.CANNOT_EXPORT_DATA_TO_PDF;
-import static greencity.constant.PdfExportingConstants.DEFAULT_PARAGRAPH_FONT_SIZE;
-import static greencity.constant.PdfExportingConstants.DEFAULT_TABLE_HEADER_FONT_SIZE;
-import static greencity.constant.PdfExportingConstants.DEFAULT_FONT_NAME;
-import static greencity.constant.PdfExportingConstants.ORDER_DETAILS_TABLE_COLUMN_WIDTH;
-import static greencity.constant.PdfExportingConstants.DEFAULT_SPACING_VALUE;
-import static greencity.constant.PdfExportingConstants.ORDER_CONTENT_TABLE_COLUMN_WIDTH;
-import static greencity.constant.PdfExportingConstants.DEFAULT_CELL_BACKGROUND_COLOR;
-import static greencity.constant.PdfExportingConstants.DEFAULT_HEADER_FONT_SIZE;
-import static greencity.constant.PdfExportingConstants.DATE_FORMATTER;
 import static greencity.constant.pdf.PdfFileHeaders.ADDRESS_INFO;
 import static greencity.constant.pdf.PdfFileHeaders.ORDER_COMMENT;
 import static greencity.constant.pdf.PdfFileHeaders.SENDER_INFO;
@@ -52,7 +43,17 @@ import static greencity.constant.pdf.PdfUnitsOfMeasurement.CURRENCY;
 
 @Service
 @AllArgsConstructor
-public class PdfFileExporterImpl implements FileExporter<OrdersDataForUserDto> {
+public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataForUserDto> {
+    private static final String DEFAULT_FONT_NAME = "Comic Sans MS";
+    private static final Color DEFAULT_CELL_BACKGROUND_COLOR = Color.WHITE;
+    private static final int DEFAULT_PARAGRAPH_FONT_SIZE = 10;
+    private static final int DEFAULT_TABLE_HEADER_FONT_SIZE = 11;
+    private static final int DEFAULT_HEADER_FONT_SIZE = 16;
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final int DEFAULT_SPACING_VALUE = 10;
+    private static final float[] ORDER_DETAILS_TABLE_COLUMN_WIDTH = new float[] {50, 95, 100, 100, 80, 100, 80};
+    private static final float[] ORDER_CONTENT_TABLE_COLUMN_WIDTH = new float[] {125, 120, 120, 120, 120};
+
     @Override
     public byte[] export(OrdersDataForUserDto objectToWrite, Locale locale) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
@@ -140,7 +141,7 @@ public class PdfFileExporterImpl implements FileExporter<OrdersDataForUserDto> {
             table.addCell(createCell(bag.getTotalPrice() + PdfUnitsOfMeasurement.getByLocale(CURRENCY, locale),
                 DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
         }
-        table.setSpacingBefore(PdfExportingConstants.DEFAULT_PARAGRAPH_FONT_SIZE);
+        table.setSpacingBefore(DEFAULT_PARAGRAPH_FONT_SIZE);
         return table;
     }
 
@@ -152,7 +153,7 @@ public class PdfFileExporterImpl implements FileExporter<OrdersDataForUserDto> {
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_CENTER);
         cell.setPadding(DEFAULT_SPACING_VALUE);
-        cell.setMinimumHeight(DEFAULT_SPACING_VALUE * 2);
+        cell.setMinimumHeight(DEFAULT_SPACING_VALUE * 2f);
         cell.setPadding(DEFAULT_SPACING_VALUE);
         cell.setUseBorderPadding(true);
         return cell;

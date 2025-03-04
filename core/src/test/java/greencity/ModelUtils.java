@@ -27,20 +27,7 @@ import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
-import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.ChangeOrderResponseDTO;
-import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.ExportDetailsDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderDetailStatusDto;
-import greencity.dto.order.OrderDetailStatusRequestDto;
-import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.RequestToChangeOrdersDataDto;
-import greencity.dto.order.UpdateAllOrderPageDto;
-import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.*;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
@@ -689,6 +676,16 @@ public class ModelUtils {
         return UpdateAddressDto.builder()
             .orderAddressExportDetails(orderAddressDetails)
             .orderId(1L)
+            .build();
+    }
+
+    public static ReadAddressByOrderDto getReadAddressByOrderDto() {
+        return ReadAddressByOrderDto.builder()
+            .comment("Comment")
+            .street("Street")
+            .entranceNumber("8")
+            .houseCorpus("9")
+            .district("District")
             .build();
     }
 }

@@ -8,6 +8,7 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.UBSManagementService;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -182,7 +183,17 @@ class AddressControllerTest {
 
     @Test
     void getAddressByOrder() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/read-address-order/{id}", 1L))
-            .andExpect(status().isOk());
+        Long orderId = 1L;
+        ReadAddressByOrderDto dto = ModelUtils.getReadAddressByOrderDto();
+        when(addressService.getAddressByOrderId(orderId)).thenReturn(dto);
+        this.mockMvc.perform(get(ubsLink + "/read-address-order/{id}", orderId))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.parseMediaType("application/xml;charset=UTF-8")))
+            .andExpect(xpath("//district").string(dto.getDistrict()))
+            .andExpect(xpath("//entranceNumber").string(dto.getEntranceNumber()))
+            .andExpect(xpath("//houseCorpus").string(dto.getHouseCorpus()))
+            .andExpect(xpath("//street").string(dto.getStreet()))
+            .andExpect(xpath("//comment").string(dto.getComment()));
+        verify(addressService).getAddressByOrderId(orderId);
     }
 }
