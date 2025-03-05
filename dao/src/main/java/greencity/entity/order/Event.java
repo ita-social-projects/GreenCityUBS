@@ -30,16 +30,16 @@ public class Event {
     private LocalDateTime eventDate;
 
     @Column(name = "event_name", nullable = false)
-    private String eventName;
+    private String eventNameUk;
 
     @Column(name = "author", nullable = false)
-    private String authorName;
+    private String authorNameUk;
 
     @Column(name = "event_name_eng", nullable = false)
-    private String eventNameEng;
+    private String eventNameEn;
 
     @Column(name = "author_eng", nullable = false)
-    private String authorNameEng;
+    private String authorNameEn;
 
     @ManyToOne
     private Order order;

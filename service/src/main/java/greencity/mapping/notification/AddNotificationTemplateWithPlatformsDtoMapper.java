@@ -22,8 +22,8 @@ public class AddNotificationTemplateWithPlatformsDtoMapper
         AddNotificationTemplateWithPlatformsDto template) {
         var notificationTemplate = NotificationTemplate
             .builder()
-            .title(template.getTitle())
-            .titleEng(template.getTitleEng())
+            .titleUk(template.getTitle())
+            .titleEn(template.getTitleEng())
             .schedule(template.getSchedule())
             .notificationType(NotificationType.CUSTOM)
             .trigger(NotificationTrigger.CUSTOM)
@@ -47,8 +47,8 @@ public class AddNotificationTemplateWithPlatformsDtoMapper
     private NotificationPlatform convertPlatform(
         AddNotificationPlatformDto platform) {
         return NotificationPlatform.builder()
-            .body(platform.getBody())
-            .bodyEng(platform.getBodyEng())
+            .bodyUk(platform.getBody())
+            .bodyEn(platform.getBodyEng())
             .notificationReceiverType(platform.getNotificationReceiverType())
             .notificationStatus(NotificationStatus.ACTIVE)
             .build();

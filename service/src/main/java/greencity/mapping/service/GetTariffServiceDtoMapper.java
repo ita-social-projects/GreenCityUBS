@@ -17,10 +17,10 @@ public class GetTariffServiceDtoMapper extends AbstractConverter<Bag, GetTariffS
             .price(convertIntoBills(source.getPrice()))
             .commission(convertIntoBills(source.getCommission()))
             .fullPrice(convertIntoBills(source.getFullPrice()))
-            .name(source.getName())
-            .nameEng(source.getNameEng())
-            .description(source.getDescription())
-            .descriptionEng(source.getDescriptionEng())
+            .name(source.getNameUk())
+            .nameEng(source.getNameEn())
+            .description(source.getDescriptionUk())
+            .descriptionEng(source.getDescriptionEn())
             .limitIncluded(source.getLimitIncluded())
             .build();
     }

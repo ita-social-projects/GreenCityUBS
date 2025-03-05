@@ -11,10 +11,10 @@ public class OrderAddressMapper extends AbstractConverter<Address, OrderAddress>
     @Override
     protected OrderAddress convert(Address address) {
         return OrderAddress.builder()
-            .region(address.getRegion())
-            .city(address.getCity())
-            .street(address.getStreet())
-            .district(address.getDistrict())
+            .regionUk(address.getRegionUk())
+            .cityUk(address.getCityUk())
+            .streetUk(address.getStreetUk())
+            .districtUk(address.getDistrictUk())
             .houseNumber(address.getHouseNumber())
             .houseCorpus(address.getHouseCorpus())
             .entranceNumber(address.getEntranceNumber())

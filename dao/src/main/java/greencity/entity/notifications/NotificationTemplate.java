@@ -76,10 +76,10 @@ public class NotificationTemplate {
     private NotificationStatus notificationStatus;
 
     @Column(name = "title")
-    private String title;
+    private String titleUk;
 
     @Column(name = "title_eng")
-    private String titleEng;
+    private String titleEn;
 
     @Builder.Default
     @Column(name = "is_schedule_update_forbidden", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")

@@ -23,16 +23,16 @@ class NotificationTemplateDtoMapperTest {
         assertEquals(notification.getId(), dto.getId());
         assertEquals(notification.getNotificationType(), mainInfoDto.getType());
         assertEquals(notification.getTrigger(), mainInfoDto.getTrigger());
-        assertEquals(notification.getTrigger().getDescription(), mainInfoDto.getTriggerDescription());
-        assertEquals(notification.getTrigger().getDescriptionEng(), mainInfoDto.getTriggerDescriptionEng());
+        assertEquals(notification.getTrigger().getDescriptionUk(), mainInfoDto.getTriggerDescription());
+        assertEquals(notification.getTrigger().getDescriptionEn(), mainInfoDto.getTriggerDescriptionEng());
         assertEquals(notification.getTime(), mainInfoDto.getTime());
-        assertEquals(notification.getTime().getDescription(), mainInfoDto.getTimeDescription());
-        assertEquals(notification.getTime().getDescriptionEng(), mainInfoDto.getTimeDescriptionEng());
+        assertEquals(notification.getTime().getDescriptionUk(), mainInfoDto.getTimeDescription());
+        assertEquals(notification.getTime().getDescriptionEn(), mainInfoDto.getTimeDescriptionEng());
         assertEquals(notification.getSchedule(), mainInfoDto.getSchedule());
-        assertEquals(notification.getTitle(), mainInfoDto.getTitle());
-        assertEquals(notification.getTitleEng(), mainInfoDto.getTitleEng());
+        assertEquals(notification.getTitleUk(), mainInfoDto.getTitle());
+        assertEquals(notification.getTitleEn(), mainInfoDto.getTitleEng());
         assertEquals(notification.getNotificationStatus(), mainInfoDto.getNotificationStatus());
-        assertEquals(notification.getUserCategory().getDescription(), mainInfoDto.getUserCategoryDescription());
-        assertEquals(notification.getUserCategory().getDescriptionEng(), mainInfoDto.getUserCategoryDescriptionEng());
+        assertEquals(notification.getUserCategory().getDescriptionUk(), mainInfoDto.getUserCategoryDescription());
+        assertEquals(notification.getUserCategory().getDescriptionEn(), mainInfoDto.getUserCategoryDescriptionEng());
     }
 }

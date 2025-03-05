@@ -39,17 +39,17 @@ public class Service {
     @Column(nullable = false)
     private Long price;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(nullable = false, name = "name")
+    private String nameUk;
 
-    @Column(nullable = false)
-    private String nameEng;
+    @Column(nullable = false, name = "name_eng")
+    private String nameEn;
 
-    @Column(nullable = false)
-    private String description;
+    @Column(nullable = false, name = "description")
+    private String descriptionUk;
 
-    @Column(nullable = false)
-    private String descriptionEng;
+    @Column(nullable = false, name = "description_eng")
+    private String descriptionEn;
 
     @Column(nullable = false)
     private LocalDate createdAt;

@@ -30,8 +30,8 @@ public class Position {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 30, unique = true)
-    private String name;
+    @Column(nullable = false, length = 30, unique = true, name = "name")
+    private String nameUk;
 
     @Column(nullable = false, length = 30, unique = true, name = "name_eng")
     private String nameEn;

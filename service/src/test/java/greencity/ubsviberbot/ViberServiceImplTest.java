@@ -114,7 +114,7 @@ class ViberServiceImplTest {
         SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
             .receiver(notification.getUser().getViberBot().getChatId())
             .type(MessageType.text)
-            .text(template.getTitle() + "\n\n" + template.getNotificationPlatforms().getFirst().getBody())
+            .text(template.getTitleUk() + "\n\n" + template.getNotificationPlatforms().getFirst().getBodyUk())
             .build();
 
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))

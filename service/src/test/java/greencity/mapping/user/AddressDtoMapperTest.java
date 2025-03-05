@@ -27,9 +27,9 @@ class AddressDtoMapperTest {
         Address actualAddress = addressDtoMapper.convert(addressDto);
 
         assertEquals(expectedAddress.getId(), actualAddress.getId());
-        assertEquals(expectedAddress.getCity(), actualAddress.getCity());
-        assertEquals(expectedAddress.getStreet(), actualAddress.getStreet());
-        assertEquals(expectedAddress.getDistrict(), actualAddress.getDistrict());
+        assertEquals(expectedAddress.getCityUk(), actualAddress.getCityUk());
+        assertEquals(expectedAddress.getStreetUk(), actualAddress.getStreetUk());
+        assertEquals(expectedAddress.getDistrictUk(), actualAddress.getDistrictUk());
         assertEquals(expectedAddress.getEntranceNumber(), actualAddress.getEntranceNumber());
         assertEquals(expectedAddress.getHouseNumber(), actualAddress.getHouseNumber());
         assertEquals(expectedAddress.getHouseCorpus(), actualAddress.getHouseCorpus());

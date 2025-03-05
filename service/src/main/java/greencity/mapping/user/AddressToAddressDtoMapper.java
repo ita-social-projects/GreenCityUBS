@@ -31,13 +31,13 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
     public AddressDto convert(Address address) {
         return AddressDto.builder()
             .id(address.getId())
-            .region(address.getRegion())
+            .region(address.getRegionUk())
             .regionEn(address.getRegionEn())
-            .city(address.getCity())
+            .city(address.getCityUk())
             .cityEn(address.getCityEn())
-            .street(address.getStreet())
+            .street(address.getStreetUk())
             .streetEn(address.getStreetEn())
-            .district(address.getDistrict())
+            .district(address.getDistrictUk())
             .districtEn(address.getDistrictEn())
             .entranceNumber(address.getEntranceNumber())
             .houseCorpus(address.getHouseCorpus())
@@ -47,7 +47,7 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
                 .latitude(address.getCoordinates().getLatitude())
                 .longitude(address.getCoordinates().getLongitude())
                 .build())
-            .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
+            .addressRegionDistrictList(getAllDistricts((address.getRegionUk()), address.getCityUk()))
             .actual(address.getActual())
             .build();
     }

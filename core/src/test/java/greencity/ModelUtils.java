@@ -437,14 +437,14 @@ public class ModelUtils {
             .type(NotificationType.UNPAID_ORDER)
             .trigger(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS)
             .triggerDescription(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS
-                .getDescription())
+                .getDescriptionUk())
             .triggerDescriptionEng(NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS
-                .getDescriptionEng())
+                .getDescriptionEn())
             .time(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID)
             .timeDescription(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID
-                .getDescription())
+                .getDescriptionUk())
             .timeDescriptionEng(NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID
-                .getDescriptionEng())
+                .getDescriptionEn())
             .schedule("0 0 18 * * ?")
             .title("Неопачене замовлення")
             .titleEng("Unpaid order")
@@ -629,12 +629,12 @@ public class ModelUtils {
         return dto;
     }
 
-    public static final String TEST_AGREEMENT_TEXT_UA = "Текст угоди українською";
+    public static final String TEST_AGREEMENT_TEXT_UK = "Текст угоди українською";
     public static final String TEST_AGREEMENT_TEXT_EN = "Agreement text in English";
 
     public static UserAgreementDto getUserAgreementDto() {
         return UserAgreementDto.builder()
-            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textUa(TEST_AGREEMENT_TEXT_UK)
             .textEn(TEST_AGREEMENT_TEXT_EN)
             .build();
     }
@@ -642,7 +642,7 @@ public class ModelUtils {
     public static UserAgreementDetailDto getUserAgreementDetailDto() {
         return UserAgreementDetailDto.builder()
             .id(1L)
-            .textUa(TEST_AGREEMENT_TEXT_UA)
+            .textUa(TEST_AGREEMENT_TEXT_UK)
             .textEn(TEST_AGREEMENT_TEXT_EN)
             .createdAt(LocalDateTime.now().minusDays(1))
             .build();

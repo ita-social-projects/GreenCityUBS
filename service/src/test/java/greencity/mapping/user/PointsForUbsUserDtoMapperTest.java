@@ -23,7 +23,7 @@ class PointsForUbsUserDtoMapperTest {
             .numberOfOrder(changeOfPoints.getOrder().getId())
             .amount(changeOfPoints.getAmount())
             .dateOfEnrollment(changeOfPoints.getDate())
-            .reasonUa(changeOfPoints.getReason().getDescriptionUa())
+            .reasonUa(changeOfPoints.getReason().getDescriptionUk())
             .reasonEn(changeOfPoints.getReason().getDescriptionEn())
             .build();
         PointsForUbsUserDto actual = pointsForUbsUserDtoMapper.convert(changeOfPoints);

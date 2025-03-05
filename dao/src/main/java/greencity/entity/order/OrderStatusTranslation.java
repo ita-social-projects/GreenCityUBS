@@ -23,10 +23,10 @@ public class OrderStatusTranslation {
     private Long id;
 
     @Column(name = "name", length = 30)
-    private String name;
+    private String nameUk;
 
     @Column(name = "name_eng", length = 30)
-    private String nameEng;
+    private String nameEn;
 
     @Column(name = "status_id")
     private Long statusId;

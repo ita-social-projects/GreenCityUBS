@@ -34,7 +34,7 @@ public class UserAgreement {
     private Long id;
 
     @Column(name = "text_ua", nullable = false, columnDefinition = "TEXT")
-    private String textUa;
+    private String textUk;
 
     @Column(name = "text_en", nullable = false, columnDefinition = "TEXT")
     private String textEn;

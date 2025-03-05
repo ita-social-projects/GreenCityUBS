@@ -22,9 +22,9 @@ class OrderAddressMapperTest {
         OrderAddress expectedOrderAddressResult = orderAddressMapper.convert(address);
 
         assertEquals(expectedOrderAddressResult.getId(), orderAddress.getId());
-        assertEquals(expectedOrderAddressResult.getCity(), orderAddress.getCity());
-        assertEquals(expectedOrderAddressResult.getStreet(), orderAddress.getStreet());
-        assertEquals(expectedOrderAddressResult.getDistrict(), orderAddress.getDistrict());
+        assertEquals(expectedOrderAddressResult.getCityUk(), orderAddress.getCityUk());
+        assertEquals(expectedOrderAddressResult.getStreetUk(), orderAddress.getStreetUk());
+        assertEquals(expectedOrderAddressResult.getDistrictUk(), orderAddress.getDistrictUk());
         assertEquals(expectedOrderAddressResult.getEntranceNumber(), orderAddress.getEntranceNumber());
         assertEquals(expectedOrderAddressResult.getHouseNumber(), orderAddress.getHouseNumber());
         assertEquals(expectedOrderAddressResult.getHouseCorpus(), orderAddress.getHouseCorpus());

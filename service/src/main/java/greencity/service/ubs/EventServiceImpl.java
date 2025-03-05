@@ -43,10 +43,10 @@ public class EventServiceImpl implements EventService {
         }
         Event event = new Event();
         event.setEventDate(LocalDateTime.now());
-        event.setEventName(eventName);
-        event.setAuthorName(eventAuthor);
-        event.setEventNameEng(getEventNameEng(eventName));
-        event.setAuthorNameEng(getAuthorNameEng(eventAuthor));
+        event.setEventNameUk(eventName);
+        event.setAuthorNameUk(eventAuthor);
+        event.setEventNameEn(getEventNameEng(eventName));
+        event.setAuthorNameEn(getAuthorNameEng(eventAuthor));
         getEventNameEngWithNumbers(eventName, event);
         getEventNameEngWithDate(eventName, event);
 
@@ -61,15 +61,15 @@ public class EventServiceImpl implements EventService {
 
     private void getEventNameEngWithDate(String eventName, Event event) {
         if (eventName.startsWith(OrderHistory.UPDATE_DATE_EXPORT)) {
-            event.setEventNameEng(
+            event.setEventNameEn(
                 OrderHistory.UPDATE_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
                     eventName.substring(OrderHistory.UPDATE_DATE_EXPORT.length())));
         } else if (eventName.startsWith(OrderHistory.SET_DATE_EXPORT)) {
-            event.setEventNameEng(
+            event.setEventNameEn(
                 OrderHistory.SET_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_EXPORT_DATA_ENG,
                     eventName.substring(OrderHistory.SET_DATE_EXPORT.length())));
         } else if (eventName.startsWith(OrderHistory.UPDATE_MIX_WASTE)) {
-            event.setEventNameEng(
+            event.setEventNameEn(
                 OrderHistory.SET_EXPORT_DETAILS_ENG + String.format(OrderHistory.UPDATE_ORDER_EXPORT_ENG,
                     eventName.substring(OrderHistory.UPDATE_MIX_WASTE.length())));
         }
@@ -77,22 +77,22 @@ public class EventServiceImpl implements EventService {
 
     private void getEventNameEngWithNumbers(String eventName, Event event) {
         if (eventName.startsWith(OrderHistory.ADD_PAYMENT_SYSTEM)) {
-            event.setEventNameEng(
+            event.setEventNameEn(
                 OrderHistory.ADD_PAYMENT_SYSTEM_ENG + eventName.substring(OrderHistory.ADD_PAYMENT_SYSTEM.length()));
         } else if (eventName.startsWith(OrderHistory.DELETE_PAYMENT_MANUALLY)) {
-            event.setEventNameEng(OrderHistory.DELETE_PAYMENT_MANUALLY_ENG
+            event.setEventNameEn(OrderHistory.DELETE_PAYMENT_MANUALLY_ENG
                 + eventName.substring(OrderHistory.DELETE_PAYMENT_MANUALLY.length()));
         } else if (eventName.startsWith(OrderHistory.UPDATE_PAYMENT_MANUALLY)) {
-            event.setEventNameEng(OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG
+            event.setEventNameEn(OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG
                 + eventName.substring(OrderHistory.UPDATE_PAYMENT_MANUALLY.length()));
         } else if (eventName.startsWith(OrderHistory.ADD_PAYMENT_MANUALLY)) {
-            event.setEventNameEng(OrderHistory.ADD_PAYMENT_MANUALLY_ENG
+            event.setEventNameEn(OrderHistory.ADD_PAYMENT_MANUALLY_ENG
                 + eventName.substring(OrderHistory.ADD_PAYMENT_MANUALLY.length()));
         } else if (eventName.startsWith(OrderHistory.ADD_NEW_ECO_NUMBER)) {
-            event.setEventNameEng(OrderHistory.ADD_NEW_ECO_NUMBER_ENG
+            event.setEventNameEn(OrderHistory.ADD_NEW_ECO_NUMBER_ENG
                 + eventName.substring(OrderHistory.ADD_NEW_ECO_NUMBER.length()));
         } else if (eventName.startsWith(OrderHistory.DELETED_ECO_NUMBER)) {
-            event.setEventNameEng(OrderHistory.DELETED_ECO_NUMBER_ENG
+            event.setEventNameEn(OrderHistory.DELETED_ECO_NUMBER_ENG
                 + eventName.substring(OrderHistory.DELETED_ECO_NUMBER.length()));
         }
     }

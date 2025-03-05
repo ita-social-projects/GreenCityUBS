@@ -15,10 +15,10 @@ public class TariffServiceDtoMapper extends AbstractConverter<Bag, TariffService
             .capacity(source.getCapacity())
             .price(convertIntoBills(source.getPrice()))
             .commission(convertIntoBills(source.getCommission()))
-            .name(source.getName())
-            .nameEng(source.getNameEng())
-            .description(source.getDescription())
-            .descriptionEng(source.getDescriptionEng())
+            .name(source.getNameUk())
+            .nameEng(source.getNameEn())
+            .description(source.getDescriptionUk())
+            .descriptionEng(source.getDescriptionEn())
             .build();
     }
 

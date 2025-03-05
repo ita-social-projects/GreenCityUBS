@@ -542,11 +542,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderStatus[] orderStatuses = OrderStatus.values();
         for (OrderStatus o : orderStatuses) {
             String ua = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue())
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getName();
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameUk();
             String en = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue())
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameEng();
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameEn();
             optionForColumnDTOS
-                .add(OptionForColumnDTO.builder().key(o.toString()).ua(ua).en(en).filtered(false).build());
+                .add(OptionForColumnDTO.builder().key(o.toString()).uk(ua).en(en).filtered(false).build());
         }
         return optionForColumnDTOS;
     }
@@ -560,8 +560,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_PAYMENT_STATUS_NOT_FOUND));
             optionForColumnDTOS.add(OptionForColumnDTO.builder()
                 .key(p.name())
-                .ua(orderPaymentStatusTranslation.getTranslationValue())
-                .en(orderPaymentStatusTranslation.getTranslationsValueEng())
+                .uk(orderPaymentStatusTranslation.getTranslationValueUk())
+                .en(orderPaymentStatusTranslation.getTranslationsValueEn())
                 .build());
         }
         return optionForColumnDTOS;
@@ -569,9 +569,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<OptionForColumnDTO> blockingStatusListForDevelopStage() {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
-        optionForColumnDTOS.add(OptionForColumnDTO.builder().key("blocked").ua("Заблоковано").en("Blocked").build());
+        optionForColumnDTOS.add(OptionForColumnDTO.builder().key("blocked").uk("Заблоковано").en("Blocked").build());
         optionForColumnDTOS
-            .add(OptionForColumnDTO.builder().key("notBlocked").ua("Не заблоковано").en("Not blocked").build());
+            .add(OptionForColumnDTO.builder().key("notBlocked").uk("Не заблоковано").en("Not blocked").build());
         return optionForColumnDTOS;
     }
 
@@ -638,7 +638,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         optionForColumnDTOS.add(OptionForColumnDTO.builder()
             .key(WITHOUT_ID)
-            .ua(nameUa)
+            .uk(nameUa)
             .en(nameEn)
             .build());
         return optionForColumnDTOS;
@@ -764,8 +764,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.getEvents().add(Event.builder()
                     .order(existedOrder)
                     .eventDate(LocalDateTime.now())
-                    .authorName(employee.getFirstName() + "  " + employee.getLastName())
-                    .eventName(OrderHistory.ORDER_CANCELLED + "  " + value)
+                    .authorNameUk(employee.getFirstName() + "  " + employee.getLastName())
+                    .eventNameUk(OrderHistory.ORDER_CANCELLED + "  " + value)
                     .build());
                 existedOrder.setCancellationComment(value);
                 orderLockService.unlockOrder(existedOrder);
@@ -790,8 +790,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.getEvents().add(Event.builder()
                     .order(existedOrder)
                     .eventDate(LocalDateTime.now())
-                    .authorName(employee.getFirstName() + "  " + employee.getLastName())
-                    .eventName(OrderHistory.ADD_ADMIN_COMMENT + "  " + value)
+                    .authorNameUk(employee.getFirstName() + "  " + employee.getLastName())
+                    .eventNameUk(OrderHistory.ADD_ADMIN_COMMENT + "  " + value)
                     .build());
                 existedOrder.setAdminComment(value);
                 orderLockService.unlockOrder(existedOrder);

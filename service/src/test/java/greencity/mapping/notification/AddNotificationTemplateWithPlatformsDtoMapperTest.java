@@ -28,12 +28,12 @@ class AddNotificationTemplateWithPlatformsDtoMapperTest {
         assertEquals(NotificationTrigger.CUSTOM, notification.getTrigger());
         assertEquals(NotificationTime.IMMEDIATELY, notification.getTime());
         assertEquals(dto.getSchedule(), notification.getSchedule());
-        assertEquals(dto.getTitle(), notification.getTitle());
-        assertEquals(dto.getTitleEng(), notification.getTitleEng());
+        assertEquals(dto.getTitle(), notification.getTitleUk());
+        assertEquals(dto.getTitleEng(), notification.getTitleEn());
         assertEquals(dto.getUserCategory(), notification.getUserCategory());
 
         assertEquals(platformDto.getNotificationReceiverType(), platform.getNotificationReceiverType());
-        assertEquals(platformDto.getBody(), platform.getBody());
-        assertEquals(platformDto.getBodyEng(), platform.getBodyEng());
+        assertEquals(platformDto.getBody(), platform.getBodyUk());
+        assertEquals(platformDto.getBodyEng(), platform.getBodyEn());
     }
 }

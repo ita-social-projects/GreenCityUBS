@@ -40,10 +40,10 @@ public class NotificationPlatform {
     private NotificationTemplate notificationTemplate;
 
     @Column(name = "body")
-    private String body;
+    private String bodyUk;
 
     @Column(name = "body_eng")
-    private String bodyEng;
+    private String bodyEn;
 
     @Column(nullable = false, name = "notification_receiver_type")
     @Enumerated(EnumType.STRING)

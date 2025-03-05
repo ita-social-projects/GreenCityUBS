@@ -395,19 +395,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private AddressExportDetailsDto getAddressDtoForAdminPage(OrderAddress address) {
         return AddressExportDetailsDto.builder()
             .id(address.getId())
-            .city(address.getCity())
+            .city(address.getCityUk())
             .cityEn(address.getCityEn())
-            .street(address.getStreet())
+            .street(address.getStreetUk())
             .streetEn(address.getStreetEn())
-            .district(address.getDistrict())
+            .district(address.getDistrictUk())
             .districtEn(address.getDistrictEn())
             .entranceNumber(address.getEntranceNumber())
             .houseCorpus(address.getHouseCorpus())
             .houseNumber(address.getHouseNumber())
-            .region(address.getRegion())
+            .region(address.getRegionUk())
             .regionEn(address.getRegionEn())
             .addressRegionDistrictList(
-                locationApiService.getAllDistrictsInCityByNames(address.getRegion(), address.getCity()).stream()
+                locationApiService.getAllDistrictsInCityByNames(address.getRegionUk(), address.getCityUk()).stream()
                     .map(p -> modelMapper.map(p, DistrictDto.class))
                     .collect(Collectors.toList()))
             .build();
@@ -428,9 +428,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
         String currentOrderStatusTranslation =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameUk() : orderStatus.name();
         String currentOrderStatusTranslationEng =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEn()
                 : orderStatus.name();
 
         OrderPaymentStatus orderStatusPayment =
@@ -447,8 +447,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation())
             .orderStatus(order.map(Order::getOrderStatus).orElse(null))
             .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
-            .orderPaymentStatusName(currentOrderStatusPaymentTranslation.getTranslationValue())
-            .orderPaymentStatusNameEng(currentOrderStatusPaymentTranslation.getTranslationsValueEng())
+            .orderPaymentStatusName(currentOrderStatusPaymentTranslation.getTranslationValueUk())
+            .orderPaymentStatusNameEng(currentOrderStatusPaymentTranslation.getTranslationsValueEn())
             .orderStatusName(currentOrderStatusTranslation)
             .orderStatusNameEng(currentOrderStatusTranslationEng)
             .adminComment(currentOrder.getAdminComment())
@@ -472,8 +472,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
                 setValueForOrderStatusIsNotTakenOutOrDoneOrCancelledAsTrue(orderStatusTranslation,
                     orderStatusesTranslationDto);
-                orderStatusesTranslationDto.setUa(orderStatusTranslation.getName());
-                orderStatusesTranslationDto.setEng(orderStatusTranslation.getNameEng());
+                orderStatusesTranslationDto.setUa(orderStatusTranslation.getNameUk());
+                orderStatusesTranslationDto.setEng(orderStatusTranslation.getNameEn());
                 if (!Objects.equals(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()),
                     "")) {
                     OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId());
@@ -515,8 +515,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (!orderStatusPaymentTranslations.isEmpty()) {
             for (OrderPaymentStatusTranslation orderStatusPaymentTranslation : orderStatusPaymentTranslations) {
                 OrderPaymentStatusesTranslationDto translationDto = new OrderPaymentStatusesTranslationDto();
-                translationDto.setUa(orderStatusPaymentTranslation.getTranslationValue());
-                translationDto.setEng(orderStatusPaymentTranslation.getTranslationsValueEng());
+                translationDto.setUa(orderStatusPaymentTranslation.getTranslationValueUk());
+                translationDto.setEng(orderStatusPaymentTranslation.getTranslationsValueEn());
                 if (!Objects.equals(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
                     orderStatusPaymentTranslation.getOrderPaymentStatusId()), "")) {
                     translationDto.setKey(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
@@ -686,7 +686,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
-                    values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
+                    values.append(bag.getNameUk()).append(" ").append(capacity).append(" л: ")
                         .append(confirmWasteWas.orElse(initialAmount.orElse(0L)))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
@@ -715,7 +715,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                         countOfChanges++;
                     }
-                    values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
+                    values.append(bag.getNameUk()).append(" ").append(capacity).append(" л: ")
                         .append(exporterWasteWas.orElse(confirmWasteWas.orElse(0L)))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
@@ -1144,7 +1144,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             newList.forEach(x -> currentPositionEmployee.put(
                 PositionDto.builder()
                     .id(x.getPosition().getId())
-                    .name(x.getPosition().getName())
+                    .name(x.getPosition().getNameUk())
                     .nameEn(x.getPosition().getNameEn())
                     .build(),
                 x.getEmployee().getFirstName().concat(" ").concat(x.getEmployee().getLastName())));
@@ -1155,7 +1155,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         for (Position position : positions) {
             PositionDto positionDto = PositionDto.builder()
                 .id(position.getId())
-                .name(position.getName())
+                .name(position.getNameUk())
                 .nameEn(position.getNameEn())
                 .build();
             allPositionEmployee.put(positionDto, listAvailableEmployeeWithPosition(order, position)

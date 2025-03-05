@@ -155,7 +155,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static greencity.ModelUtils.KYIV_REGION_EN;
-import static greencity.ModelUtils.KYIV_REGION_UA;
+import static greencity.ModelUtils.KYIV_REGION_UK;
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
 import static greencity.ModelUtils.TEST_CREATE_ADDRESS_DTO;
 import static greencity.ModelUtils.TEST_EMAIL;
@@ -2060,14 +2060,14 @@ class UBSClientServiceImplTest {
 
     private List<Address> getTestAddresses(User user) {
         Address address1 = Address.builder()
-            .addressStatus(AddressStatus.NEW).id(13L).city("Kyiv").district("Svyatoshyn")
-            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
+            .addressStatus(AddressStatus.NEW).id(13L).cityUk("Kyiv").districtUk("Svyatoshyn")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").streetUk("Peremohy av.")
             .user(user).actual(true).coordinates(new Coordinates(12.5, 34.5))
             .build();
 
         Address address2 = Address.builder()
-            .addressStatus(AddressStatus.NEW).id(42L).city("Lviv").district("Syhiv")
-            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Lvivska st.")
+            .addressStatus(AddressStatus.NEW).id(42L).cityUk("Lviv").districtUk("Syhiv")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").streetUk("Lvivska st.")
             .user(user).actual(true).coordinates(new Coordinates(13.5, 36.5))
             .build();
 
@@ -2196,7 +2196,7 @@ class UBSClientServiceImplTest {
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
 
-        assertEquals(KYIV_REGION_UA, actualWithSearchAddress.getAddressList().getFirst().getRegion());
+        assertEquals(KYIV_REGION_UK, actualWithSearchAddress.getAddressList().getFirst().getRegion());
 
         verify(userRepository, times(2)).findByUuid(user.getUuid());
         verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());

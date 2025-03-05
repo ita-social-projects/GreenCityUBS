@@ -214,7 +214,7 @@ class OrdersAdminsPageServiceImplTest {
     void getParametersForOrdersTest() {
 
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
-        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEng("en");
+        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEn("en");
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
 
         List<ReceivingStationDto> receivingStations = new ArrayList<>();
@@ -1000,8 +1000,8 @@ class OrdersAdminsPageServiceImplTest {
         Event event = Event.builder()
             .order(expectedSavedOrder)
             .eventDate(dateTime)
-            .authorName(employee.getFirstName() + "  " + employee.getLastName())
-            .eventName(OrderHistory.ORDER_CANCELLED + "  " + newComment)
+            .authorNameUk(employee.getFirstName() + "  " + employee.getLastName())
+            .eventNameUk(OrderHistory.ORDER_CANCELLED + "  " + newComment)
             .build();
 
         expectedSavedOrder.getEvents().add(event);

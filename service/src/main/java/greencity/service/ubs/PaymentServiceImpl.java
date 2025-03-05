@@ -49,8 +49,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
-import static greencity.constant.AppConstant.PAYMENT_REFUND_ENG;
+import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
+import static greencity.constant.AppConstant.PAYMENT_REFUND_EN;
 import static greencity.constant.ErrorMessage.CANNOT_REFUND_MONEY;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND;
@@ -234,7 +234,7 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
         order.getPayment().add(
-            buildPaymentForRefund(-amount, PAYMENT_REFUND_ENG, order));
+            buildPaymentForRefund(-amount, PAYMENT_REFUND_EN, order));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
         try {
             refundRepository.save(Refund.builder()
@@ -262,7 +262,7 @@ public class PaymentServiceImpl implements PaymentService {
         checkOverpayment(amount);
         User currentUser = order.getUser();
         order.getPayment().add(
-            buildPaymentForRefund(-amount, ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG, order));
+            buildPaymentForRefund(-amount, ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN, order));
         transferPointsToUser(order, currentUser, amount, reason);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
         orderRepository.save(order);

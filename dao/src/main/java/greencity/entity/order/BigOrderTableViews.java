@@ -30,10 +30,14 @@ public class BigOrderTableViews {
     private String senderPhone;
     private String senderEmail;
     private Integer violationsAmount;
-    private String region;
-    private String city;
-    private String district;
-    private String address;
+    @Column(name = "region")
+    private String regionUk;
+    @Column(name = "city")
+    private String cityUk;
+    @Column(name = "district")
+    private String districtUk;
+    @Column(name = "address")
+    private String addressUk;
     private String regionEn;
     private String cityEn;
     private String districtEn;
@@ -46,9 +50,9 @@ public class BigOrderTableViews {
     @Column(name = "textile_waste_20")
     private Long textileWaste20;
     @Column(name = "other_packages")
-    private String otherPackages;
+    private String otherPackagesUk;
     @Column(name = "other_packages_eng")
-    private String otherPackagesEng;
+    private String otherPackagesEn;
     private Long totalOrderSum;
     private String orderCertificateCode;
     private Long generalDiscount;

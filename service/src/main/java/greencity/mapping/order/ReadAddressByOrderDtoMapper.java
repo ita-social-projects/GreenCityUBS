@@ -21,10 +21,10 @@ public class ReadAddressByOrderDtoMapper extends AbstractConverter<OrderAddress,
     @Override
     protected ReadAddressByOrderDto convert(OrderAddress address) {
         return ReadAddressByOrderDto.builder()
-            .district(address.getDistrict())
+            .district(address.getDistrictUk())
             .entranceNumber(address.getEntranceNumber())
             .houseCorpus(address.getHouseCorpus())
-            .street(address.getStreet())
+            .street(address.getStreetUk())
             .houseNumber(address.getHouseNumber())
             .comment(address.getAddressComment())
             .build();

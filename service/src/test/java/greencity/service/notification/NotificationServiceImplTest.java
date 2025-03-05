@@ -735,14 +735,14 @@ class NotificationServiceImplTest {
 
         private void setEventsToOrder(Order order, String... eventNames) {
             List<Event> events = Stream.of(eventNames)
-                .map(e -> Event.builder().eventName(e).build())
+                .map(e -> Event.builder().eventNameUk(e).build())
                 .toList();
             order.setEvents(events);
         }
 
         private void setEventsToOrder(Order order, List<String> eventNames) {
             List<Event> events = eventNames.stream()
-                .map(e -> Event.builder().eventName(e).build())
+                .map(e -> Event.builder().eventNameUk(e).build())
                 .toList();
             order.setEvents(events);
         }
@@ -1135,7 +1135,7 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.emptyMap());
-        order.setEvents(List.of(Event.builder().eventName(ORDER_FORMED).build()));
+        order.setEvents(List.of(Event.builder().eventNameUk(ORDER_FORMED).build()));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
@@ -1160,10 +1160,10 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusDoneDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.singletonMap(1, 1));
-        Event formed = Event.builder().eventName(ORDER_FORMED).build();
-        Event adjustment = Event.builder().eventName(ORDER_ADJUSTMENT).build();
-        Event confirmed = Event.builder().eventName(ORDER_CONFIRMED).build();
-        Event onTheRoad = Event.builder().eventName(ORDER_ON_THE_ROUTE).build();
+        Event formed = Event.builder().eventNameUk(ORDER_FORMED).build();
+        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT).build();
+        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED).build();
+        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE).build();
         order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
@@ -1191,10 +1191,10 @@ class NotificationServiceImplTest {
         order.setConfirmedQuantity(Collections.emptyMap());
         order.setExportedQuantity(Collections.emptyMap());
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
-        Event formed = Event.builder().eventName(ORDER_FORMED).build();
-        Event adjustment = Event.builder().eventName(ORDER_ADJUSTMENT).build();
-        Event confirmed = Event.builder().eventName(ORDER_CONFIRMED).build();
-        Event onTheRoad = Event.builder().eventName(ORDER_ON_THE_ROUTE).build();
+        Event formed = Event.builder().eventNameUk(ORDER_FORMED).build();
+        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT).build();
+        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED).build();
+        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE).build();
         order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
@@ -1222,10 +1222,10 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusDoneDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.singletonMap(1, 1));
-        Event formed = Event.builder().eventName(ORDER_FORMED).build();
-        Event adjustment = Event.builder().eventName(ORDER_ADJUSTMENT).build();
-        Event confirmed = Event.builder().eventName(ORDER_CONFIRMED).build();
-        Event onTheRoad = Event.builder().eventName(ORDER_ON_THE_ROUTE).build();
+        Event formed = Event.builder().eventNameUk(ORDER_FORMED).build();
+        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT).build();
+        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED).build();
+        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE).build();
         order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
@@ -1253,7 +1253,7 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.emptyMap());
-        order.setEvents(List.of(Event.builder().eventName(ORDER_FORMED).build()));
+        order.setEvents(List.of(Event.builder().eventNameUk(ORDER_FORMED).build()));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
@@ -1284,7 +1284,7 @@ class NotificationServiceImplTest {
         NotificationDto result = NotificationServiceImpl.createNotificationDto(TEST_USER_NOTIFICATION, language,
             NotificationReceiverType.MOBILE, templateRepository, 5L);
 
-        assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitle(), result.getTitle());
+        assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitleUk(), result.getTitle());
     }
 
     @Test
@@ -1297,7 +1297,7 @@ class NotificationServiceImplTest {
         NotificationDto result = NotificationServiceImpl.createNotificationDto(TEST_USER_NOTIFICATION, language,
             NotificationReceiverType.MOBILE, templateRepository, 5L);
 
-        assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitleEng(), result.getTitle());
+        assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitleEn(), result.getTitle());
     }
 
     @Test
@@ -1318,7 +1318,7 @@ class NotificationServiceImplTest {
         NotificationDto result = NotificationServiceImpl.createNotificationDto(testUserNotification, language,
             NotificationReceiverType.MOBILE, templateRepository, 5L);
 
-        assertEquals(testNotificationTemplate.getTitleEng(), result.getTitle());
+        assertEquals(testNotificationTemplate.getTitleEn(), result.getTitle());
         verify(templateRepository).findNotificationTemplateByIdAndNotificationReceiverType(any(), any());
     }
 

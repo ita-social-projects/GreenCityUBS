@@ -178,7 +178,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
+import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
@@ -481,8 +481,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .capacity(source.getCapacity())
             .price(BigDecimal.valueOf(source.getFullPrice())
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
-            .name(source.getName())
-            .nameEng(source.getNameEng())
+            .name(source.getNameUk())
+            .nameEng(source.getNameEn())
             .limitedIncluded(source.getLimitIncluded())
             .quantity(getQuantityOfBagsByBagIdAndOrderId(orderId, source.getId()))
             .build();
@@ -648,10 +648,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private BasketOrder convert(OrderBag bag) {
         return BasketOrder.builder()
-            .name(bag.getName())
+            .name(bag.getNameUk())
             .quantity(bag.getAmount().floatValue())
             .sum((int) (bag.getPrice() * bag.getAmount()))
-            .code(bag.getName())
+            .code(bag.getNameUk())
             .build();
     }
 
@@ -844,13 +844,13 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
         Optional<Region> optionalRegion =
-            regionRepository.findRegionByNameEnOrNameUk(address.getRegionEn(), address.getRegion());
+            regionRepository.findRegionByNameEnOrNameUk(address.getRegionEn(), address.getRegionUk());
 
         if (optionalRegion.isPresent()) {
             address.setRegionId(optionalRegion.get());
 
             Optional<City> optionalCity = cityRepository
-                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getCity(),
+                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getCityUk(),
                     address.getCityEn());
 
             City city;
@@ -865,7 +865,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             address.setCityId(city);
 
             Optional<District> optionalDistrict = districtRepository
-                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getDistrictEn(), address.getDistrict());
+                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getDistrictEn(), address.getDistrictUk());
 
             if (optionalDistrict.isPresent()) {
                 address.setDistrictId(optionalDistrict.get());
@@ -1013,7 +1013,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Double amountBeforePayment = convertCoinsIntoBills(amountWithDiscountInCoins - paidAmountInCoins);
 
         double refundedBonuses = order.getPayment().stream()
-            .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG.equals(payment.getReceiptLink()))
+            .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN.equals(payment.getReceiptLink()))
             .map(payment -> payment.getAmount().doubleValue())
             .reduce(0.0, Double::sum);
 
@@ -1026,8 +1026,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .id(order.getId())
             .dateForm(order.getOrderDate())
             .datePaid(order.getOrderDate())
-            .orderStatus(orderStatusTranslation.getName())
-            .orderStatusEng(orderStatusTranslation.getNameEng())
+            .orderStatus(orderStatusTranslation.getNameUk())
+            .orderStatusEng(orderStatusTranslation.getNameEn())
             .orderComment(order.getComment())
             .bags(bagForUserDtos)
             .additionalOrders(order.getAdditionalOrders())
@@ -1040,8 +1040,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .bonuses(order.getPointsToUse().doubleValue())
             .sender(senderInfoDtoBuilder(order))
             .address(addressInfoDtoBuilder(order))
-            .paymentStatus(paymentStatusTranslation.getTranslationValue())
-            .paymentStatusEng(paymentStatusTranslation.getTranslationsValueEng())
+            .paymentStatus(paymentStatusTranslation.getTranslationValueUk())
+            .paymentStatusEng(paymentStatusTranslation.getTranslationsValueEn())
             .build();
     }
 
@@ -1075,14 +1075,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
         var address = order.getUbsUser().getOrderAddress();
         return AddressInfoDto.builder()
-            .addressCity(address.getCity())
+            .addressCity(address.getCityUk())
             .addressCityEng(address.getCityEn())
             .addressComment(address.getAddressComment())
-            .addressDistinct(address.getDistrict())
+            .addressDistinct(address.getDistrictUk())
             .addressDistinctEng(address.getDistrictEn())
-            .addressRegion(address.getRegion())
+            .addressRegion(address.getRegionUk())
             .addressRegionEng(address.getRegionEn())
-            .addressStreet(address.getStreet())
+            .addressStreet(address.getStreetUk())
             .addressStreetEng(address.getStreetEn())
             .houseCorpus(address.getHouseCorpus())
             .houseNumber(address.getHouseNumber())
@@ -1298,7 +1298,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderTimeout(VALIDITY_DURATION_TEN_DAYS)
             .productName(order.getOrderBags().stream()
                 .filter(bag -> bag.getAmount() != 0)
-                .map(orderBag -> orderBag.getName().trim())
+                .map(orderBag -> orderBag.getNameUk().trim())
                 .flatMap(name -> Arrays.stream(name.split(",")))
                 .toList())
             .productPrice(order.getOrderBags().stream()
@@ -1477,8 +1477,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .bag(bag)
             .capacity(bag.getCapacity())
             .price(bag.getFullPrice())
-            .name(bag.getName())
-            .nameEng(bag.getNameEng())
+            .nameUk(bag.getNameUk())
+            .nameEn(bag.getNameEn())
             .build();
     }
 
@@ -1549,8 +1549,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void localizeEventNames(List<Event> events, String language) {
         if (LANGUAGE_EN.equals(language)) {
             events.forEach(event -> {
-                event.setEventName(event.getEventNameEng());
-                event.setAuthorName(event.getAuthorNameEng());
+                event.setEventNameUk(event.getEventNameEn());
+                event.setAuthorNameUk(event.getAuthorNameEn());
             });
         } else if (!LANGUAGE_UA.equals(language)) {
             throw new BadRequestException("Unexpected value: " + language);

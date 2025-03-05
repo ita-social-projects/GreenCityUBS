@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class AddressValidator implements ConstraintValidator<ValidAddress, CreateAddressRequestDto> {
     private final GoogleApiService googleApiService;
     private static final double DELTA = 0.007;
-    private static final int LANGUAGE_CODE_FOR_UA = 0;
+    private static final int LANGUAGE_CODE_FOR_UK = 0;
 
     @Override
     public boolean isValid(CreateAddressRequestDto createAddressRequestDto, ConstraintValidatorContext context) {
@@ -38,7 +38,7 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
         AddressResponseFromGoogleAPI resultFromCoordinates;
 
         try {
-            geoResult = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_UA);
+            geoResult = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_UK);
             resultFromCoordinates = googleApiService.getResultFromGoogleByCoordinates(latLng);
         } catch (NotFoundException | GoogleApiException e) {
             context.disableDefaultConstraintViolation();

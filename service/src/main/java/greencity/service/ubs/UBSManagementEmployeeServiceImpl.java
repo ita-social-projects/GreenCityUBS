@@ -121,7 +121,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .employeePosition(employeeWithTariffsIdDto.getEmployeeDto().getEmployeePositions().stream()
                 .map(positionDto -> Position.builder()
                     .id(positionDto.getId())
-                    .name(positionDto.getName())
+                    .nameUk(positionDto.getName())
                     .nameEn(positionDto.getNameEn())
                     .build())
                 .collect(Collectors.toSet()))
@@ -136,7 +136,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .positions(employee.getEmployeePosition().stream()
                 .map(position -> PositionDto.builder()
                     .id(position.getId())
-                    .name(position.getName())
+                    .name(position.getNameUk())
                     .nameEn(position.getNameEn())
                     .build())
                 .collect(Collectors.toList()))
@@ -288,7 +288,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         if (!positionRepository.existsById(dto.getId())) {
             throw new NotFoundException(ErrorMessage.POSITION_NOT_FOUND_BY_ID + dto.getId());
         }
-        if (!positionRepository.existsPositionByName(dto.getName())) {
+        if (!positionRepository.existsPositionByNameUk(dto.getName())) {
             Position position = modelMapper.map(dto, Position.class);
             return modelMapper.map(positionRepository.save(position), PositionDto.class);
         }
@@ -363,7 +363,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     public PositionDto create(AddingPositionDto dto) {
-        if (!positionRepository.existsPositionByName(dto.getName())) {
+        if (!positionRepository.existsPositionByNameUk(dto.getName())) {
             Position position = positionRepository.save(buildPosition(dto));
             return modelMapper.map(position, PositionDto.class);
         }
@@ -372,7 +372,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
     private Position buildPosition(AddingPositionDto dto) {
         return Position.builder()
-            .name(dto.getName())
+            .nameUk(dto.getName())
             .nameEn(dto.getNameEn())
             .build();
     }
@@ -423,7 +423,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
     private boolean existPositions(List<PositionDto> positions) {
         return positions.stream()
-            .allMatch(p -> positionRepository.existsPositionByIdAndName(p.getId(), p.getName()));
+            .allMatch(p -> positionRepository.existsPositionByIdAndNameUk(p.getId(), p.getName()));
     }
 
     /**

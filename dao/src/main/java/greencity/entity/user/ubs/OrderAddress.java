@@ -46,20 +46,20 @@ public class OrderAddress {
     private Location location;
 
     @Size(min = 1, max = 20, message = "Invalid region name")
-    @Column(columnDefinition = "varchar(30)", nullable = false)
-    private String region;
+    @Column(columnDefinition = "varchar(30)", nullable = false, name = "region")
+    private String regionUk;
 
     @Size(min = 1, max = 30, message = "Invalid city name")
-    @Column(columnDefinition = "varchar(30) default 'Kyiv'", nullable = false)
-    private String city;
+    @Column(columnDefinition = "varchar(30) default 'Kyiv'", nullable = false, name = "city")
+    private String cityUk;
 
     @Size(min = 1, max = 50)
-    @Column(nullable = false)
-    private String street;
+    @Column(nullable = false, name = "street")
+    private String streetUk;
 
     @Size(min = 1, max = 30)
-    @Column(nullable = false)
-    private String district;
+    @Column(nullable = false, name = "district")
+    private String districtUk;
 
     @Size(min = 1, max = 10)
     @Column(name = "house_number", nullable = false)

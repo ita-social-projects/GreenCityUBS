@@ -18,19 +18,19 @@ public class NotificationTemplateDtoMapper
                 NotificationTemplateMainInfoDto.builder()
                     .type(notificationTemplate.getNotificationType())
                     .trigger(notificationTemplate.getTrigger())
-                    .triggerDescription(notificationTemplate.getTrigger().getDescription())
-                    .triggerDescriptionEng(notificationTemplate.getTrigger().getDescriptionEng())
+                    .triggerDescription(notificationTemplate.getTrigger().getDescriptionUk())
+                    .triggerDescriptionEng(notificationTemplate.getTrigger().getDescriptionEn())
                     .time(notificationTemplate.getTime())
-                    .timeDescription(notificationTemplate.getTime().getDescription())
-                    .timeDescriptionEng(notificationTemplate.getTime().getDescriptionEng())
+                    .timeDescription(notificationTemplate.getTime().getDescriptionUk())
+                    .timeDescriptionEng(notificationTemplate.getTime().getDescriptionEn())
                     .schedule(notificationTemplate.getSchedule())
-                    .title(notificationTemplate.getTitle())
-                    .titleEng(notificationTemplate.getTitleEng())
+                    .title(notificationTemplate.getTitleUk())
+                    .titleEng(notificationTemplate.getTitleEn())
                     .notificationStatus(notificationTemplate.getNotificationStatus())
                     .userCategoryDescription(Objects.isNull(notificationTemplate.getUserCategory()) ? null
-                        : notificationTemplate.getUserCategory().getDescription())
+                        : notificationTemplate.getUserCategory().getDescriptionUk())
                     .userCategoryDescriptionEng(Objects.isNull(notificationTemplate.getUserCategory()) ? null
-                        : notificationTemplate.getUserCategory().getDescriptionEng())
+                        : notificationTemplate.getUserCategory().getDescriptionEn())
                     .build())
             .build();
     }

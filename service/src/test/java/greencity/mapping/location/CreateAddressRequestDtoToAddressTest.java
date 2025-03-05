@@ -38,17 +38,17 @@ class CreateAddressRequestDtoToAddressTest {
 
         Address address = converter.convert(dto);
 
-        assertEquals(dto.getRegion(), address.getRegion());
+        assertEquals(dto.getRegion(), address.getRegionUk());
         assertEquals(dto.getRegionEn(), address.getRegionEn());
-        assertEquals(dto.getCity(), address.getCity());
+        assertEquals(dto.getCity(), address.getCityUk());
         assertEquals(dto.getCityEn(), address.getCityEn());
-        assertEquals(dto.getDistrict(), address.getDistrict());
+        assertEquals(dto.getDistrict(), address.getDistrictUk());
         assertEquals(dto.getDistrictEn(), address.getDistrictEn());
         assertEquals(dto.getAddressComment(), address.getAddressComment());
         assertEquals(dto.getHouseNumber(), address.getHouseNumber());
         assertEquals(dto.getEntranceNumber(), address.getEntranceNumber());
         assertEquals(dto.getHouseCorpus(), address.getHouseCorpus());
-        assertEquals(dto.getStreet(), address.getStreet());
+        assertEquals(dto.getStreet(), address.getStreetUk());
         assertEquals(dto.getStreetEn(), address.getStreetEn());
         assertEquals(dto.getCoordinates().getLongitude(), address.getCoordinates().getLongitude());
         assertEquals(dto.getCoordinates().getLatitude(), address.getCoordinates().getLatitude());

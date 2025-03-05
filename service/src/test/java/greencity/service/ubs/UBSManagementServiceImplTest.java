@@ -607,7 +607,7 @@ class UBSManagementServiceImplTest {
         orderAddress.setLocation(getLocation());
         OrderAddressExportDetailsDtoUpdate dtoUpdate = ModelUtils.getOrderAddressExportDetailsDtoUpdate();
         OrderAddress updatedOrderAddress = getOrderAddress();
-        updatedOrderAddress.setCity("Updated");
+        updatedOrderAddress.setCityUk("Updated");
 
         when(orderAddressRepository.findById(dtoUpdate.getId())).thenReturn(Optional.of(orderAddress));
         when(ubsClientService.updateOrderAddress(any())).thenReturn(updatedOrderAddress);
@@ -1555,7 +1555,7 @@ class UBSManagementServiceImplTest {
         when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValueUk("name").build());
         when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
@@ -1596,7 +1596,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValueUk("name").build());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
         when(modelMapper.map(getOrderForGetOrderStatusData2Test().getPayment().getFirst(), PaymentInfoDto.class))
@@ -1638,7 +1638,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValueUk("name").build());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
         when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
@@ -1674,7 +1674,7 @@ class UBSManagementServiceImplTest {
         when(modelMapper.map(getOrderBag(), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValueUk("name").build());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
         when(paymentService.getPaymentInfo(anyLong(), anyDouble())).thenReturn(getPaymentTableInfoDto());
@@ -1713,7 +1713,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValueUk("name").build());
         assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderStatusData(1L, "test@gmail.com"));
     }
 
@@ -1922,7 +1922,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValueUk("name").build());
         when(
             orderPaymentStatusTranslationRepository.getAllBy())
             .thenReturn(List.of(orderPaymentStatusTranslation));
@@ -1967,7 +1967,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
             orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValueUk("name").build());
 
         when(orderStatusTranslationRepository.findAllBy())
             .thenReturn(list);
@@ -2317,7 +2317,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
         when(orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValueUk("name").build());
         when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
@@ -2357,7 +2357,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
         when(orderPaymentStatusTranslationRepository.getById(1L))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValueUk("name").build());
         when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
         when(orderRepository.findById(6L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
@@ -2400,7 +2400,7 @@ class UBSManagementServiceImplTest {
         when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());
         when(
             orderPaymentStatusTranslationRepository.getById(anyLong()))
-            .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+            .thenReturn(OrderPaymentStatusTranslation.builder().translationValueUk("name").build());
         when(orderPaymentStatusTranslationRepository.getAllBy()).thenReturn(getOrderStatusPaymentTranslations());
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
