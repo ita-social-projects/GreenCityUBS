@@ -605,23 +605,22 @@ class OrdersAdminsPageServiceImplTest {
         int pointsToUse = 100;
         int currentUserPoints = 200;
         Set<Certificate> certificates = Set.of(
-                new Certificate()
-        );
+            new Certificate());
         User user = Mockito.mock(User.class);
         List<ChangeOfPoints> changeOfPointsList = spy(new ArrayList<>());
         ArgumentCaptor<ChangeOfPoints> argumentCaptor = ArgumentCaptor.forClass(ChangeOfPoints.class);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(order.getPointsToUse())
-                .thenReturn(pointsToUse);
+            .thenReturn(pointsToUse);
         when(order.getUser())
-                .thenReturn(user);
+            .thenReturn(user);
         when(user.getCurrentPoints())
-                .thenReturn(currentUserPoints);
+            .thenReturn(currentUserPoints);
         when(user.getChangeOfPointsList())
-                .thenReturn(changeOfPointsList);
+            .thenReturn(changeOfPointsList);
         when(order.getCertificates())
-                .thenReturn(certificates);
+            .thenReturn(certificates);
 
         ordersAdminsPageService.orderStatusForDevelopStage(orderIdsList, newStatus, ModelUtils.getEmployee());
 
@@ -639,7 +638,7 @@ class OrdersAdminsPageServiceImplTest {
 
         verify(userRepository).save(user);
         verify(certificateRepository, times(certificates.size()))
-                .save(any(Certificate.class));
+            .save(any(Certificate.class));
         verify(orderLockService).unlockOrder(order);
     }
 
