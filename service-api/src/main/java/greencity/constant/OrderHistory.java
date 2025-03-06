@@ -68,7 +68,8 @@ public class OrderHistory {
     public static final String SET_EXPORT_DETAILS_UK = "Встановлено деталі вивезення.";
     public static final String SET_EXPORT_DETAILS_EN = "Installed export details.";
     public static final String UPDATE_ORDER_EXPORT_EN = " Waste mix: %s.";
-    public static final String RETURN_BONUSES_TO_CLIENT_UK = "Невикористані бонуси повернено на бонусний рахунок клієнта";
+    public static final String RETURN_BONUSES_TO_CLIENT_UK =
+        "Невикористані бонуси повернено на бонусний рахунок клієнта";
     public static final String WASTE_REMOVAL_ADDRESS_CHANGE_UK = "Змінено адресу вивезення відходів";
     public static final String WASTE_REMOVAL_ADDRESS_CHANGE_EN = "The address of waste removal has been changed";
     public static final String ADD_ADMIN_COMMENT_UK = "Додано коментар";
