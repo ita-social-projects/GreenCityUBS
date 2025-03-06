@@ -9,7 +9,8 @@ class NotificationTriggerTest {
     @Test
     void testOrderNotPaidFor3Days() {
         NotificationTrigger trigger = NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS;
-        assertEquals("Замовлення не оплачується протягом 3 днів після формування замовлення", trigger.getDescriptionUk());
+        assertEquals("Замовлення не оплачується протягом 3 днів після формування замовлення",
+            trigger.getDescriptionUk());
         assertEquals("The order is not paid 3 days after order was formed", trigger.getDescriptionEn());
     }
 
@@ -24,9 +25,9 @@ class NotificationTriggerTest {
     void testOrderAddedToItineraryStatusConfirmed() {
         NotificationTrigger trigger = NotificationTrigger.ORDER_ADDED_TO_ITINERARY_STATUS_CONFIRMED;
         assertEquals("Менеджер включає замовлення в маршрут і змінює статус замовлення на «Підтверджено»",
-                trigger.getDescriptionUk());
+            trigger.getDescriptionUk());
         assertEquals("The manager includes the order in the itinerary and changes order status to «Confirmed»",
-                trigger.getDescriptionEn());
+            trigger.getDescriptionEn());
     }
 
     @Test
@@ -40,7 +41,7 @@ class NotificationTriggerTest {
     void testOverpaymentWhenStatusDone() {
         NotificationTrigger trigger = NotificationTrigger.OVERPAYMENT_WHEN_STATUS_DONE;
         assertEquals("Якщо в замовленні є переплата після зміни статусу замовлення на «Виконано»",
-                trigger.getDescriptionUk());
+            trigger.getDescriptionUk());
         assertEquals("If the order has overpayment after changing order status to «Done»", trigger.getDescriptionEn());
     }
 
@@ -103,7 +104,8 @@ class NotificationTriggerTest {
     @Test
     void testUnderpaymentWhenStatusDoneOrCanceled() {
         NotificationTrigger trigger = NotificationTrigger.UNDERPAYMENT_WHEN_STATUS_DONE_OR_CANCELED;
-        assertEquals("Статус не оплаченого замовлення змінено на «Виконано» або «Скасовано»", trigger.getDescriptionUk());
+        assertEquals("Статус не оплаченого замовлення змінено на «Виконано» або «Скасовано»",
+            trigger.getDescriptionUk());
         assertEquals("Status of unpaid order changed to «Done» or «Canceled»", trigger.getDescriptionEn());
     }
 
