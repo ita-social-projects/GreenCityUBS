@@ -1,6 +1,7 @@
 package greencity.enums;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class NotificationTriggerTest {
@@ -23,9 +24,9 @@ class NotificationTriggerTest {
     void testOrderAddedToItineraryStatusConfirmed() {
         NotificationTrigger trigger = NotificationTrigger.ORDER_ADDED_TO_ITINERARY_STATUS_CONFIRMED;
         assertEquals("Менеджер включає замовлення в маршрут і змінює статус замовлення на «Підтверджено»",
-            trigger.getDescriptionUk());
+                trigger.getDescriptionUk());
         assertEquals("The manager includes the order in the itinerary and changes order status to «Confirmed»",
-            trigger.getDescriptionEn());
+                trigger.getDescriptionEn());
     }
 
     @Test
@@ -39,7 +40,7 @@ class NotificationTriggerTest {
     void testOverpaymentWhenStatusDone() {
         NotificationTrigger trigger = NotificationTrigger.OVERPAYMENT_WHEN_STATUS_DONE;
         assertEquals("Якщо в замовленні є переплата після зміни статусу замовлення на «Виконано»",
-            trigger.getDescriptionUk());
+                trigger.getDescriptionUk());
         assertEquals("If the order has overpayment after changing order status to «Done»", trigger.getDescriptionEn());
     }
 
