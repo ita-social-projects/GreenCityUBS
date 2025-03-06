@@ -34,7 +34,7 @@ public class CreateAddressRequestDto {
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
-    private String district;
+    private String districtUk;
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ’]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
@@ -42,7 +42,7 @@ public class CreateAddressRequestDto {
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ’]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
-    private String region;
+    private String regionUk;
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ’—/\"\\s]" + "{1,10}", message = houseNumberNotValid)
     @NotBlank(message = notEmptyValidationMessage)
@@ -62,7 +62,7 @@ public class CreateAddressRequestDto {
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
-    private String city;
+    private String cityUk;
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
@@ -70,7 +70,7 @@ public class CreateAddressRequestDto {
 
     @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
     @NotEmpty(message = notEmptyValidationMessage)
-    private String street;
+    private String streetUk;
 
     @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
     @NotEmpty(message = notEmptyValidationMessage)

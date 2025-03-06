@@ -582,7 +582,7 @@ class OrdersAdminsPageServiceImplTest {
 
         ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
 
-        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF), anyString(), any(Order.class));
+        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK), anyString(), any(Order.class));
         verify(notificationService).notifySelfPickupOrder(expected);
         verify(orderLockService).unlockOrder(expected);
     }
@@ -1001,7 +1001,7 @@ class OrdersAdminsPageServiceImplTest {
             .order(expectedSavedOrder)
             .eventDate(dateTime)
             .authorNameUk(employee.getFirstName() + "  " + employee.getLastName())
-            .eventNameUk(OrderHistory.ORDER_CANCELLED + "  " + newComment)
+            .eventNameUk(OrderHistory.ORDER_CANCELLED_UK + "  " + newComment)
             .build();
 
         expectedSavedOrder.getEvents().add(event);

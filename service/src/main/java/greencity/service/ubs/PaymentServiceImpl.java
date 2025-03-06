@@ -140,7 +140,7 @@ public class PaymentServiceImpl implements PaymentService {
             fileService.delete(payment.getImagePath());
         }
         paymentRepository.deletePaymentById(paymentId);
-        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
+        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
         updateOrderPaymentStatusForManualPayment(payment.getOrder());
     }
@@ -156,7 +156,7 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(
             () -> new NotFoundException(PAYMENT_NOT_FOUND + paymentId));
         Payment paymentUpdated = paymentRepository.save(changePaymentEntity(payment, paymentRequestDto, image));
-        eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
+        eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK + paymentRequestDto.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
 
         ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(paymentUpdated);
@@ -246,7 +246,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new BadRequestException(CANNOT_REFUND_MONEY);
         }
         orderRepository.save(order);
-        eventService.saveEvent(OrderHistory.CANCELED_ORDER_MONEY_REFUND, employeeEmail, order);
+        eventService.saveEvent(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK, employeeEmail, order);
     }
 
     private void refundPaymentsInBonus(Order order, String email, BonusReason reason) {
@@ -267,7 +267,7 @@ public class PaymentServiceImpl implements PaymentService {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
         orderRepository.save(order);
         userRepository.save(currentUser);
-        eventService.saveEvent(OrderHistory.ADDED_BONUSES, email, order);
+        eventService.saveEvent(OrderHistory.ADDED_BONUSES_UK, email, order);
     }
 
     private void checkOverpayment(long overpayment) {
@@ -328,11 +328,11 @@ public class PaymentServiceImpl implements PaymentService {
 
         if (paymentsForCurrentOrder > 0 && totalAmount > totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
-            eventService.save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ORDER_HALF_PAID_UK, OrderHistory.SYSTEM_UK, order);
             notificationService.notifyHalfPaidPackage(order);
         } else if (paymentsForCurrentOrder > 0 && totalAmount <= totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
             notificationService.notifyPaidOrder(order);
         } else if (paymentsForCurrentOrder == 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
@@ -400,7 +400,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
-        eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
+        eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + paymentRequestDto.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), order);
         return payment;
     }

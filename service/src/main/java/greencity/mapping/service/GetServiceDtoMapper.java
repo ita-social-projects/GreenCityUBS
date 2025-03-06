@@ -15,10 +15,10 @@ public class GetServiceDtoMapper extends AbstractConverter<Service, GetServiceDt
             .id(source.getId())
             .price(BigDecimal.valueOf(source.getPrice())
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
-            .name(source.getNameUk())
-            .nameEng(source.getNameEn())
-            .description(source.getDescriptionUk())
-            .descriptionEng(source.getDescriptionEn())
+            .nameUk(source.getNameUk())
+            .nameEn(source.getNameEn())
+            .descriptionUk(source.getDescriptionUk())
+            .descriptionEn(source.getDescriptionEn())
             .build();
     }
 }

@@ -10,7 +10,7 @@ public class CreateAddressRequestDtoToDistrict extends AbstractConverter<CreateA
     @Override
     protected District convert(CreateAddressRequestDto source) {
         return District.builder()
-            .nameUk(source.getDistrict())
+            .nameUk(source.getDistrictUk())
             .nameEn(source.getDistrictEn())
             .build();
     }

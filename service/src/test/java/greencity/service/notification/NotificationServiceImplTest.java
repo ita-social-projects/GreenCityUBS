@@ -106,14 +106,14 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.anyLong;
-import static greencity.constant.OrderHistory.ADD_VIOLATION;
-import static greencity.constant.OrderHistory.CHANGES_VIOLATION;
-import static greencity.constant.OrderHistory.DELETE_VIOLATION;
-import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT;
-import static greencity.constant.OrderHistory.ORDER_CONFIRMED;
-import static greencity.constant.OrderHistory.ORDER_FORMED;
-import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT;
-import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE;
+import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
+import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
+import static greencity.constant.OrderHistory.DELETE_VIOLATION_UK;
+import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT_UK;
+import static greencity.constant.OrderHistory.ORDER_CONFIRMED_UK;
+import static greencity.constant.OrderHistory.ORDER_FORMED_UK;
+import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT_UK;
+import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE_UK;
 import static java.util.Arrays.asList;
 
 @ExtendWith(MockitoExtension.class)
@@ -471,12 +471,12 @@ class NotificationServiceImplTest {
         void testNotifyAllAddedViolations() {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, ADD_VIOLATION);
+            setEventsToOrder(order, ADD_VIOLATION_UK);
             Violation violation = getOrdersViolations(order);
             Set<NotificationParameter> parameters = getNewViolationParameter(violation);
 
             mockUserNeedNotificationCheck(order, NotificationType.VIOLATION_THE_RULES);
-            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION, CHANGES_VIOLATION, DELETE_VIOLATION))
+            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK))
                 .thenReturn(orders);
             when(violationRepository.findActiveViolationByOrderId(anyLong())).thenReturn(Optional.of(violation));
             mockFillAndSendNotification(parameters, order, NotificationType.VIOLATION_THE_RULES);
@@ -510,9 +510,9 @@ class NotificationServiceImplTest {
         void testNotifyAllAddedViolationsWhenThereAreNotJustNewViolations() {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, ADD_VIOLATION, CHANGES_VIOLATION);
+            setEventsToOrder(order, ADD_VIOLATION_UK, CHANGES_VIOLATION_UK);
 
-            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION, CHANGES_VIOLATION, DELETE_VIOLATION))
+            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK))
                 .thenReturn(orders);
 
             notificationService.notifyAllAddedViolations();
@@ -524,11 +524,11 @@ class NotificationServiceImplTest {
         void testNotifyAllChangedViolations() {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, CHANGES_VIOLATION);
+            setEventsToOrder(order, CHANGES_VIOLATION_UK);
             Set<NotificationParameter> parameters = getViolationParameter(order);
 
             mockUserNeedNotificationCheck(order, NotificationType.CHANGED_IN_RULE_VIOLATION_STATUS);
-            when(orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION, DELETE_VIOLATION))
+            when(orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK))
                 .thenReturn(orders);
             mockFillAndSendNotification(parameters, order, NotificationType.CHANGED_IN_RULE_VIOLATION_STATUS);
 
@@ -543,9 +543,9 @@ class NotificationServiceImplTest {
         void testNotifyAllChangedViolationsWithDeletedEvents() {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, CHANGES_VIOLATION, DELETE_VIOLATION);
+            setEventsToOrder(order, CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK);
 
-            when(orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION, DELETE_VIOLATION))
+            when(orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK))
                 .thenReturn(orders);
 
             notificationService.notifyAllChangedViolations();
@@ -557,11 +557,11 @@ class NotificationServiceImplTest {
         void testNotifyAllCanceledViolations() {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, DELETE_VIOLATION);
+            setEventsToOrder(order, DELETE_VIOLATION_UK);
             Set<NotificationParameter> parameters = getViolationParameter(order);
 
             mockUserNeedNotificationCheck(order, NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
-            when(orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION)).thenReturn(orders);
+            when(orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION_UK)).thenReturn(orders);
             mockFillAndSendNotification(parameters, order,
                 NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
 
@@ -585,7 +585,7 @@ class NotificationServiceImplTest {
         void testNotifyAllDoneOrCanceledUnpaidOrders() {
             Order order = getOrderWithAmountToPay();
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, ORDER_ADJUSTMENT, ORDER_CONFIRMED, ORDER_ON_THE_ROUTE);
+            setEventsToOrder(order, ORDER_ADJUSTMENT_UK, ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK);
             Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order);
 
             mockUserNeedNotificationCheck(order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
@@ -640,7 +640,7 @@ class NotificationServiceImplTest {
         @Test
         void testNotifyAllChangedOrderStatuses() {
             Order order = getOrderWithAmountToPay();
-            setEventsToOrder(order, ORDER_NOT_TAKEN_OUT, ADD_VIOLATION);
+            setEventsToOrder(order, ORDER_NOT_TAKEN_OUT_UK, ADD_VIOLATION_UK);
             List<Order> orders = Collections.singletonList(order);
             Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order);
 
@@ -659,7 +659,7 @@ class NotificationServiceImplTest {
         @Test
         void testNotifyAllChangedOrderStatusesWithUnacceptableEvents() {
             Order order = getOrderWithAmountToPay();
-            setEventsToOrder(order, ORDER_ADJUSTMENT, ORDER_CONFIRMED);
+            setEventsToOrder(order, ORDER_ADJUSTMENT_UK, ORDER_CONFIRMED_UK);
             List<Order> orders = Collections.singletonList(order);
 
             when(orderRepository.findAllByOrderStatusWithEvents(OrderStatus.BROUGHT_IT_HIMSELF)).thenReturn(orders);
@@ -693,9 +693,9 @@ class NotificationServiceImplTest {
 
         private static Stream<Arguments> correctArguments() {
             return Stream.of(
-                Arguments.of(OrderStatus.CONFIRMED, asList(ORDER_CONFIRMED, ORDER_ON_THE_ROUTE, ORDER_NOT_TAKEN_OUT)),
-                Arguments.of(OrderStatus.DONE, Collections.singletonList(ORDER_CONFIRMED)),
-                Arguments.of(OrderStatus.CANCELED, asList(ORDER_CONFIRMED, ORDER_ON_THE_ROUTE)));
+                Arguments.of(OrderStatus.CONFIRMED, asList(ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK, ORDER_NOT_TAKEN_OUT_UK)),
+                Arguments.of(OrderStatus.DONE, Collections.singletonList(ORDER_CONFIRMED_UK)),
+                Arguments.of(OrderStatus.CANCELED, asList(ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK)));
         }
 
         @ParameterizedTest
@@ -703,7 +703,7 @@ class NotificationServiceImplTest {
         void testNotifyUnpaidPackagesWhenOrderHasUnacceptableStatusesAndEvents(OrderStatus status) {
             Order order = getOrderWithAmountToPay();
             order.setOrderStatus(status);
-            setEventsToOrder(order, ORDER_CONFIRMED, ORDER_ON_THE_ROUTE, ORDER_NOT_TAKEN_OUT);
+            setEventsToOrder(order, ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK, ORDER_NOT_TAKEN_OUT_UK);
             List<Order> orders = Collections.singletonList(order);
 
             when(orderRepository.findAllByOrderPaymentStatusWithEvents(OrderPaymentStatus.HALF_PAID))
@@ -1135,7 +1135,7 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.emptyMap());
-        order.setEvents(List.of(Event.builder().eventNameUk(ORDER_FORMED).build()));
+        order.setEvents(List.of(Event.builder().eventNameUk(ORDER_FORMED_UK).build()));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
@@ -1160,10 +1160,10 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusDoneDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.singletonMap(1, 1));
-        Event formed = Event.builder().eventNameUk(ORDER_FORMED).build();
-        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT).build();
-        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED).build();
-        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE).build();
+        Event formed = Event.builder().eventNameUk(ORDER_FORMED_UK).build();
+        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT_UK).build();
+        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED_UK).build();
+        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE_UK).build();
         order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
@@ -1191,10 +1191,10 @@ class NotificationServiceImplTest {
         order.setConfirmedQuantity(Collections.emptyMap());
         order.setExportedQuantity(Collections.emptyMap());
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
-        Event formed = Event.builder().eventNameUk(ORDER_FORMED).build();
-        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT).build();
-        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED).build();
-        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE).build();
+        Event formed = Event.builder().eventNameUk(ORDER_FORMED_UK).build();
+        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT_UK).build();
+        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED_UK).build();
+        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE_UK).build();
         order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
@@ -1222,10 +1222,10 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusDoneDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.singletonMap(1, 1));
-        Event formed = Event.builder().eventNameUk(ORDER_FORMED).build();
-        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT).build();
-        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED).build();
-        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE).build();
+        Event formed = Event.builder().eventNameUk(ORDER_FORMED_UK).build();
+        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT_UK).build();
+        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED_UK).build();
+        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE_UK).build();
         order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
@@ -1253,7 +1253,7 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.emptyMap());
-        order.setEvents(List.of(Event.builder().eventNameUk(ORDER_FORMED).build()));
+        order.setEvents(List.of(Event.builder().eventNameUk(ORDER_FORMED_UK).build()));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());

@@ -45,16 +45,16 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     private AddressDto createAddressDto(Address address) {
         return AddressDto.builder()
             .id(address.getId())
-            .city(address.getCityUk())
+            .cityUk(address.getCityUk())
             .cityEn(address.getCityEn())
-            .district(address.getDistrictUk())
+            .districtUk(address.getDistrictUk())
             .districtEn(address.getDistrictEn())
-            .region(address.getRegionUk())
+            .regionUk(address.getRegionUk())
             .regionEn(address.getRegionEn())
             .entranceNumber(address.getEntranceNumber())
             .houseCorpus(address.getHouseCorpus())
             .houseNumber(address.getHouseNumber())
-            .street(address.getStreetUk())
+            .streetUk(address.getStreetUk())
             .streetEn(address.getStreetEn())
             .addressComment(address.getAddressComment())
             .coordinates(Coordinates.builder()
@@ -77,7 +77,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
 
     private DistrictDto getDistrictDto(District district) {
         return DistrictDto.builder()
-            .nameUa(district.getNameUk())
+            .nameUk(district.getNameUk())
             .nameEn(district.getNameEn())
             .build();
     }

@@ -403,7 +403,7 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void createPositionTest() {
-        AddingPositionDto addingPositionDto = AddingPositionDto.builder().name("Водій").build();
+        AddingPositionDto addingPositionDto = AddingPositionDto.builder().nameUk("Водій").build();
         when(positionRepository.existsPositionByNameUk(any())).thenReturn(false, true);
         lenient().when(modelMapper.map(any(Position.class), eq(PositionDto.class))).thenReturn(getPositionDto(1L));
         when(positionRepository.save(any())).thenReturn(getPosition(), getPosition());
@@ -417,20 +417,20 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.create(addingPositionDto));
         assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
-            + addingPositionDto.getName());
+            + addingPositionDto.getNameUk());
     }
 
     @Test
     void updatePositionTest() {
         PositionDto dto = getPositionDto(1L);
         when(positionRepository.existsById(dto.getId())).thenReturn(true, true, false);
-        when(positionRepository.existsPositionByNameUk(dto.getName())).thenReturn(false, true);
+        when(positionRepository.existsPositionByNameUk(dto.getNameUk())).thenReturn(false, true);
         when(modelMapper.map(any(), any())).thenReturn(getPosition(), dto);
 
         employeeService.update(dto);
 
         verify(positionRepository, times(1)).existsById(dto.getId());
-        verify(positionRepository, times(1)).existsPositionByNameUk(dto.getName());
+        verify(positionRepository, times(1)).existsPositionByNameUk(dto.getNameUk());
         verify(modelMapper, times(2)).map(any(), any());
 
         Exception thrown = assertThrows(UnprocessableEntityException.class,
@@ -440,7 +440,7 @@ class UBSManagementEmployeeServiceImplTest {
 
         assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND_BY_ID + dto.getId());
         assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
-            + dto.getName());
+            + dto.getNameUk());
     }
 
     @Test

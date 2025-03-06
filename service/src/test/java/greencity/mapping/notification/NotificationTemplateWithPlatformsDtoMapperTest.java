@@ -24,23 +24,23 @@ class NotificationTemplateWithPlatformsDtoMapperTest {
 
         assertEquals(notification.getNotificationType(), mainInfoDto.getType());
         assertEquals(notification.getTrigger(), mainInfoDto.getTrigger());
-        assertEquals(notification.getTrigger().getDescriptionUk(), mainInfoDto.getTriggerDescription());
-        assertEquals(notification.getTrigger().getDescriptionEn(), mainInfoDto.getTriggerDescriptionEng());
+        assertEquals(notification.getTrigger().getDescriptionUk(), mainInfoDto.getTriggerDescriptionUk());
+        assertEquals(notification.getTrigger().getDescriptionEn(), mainInfoDto.getTriggerDescriptionEn());
         assertEquals(notification.getTime(), mainInfoDto.getTime());
-        assertEquals(notification.getTime().getDescriptionUk(), mainInfoDto.getTimeDescription());
-        assertEquals(notification.getTime().getDescriptionEn(), mainInfoDto.getTimeDescriptionEng());
+        assertEquals(notification.getTime().getDescriptionUk(), mainInfoDto.getTimeDescriptionUk());
+        assertEquals(notification.getTime().getDescriptionEn(), mainInfoDto.getTimeDescriptionEn());
         assertEquals(notification.getSchedule(), mainInfoDto.getSchedule());
-        assertEquals(notification.getTitleUk(), mainInfoDto.getTitle());
-        assertEquals(notification.getTitleEn(), mainInfoDto.getTitleEng());
+        assertEquals(notification.getTitleUk(), mainInfoDto.getTitleUk());
+        assertEquals(notification.getTitleEn(), mainInfoDto.getTitleEn());
         assertEquals(notification.getNotificationStatus(), mainInfoDto.getNotificationStatus());
-        assertEquals(notification.getUserCategory().getDescriptionUk(), mainInfoDto.getUserCategoryDescription());
-        assertEquals(notification.getUserCategory().getDescriptionEn(), mainInfoDto.getUserCategoryDescriptionEng());
+        assertEquals(notification.getUserCategory().getDescriptionUk(), mainInfoDto.getUserCategoryDescriptionUk());
+        assertEquals(notification.getUserCategory().getDescriptionEn(), mainInfoDto.getUserCategoryDescriptionEn());
 
         assertEquals(platform.getId(), platformDto.getId());
         assertEquals(platform.getNotificationReceiverType(), platformDto.getReceiverType());
-        assertEquals(platform.getNotificationReceiverType().getName(), platformDto.getNameEng());
-        assertEquals(platform.getBodyUk(), platformDto.getBody());
-        assertEquals(platform.getBodyEn(), platformDto.getBodyEng());
+        assertEquals(platform.getNotificationReceiverType().getName(), platformDto.getNameEn());
+        assertEquals(platform.getBodyUk(), platformDto.getBodyUk());
+        assertEquals(platform.getBodyEn(), platformDto.getBodyEn());
         assertEquals(platform.getNotificationStatus(), platformDto.getStatus());
     }
 }

@@ -63,7 +63,6 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
@@ -304,7 +303,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
     private static final String LANGUAGE_EN = "en";
-    private static final String LANGUAGE_UA = "ua";
+    private static final String LANGUAGE_UK = "ua";
     private static final Double KYIV_LATITUDE = 50.4546600;
     private static final Double KYIV_LONGITUDE = 30.5238000;
     private static final Double LOCATION_40_KM_ZONE_VALUE = 40.00;
@@ -481,8 +480,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .capacity(source.getCapacity())
             .price(BigDecimal.valueOf(source.getFullPrice())
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
-            .name(source.getNameUk())
-            .nameEng(source.getNameEn())
+            .nameUk(source.getNameUk())
+            .nameEn(source.getNameEn())
             .limitedIncluded(source.getLimitIncluded())
             .quantity(getQuantityOfBagsByBagIdAndOrderId(orderId, source.getId()))
             .build();
@@ -588,7 +587,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
-        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+        eventService.save(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
         PaymentSystemResponse paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
         notificationService.notifyCreatedOrder(order);
 
@@ -907,9 +906,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             return false;
         }
 
-        return (Objects.equals(a.getRegion(), b.getRegion()) || Objects.equals(a.getRegionEn(), b.getRegionEn()))
-            && (Objects.equals(a.getCity(), b.getCity()) || Objects.equals(a.getCityEn(), b.getCityEn()))
-            && (Objects.equals(a.getDistrict(), b.getDistrict())
+        return (Objects.equals(a.getRegionUk(), b.getRegionUk()) || Objects.equals(a.getRegionEn(), b.getRegionEn()))
+            && (Objects.equals(a.getCityUk(), b.getCityUk()) || Objects.equals(a.getCityEn(), b.getCityEn()))
+            && (Objects.equals(a.getDistrictUk(), b.getDistrictUk())
                 || Objects.equals(a.getDistrictEn(), b.getDistrictEn()))
             && Objects.equals(a.getHouseNumber(), b.getHouseNumber())
             && Objects.equals(a.getEntranceNumber(), b.getEntranceNumber())
@@ -1026,8 +1025,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .id(order.getId())
             .dateForm(order.getOrderDate())
             .datePaid(order.getOrderDate())
-            .orderStatus(orderStatusTranslation.getNameUk())
-            .orderStatusEng(orderStatusTranslation.getNameEn())
+            .orderStatusUk(orderStatusTranslation.getNameUk())
+            .orderStatusEn(orderStatusTranslation.getNameEn())
             .orderComment(order.getComment())
             .bags(bagForUserDtos)
             .additionalOrders(order.getAdditionalOrders())
@@ -1040,8 +1039,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .bonuses(order.getPointsToUse().doubleValue())
             .sender(senderInfoDtoBuilder(order))
             .address(addressInfoDtoBuilder(order))
-            .paymentStatus(paymentStatusTranslation.getTranslationValueUk())
-            .paymentStatusEng(paymentStatusTranslation.getTranslationsValueEn())
+            .paymentStatusUk(paymentStatusTranslation.getTranslationValueUk())
+            .paymentStatusEn(paymentStatusTranslation.getTranslationsValueEn())
             .build();
     }
 
@@ -1075,15 +1074,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
         var address = order.getUbsUser().getOrderAddress();
         return AddressInfoDto.builder()
-            .addressCity(address.getCityUk())
-            .addressCityEng(address.getCityEn())
+            .addressCityUk(address.getCityUk())
+            .addressCityEn(address.getCityEn())
             .addressComment(address.getAddressComment())
-            .addressDistinct(address.getDistrictUk())
-            .addressDistinctEng(address.getDistrictEn())
-            .addressRegion(address.getRegionUk())
-            .addressRegionEng(address.getRegionEn())
-            .addressStreet(address.getStreetUk())
-            .addressStreetEng(address.getStreetEn())
+            .addressDistinctUk(address.getDistrictUk())
+            .addressDistinctEn(address.getDistrictEn())
+            .addressRegionUk(address.getRegionUk())
+            .addressRegionEn(address.getRegionEn())
+            .addressStreetUk(address.getStreetUk())
+            .addressStreetEn(address.getStreetEn())
             .houseCorpus(address.getHouseCorpus())
             .houseNumber(address.getHouseNumber())
             .entranceNumber(address.getEntranceNumber())
@@ -1166,10 +1165,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
         if (!isAdmin(authentication)) {
-            eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.CLIENT,
+            eventService.save(OrderHistory.CHANGED_SENDER_UK, OrderHistory.CLIENT_UK,
                 ubsUser.getOrders().getFirst());
         } else {
-            eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.UBS_ADMIN,
+            eventService.save(OrderHistory.CHANGED_SENDER_UK, OrderHistory.UBS_ADMIN,
                 ubsUser.getOrders().getFirst());
         }
 
@@ -1552,7 +1551,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 event.setEventNameUk(event.getEventNameEn());
                 event.setAuthorNameUk(event.getAuthorNameEn());
             });
-        } else if (!LANGUAGE_UA.equals(language)) {
+        } else if (!LANGUAGE_UK.equals(language)) {
             throw new BadRequestException("Unexpected value: " + language);
         }
     }
@@ -1720,9 +1719,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             removePaymentLinkForOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
+            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + orderPayment.getPaymentId(),
+                OrderHistory.SYSTEM_UK, order);
         }
     }
 
@@ -1944,7 +1943,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             order.setOrderStatus(OrderStatus.CONFIRMED);
             orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_CONFIRMED, OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ORDER_CONFIRMED_UK, OrderHistory.SYSTEM_UK, order);
         }
     }
 
@@ -2151,7 +2150,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .values()
             .stream()
             .map(district -> DistrictDto.builder()
-                .nameUa(district.getNameUk())
+                .nameUk(district.getNameUk())
                 .nameEn(district.getNameEn())
                 .build())
             .toList();
@@ -2211,15 +2210,15 @@ public class UBSClientServiceImpl implements UBSClientService {
             }
             case REVERSED -> {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
-                logOrderEvent(order, OrderHistory.PAYMENT_REVERSED);
+                logOrderEvent(order, OrderHistory.PAYMENT_REVERSED_UK);
             }
             case PROCESSING -> {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
-                logOrderEvent(order, OrderHistory.PAYMENT_PENDING);
+                logOrderEvent(order, OrderHistory.PAYMENT_PENDING_UK);
             }
             case FAILURE -> {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
-                logOrderEvent(order, OrderHistory.PAYMENT_FAILURE);
+                logOrderEvent(order, OrderHistory.PAYMENT_FAILURE_UK);
             }
             default -> updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
         }
@@ -2235,12 +2234,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void logOrderEvent(Order order, String event) {
-        eventService.save(event, OrderHistory.SYSTEM, order);
+        eventService.save(event, OrderHistory.SYSTEM_UK, order);
     }
 
     private void logPaymentEvent(Order order, String paymentId) {
-        eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + paymentId, OrderHistory.SYSTEM, order);
+        eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
+        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + paymentId, OrderHistory.SYSTEM_UK, order);
     }
 
     private void removePaymentLinkForOrder(Order order) {

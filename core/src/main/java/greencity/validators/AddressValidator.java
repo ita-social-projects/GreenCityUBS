@@ -82,9 +82,9 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
             return false;
         }
 
-        return dto.getCity().equalsIgnoreCase(apiCity)
+        return dto.getCityUk().equalsIgnoreCase(apiCity)
             && apiCity.equalsIgnoreCase(resultFromCoordinates.getCity())
-            && dto.getCity().equalsIgnoreCase(resultFromCoordinates.getCity());
+            && dto.getCityUk().equalsIgnoreCase(resultFromCoordinates.getCity());
     }
 
     private String getLongName(AddressComponent[] addressComponents, AddressComponentType type) {

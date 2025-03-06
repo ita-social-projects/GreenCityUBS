@@ -2075,12 +2075,12 @@ class UBSClientServiceImplTest {
     }
 
     private List<AddressDto> getTestAddressesDto() {
-        AddressDto addressDto1 = AddressDto.builder().actual(true).id(13L).city("Kyiv").district("Svyatoshyn")
-            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
+        AddressDto addressDto1 = AddressDto.builder().actual(true).id(13L).cityUk("Kyiv").districtUk("Svyatoshyn")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").streetUk("Peremohy av.")
             .coordinates(new Coordinates(12.5, 34.5)).build();
 
-        AddressDto addressDto2 = AddressDto.builder().actual(true).id(42L).city("Lviv").district("Syhiv")
-            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Lvivska st.")
+        AddressDto addressDto2 = AddressDto.builder().actual(true).id(42L).cityUk("Lviv").districtUk("Syhiv")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").streetUk("Lvivska st.")
             .coordinates(new Coordinates(13.5, 36.5)).build();
         return Arrays.asList(addressDto1, addressDto2);
     }
@@ -2107,7 +2107,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(getDistrict()));
 
         var addressDto = addressDto();
-        addressDto.setDistrict("Район");
+        addressDto.setDistrictUk("Район");
         addressDto.setDistrictEn("District");
         when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressDto);
 
@@ -2115,8 +2115,8 @@ class UBSClientServiceImplTest {
             ubsService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
 
         assertEquals(getAddressDtoResponse(), actualWithSearchAddress);
-        assertEquals(createAddressRequestToSaveDto.getDistrict(),
-            actualWithSearchAddress.getAddressList().getFirst().getDistrict());
+        assertEquals(createAddressRequestToSaveDto.getDistrictUk(),
+            actualWithSearchAddress.getAddressList().getFirst().getDistrictUk());
         assertEquals(createAddressRequestToSaveDto.getDistrictEn(),
             actualWithSearchAddress.getAddressList().getFirst().getDistrictEn());
 
@@ -2196,7 +2196,7 @@ class UBSClientServiceImplTest {
         OrderWithAddressesResponseDto actualWithSearchAddress =
             ubsService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
 
-        assertEquals(KYIV_REGION_UK, actualWithSearchAddress.getAddressList().getFirst().getRegion());
+        assertEquals(KYIV_REGION_UK, actualWithSearchAddress.getAddressList().getFirst().getRegionUk());
 
         verify(userRepository, times(2)).findByUuid(user.getUuid());
         verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
@@ -2284,7 +2284,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(getDistrict()));
 
         var addressDto = addressDto();
-        addressDto.setDistrict("Район");
+        addressDto.setDistrictUk("Район");
         addressDto.setDistrictEn("District");
 
         when(modelMapper.map(addresses.getFirst(),
@@ -2295,8 +2295,8 @@ class UBSClientServiceImplTest {
             ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
 
         assertEquals(getAddressDtoResponse(), actualWithSearchAddress);
-        assertEquals(updateAddressRequestDto.getDistrict(),
-            actualWithSearchAddress.getAddressList().getFirst().getDistrict());
+        assertEquals(updateAddressRequestDto.getDistrictUk(),
+            actualWithSearchAddress.getAddressList().getFirst().getDistrictUk());
         assertEquals(updateAddressRequestDto.getDistrictEn(),
             actualWithSearchAddress.getAddressList().getFirst().getDistrictEn());
 

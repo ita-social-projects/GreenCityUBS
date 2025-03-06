@@ -11,11 +11,11 @@ public class CreateAddressRequestDtoToAddress extends AbstractConverter<CreateAd
     @Override
     protected Address convert(CreateAddressRequestDto source) {
         return Address.builder()
-            .regionUk(source.getRegion())
+            .regionUk(source.getRegionUk())
             .regionEn(source.getRegionEn())
-            .cityUk(source.getCity())
+            .cityUk(source.getCityUk())
             .cityEn(source.getCityEn())
-            .districtUk(source.getDistrict())
+            .districtUk(source.getDistrictUk())
             .districtEn(source.getDistrictEn())
             .addressComment(source.getAddressComment())
             .houseNumber(source.getHouseNumber())
@@ -25,7 +25,7 @@ public class CreateAddressRequestDtoToAddress extends AbstractConverter<CreateAd
                 .longitude(source.getCoordinates().getLongitude())
                 .latitude(source.getCoordinates().getLatitude())
                 .build())
-            .streetUk(source.getStreet())
+            .streetUk(source.getStreetUk())
             .streetEn(source.getStreetEn())
             .build();
     }

@@ -77,9 +77,9 @@ import static greencity.constant.ErrorMessage.VIOLATION_DOES_NOT_EXIST;
 import static greencity.enums.NotificationReceiverType.SITE;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
-import static greencity.constant.OrderHistory.ADD_VIOLATION;
-import static greencity.constant.OrderHistory.CHANGES_VIOLATION;
-import static greencity.constant.OrderHistory.DELETE_VIOLATION;
+import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
+import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
+import static greencity.constant.OrderHistory.DELETE_VIOLATION_UK;
 
 @Service
 @Transactional
@@ -261,8 +261,8 @@ public class NotificationServiceImpl implements NotificationService {
         } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
             && order.getEvents().stream()
                 .map(Event::getEventNameUk)
-                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
-                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
+                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK)
+                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE_UK) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT_UK))
                 .count() == 3) {
             fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
         } else {
@@ -292,13 +292,13 @@ public class NotificationServiceImpl implements NotificationService {
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()
                 .map(Event::getEventNameUk)
-                .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED))) {
+                .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK))) {
             fillAndSendNotification(parameters, order, NotificationType.ORDER_STATUS_CHANGED);
         } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
             && order.getEvents().stream()
                 .map(Event::getEventNameUk)
-                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
-                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
+                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK)
+                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE_UK) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT_UK))
                 .count() == 3) {
             fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
         }
@@ -489,7 +489,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private List<Order> getOrdersWithNewViolations() {
-        return orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION, CHANGES_VIOLATION, DELETE_VIOLATION)
+        return orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK)
             .stream()
             .filter(order -> orderHasJustNewViolations(order.getEvents()))
             .toList();
@@ -500,8 +500,8 @@ public class NotificationServiceImpl implements NotificationService {
             .map(Event::getEventNameUk)
             .toList();
 
-        return names.contains(ADD_VIOLATION)
-            && !names.contains(CHANGES_VIOLATION) && !names.contains(DELETE_VIOLATION);
+        return names.contains(ADD_VIOLATION_UK)
+            && !names.contains(CHANGES_VIOLATION_UK) && !names.contains(DELETE_VIOLATION_UK);
     }
 
     private void notifyNewViolations(List<Order> orders) {
@@ -527,7 +527,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyAllCanceledViolations() {
-        var orders = orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION);
+        var orders = orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION_UK);
         notifyViolations(orders, NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
     }
 
@@ -538,7 +538,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private List<Order> getOrdersWithChangedViolations() {
-        return orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION, DELETE_VIOLATION)
+        return orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK)
             .stream()
             .filter(o -> orderHasChangedViolations(o.getEvents()))
             .toList();
@@ -549,7 +549,7 @@ public class NotificationServiceImpl implements NotificationService {
             .map(Event::getEventNameUk)
             .toList();
 
-        return names.contains(CHANGES_VIOLATION) && !names.contains(DELETE_VIOLATION);
+        return names.contains(CHANGES_VIOLATION_UK) && !names.contains(DELETE_VIOLATION_UK);
     }
 
     private void notifyViolations(List<Order> orders, NotificationType notificationType) {
@@ -581,8 +581,8 @@ public class NotificationServiceImpl implements NotificationService {
     private boolean checkByEventsOrderDoneOrCanceled(Order order) {
         return order.getEvents().stream()
             .map(Event::getEventNameUk)
-            .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
-                || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
+            .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK)
+                || e.equals(OrderHistory.ORDER_ON_THE_ROUTE_UK) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT_UK))
             .count() == 3;
     }
 
@@ -608,7 +608,7 @@ public class NotificationServiceImpl implements NotificationService {
     private boolean checkByEventsOrderStatusIsChanged(Order order) {
         return order.getEvents().stream()
             .map(Event::getEventNameUk)
-            .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED));
+            .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK));
     }
 
     @Override

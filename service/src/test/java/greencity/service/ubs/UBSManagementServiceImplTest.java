@@ -546,7 +546,7 @@ class UBSManagementServiceImplTest {
 
         OrderDetailStatusDto result = ubsManagementService.updateOrderDetailStatus(saved, detailStatusDto, email);
 
-        verify(eventService).saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, updated);
+        verify(eventService).saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK, email, updated);
         verify(notificationService).notifySelfPickupOrder(updated);
         verify(orderRepository).save(updated);
 
@@ -620,7 +620,7 @@ class UBSManagementServiceImplTest {
 
         verify(orderAddressRepository).findById(dtoUpdate.getId());
         verify(orderAddressRepository).save(updatedOrderAddress);
-        verify(eventService).saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, "test@gmail.com", order);
+        verify(eventService).saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_UK, "test@gmail.com", order);
         verify(modelMapper).map(updatedOrderAddress, OrderAddressDtoResponse.class);
         assertEquals(1L, updatedOrderAddress.getLocation().getId());
         assertEquals(1L, updatedOrderAddress.getId());
@@ -2049,29 +2049,29 @@ class UBSManagementServiceImplTest {
         Order orderWithoutDeliverFromTo = getOrderExportDetails();
         orderWithoutDeliverFromTo.setDeliverFrom(null);
         orderWithoutDeliverFromTo.setDeliverTo(null);
-        String updateExportDetails = String.format(OrderHistory.UPDATE_EXPORT_DATA,
+        String updateExportDetails = String.format(OrderHistory.UPDATE_EXPORT_DATA_UK,
             LocalDate.of(1997, 12, 4)) +
-            String.format(OrderHistory.UPDATE_DELIVERY_TIME,
+            String.format(OrderHistory.UPDATE_DELIVERY_TIME_UK,
                 LocalTime.of(15, 40, 24), LocalTime.of(19, 30, 30))
             +
-            String.format(OrderHistory.UPDATE_RECEIVING_STATION, "Петрівка");
+            String.format(OrderHistory.UPDATE_RECEIVING_STATION_UK, "Петрівка");
         return Stream.of(
             Arguments.of(getOrderExportDetailsWithNullValues(),
-                OrderHistory.SET_EXPORT_DETAILS + updateExportDetails),
+                OrderHistory.SET_EXPORT_DETAILS_UK + updateExportDetails),
             Arguments.of(getOrderExportDetailsWithExportDate(),
-                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+                OrderHistory.UPDATE_EXPORT_DETAILS_UK + updateExportDetails),
             Arguments.of(getOrderExportDetailsWithExportDateDeliverFrom(),
-                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+                OrderHistory.UPDATE_EXPORT_DETAILS_UK + updateExportDetails),
             Arguments.of(getOrderExportDetailsWithExportDateDeliverFromTo(),
-                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+                OrderHistory.UPDATE_EXPORT_DETAILS_UK + updateExportDetails),
             Arguments.of(getOrderExportDetails(),
-                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+                OrderHistory.UPDATE_EXPORT_DETAILS_UK + updateExportDetails),
             Arguments.of(getOrderExportDetailsWithDeliverFromTo(),
-                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+                OrderHistory.UPDATE_EXPORT_DETAILS_UK + updateExportDetails),
             Arguments.of(orderWithoutExportDate,
-                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails),
+                OrderHistory.UPDATE_EXPORT_DETAILS_UK + updateExportDetails),
             Arguments.of(orderWithoutDeliverFromTo,
-                OrderHistory.UPDATE_EXPORT_DETAILS + updateExportDetails));
+                OrderHistory.UPDATE_EXPORT_DETAILS_UK + updateExportDetails));
     }
 
     @Test

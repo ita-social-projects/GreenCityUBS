@@ -28,8 +28,8 @@ class OrderBagToBagInfoDtoMapperTest {
         assertEquals(orderBag.getBag().getId(), result.getId(), "Bag ID should match");
         assertEquals(120.00, result.getPrice(), "Price should be converted to decimal format");
         assertEquals(orderBag.getCapacity(), result.getCapacity(), "Capacity should match");
-        assertEquals(orderBag.getNameUk(), result.getName(), "Name should match");
-        assertEquals(orderBag.getNameEn(), result.getNameEng(), "NameEn should match");
+        assertEquals(orderBag.getNameUk(), result.getNameUk(), "Name should match");
+        assertEquals(orderBag.getNameEn(), result.getNameEn(), "NameEn should match");
     }
 
     @Test

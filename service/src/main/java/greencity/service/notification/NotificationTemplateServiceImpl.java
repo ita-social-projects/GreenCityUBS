@@ -60,8 +60,8 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
 
     private void updateNotificationTemplate(NotificationTemplate template,
         NotificationTemplateWithPlatformsUpdateDto dto) {
-        template.setTitleUk(dto.getNotificationTemplateUpdateInfo().getTitle());
-        template.setTitleEn(dto.getNotificationTemplateUpdateInfo().getTitleEng());
+        template.setTitleUk(dto.getNotificationTemplateUpdateInfo().getTitleUk());
+        template.setTitleEn(dto.getNotificationTemplateUpdateInfo().getTitleEn());
         template.setTrigger(dto.getNotificationTemplateUpdateInfo().getTrigger());
         template.setTime(dto.getNotificationTemplateUpdateInfo().getTime());
 
@@ -90,8 +90,8 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
                 .filter(dto -> dto.getId().equals(platform.getId()))
                 .findAny()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_PLATFORM_NOT_FOUND));
-            platform.setBodyUk(platformDto.getBody());
-            platform.setBodyEn(platformDto.getBodyEng());
+            platform.setBodyUk(platformDto.getBodyUk());
+            platform.setBodyEn(platformDto.getBodyEn());
             platform.setNotificationStatus(platformDto.getStatus());
         }
     }

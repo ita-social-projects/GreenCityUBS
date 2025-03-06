@@ -19,10 +19,10 @@ public class TariffServiceDtoToBagMapper extends AbstractConverter<TariffService
             .commission(convertIntoCoins(source.getCommission()))
             .fullPrice(convertIntoCoins(source.getPrice() + source.getCommission()))
             .limitIncluded(false)
-            .nameUk(source.getName())
-            .nameEn(source.getNameEng())
-            .descriptionUk(source.getDescription())
-            .descriptionEn(source.getDescriptionEng())
+            .nameUk(source.getNameUk())
+            .nameEn(source.getNameEn())
+            .descriptionUk(source.getDescriptionUk())
+            .descriptionEn(source.getDescriptionEn())
             .createdAt(LocalDate.now())
             .build();
     }

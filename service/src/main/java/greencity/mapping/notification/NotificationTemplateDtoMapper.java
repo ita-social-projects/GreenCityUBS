@@ -18,18 +18,18 @@ public class NotificationTemplateDtoMapper
                 NotificationTemplateMainInfoDto.builder()
                     .type(notificationTemplate.getNotificationType())
                     .trigger(notificationTemplate.getTrigger())
-                    .triggerDescription(notificationTemplate.getTrigger().getDescriptionUk())
-                    .triggerDescriptionEng(notificationTemplate.getTrigger().getDescriptionEn())
+                    .triggerDescriptionUk(notificationTemplate.getTrigger().getDescriptionUk())
+                    .triggerDescriptionEn(notificationTemplate.getTrigger().getDescriptionEn())
                     .time(notificationTemplate.getTime())
-                    .timeDescription(notificationTemplate.getTime().getDescriptionUk())
-                    .timeDescriptionEng(notificationTemplate.getTime().getDescriptionEn())
+                    .timeDescriptionUk(notificationTemplate.getTime().getDescriptionUk())
+                    .timeDescriptionEn(notificationTemplate.getTime().getDescriptionEn())
                     .schedule(notificationTemplate.getSchedule())
-                    .title(notificationTemplate.getTitleUk())
-                    .titleEng(notificationTemplate.getTitleEn())
+                    .titleUk(notificationTemplate.getTitleUk())
+                    .titleEn(notificationTemplate.getTitleEn())
                     .notificationStatus(notificationTemplate.getNotificationStatus())
-                    .userCategoryDescription(Objects.isNull(notificationTemplate.getUserCategory()) ? null
+                    .userCategoryDescriptionUk(Objects.isNull(notificationTemplate.getUserCategory()) ? null
                         : notificationTemplate.getUserCategory().getDescriptionUk())
-                    .userCategoryDescriptionEng(Objects.isNull(notificationTemplate.getUserCategory()) ? null
+                    .userCategoryDescriptionEn(Objects.isNull(notificationTemplate.getUserCategory()) ? null
                         : notificationTemplate.getUserCategory().getDescriptionEn())
                     .build())
             .build();

@@ -21,7 +21,7 @@ public class PositionMapper extends AbstractConverter<PositionDto, Position> {
     protected Position convert(PositionDto positionDto) {
         return Position.builder()
             .id(positionDto.getId())
-            .nameUk(positionDto.getName())
+            .nameUk(positionDto.getNameUk())
             .nameEn(positionDto.getNameEn())
             .build();
     }

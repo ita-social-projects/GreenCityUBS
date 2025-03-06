@@ -18,10 +18,10 @@ public class GetServiceDtoToServiceMapper extends AbstractConverter<GetServiceDt
                 .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
                 .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
                 .longValue())
-            .nameUk(source.getName())
-            .nameEn(source.getNameEng())
-            .descriptionUk(source.getDescription())
-            .descriptionEn(source.getDescriptionEng())
+            .nameUk(source.getNameUk())
+            .nameEn(source.getNameEn())
+            .descriptionUk(source.getDescriptionUk())
+            .descriptionEn(source.getDescriptionEn())
             .build();
     }
 }

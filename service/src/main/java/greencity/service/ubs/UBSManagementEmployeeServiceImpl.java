@@ -121,7 +121,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .employeePosition(employeeWithTariffsIdDto.getEmployeeDto().getEmployeePositions().stream()
                 .map(positionDto -> Position.builder()
                     .id(positionDto.getId())
-                    .nameUk(positionDto.getName())
+                    .nameUk(positionDto.getNameUk())
                     .nameEn(positionDto.getNameEn())
                     .build())
                 .collect(Collectors.toSet()))
@@ -136,7 +136,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .positions(employee.getEmployeePosition().stream()
                 .map(position -> PositionDto.builder()
                     .id(position.getId())
-                    .name(position.getNameUk())
+                    .nameUk(position.getNameUk())
                     .nameEn(position.getNameEn())
                     .build())
                 .collect(Collectors.toList()))
@@ -288,11 +288,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         if (!positionRepository.existsById(dto.getId())) {
             throw new NotFoundException(ErrorMessage.POSITION_NOT_FOUND_BY_ID + dto.getId());
         }
-        if (!positionRepository.existsPositionByNameUk(dto.getName())) {
+        if (!positionRepository.existsPositionByNameUk(dto.getNameUk())) {
             Position position = modelMapper.map(dto, Position.class);
             return modelMapper.map(positionRepository.save(position), PositionDto.class);
         }
-        throw new UnprocessableEntityException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
+        throw new UnprocessableEntityException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getNameUk());
     }
 
     private void updateEmployeeAuthoritiesToRelatedPositions(EmployeeWithTariffsIdDto dto) {
@@ -363,16 +363,16 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     public PositionDto create(AddingPositionDto dto) {
-        if (!positionRepository.existsPositionByNameUk(dto.getName())) {
+        if (!positionRepository.existsPositionByNameUk(dto.getNameUk())) {
             Position position = positionRepository.save(buildPosition(dto));
             return modelMapper.map(position, PositionDto.class);
         }
-        throw new UnprocessableEntityException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
+        throw new UnprocessableEntityException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getNameUk());
     }
 
     private Position buildPosition(AddingPositionDto dto) {
         return Position.builder()
-            .nameUk(dto.getName())
+            .nameUk(dto.getNameUk())
             .nameEn(dto.getNameEn())
             .build();
     }
@@ -423,7 +423,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
     private boolean existPositions(List<PositionDto> positions) {
         return positions.stream()
-            .allMatch(p -> positionRepository.existsPositionByIdAndNameUk(p.getId(), p.getName()));
+            .allMatch(p -> positionRepository.existsPositionByIdAndNameUk(p.getId(), p.getNameUk()));
     }
 
     /**

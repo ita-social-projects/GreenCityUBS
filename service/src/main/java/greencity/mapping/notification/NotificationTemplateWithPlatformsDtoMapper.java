@@ -18,31 +18,31 @@ class NotificationTemplateWithPlatformsDtoMapper
             .notificationTemplateMainInfoDto(NotificationTemplateMainInfoDto.builder()
                 .type(notificationTemplate.getNotificationType())
                 .trigger(notificationTemplate.getTrigger())
-                .triggerDescription(notificationTemplate.getTrigger().getDescriptionUk())
-                .triggerDescriptionEng(notificationTemplate.getTrigger().getDescriptionEn())
+                .triggerDescriptionUk(notificationTemplate.getTrigger().getDescriptionUk())
+                .triggerDescriptionEn(notificationTemplate.getTrigger().getDescriptionEn())
                 .time(notificationTemplate.getTime())
-                .timeDescription(notificationTemplate.getTime().getDescriptionUk())
-                .timeDescriptionEng(notificationTemplate.getTime().getDescriptionEn())
+                .timeDescriptionUk(notificationTemplate.getTime().getDescriptionUk())
+                .timeDescriptionEn(notificationTemplate.getTime().getDescriptionEn())
                 .schedule(notificationTemplate.getSchedule())
-                .title(notificationTemplate.getTitleUk())
-                .titleEng(notificationTemplate.getTitleEn())
+                .titleUk(notificationTemplate.getTitleUk())
+                .titleEn(notificationTemplate.getTitleEn())
                 .notificationStatus(notificationTemplate.getNotificationStatus())
                 .scheduleUpdateForbidden(notificationTemplate.isScheduleUpdateForbidden())
-                .userCategoryDescription(
+                .userCategoryDescriptionUk(
                     Objects.isNull(notificationTemplate.getUserCategory()) ? null
                         : notificationTemplate.getUserCategory().getDescriptionUk())
-                .userCategoryDescriptionEng(Objects.isNull(notificationTemplate.getUserCategory()) ? null
+                .userCategoryDescriptionEn(Objects.isNull(notificationTemplate.getUserCategory()) ? null
                     : notificationTemplate.getUserCategory().getDescriptionEn())
                 .build())
             .platforms(notificationTemplate.getNotificationPlatforms().stream()
                 .map(platform -> NotificationPlatformDto.builder()
                     .id(platform.getId())
                     .receiverType(platform.getNotificationReceiverType())
-                    .nameEng(platform
+                    .nameEn(platform
                         .getNotificationReceiverType()
                         .getName())
-                    .body(platform.getBodyUk())
-                    .bodyEng(platform.getBodyEn())
+                    .bodyUk(platform.getBodyUk())
+                    .bodyEn(platform.getBodyEn())
                     .status(platform.getNotificationStatus())
                     .build())
                 .collect(Collectors.toList()))
