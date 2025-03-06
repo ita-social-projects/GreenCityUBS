@@ -292,7 +292,8 @@ public class NotificationServiceImpl implements NotificationService {
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()
                 .map(Event::getEventNameUk)
-                .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK))) {
+                .noneMatch(
+                    e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK))) {
             fillAndSendNotification(parameters, order, NotificationType.ORDER_STATUS_CHANGED);
         } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
             && order.getEvents().stream()
@@ -489,7 +490,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private List<Order> getOrdersWithNewViolations() {
-        return orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK)
+        return orderRepository
+            .findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK)
             .stream()
             .filter(order -> orderHasJustNewViolations(order.getEvents()))
             .toList();

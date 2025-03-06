@@ -579,7 +579,8 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
+            order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
@@ -608,7 +609,8 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
+            order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
@@ -637,7 +639,8 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
+            order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
@@ -666,7 +669,8 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
+            order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
@@ -695,7 +699,8 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко", order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
+            order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, Mockito.mock(MultipartFile.class),
             TEST_EMAIL);
 

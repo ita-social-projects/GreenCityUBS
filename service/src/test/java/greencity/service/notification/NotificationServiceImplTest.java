@@ -476,7 +476,8 @@ class NotificationServiceImplTest {
             Set<NotificationParameter> parameters = getNewViolationParameter(violation);
 
             mockUserNeedNotificationCheck(order, NotificationType.VIOLATION_THE_RULES);
-            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK))
+            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK,
+                DELETE_VIOLATION_UK))
                 .thenReturn(orders);
             when(violationRepository.findActiveViolationByOrderId(anyLong())).thenReturn(Optional.of(violation));
             mockFillAndSendNotification(parameters, order, NotificationType.VIOLATION_THE_RULES);
@@ -512,7 +513,8 @@ class NotificationServiceImplTest {
             List<Order> orders = Collections.singletonList(order);
             setEventsToOrder(order, ADD_VIOLATION_UK, CHANGES_VIOLATION_UK);
 
-            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK))
+            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK,
+                DELETE_VIOLATION_UK))
                 .thenReturn(orders);
 
             notificationService.notifyAllAddedViolations();
@@ -693,7 +695,8 @@ class NotificationServiceImplTest {
 
         private static Stream<Arguments> correctArguments() {
             return Stream.of(
-                Arguments.of(OrderStatus.CONFIRMED, asList(ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK, ORDER_NOT_TAKEN_OUT_UK)),
+                Arguments.of(OrderStatus.CONFIRMED,
+                    asList(ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK, ORDER_NOT_TAKEN_OUT_UK)),
                 Arguments.of(OrderStatus.DONE, Collections.singletonList(ORDER_CONFIRMED_UK)),
                 Arguments.of(OrderStatus.CANCELED, asList(ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK)));
         }
