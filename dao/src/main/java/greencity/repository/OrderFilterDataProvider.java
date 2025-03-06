@@ -11,9 +11,9 @@ public class OrderFilterDataProvider {
         "orderPaymentStatus", OrderSearchCriteria::getOrderPaymentStatus);
 
     private static final Map<String, Function<OrderSearchCriteria, String[]>> FILTERS_STRING_MAP = Map.of(
-        "region", OrderSearchCriteria::getRegionUk,
-        "city", OrderSearchCriteria::getCitiesUk,
-        "district", OrderSearchCriteria::getDistrictsUk,
+        "regionUk", OrderSearchCriteria::getRegionUk,
+        "cityUk", OrderSearchCriteria::getCitiesUk,
+        "districtUk", OrderSearchCriteria::getDistrictsUk,
         "regionEn", OrderSearchCriteria::getRegionEn,
         "cityEn", OrderSearchCriteria::getCitiesEn,
         "districtEn", OrderSearchCriteria::getDistrictsEn);
