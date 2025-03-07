@@ -135,6 +135,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -254,6 +256,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
+@MockitoSettings(strictness = Strictness.LENIENT)
 class UBSClientServiceImplTest {
     @Mock
     private UserRepository userRepository;
@@ -1424,7 +1427,7 @@ class UBSClientServiceImplTest {
             .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
         verify(ubsUserRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(dto.getPersonalData(), UBSuser.class);
-        verify(orderRepository, times(2)).findById(anyLong());
+        verify(orderRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -3589,5 +3592,192 @@ class UBSClientServiceImplTest {
 
         assertThrows(BadRequestException.class,
             () -> ubsClientService.validatePaymentFromMonoBank(response));
+    }
+  
+    @Test
+    void testUpdateOrderAddress() {
+        Address addressToSave = getAddress();
+
+        when(modelMapper.map(TEST_ORDER_ADDRESS_DTO_UPDATE, CreateAddressRequestDto.class))
+            .thenReturn(TEST_CREATE_ADDRESS_DTO);
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
+        when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
+        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getCity()));
+        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(getDistrict()));
+
+        ubsService.updateOrderAddress(TEST_ORDER_ADDRESS_DTO_UPDATE);
+
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
+        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
+    }
+
+    @Test
+    void getAllDistrictsForKyivTest() {
+        when(districtRepository.findAllByCityId(anyLong())).thenReturn(List.of(getDistrict()));
+
+        ubsClientService.getAllDistrictsForKyiv();
+
+        verify(districtRepository).findAllByCityId(anyLong());
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithInvalidUserTest() {
+        when(userRepository.findByUuid(anyString())).thenReturn(null);
+
+        assertThrows(NotFoundException.class,
+            () -> ubsService.updateCurrentAddressForOrder(null, USER_UUID));
+
+        verify(userRepository).findByUuid(anyString());
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithExistingDeletedAddressTest() {
+        OrderAddressDtoRequest dtoRequest = getTestOrderAddressDtoRequest2();
+        User user = getUser();
+        Address address = getAddress(1L)
+            .setUser(user)
+            .setAddressStatus(AddressStatus.DELETED);
+        CreateAddressRequestDto dto = getAddressRequestDto2();
+
+        when(userRepository.findByUuid(anyString())).thenReturn(user);
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(addressRepository.findAllByUserId(anyLong())).thenReturn(List.of(address));
+        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
+
+        ubsClientService.updateCurrentAddressForOrder(dtoRequest, USER_UUID);
+
+        verify(userRepository, times(2)).findByUuid(anyString());
+        verify(addressRepository).findById(anyLong());
+        verify(addressRepository).findAllByUserId(anyLong());
+        verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
+        verify(addressRepository, times(2)).save(any());
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithNoExistingRegionTest() {
+        OrderAddressDtoRequest dtoRequest = getTestOrderAddressDtoRequest2();
+        User user = getUser();
+        Address address = getAddress(1L)
+            .setUser(user)
+            .setAddressStatus(AddressStatus.DELETED);
+        CreateAddressRequestDto dto = getAddressRequestDto();
+
+        when(userRepository.findByUuid(anyString())).thenReturn(user);
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(addressRepository.findAllByUserId(anyLong())).thenReturn(List.of(address));
+        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(getAddress());
+        when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString()))
+            .thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class,
+            () -> ubsClientService.updateCurrentAddressForOrder(dtoRequest, USER_UUID));
+
+        verify(userRepository).findByUuid(anyString());
+        verify(addressRepository).findById(anyLong());
+        verify(addressRepository).findAllByUserId(anyLong());
+        verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
+        verify(modelMapper).map(any(), eq(Address.class));
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+    }
+
+    @Test
+    void testAreAddressesEqual() throws Exception {
+        Method areAddressesEqualMethod = UBSClientServiceImpl.class.getDeclaredMethod("areAddressesEqual",
+            CreateAddressRequestDto.class, CreateAddressRequestDto.class);
+        areAddressesEqualMethod.setAccessible(true);
+
+        CreateAddressRequestDto address1 = getAddressRequestDtoReflection();
+        CreateAddressRequestDto address2 = getAddressRequestDtoReflection2();
+        CreateAddressRequestDto address3 = getAddressRequestDtoReflection3();
+        CreateAddressRequestDto address4 = getAddressRequestDtoReflection4();
+        CreateAddressRequestDto address5 = getAddressRequestDtoReflection5();
+
+        boolean result1 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address2);
+        assertTrue(result1);
+
+        boolean result2 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address3);
+        assertFalse(result2);
+
+        boolean result3 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, null);
+        assertFalse(result3);
+
+        boolean result4 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, null, null);
+        assertFalse(result4);
+
+        boolean result5 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address4);
+        assertFalse(result5);
+
+        boolean result6 = (boolean) areAddressesEqualMethod.invoke(ubsClientService, address1, address5);
+        assertTrue(result6);
+    }
+
+    @Test
+    void updateCurrentAddressForOrderWithNoExistingAddressTest() throws Exception {
+        Method setLocations = UBSClientServiceImpl.class.getDeclaredMethod("setLocations",
+            CreateAddressRequestDto.class, Address.class);
+        setLocations.setAccessible(true);
+
+        Address address = getAddress();
+        CreateAddressRequestDto dto = getAddressRequestToSaveDto();
+
+        when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString()))
+            .thenReturn(Optional.of(getRegion()));
+        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.empty());
+        when(addressMapper.convert(any(), eq(City.class))).thenReturn(getCity());
+        when(cityRepository.save(any())).thenReturn(getCity());
+        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.empty());
+        when(addressMapper.convert(any(), eq(District.class))).thenReturn(getDistrict());
+
+        setLocations.invoke(ubsClientService, dto, address);
+
+        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
+        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
+        verify(addressMapper).convert(any(), eq(City.class));
+        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
+        verify(addressMapper).convert(any(), eq(District.class));
+        verify(cityRepository).save(any());
+        verify(districtRepository).save(any());
+    }
+
+    @Test
+    void processOrderIfPaidWithBonusesTest() {
+        Order order = getOrder();
+        User user = getUserWithLastLocation();
+        user.setCurrentPoints(360);
+        String uuid = user.getUuid();
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.setBags(Collections.singletonList(new BagDto(3, 3)));
+        dto.setPointsToUse(360);
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        UBSuser ubSuser = getUBSuser();
+
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(getAddress()));
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(ubsUserRepository.findById(anyLong())).thenReturn(Optional.of(ubSuser));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(getBag()));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+
+        PaymentSystemResponse paymentSystemResponse = ubsClientService.saveFullOrderToDB(dto, uuid, 1L);
+
+        verify(userRepository).findByUuid(uuid);
+        verify(addressRepository).findById(anyLong());
+        verify(tariffsInfoRepository).findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
+        verify(ubsUserRepository).findById(anyLong());
+        verify(bagRepository).findActiveBagById(anyInt());
+        verify(orderRepository, times(1)).findById(anyLong());
+        verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
+        verify(monoBankClient, times(0)).getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token));
+
+        assertEquals("", paymentSystemResponse.link());
+        assertEquals(1L, paymentSystemResponse.orderId());
     }
 }

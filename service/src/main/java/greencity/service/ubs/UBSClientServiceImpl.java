@@ -545,7 +545,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             dto.getBags(), tariffsInfo);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
-
         Order order = isExistOrder(dto, orderId);
         if (orderId != null) {
             checkIsOrderOfCurrentUser(currentUser, order);
@@ -553,20 +552,21 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setTariffsInfo(tariffsInfo);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPayInCoins = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPayInCoins);
-
+        if (sumToPayInCoins <= 0) {
+            dto.setShouldBePaid(false);
+        }
         UBSuser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
-
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        PaymentSystemResponse paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
-        notificationService.notifyCreatedOrder(order);
-
-        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
-
-        if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
-            return getPaymentRequestDto(order, "");
+        PaymentSystemResponse paymentSystemResponse;
+        if (dto.isShouldBePaid()) {
+            paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
+        } else {
+            paymentSystemResponse = getPaymentRequestDto(order, "");
         }
+        notificationService.notifyCreatedOrder(order);
+        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
         return paymentSystemResponse;
     }
 
@@ -588,14 +588,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         MonoBankPaymentRequestDto requestDto =
             formPaymentRequestForMonoBank(order.getId(), sumToPayInCoins, currentUser);
         CheckoutResponseFromMonoBank checkoutResponse = monoBankClient.getCheckoutResponse(requestDto, token);
-
         return getPaymentRequestDto(order, checkoutResponse.pageUrl());
     }
 
     private MonoBankPaymentRequestDto formPaymentRequestForMonoBank(Long orderId, long sumToPayInCoins, User user) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-
         return MonoBankPaymentRequestDto.builder()
             .amount((int) sumToPayInCoins)
             .merchantPaymentInfo(MerchantPaymentInfo.builder()
