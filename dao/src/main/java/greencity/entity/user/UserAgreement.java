@@ -33,7 +33,7 @@ public class UserAgreement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "text_ua", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "text_uk", nullable = false, columnDefinition = "TEXT")
     private String textUk;
 
     @Column(name = "text_en", nullable = false, columnDefinition = "TEXT")

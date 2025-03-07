@@ -58,16 +58,16 @@ public class Bag {
     @Column(nullable = false)
     private Long fullPrice;
 
-    @Column(nullable = false, name = "name")
+    @Column(nullable = false, name = "name_uk")
     private String nameUk;
 
-    @Column(nullable = false, name = "name_eng")
+    @Column(nullable = false, name = "name_en")
     private String nameEn;
 
-    @Column(nullable = false, name = "description")
+    @Column(nullable = false, name = "description_uk")
     private String descriptionUk;
 
-    @Column(nullable = false, name = "description_eng")
+    @Column(nullable = false, name = "description_en")
     private String descriptionEn;
 
     @Column(nullable = false)

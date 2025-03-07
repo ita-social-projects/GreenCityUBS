@@ -34,19 +34,19 @@ public class Address {
     private User user;
 
     @Size(min = 1, max = 30, message = "Invalid region name")
-    @Column(columnDefinition = "varchar(30)", nullable = false, name = "region")
+    @Column(columnDefinition = "varchar(30)", nullable = false, name = "region_uk")
     private String regionUk;
 
     @Size(min = 1, max = 30, message = "Invalid city name")
-    @Column(columnDefinition = "varchar(30) default 'Kyiv'", nullable = false, name = "city")
+    @Column(columnDefinition = "varchar(30) default 'Kyiv'", nullable = false, name = "city_uk")
     private String cityUk;
 
     @Size(min = 1, max = 50)
-    @Column(nullable = false, name = "street")
+    @Column(nullable = false, name = "street_uk")
     private String streetUk;
 
     @Size(min = 1, max = 30)
-    @Column(nullable = false, name = "district")
+    @Column(nullable = false, name = "district_uk")
     private String districtUk;
 
     @Size(min = 1, max = 10)

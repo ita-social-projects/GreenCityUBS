@@ -47,7 +47,7 @@ public class EmployeeFilterView {
     @Column(name = "employee_status")
     private String employeeStatus;
 
-    @Column(name = "position_name")
+    @Column(name = "position_name_uk")
     private String positionNameUk;
 
     @Column(name = "position_name_en")

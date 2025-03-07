@@ -22,10 +22,10 @@ public class OrderPaymentStatusTranslation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "translation_value", length = 30)
+    @Column(name = "translation_value_uk", length = 30)
     private String translationValueUk;
 
-    @Column(name = "translation_value_eng", length = 30)
+    @Column(name = "translation_value_en", length = 30)
     private String translationsValueEn;
 
     @Column(name = "order_payment_status_id")

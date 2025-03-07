@@ -75,10 +75,10 @@ public class NotificationTemplate {
     @Enumerated(EnumType.STRING)
     private NotificationStatus notificationStatus;
 
-    @Column(name = "title")
+    @Column(name = "title_uk")
     private String titleUk;
 
-    @Column(name = "title_eng")
+    @Column(name = "title_en")
     private String titleEn;
 
     @Builder.Default

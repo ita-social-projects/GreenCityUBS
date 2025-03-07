@@ -58,11 +58,11 @@ public class OrderBag {
 
     @NotBlank
     @Size(min = 1, max = 30)
-    @Column(nullable = false, name = "name")
+    @Column(nullable = false, name = "name_uk")
     private String nameUk;
 
     @NotBlank
     @Size(min = 1, max = 30)
-    @Column(nullable = false, name = "name_eng")
+    @Column(nullable = false, name = "name_en")
     private String nameEn;
 }
