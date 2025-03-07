@@ -1679,6 +1679,7 @@ public class ModelUtils {
             .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
             .district("Zaliznuchnuy")
             .city("Lviv")
+            .addressStatus(AddressStatus.NEW)
             .actual(false)
             .build());
         list.add(Address.builder().id(2L)
@@ -1689,6 +1690,7 @@ public class ModelUtils {
             .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
             .district("Zaliznuchnuy")
             .city("Lviv")
+            .addressStatus(AddressStatus.DELETED)
             .actual(false)
             .build());
         return list;
@@ -5758,76 +5760,6 @@ public class ModelUtils {
             .coordinates(new CoordinatesDto(50.5555555d, 50.5555555d))
             .build();
 
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDtoReflection() {
-        return CreateAddressRequestDto.builder()
-            .region("Region")
-            .regionEn("RegionEn")
-            .city("City")
-            .cityEn("CityEn")
-            .district("District")
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDtoReflection2() {
-        return CreateAddressRequestDto.builder()
-            .region("Region")
-            .regionEn("RegionEn")
-            .city("City")
-            .cityEn("CityEn")
-            .district("District")
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDtoReflection3() {
-        return CreateAddressRequestDto.builder()
-            .region("DifferentRegion")
-            .regionEn("DifferentRegionEn")
-            .city("DifferentCity")
-            .cityEn("DifferentCityEn")
-            .district("DifferentDistrict")
-            .districtEn("DifferentDistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDtoReflection4() {
-        return CreateAddressRequestDto.builder()
-            .region("DifferentRegion")
-            .regionEn("DifferentRegionEn")
-            .city("DifferentCity")
-            .cityEn("DifferentCityEn")
-            .district("District")
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDtoReflection5() {
-        return CreateAddressRequestDto.builder()
-            .region(null)
-            .regionEn("RegionEn")
-            .city(null)
-            .cityEn("CityEn")
-            .district(null)
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
     }
 
     public static UpdateAddressDto getUpdateAddressDto() {

@@ -6,7 +6,6 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.address.AddressExportDetailsDto;
-import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagMappingDto;
@@ -27,8 +26,6 @@ import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.GeneralOrderInfo;
 import greencity.dto.order.NotTakenOrderReasonDto;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailDto;
 import greencity.dto.order.OrderDetailInfoDto;
@@ -38,7 +35,6 @@ import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderPaymentStatusesTranslationDto;
 import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrderStatusesTranslationDto;
-import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
@@ -125,8 +121,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ID;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
@@ -178,6 +172,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderBagRepository orderBagRepository;
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
+    private final AddressService addressService;
     private static final String PAY_BUTTON = "payButton";
 
     /**
@@ -235,36 +230,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
         ourUser.getChangeOfPointsList().add(changeOfPoints);
         userRepository.save(ourUser);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-
-    @Override
-    public ReadAddressByOrderDto getAddressByOrderId(Long orderId) {
-        if (orderRepository.findById(orderId).isEmpty()) {
-            throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
-        }
-        OrderAddress orderAddress = orderAddressRepository.findByOrderId(orderId)
-            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
-        return modelMapper.map(orderAddress, ReadAddressByOrderDto.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
-        String email) {
-        OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
-            .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ADDRESS_BY_ID, dtoUpdate.getId())));
-        OrderAddress updatedOrderAddress = ubsClientService.updateOrderAddress(dtoUpdate);
-        mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress, dtoUpdate.getAddressComment());
-        orderAddressRepository.save(updatedOrderAddress);
-        eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
-        return Optional.of(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class));
     }
 
     /**
@@ -884,14 +849,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return eventRepository.wasOrderStatusChangedFromFormedToCanceled(orderId);
     }
 
-    @Override
-    @Transactional
-    public void addressUpdate(UpdateAddressDto addressDto, String email) {
-        Order order = orderRepository.findById(addressDto.getOrderId())
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + addressDto.getOrderId()));
-        updateAddress(addressDto.getOrderAddressExportDetails(), order, email);
-    }
-
     private void verifyPaidWithBonuses(Order order, String email) {
         if (order.getPointsToUse() > 0) {
             eventService.saveEvent(OrderHistory.RETURN_BONUSES_TO_CLIENT + ". Всього " + order.getPointsToUse(), email,
@@ -1268,7 +1225,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
         }
         if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
-            updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), order, email);
+            addressService.updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), order, email);
         }
         setUbsCourierSumAndWriteOffStationSum(order, updateOrderPageDto.getWriteOffStationSum(),
             updateOrderPageDto.getUbsCourierSum());
@@ -1486,15 +1443,5 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .description(order.getReasonNotTakingBagDescription())
             .images(order.getImageReasonNotTakingBags())
             .build();
-    }
-
-    private void mapUpdatedOrderAddressFields(OrderAddress orderAddress, OrderAddress updatedOrderAddress,
-        String comment) {
-        updatedOrderAddress.setLocation(orderAddress.getLocation());
-        updatedOrderAddress.setId(orderAddress.getId());
-        updatedOrderAddress.setActual(orderAddress.getActual());
-        updatedOrderAddress.setAddressComment(comment);
-        updatedOrderAddress.setCoordinates(orderAddress.getCoordinates());
-        updatedOrderAddress.setAddressStatus(orderAddress.getAddressStatus());
     }
 }

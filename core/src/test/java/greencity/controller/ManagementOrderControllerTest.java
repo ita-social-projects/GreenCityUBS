@@ -37,7 +37,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getRequestDto;
 import static greencity.ModelUtils.getUpdateOrderPageAdminDto;
@@ -59,8 +58,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 class ManagementOrderControllerTest {
-
-    private static final String ubsLink = "/ubs/management";
+    private static final String ubsLink = "/ubs";
+    private static final String ubsManagementLink = ubsLink + "/management";
 
     private MockMvc mockMvc;
 
@@ -110,14 +109,14 @@ class ManagementOrderControllerTest {
         CertificateFilterCriteria certificateFilterCriteria = new CertificateFilterCriteria();
         CertificatePage certificatePage = new CertificatePage();
         mockMvc
-            .perform(MockMvcRequestBuilders.get(ubsLink + "/getAllCertificates"))
+            .perform(MockMvcRequestBuilders.get(ubsManagementLink + "/getAllCertificates"))
             .andExpect(MockMvcResultMatchers.status().isOk());
         verify(certificateService).getCertificatesWithFilter(certificatePage, certificateFilterCriteria);
     }
 
     @Test
     void addCertificateTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/addCertificate")
+        mockMvc.perform(MockMvcRequestBuilders.post(ubsManagementLink + "/addCertificate")
             .content(contentForaddingcontroller)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isCreated());
@@ -133,33 +132,27 @@ class ManagementOrderControllerTest {
     void deleteCertificateTest() throws Exception {
         doNothing().when(certificateService).deleteCertificate("1111-1234");
 
-        mockMvc.perform(delete(ubsLink + "/deleteCertificate" + "/" + "{code}", "1111-1234")
+        mockMvc.perform(delete(ubsManagementLink + "/deleteCertificate" + "/" + "{code}", "1111-1234")
             .principal(principal)).andExpect(status().isOk());
         verify(certificateService, times(1)).deleteCertificate("1111-1234");
     }
 
     @Test
-    void getAddressByOrder() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/read-address-order" + "/{id}", 1L))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     void getOrderDetail() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/read-order-info" + "/{id}", 1L)
+        this.mockMvc.perform(get(ubsManagementLink + "/read-order-info" + "/{id}", 1L)
             .param("language", "ua"))
             .andExpect(status().isOk());
     }
 
     @Test
     void getSumOrderDetail() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-order-sum-detail" + "/{id}", 1L))
+        this.mockMvc.perform(get(ubsManagementLink + "/get-order-sum-detail" + "/{id}", 1L))
             .andExpect(status().isOk());
     }
 
     @Test
     void answersNotFoundWhenNoViolationWithGivenOrderId() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
+        this.mockMvc.perform(get(ubsManagementLink + "/violation-details" + "/{orderId}", 1L))
             .andExpect(status().isNotFound());
 
         verify(violationService).getViolationDetailsByOrderId(1L);
@@ -170,7 +163,7 @@ class ManagementOrderControllerTest {
         ViolationDetailInfoDto violationDetailInfoDto = getViolationDetailInfoDto();
         when(violationService.getViolationDetailsByOrderId(1L)).thenReturn(Optional.of(violationDetailInfoDto));
 
-        this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
+        this.mockMvc.perform(get(ubsManagementLink + "/violation-details" + "/{orderId}", 1L))
             .andExpect(status().isOk());
 
         verify(violationService).getViolationDetailsByOrderId(1L);
@@ -181,7 +174,7 @@ class ManagementOrderControllerTest {
         OrderDetailStatusDto dto = ModelUtils.getPaidOrderDetailStatusDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
-        this.mockMvc.perform(put(ubsLink + "/update-order-detail-status" + "/{id}", 1L)
+        this.mockMvc.perform(put(ubsManagementLink + "/update-order-detail-status" + "/{id}", 1L)
             .content(orderResponceDtoJSON)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
@@ -190,13 +183,13 @@ class ManagementOrderControllerTest {
 
     @Test
     void geOrderStatusesDetail() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/read-order-detail-status" + "/{id}", 1L))
+        this.mockMvc.perform(get(ubsManagementLink + "/read-order-detail-status" + "/{id}", 1L))
             .andExpect(status().isOk());
     }
 
     @Test
     void getOrderExportDetail() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-order-export-details" + "/{id}", 1L))
+        this.mockMvc.perform(get(ubsManagementLink + "/get-order-export-details" + "/{id}", 1L))
             .andExpect(status().isOk());
 
         verify(ubsManagementService).getOrderExportDetails(1L);
@@ -204,13 +197,13 @@ class ManagementOrderControllerTest {
 
     @Test
     void getAllDataForOrderTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-all-orders" + "/{uuid}", "uuid7"));
+        this.mockMvc.perform(get(ubsManagementLink + "/get-all-orders" + "/{uuid}", "uuid7"));
         verify(ubsManagementService).getOrdersForUser("uuid7");
     }
 
     @Test
     void getOrdersTotalAmountTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/orders/count")
+        this.mockMvc.perform(get(ubsManagementLink + "/orders/count")
             .principal(principal))
             .andExpect(status().isOk());
 
@@ -219,14 +212,14 @@ class ManagementOrderControllerTest {
 
     @Test
     void getDataForOrderStatusPageTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-data-for-order/{id}", 1L)
+        this.mockMvc.perform(get(ubsManagementLink + "/get-data-for-order/{id}", 1L)
             .principal(principal));
         verify(ubsManagementService).getOrderStatusData(1L, "35467585763t4sfgchjfuyetf");
     }
 
     @Test
     void checkEmployeeForOrderPageTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/check-employee-for-order/{id}", 1L)
+        this.mockMvc.perform(get(ubsManagementLink + "/check-employee-for-order/{id}", 1L)
             .principal(principal));
         verify(ubsManagementService).checkEmployeeForOrder(1L, "35467585763t4sfgchjfuyetf");
     }
@@ -236,7 +229,7 @@ class ManagementOrderControllerTest {
         ExportDetailsDto dto = ModelUtils.getOrderDetailExportDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
-        this.mockMvc.perform(put(ubsLink + "/update-order-export-details" + "/{id}", 1L)
+        this.mockMvc.perform(put(ubsManagementLink + "/update-order-export-details" + "/{id}", 1L)
             .content(orderResponceDtoJSON)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
@@ -245,7 +238,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void deletesViolationFromOrder() throws Exception {
-        mockMvc.perform(delete(ubsLink + "/delete-violation-from-order" + "/{orderId}", 1L))
+        mockMvc.perform(delete(ubsManagementLink + "/delete-violation-from-order" + "/{orderId}", 1L))
             .andExpect(status().isOk());
 
         verify(violationService).deleteViolation(1L, null);
@@ -259,7 +252,7 @@ class ManagementOrderControllerTest {
         MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
             "", "application/json", responseJSON.getBytes());
 
-        mockMvc.perform(multipart(ubsLink + "/add-manual-payment/{id}", 1)
+        mockMvc.perform(multipart(ubsManagementLink + "/add-manual-payment/{id}", 1)
             .file(jsonFile)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
@@ -268,7 +261,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void deleteManualPayment() throws Exception {
-        mockMvc.perform(delete(ubsLink + "/delete-manual-payment/{id}", 1L))
+        mockMvc.perform(delete(ubsManagementLink + "/delete-manual-payment/{id}", 1L))
             .andExpect(status().isOk()).andDo(print());
     }
 
@@ -281,7 +274,7 @@ class ManagementOrderControllerTest {
             "", "application/json", responseJSON.getBytes());
 
         MockMultipartHttpServletRequestBuilder builder =
-            multipart(ubsLink + "/update-manual-payment/{id}", 1L);
+            multipart(ubsManagementLink + "/update-manual-payment/{id}", 1L);
         builder.with(request -> {
             request.setMethod("PUT");
             return request;
@@ -295,7 +288,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void getAllEmployeeByPositionTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-all-employee-by-position" + "/{id}", 1L)
+        this.mockMvc.perform(get(ubsManagementLink + "/get-all-employee-by-position" + "/{id}", 1L)
             .principal(principal))
             .andExpect(status().isOk());
     }
@@ -303,7 +296,7 @@ class ManagementOrderControllerTest {
     @Test
     void groupCoordsWithSpecifiedOnes() throws Exception {
         this.mockMvc.perform(
-            post(ubsLink + "/group-undelivered-with-specified")
+            post(ubsManagementLink + "/group-undelivered-with-specified")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("[{\"latitude\":84.525254,\"longitude\":12.436964}]"))
             .andExpect(status().isOk());
@@ -315,7 +308,7 @@ class ManagementOrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String writeValueAsString = objectMapper.writeValueAsString(adminCommentDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/save-admin-comment", 1L)
+        mockMvc.perform(MockMvcRequestBuilders.post(ubsManagementLink + "/save-admin-comment", 1L)
             .content(writeValueAsString)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
@@ -328,7 +321,7 @@ class ManagementOrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String writeValueAsString = objectMapper.writeValueAsString(ecoNumberDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.put(ubsLink + "/update-eco-store{id}", 1L)
+        mockMvc.perform(MockMvcRequestBuilders.put(ubsManagementLink + "/update-eco-store{id}", 1L)
             .content(writeValueAsString)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
@@ -337,19 +330,19 @@ class ManagementOrderControllerTest {
 
     @Test
     void getCustomTableParametersTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(ubsLink + "/getOrdersViewParameters"))
+        mockMvc.perform(MockMvcRequestBuilders.get(ubsManagementLink + "/getOrdersViewParameters"))
             .andExpect(status().isOk());
     }
 
     @Test
     void setCustomTableTest() throws Exception {
-        mockMvc.perform(put(ubsLink + "/changeOrdersTableView"))
+        mockMvc.perform(put(ubsManagementLink + "/changeOrdersTableView"))
             .andExpect(status().isOk());
     }
 
     @Test
     void allUndeliveredCoordsTest() throws Exception {
-        mockMvc.perform(get(ubsLink + "/all-undelivered"))
+        mockMvc.perform(get(ubsManagementLink + "/all-undelivered"))
             .andExpect(status().isOk());
 
         verify(coordinateService).getAllUndeliveredOrdersWithLiters();
@@ -361,7 +354,7 @@ class ManagementOrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String dtoJSON = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(patch(ubsLink + "/addPointsToUser")
+        mockMvc.perform(patch(ubsManagementLink + "/addPointsToUser")
             .content(dtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -369,7 +362,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void paymentInfoTest() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getPaymentInfo")
+        mockMvc.perform(get(ubsManagementLink + "/getPaymentInfo")
             .principal(principal)
             .param("orderId", "1")
             .param("sumToPay", "1")
@@ -379,7 +372,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void groupCoordsTest() throws Exception {
-        mockMvc.perform(get(ubsLink + "/group-undelivered")
+        mockMvc.perform(get(ubsManagementLink + "/group-undelivered")
             .param("radius", "2.04")
             .param("litres", "2")
             .contentType(MediaType.APPLICATION_JSON))
@@ -388,7 +381,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void getUserViolationsTest() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getUsersViolations")
+        mockMvc.perform(get(ubsManagementLink + "/getUsersViolations")
             .param("email", "max@email.com")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -396,7 +389,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void setCustomTable() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put(ubsLink + "/changeOrdersTableView")
+        mockMvc.perform(MockMvcRequestBuilders.put(ubsManagementLink + "/changeOrdersTableView")
             .content("titles1,titles2,titles3")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -404,20 +397,20 @@ class ManagementOrderControllerTest {
 
     @Test
     void getCustomTableParameters() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/getOrdersViewParameters", "uuid1"))
+        this.mockMvc.perform(get(ubsManagementLink + "/getOrdersViewParameters", "uuid1"))
             .andExpect(status().isOk());
     }
 
     @Test
     void getOrders() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/bigOrderTable", "uuid1")
+        this.mockMvc.perform(get(ubsManagementLink + "/bigOrderTable", "uuid1")
             .principal(principal))
             .andExpect(status().isOk());
     }
 
     @Test
     void getOrderBagsInfo() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/getOrderBagsInfo" + "/{id}", 1L))
+        this.mockMvc.perform(get(ubsManagementLink + "/getOrderBagsInfo" + "/{id}", 1L))
             .andExpect(status().isOk());
     }
 
@@ -427,7 +420,7 @@ class ManagementOrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonDto = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(put(ubsLink + "/all-order-page-admin-info")
+        mockMvc.perform(put(ubsManagementLink + "/all-order-page-admin-info")
             .content(jsonDto)
             .principal(principal)
             .param("lang", "ua")
@@ -437,14 +430,14 @@ class ManagementOrderControllerTest {
 
     @Test
     void getOrderCancellationReason() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-order-cancellation-reason" + "/{id}", 1L))
+        this.mockMvc.perform(get(ubsManagementLink + "/get-order-cancellation-reason" + "/{id}", 1L))
             .andExpect(status().isOk());
         verify(ubsManagementService).getOrderCancellationReason(1L);
     }
 
     @Test
     void getNotTakenOrderReason() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-not-taken-order-reason/{id}", 1L))
+        this.mockMvc.perform(get(ubsManagementLink + "/get-not-taken-order-reason/{id}", 1L))
             .andExpect(status().isOk());
         verify(ubsManagementService).getNotTakenOrderReason(1L);
     }
@@ -462,7 +455,7 @@ class ManagementOrderControllerTest {
             responseJSON.getBytes());
 
         MockMultipartHttpServletRequestBuilder builder =
-            MockMvcRequestBuilders.multipart(ubsLink + "/update-order-page-admin-info/{id}", 1L);
+            MockMvcRequestBuilders.multipart(ubsManagementLink + "/update-order-page-admin-info/{id}", 1L);
         builder.with(request -> {
             request.setMethod("PATCH");
             return request;
@@ -480,7 +473,7 @@ class ManagementOrderControllerTest {
     void checkIfOrderStatusIsFormedToCanceledTest() throws Exception {
         Long orderId = 1L;
         when(ubsManagementService.checkIfOrderStatusIsFormedToCanceled(orderId)).thenReturn(true);
-        mockMvc.perform(get(ubsLink + "/check-status-transition/formed-to-canceled/{id}", orderId)
+        mockMvc.perform(get(ubsManagementLink + "/check-status-transition/formed-to-canceled/{id}", orderId)
             .contentType(MediaType.APPLICATION_XML))
             .andExpect(status().isOk())
             .andExpect(content().string("<Boolean>true</Boolean>"));
