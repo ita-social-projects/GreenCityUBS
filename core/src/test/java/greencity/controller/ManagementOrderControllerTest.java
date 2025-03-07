@@ -21,7 +21,10 @@ import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
 import java.security.Principal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +39,6 @@ import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequ
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.validation.Validator;
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getRequestDto;
 import static greencity.ModelUtils.getUpdateOrderPageAdminDto;
@@ -75,9 +77,6 @@ class ManagementOrderControllerTest {
     @Mock
     CertificateService certificateService;
 
-    @Mock
-    private Validator mockValidator;
-
     @InjectMocks
     ManagementOrderController managementOrderController;
 
@@ -87,20 +86,20 @@ class ManagementOrderControllerTest {
     @Mock
     PaymentService paymentService;
 
+    private static ObjectMapper objectMapper;
+
     private final Principal principal = getUuid();
 
-    public static final String contentForaddingcontroller = """
-        {
-         "code": "1111-2222",
-         "monthCount": 8,
-         "points": 100
-        }""";
+    @BeforeAll
+    static void setUpBeforeClass() {
+        objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+    }
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(managementOrderController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-            .setValidator(mockValidator)
             .build();
     }
 
@@ -116,15 +115,12 @@ class ManagementOrderControllerTest {
 
     @Test
     void addCertificateTest() throws Exception {
+        CertificateDtoForAdding certificateDtoForAdding = ModelUtils.getCertificateDtoForAdding();
+        String json = objectMapper.writeValueAsString(certificateDtoForAdding);
         mockMvc.perform(MockMvcRequestBuilders.post(ubsManagementLink + "/addCertificate")
-            .content(contentForaddingcontroller)
+            .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isCreated());
-        CertificateDtoForAdding certificateDtoForAdding = CertificateDtoForAdding.builder()
-            .code("1111-2222")
-            .points(100)
-            .monthCount(8)
-            .build();
         verify(certificateService, times(1)).addCertificate(certificateDtoForAdding);
     }
 
@@ -172,7 +168,7 @@ class ManagementOrderControllerTest {
     @Test
     void updateOrderStatusesDetail() throws Exception {
         OrderDetailStatusDto dto = ModelUtils.getPaidOrderDetailStatusDto();
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
         this.mockMvc.perform(put(ubsManagementLink + "/update-order-detail-status" + "/{id}", 1L)
             .content(orderResponceDtoJSON)
@@ -227,7 +223,7 @@ class ManagementOrderControllerTest {
     @Test
     void updateOrderExportedDetail() throws Exception {
         ExportDetailsDto dto = ModelUtils.getOrderDetailExportDto();
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
         this.mockMvc.perform(put(ubsManagementLink + "/update-order-export-details" + "/{id}", 1L)
             .content(orderResponceDtoJSON)
@@ -247,7 +243,7 @@ class ManagementOrderControllerTest {
     @Test
     void addManualPayment() throws Exception {
         ManualPaymentRequestDto dto = getRequestDto();
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String responseJSON = objectMapper.writeValueAsString(dto);
         MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
             "", "application/json", responseJSON.getBytes());
@@ -268,7 +264,7 @@ class ManagementOrderControllerTest {
     @Test
     void updateManualPayment() throws Exception {
         ManualPaymentRequestDto dto = getRequestDto();
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String responseJSON = objectMapper.writeValueAsString(dto);
         MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
             "", "application/json", responseJSON.getBytes());
@@ -305,7 +301,7 @@ class ManagementOrderControllerTest {
     @Test
     void saveAdminCommentToOrder() throws Exception {
         AdminCommentDto adminCommentDto = ModelUtils.getAdminComment();
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String writeValueAsString = objectMapper.writeValueAsString(adminCommentDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post(ubsManagementLink + "/save-admin-comment", 1L)
@@ -318,7 +314,7 @@ class ManagementOrderControllerTest {
     @Test
     void updateEcoNumberForOrder() throws Exception {
         EcoNumberDto ecoNumberDto = getEcoNumberDto();
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String writeValueAsString = objectMapper.writeValueAsString(ecoNumberDto);
 
         mockMvc.perform(MockMvcRequestBuilders.put(ubsManagementLink + "/update-eco-store{id}", 1L)
@@ -351,7 +347,7 @@ class ManagementOrderControllerTest {
     @Test
     void addPointsToUserTest() throws Exception {
         AddingPointsToUserDto dto = ModelUtils.getAddingPointsToUserDto();
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String dtoJSON = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(patch(ubsManagementLink + "/addPointsToUser")
@@ -417,7 +413,7 @@ class ManagementOrderControllerTest {
     @Test
     void getUpdateAllOrderPageAdminInfoTest() throws Exception {
         UpdateAllOrderPageDto dto = ModelUtils.getUpdateAllOrderPageDto();
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String jsonDto = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(ubsManagementLink + "/all-order-page-admin-info")
@@ -445,7 +441,7 @@ class ManagementOrderControllerTest {
     @Test
     void updatePageAdminInfoTest() throws Exception {
         UpdateOrderPageAdminDto dto = getUpdateOrderPageAdminDto();
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String responseJSON = objectMapper.writeValueAsString(dto);
 
         MockMultipartFile jsonFile = new MockMultipartFile(
@@ -478,5 +474,26 @@ class ManagementOrderControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().string("<Boolean>true</Boolean>"));
         verify(ubsManagementService).checkIfOrderStatusIsFormedToCanceled(orderId);
+    }
+
+    @Test
+    void updateManualPaymentWithFutureSettlementDateTest() throws Exception {
+        ManualPaymentRequestDto dto = getRequestDto();
+        dto.setSettlementdate(LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+
+        objectMapper.findAndRegisterModules();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
+            "", "application/json", responseJSON.getBytes());
+        MockMultipartHttpServletRequestBuilder builder =
+            multipart(ubsManagementLink + "/update-manual-payment/{id}", 1L);
+        builder.with(request -> {
+            request.setMethod("PUT");
+            return request;
+        });
+        mockMvc.perform(builder.file(jsonFile)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
     }
 }
