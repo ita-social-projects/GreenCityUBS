@@ -296,7 +296,8 @@ public class SecurityConfig {
                 .hasAnyRole(USER)
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK + "/userProfile/**",
-                    UBS_LINK + "/get-all-districts")
+                    UBS_LINK + "/get-all-districts",
+                    UBS_EXPORT)
                 .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.PATCH,
                     UBS_LINK + "/userProfile/**",
@@ -319,8 +320,6 @@ public class SecurityConfig {
                 .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.HEAD,
                     UBS_LINK + "/userProfile/**")
-                .hasAnyRole(USER, ADMIN)
-                .requestMatchers(HttpMethod.GET, UBS_EXPORT)
                 .hasAnyRole(USER, ADMIN));
         return http.build();
     }

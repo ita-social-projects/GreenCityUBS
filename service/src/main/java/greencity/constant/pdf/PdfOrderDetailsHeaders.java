@@ -17,8 +17,14 @@ public enum PdfOrderDetailsHeaders {
     PAYMENT_DATE("Дата оплати", "Payment date"),
     ORDER_STATUS("Статус замовлення", "Order status"),
     PAYMENT_STATUS("Статус оплати", "Payment status"),
-    PAYMENT_AMOUNT("Сума замовлення", "Payment amount"),
-    AMOUNT_DUE("Сума до оплати", "Amount-due");
+    PAYMENT_AMOUNT("Сума замовлення, "
+        + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY, Locale.of(AppConstant.LOCALE_UK_NAME)),
+                   "Payment amount, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY,
+                       Locale.of(AppConstant.LOCALE_ENG_NAME))),
+    AMOUNT_DUE("Сума до оплати, "
+        + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY, Locale.of(AppConstant.LOCALE_UK_NAME)),
+               "Amount-due, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY,
+                   Locale.of(AppConstant.LOCALE_ENG_NAME)));
 
     private final String nameUa;
     private final String nameEn;

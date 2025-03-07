@@ -14,10 +14,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public enum PdfOrderContentDetailsHeaders {
     SERVICE("Послуги", "Services"),
-    VOLUME("Об'єм", "Volume"),
-    COST("Вартість", "Cost"),
-    QUANTITY("Кількість пакетів", "Quantity of bags"),
-    SUM("Сума", "Sum");
+    VOLUME("Об'єм, "
+        + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.VOLUME, Locale.of(AppConstant.LOCALE_UK_NAME)),
+           "Volume, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.VOLUME,
+               Locale.of(AppConstant.LOCALE_ENG_NAME))),
+    COST("Вартість, "
+        + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY, Locale.of(AppConstant.LOCALE_UK_NAME)),
+         "Cost, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY,
+             Locale.of(AppConstant.LOCALE_ENG_NAME))),
+    QUANTITY("Кількість пакетів, "
+        + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.UNITS, Locale.of(AppConstant.LOCALE_UK_NAME)),
+             "Quantity of bags, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.UNITS,
+                 Locale.of(AppConstant.LOCALE_ENG_NAME))),
+    SUM("Сума, "
+        + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY, Locale.of(AppConstant.LOCALE_UK_NAME)),
+        "Sum, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY,
+            Locale.of(AppConstant.LOCALE_ENG_NAME)));
 
     private final String nameUa;
     private final String nameEn;

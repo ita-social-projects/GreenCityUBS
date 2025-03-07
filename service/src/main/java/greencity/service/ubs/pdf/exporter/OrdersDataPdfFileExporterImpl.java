@@ -14,7 +14,6 @@ import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.draw.LineSeparator;
 import greencity.constant.pdf.PdfAddressConstants;
 import greencity.constant.pdf.PdfFileHeaders;
-import greencity.constant.pdf.PdfUnitsOfMeasurement;
 import greencity.constant.pdf.PdfOrderDetailsHeaders;
 import greencity.constant.pdf.PdfOrderContentDetailsHeaders;
 import greencity.dto.bag.BagForUserDto;
@@ -31,15 +30,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import static greencity.constant.AppConstant.LOCALE_ENG_NAME;
-import static greencity.constant.AppConstant.LOCALE_UA_NAME;
+import static greencity.constant.AppConstant.LOCALE_UK_NAME;
 import static greencity.constant.ErrorMessage.CANNOT_EXPORT_DATA_TO_PDF;
 import static greencity.constant.pdf.PdfFileHeaders.ADDRESS_INFO;
 import static greencity.constant.pdf.PdfFileHeaders.ORDER_COMMENT;
 import static greencity.constant.pdf.PdfFileHeaders.SENDER_INFO;
 import static greencity.constant.pdf.PdfFileHeaders.ORDER_DETAILS;
-import static greencity.constant.pdf.PdfUnitsOfMeasurement.UNITS;
-import static greencity.constant.pdf.PdfUnitsOfMeasurement.VOLUME;
-import static greencity.constant.pdf.PdfUnitsOfMeasurement.CURRENCY;
 
 @Service
 @AllArgsConstructor
@@ -49,15 +45,19 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     private static final int DEFAULT_PARAGRAPH_FONT_SIZE = 10;
     private static final int DEFAULT_TABLE_HEADER_FONT_SIZE = 11;
     private static final int DEFAULT_HEADER_FONT_SIZE = 16;
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter DATE_FORMATTER_UK = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter DATE_FORMATTER_EN = DateTimeFormatter.ofPattern("MM.dd.yyyy");
     private static final int DEFAULT_SPACING_VALUE = 10;
     private static final float[] ORDER_DETAILS_TABLE_COLUMN_WIDTH = new float[] {50, 95, 100, 100, 80, 100, 80};
     private static final float[] ORDER_CONTENT_TABLE_COLUMN_WIDTH = new float[] {125, 120, 120, 120, 120};
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] export(OrdersDataForUserDto objectToWrite, Locale locale) {
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            Document document = new Document(PageSize.A4);
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            Document document = new Document(PageSize.A4)) {
             PdfWriter.getInstance(document, byteArrayOutputStream);
             document.open();
             document.setDocumentLanguage(locale.getLanguage());
@@ -105,10 +105,12 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
 
     private PdfPTable fillOrderInfoTable(OrdersDataForUserDto orderInfo, Locale locale, PdfPTable table, int fontSize) {
         table.addCell(createCell(orderInfo.getId(), DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
-        table.addCell(createCell(orderInfo.getDatePaid().format(DATE_FORMATTER), DEFAULT_FONT_NAME, fontSize,
-            DEFAULT_CELL_BACKGROUND_COLOR, false));
-        table.addCell(createCell(orderInfo.getDateForm().format(DATE_FORMATTER), DEFAULT_FONT_NAME, fontSize,
-            DEFAULT_CELL_BACKGROUND_COLOR, false));
+        table.addCell(createCell(orderInfo.getDatePaid().format(
+            Objects.equals(LOCALE_UK_NAME, locale.getLanguage()) ? DATE_FORMATTER_UK : DATE_FORMATTER_EN),
+            DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
+        table.addCell(createCell(orderInfo.getDateForm().format(
+            Objects.equals(LOCALE_UK_NAME, locale.getLanguage()) ? DATE_FORMATTER_UK : DATE_FORMATTER_EN),
+            DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
         if (locale.getLanguage().equals(LOCALE_ENG_NAME)) {
             table.addCell(createCell(orderInfo.getOrderStatusEng(), DEFAULT_FONT_NAME, fontSize,
                 DEFAULT_CELL_BACKGROUND_COLOR, false));
@@ -120,33 +122,26 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
             table.addCell(createCell(orderInfo.getPaymentStatus(), DEFAULT_FONT_NAME, fontSize,
                 DEFAULT_CELL_BACKGROUND_COLOR, false));
         }
-        table.addCell(createCell(String.join(" ",
-            orderInfo.getOrderFullPrice().toString(),
-            PdfUnitsOfMeasurement.getByLocale(CURRENCY, locale)),
+        table.addCell(createCell(orderInfo.getOrderFullPrice(),
             DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
-        table.addCell(createCell(String.join(" ",
-            orderInfo.getAmountBeforePayment().toString(),
-            PdfUnitsOfMeasurement.getByLocale(CURRENCY, locale)),
+        table.addCell(createCell(orderInfo.getAmountBeforePayment(),
             DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
         return table;
     }
 
     private PdfPTable fillOrdersTable(List<BagForUserDto> bags, Locale locale, PdfPTable table, int fontSize) {
         bags.stream().filter(bag -> bag.getCount() > 0).forEach(bag -> {
-            table.addCell(createCell(Objects.equals(locale.getLanguage(), LOCALE_UA_NAME)
+            table.addCell(createCell(Objects.equals(locale.getLanguage(), LOCALE_UK_NAME)
                 ? bag.getService()
                 : bag.getServiceEng(), DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
             table.addCell(createCell(
-                String.join(" ", bag.getCapacity().toString(), PdfUnitsOfMeasurement.getByLocale(VOLUME, locale)),
+                bag.getCapacity(),
                 DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
-            table.addCell(createCell(String.join(" ", bag.getFullPrice().toString(),
-                PdfUnitsOfMeasurement.getByLocale(CURRENCY, locale)),
+            table.addCell(createCell(bag.getFullPrice(),
                 DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
-            table.addCell(createCell(String.join(" ", bag.getCount().toString(),
-                PdfUnitsOfMeasurement.getByLocale(UNITS, locale)),
+            table.addCell(createCell(bag.getCount(),
                 DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
-            table.addCell(createCell(String.join(" ", bag.getTotalPrice().toString(),
-                PdfUnitsOfMeasurement.getByLocale(CURRENCY, locale)),
+            table.addCell(createCell(bag.getTotalPrice(),
                 DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
         });
         table.setSpacingBefore(DEFAULT_PARAGRAPH_FONT_SIZE);

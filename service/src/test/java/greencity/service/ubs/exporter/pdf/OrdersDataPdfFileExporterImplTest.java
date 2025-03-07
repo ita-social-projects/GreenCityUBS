@@ -5,11 +5,19 @@ import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import greencity.ModelUtils;
 import greencity.constant.AppConstant;
 import greencity.dto.order.OrdersDataForUserDto;
+
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+
+import greencity.exceptions.exporting.pdf.PdfFileExportingException;
 import greencity.service.ubs.pdf.exporter.OrdersDataPdfFileExporterImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.util.Locale;
 
@@ -46,7 +54,7 @@ class OrdersDataPdfFileExporterImplTest {
     @Test
     void exportValidUaPdf() throws IOException {
         OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDto();
-        byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.of(AppConstant.LOCALE_UA_NAME));
+        byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.of(AppConstant.LOCALE_UK_NAME));
         PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(new PdfReader(pdfBytes));
         String pdfText = pdfTextExtractor.getTextFromPage(1, true);
         assertTrue(pdfText.contains("Деталі замовлення"));
@@ -68,9 +76,20 @@ class OrdersDataPdfFileExporterImplTest {
     @Test
     void exportPdfWithEmptyComment() throws IOException {
         OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDtoWithNullComment();
-        byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.of(AppConstant.LOCALE_UA_NAME));
+        byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.of(AppConstant.LOCALE_UK_NAME));
         PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(new PdfReader(pdfBytes));
         String pdfText = pdfTextExtractor.getTextFromPage(1, true);
         assertFalse(pdfText.contains("Коментар до замовлення"));
+    }
+
+    @Test
+    void exportShouldThrowPdfFileExportingExceptionWhenIOExceptionOccurs() {
+        OrdersDataForUserDto mockDto = mock(OrdersDataForUserDto.class);
+        Locale mockLocale = mock(Locale.class);
+        OrdersDataPdfFileExporterImpl spyExporter = spy(pdfFileExporter);
+        doThrow(new PdfFileExportingException())
+            .when(spyExporter)
+            .export(mockDto, mockLocale);
+        assertThrows(PdfFileExportingException.class, () -> spyExporter.export(mockDto, mockLocale));
     }
 }

@@ -12,13 +12,16 @@ import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
-public class PdfExporterServiceImpl implements PdfExporterService {
+public class OrderPdfExporterServiceImpl implements PdfExporterService {
     private final FileExporter<OrdersDataForUserDto> pdfExporterService;
     private final UBSClientService ubsClientService;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Resource exportById(long orderId, Locale locale, String userUuid) {
-        OrdersDataForUserDto orderToWrite = ubsClientService.getOrderForUser(userUuid, orderId);
+    public Resource generatePdfFileByObjectId(long objectId, Locale locale, String userUuid) {
+        OrdersDataForUserDto orderToWrite = ubsClientService.getOrderForUser(userUuid, objectId);
         return new ByteArrayResource(pdfExporterService.export(orderToWrite, locale));
     }
 }

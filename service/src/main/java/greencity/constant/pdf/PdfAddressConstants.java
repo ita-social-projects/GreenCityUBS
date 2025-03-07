@@ -10,9 +10,9 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public enum PdfAddressConstants {
     HOUSE_NUMBER("буд.", "b."),
-    HOUSE_CORPUS_NUMBER("корпус ", "b."),
-    ENTRANCE_NUMBER("під'їзд", "e."),
-    DISTRICT("район", "d.");
+    HOUSE_CORPUS_NUMBER("корпус", "housing"),
+    ENTRANCE_NUMBER("під'їзд", "entrance"),
+    DISTRICT("район", "district");
 
     private final String nameUa;
     private final String nameEn;
