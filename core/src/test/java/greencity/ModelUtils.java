@@ -281,7 +281,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static ManualPaymentRequestDto getRequestDto() {
+    public static ManualPaymentRequestDto getManualPaymentRequestDto() {
         return ManualPaymentRequestDto.builder()
             .amount(500L)
             .settlementdate("2021-03-07")

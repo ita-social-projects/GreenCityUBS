@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static greencity.ModelUtils.getEcoNumberDto;
-import static greencity.ModelUtils.getRequestDto;
+import static greencity.ModelUtils.getManualPaymentRequestDto;
 import static greencity.ModelUtils.getUpdateOrderPageAdminDto;
 import static greencity.ModelUtils.getUuid;
 import static greencity.ModelUtils.getViolationDetailInfoDto;
@@ -242,7 +242,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void addManualPayment() throws Exception {
-        ManualPaymentRequestDto dto = getRequestDto();
+        ManualPaymentRequestDto dto = getManualPaymentRequestDto();
 
         String responseJSON = objectMapper.writeValueAsString(dto);
         MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
@@ -263,7 +263,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void updateManualPayment() throws Exception {
-        ManualPaymentRequestDto dto = getRequestDto();
+        ManualPaymentRequestDto dto = getManualPaymentRequestDto();
 
         String responseJSON = objectMapper.writeValueAsString(dto);
         MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
@@ -478,7 +478,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void updateManualPaymentWithFutureSettlementDateTest() throws Exception {
-        ManualPaymentRequestDto dto = getRequestDto();
+        ManualPaymentRequestDto dto = getManualPaymentRequestDto();
         dto.setSettlementdate(LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 
         objectMapper.findAndRegisterModules();
