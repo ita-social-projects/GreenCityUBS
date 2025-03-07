@@ -6,7 +6,7 @@
 
     <changeSet id="add-new-column-to-user" author="Kizerov Dmytro">
         <addColumn tableName="users">
-            <column name="chat_link" type="VARCHAR(500)">
+            <column name="chat_link" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
         </addColumn>
