@@ -3,7 +3,6 @@ package greencity.validator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -25,6 +24,7 @@ public class SettlementDateValidatorTest {
         localDate = LocalDate.now().minusDays(1);
         assertTrue(validator.isValid(formatter.format(localDate), context));
     }
+
     @Test
     public void validateInvalidSettlementDate() {
         LocalDate localDate = LocalDate.now().plusDays(1);
