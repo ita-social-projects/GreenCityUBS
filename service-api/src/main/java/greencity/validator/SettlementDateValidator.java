@@ -16,7 +16,7 @@ public class SettlementDateValidator implements ConstraintValidator<ValidSettlem
             return false;
         }
         try {
-          return LocalDate.parse(s, formatter).isBefore(LocalDate.now().plusDays(1));
+            return LocalDate.parse(s, formatter).isBefore(LocalDate.now().plusDays(1));
         } catch (DateTimeParseException e) {
             return false;
         }
