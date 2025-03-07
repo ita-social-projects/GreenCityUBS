@@ -589,7 +589,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
         PaymentSystemResponse paymentSystemResponse;
-        if (sumToPayInCoins > 0 || dto.isShouldBePaid()) {
+        if (dto.isShouldBePaid()) {
             paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
         } else {
             paymentSystemResponse = getPaymentRequestDto(order, "");
