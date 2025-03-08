@@ -24,7 +24,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeAll;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -86,15 +86,9 @@ class ManagementOrderControllerTest {
     @Mock
     PaymentService paymentService;
 
-    private static ObjectMapper objectMapper;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Principal principal = getUuid();
-
-    @BeforeAll
-    static void setUpBeforeClass() {
-        objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
-    }
 
     @BeforeEach
     void setup() {
@@ -479,7 +473,7 @@ class ManagementOrderControllerTest {
     @Test
     void updateManualPaymentWithFutureSettlementDateTest() throws Exception {
         ManualPaymentRequestDto dto = getManualPaymentRequestDto();
-        dto.setSettlementdate(LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        dto.setSettlementDate(LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 
         objectMapper.findAndRegisterModules();
         String responseJSON = objectMapper.writeValueAsString(dto);

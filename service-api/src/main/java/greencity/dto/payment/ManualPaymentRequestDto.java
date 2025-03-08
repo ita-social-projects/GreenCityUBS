@@ -18,7 +18,7 @@ import lombok.Setter;
 public class ManualPaymentRequestDto {
     @NotEmpty
     @ValidSettlementDate
-    private String settlementdate;
+    private String settlementDate;
     @NotNull
     @Positive
     private Long amount;
