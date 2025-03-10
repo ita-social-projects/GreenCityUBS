@@ -607,7 +607,7 @@ class UBSManagementServiceImplTest {
         orderAddress.setLocation(getLocation());
         OrderAddressExportDetailsDtoUpdate dtoUpdate = ModelUtils.getOrderAddressExportDetailsDtoUpdate();
         OrderAddress updatedOrderAddress = getOrderAddress();
-        updatedOrderAddress.setCityUk("Updated");
+        updatedOrderAddress.getAddress().setCityUk("Updated");
 
         when(orderAddressRepository.findById(dtoUpdate.getId())).thenReturn(Optional.of(orderAddress));
         when(ubsClientService.updateOrderAddress(any())).thenReturn(updatedOrderAddress);

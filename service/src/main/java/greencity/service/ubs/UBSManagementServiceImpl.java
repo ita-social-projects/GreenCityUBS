@@ -317,7 +317,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
             .userInfoDto(userInfoDto)
             .addressExportDetailsDto(addressDtoForAdminPage)
-            .addressComment(orderAddress.getAddressComment())
+            .addressComment(orderAddress.getAddress().getAddressComment())
             .bags(bagInfoDtoList)
             .orderFullPrice(setTotalPrice(prices))
             .orderDiscountedPrice(paymentService.getPaymentInfo(orderId, prices.getSumAmount()).getUnPaidAmount())
@@ -395,19 +395,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private AddressExportDetailsDto getAddressDtoForAdminPage(OrderAddress address) {
         return AddressExportDetailsDto.builder()
             .id(address.getId())
-            .cityUk(address.getCityUk())
-            .cityEn(address.getCityEn())
-            .streetUk(address.getStreetUk())
-            .streetEn(address.getStreetEn())
-            .districtUk(address.getDistrictUk())
-            .districtEn(address.getDistrictEn())
-            .entranceNumber(address.getEntranceNumber())
-            .houseCorpus(address.getHouseCorpus())
-            .houseNumber(address.getHouseNumber())
-            .regionUk(address.getRegionUk())
-            .regionEn(address.getRegionEn())
+            .cityUk(address.getAddress().getCityUk())
+            .cityEn(address.getAddress().getCityEn())
+            .streetUk(address.getAddress().getStreetUk())
+            .streetEn(address.getAddress().getStreetEn())
+            .districtUk(address.getAddress().getDistrictUk())
+            .districtEn(address.getAddress().getDistrictEn())
+            .entranceNumber(address.getAddress().getEntranceNumber())
+            .houseCorpus(address.getAddress().getHouseCorpus())
+            .houseNumber(address.getAddress().getHouseNumber())
+            .regionUk(address.getAddress().getRegionUk())
+            .regionEn(address.getAddress().getRegionEn())
             .addressRegionDistrictList(
-                locationApiService.getAllDistrictsInCityByNames(address.getRegionUk(), address.getCityUk()).stream()
+                locationApiService.getAllDistrictsInCityByNames(address.getAddress().getRegionUk(), address.getAddress().getCityUk()).stream()
                     .map(p -> modelMapper.map(p, DistrictDto.class))
                     .collect(Collectors.toList()))
             .build();
@@ -1493,9 +1493,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String comment) {
         updatedOrderAddress.setLocation(orderAddress.getLocation());
         updatedOrderAddress.setId(orderAddress.getId());
-        updatedOrderAddress.setActual(orderAddress.getActual());
-        updatedOrderAddress.setAddressComment(comment);
+        updatedOrderAddress.getAddress().setActual(orderAddress.getAddress().getActual());
+        updatedOrderAddress.getAddress().setAddressComment(comment);
         updatedOrderAddress.setCoordinates(orderAddress.getCoordinates());
-        updatedOrderAddress.setAddressStatus(orderAddress.getAddressStatus());
+        updatedOrderAddress.getAddress().setAddressStatus(orderAddress.getAddress().getAddressStatus());
     }
 }

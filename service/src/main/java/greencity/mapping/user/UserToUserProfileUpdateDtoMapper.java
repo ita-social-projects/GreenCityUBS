@@ -27,7 +27,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     @Override
     protected UserProfileUpdateDto convert(User user) {
         List<AddressDto> addressDtoList = user.getAddresses().stream()
-            .filter(address -> AddressStatus.DELETED != address.getAddressStatus())
+            .filter(address -> AddressStatus.DELETED != address.getAddress().getAddressStatus())
             .map(this::createAddressDto)
             .toList();
 
@@ -45,23 +45,23 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     private AddressDto createAddressDto(Address address) {
         return AddressDto.builder()
             .id(address.getId())
-            .cityUk(address.getCityUk())
-            .cityEn(address.getCityEn())
-            .districtUk(address.getDistrictUk())
-            .districtEn(address.getDistrictEn())
-            .regionUk(address.getRegionUk())
-            .regionEn(address.getRegionEn())
-            .entranceNumber(address.getEntranceNumber())
-            .houseCorpus(address.getHouseCorpus())
-            .houseNumber(address.getHouseNumber())
-            .streetUk(address.getStreetUk())
-            .streetEn(address.getStreetEn())
-            .addressComment(address.getAddressComment())
+            .cityUk(address.getAddress().getCityUk())
+            .cityEn(address.getAddress().getCityEn())
+            .districtUk(address.getAddress().getDistrictUk())
+            .districtEn(address.getAddress().getDistrictEn())
+            .regionUk(address.getAddress().getRegionUk())
+            .regionEn(address.getAddress().getRegionEn())
+            .entranceNumber(address.getAddress().getEntranceNumber())
+            .houseCorpus(address.getAddress().getHouseCorpus())
+            .houseNumber(address.getAddress().getHouseNumber())
+            .streetUk(address.getAddress().getStreetUk())
+            .streetEn(address.getAddress().getStreetEn())
+            .addressComment(address.getAddress().getAddressComment())
             .coordinates(Coordinates.builder()
                 .latitude(address.getCoordinates().getLatitude())
                 .longitude(address.getCoordinates().getLongitude())
                 .build())
-            .actual(address.getActual())
+            .actual(address.getAddress().getActual())
             .addressRegionDistrictList(getAllDistricts(address))
             .build();
     }

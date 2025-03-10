@@ -22,15 +22,15 @@ class OrderAddressMapperTest {
         OrderAddress expectedOrderAddressResult = orderAddressMapper.convert(address);
 
         assertEquals(expectedOrderAddressResult.getId(), orderAddress.getId());
-        assertEquals(expectedOrderAddressResult.getCityUk(), orderAddress.getCityUk());
-        assertEquals(expectedOrderAddressResult.getStreetUk(), orderAddress.getStreetUk());
-        assertEquals(expectedOrderAddressResult.getDistrictUk(), orderAddress.getDistrictUk());
-        assertEquals(expectedOrderAddressResult.getEntranceNumber(), orderAddress.getEntranceNumber());
-        assertEquals(expectedOrderAddressResult.getHouseNumber(), orderAddress.getHouseNumber());
-        assertEquals(expectedOrderAddressResult.getHouseCorpus(), orderAddress.getHouseCorpus());
+        assertEquals(expectedOrderAddressResult.getAddress().getCityUk(), orderAddress.getAddress().getCityUk());
+        assertEquals(expectedOrderAddressResult.getAddress().getStreetUk(), orderAddress.getAddress().getStreetUk());
+        assertEquals(expectedOrderAddressResult.getAddress().getDistrictUk(), orderAddress.getAddress().getDistrictUk());
+        assertEquals(expectedOrderAddressResult.getAddress().getEntranceNumber(), orderAddress.getAddress().getEntranceNumber());
+        assertEquals(expectedOrderAddressResult.getAddress().getHouseNumber(), orderAddress.getAddress().getHouseNumber());
+        assertEquals(expectedOrderAddressResult.getAddress().getHouseCorpus(), orderAddress.getAddress().getHouseCorpus());
         assertEquals(expectedOrderAddressResult.getCoordinates(), orderAddress.getCoordinates());
-        assertEquals(expectedOrderAddressResult.getActual(), orderAddress.getActual());
-        assertEquals(expectedOrderAddressResult.getAddressStatus(), orderAddress.getAddressStatus());
+        assertEquals(expectedOrderAddressResult.getAddress().getActual(), orderAddress.getAddress().getActual());
+        assertEquals(expectedOrderAddressResult.getAddress().getAddressStatus(), orderAddress.getAddress().getAddressStatus());
     }
 
 }

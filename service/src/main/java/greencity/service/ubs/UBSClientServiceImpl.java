@@ -658,7 +658,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address = addressRepo.findById(addressId)
             .orElseThrow(() -> new EntityNotFoundException(ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
 
-        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getCityEn());
+        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getAddress().getCityEn());
 
         if (locationId == TariffLocation.KYIV_TARIFF.getLocationId()) {
             return isKyivTariff;
@@ -686,7 +686,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void checkAndCalculateAddressCoordinatesIfEmpty(Address address) {
         if (address.getCoordinates().getLatitude() == 0.0 && address.getCoordinates().getLongitude() == 0.0) {
             LatLng latLng = googleApiService
-                .getGeocodingResultByCityAndCountryAndLocale(UKRAINE_EN, address.getCityEn(),
+                .getGeocodingResultByCityAndCountryAndLocale(UKRAINE_EN, address.getAddress().getCityEn(),
                     LANG_EN).geometry.location;
             Coordinates addressCoordinates = Coordinates.builder().latitude(latLng.lat).longitude(latLng.lng).build();
             address.setCoordinates(addressCoordinates);
@@ -733,7 +733,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkIfAddressHasBeenDeleted(Address address) {
-        if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
+        if (address.getAddress().getAddressStatus().equals(AddressStatus.DELETED)) {
             throw new NotFoundException(
                 NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
@@ -787,12 +787,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
             setLocations(addressRequestDto, address);
 
-            address.setAddressStatus(AddressStatus.NEW);
+            address.getAddress().setAddressStatus(AddressStatus.NEW);
             address.setUser(currentUser);
-            address.setActual(addresses.isEmpty());
+            address.getAddress().setActual(addresses.isEmpty());
             addressRepo.save(address);
         } else {
-            addressIfExist.setAddressStatus(AddressStatus.NEW);
+            addressIfExist.getAddress().setAddressStatus(AddressStatus.NEW);
             addressRepo.save(addressIfExist);
         }
         return findAllAddressesForCurrentOrder(uuid);
@@ -828,13 +828,13 @@ public class UBSClientServiceImpl implements UBSClientService {
 
             newAddress.setId(addressRequestDto.getId());
             newAddress.setUser(address.getUser());
-            newAddress.setAddressStatus(address.getAddressStatus());
-            newAddress.setActual(address.getActual());
+            newAddress.getAddress().setAddressStatus(address.getAddress().getAddressStatus());
+            newAddress.getAddress().setActual(address.getAddress().getActual());
 
             addressRepo.save(newAddress);
         } else {
-            address.setAddressStatus(AddressStatus.DELETED);
-            addressIfExist.setAddressStatus(AddressStatus.NEW);
+            address.getAddress().setAddressStatus(AddressStatus.DELETED);
+            addressIfExist.getAddress().setAddressStatus(AddressStatus.NEW);
             addressRepo.save(addressIfExist);
             addressRepo.save(address);
         }
@@ -843,14 +843,14 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
         Optional<Region> optionalRegion =
-            regionRepository.findRegionByNameEnOrNameUk(address.getRegionEn(), address.getRegionUk());
+            regionRepository.findRegionByNameEnOrNameUk(address.getAddress().getRegionEn(), address.getAddress().getRegionUk());
 
         if (optionalRegion.isPresent()) {
             address.setRegionId(optionalRegion.get());
 
             Optional<City> optionalCity = cityRepository
-                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getCityUk(),
-                    address.getCityEn());
+                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getAddress().getCityUk(),
+                    address.getAddress().getCityEn());
 
             City city;
             if (optionalCity.isPresent()) {
@@ -864,7 +864,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             address.setCityId(city);
 
             Optional<District> optionalDistrict = districtRepository
-                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getDistrictEn(), address.getDistrictUk());
+                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getAddress().getDistrictEn(), address.getAddress().getDistrictUk());
 
             if (optionalDistrict.isPresent()) {
                 address.setDistrictId(optionalDistrict.get());
@@ -883,7 +883,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> addresses = addressRepo.findAllByUserId(userId);
 
         boolean exist = addresses.stream()
-            .filter(address -> !address.getAddressStatus().equals(AddressStatus.DELETED))
+            .filter(address -> !address.getAddress().getAddressStatus().equals(AddressStatus.DELETED))
             .map(address -> modelMapper.map(address, CreateAddressRequestDto.class))
             .anyMatch(
                 addressDto -> addressDto.equals(modelMapper.map(addressRequestDto, CreateAddressRequestDto.class)));
@@ -893,7 +893,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         Optional<Address> deletedAddress = addresses.stream()
-            .filter(address -> AddressStatus.DELETED.equals(address.getAddressStatus()))
+            .filter(address -> AddressStatus.DELETED.equals(address.getAddress().getAddressStatus()))
             .filter(address -> areAddressesEqual(modelMapper.map(address, CreateAddressRequestDto.class),
                 addressRequestDto))
             .findFirst();
@@ -926,15 +926,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!Objects.equals(address.getUser().getUuid(), uuid)) {
             throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
         }
-        if (address.getAddressStatus() == AddressStatus.DELETED) {
+        if (address.getAddress().getAddressStatus() == AddressStatus.DELETED) {
             throw new BadRequestException(CANNOT_DELETE_ALREADY_DELETED_ADDRESS);
         }
-        address.setAddressStatus(AddressStatus.DELETED);
+        address.getAddress().setAddressStatus(AddressStatus.DELETED);
 
-        if (Boolean.TRUE.equals(address.getActual())) {
-            address.setActual(false);
+        if (Boolean.TRUE.equals(address.getAddress().getActual())) {
+            address.getAddress().setActual(false);
             addressRepo.findAnyByUserIdAndAddressStatusNotDeleted(address.getUser().getId())
-                .ifPresent(newActualAddress -> newActualAddress.setActual(true));
+                .ifPresent(newActualAddress -> newActualAddress.getAddress().setActual(true));
         }
 
         return findAllAddressesForCurrentOrder(uuid);
@@ -1074,18 +1074,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
         var address = order.getUbsUser().getOrderAddress();
         return AddressInfoDto.builder()
-            .addressCityUk(address.getCityUk())
-            .addressCityEn(address.getCityEn())
-            .addressComment(address.getAddressComment())
-            .addressDistinctUk(address.getDistrictUk())
-            .addressDistinctEn(address.getDistrictEn())
-            .addressRegionUk(address.getRegionUk())
-            .addressRegionEn(address.getRegionEn())
-            .addressStreetUk(address.getStreetUk())
-            .addressStreetEn(address.getStreetEn())
-            .houseCorpus(address.getHouseCorpus())
-            .houseNumber(address.getHouseNumber())
-            .entranceNumber(address.getEntranceNumber())
+            .addressCityUk(address.getAddress().getCityUk())
+            .addressCityEn(address.getAddress().getCityEn())
+            .addressComment(address.getAddress().getAddressComment())
+            .addressDistinctUk(address.getAddress().getDistrictUk())
+            .addressDistinctEn(address.getAddress().getDistrictEn())
+            .addressRegionUk(address.getAddress().getRegionUk())
+            .addressRegionEn(address.getAddress().getRegionEn())
+            .addressStreetUk(address.getAddress().getStreetUk())
+            .addressStreetEn(address.getAddress().getStreetEn())
+            .houseCorpus(address.getAddress().getHouseCorpus())
+            .houseNumber(address.getAddress().getHouseNumber())
+            .entranceNumber(address.getAddress().getEntranceNumber())
             .build();
     }
 
@@ -1338,8 +1338,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
             mappedFromDtoUser.setOrderAddress(saveOrderAddressWithLocation(addressId, locationId, currentUser));
-            if (mappedFromDtoUser.getOrderAddress().getAddressComment() == null) {
-                mappedFromDtoUser.getOrderAddress().setAddressComment(dto.getAddressComment());
+            if (mappedFromDtoUser.getOrderAddress().getAddress().getAddressComment() == null) {
+                mappedFromDtoUser.getOrderAddress().getAddress().setAddressComment(dto.getAddressComment());
             }
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
@@ -1875,15 +1875,15 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
 
-        if (currentAddress.getAddressStatus() == AddressStatus.DELETED) {
+        if (currentAddress.getAddress().getAddressStatus() == AddressStatus.DELETED) {
             throw new BadRequestException(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS);
         }
 
-        if (Boolean.FALSE.equals(currentAddress.getActual())) {
-            Address address = addressRepo.findByUserIdAndActualTrue(currentAddress.getUser().getId()).orElseThrow(
+        if (Boolean.FALSE.equals(currentAddress.getAddress().getActual())) {
+            Address address = addressRepo.findByUserIdAndAddress_ActualTrue(currentAddress.getUser().getId()).orElseThrow(
                 () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
-            address.setActual(false);
-            currentAddress.setActual(true);
+            address.getAddress().setActual(false);
+            currentAddress.getAddress().setActual(true);
         }
 
         return modelMapper.map(currentAddress, AddressDto.class);

@@ -22,20 +22,20 @@ class AddressDtoMapperTest {
         AddressDto addressDto = ModelUtils.addressDto();
 
         Address expectedAddress = ModelUtils.getAddress();
-        expectedAddress.setAddressStatus(AddressStatus.DELETED);
+        expectedAddress.getAddress().setAddressStatus(AddressStatus.DELETED);
 
         Address actualAddress = addressDtoMapper.convert(addressDto);
 
         assertEquals(expectedAddress.getId(), actualAddress.getId());
-        assertEquals(expectedAddress.getCityUk(), actualAddress.getCityUk());
-        assertEquals(expectedAddress.getStreetUk(), actualAddress.getStreetUk());
-        assertEquals(expectedAddress.getDistrictUk(), actualAddress.getDistrictUk());
-        assertEquals(expectedAddress.getEntranceNumber(), actualAddress.getEntranceNumber());
-        assertEquals(expectedAddress.getHouseNumber(), actualAddress.getHouseNumber());
-        assertEquals(expectedAddress.getHouseCorpus(), actualAddress.getHouseCorpus());
+        assertEquals(expectedAddress.getAddress().getCityUk(), actualAddress.getAddress().getCityUk());
+        assertEquals(expectedAddress.getAddress().getStreetUk(), actualAddress.getAddress().getStreetUk());
+        assertEquals(expectedAddress.getAddress().getDistrictUk(), actualAddress.getAddress().getDistrictUk());
+        assertEquals(expectedAddress.getAddress().getEntranceNumber(), actualAddress.getAddress().getEntranceNumber());
+        assertEquals(expectedAddress.getAddress().getHouseNumber(), actualAddress.getAddress().getHouseNumber());
+        assertEquals(expectedAddress.getAddress().getHouseCorpus(), actualAddress.getAddress().getHouseCorpus());
         assertEquals(expectedAddress.getCoordinates(), actualAddress.getCoordinates());
-        assertEquals(expectedAddress.getActual(), actualAddress.getActual());
-        assertNotEquals(expectedAddress.getAddressStatus(), actualAddress.getAddressStatus());
+        assertEquals(expectedAddress.getAddress().getActual(), actualAddress.getAddress().getActual());
+        assertNotEquals(expectedAddress.getAddress().getAddressStatus(), actualAddress.getAddress().getAddressStatus());
     }
 
 }

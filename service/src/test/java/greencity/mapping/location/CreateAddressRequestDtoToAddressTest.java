@@ -38,18 +38,18 @@ class CreateAddressRequestDtoToAddressTest {
 
         Address address = converter.convert(dto);
 
-        assertEquals(dto.getRegionUk(), address.getRegionUk());
-        assertEquals(dto.getRegionEn(), address.getRegionEn());
-        assertEquals(dto.getCityUk(), address.getCityUk());
-        assertEquals(dto.getCityEn(), address.getCityEn());
-        assertEquals(dto.getDistrictUk(), address.getDistrictUk());
-        assertEquals(dto.getDistrictEn(), address.getDistrictEn());
-        assertEquals(dto.getAddressComment(), address.getAddressComment());
-        assertEquals(dto.getHouseNumber(), address.getHouseNumber());
-        assertEquals(dto.getEntranceNumber(), address.getEntranceNumber());
-        assertEquals(dto.getHouseCorpus(), address.getHouseCorpus());
-        assertEquals(dto.getStreetUk(), address.getStreetUk());
-        assertEquals(dto.getStreetEn(), address.getStreetEn());
+        assertEquals(dto.getRegionUk(), address.getAddress().getRegionUk());
+        assertEquals(dto.getRegionEn(), address.getAddress().getRegionEn());
+        assertEquals(dto.getCityUk(), address.getAddress().getCityUk());
+        assertEquals(dto.getCityEn(), address.getAddress().getCityEn());
+        assertEquals(dto.getDistrictUk(), address.getAddress().getDistrictUk());
+        assertEquals(dto.getDistrictEn(), address.getAddress().getDistrictEn());
+        assertEquals(dto.getAddressComment(), address.getAddress().getAddressComment());
+        assertEquals(dto.getHouseNumber(), address.getAddress().getHouseNumber());
+        assertEquals(dto.getEntranceNumber(), address.getAddress().getEntranceNumber());
+        assertEquals(dto.getHouseCorpus(), address.getAddress().getHouseCorpus());
+        assertEquals(dto.getStreetUk(), address.getAddress().getStreetUk());
+        assertEquals(dto.getStreetEn(), address.getAddress().getStreetEn());
         assertEquals(dto.getCoordinates().getLongitude(), address.getCoordinates().getLongitude());
         assertEquals(dto.getCoordinates().getLatitude(), address.getCoordinates().getLatitude());
     }
