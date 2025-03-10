@@ -7,6 +7,7 @@ import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagLimitDto;
+import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
@@ -280,10 +281,10 @@ public class ModelUtils {
             .build();
     }
 
-    public static ManualPaymentRequestDto getRequestDto() {
+    public static ManualPaymentRequestDto getManualPaymentRequestDto() {
         return ManualPaymentRequestDto.builder()
             .amount(500L)
-            .settlementdate("09-02-2021")
+            .settlementDate("2021-03-07")
             .receiptLink("somelink.com")
             .paymentId("10l")
             .build();
@@ -689,6 +690,16 @@ public class ModelUtils {
         return UpdateAddressDto.builder()
             .orderAddressExportDetails(orderAddressDetails)
             .orderId(1L)
+            .build();
+    }
+
+    public static CertificateDtoForAdding getCertificateDtoForAdding() {
+        return CertificateDtoForAdding
+            .builder()
+            .points(10)
+            .monthCount(1)
+            .initialPointsValue(2000)
+            .code("4444-4444")
             .build();
     }
 }

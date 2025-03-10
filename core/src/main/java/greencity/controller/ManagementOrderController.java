@@ -68,6 +68,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -86,6 +87,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/ubs/management")
 @RequiredArgsConstructor
+@Validated
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
     private final CertificateService certificateService;
