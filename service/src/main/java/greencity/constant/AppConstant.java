@@ -36,5 +36,5 @@ public class AppConstant {
     public static final String UNKNOWN_ENG = "Unknown";
     public static final String UNKNOWN_UA = "Невідомо";
     public static final String LOCALE_UK_NAME = "ua";
-    public static final String LOCALE_ENG_NAME = "en";
+    public static final String LOCALE_EN_NAME = "en";
 }

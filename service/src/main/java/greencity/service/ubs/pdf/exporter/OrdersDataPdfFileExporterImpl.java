@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import static greencity.constant.AppConstant.LOCALE_ENG_NAME;
+import static greencity.constant.AppConstant.LOCALE_EN_NAME;
 import static greencity.constant.AppConstant.LOCALE_UK_NAME;
 import static greencity.constant.ErrorMessage.CANNOT_EXPORT_DATA_TO_PDF;
 import static greencity.constant.pdf.PdfFileHeaders.ADDRESS_INFO;
@@ -111,7 +111,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         table.addCell(createCell(orderInfo.getDateForm().format(
             Objects.equals(LOCALE_UK_NAME, locale.getLanguage()) ? DATE_FORMATTER_UK : DATE_FORMATTER_EN),
             DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
-        if (locale.getLanguage().equals(LOCALE_ENG_NAME)) {
+        if (locale.getLanguage().equals(LOCALE_EN_NAME)) {
             table.addCell(createCell(orderInfo.getOrderStatusEng(), DEFAULT_FONT_NAME, fontSize,
                 DEFAULT_CELL_BACKGROUND_COLOR, false));
             table.addCell(createCell(orderInfo.getPaymentStatusEng(), DEFAULT_FONT_NAME, fontSize,
@@ -191,7 +191,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
 
     private void addSenderAddress(OrdersDataForUserDto orderDetails, Locale locale, Document document) {
         addHeader(PdfFileHeaders.getByLocale(ADDRESS_INFO, locale), document);
-        if (Objects.equals(LOCALE_ENG_NAME, locale.getLanguage())) {
+        if (Objects.equals(LOCALE_EN_NAME, locale.getLanguage())) {
             addParagraph(document, orderDetails.getAddress().getAddressCityEng(),
                 DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
             addParagraph(document, orderDetails.getAddress().getAddressRegionEng(), DEFAULT_FONT_NAME,

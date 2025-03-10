@@ -13,13 +13,13 @@ public enum PdfFileHeaders {
     ORDER_COMMENT("Коментар до замовлення", "Comment to the order"),
     ADDRESS_INFO("Адреса вивезення відходів", "The address of export of the ordered services");
 
-    private final String nameUa;
+    private final String nameUk;
     private final String nameEn;
 
     public static String getByLocale(PdfFileHeaders headerName, Locale locale) {
-        if (locale.getLanguage().equals(AppConstant.LOCALE_ENG_NAME)) {
+        if (locale.getLanguage().equals(AppConstant.LOCALE_EN_NAME)) {
             return headerName.nameEn;
         }
-        return headerName.nameUa;
+        return headerName.nameUk;
     }
 }

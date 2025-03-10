@@ -17,28 +17,28 @@ public enum PdfOrderContentDetailsHeaders {
     VOLUME("Об'єм, "
         + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.VOLUME, Locale.of(AppConstant.LOCALE_UK_NAME)),
            "Volume, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.VOLUME,
-               Locale.of(AppConstant.LOCALE_ENG_NAME))),
+               Locale.of(AppConstant.LOCALE_EN_NAME))),
     COST("Вартість, "
         + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY, Locale.of(AppConstant.LOCALE_UK_NAME)),
          "Cost, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY,
-             Locale.of(AppConstant.LOCALE_ENG_NAME))),
+             Locale.of(AppConstant.LOCALE_EN_NAME))),
     QUANTITY("Кількість пакетів, "
         + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.UNITS, Locale.of(AppConstant.LOCALE_UK_NAME)),
              "Quantity of bags, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.UNITS,
-                 Locale.of(AppConstant.LOCALE_ENG_NAME))),
+                 Locale.of(AppConstant.LOCALE_EN_NAME))),
     SUM("Сума, "
         + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY, Locale.of(AppConstant.LOCALE_UK_NAME)),
         "Sum, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY,
-            Locale.of(AppConstant.LOCALE_ENG_NAME)));
+            Locale.of(AppConstant.LOCALE_EN_NAME)));
 
-    private final String nameUa;
+    private final String nameUk;
     private final String nameEn;
 
     public static String getByLocale(PdfOrderContentDetailsHeaders headerName, Locale locale) {
-        if (Objects.equals(AppConstant.LOCALE_ENG_NAME, locale.getLanguage())) {
+        if (Objects.equals(AppConstant.LOCALE_EN_NAME, locale.getLanguage())) {
             return headerName.nameEn;
         }
-        return headerName.nameUa;
+        return headerName.nameUk;
     }
 
     public static List<String> getAllByLocale(Locale locale) {

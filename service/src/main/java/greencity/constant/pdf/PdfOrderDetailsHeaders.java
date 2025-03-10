@@ -20,20 +20,20 @@ public enum PdfOrderDetailsHeaders {
     PAYMENT_AMOUNT("Сума замовлення, "
         + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY, Locale.of(AppConstant.LOCALE_UK_NAME)),
                    "Payment amount, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY,
-                       Locale.of(AppConstant.LOCALE_ENG_NAME))),
+                       Locale.of(AppConstant.LOCALE_EN_NAME))),
     AMOUNT_DUE("Сума до оплати, "
         + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY, Locale.of(AppConstant.LOCALE_UK_NAME)),
                "Amount-due, " + PdfUnitsOfMeasurement.getByLocale(PdfUnitsOfMeasurement.CURRENCY,
-                   Locale.of(AppConstant.LOCALE_ENG_NAME)));
+                   Locale.of(AppConstant.LOCALE_EN_NAME)));
 
-    private final String nameUa;
+    private final String nameUk;
     private final String nameEn;
 
     public static String getByLocale(PdfOrderDetailsHeaders headerName, Locale locale) {
-        if (Objects.equals(AppConstant.LOCALE_ENG_NAME, locale.getLanguage())) {
+        if (Objects.equals(AppConstant.LOCALE_EN_NAME, locale.getLanguage())) {
             return headerName.nameEn;
         }
-        return headerName.nameUa;
+        return headerName.nameUk;
     }
 
     public static List<String> getAllByLocale(Locale locale) {
