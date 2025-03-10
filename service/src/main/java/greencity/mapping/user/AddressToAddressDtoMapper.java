@@ -47,7 +47,8 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
                 .latitude(address.getCoordinates().getLatitude())
                 .longitude(address.getCoordinates().getLongitude())
                 .build())
-            .addressRegionDistrictList(getAllDistricts((address.getAddress().getRegionUk()), address.getAddress().getCityUk()))
+            .addressRegionDistrictList(
+                getAllDistricts((address.getAddress().getRegionUk()), address.getAddress().getCityUk()))
             .actual(address.getAddress().getActual())
             .build();
     }

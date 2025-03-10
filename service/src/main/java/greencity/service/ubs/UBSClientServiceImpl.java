@@ -843,7 +843,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
         Optional<Region> optionalRegion =
-            regionRepository.findRegionByNameEnOrNameUk(address.getAddress().getRegionEn(), address.getAddress().getRegionUk());
+            regionRepository.findRegionByNameEnOrNameUk(address.getAddress().getRegionEn(),
+                address.getAddress().getRegionUk());
 
         if (optionalRegion.isPresent()) {
             address.setRegionId(optionalRegion.get());
@@ -864,7 +865,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             address.setCityId(city);
 
             Optional<District> optionalDistrict = districtRepository
-                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getAddress().getDistrictEn(), address.getAddress().getDistrictUk());
+                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getAddress().getDistrictEn(),
+                    address.getAddress().getDistrictUk());
 
             if (optionalDistrict.isPresent()) {
                 address.setDistrictId(optionalDistrict.get());
@@ -1880,8 +1882,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         if (Boolean.FALSE.equals(currentAddress.getAddress().getActual())) {
-            Address address = addressRepo.findByUserIdAndAddress_ActualTrue(currentAddress.getUser().getId()).orElseThrow(
-                () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
+            Address address =
+                addressRepo.findByUserIdAndAddress_ActualTrue(currentAddress.getUser().getId()).orElseThrow(
+                    () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
             address.getAddress().setActual(false);
             currentAddress.getAddress().setActual(true);
         }

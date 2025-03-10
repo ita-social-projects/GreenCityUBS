@@ -407,7 +407,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .regionUk(address.getAddress().getRegionUk())
             .regionEn(address.getAddress().getRegionEn())
             .addressRegionDistrictList(
-                locationApiService.getAllDistrictsInCityByNames(address.getAddress().getRegionUk(), address.getAddress().getCityUk()).stream()
+                locationApiService
+                    .getAllDistrictsInCityByNames(address.getAddress().getRegionUk(), address.getAddress().getCityUk())
+                    .stream()
                     .map(p -> modelMapper.map(p, DistrictDto.class))
                     .collect(Collectors.toList()))
             .build();

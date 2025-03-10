@@ -24,13 +24,18 @@ class OrderAddressMapperTest {
         assertEquals(expectedOrderAddressResult.getId(), orderAddress.getId());
         assertEquals(expectedOrderAddressResult.getAddress().getCityUk(), orderAddress.getAddress().getCityUk());
         assertEquals(expectedOrderAddressResult.getAddress().getStreetUk(), orderAddress.getAddress().getStreetUk());
-        assertEquals(expectedOrderAddressResult.getAddress().getDistrictUk(), orderAddress.getAddress().getDistrictUk());
-        assertEquals(expectedOrderAddressResult.getAddress().getEntranceNumber(), orderAddress.getAddress().getEntranceNumber());
-        assertEquals(expectedOrderAddressResult.getAddress().getHouseNumber(), orderAddress.getAddress().getHouseNumber());
-        assertEquals(expectedOrderAddressResult.getAddress().getHouseCorpus(), orderAddress.getAddress().getHouseCorpus());
+        assertEquals(expectedOrderAddressResult.getAddress().getDistrictUk(),
+            orderAddress.getAddress().getDistrictUk());
+        assertEquals(expectedOrderAddressResult.getAddress().getEntranceNumber(),
+            orderAddress.getAddress().getEntranceNumber());
+        assertEquals(expectedOrderAddressResult.getAddress().getHouseNumber(),
+            orderAddress.getAddress().getHouseNumber());
+        assertEquals(expectedOrderAddressResult.getAddress().getHouseCorpus(),
+            orderAddress.getAddress().getHouseCorpus());
         assertEquals(expectedOrderAddressResult.getCoordinates(), orderAddress.getCoordinates());
         assertEquals(expectedOrderAddressResult.getAddress().getActual(), orderAddress.getAddress().getActual());
-        assertEquals(expectedOrderAddressResult.getAddress().getAddressStatus(), orderAddress.getAddress().getAddressStatus());
+        assertEquals(expectedOrderAddressResult.getAddress().getAddressStatus(),
+            orderAddress.getAddress().getAddressStatus());
     }
 
 }
