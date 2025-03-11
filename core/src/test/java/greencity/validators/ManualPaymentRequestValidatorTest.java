@@ -3,6 +3,7 @@ package greencity.validators;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.entity.order.Order;
 import greencity.repository.OrderRepository;
+import greencity.service.ubs.UBSManagementService;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,10 +27,14 @@ class ManualPaymentRequestValidatorTest {
     private ConstraintViolationBuilder violationBuilder;
     @Mock
     private OrderRepository orderRepository;
+    @Mock
+    private UBSManagementService ubsManagementService;
     @InjectMocks
     private ManualPaymentRequestValidator validator;
 
     private ManualPaymentRequestDto requestDto;
+
+    private static final String ORDER_ID = "1";
 
     @BeforeEach
     void setUp() {
@@ -39,10 +44,10 @@ class ManualPaymentRequestValidatorTest {
     @Test
     void testValidPaymentDate() {
         requestDto.setSettlementDate(LocalDate.now().toString());
-        requestDto.setPaymentId("123");
+        requestDto.setPaymentId(ORDER_ID);
         Order order = new Order();
         order.setOrderDate(LocalDate.now().minusDays(1).atStartOfDay());
-        when(orderRepository.findOrderByPaymentId("123")).thenReturn(order);
+        when(ubsManagementService.getOrderByPaymentId(anyString())).thenReturn(order);
         assertTrue(validator.isValid(requestDto, context));
     }
 
@@ -64,10 +69,10 @@ class ManualPaymentRequestValidatorTest {
     void testPaymentDateBeforeOrderCreation() {
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         requestDto.setSettlementDate(LocalDate.now().minusDays(10).toString());
-        requestDto.setPaymentId("123");
+        requestDto.setPaymentId(ORDER_ID);
         Order order = new Order();
         order.setOrderDate(LocalDate.now().minusDays(5).atStartOfDay());
-        when(orderRepository.findOrderByPaymentId("123")).thenReturn(order);
+        when(ubsManagementService.getOrderByPaymentId(anyString())).thenReturn(order);
         assertFalse(validator.isValid(requestDto, context));
     }
 

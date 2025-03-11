@@ -3,7 +3,7 @@ package greencity.validators;
 import greencity.annotations.ValidManualPaymentRequest;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.entity.order.Order;
-import greencity.repository.OrderRepository;
+import greencity.service.ubs.UBSManagementService;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +19,12 @@ import static greencity.constant.ValidationConstant.PAYMENT_DATE_IS_NULL_MESSAGE
 public class ManualPaymentRequestValidator
     implements ConstraintValidator<ValidManualPaymentRequest, ManualPaymentRequestDto> {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private final OrderRepository orderRepository;
+    private final UBSManagementService ubsManagementService;
 
     @Override
     public boolean isValid(ManualPaymentRequestDto manualPaymentRequestDto,
         ConstraintValidatorContext constraintValidatorContext) {
         String settlementDate = manualPaymentRequestDto.getSettlementDate();
-        System.out.println(settlementDate);
         if (settlementDate == null) {
             return setValidViolationMessages(constraintValidatorContext, PAYMENT_DATE_IS_NULL_MESSAGE);
         }
@@ -34,7 +33,7 @@ public class ManualPaymentRequestValidator
                 return setValidViolationMessages(constraintValidatorContext,
                     PAYMENT_DATE_IS_AFTER_CURRENT_DATE_MESSAGE);
             }
-            Order order = orderRepository.findOrderByPaymentId(manualPaymentRequestDto.getPaymentId());
+            Order order = ubsManagementService.getOrderByPaymentId(manualPaymentRequestDto.getPaymentId());
             if (LocalDate.parse(settlementDate, formatter).isBefore(order.getOrderDate().toLocalDate())) {
                 return setValidViolationMessages(constraintValidatorContext,
                     PAYMENT_DATE_IS_BEFORE_ORDER_CREATION_MESSAGE);
