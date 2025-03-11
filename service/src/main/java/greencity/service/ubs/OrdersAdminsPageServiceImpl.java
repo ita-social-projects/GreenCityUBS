@@ -28,6 +28,7 @@ import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.BonusReason;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
@@ -230,21 +231,22 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 false,
                 37,
                 EditType.READ_ONLY, new ArrayList<>(), orderDetails),
-            new ColumnDTO(new TitleDto("totalOrderSum", "Сума замовлення", "Total order sum"), "totalOrderSum",
+            new ColumnDTO(new TitleDto("totalOrderSum", "Сума замовлення (грн)", "Total order sum (UAH)"),
+                "totalOrderSum",
                 20, false, true, false, 18, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto("orderCertificateCode", "№ сертифікату", "Order certificate code"),
                 "orderCertificateCode",
                 20, false, true, false, 19, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
-            new ColumnDTO(new TitleDto("generalDiscount", "Загальна знижка", "General discount"),
+            new ColumnDTO(new TitleDto("generalDiscount", "Загальна знижка (грн)", "General discount (UAH)"),
                 "generalDiscount", 20, false, true, false, 20, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
-            new ColumnDTO(new TitleDto("amountDue", "Сума до оплати", "Amount due"), "amountDue", 20,
+            new ColumnDTO(new TitleDto("amountDue", "Сума до оплати (грн)", "Amount due (UAH)"), "amountDue", 20,
                 false, true, false, 21, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(
                 new TitleDto(CLIENT_COMMENT, "Коментар до замовлення",
                     "Comment to the order"),
                 CLIENT_COMMENT, 20, false, true, false, 22, EditType.INLINE, new ArrayList<>(),
                 ordersInfo),
-            new ColumnDTO(new TitleDto("totalPayment", "Оплата", "Total payment"),
+            new ColumnDTO(new TitleDto("totalPayment", "Оплата (грн)", "Total payment (UAH)"),
                 "totalPayment", 20, false, true,
                 false, 23,
                 EditType.READ_ONLY, new ArrayList<>(), orderDetails),
@@ -697,6 +699,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
             .amount(pointsToReturn)
             .date(LocalDateTime.now())
+            .reason(BonusReason.REFUND_CANCELED_ORDER)
             .user(user)
             .order(order)
             .build();

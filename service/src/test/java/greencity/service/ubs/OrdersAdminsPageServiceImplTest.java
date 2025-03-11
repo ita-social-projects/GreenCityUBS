@@ -13,11 +13,14 @@ import greencity.dto.user.ChatLinkDto;
 import greencity.entity.order.Event;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.ubs.OrderAddress;
+import greencity.enums.BonusReason;
 import greencity.enums.CancellationReason;
 import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.ChangeOfPoints;
+import greencity.entity.order.Certificate;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -38,6 +41,7 @@ import greencity.repository.DistrictRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.CertificateRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -51,6 +55,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -82,6 +87,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersAdminsPageServiceImplTest {
@@ -89,6 +95,8 @@ class OrdersAdminsPageServiceImplTest {
     private OrderRepository orderRepository;
     @Mock
     private EmployeeRepository employeeRepository;
+    @Mock
+    private CertificateRepository certificateRepository;
     @Mock
     private UBSManagementEmployeeService employeeService;
     @Mock
@@ -585,6 +593,53 @@ class OrdersAdminsPageServiceImplTest {
         verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF), anyString(), any(Order.class));
         verify(notificationService).notifySelfPickupOrder(expected);
         verify(orderLockService).unlockOrder(expected);
+    }
+
+    @Test
+    void orderStatusForDevelopStageTest_ChangeOrderStatusFromFormedToCanceled() {
+        long orderId = 1;
+        List<Long> orderIdsList = List.of(orderId);
+        String newStatus = "CANCELED";
+        Order order = spy(ModelUtils.getOrder());
+        order.setOrderStatus(OrderStatus.FORMED);
+        int pointsToUse = 100;
+        int currentUserPoints = 200;
+        Set<Certificate> certificates = Set.of(
+            new Certificate());
+        User user = Mockito.mock(User.class);
+        List<ChangeOfPoints> changeOfPointsList = spy(new ArrayList<>());
+        ArgumentCaptor<ChangeOfPoints> argumentCaptor = ArgumentCaptor.forClass(ChangeOfPoints.class);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(order.getPointsToUse())
+            .thenReturn(pointsToUse);
+        when(order.getUser())
+            .thenReturn(user);
+        when(user.getCurrentPoints())
+            .thenReturn(currentUserPoints);
+        when(user.getChangeOfPointsList())
+            .thenReturn(changeOfPointsList);
+        when(order.getCertificates())
+            .thenReturn(certificates);
+
+        ordersAdminsPageService.orderStatusForDevelopStage(orderIdsList, newStatus, ModelUtils.getEmployee());
+
+        verify(orderRepository).findById(orderId);
+        verify(notificationService).notifyBonusesFromCanceledOrder(order);
+        verify(user).setCurrentPoints(currentUserPoints + pointsToUse);
+        verify(changeOfPointsList).add(argumentCaptor.capture());
+
+        ChangeOfPoints changeOfPoints = argumentCaptor.getValue();
+        assertEquals(pointsToUse, changeOfPoints.getAmount());
+        assertEquals(LocalDateTime.now().toLocalDate(), changeOfPoints.getDate().toLocalDate());
+        assertEquals(BonusReason.REFUND_CANCELED_ORDER, changeOfPoints.getReason());
+        assertEquals(user, changeOfPoints.getUser());
+        assertEquals(order, changeOfPoints.getOrder());
+
+        verify(userRepository).save(user);
+        verify(certificateRepository, times(certificates.size()))
+            .save(any(Certificate.class));
+        verify(orderLockService).unlockOrder(order);
     }
 
     @ParameterizedTest

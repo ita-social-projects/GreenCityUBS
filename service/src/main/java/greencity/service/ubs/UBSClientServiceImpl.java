@@ -10,7 +10,6 @@ import greencity.constant.KyivTariffLocation;
 import greencity.constant.OrderHistory;
 import greencity.constant.TariffLocation;
 import greencity.dto.AllActiveLocationsDto;
-import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationWithTariffInfoDto;
 import greencity.dto.LocationsDto;
 import greencity.dto.OrderCourierPopUpDto;
@@ -28,17 +27,13 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.location.api.DistrictDto;
-import greencity.dto.location.api.LocationDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
@@ -63,7 +58,6 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
@@ -77,11 +71,8 @@ import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
-import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
-import greencity.entity.user.locations.City;
-import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -107,15 +98,11 @@ import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.mapping.location.AddressRequestDtoToBaseEntityMapper;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
-import greencity.notificator.UnpaidOrderNotificator;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
-import greencity.repository.CityRepository;
 import greencity.repository.CourierRepository;
-import greencity.repository.DistrictRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
@@ -127,7 +114,6 @@ import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.OrdersForUserRepository;
 import greencity.repository.PaymentRepository;
-import greencity.repository.RegionRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.TelegramBotRepository;
@@ -137,7 +123,6 @@ import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
-import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
@@ -162,7 +147,6 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -181,14 +165,9 @@ import org.springframework.stereotype.Service;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
-import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
-import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
-import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
-import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
 import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
@@ -201,7 +180,6 @@ import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
 import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
-import static greencity.constant.ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED;
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
@@ -234,8 +212,6 @@ import static java.util.stream.Collectors.toMap;
 @Service
 @RequiredArgsConstructor
 public class UBSClientServiceImpl implements UBSClientService {
-    private static final Long CITY_ID_KIEV = 3L;
-    private static final String KYIV_CITY = "Kyiv City";
     private static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
     private static final String PAY_BUTTON = "payButton";
     private final UserRepository userRepository;
@@ -262,21 +238,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final TariffsInfoRepository tariffsInfoRepository;
     private final TelegramBotRepository telegramBotRepository;
     private final ViberBotRepository viberBotRepository;
-    private final LocationApiService locationApiService;
     private final OrderBagRepository orderBagRepository;
     private final OrderBagService orderBagService;
     private final NotificationService notificationService;
     private final WayForPayClient wayForPayClient;
     private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
-    private final RegionRepository regionRepository;
-    private final CityRepository cityRepository;
-    private final DistrictRepository districtRepository;
     private final MonoBankClient monoBankClient;
     private final NotificationServiceImpl notificationServiceImpl;
-    private final UnpaidOrderNotificator unpaidOrderNotificator;
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
-    private final AddressRequestDtoToBaseEntityMapper baseEntityMapper;
+    private final AddressService addressService;
 
     @Value("${greencity.bots.viber-bot-uri}")
     private String viberBotUri;
@@ -302,7 +273,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
-    private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
     private static final String LANGUAGE_EN = "en";
     private static final String LANGUAGE_UA = "ua";
     private static final Double KYIV_LATITUDE = 50.4546600;
@@ -575,7 +545,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             dto.getBags(), tariffsInfo);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
-
         Order order = isExistOrder(dto, orderId);
         if (orderId != null) {
             checkIsOrderOfCurrentUser(currentUser, order);
@@ -583,20 +552,21 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setTariffsInfo(tariffsInfo);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPayInCoins = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPayInCoins);
-
+        if (sumToPayInCoins <= 0) {
+            dto.setShouldBePaid(false);
+        }
         UBSuser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
-
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        PaymentSystemResponse paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
-        notificationService.notifyCreatedOrder(order);
-
-        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
-
-        if (sumToPayInCoins <= 0 || !dto.isShouldBePaid()) {
-            return getPaymentRequestDto(order, "");
+        PaymentSystemResponse paymentSystemResponse;
+        if (dto.isShouldBePaid()) {
+            paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
+        } else {
+            paymentSystemResponse = getPaymentRequestDto(order, "");
         }
+        notificationService.notifyCreatedOrder(order);
+        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
         return paymentSystemResponse;
     }
 
@@ -618,14 +588,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         MonoBankPaymentRequestDto requestDto =
             formPaymentRequestForMonoBank(order.getId(), sumToPayInCoins, currentUser);
         CheckoutResponseFromMonoBank checkoutResponse = monoBankClient.getCheckoutResponse(requestDto, token);
-
         return getPaymentRequestDto(order, checkoutResponse.pageUrl());
     }
 
     private MonoBankPaymentRequestDto formPaymentRequestForMonoBank(Long orderId, long sumToPayInCoins, User user) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-
         return MonoBankPaymentRequestDto.builder()
             .amount((int) sumToPayInCoins)
             .merchantPaymentInfo(MerchantPaymentInfo.builder()
@@ -751,194 +719,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (i1 < i2) {
             throw new BadRequestException(USER_DONT_HAVE_ENOUGH_POINTS);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
-        Long id = userRepository.findByUuid(uuid).getId();
-        List<AddressDto> addressDtoList = addressRepo.findAllNonDeletedAddressesByUserId(id)
-            .stream()
-            .sorted(Comparator.comparing(Address::getId))
-            .map(u -> modelMapper.map(u, AddressDto.class))
-            .toList();
-        return new OrderWithAddressesResponseDto(addressDtoList);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto addressRequestDto,
-        String uuid) {
-        User currentUser = userRepository.findByUuid(uuid);
-        List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
-
-        if (addresses.size() == MAXIMUM_NUMBER_OF_ADDRESSES) {
-            throw new BadRequestException(NUMBER_OF_ADDRESSES_EXCEEDED);
-        }
-
-        Address addressIfExist = checkIfAddressExist(currentUser.getId(), addressRequestDto);
-
-        if (addressIfExist == null) {
-            Address address = modelMapper.map(addressRequestDto, Address.class);
-
-            setLocations(addressRequestDto, address);
-
-            address.setAddressStatus(AddressStatus.NEW);
-            address.setUser(currentUser);
-            address.setActual(addresses.isEmpty());
-            addressRepo.save(address);
-        } else {
-            addressIfExist.setAddressStatus(AddressStatus.NEW);
-            addressRepo.save(addressIfExist);
-        }
-        return findAllAddressesForCurrentOrder(uuid);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest addressRequestDto,
-        String uuid) {
-        User currentUser = userRepository.findByUuid(uuid);
-
-        if (Objects.isNull(currentUser)) {
-            throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
-        }
-
-        Address address = addressRepo.findById(addressRequestDto.getId())
-            .orElseThrow(() -> new NotFoundException(
-                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressRequestDto.getId()));
-
-        if (!address.getUser().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
-        }
-
-        Address addressIfExist = checkIfAddressExist(currentUser.getId(), addressRequestDto);
-
-        if (addressIfExist == null) {
-            Address newAddress = modelMapper.map(addressRequestDto, Address.class);
-
-            setLocations(addressRequestDto, newAddress);
-
-            newAddress.setId(addressRequestDto.getId());
-            newAddress.setUser(address.getUser());
-            newAddress.setAddressStatus(address.getAddressStatus());
-            newAddress.setActual(address.getActual());
-
-            addressRepo.save(newAddress);
-        } else {
-            address.setAddressStatus(AddressStatus.DELETED);
-            addressIfExist.setAddressStatus(AddressStatus.NEW);
-            addressRepo.save(addressIfExist);
-            addressRepo.save(address);
-        }
-        return findAllAddressesForCurrentOrder(uuid);
-    }
-
-    private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
-        Optional<Region> optionalRegion =
-            regionRepository.findRegionByNameEnOrNameUk(address.getRegionEn(), address.getRegion());
-
-        if (optionalRegion.isPresent()) {
-            address.setRegionId(optionalRegion.get());
-
-            Optional<City> optionalCity = cityRepository
-                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getCity(),
-                    address.getCityEn());
-
-            City city;
-            if (optionalCity.isPresent()) {
-                city = optionalCity.get();
-            } else {
-                city = baseEntityMapper.convert(addressRequestDto, City.class);
-                city.setRegion(optionalRegion.get());
-                city = cityRepository.save(city);
-            }
-
-            address.setCityId(city);
-
-            Optional<District> optionalDistrict = districtRepository
-                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getDistrictEn(), address.getDistrict());
-
-            if (optionalDistrict.isPresent()) {
-                address.setDistrictId(optionalDistrict.get());
-            } else {
-                District district = baseEntityMapper.convert(addressRequestDto, District.class);
-                district.setCity(city);
-                District savedDistrict = districtRepository.save(district);
-                address.setDistrictId(savedDistrict);
-            }
-        } else {
-            throw new BadRequestException(ErrorMessage.REGION_NOT_FOUND);
-        }
-    }
-
-    private <T extends CreateAddressRequestDto> Address checkIfAddressExist(Long userId, T addressRequestDto) {
-        List<Address> addresses = addressRepo.findAllByUserId(userId);
-
-        boolean exist = addresses.stream()
-            .filter(address -> !address.getAddressStatus().equals(AddressStatus.DELETED))
-            .map(address -> modelMapper.map(address, CreateAddressRequestDto.class))
-            .anyMatch(
-                addressDto -> addressDto.equals(modelMapper.map(addressRequestDto, CreateAddressRequestDto.class)));
-
-        if (exist) {
-            throw new BadRequestException(ADDRESS_ALREADY_EXISTS);
-        }
-
-        Optional<Address> deletedAddress = addresses.stream()
-            .filter(address -> AddressStatus.DELETED.equals(address.getAddressStatus()))
-            .filter(address -> areAddressesEqual(modelMapper.map(address, CreateAddressRequestDto.class),
-                addressRequestDto))
-            .findFirst();
-
-        return deletedAddress.orElse(null);
-    }
-
-    private boolean areAddressesEqual(CreateAddressRequestDto a, CreateAddressRequestDto b) {
-        if (a == null || b == null) {
-            return false;
-        }
-
-        return (Objects.equals(a.getRegion(), b.getRegion()) || Objects.equals(a.getRegionEn(), b.getRegionEn()))
-            && (Objects.equals(a.getCity(), b.getCity()) || Objects.equals(a.getCityEn(), b.getCityEn()))
-            && (Objects.equals(a.getDistrict(), b.getDistrict())
-                || Objects.equals(a.getDistrictEn(), b.getDistrictEn()))
-            && Objects.equals(a.getHouseNumber(), b.getHouseNumber())
-            && Objects.equals(a.getEntranceNumber(), b.getEntranceNumber())
-            && Objects.equals(a.getHouseCorpus(), b.getHouseCorpus());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid) {
-        Address address = addressRepo.findById(addressId).orElseThrow(
-            () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
-        if (!Objects.equals(address.getUser().getUuid(), uuid)) {
-            throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
-        }
-        if (address.getAddressStatus() == AddressStatus.DELETED) {
-            throw new BadRequestException(CANNOT_DELETE_ALREADY_DELETED_ADDRESS);
-        }
-        address.setAddressStatus(AddressStatus.DELETED);
-
-        if (Boolean.TRUE.equals(address.getActual())) {
-            address.setActual(false);
-            addressRepo.findAnyByUserIdAndAddressStatusNotDeleted(address.getUser().getId())
-                .ifPresent(newActualAddress -> newActualAddress.setActual(true));
-        }
-
-        return findAllAddressesForCurrentOrder(uuid);
     }
 
     private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {
@@ -1570,7 +1350,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             userProfileUpdateDto.getViberIsNotify());
         userProfileUpdateDto.getAddressDto().stream()
             .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
-            .forEach(addressRequestDto -> updateCurrentAddressForOrder(addressRequestDto, uuid));
+            .forEach(addressRequestDto -> addressService.updateCurrentAddressForOrder(addressRequestDto, uuid));
         User savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserProfileUpdateDto.class);
     }
@@ -1867,43 +1647,6 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    @Transactional
-    public AddressDto makeAddressActual(Long addressId, String uuid) {
-        Address currentAddress = addressRepo.findById(addressId).orElseThrow(
-            () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
-
-        if (!currentAddress.getUser().getUuid().equals(uuid)) {
-            throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
-        }
-
-        if (currentAddress.getAddressStatus() == AddressStatus.DELETED) {
-            throw new BadRequestException(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS);
-        }
-
-        if (Boolean.FALSE.equals(currentAddress.getActual())) {
-            Address address = addressRepo.findByUserIdAndActualTrue(currentAddress.getUser().getId()).orElseThrow(
-                () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
-            address.setActual(false);
-            currentAddress.setActual(true);
-        }
-
-        return modelMapper.map(currentAddress, AddressDto.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<DistrictDto> getAllDistricts(String region, String city) {
-        List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
-        return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
-            .collect(toList());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public PaymentSystemResponse processOrder(String userUuid, OrderWayForPayClientDto dto) {
         Order order = orderRepository.findById(dto.getOrderId())
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
@@ -2123,38 +1866,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
         Payment payment = createPayment(response, order, decodedOrderReference);
         checkPaymentResponseStatus(response, payment, order);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public OrderAddress updateOrderAddress(OrderAddressExportDetailsDtoUpdate orderAddressDtoUpdate) {
-        CreateAddressRequestDto createAddressRequestDto =
-            modelMapper.map(orderAddressDtoUpdate, CreateAddressRequestDto.class);
-        Address address = modelMapper.map(orderAddressDtoUpdate, Address.class);
-        setLocations(createAddressRequestDto, address);
-        return modelMapper.map(address, OrderAddress.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<DistrictDto> getAllDistrictsForKyiv() {
-        return districtRepository.findAllByCityId(CITY_ID_KIEV).stream()
-            .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn()))
-            .collect(toMap(
-                District::getNameUk,
-                district -> district,
-                (existing, replacement) -> existing))
-            .values()
-            .stream()
-            .map(district -> DistrictDto.builder()
-                .nameUa(district.getNameUk())
-                .nameEn(district.getNameEn())
-                .build())
-            .toList();
     }
 
     private Payment createPayment(MonoBankPaymentResponseDto response, Order order, String decodedOrderReference) {

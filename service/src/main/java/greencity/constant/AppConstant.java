@@ -6,7 +6,9 @@ import lombok.experimental.UtilityClass;
 public class AppConstant {
     public static final String UKRAINE_TIMEZONE = "Europe/Kyiv";
     public static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
+    public static final String ENROLLMENT_TO_THE_BONUS_ACCOUNT = "Зарахування на бонусний рахунок";
     public static final String ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG = "Enrollment to the bonus account";
+    public static final String PAYMENT_REFUND = "Повернення коштів";
     public static final String PAYMENT_REFUND_ENG = "Money refund";
     public static final String ubsLink = "/ubs/userProfile";
     public static final String DEFAULT_IMAGE =
@@ -17,6 +19,7 @@ public class AppConstant {
     public static final String ADMIN_EMPL_LINK = "/admin/ubs-employee";
     public static final String SUPER_ADMIN_LINK = "/ubs/superAdmin";
     public static final String USER_AGREEMENT_LINK = "/user-agreement";
+    public static final String UBS_EXPORT = UBS_LINK + "/order/pdf/export";
     public static final String ADMIN = "ADMIN";
     public static final String USER = "USER";
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";
@@ -25,13 +28,13 @@ public class AppConstant {
     public static final String COMMIT_INFO = "/commit-info";
     public static final Integer TWO_DECIMALS_AFTER_POINT_IN_CURRENCY = 2;
     public static final Integer NO_DECIMALS_AFTER_POINT_IN_CURRENCY = 0;
-
     public static final String NOTIFICATOR_START_IS_FAILED_LOG_MESSAGE =
         "Failed to start scheduled notificator with type {} because cron is incorrect or template is inactive.";
     public static final String NOTIFICATOR_SUCCESSFULLY_START_LOG_MESSAGE =
         "Scheduled notificator for {} notification template by {} cron";
     public static final String NOTIFICATOR_RESTART_LOG_MESSAGE = "Restarting scheduled notificator {}";
-
     public static final String UNKNOWN_ENG = "Unknown";
     public static final String UNKNOWN_UA = "Невідомо";
+    public static final String LOCALE_UK_NAME = "ua";
+    public static final String LOCALE_EN_NAME = "en";
 }
