@@ -448,9 +448,9 @@ class PaymentServiceImplTest {
 
     private static Stream<Arguments> provideManualPaymentRequestDto() {
         return Stream.of(Arguments.of(ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
             Arguments.of(ManualPaymentRequestDto.builder()
-                .settlementDate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
+                .settlementdate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
                 Mockito.mock(MultipartFile.class)));
     }
 
@@ -468,7 +468,7 @@ class PaymentServiceImplTest {
         payment.setAmount(0L);
         order.setPayment(singletonList(payment));
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(0L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(0L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -501,7 +501,7 @@ class PaymentServiceImplTest {
         payment.setAmount(50_00L);
         order.setPayment(singletonList(payment));
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(50_00L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(50_00L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -538,7 +538,7 @@ class PaymentServiceImplTest {
         payment.setAmount(500_00L);
         order.setPayment(singletonList(payment));
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500_00L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500_00L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -570,7 +570,7 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -599,7 +599,7 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(200L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(200L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -628,7 +628,7 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -657,7 +657,7 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -686,7 +686,7 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -709,7 +709,7 @@ class PaymentServiceImplTest {
     @Test
     void saveNewManualPaymentWithoutLinkAndImageTest() {
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).paymentId("1").build();
         assertThrows(BadRequestException.class,
             () -> paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL));
     }
