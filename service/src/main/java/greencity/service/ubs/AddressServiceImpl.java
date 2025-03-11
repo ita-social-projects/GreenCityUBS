@@ -289,7 +289,8 @@ public class AddressServiceImpl implements AddressService {
             address.setRegionId(optionalRegion.get());
 
             Optional<City> optionalCity = cityRepository
-                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getBaseAddress().getCityUk(),
+                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(),
+                    address.getBaseAddress().getCityUk(),
                     address.getBaseAddress().getCityEn());
 
             City city;

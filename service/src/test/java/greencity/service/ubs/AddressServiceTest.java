@@ -925,7 +925,8 @@ class AddressServiceTest {
         String uuid = user.getUuid();
 
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
-        when(addressRepository.findByUserIdAndBaseAddress_ActualTrue(user.getId())).thenReturn(Optional.of(secondAddress));
+        when(addressRepository.findByUserIdAndBaseAddress_ActualTrue(user.getId()))
+            .thenReturn(Optional.of(secondAddress));
 
         addressService.makeAddressActual(firstAddressId, uuid);
 

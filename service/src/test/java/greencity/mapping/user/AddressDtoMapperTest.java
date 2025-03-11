@@ -30,12 +30,16 @@ class AddressDtoMapperTest {
         assertEquals(expectedAddress.getBaseAddress().getCityUk(), actualAddress.getBaseAddress().getCityUk());
         assertEquals(expectedAddress.getBaseAddress().getStreetUk(), actualAddress.getBaseAddress().getStreetUk());
         assertEquals(expectedAddress.getBaseAddress().getDistrictUk(), actualAddress.getBaseAddress().getDistrictUk());
-        assertEquals(expectedAddress.getBaseAddress().getEntranceNumber(), actualAddress.getBaseAddress().getEntranceNumber());
-        assertEquals(expectedAddress.getBaseAddress().getHouseNumber(), actualAddress.getBaseAddress().getHouseNumber());
-        assertEquals(expectedAddress.getBaseAddress().getHouseCorpus(), actualAddress.getBaseAddress().getHouseCorpus());
+        assertEquals(expectedAddress.getBaseAddress().getEntranceNumber(),
+            actualAddress.getBaseAddress().getEntranceNumber());
+        assertEquals(expectedAddress.getBaseAddress().getHouseNumber(),
+            actualAddress.getBaseAddress().getHouseNumber());
+        assertEquals(expectedAddress.getBaseAddress().getHouseCorpus(),
+            actualAddress.getBaseAddress().getHouseCorpus());
         assertEquals(expectedAddress.getCoordinates(), actualAddress.getCoordinates());
         assertEquals(expectedAddress.getBaseAddress().getActual(), actualAddress.getBaseAddress().getActual());
-        assertNotEquals(expectedAddress.getBaseAddress().getAddressStatus(), actualAddress.getBaseAddress().getAddressStatus());
+        assertNotEquals(expectedAddress.getBaseAddress().getAddressStatus(),
+            actualAddress.getBaseAddress().getAddressStatus());
     }
 
 }

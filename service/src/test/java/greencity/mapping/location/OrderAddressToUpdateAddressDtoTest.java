@@ -20,8 +20,10 @@ class OrderAddressToUpdateAddressDtoTest {
         var result = mapper.convert(orderAddress);
 
         assertEquals(orderAddress.getId(), result.getOrderAddressExportDetails().getId());
-        assertEquals(orderAddress.getBaseAddress().getDistrictUk(), result.getOrderAddressExportDetails().getDistrictUk());
-        assertEquals(orderAddress.getBaseAddress().getDistrictEn(), result.getOrderAddressExportDetails().getDistrictEn());
+        assertEquals(orderAddress.getBaseAddress().getDistrictUk(),
+            result.getOrderAddressExportDetails().getDistrictUk());
+        assertEquals(orderAddress.getBaseAddress().getDistrictEn(),
+            result.getOrderAddressExportDetails().getDistrictEn());
         assertEquals(orderAddress.getBaseAddress().getStreetUk(), result.getOrderAddressExportDetails().getStreetUk());
         assertEquals(orderAddress.getBaseAddress().getStreetEn(), result.getOrderAddressExportDetails().getStreetEn());
         assertEquals(orderAddress.getBaseAddress().getHouseCorpus(),

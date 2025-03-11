@@ -373,7 +373,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .regionEn(address.getBaseAddress().getRegionEn())
             .addressRegionDistrictList(
                 locationApiService
-                    .getAllDistrictsInCityByNames(address.getBaseAddress().getRegionUk(), address.getBaseAddress().getCityUk())
+                    .getAllDistrictsInCityByNames(address.getBaseAddress().getRegionUk(),
+                        address.getBaseAddress().getCityUk())
                     .stream()
                     .map(p -> modelMapper.map(p, DistrictDto.class))
                     .collect(Collectors.toList()))
