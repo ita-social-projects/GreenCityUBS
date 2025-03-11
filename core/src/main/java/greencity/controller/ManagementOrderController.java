@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
+import greencity.annotations.ValidManualPaymentRequest;
 import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
 import greencity.dto.bag.AdditionalBagInfoDto;
@@ -757,7 +758,7 @@ public class ManagementOrderController {
     @PutMapping(value = "/update-manual-payment/{id}",
         consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> updateManualPayment(@PathVariable(name = "id") Long paymentId,
-        @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
+        @Valid @ValidManualPaymentRequest @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image, @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(paymentService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));

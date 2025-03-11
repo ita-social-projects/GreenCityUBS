@@ -252,4 +252,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findAllByOrderStatusNotAndOrderPaymentStatus(OrderStatus orderStatus,
         OrderPaymentStatus orderPaymentStatus);
+
+    @Query("SELECT p.order FROM Payment p WHERE p.paymentId = ?1")
+    Order findOrderByPaymentId(String paymentId);
 }
