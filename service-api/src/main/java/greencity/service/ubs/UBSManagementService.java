@@ -279,7 +279,7 @@ public interface UBSManagementService {
     Boolean checkIfOrderStatusIsFormedToCanceled(Long orderId);
 
     /**
-     * Method returns an order by provided payment ID
+     * Method returns an order by provided payment ID.
      *
      * @param paymentId {@link String} the ID of the order.
      * @return {@link Order}
