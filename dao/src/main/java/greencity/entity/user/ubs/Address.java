@@ -47,5 +47,5 @@ public class Address {
     private District districtId;
 
     @Embedded
-    private BaseAddress address;
+    private BaseAddress baseAddress;
 }

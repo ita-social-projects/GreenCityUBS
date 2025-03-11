@@ -27,7 +27,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     @Override
     protected UserProfileUpdateDto convert(User user) {
         List<AddressDto> addressDtoList = user.getAddresses().stream()
-            .filter(address -> AddressStatus.DELETED != address.getAddress().getAddressStatus())
+            .filter(address -> AddressStatus.DELETED != address.getBaseAddress().getAddressStatus())
             .map(this::createAddressDto)
             .toList();
 
@@ -45,23 +45,23 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     private AddressDto createAddressDto(Address address) {
         return AddressDto.builder()
             .id(address.getId())
-            .cityUk(address.getAddress().getCityUk())
-            .cityEn(address.getAddress().getCityEn())
-            .districtUk(address.getAddress().getDistrictUk())
-            .districtEn(address.getAddress().getDistrictEn())
-            .regionUk(address.getAddress().getRegionUk())
-            .regionEn(address.getAddress().getRegionEn())
-            .entranceNumber(address.getAddress().getEntranceNumber())
-            .houseCorpus(address.getAddress().getHouseCorpus())
-            .houseNumber(address.getAddress().getHouseNumber())
-            .streetUk(address.getAddress().getStreetUk())
-            .streetEn(address.getAddress().getStreetEn())
-            .addressComment(address.getAddress().getAddressComment())
+            .cityUk(address.getBaseAddress().getCityUk())
+            .cityEn(address.getBaseAddress().getCityEn())
+            .districtUk(address.getBaseAddress().getDistrictUk())
+            .districtEn(address.getBaseAddress().getDistrictEn())
+            .regionUk(address.getBaseAddress().getRegionUk())
+            .regionEn(address.getBaseAddress().getRegionEn())
+            .entranceNumber(address.getBaseAddress().getEntranceNumber())
+            .houseCorpus(address.getBaseAddress().getHouseCorpus())
+            .houseNumber(address.getBaseAddress().getHouseNumber())
+            .streetUk(address.getBaseAddress().getStreetUk())
+            .streetEn(address.getBaseAddress().getStreetEn())
+            .addressComment(address.getBaseAddress().getAddressComment())
             .coordinates(Coordinates.builder()
                 .latitude(address.getCoordinates().getLatitude())
                 .longitude(address.getCoordinates().getLongitude())
                 .build())
-            .actual(address.getAddress().getActual())
+            .actual(address.getBaseAddress().getActual())
             .addressRegionDistrictList(getAllDistricts(address))
             .build();
     }

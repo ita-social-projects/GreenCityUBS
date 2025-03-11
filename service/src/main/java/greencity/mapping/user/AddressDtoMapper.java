@@ -14,7 +14,7 @@ public class AddressDtoMapper extends AbstractConverter<AddressDto, Address> {
     protected Address convert(AddressDto addressDto) {
         return Address.builder()
             .id(addressDto.getId())
-            .address(BaseAddress.builder()
+            .baseAddress(BaseAddress.builder()
                 .regionUk(addressDto.getRegionUk())
                 .regionEn(addressDto.getRegionEn())
                 .cityUk(addressDto.getCityUk())

@@ -12,7 +12,7 @@ public class CreateAddressRequestDtoToAddress extends AbstractConverter<CreateAd
     @Override
     protected Address convert(CreateAddressRequestDto source) {
         return Address.builder()
-            .address(BaseAddress.builder()
+            .baseAddress(BaseAddress.builder()
                 .regionUk(source.getRegionUk())
                 .regionEn(source.getRegionEn())
                 .cityUk(source.getCityUk())

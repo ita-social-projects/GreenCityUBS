@@ -38,18 +38,18 @@ class CreateAddressRequestDtoToAddressTest {
 
         Address address = converter.convert(dto);
 
-        assertEquals(dto.getRegionUk(), address.getAddress().getRegionUk());
-        assertEquals(dto.getRegionEn(), address.getAddress().getRegionEn());
-        assertEquals(dto.getCityUk(), address.getAddress().getCityUk());
-        assertEquals(dto.getCityEn(), address.getAddress().getCityEn());
-        assertEquals(dto.getDistrictUk(), address.getAddress().getDistrictUk());
-        assertEquals(dto.getDistrictEn(), address.getAddress().getDistrictEn());
-        assertEquals(dto.getAddressComment(), address.getAddress().getAddressComment());
-        assertEquals(dto.getHouseNumber(), address.getAddress().getHouseNumber());
-        assertEquals(dto.getEntranceNumber(), address.getAddress().getEntranceNumber());
-        assertEquals(dto.getHouseCorpus(), address.getAddress().getHouseCorpus());
-        assertEquals(dto.getStreetUk(), address.getAddress().getStreetUk());
-        assertEquals(dto.getStreetEn(), address.getAddress().getStreetEn());
+        assertEquals(dto.getRegionUk(), address.getBaseAddress().getRegionUk());
+        assertEquals(dto.getRegionEn(), address.getBaseAddress().getRegionEn());
+        assertEquals(dto.getCityUk(), address.getBaseAddress().getCityUk());
+        assertEquals(dto.getCityEn(), address.getBaseAddress().getCityEn());
+        assertEquals(dto.getDistrictUk(), address.getBaseAddress().getDistrictUk());
+        assertEquals(dto.getDistrictEn(), address.getBaseAddress().getDistrictEn());
+        assertEquals(dto.getAddressComment(), address.getBaseAddress().getAddressComment());
+        assertEquals(dto.getHouseNumber(), address.getBaseAddress().getHouseNumber());
+        assertEquals(dto.getEntranceNumber(), address.getBaseAddress().getEntranceNumber());
+        assertEquals(dto.getHouseCorpus(), address.getBaseAddress().getHouseCorpus());
+        assertEquals(dto.getStreetUk(), address.getBaseAddress().getStreetUk());
+        assertEquals(dto.getStreetEn(), address.getBaseAddress().getStreetEn());
         assertEquals(dto.getCoordinates().getLongitude(), address.getCoordinates().getLongitude());
         assertEquals(dto.getCoordinates().getLatitude(), address.getCoordinates().getLatitude());
     }

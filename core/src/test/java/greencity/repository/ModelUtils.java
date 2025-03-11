@@ -128,7 +128,7 @@ public class ModelUtils {
         return Address.builder()
             .id(1L)
             .user(User.builder().id(1L).build())
-            .address(BaseAddress.builder()
+            .baseAddress(BaseAddress.builder()
                 .addressComment("")
                 .cityUk("Київ")
                 .districtUk("Шевченківський")

@@ -60,7 +60,6 @@ import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.BaseAddress;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
@@ -115,7 +114,6 @@ import greencity.util.OrderUtils;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -153,8 +151,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import static greencity.ModelUtils.KYIV_REGION_EN;
-import static greencity.ModelUtils.KYIV_REGION_UK;
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
 import static greencity.ModelUtils.TEST_EMAIL;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
@@ -741,7 +737,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubsUser = getUBSuser();
         OrderAddress orderAddress = ubsUser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -818,7 +814,7 @@ class UBSClientServiceImplTest {
         dto.setLocationId(2L);
 
         Address addressWithNullCoordinates = ModelUtils.getAddress();
-        addressWithNullCoordinates.getAddress().setCityEn("Poltava");
+        addressWithNullCoordinates.getBaseAddress().setCityEn("Poltava");
         Coordinates coordinates = Coordinates.builder().latitude(0.0).longitude(0.0).build();
         addressWithNullCoordinates.setCoordinates(coordinates);
         when(googleApiService.getGeocodingResultByCityAndCountryAndLocale(anyString(), anyString(), anyString()))
@@ -869,7 +865,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -922,7 +918,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -948,7 +944,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser.setId(null));
         Address address = getAddress();
-        address.getAddress().setAddressStatus(AddressStatus.DELETED);
+        address.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
         when(addressRepository.findById(any()))
             .thenReturn(Optional.of(address));
         when(locationRepository.findById(any())).thenReturn(Optional.of(getLocation()));
@@ -985,7 +981,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1046,7 +1042,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1105,7 +1101,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1161,7 +1157,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1277,7 +1273,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1319,7 +1315,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1356,7 +1352,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1407,7 +1403,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1487,7 +1483,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.getAddress().setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -2198,7 +2194,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.getAddress().setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -2266,8 +2262,8 @@ class UBSClientServiceImplTest {
         OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setLocation(location);
 
-        orderAddress.getAddress().setAddressStatus(AddressStatus.NEW);
-        address.getAddress().setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -2318,7 +2314,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.getAddress().setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -2364,7 +2360,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.getAddress().setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -2407,7 +2403,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.getAddress().setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -2816,7 +2812,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.getAddress().setAddressStatus(AddressStatus.DELETED);
+        address.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -2862,7 +2858,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.getAddress().setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {

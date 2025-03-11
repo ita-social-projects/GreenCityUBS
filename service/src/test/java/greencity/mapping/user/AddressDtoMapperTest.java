@@ -22,20 +22,20 @@ class AddressDtoMapperTest {
         AddressDto addressDto = ModelUtils.addressDto();
 
         Address expectedAddress = ModelUtils.getAddress();
-        expectedAddress.getAddress().setAddressStatus(AddressStatus.DELETED);
+        expectedAddress.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
 
         Address actualAddress = addressDtoMapper.convert(addressDto);
 
         assertEquals(expectedAddress.getId(), actualAddress.getId());
-        assertEquals(expectedAddress.getAddress().getCityUk(), actualAddress.getAddress().getCityUk());
-        assertEquals(expectedAddress.getAddress().getStreetUk(), actualAddress.getAddress().getStreetUk());
-        assertEquals(expectedAddress.getAddress().getDistrictUk(), actualAddress.getAddress().getDistrictUk());
-        assertEquals(expectedAddress.getAddress().getEntranceNumber(), actualAddress.getAddress().getEntranceNumber());
-        assertEquals(expectedAddress.getAddress().getHouseNumber(), actualAddress.getAddress().getHouseNumber());
-        assertEquals(expectedAddress.getAddress().getHouseCorpus(), actualAddress.getAddress().getHouseCorpus());
+        assertEquals(expectedAddress.getBaseAddress().getCityUk(), actualAddress.getBaseAddress().getCityUk());
+        assertEquals(expectedAddress.getBaseAddress().getStreetUk(), actualAddress.getBaseAddress().getStreetUk());
+        assertEquals(expectedAddress.getBaseAddress().getDistrictUk(), actualAddress.getBaseAddress().getDistrictUk());
+        assertEquals(expectedAddress.getBaseAddress().getEntranceNumber(), actualAddress.getBaseAddress().getEntranceNumber());
+        assertEquals(expectedAddress.getBaseAddress().getHouseNumber(), actualAddress.getBaseAddress().getHouseNumber());
+        assertEquals(expectedAddress.getBaseAddress().getHouseCorpus(), actualAddress.getBaseAddress().getHouseCorpus());
         assertEquals(expectedAddress.getCoordinates(), actualAddress.getCoordinates());
-        assertEquals(expectedAddress.getAddress().getActual(), actualAddress.getAddress().getActual());
-        assertNotEquals(expectedAddress.getAddress().getAddressStatus(), actualAddress.getAddress().getAddressStatus());
+        assertEquals(expectedAddress.getBaseAddress().getActual(), actualAddress.getBaseAddress().getActual());
+        assertNotEquals(expectedAddress.getBaseAddress().getAddressStatus(), actualAddress.getBaseAddress().getAddressStatus());
     }
 
 }

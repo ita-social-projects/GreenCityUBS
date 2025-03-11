@@ -228,8 +228,8 @@ class AddressServiceTest {
         when(mapper.map(any(Address.class), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
         when(mapper.map(createAddressRequestDto, CreateAddressRequestDto.class))
             .thenReturn(createAddressRequestDto1);
-        addresses.getFirst().getAddress().setRegionEn(region.getNameEn());
-        addresses.getFirst().getAddress().setRegionUk(region.getNameUk());
+        addresses.getFirst().getBaseAddress().setRegionEn(region.getNameEn());
+        addresses.getFirst().getBaseAddress().setRegionUk(region.getNameUk());
         when(mapper.map(createAddressRequestDto, Address.class)).thenReturn(addresses.getFirst());
         when(addressMapper.convert(any(CreateAddressRequestDto.class), eq(City.class)))
             .thenReturn(ModelUtils.getCity());
@@ -275,7 +275,7 @@ class AddressServiceTest {
         Address firstAddress = getAddress();
         firstAddress.setId(firstAddressId);
         firstAddress.setUser(user);
-        firstAddress.getAddress().setAddressStatus(AddressStatus.DELETED);
+        firstAddress.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
         user.setAddresses(List.of(firstAddress));
 
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
@@ -286,7 +286,7 @@ class AddressServiceTest {
         assertEquals(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS, exception.getMessage());
 
         verify(addressRepository).findById(firstAddressId);
-        verify(addressRepository, times(0)).findByUserIdAndAddress_ActualTrue(anyLong());
+        verify(addressRepository, times(0)).findByUserIdAndBaseAddress_ActualTrue(anyLong());
         verify(mapper, times(0)).map(any(), any());
     }
 
@@ -311,7 +311,7 @@ class AddressServiceTest {
         assertEquals(CANNOT_ACCESS_PERSONAL_INFO, exception.getMessage());
 
         verify(addressRepository).findById(firstAddressId);
-        verify(addressRepository, times(0)).findByUserIdAndAddress_ActualTrue(anyLong());
+        verify(addressRepository, times(0)).findByUserIdAndBaseAddress_ActualTrue(anyLong());
         verify(mapper, times(0)).map(any(), any());
     }
 
@@ -358,7 +358,7 @@ class AddressServiceTest {
         OrderAddressDtoRequest dtoRequest = getTestOrderAddressDtoRequest2();
         User user = getUser();
         Address address = getAddress(1L);
-        address.getAddress().setAddressStatus(AddressStatus.DELETED);
+        address.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
         address.setUser(user);
 
         CreateAddressRequestDto dto = getAddressRequestDto2();
@@ -383,7 +383,7 @@ class AddressServiceTest {
         User user = getUser();
         Address address = getAddress(1L)
             .setUser(user);
-        address.getAddress().setAddressStatus(AddressStatus.DELETED);
+        address.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
         CreateAddressRequestDto dto = getAddressRequestDto();
 
         when(userRepository.findByUuid(anyString())).thenReturn(user);
@@ -443,7 +443,7 @@ class AddressServiceTest {
     private List<Address> getTestAddresses(User user) {
         Address address1 = Address.builder()
             .id(13L)
-            .address(BaseAddress.builder()
+            .baseAddress(BaseAddress.builder()
                 .actual(true)
                 .addressStatus(AddressStatus.NEW).districtUk("Svyatoshyn")
                 .cityUk("Kyiv")
@@ -453,7 +453,7 @@ class AddressServiceTest {
 
         Address address2 = Address.builder()
             .id(42L)
-            .address(BaseAddress.builder()
+            .baseAddress(BaseAddress.builder()
                 .addressStatus(AddressStatus.NEW).cityUk("Lviv").districtUk("Syhiv")
                 .actual(true)
                 .entranceNumber("1").houseCorpus("1").houseNumber("55").streetUk("Lvivska st.").build())
@@ -467,8 +467,8 @@ class AddressServiceTest {
     void testSaveCurrentAddressForOrder() {
         User user = getUserForCreate();
         List<Address> addresses = user.getAddresses();
-        addresses.getFirst().getAddress().setActual(false);
-        addresses.getFirst().getAddress().setAddressStatus(AddressStatus.NEW);
+        addresses.getFirst().getBaseAddress().setActual(false);
+        addresses.getFirst().getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         String uuid = user.getUuid();
         CreateAddressRequestDto createAddressRequestToSaveDto = getAddressRequestToSaveDto();
@@ -518,7 +518,7 @@ class AddressServiceTest {
         Long firstAddressId = 1L;
         Address firstAddress = getAddress();
         firstAddress.setId(firstAddressId);
-        firstAddress.getAddress().setActual(true);
+        firstAddress.getBaseAddress().setActual(true);
         User user = getUser();
         firstAddress.setUser(user);
         String uuid = user.getUuid();
@@ -529,8 +529,8 @@ class AddressServiceTest {
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         addressService.deleteCurrentAddressForOrder(firstAddressId, uuid);
 
-        Assertions.assertFalse(firstAddress.getAddress().getActual());
-        assertEquals(AddressStatus.DELETED, firstAddress.getAddress().getAddressStatus());
+        Assertions.assertFalse(firstAddress.getBaseAddress().getActual());
+        assertEquals(AddressStatus.DELETED, firstAddress.getBaseAddress().getAddressStatus());
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository).findAnyByUserIdAndAddressStatusNotDeleted(user.getId());
@@ -561,8 +561,8 @@ class AddressServiceTest {
 
         CreateAddressRequestDto createAddressRequestDto = getAddressRequestDto();
 
-        addresses.getFirst().getAddress().setAddressStatus(AddressStatus.NEW);
-        addresses.getFirst().getAddress().setActual(false);
+        addresses.getFirst().getBaseAddress().setAddressStatus(AddressStatus.NEW);
+        addresses.getFirst().getBaseAddress().setActual(false);
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
@@ -592,8 +592,8 @@ class AddressServiceTest {
         dtoRequest.setId(1L);
         OrderAddressDtoRequest updateAddressRequestDto = getTestOrderAddressDtoRequest();
         updateAddressRequestDto.setId(1L);
-        addresses.getFirst().getAddress().setActual(false);
-        addresses.getFirst().getAddress().setAddressStatus(AddressStatus.IN_ORDER);
+        addresses.getFirst().getBaseAddress().setActual(false);
+        addresses.getFirst().getBaseAddress().setAddressStatus(AddressStatus.IN_ORDER);
         addresses.getFirst().setUser(user);
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
@@ -651,7 +651,7 @@ class AddressServiceTest {
         assertEquals(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + firstAddressId, exception.getMessage());
 
         verify(addressRepository).findById(firstAddressId);
-        verify(addressRepository, times(0)).findByUserIdAndAddress_ActualTrue(anyLong());
+        verify(addressRepository, times(0)).findByUserIdAndBaseAddress_ActualTrue(anyLong());
         verify(mapper, times(0)).map(any(), any());
     }
 
@@ -665,7 +665,7 @@ class AddressServiceTest {
         String uuid = user.getUuid();
 
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
-        when(addressRepository.findByUserIdAndAddress_ActualTrue(user.getId())).thenReturn(Optional.empty());
+        when(addressRepository.findByUserIdAndBaseAddress_ActualTrue(user.getId())).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> addressService.makeAddressActual(firstAddressId, uuid));
@@ -673,7 +673,7 @@ class AddressServiceTest {
         assertEquals(ACTUAL_ADDRESS_NOT_FOUND, exception.getMessage());
 
         verify(addressRepository).findById(firstAddressId);
-        verify(addressRepository).findByUserIdAndAddress_ActualTrue(user.getId());
+        verify(addressRepository).findByUserIdAndBaseAddress_ActualTrue(user.getId());
         verify(mapper, times(0)).map(any(), any());
     }
 
@@ -686,7 +686,7 @@ class AddressServiceTest {
         dtoRequest.setId(7L);
         OrderAddressDtoRequest updateAddressRequestDto = getTestOrderAddressDtoRequest();
         updateAddressRequestDto.setId(1L);
-        addresses.getFirst().getAddress().setActual(false);
+        addresses.getFirst().getBaseAddress().setActual(false);
         addresses.getFirst().setUser(user);
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
@@ -725,8 +725,8 @@ class AddressServiceTest {
         dtoRequest.setPlaceId(null);
         OrderAddressDtoRequest updateAddressRequestDto = getTestOrderAddressDtoRequest();
         updateAddressRequestDto.setId(1L);
-        addresses.getFirst().getAddress().setActual(false);
-        addresses.getFirst().getAddress().setAddressStatus(AddressStatus.IN_ORDER);
+        addresses.getFirst().getBaseAddress().setActual(false);
+        addresses.getFirst().getBaseAddress().setAddressStatus(AddressStatus.IN_ORDER);
         addresses.getFirst().setUser(user);
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
@@ -777,7 +777,7 @@ class AddressServiceTest {
         Long secondAddressId = 2L;
         Address firstAddress = getAddress();
         firstAddress.setId(firstAddressId);
-        firstAddress.getAddress().setActual(true);
+        firstAddress.getBaseAddress().setActual(true);
         Address secondAddress = getAddress();
         secondAddress.setId(secondAddressId);
         User user = getUser();
@@ -791,9 +791,9 @@ class AddressServiceTest {
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         addressServiceSpy.deleteCurrentAddressForOrder(firstAddressId, uuid);
 
-        Assertions.assertFalse(firstAddress.getAddress().getActual());
-        assertEquals(AddressStatus.DELETED, firstAddress.getAddress().getAddressStatus());
-        Assertions.assertTrue(secondAddress.getAddress().getActual());
+        Assertions.assertFalse(firstAddress.getBaseAddress().getActual());
+        assertEquals(AddressStatus.DELETED, firstAddress.getBaseAddress().getAddressStatus());
+        Assertions.assertTrue(secondAddress.getBaseAddress().getActual());
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository).findAnyByUserIdAndAddressStatusNotDeleted(user.getId());
@@ -817,7 +817,7 @@ class AddressServiceTest {
 
         addressServiceSpy.deleteCurrentAddressForOrder(firstAddressId, uuid);
 
-        assertEquals(AddressStatus.DELETED, firstAddress.getAddress().getAddressStatus());
+        assertEquals(AddressStatus.DELETED, firstAddress.getBaseAddress().getAddressStatus());
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository, times(0)).findAnyByUserIdAndAddressStatusNotDeleted(anyLong());
@@ -833,8 +833,8 @@ class AddressServiceTest {
         dtoRequest.setId(1L);
         OrderAddressDtoRequest updateAddressRequestDto = getTestOrderAddressDtoRequest();
         updateAddressRequestDto.setId(1L);
-        addresses.getFirst().getAddress().setActual(false);
-        addresses.getFirst().getAddress().setAddressStatus(AddressStatus.IN_ORDER);
+        addresses.getFirst().getBaseAddress().setActual(false);
+        addresses.getFirst().getBaseAddress().setAddressStatus(AddressStatus.IN_ORDER);
         addresses.getFirst().setUser(user);
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
@@ -894,7 +894,7 @@ class AddressServiceTest {
         Long firstAddressId = 1L;
         Address firstAddress = getAddress();
         firstAddress.setId(firstAddressId);
-        firstAddress.getAddress().setAddressStatus(AddressStatus.DELETED);
+        firstAddress.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
         User user = getUser();
         firstAddress.setUser(user);
         String uuid = user.getUuid();
@@ -919,21 +919,21 @@ class AddressServiceTest {
         firstAddress.setId(firstAddressId);
         Address secondAddress = getAddress();
         secondAddress.setId(secondAddressId);
-        secondAddress.getAddress().setActual(true);
+        secondAddress.getBaseAddress().setActual(true);
         User user = getUser();
         firstAddress.setUser(user);
         String uuid = user.getUuid();
 
         when(addressRepository.findById(firstAddressId)).thenReturn(Optional.of(firstAddress));
-        when(addressRepository.findByUserIdAndAddress_ActualTrue(user.getId())).thenReturn(Optional.of(secondAddress));
+        when(addressRepository.findByUserIdAndBaseAddress_ActualTrue(user.getId())).thenReturn(Optional.of(secondAddress));
 
         addressService.makeAddressActual(firstAddressId, uuid);
 
-        Assertions.assertTrue(firstAddress.getAddress().getActual());
-        assertFalse(secondAddress.getAddress().getActual());
+        Assertions.assertTrue(firstAddress.getBaseAddress().getActual());
+        assertFalse(secondAddress.getBaseAddress().getActual());
 
         verify(addressRepository).findById(firstAddressId);
-        verify(addressRepository).findByUserIdAndAddress_ActualTrue(user.getId());
+        verify(addressRepository).findByUserIdAndBaseAddress_ActualTrue(user.getId());
         verify(mapper).map(firstAddress, AddressDto.class);
     }
 
@@ -955,7 +955,7 @@ class AddressServiceTest {
         String comment = "New comment test";
         OrderAddress actual = OrderAddress.builder().location(location)
             .id(1L)
-            .address(BaseAddress.builder()
+            .baseAddress(BaseAddress.builder()
                 .actual(false)
                 .addressComment("No comments")
                 .addressStatus(AddressStatus.DELETED)
@@ -966,10 +966,10 @@ class AddressServiceTest {
         mapUpdatedOrderAddressFieldsMethod.invoke(addressService, expected, actual, comment);
         assertEquals(expected.getLocation(), actual.getLocation());
         assertEquals(expected.getId(), actual.getId());
-        assertEquals(expected.getAddress().getActual(), actual.getAddress().getActual());
-        assertEquals(comment, actual.getAddress().getAddressComment());
+        assertEquals(expected.getBaseAddress().getActual(), actual.getBaseAddress().getActual());
+        assertEquals(comment, actual.getBaseAddress().getAddressComment());
         assertEquals(expected.getCoordinates(), actual.getCoordinates());
-        assertEquals(expected.getAddress().getAddressStatus(), actual.getAddress().getAddressStatus());
+        assertEquals(expected.getBaseAddress().getAddressStatus(), actual.getBaseAddress().getAddressStatus());
     }
 
     @Test
@@ -1007,8 +1007,8 @@ class AddressServiceTest {
     void saveCurrentAddressForOrderForAddressesBelongToKyivEnTest() {
         User user = getUserForCreate();
         List<Address> addresses = user.getAddresses();
-        addresses.getFirst().getAddress().setActual(false);
-        addresses.getFirst().getAddress().setAddressStatus(AddressStatus.NEW);
+        addresses.getFirst().getBaseAddress().setActual(false);
+        addresses.getFirst().getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         String uuid = user.getUuid();
         CreateAddressRequestDto createAddressRequestToSaveDto = getAddressWithKyivRegionToSaveRequestDto();
@@ -1046,8 +1046,8 @@ class AddressServiceTest {
     void saveCurrentAddressForOrderForAddressesBelongToKyivUaTest() {
         User user = getUserForCreate();
         List<Address> addresses = user.getAddresses();
-        addresses.getFirst().getAddress().setActual(false);
-        addresses.getFirst().getAddress().setAddressStatus(AddressStatus.NEW);
+        addresses.getFirst().getBaseAddress().setActual(false);
+        addresses.getFirst().getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         String uuid = user.getUuid();
         CreateAddressRequestDto createAddressRequestToSaveDto = getAddressWithKyivRegionToSaveRequestDto();

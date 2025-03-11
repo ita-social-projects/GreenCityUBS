@@ -22,20 +22,20 @@ class OrderAddressMapperTest {
         OrderAddress expectedOrderAddressResult = orderAddressMapper.convert(address);
 
         assertEquals(expectedOrderAddressResult.getId(), orderAddress.getId());
-        assertEquals(expectedOrderAddressResult.getAddress().getCityUk(), orderAddress.getAddress().getCityUk());
-        assertEquals(expectedOrderAddressResult.getAddress().getStreetUk(), orderAddress.getAddress().getStreetUk());
-        assertEquals(expectedOrderAddressResult.getAddress().getDistrictUk(),
-            orderAddress.getAddress().getDistrictUk());
-        assertEquals(expectedOrderAddressResult.getAddress().getEntranceNumber(),
-            orderAddress.getAddress().getEntranceNumber());
-        assertEquals(expectedOrderAddressResult.getAddress().getHouseNumber(),
-            orderAddress.getAddress().getHouseNumber());
-        assertEquals(expectedOrderAddressResult.getAddress().getHouseCorpus(),
-            orderAddress.getAddress().getHouseCorpus());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getCityUk(), orderAddress.getBaseAddress().getCityUk());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getStreetUk(), orderAddress.getBaseAddress().getStreetUk());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getDistrictUk(),
+            orderAddress.getBaseAddress().getDistrictUk());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getEntranceNumber(),
+            orderAddress.getBaseAddress().getEntranceNumber());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getHouseNumber(),
+            orderAddress.getBaseAddress().getHouseNumber());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getHouseCorpus(),
+            orderAddress.getBaseAddress().getHouseCorpus());
         assertEquals(expectedOrderAddressResult.getCoordinates(), orderAddress.getCoordinates());
-        assertEquals(expectedOrderAddressResult.getAddress().getActual(), orderAddress.getAddress().getActual());
-        assertEquals(expectedOrderAddressResult.getAddress().getAddressStatus(),
-            orderAddress.getAddress().getAddressStatus());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getActual(), orderAddress.getBaseAddress().getActual());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getAddressStatus(),
+            orderAddress.getBaseAddress().getAddressStatus());
     }
 
 }

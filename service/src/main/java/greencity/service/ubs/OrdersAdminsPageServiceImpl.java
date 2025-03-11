@@ -353,7 +353,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderAddress address = orderAddressRepository.findByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
 
-        address.getAddress().setAddressComment(value);
+        address.getBaseAddress().setAddressComment(value);
         orderAddressRepository.save(address);
     }
 

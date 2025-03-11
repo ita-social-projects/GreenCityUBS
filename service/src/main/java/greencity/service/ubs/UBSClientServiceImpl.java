@@ -627,7 +627,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address = addressRepo.findById(addressId)
             .orElseThrow(() -> new EntityNotFoundException(ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
 
-        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getAddress().getCityEn());
+        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getBaseAddress().getCityEn());
 
         if (locationId == TariffLocation.KYIV_TARIFF.getLocationId()) {
             return isKyivTariff;
@@ -655,7 +655,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void checkAndCalculateAddressCoordinatesIfEmpty(Address address) {
         if (address.getCoordinates().getLatitude() == 0.0 && address.getCoordinates().getLongitude() == 0.0) {
             LatLng latLng = googleApiService
-                .getGeocodingResultByCityAndCountryAndLocale(UKRAINE_EN, address.getAddress().getCityEn(),
+                .getGeocodingResultByCityAndCountryAndLocale(UKRAINE_EN, address.getBaseAddress().getCityEn(),
                     LANG_EN).geometry.location;
             Coordinates addressCoordinates = Coordinates.builder().latitude(latLng.lat).longitude(latLng.lng).build();
             address.setCoordinates(addressCoordinates);
@@ -702,7 +702,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkIfAddressHasBeenDeleted(Address address) {
-        if (address.getAddress().getAddressStatus().equals(AddressStatus.DELETED)) {
+        if (address.getBaseAddress().getAddressStatus().equals(AddressStatus.DELETED)) {
             throw new NotFoundException(
                 NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
@@ -855,18 +855,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
         var address = order.getUbsUser().getOrderAddress();
         return AddressInfoDto.builder()
-            .addressCityUk(address.getAddress().getCityUk())
-            .addressCityEn(address.getAddress().getCityEn())
-            .addressComment(address.getAddress().getAddressComment())
-            .addressDistinctUk(address.getAddress().getDistrictUk())
-            .addressDistinctEn(address.getAddress().getDistrictEn())
-            .addressRegionUk(address.getAddress().getRegionUk())
-            .addressRegionEn(address.getAddress().getRegionEn())
-            .addressStreetUk(address.getAddress().getStreetUk())
-            .addressStreetEn(address.getAddress().getStreetEn())
-            .houseCorpus(address.getAddress().getHouseCorpus())
-            .houseNumber(address.getAddress().getHouseNumber())
-            .entranceNumber(address.getAddress().getEntranceNumber())
+            .addressCityUk(address.getBaseAddress().getCityUk())
+            .addressCityEn(address.getBaseAddress().getCityEn())
+            .addressComment(address.getBaseAddress().getAddressComment())
+            .addressDistinctUk(address.getBaseAddress().getDistrictUk())
+            .addressDistinctEn(address.getBaseAddress().getDistrictEn())
+            .addressRegionUk(address.getBaseAddress().getRegionUk())
+            .addressRegionEn(address.getBaseAddress().getRegionEn())
+            .addressStreetUk(address.getBaseAddress().getStreetUk())
+            .addressStreetEn(address.getBaseAddress().getStreetEn())
+            .houseCorpus(address.getBaseAddress().getHouseCorpus())
+            .houseNumber(address.getBaseAddress().getHouseNumber())
+            .entranceNumber(address.getBaseAddress().getEntranceNumber())
             .build();
     }
 
@@ -1119,8 +1119,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
             mappedFromDtoUser.setOrderAddress(saveOrderAddressWithLocation(addressId, locationId, currentUser));
-            if (mappedFromDtoUser.getOrderAddress().getAddress().getAddressComment() == null) {
-                mappedFromDtoUser.getOrderAddress().getAddress().setAddressComment(dto.getAddressComment());
+            if (mappedFromDtoUser.getOrderAddress().getBaseAddress().getAddressComment() == null) {
+                mappedFromDtoUser.getOrderAddress().getBaseAddress().setAddressComment(dto.getAddressComment());
             }
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);

@@ -56,5 +56,5 @@ public class OrderAddress {
     private District districtId;
 
     @Embedded
-    private BaseAddress address;
+    private BaseAddress baseAddress;
 }
