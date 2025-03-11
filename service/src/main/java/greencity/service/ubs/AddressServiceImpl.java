@@ -327,7 +327,7 @@ public class AddressServiceImpl implements AddressService {
         T addressRequestDto) {
         List<Address> addresses = addressRepo.findAllByUserId(userId);
         boolean exist = addresses.stream()
-            .filter(address -> !address.getAddress().getAddressStatus().equals(AddressStatus.DELETED))
+            .filter(address -> !AddressStatus.DELETED.equals(address.getAddress().getAddressStatus()))
             .map(address -> modelMapper.map(address, CreateAddressRequestDto.class))
             .anyMatch(
                 addressDto -> addressDto.equals(modelMapper.map(addressRequestDto, CreateAddressRequestDto.class)));

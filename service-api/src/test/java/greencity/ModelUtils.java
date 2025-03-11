@@ -95,11 +95,11 @@ public class ModelUtils {
 
     public static CreateAddressRequestDto getAddressRequestDto1() {
         return CreateAddressRequestDto.builder()
-            .region("Region")
+            .regionUk("Region")
             .regionEn("RegionEn")
-            .city("City")
+            .cityUk("City")
             .cityEn("CityEn")
-            .district("District")
+            .districtUk("District")
             .districtEn("DistrictEn")
             .houseNumber("1")
             .entranceNumber("2")
@@ -109,11 +109,11 @@ public class ModelUtils {
 
     public static CreateAddressRequestDto getAddressRequestDto2() {
         return CreateAddressRequestDto.builder()
-            .region("Region")
+            .regionUk("Region")
             .regionEn("RegionEn")
-            .city("City")
+            .cityUk("City")
             .cityEn("CityEn")
-            .district("District")
+            .districtUk("District")
             .districtEn("DistrictEn")
             .houseNumber("1")
             .entranceNumber("2")
@@ -123,11 +123,11 @@ public class ModelUtils {
 
     public static CreateAddressRequestDto getAddressRequestDto3() {
         return CreateAddressRequestDto.builder()
-            .region("DifferentRegion")
+            .regionUk("DifferentRegion")
             .regionEn("DifferentRegionEn")
-            .city("DifferentCity")
+            .cityUk("DifferentCity")
             .cityEn("DifferentCityEn")
-            .district("DifferentDistrict")
+            .districtUk("DifferentDistrict")
             .districtEn("DifferentDistrictEn")
             .houseNumber("1")
             .entranceNumber("2")
@@ -137,11 +137,11 @@ public class ModelUtils {
 
     public static CreateAddressRequestDto getAddressRequestDto4() {
         return CreateAddressRequestDto.builder()
-            .region("DifferentRegion")
+            .regionUk("DifferentRegion")
             .regionEn("DifferentRegionEn")
-            .city("DifferentCity")
+            .cityUk("DifferentCity")
             .cityEn("DifferentCityEn")
-            .district("District")
+            .districtUk("District")
             .districtEn("DistrictEn")
             .houseNumber("1")
             .entranceNumber("2")
@@ -151,11 +151,11 @@ public class ModelUtils {
 
     public static CreateAddressRequestDto getAddressRequestDto5() {
         return CreateAddressRequestDto.builder()
-            .region(null)
+            .regionUk(null)
             .regionEn("RegionEn")
-            .city(null)
+            .cityUk(null)
             .cityEn("CityEn")
-            .district(null)
+            .districtUk(null)
             .districtEn("DistrictEn")
             .houseNumber("1")
             .entranceNumber("2")
