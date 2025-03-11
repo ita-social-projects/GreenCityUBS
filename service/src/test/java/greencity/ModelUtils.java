@@ -16,6 +16,7 @@ import greencity.dto.RegionDto;
 import greencity.dto.TariffInfoDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressInfoDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagDto;
@@ -54,45 +55,18 @@ import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
-import greencity.dto.notification.AddNotificationPlatformDto;
-import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
-import greencity.dto.notification.NotificationDto;
-import greencity.dto.notification.NotificationPlatformDto;
-import greencity.dto.notification.NotificationShortDto;
-import greencity.dto.notification.NotificationTemplateDto;
-import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
+import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationPlatformDto;
+import greencity.dto.notification.AddNotificationPlatformDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
-import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.BigOrderTableDTO;
-import greencity.dto.order.CounterOrderDetailsDto;
-import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.ExportDetailsDto;
-import greencity.dto.order.ExportDetailsDtoUpdate;
-import greencity.dto.order.GroupedOrderDto;
-import greencity.dto.order.NotTakenOrderReasonDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderDetailInfoDto;
-import greencity.dto.order.OrderDetailStatusDto;
-import greencity.dto.order.OrderDetailStatusRequestDto;
-import greencity.dto.order.OrderDto;
-import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OtherPackages;
-import greencity.dto.order.ReadAddressByOrderDto;
-import greencity.dto.order.RequestToChangeOrdersDataDto;
-import greencity.dto.order.SenderLocation;
-import greencity.dto.order.UpdateAllOrderPageDto;
-import greencity.dto.order.UpdateOrderDetailDto;
-import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.SenderInfoDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -2148,7 +2122,7 @@ public class ModelUtils {
 
     public static ManualPaymentRequestDto getManualPaymentRequestDto() {
         return ManualPaymentRequestDto.builder()
-            .settlementdate("02-08-2021")
+            .settlementDate("02-08-2021")
             .amount(500L)
             .receiptLink("link")
             .paymentId("1")
@@ -5798,76 +5772,6 @@ public class ModelUtils {
 
     }
 
-    public static CreateAddressRequestDto getAddressRequestDtoReflection() {
-        return CreateAddressRequestDto.builder()
-            .regionUk("Region")
-            .regionEn("RegionEn")
-            .cityUk("City")
-            .cityEn("CityEn")
-            .districtUk("District")
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDtoReflection2() {
-        return CreateAddressRequestDto.builder()
-            .regionUk("Region")
-            .regionEn("RegionEn")
-            .cityUk("City")
-            .cityEn("CityEn")
-            .districtUk("District")
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDtoReflection3() {
-        return CreateAddressRequestDto.builder()
-            .regionUk("DifferentRegion")
-            .regionEn("DifferentRegionEn")
-            .cityUk("DifferentCity")
-            .cityEn("DifferentCityEn")
-            .districtUk("DifferentDistrict")
-            .districtEn("DifferentDistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDtoReflection4() {
-        return CreateAddressRequestDto.builder()
-            .regionUk("DifferentRegion")
-            .regionEn("DifferentRegionEn")
-            .cityUk("DifferentCity")
-            .cityEn("DifferentCityEn")
-            .districtUk("District")
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDtoReflection5() {
-        return CreateAddressRequestDto.builder()
-            .regionUk(null)
-            .regionEn("RegionEn")
-            .cityUk(null)
-            .cityEn("CityEn")
-            .districtUk(null)
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
     public static UpdateAddressDto getUpdateAddressDto() {
         OrderAddressExportDetailsDtoUpdate orderAddressDetails = OrderAddressExportDetailsDtoUpdate.builder()
             .id(1L)
@@ -5908,6 +5812,76 @@ public class ModelUtils {
                 .regionEn("Kyiv city")
                 .addressComment("Test comment for address №1")
                 .build())
+            .build();
+    }
+
+    public static BagForUserDto getBagForUserDto() {
+        return BagForUserDto.builder()
+            .count(3)
+            .fullPrice(120d)
+            .capacity(1)
+            .totalPrice(360d)
+            .serviceEn("Textile waste")
+            .serviceUk("Текстильні відходи")
+            .build();
+    }
+
+    public static AddressInfoDto getAddressInfoDto() {
+        return AddressInfoDto.builder()
+            .addressCityUk("Київ")
+            .addressCityEn("Kyiv")
+            .addressComment("Comment Test")
+            .addressStreetUk("Вулиця")
+            .addressStreetEn("Street")
+            .addressDistinctEn("district")
+            .addressDistinctUk("район")
+            .houseCorpus("2")
+            .houseNumber("106")
+            .entranceNumber("5").build();
+    }
+
+    public static SenderInfoDto getSenderInfoDto() {
+        return SenderInfoDto
+            .builder()
+            .senderEmail("email@gmail.com")
+            .senderPhone("+360312423424")
+            .senderSurname("Danylenko")
+            .senderName("Andrii")
+            .build();
+    }
+
+    public static OrdersDataForUserDto getOrdersDataForUserDto() {
+        return OrdersDataForUserDto.builder()
+            .id(1L)
+            .orderFullPrice(360d)
+            .orderStatusUk("Відправлено")
+            .paymentStatusUk("Сплачено")
+            .address(getAddressInfoDto())
+            .sender(getSenderInfoDto())
+            .bags(List.of(getBagForUserDto()))
+            .dateForm(LocalDateTime.now())
+            .datePaid(LocalDateTime.now())
+            .orderStatusEn("CREATING")
+            .paymentStatusEn("PAID")
+            .amountBeforePayment(120d)
+            .orderComment("order comment")
+            .build();
+    }
+
+    public static OrdersDataForUserDto getOrdersDataForUserDtoWithNullComment() {
+        return OrdersDataForUserDto.builder()
+            .id(1L)
+            .orderFullPrice(360d)
+            .orderStatusUk("Відправлено")
+            .paymentStatusUk("Сплачено")
+            .address(getAddressInfoDto())
+            .sender(getSenderInfoDto())
+            .bags(List.of(getBagForUserDto()))
+            .dateForm(LocalDateTime.now())
+            .datePaid(LocalDateTime.now())
+            .orderStatusEn("CREATING")
+            .paymentStatusEn("PAID")
+            .amountBeforePayment(120d)
             .build();
     }
 }

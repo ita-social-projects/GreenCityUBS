@@ -353,7 +353,7 @@ public class PaymentServiceImpl implements PaymentService {
     private Payment changePaymentEntity(Payment updatePayment,
         ManualPaymentRequestDto requestDto,
         MultipartFile image) {
-        updatePayment.setSettlementDate(requestDto.getSettlementdate());
+        updatePayment.setSettlementDate(requestDto.getSettlementDate());
         updatePayment.setAmount(requestDto.getAmount());
         updatePayment.setPaymentId(requestDto.getPaymentId());
         updatePayment.setReceiptLink(requestDto.getReceiptLink());
