@@ -1,17 +1,17 @@
-package greencity.ubstelegrambot;
+package greencity.ubstelegrambot.service;
 
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.dto.language.LanguageVO;
 import greencity.dto.user.UserVO;
-import greencity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
-import greencity.entity.telegram.TelegramBot;
+import greencity.entity.telegram.AuthorizedUser;
 import greencity.entity.user.User;
+import greencity.enums.NotificationType;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
-import greencity.ubstelegrambot.service.TelegramNotificationService;
+import greencity.ubstelegrambot.UBSTelegramBot;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,14 +20,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 import java.util.Optional;
+
 import static greencity.enums.NotificationReceiverType.MOBILE;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramNotificationServiceTest {
@@ -42,9 +44,9 @@ class TelegramNotificationServiceTest {
     private UBSTelegramBot ubsTelegramBot;
 
     @InjectMocks
-    private TelegramNotificationService telegramService;
+    private TelegramNotificationService telegramNotificationService;
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
-        .telegramBot(TelegramBot.builder().id(1L).chatId(1L).isNotify(true).build())
+        .telegramBot(new AuthorizedUser("12345", false, false, null, false))
         .build();
     private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
     private final UserNotification notification = new UserNotification()
@@ -56,8 +58,8 @@ class TelegramNotificationServiceTest {
     @Test
     void testSendNotification() throws TelegramApiException {
         SendMessage sendMessage = new SendMessage(
-            notification.getUser().getTelegramBot().getChatId().toString(),
-            template.getTitle() + "\n\n" + template.getNotificationPlatforms().getFirst().getBody());
+            notification.getUser().getTelegramBot().getChatId(),
+            template.getTitle() + "\n\n" + template.getNotificationPlatforms().get(0).getBody());
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
@@ -66,7 +68,7 @@ class TelegramNotificationServiceTest {
             .thenReturn(Optional.of(userVO));
         when(ubsTelegramBot.execute(sendMessage)).thenReturn(null);
 
-        telegramService.sendNotification(notification, MOBILE, 0L);
+        telegramNotificationService.sendNotification(notification, MOBILE, 0L);
         verify(userRemoteClient).findNotDeactivatedByEmail(notification.getUser().getRecipientEmail());
         verify(ubsTelegramBot).execute(sendMessage);
     }
@@ -81,23 +83,24 @@ class TelegramNotificationServiceTest {
             .thenReturn(Optional.of(userVO));
         when(ubsTelegramBot.execute(any(SendMessage.class))).thenThrow(new TelegramApiException());
 
-        assertThrows(MessageWasNotSent.class, () -> telegramService.sendNotification(notification, MOBILE, 0L));
+        assertThrows(MessageWasNotSent.class,
+            () -> telegramNotificationService.sendNotification(notification, MOBILE, 0L));
     }
 
     @Test
     void isEnabled() {
-        assertFalse(telegramService.isEnabled(null));
+        assertFalse(telegramNotificationService.isEnabled(null));
 
-        User newUser = new User();
-        assertFalse(telegramService.isEnabled(newUser));
+        User userEntity = new User();
+        assertFalse(telegramNotificationService.isEnabled(userEntity));
 
-        newUser.setTelegramBot(new TelegramBot());
-        assertFalse(telegramService.isEnabled(newUser));
+        userEntity.setTelegramBot(new AuthorizedUser());
+        assertFalse(telegramNotificationService.isEnabled(userEntity));
 
-        newUser.setTelegramBot(new TelegramBot(1L, 123L, true, newUser));
-        assertTrue(telegramService.isEnabled(newUser));
+        userEntity.setTelegramBot(new AuthorizedUser("12345", false, true, userEntity, false));
+        assertTrue(telegramNotificationService.isEnabled(userEntity));
 
-        newUser.setTelegramBot(new TelegramBot(1L, 123L, false, newUser));
-        assertFalse(telegramService.isEnabled(newUser));
+        userEntity.setTelegramBot(new AuthorizedUser("12345", false, true, userEntity, false));
+        assertFalse(telegramNotificationService.isEnabled(userEntity));
     }
 }

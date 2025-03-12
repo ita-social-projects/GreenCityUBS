@@ -1,157 +1,383 @@
 package greencity.ubstelegrambot;
 
-import greencity.ModelUtils;
-import greencity.entity.telegram.TelegramBot;
-import greencity.entity.user.User;
-import greencity.exceptions.NotFoundException;
-import greencity.exceptions.bots.MessageWasNotSent;
-import greencity.exceptions.bots.TelegramBotAlreadyConnected;
-import greencity.repository.TelegramBotRepository;
-import greencity.repository.UserRepository;
+import greencity.constant.TelegramBotConstants;
+import greencity.service.ubs.TelegramPhotoService;
+import greencity.service.ubs.TelegramService;
+import greencity.ubstelegrambot.messages.MessageFactory;
+import greencity.ubstelegrambot.service.TelegramExecutor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import java.util.Optional;
-import java.util.UUID;
-import static greencity.ModelUtils.getUserWithBotNotifyTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import org.telegram.telegrambots.meta.api.objects.User;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UBSTelegramBotTest {
+
+    @Value("${greencity.bots.ubs-bot-name}")
+    private String botName;
+
+    @Value("${greencity.bots.ubs-bot-token}")
+    private String botToken;
+
     @Mock
-    private UserRepository userRepository;
+    private TelegramService telegramService;
+
     @Mock
-    private TelegramBotRepository telegramBotRepository;
+    private TelegramExecutor executor;
+
+    @Mock
+    private TelegramPhotoService photoService;
+
     @InjectMocks
     private UBSTelegramBot ubsTelegramBot;
 
+    private boolean hasMessage;
+    private boolean hasText;
+    private long chatId;
+    private String chatIdStr;
+    private long userId;
+    private String userIdStr;
+    private Message message;
+    private SendMessage sendMessage;
+    private Update update;
+
+    @BeforeEach
+    void setUp() {
+        hasMessage = true;
+        hasText = true;
+        chatId = 123L;
+        chatIdStr = String.valueOf(chatId);
+        userId = 1L;
+        userIdStr = String.valueOf(userId);
+        message = Mockito.mock(Message.class);
+        sendMessage = Mockito.mock(SendMessage.class);
+        update = Mockito.mock(Update.class);
+    }
+
     @Test
     void getBotUsernameTest() {
-        assertNull(ubsTelegramBot.getBotUsername());
+        String expectedResult = botName;
+
+        String actualResult = ubsTelegramBot.getBotUsername();
+
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
     void getBotTokenTest() {
-        assertNull(ubsTelegramBot.getBotToken());
+        String expectedResult = botToken;
+
+        String actualResult = ubsTelegramBot.getBotToken();
+
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
-    void onUpdateReceivedThrowMessageWasNotSent1() {
-        User user = ModelUtils.getUser();
-        User userWithBot = getUserWithBotNotifyTrue();
-        TelegramBot telegramBotTrue = ModelUtils.getTelegramBotNotifyTrue();
-        TelegramBot telegramBotWithNullId = telegramBotTrue.setId(null);
-        String uuid = UUID.randomUUID().toString();
+    void onUpdateReceivedTest_WhenUpdateHasMessage_AndUpdateMessageHasText_AndTextDidNotMatchAnyCommand_AndUserIsNotInSupportMode() {
+        String messageText = "some text that does not match any command";
+        boolean userIsInSupportMode = false;
 
-        Update update = new Update();
-        Message message = mock(Message.class);
-        update.setMessage(message);
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.getMessage())
+            .thenReturn(message);
+        when(message.hasText())
+            .thenReturn(hasText);
+        when(message.getText())
+            .thenReturn(messageText);
+        when(message.getChatId())
+            .thenReturn(chatId);
+        when(telegramService.isUserInSupportMode(chatIdStr))
+            .thenReturn(userIsInSupportMode);
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
-        when(message.getChatId()).thenReturn(telegramBotTrue.getChatId());
-        when(message.getText()).thenReturn("/start" + uuid);
-        when(telegramBotRepository.findByUserAndChatIdAndIsNotify(user, message.getChatId(), true))
-            .thenReturn(Optional.empty());
-        when(telegramBotRepository.save(telegramBotWithNullId)).thenReturn(telegramBotTrue);
-        when(userRepository.save(user)).thenReturn(userWithBot);
+        try (MockedStatic<MessageFactory> mockedStatic = Mockito.mockStatic(MessageFactory.class)) {
+            mockedStatic.when(() -> MessageFactory.createUnknownCommandMessage(chatIdStr))
+                .thenReturn(sendMessage);
 
-        assertThrows(MessageWasNotSent.class,
-            () -> ubsTelegramBot.onUpdateReceived(update));
+            ubsTelegramBot.onUpdateReceived(update);
 
-        verify(userRepository).findUserByUuid(uuid);
-        verify(message, atLeast(1)).getChatId();
-        verify(message, atLeast(1)).getText();
-        verify(telegramBotRepository).findByUserAndChatIdAndIsNotify(user, message.getChatId(), true);
-        verify(telegramBotRepository).save(telegramBotWithNullId);
-        verify(userRepository).save(user);
+            verify(telegramService).isUserInSupportMode(chatIdStr);
+            verify(executor).executeCommand(ubsTelegramBot, sendMessage);
+        }
     }
 
     @Test
-    void onUpdateReceivedThrowMessageWasNotSent2() {
-        User user = ModelUtils.getUserWithBotNotifyFalse();
-        User userWithBot = getUserWithBotNotifyTrue();
-        TelegramBot telegramBotTrue = ModelUtils.getTelegramBotNotifyTrue();
-        String uuid = UUID.randomUUID().toString();
+    void onUpdateReceivedTest_WhenUpdateHasMessage_AndUpdateMessageHasText_AndTextDidNotMatchAnyCommand_AndUserIsInSupportMode() {
+        String messageText = "some text that does not match any command";
+        boolean userIsInSupportMode = true;
 
-        Update update = new Update();
-        Message message = mock(Message.class);
-        update.setMessage(message);
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.getMessage())
+            .thenReturn(message);
+        when(message.hasText())
+            .thenReturn(hasText);
+        when(message.getText())
+            .thenReturn(messageText);
+        when(message.getChatId())
+            .thenReturn(chatId);
+        when(telegramService.isUserInSupportMode(chatIdStr))
+            .thenReturn(userIsInSupportMode);
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
-        when(message.getChatId()).thenReturn(telegramBotTrue.getChatId());
-        when(message.getText()).thenReturn("/start" + uuid);
-        when(telegramBotRepository.findByUserAndChatIdAndIsNotify(user, message.getChatId(), true))
-            .thenReturn(Optional.empty());
-        when(telegramBotRepository.save(telegramBotTrue)).thenReturn(telegramBotTrue);
-        when(userRepository.save(user)).thenReturn(userWithBot);
+        try (MockedStatic<MessageFactory> mockedStatic = Mockito.mockStatic(MessageFactory.class)) {
+            mockedStatic.when(() -> MessageFactory.createKeyboardMessage(chatIdStr))
+                .thenReturn(sendMessage);
 
-        assertThrows(MessageWasNotSent.class,
-            () -> ubsTelegramBot.onUpdateReceived(update));
+            ubsTelegramBot.onUpdateReceived(update);
 
-        verify(userRepository).findUserByUuid(uuid);
-        verify(message, atLeast(1)).getChatId();
-        verify(message, atLeast(1)).getText();
-        verify(telegramBotRepository).findByUserAndChatIdAndIsNotify(user, message.getChatId(), true);
-        verify(telegramBotRepository).save(telegramBotTrue);
-        verify(userRepository).save(user);
+            verify(telegramService).isUserInSupportMode(chatIdStr);
+            verify(telegramService).saveManagerMessage(chatIdStr, messageText);
+            verify(executor).executeCommand(ubsTelegramBot, sendMessage);
+        }
     }
 
     @Test
-    void onUpdateReceivedThrowTelegramBotAlreadyConnected() {
-        Long chatId = 1234567824356L;
-        String uuid = UUID.randomUUID().toString();
-        User user = ModelUtils.getUser();
-        TelegramBot telegramBot = ModelUtils.getTelegramBotNotifyTrue();
+    void onUpdateReceivedTest_WhenUpdateHasMessage_AndUpdateMessageHasText_AndTextIsEndSupportModeCommand() {
+        String messageText = TelegramBotConstants.CLIENT_END_SUPPORT_MODE;
 
-        Update update = new Update();
-        Message message = mock(Message.class);
-        update.setMessage(message);
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.getMessage())
+            .thenReturn(message);
+        when(message.hasText())
+            .thenReturn(hasText);
+        when(message.getText())
+            .thenReturn(messageText);
+        when(message.getChatId())
+            .thenReturn(chatId);
+        when(telegramService.stopSupportMode(chatIdStr))
+            .thenReturn(sendMessage);
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
-        when(message.getChatId()).thenReturn(chatId);
-        when(message.getText()).thenReturn("/start" + uuid);
-        when(telegramBotRepository.findByUserAndChatIdAndIsNotify(user, message.getChatId(), true))
-            .thenReturn(Optional.of(telegramBot));
+        ubsTelegramBot.onUpdateReceived(update);
 
-        assertThrows(TelegramBotAlreadyConnected.class,
-            () -> ubsTelegramBot.onUpdateReceived(update));
-
-        verify(userRepository).findUserByUuid(uuid);
-        verify(message, atLeast(1)).getChatId();
-        verify(message, atLeast(1)).getText();
-        verify(telegramBotRepository).findByUserAndChatIdAndIsNotify(user, message.getChatId(), true);
-        verify(telegramBotRepository, never()).save(any(TelegramBot.class));
-        verify(userRepository, never()).save(user);
+        verify(telegramService).stopSupportMode(chatIdStr);
+        verify(executor).executeCommand(ubsTelegramBot, sendMessage);
     }
 
     @Test
-    void onUpdateReceivedThrowNotFoundException() {
-        String uuid = UUID.randomUUID().toString();
+    void onUpdateReceivedTest_WhenUpdateHasMessage_AndUpdateMessageHasText_AndTextIsLoginCommand() {
+        String messageText = TelegramBotConstants.LOGIN_COMMAND;
 
-        Update update = new Update();
-        Message message = mock(Message.class);
-        update.setMessage(message);
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.getMessage())
+            .thenReturn(message);
+        when(message.hasText())
+            .thenReturn(hasText);
+        when(message.getText())
+            .thenReturn(messageText);
+        when(telegramService.processLoginCommand(message))
+            .thenReturn(sendMessage);
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
-        when(message.getText()).thenReturn("/start" + uuid);
+        ubsTelegramBot.onUpdateReceived(update);
 
-        assertThrows(NotFoundException.class,
-            () -> ubsTelegramBot.onUpdateReceived(update));
+        verify(telegramService).processLoginCommand(message);
+        verify(executor).executeCommand(ubsTelegramBot, sendMessage);
+    }
 
-        verify(userRepository).findUserByUuid(uuid);
-        verify(message, atLeast(1)).getText();
-        verify(telegramBotRepository, never()).save(any(TelegramBot.class));
-        verify(userRepository, never()).save(any(User.class));
+    @Test
+    void onUpdateReceivedTest_WhenUpdateHasMessage_AndUpdateMessageHasText_AndTextIsSupportCommand() {
+        String messageText = TelegramBotConstants.SUPPORT_COMMAND;
+
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.getMessage())
+            .thenReturn(message);
+        when(message.hasText())
+            .thenReturn(hasText);
+        when(message.getText())
+            .thenReturn(messageText);
+        when(telegramService.processSupportCommand(message))
+            .thenReturn(sendMessage);
+
+        ubsTelegramBot.onUpdateReceived(update);
+
+        verify(telegramService).processSupportCommand(message);
+        verify(executor).executeCommand(ubsTelegramBot, sendMessage);
+    }
+
+    @Test
+    void onUpdateReceivedTest_WhenUpdateHasMessage_AndUpdateMessageHasText_AndTextIsHelpCommand() {
+        String messageText = TelegramBotConstants.HELP_COMMAND;
+
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.getMessage())
+            .thenReturn(message);
+        when(message.hasText())
+            .thenReturn(hasText);
+        when(message.getText())
+            .thenReturn(messageText);
+        when(message.getChatId())
+            .thenReturn(chatId);
+
+        try (MockedStatic<MessageFactory> mockedStatic = Mockito.mockStatic(MessageFactory.class)) {
+            mockedStatic.when(() -> MessageFactory.createHelpMessage(chatIdStr))
+                .thenReturn(sendMessage);
+
+            ubsTelegramBot.onUpdateReceived(update);
+
+            verify(executor).executeCommand(ubsTelegramBot, sendMessage);
+        }
+    }
+
+    @Test
+    void onUpdateReceivedTest_WhenUpdateHasMessage_AndUpdateMessageHasText_AndTextIsStartCommand() {
+        String messageText = "/start";
+
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.getMessage())
+            .thenReturn(message);
+        when(message.hasText())
+            .thenReturn(hasText);
+        when(message.getText())
+            .thenReturn(messageText);
+        when(telegramService.processStartCommand(message))
+            .thenReturn(sendMessage);
+
+        ubsTelegramBot.onUpdateReceived(update);
+
+        verify(telegramService).processStartCommand(message);
+        verify(executor).executeCommand(ubsTelegramBot, sendMessage);
+    }
+
+    @Test
+    void onUpdateReceivedTest_WhenUpdateHasMessage_AndUpdateMessageHasPhoto() {
+        boolean hasPhoto = true;
+        String messageCaption = "caption";
+        List<String> downloadedPhotoFromTelegram = List.of(
+            "photo1",
+            "photo2");
+
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.getMessage())
+            .thenReturn(message);
+        when(message.hasPhoto())
+            .thenReturn(hasPhoto);
+        when(message.getCaption())
+            .thenReturn(messageCaption);
+        when(message.getChatId())
+            .thenReturn(chatId);
+
+        when(photoService.downloadPhotoFromTelegram(message))
+            .thenReturn(downloadedPhotoFromTelegram);
+
+        ubsTelegramBot.onUpdateReceived(update);
+
+        verify(photoService).downloadPhotoFromTelegram(message);
+        verify(photoService).saveToDB(
+            downloadedPhotoFromTelegram,
+            chatIdStr,
+            messageCaption);
+    }
+
+    @Test
+    void onUpdateReceivedTest_WhenUpdateHasCallbackQuery_AndCallbackQueryDataEqualsClientSupportCallback() {
+        hasMessage = false;
+        boolean hasCallbackQuery = true;
+        CallbackQuery callbackQuery = Mockito.mock(CallbackQuery.class);
+        String callbackQueryData = TelegramBotConstants.CLIENT_SUPPORT_CALLBACK;
+        User user = Mockito.mock(User.class);
+
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.hasCallbackQuery())
+            .thenReturn(hasCallbackQuery);
+        when(update.getCallbackQuery())
+            .thenReturn(callbackQuery);
+        when(callbackQuery.getData())
+            .thenReturn(callbackQueryData);
+        try (MockedStatic<MessageFactory> mockedStatic = Mockito.mockStatic(MessageFactory.class)) {
+            when(callbackQuery.getFrom())
+                .thenReturn(user);
+            when(user.getId())
+                .thenReturn(userId);
+            mockedStatic.when(() -> MessageFactory.createClientSupportMessage(userIdStr))
+                .thenReturn(sendMessage);
+
+            ubsTelegramBot.onUpdateReceived(update);
+
+            verify(executor).executeCommand(ubsTelegramBot, sendMessage);
+        }
+    }
+
+    @Test
+    void onUpdateReceivedTest_WhenUpdateHasCallbackQuery_AndCallbackQueryDataEqualsLoginCallback() {
+        hasMessage = false;
+        boolean hasCallbackQuery = true;
+        CallbackQuery callbackQuery = Mockito.mock(CallbackQuery.class);
+        String callbackQueryData = TelegramBotConstants.LOGIN_CALLBACK;
+        User user = Mockito.mock(User.class);
+
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.hasCallbackQuery())
+            .thenReturn(hasCallbackQuery);
+        when(update.getCallbackQuery())
+            .thenReturn(callbackQuery);
+        when(callbackQuery.getData())
+            .thenReturn(callbackQueryData);
+        try (MockedStatic<MessageFactory> mockedStatic = Mockito.mockStatic(MessageFactory.class)) {
+            when(callbackQuery.getFrom())
+                .thenReturn(user);
+            when(user.getId())
+                .thenReturn(userId);
+            mockedStatic.when(() -> MessageFactory.createLoginMessage(userIdStr))
+                .thenReturn(sendMessage);
+
+            ubsTelegramBot.onUpdateReceived(update);
+
+            verify(executor).executeCommand(ubsTelegramBot, sendMessage);
+        }
+    }
+
+    @Test
+    void onUpdateReceivedTest_WhenUpdateHasCallbackQuery_AndCallbackQueryDataStartsWithScore() {
+        hasMessage = false;
+        boolean hasCallbackQuery = true;
+        CallbackQuery callbackQuery = Mockito.mock(CallbackQuery.class);
+        String callbackQueryData = TelegramBotConstants.SCORE + "score";
+        User user = Mockito.mock(User.class);
+
+        when(update.hasMessage())
+            .thenReturn(hasMessage);
+        when(update.hasCallbackQuery())
+            .thenReturn(hasCallbackQuery);
+        when(update.getCallbackQuery())
+            .thenReturn(callbackQuery);
+        when(callbackQuery.getData())
+            .thenReturn(callbackQueryData);
+        when(callbackQuery.getFrom())
+            .thenReturn(user);
+        when(user.getId())
+            .thenReturn(userId);
+        when(telegramService.handleUserChatScope(
+            callbackQueryData,
+            userIdStr)).thenReturn(sendMessage);
+
+        ubsTelegramBot.onUpdateReceived(update);
+
+        verify(telegramService).handleUserChatScope(
+            callbackQuery.getData(),
+            callbackQuery.getFrom().getId().toString());
+        verify(executor).executeCommand(ubsTelegramBot, sendMessage);
     }
 }

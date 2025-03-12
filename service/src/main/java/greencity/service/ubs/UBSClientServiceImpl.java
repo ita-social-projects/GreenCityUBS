@@ -75,7 +75,7 @@ import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.telegram.TelegramBot;
+import greencity.entity.telegram.AuthorizedUser;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -130,7 +130,7 @@ import greencity.repository.PaymentRepository;
 import greencity.repository.RegionRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
-import greencity.repository.TelegramBotRepository;
+import greencity.repository.AuthorizedUserRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
@@ -260,7 +260,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final TariffLocationRepository tariffLocationRepository;
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
-    private final TelegramBotRepository telegramBotRepository;
+    private final AuthorizedUserRepository telegramBotRepository;
     private final ViberBotRepository viberBotRepository;
     private final LocationApiService locationApiService;
     private final OrderBagRepository orderBagRepository;
@@ -462,7 +462,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Integer userPoints, Long orderId) {
         var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
             .map(bag -> buildBagTranslationDto(orderId, bag))
-            .collect(toList());
+            .toList();
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
     }
 
@@ -698,7 +698,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private List<Integer> getBagIds(List<BagDto> dto) {
         return dto.stream()
             .map(BagDto::getId)
-            .collect(toList());
+            .toList();
     }
 
     private Bag findActiveBagById(Integer id) {
@@ -1003,7 +1003,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .collect(toList());
+            .toList();
 
         Long amountWithDiscountInCoins = fullPriceInCoins
             - 100L * (order.getPointsToUse() + countCertificatesBonuses(certificateDtos));
@@ -1095,7 +1095,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Map<Integer, Integer> actualBagsAmount = orderBagService.getActualBagsAmountForOrder(bagsAmountInOrder);
         return bagsAmountInOrder.stream()
             .map(orderBag -> buildBagForUserDto(orderBag, actualBagsAmount.get(orderBag.getBag().getId())))
-            .collect(toList());
+            .toList();
     }
 
     private BagForUserDto buildBagForUserDto(OrderBag orderBag, int count) {
@@ -1508,7 +1508,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             bonusForUbsUser = changeOfPointsList.stream()
                 .sorted(Comparator.comparing(ChangeOfPoints::getDate).reversed())
                 .map(m -> modelMapper.map(m, PointsForUbsUserDto.class))
-                .collect(toList());
+                .toList();
         }
         AllPointsUserDto allBonusesForUserDto = new AllPointsUserDto();
         allBonusesForUserDto.setUserBonuses(userBonuses);
@@ -1585,7 +1585,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<AddressDto> addressDto =
             allAddress.stream()
                 .map(a -> modelMapper.map(a, AddressDto.class))
-                .collect(toList());
+                .toList();
         userProfileDto.setAddressDto(addressDto);
         userProfileDto.setBotList(botList);
         userProfileDto.setHasPassword(userRemoteClient.getPasswordStatus().isHasPassword());
@@ -1601,7 +1601,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void setTelegramAndViberBots(User user, Boolean telegramIsNotify, Boolean viberIsNotify) {
-        TelegramBot telegramBot = telegramBotRepository.findByUser(user).orElse(null);
+        AuthorizedUser telegramBot = telegramBotRepository.findByUser(user).orElse(null);
         ViberBot viberBot = viberBotRepository.findByUser(user).orElse(null);
         if (telegramBot != null) {
             telegramBot.setIsNotify(telegramIsNotify);
@@ -1738,7 +1738,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return EnumSet.allOf(BotType.class)
             .stream()
             .map(type -> new Bot(type.name(), createLink(type, uuid)))
-            .collect(toList());
+            .toList();
     }
 
     private String createLink(BotType type, String uuid) {
@@ -1784,7 +1784,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .nameUk(x.getKey().getNameUk())
                 .locations(x.getValue())
                 .build())
-            .collect(toList());
+            .toList();
     }
 
     @Override
@@ -1897,7 +1897,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public List<DistrictDto> getAllDistricts(String region, String city) {
         List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
         return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -1994,7 +1994,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .collect(toList());
+            .toList();
 
         sumToPayInCoins = sumToPayInCoins - 100L * (order.getPointsToUse() + countCertificatesBonuses(certificateDtos));
 
@@ -2081,7 +2081,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public List<LocationsDto> getAllLocations() {
         List<Location> allActiveLocations = locationRepository.findAllActiveLocations();
-        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).collect(toList());
+        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).toList();
     }
 
     /**
@@ -2108,7 +2108,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
                     .orElseThrow(() -> new NotFoundException(
                         String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationsDto.getId())))))
-            .collect(toList());
+            .toList();
     }
 
     /**

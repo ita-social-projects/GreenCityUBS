@@ -186,4 +186,5 @@ public class ErrorMessage {
     public static final String ORDER_STATUS_INVALID = "Order with ID %d cannot be updated due to its current status.";
     public static final String MAPPER_ERROR = "Data mapping error occurred. Please verify the input.";
     public static final String UNSUPPORTED_TYPE = "Unsupported target type: ";
+    public static final String TELEGRAM_BOT_ERROR_BAD_CREDENTIALS = "Bad credentials";
 }

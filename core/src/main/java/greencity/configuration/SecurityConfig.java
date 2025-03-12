@@ -267,17 +267,20 @@ public class SecurityConfig {
                     UBS_LINK + "/client/**",
                     "/notifications/**")
                 .hasAnyRole(USER, ADMIN)
-                .requestMatchers(HttpMethod.GET,
-                    UBS_LINK + "/**",
+                .requestMatchers(HttpMethod.POST,
+                    UBS_LINK + "/order/**",
+                    UBS_LINK + "/processOrder",
+                    UBS_LINK + "/processOrder/{id}",
+                    UBS_LINK + "/save-order-address",
                     UBS_LINK + "/client/**",
-                    UBS_LINK + "/order/{id}/cancellation",
-                    UBS_LINK + "/certificate/{responseCode}",
-                    "/notifications",
-                    "/notifications/**",
-                    "/notifications/quantityUnreadenNotifications",
-                    UBS_LINK + "/check-if-tariff-exists/{id}",
-                    UBS_LINK + "/locations")
-                .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
+                    "/notifications/**")
+                .hasAnyRole(USER, ADMIN)
+                .requestMatchers(HttpMethod.GET,
+                    UBS_LINK + "/telegram/**")
+                .hasRole(UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.POST,
+                    UBS_LINK + "/telegram/**")
+                .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     "/notifications/{notificationId}/viewNotification",
                     "/notifications/{notificationId}/unreadNotification")

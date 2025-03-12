@@ -21,6 +21,7 @@
         <commons-text.version>1.11.0</commons-text.version>
         <json.version>20231013</json.version>
         <telegrambots.version>6.9.7.0</telegrambots.version>
+        <emoji-java.version>5.1.1</emoji-java.version>
     </properties>
 
     <dependencyManagement>
@@ -68,6 +69,12 @@
             <artifactId>spring-social-facebook</artifactId>
             <version>${org.springframework.social.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <!-- emoji -->
+        <dependency>
+            <groupId>com.vdurmont</groupId>
+            <artifactId>emoji-java</artifactId>
+            <version>${emoji-java.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

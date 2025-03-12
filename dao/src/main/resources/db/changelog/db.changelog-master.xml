@@ -269,4 +269,10 @@
     <include file="db/changelog/logs/update-logic-to-fill-other-packages-column.xml"/>
     <include file="db/changelog/logs/add-other_packages_eng-column-to-big_order_table-view.xml"/>
     <include file="db/changelog/logs/ch-update-values-in-notification-platforms-table-Chernenko.xml"/>
+    <include file="db/changelog/logs/ch-add-table-telegram-image-Haliara.xml"/>
+    <include file="db/changelog/logs/ch-add-table-telegram-manager-notifications-Haliara.xml"/>
+    <include file="db/changelog/logs/ch-add-table-authorized-telegram-user-Haliara.xml"/>
+    <include file="db/changelog/logs/ch-add-table-telegram-manager-Haliara.xml"/>
+    <include file="db/changelog/logs/ch-add-table-telegram-text-message-Haliara.xml"/>
+    <include file="db/changelog/logs/ch-create-table-unknown-telegram-user-Haliara.xml"/>
 </databaseChangeLog>
