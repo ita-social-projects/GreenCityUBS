@@ -10,11 +10,10 @@ import greencity.repository.TelegramImageRepository;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.AzureCloudStorageService;
 import greencity.service.ubs.BASE64DecodedMultipartFile;
-import greencity.service.ubs.TelegramService;
+import greencity.service.ubs.TelegramStreamingService;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,8 +39,7 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
     private final ApplicationContext applicationContext;
     private final AuthorizedUserRepository telegramBotRepository;
     private final ImageConverter imageConverter;
-    private final TelegramService telegramService;
-    private final ModelMapper modelMapper;
+    private final TelegramStreamingService telegramStrimingService;
     private static final String PHOTO_NOT_FOUND = "Photo not found in message";
     private static final String LARGEST_PHOTO_NOT_FOUND = "Cannot determine largest photo";
     private static final String CHAT_NOT_FOUND = "Chat with id %s not found";
@@ -92,7 +90,7 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
                 url,
                 caption);
             telegramImageRepository.save(telegramUserPhotos);
-            telegramService.streamMessages(chatId, imageConverter.map(telegramUserPhotos));
+            telegramStrimingService.streamMessages(chatId, imageConverter.map(telegramUserPhotos));
         }
     }
 

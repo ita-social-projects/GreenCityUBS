@@ -8,6 +8,7 @@ import greencity.dto.telegram.TelegramImageDto;
 import greencity.dto.telegram.TelegramTextMessageDto;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramService;
+import greencity.service.ubs.TelegramStreamingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class TelegramController {
     private final TelegramService telegramService;
     private final TelegramPhotoService telegramPhotoService;
+    private final TelegramStreamingService telegramStrimingService;
 
     /**
      * Retrieves a list of TelegramUserMessages for a given chatId.
@@ -195,10 +197,10 @@ public class TelegramController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@RequestParam String chatId) {
         SseEmitter emitter = new SseEmitter(0L);
-        telegramService.addEmitter(emitter, chatId);
+        telegramStrimingService.addEmitter(emitter, chatId);
 
-        emitter.onCompletion(() -> telegramService.removeEmitter(emitter));
-        emitter.onTimeout(() -> telegramService.removeEmitter(emitter));
+        emitter.onCompletion(() -> telegramStrimingService.removeEmitter(emitter));
+        emitter.onTimeout(() -> telegramStrimingService.removeEmitter(emitter));
 
         return emitter;
     }

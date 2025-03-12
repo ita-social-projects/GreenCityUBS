@@ -5,9 +5,9 @@ import greencity.dto.telegram.AuthorizedUserDto;
 import greencity.dto.telegram.TelegramImageDto;
 import greencity.dto.telegram.TelegramTextMessageDto;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.UUID;
 
 public interface TelegramService {
@@ -157,37 +157,6 @@ public interface TelegramService {
     SendMessage handleUserChatScope(String data, String chatId);
 
     /**
-     * Stream messages to client for specified chatId.
-     *
-     * @param chatId  the telegram chat ID
-     * @param message the message to stream
-     */
-    void streamMessages(String chatId, TelegramTextMessageDto message);
-
-    /**
-     * Streams a photo message to client for specified chatId.
-     *
-     * @param chatId  the telegram chat ID
-     * @param message the message to stream
-     */
-    void streamMessages(String chatId, TelegramImageDto message);
-
-    /**
-     * Adds an emitter to the map of emitters for the specified chatId.
-     *
-     * @param emitter the emitter to add
-     * @param chatId  the telegram chat ID
-     */
-    void addEmitter(SseEmitter emitter, String chatId);
-
-    /**
-     * Removes an emitter from the map of emitters for the specified chatId.
-     *
-     * @param emitter the emitter to remove
-     */
-    void removeEmitter(SseEmitter emitter);
-
-    /**
      * Retrieves all TelegramUserPhotos by chatId.
      *
      * @param chatId the telegram chat ID
@@ -196,4 +165,10 @@ public interface TelegramService {
      * @return a list of TelegramUserPhotos associated with the specified chatId
      */
     PageableDto<TelegramImageDto> findUserPhotosByChatId(String chatId, Pageable page);
+
+    void processTextCommand(Update update);
+
+    void processImageCommand(Update update);
+
+    void processCallBackQuery(Update update);
 }

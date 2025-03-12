@@ -6,9 +6,9 @@ import greencity.dto.TestersSignInRequest;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
 import greencity.dto.telegram.TelegramImageDto;
-import greencity.dto.telegram.TelegramMessageDto;
 import greencity.dto.telegram.TelegramTextMessageDto;
 import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.ChatFeedback;
 import greencity.entity.telegram.Image;
 import greencity.entity.telegram.TelegramManager;
 import greencity.entity.telegram.TextMessage;
@@ -22,7 +22,9 @@ import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UnknownTelegramUserRepository;
 import greencity.service.ubs.TelegramAuthorizationService;
+import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramService;
+import greencity.service.ubs.TelegramStreamingService;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +34,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import java.io.IOException;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -51,12 +50,13 @@ public class TelegramServiceImpl implements TelegramService {
     private final ApplicationContext applicationContext;
     private final TelegramAuthorizationService telegramAuthorizationService;
     private final ModelMapper modelMapper;
-    private final AuthorizedUserRepository telegramBotRepository;
-    private final Map<SseEmitter, String> emitters = new ConcurrentHashMap<>();
     private final TelegramImageRepository telegramImageRepository;
     private final AuthorizedUserRepository authorizedUserRepository;
     private final UnknownTelegramUserRepository unknownTelegramUserRepository;
     private final TextMessageMapper textMessageMapper;
+    private final TelegramPhotoService telegramPhotoService;
+    private final TelegramExecutor executor;
+    private final TelegramStreamingService telegramStrimingService;
     @Value("${greencity.sing-in.secret-token}")
     private String secretToken;
 
@@ -113,7 +113,7 @@ public class TelegramServiceImpl implements TelegramService {
             false);
         telegramManagerNotification.shouldNotifyManager(chatId);
         telegramMessageRepository.save(telegramMessage);
-        streamMessages(chatId, textMessageMapper.map(telegramMessage));
+        telegramStrimingService.streamMessages(chatId, textMessageMapper.map(telegramMessage));
     }
 
     @Override
@@ -242,28 +242,7 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public SendMessage handleUserChatScope(String data, String chatId) {
-        // TODO: customers business logic
         return MessageFactory.createMessageAfterUserFeedback(chatId);
-    }
-
-    @Override
-    public void streamMessages(String chatId, TelegramTextMessageDto message) {
-        sendMessages(chatId, message);
-    }
-
-    @Override
-    public void streamMessages(String chatId, TelegramImageDto message) {
-        sendMessages(chatId, message);
-    }
-
-    @Override
-    public void addEmitter(SseEmitter emitter, String chatId) {
-        emitters.put(emitter, chatId);
-    }
-
-    @Override
-    public void removeEmitter(SseEmitter emitter) {
-        emitters.remove(emitter);
     }
 
     @Override
@@ -282,18 +261,66 @@ public class TelegramServiceImpl implements TelegramService {
             telegramImages.getTotalPages());
     }
 
-    private void sendMessages(String chatId, TelegramMessageDto message) {
-        for (Map.Entry<SseEmitter, String> entry : emitters.entrySet()) {
-            SseEmitter emitter = entry.getKey();
-            String storedChatId = entry.getValue();
+    @Override
+    public void processTextCommand(Update update) {
+        var message = update.getMessage();
+        var text = message.getText();
+        var chatId = message.getChatId().toString();
+        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
 
-            if (storedChatId.equals(chatId)) {
-                try {
-                    emitter.send(SseEmitter.event().data(message));
-                } catch (IOException e) {
-                    emitters.remove(emitter);
+        if (text.startsWith(TelegramBotConstants.START_COMMAND)) {
+            executor.executeCommand(ubsTelegramBot, processStartCommand(message));
+            return;
+        }
+        String command = text.contains(":") ? text.split(":")[0].trim() : text;
+
+        switch (command) {
+            case TelegramBotConstants.HELP_COMMAND ->
+                executor.executeCommand(ubsTelegramBot,
+                    MessageFactory.createHelpMessage(message.getChatId().toString()));
+
+            case TelegramBotConstants.SUPPORT_COMMAND ->
+                executor.executeCommand(ubsTelegramBot, processSupportCommand(message));
+
+            case TelegramBotConstants.LOGIN_COMMAND ->
+                executor.executeCommand(ubsTelegramBot, processLoginCommand(message));
+
+            case TelegramBotConstants.CLIENT_END_SUPPORT_MODE ->
+                executor.executeCommand(ubsTelegramBot, stopSupportMode(chatId));
+
+            default -> {
+                if (isUserInSupportMode(chatId)) {
+                    saveManagerMessage(chatId, text);
+                    executor.executeCommand(ubsTelegramBot, MessageFactory.createKeyboardMessage(chatId));
+                } else {
+                    executor.executeCommand(ubsTelegramBot, MessageFactory.createUnknownCommandMessage(chatId));
                 }
             }
+        }
+    }
+
+    @Override
+    public void processImageCommand(Update update) {
+        var message = update.getMessage();
+        var photos = telegramPhotoService.downloadPhotoFromTelegram(message);
+        telegramPhotoService.saveToDB(photos, message.getChatId().toString(), message.getCaption());
+    }
+
+    @Override
+    public void processCallBackQuery(Update update) {
+        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
+        var callBackQuery = update.getCallbackQuery();
+        if (callBackQuery.getData().equals(TelegramBotConstants.CLIENT_SUPPORT_CALLBACK)) {
+            executor.executeCommand(ubsTelegramBot, MessageFactory.createClientSupportMessage(
+                callBackQuery.getFrom().getId().toString()));
+        }
+        if (callBackQuery.getData().equals(TelegramBotConstants.LOGIN_CALLBACK)) {
+            executor.executeCommand(ubsTelegramBot, MessageFactory.createLoginMessage(
+                callBackQuery.getFrom().getId().toString()));
+        }
+        if (callBackQuery.getData().startsWith(String.format(TelegramBotConstants.SCORE, ""))) {
+            executor.executeCommand(ubsTelegramBot, handleUserChatScope(callBackQuery.getData(),
+                callBackQuery.getFrom().getId().toString()));
         }
     }
 }
