@@ -349,7 +349,9 @@ public class AddressServiceImpl implements AddressService {
      */
     @Override
     public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
-        Long id = userRepository.findByUuid(uuid).getId();
+        Long id = userRepository.findUserByUuid(uuid).orElseThrow(
+                () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)
+        ).getId();
         List<AddressDto> addressDtoList = addressRepo.findAllNonDeletedAddressesByUserId(id)
             .stream()
             .sorted(Comparator.comparing(Address::getId))
