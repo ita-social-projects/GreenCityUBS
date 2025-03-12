@@ -51,16 +51,12 @@ public class TelegramManagerNotificationServiceImpl implements TelegramManagerNo
             sendSupportNotificationMessageToManagers(telegramBot, chatId, 1);
         }
         if (messageCount > 0 && now.isAfter(notificationTimestampRepository
-            .findInstantByChatId(chatId).plusSeconds(notificationCooldownMilliseconds))) {
+            .findInstantByChatId(chatId).plusMillis(notificationCooldownMilliseconds))) {
             notificationTimestampRepository.save(NotificationTimestamp.builder()
                 .chatId(chatId).lastNotificationTime(now).build());
 
-            if (pendingMessage != null) {
-                pendingMessage.setMessageCount(0);
-                pendingMessageRepository.save(pendingMessage);
-            } else {
-                pendingMessageRepository.save(PendingMessage.builder().chatId(chatId).messageCount(0).build());
-            }
+            pendingMessage.setMessageCount(0);
+            pendingMessageRepository.save(pendingMessage);
 
             sendSupportNotificationMessageToManagers(telegramBot, chatId, messageCount);
         }

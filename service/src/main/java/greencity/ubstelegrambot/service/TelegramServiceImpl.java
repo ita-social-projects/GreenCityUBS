@@ -17,6 +17,8 @@ import greencity.enums.TelegramUser;
 import greencity.exceptions.BadRequestException;
 import greencity.mapping.telegrammessage.TextMessageMapper;
 import greencity.repository.AuthorizedUserRepository;
+import greencity.repository.ChatFeedbackRepository;
+import greencity.repository.NotificationTimestampRepository;
 import greencity.repository.TelegramImageRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
@@ -57,6 +59,10 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramPhotoService telegramPhotoService;
     private final TelegramExecutor executor;
     private final TelegramStreamingService telegramStrimingService;
+    private final ChatFeedbackRepository chatFeedbackRepository;
+    private final NotificationTimestampRepository notificationTimestampRepository;
+    private Integer messageIdForDeleting;
+    private static final String SCORE = "Score";
     @Value("${greencity.sing-in.secret-token}")
     private String secretToken;
 
@@ -152,8 +158,9 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    public SendMessage stopSupportMode(String chatId) {
-        var supportModeUser = authorizedUserRepository.findByChatId(chatId);
+    public SendMessage stopSupportMode(Message message) {
+        var chatId = message.getChatId().toString();
+        var supportModeUser = authorizedUserRepository.findByChatId(message.getChatId().toString());
         if (supportModeUser.isPresent()) {
             supportModeUser.get().setIsSupportStatusActive(false);
             authorizedUserRepository.save(supportModeUser.get());
@@ -165,7 +172,10 @@ public class TelegramServiceImpl implements TelegramService {
                 unknownTelegramUserRepository.save(user);
             }
         }
-        return MessageFactory.createStopSupportModeMessage(chatId);
+        telegramManagerNotification.notifyManagerAboutEndSupportModeFromUser(chatId);
+        notificationTimestampRepository.deleteById(chatId);
+        messageIdForDeleting = message.getMessageId();
+        return MessageFactory.createEndSupportMessage(chatId);
     }
 
     @Override
@@ -241,7 +251,9 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    public SendMessage handleUserChatScope(String data, String chatId) {
+    public SendMessage handleUserChatScope(String data, String chatId, Integer messageId) {
+        int score = Integer.parseInt(data.replace(SCORE, ""));
+        chatFeedbackRepository.save(new ChatFeedback(chatId, score));
         return MessageFactory.createMessageAfterUserFeedback(chatId);
     }
 
@@ -275,9 +287,8 @@ public class TelegramServiceImpl implements TelegramService {
         String command = text.contains(":") ? text.split(":")[0].trim() : text;
 
         switch (command) {
-            case TelegramBotConstants.HELP_COMMAND ->
-                executor.executeCommand(ubsTelegramBot,
-                    MessageFactory.createHelpMessage(message.getChatId().toString()));
+            case TelegramBotConstants.HELP_COMMAND -> executor.executeCommand(ubsTelegramBot,
+                MessageFactory.createHelpMessage(message.getChatId().toString()));
 
             case TelegramBotConstants.SUPPORT_COMMAND ->
                 executor.executeCommand(ubsTelegramBot, processSupportCommand(message));
@@ -286,7 +297,7 @@ public class TelegramServiceImpl implements TelegramService {
                 executor.executeCommand(ubsTelegramBot, processLoginCommand(message));
 
             case TelegramBotConstants.CLIENT_END_SUPPORT_MODE ->
-                executor.executeCommand(ubsTelegramBot, stopSupportMode(chatId));
+                executor.executeCommand(ubsTelegramBot, stopSupportMode(message));
 
             default -> {
                 if (isUserInSupportMode(chatId)) {
@@ -320,7 +331,7 @@ public class TelegramServiceImpl implements TelegramService {
         }
         if (callBackQuery.getData().startsWith(String.format(TelegramBotConstants.SCORE, ""))) {
             executor.executeCommand(ubsTelegramBot, handleUserChatScope(callBackQuery.getData(),
-                callBackQuery.getFrom().getId().toString()));
+                callBackQuery.getFrom().getId().toString(), messageIdForDeleting));
         }
     }
 }

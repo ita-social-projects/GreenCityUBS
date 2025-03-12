@@ -20,4 +20,9 @@ public class ChatFeedback {
     private String chatId;
 
     private int rating;
+
+    public ChatFeedback(String chatId, int score) {
+        this.chatId = chatId;
+        this.rating = score;
+    }
 }

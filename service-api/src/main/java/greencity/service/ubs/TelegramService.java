@@ -91,9 +91,9 @@ public interface TelegramService {
     /**
      * Stops support mode for user.
      *
-     * @param chatId {@link String} chat ID
+     * @param message {@link Message} chat ID
      */
-    SendMessage stopSupportMode(String chatId);
+    SendMessage stopSupportMode(Message message);
 
     /**
      * Checks if user is manager.
@@ -154,7 +154,7 @@ public interface TelegramService {
      *
      * @return a SendMessage with the response
      */
-    SendMessage handleUserChatScope(String data, String chatId);
+    SendMessage handleUserChatScope(String data, String chatId, Integer messageId);
 
     /**
      * Retrieves all TelegramUserPhotos by chatId.

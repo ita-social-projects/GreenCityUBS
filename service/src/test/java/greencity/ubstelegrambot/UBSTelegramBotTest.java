@@ -161,12 +161,12 @@ class UBSTelegramBotTest {
             .thenReturn(messageText);
         when(message.getChatId())
             .thenReturn(chatId);
-        when(telegramService.stopSupportMode(chatIdStr))
+        when(telegramService.stopSupportMode(message))
             .thenReturn(sendMessage);
 
         ubsTelegramBot.onUpdateReceived(update);
 
-        verify(telegramService).stopSupportMode(chatIdStr);
+        verify(telegramService).stopSupportMode(message);
         verify(executor).executeCommand(ubsTelegramBot, sendMessage);
     }
 
@@ -371,13 +371,14 @@ class UBSTelegramBotTest {
             .thenReturn(userId);
         when(telegramService.handleUserChatScope(
             callbackQueryData,
-            userIdStr)).thenReturn(sendMessage);
+            userIdStr, message.getMessageId())).thenReturn(sendMessage);
 
         ubsTelegramBot.onUpdateReceived(update);
 
         verify(telegramService).handleUserChatScope(
             callbackQuery.getData(),
-            callbackQuery.getFrom().getId().toString());
+            callbackQuery.getFrom().getId().toString(),
+            message.getMessageId());
         verify(executor).executeCommand(ubsTelegramBot, sendMessage);
     }
 }
