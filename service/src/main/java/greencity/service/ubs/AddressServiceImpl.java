@@ -102,7 +102,8 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto addressRequestDto,
         String uuid) {
-        User currentUser = userRepository.findByUuid(uuid);
+        User currentUser = userRepository.findUserByUuid(uuid).orElseThrow(
+            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST + uuid));
         List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
         if (addresses.size() == MAXIMUM_NUMBER_OF_ADDRESSES) {
@@ -219,11 +220,8 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest addressRequestDto,
         String uuid) {
-        User currentUser = userRepository.findByUuid(uuid);
-
-        if (Objects.isNull(currentUser)) {
-            throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
-        }
+        User currentUser = userRepository.findUserByUuid(uuid).orElseThrow(
+            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
 
         Address address = addressRepo.findById(addressRequestDto.getId())
             .orElseThrow(() -> new NotFoundException(
@@ -292,7 +290,6 @@ public class AddressServiceImpl implements AddressService {
                 .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(),
                     address.getBaseAddress().getCityUk(),
                     address.getBaseAddress().getCityEn());
-
             City city;
             if (optionalCity.isPresent()) {
                 city = optionalCity.get();
@@ -350,8 +347,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
         Long id = userRepository.findUserByUuid(uuid).orElseThrow(
-                () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)
-        ).getId();
+            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getId();
         List<AddressDto> addressDtoList = addressRepo.findAllNonDeletedAddressesByUserId(id)
             .stream()
             .sorted(Comparator.comparing(Address::getId))
