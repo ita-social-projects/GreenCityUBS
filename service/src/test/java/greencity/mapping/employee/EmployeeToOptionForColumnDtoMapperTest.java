@@ -24,7 +24,7 @@ class EmployeeToOptionForColumnDtoMapperTest {
 
         OptionForColumnDTO expected = OptionForColumnDTO.builder()
             .key("1")
-            .ua("Петро Петренко")
+            .uk("Петро Петренко")
             .en("Петро Петренко")
             .build();
 

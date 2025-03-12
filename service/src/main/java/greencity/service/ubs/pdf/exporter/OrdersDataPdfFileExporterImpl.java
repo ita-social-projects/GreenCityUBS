@@ -112,14 +112,14 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
             Objects.equals(LOCALE_UK_NAME, locale.getLanguage()) ? DATE_FORMATTER_UK : DATE_FORMATTER_EN),
             DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
         if (locale.getLanguage().equals(LOCALE_EN_NAME)) {
-            table.addCell(createCell(orderInfo.getOrderStatusEng(), DEFAULT_FONT_NAME, fontSize,
+            table.addCell(createCell(orderInfo.getOrderStatusEn(), DEFAULT_FONT_NAME, fontSize,
                 DEFAULT_CELL_BACKGROUND_COLOR, false));
-            table.addCell(createCell(orderInfo.getPaymentStatusEng(), DEFAULT_FONT_NAME, fontSize,
+            table.addCell(createCell(orderInfo.getPaymentStatusEn(), DEFAULT_FONT_NAME, fontSize,
                 DEFAULT_CELL_BACKGROUND_COLOR, false));
         } else {
-            table.addCell(createCell(orderInfo.getOrderStatus(), DEFAULT_FONT_NAME, fontSize,
+            table.addCell(createCell(orderInfo.getOrderStatusUk(), DEFAULT_FONT_NAME, fontSize,
                 DEFAULT_CELL_BACKGROUND_COLOR, false));
-            table.addCell(createCell(orderInfo.getPaymentStatus(), DEFAULT_FONT_NAME, fontSize,
+            table.addCell(createCell(orderInfo.getPaymentStatusUk(), DEFAULT_FONT_NAME, fontSize,
                 DEFAULT_CELL_BACKGROUND_COLOR, false));
         }
         table.addCell(createCell(orderInfo.getOrderFullPrice(),
@@ -132,8 +132,8 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     private PdfPTable fillOrdersTable(List<BagForUserDto> bags, Locale locale, PdfPTable table, int fontSize) {
         bags.stream().filter(bag -> bag.getCount() > 0).forEach(bag -> {
             table.addCell(createCell(Objects.equals(locale.getLanguage(), LOCALE_UK_NAME)
-                ? bag.getService()
-                : bag.getServiceEng(), DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
+                ? bag.getServiceUk()
+                : bag.getServiceEn(), DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
             table.addCell(createCell(
                 bag.getCapacity(),
                 DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
@@ -192,24 +192,24 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     private void addSenderAddress(OrdersDataForUserDto orderDetails, Locale locale, Document document) {
         addHeader(PdfFileHeaders.getByLocale(ADDRESS_INFO, locale), document);
         if (Objects.equals(LOCALE_EN_NAME, locale.getLanguage())) {
-            addParagraph(document, orderDetails.getAddress().getAddressCityEng(),
+            addParagraph(document, orderDetails.getAddress().getAddressCityEn(),
                 DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
-            addParagraph(document, orderDetails.getAddress().getAddressRegionEng(), DEFAULT_FONT_NAME,
+            addParagraph(document, orderDetails.getAddress().getAddressRegionEn(), DEFAULT_FONT_NAME,
                 DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
-            addParagraph(document, String.join(", ", orderDetails.getAddress().getAddressStreetEng(),
+            addParagraph(document, String.join(", ", orderDetails.getAddress().getAddressStreetEn(),
                 orderDetails.getAddress().getHouseNumber()), DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE,
                 false, Element.ALIGN_LEFT);
-            addParagraph(document, orderDetails.getAddress().getAddressDistinctEng(),
+            addParagraph(document, orderDetails.getAddress().getAddressDistinctEn(),
                 DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
         } else {
-            addParagraph(document, orderDetails.getAddress().getAddressCity(),
+            addParagraph(document, orderDetails.getAddress().getAddressCityUk(),
                 DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
-            addParagraph(document, orderDetails.getAddress().getAddressRegion(),
+            addParagraph(document, orderDetails.getAddress().getAddressRegionUk(),
                 DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
-            addParagraph(document, String.join(", ", orderDetails.getAddress().getAddressStreet(),
+            addParagraph(document, String.join(", ", orderDetails.getAddress().getAddressStreetUk(),
                 orderDetails.getAddress().getHouseNumber()), DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE,
                 false, Element.ALIGN_LEFT);
-            addParagraph(document, orderDetails.getAddress().getAddressDistinct(),
+            addParagraph(document, orderDetails.getAddress().getAddressDistinctUk(),
                 DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
         }
         addParagraph(document, String.join(" ",

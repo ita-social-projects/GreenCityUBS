@@ -20,6 +20,6 @@ public enum NotificationTime {
                                                  + "in case the order was formed 3 days ago "
                                                  + "and wasn’t paid by the client.");
 
-    private final String description;
-    private final String descriptionEng;
+    private final String descriptionUk;
+    private final String descriptionEn;
 }
