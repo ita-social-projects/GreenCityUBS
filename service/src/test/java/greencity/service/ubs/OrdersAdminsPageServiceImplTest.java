@@ -222,7 +222,7 @@ class OrdersAdminsPageServiceImplTest {
     void getParametersForOrdersTest() {
 
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
-        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEng("en");
+        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEn("en");
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
 
         List<ReceivingStationDto> receivingStations = new ArrayList<>();
@@ -590,7 +590,7 @@ class OrdersAdminsPageServiceImplTest {
 
         ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
 
-        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF), anyString(), any(Order.class));
+        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK), anyString(), any(Order.class));
         verify(notificationService).notifySelfPickupOrder(expected);
         verify(orderLockService).unlockOrder(expected);
     }
@@ -1055,8 +1055,8 @@ class OrdersAdminsPageServiceImplTest {
         Event event = Event.builder()
             .order(expectedSavedOrder)
             .eventDate(dateTime)
-            .authorName(employee.getFirstName() + "  " + employee.getLastName())
-            .eventName(OrderHistory.ORDER_CANCELLED + "  " + newComment)
+            .authorNameUk(employee.getFirstName() + "  " + employee.getLastName())
+            .eventNameUk(OrderHistory.ORDER_CANCELLED_UK + "  " + newComment)
             .build();
 
         expectedSavedOrder.getEvents().add(event);

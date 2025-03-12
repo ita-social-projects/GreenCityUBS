@@ -29,17 +29,17 @@ public class Event {
     @Column
     private LocalDateTime eventDate;
 
-    @Column(name = "event_name", nullable = false)
-    private String eventName;
+    @Column(name = "event_name_uk", nullable = false)
+    private String eventNameUk;
 
-    @Column(name = "author", nullable = false)
-    private String authorName;
+    @Column(name = "author_uk", nullable = false)
+    private String authorNameUk;
 
-    @Column(name = "event_name_eng", nullable = false)
-    private String eventNameEng;
+    @Column(name = "event_name_en", nullable = false)
+    private String eventNameEn;
 
-    @Column(name = "author_eng", nullable = false)
-    private String authorNameEng;
+    @Column(name = "author_en", nullable = false)
+    private String authorNameEn;
 
     @ManyToOne
     private Order order;

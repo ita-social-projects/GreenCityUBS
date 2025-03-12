@@ -162,7 +162,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG;
+import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
@@ -274,7 +274,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final String LANGUAGE_EN = "en";
-    private static final String LANGUAGE_UA = "ua";
+    private static final String LANGUAGE_UK = "ua";
     private static final Double KYIV_LATITUDE = 50.4546600;
     private static final Double KYIV_LONGITUDE = 30.5238000;
     private static final Double LOCATION_40_KM_ZONE_VALUE = 40.00;
@@ -451,8 +451,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .capacity(source.getCapacity())
             .price(BigDecimal.valueOf(source.getFullPrice())
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
-            .name(source.getName())
-            .nameEng(source.getNameEng())
+            .nameUk(source.getNameUk())
+            .nameEn(source.getNameEn())
             .limitedIncluded(source.getLimitIncluded())
             .quantity(getQuantityOfBagsByBagIdAndOrderId(orderId, source.getId()))
             .build();
@@ -558,7 +558,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         UBSuser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
-        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+        eventService.save(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
         PaymentSystemResponse paymentSystemResponse;
         if (dto.isShouldBePaid()) {
             paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
@@ -616,10 +616,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private BasketOrder convert(OrderBag bag) {
         return BasketOrder.builder()
-            .name(bag.getName())
+            .name(bag.getNameUk())
             .quantity(bag.getAmount().floatValue())
             .sum((int) (bag.getPrice() * bag.getAmount()))
-            .code(bag.getName())
+            .code(bag.getNameUk())
             .build();
     }
 
@@ -627,7 +627,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address = addressRepo.findById(addressId)
             .orElseThrow(() -> new EntityNotFoundException(ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
 
-        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getCityEn());
+        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getBaseAddress().getCityEn());
 
         if (locationId == TariffLocation.KYIV_TARIFF.getLocationId()) {
             return isKyivTariff;
@@ -655,7 +655,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void checkAndCalculateAddressCoordinatesIfEmpty(Address address) {
         if (address.getCoordinates().getLatitude() == 0.0 && address.getCoordinates().getLongitude() == 0.0) {
             LatLng latLng = googleApiService
-                .getGeocodingResultByCityAndCountryAndLocale(UKRAINE_EN, address.getCityEn(),
+                .getGeocodingResultByCityAndCountryAndLocale(UKRAINE_EN, address.getBaseAddress().getCityEn(),
                     LANG_EN).geometry.location;
             Coordinates addressCoordinates = Coordinates.builder().latitude(latLng.lat).longitude(latLng.lng).build();
             address.setCoordinates(addressCoordinates);
@@ -702,7 +702,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkIfAddressHasBeenDeleted(Address address) {
-        if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
+        if (address.getBaseAddress().getAddressStatus().equals(AddressStatus.DELETED)) {
             throw new NotFoundException(
                 NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
@@ -793,7 +793,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Double amountBeforePayment = convertCoinsIntoBills(amountWithDiscountInCoins - paidAmountInCoins);
 
         double refundedBonuses = order.getPayment().stream()
-            .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_ENG.equals(payment.getReceiptLink()))
+            .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN.equals(payment.getReceiptLink()))
             .map(payment -> payment.getAmount().doubleValue())
             .reduce(0.0, Double::sum);
 
@@ -806,8 +806,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .id(order.getId())
             .dateForm(order.getOrderDate())
             .datePaid(order.getOrderDate())
-            .orderStatus(orderStatusTranslation.getName())
-            .orderStatusEng(orderStatusTranslation.getNameEng())
+            .orderStatusUk(orderStatusTranslation.getNameUk())
+            .orderStatusEn(orderStatusTranslation.getNameEn())
             .orderComment(order.getComment())
             .bags(bagForUserDtos)
             .additionalOrders(order.getAdditionalOrders())
@@ -820,8 +820,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .bonuses(order.getPointsToUse().doubleValue())
             .sender(senderInfoDtoBuilder(order))
             .address(addressInfoDtoBuilder(order))
-            .paymentStatus(paymentStatusTranslation.getTranslationValue())
-            .paymentStatusEng(paymentStatusTranslation.getTranslationsValueEng())
+            .paymentStatusUk(paymentStatusTranslation.getTranslationValueUk())
+            .paymentStatusEn(paymentStatusTranslation.getTranslationsValueEn())
             .build();
     }
 
@@ -855,18 +855,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
         var address = order.getUbsUser().getOrderAddress();
         return AddressInfoDto.builder()
-            .addressCity(address.getCity())
-            .addressCityEng(address.getCityEn())
-            .addressComment(address.getAddressComment())
-            .addressDistinct(address.getDistrict())
-            .addressDistinctEng(address.getDistrictEn())
-            .addressRegion(address.getRegion())
-            .addressRegionEng(address.getRegionEn())
-            .addressStreet(address.getStreet())
-            .addressStreetEng(address.getStreetEn())
-            .houseCorpus(address.getHouseCorpus())
-            .houseNumber(address.getHouseNumber())
-            .entranceNumber(address.getEntranceNumber())
+            .addressCityUk(address.getBaseAddress().getCityUk())
+            .addressCityEn(address.getBaseAddress().getCityEn())
+            .addressComment(address.getBaseAddress().getAddressComment())
+            .addressDistinctUk(address.getBaseAddress().getDistrictUk())
+            .addressDistinctEn(address.getBaseAddress().getDistrictEn())
+            .addressRegionUk(address.getBaseAddress().getRegionUk())
+            .addressRegionEn(address.getBaseAddress().getRegionEn())
+            .addressStreetUk(address.getBaseAddress().getStreetUk())
+            .addressStreetEn(address.getBaseAddress().getStreetEn())
+            .houseCorpus(address.getBaseAddress().getHouseCorpus())
+            .houseNumber(address.getBaseAddress().getHouseNumber())
+            .entranceNumber(address.getBaseAddress().getEntranceNumber())
             .build();
     }
 
@@ -946,10 +946,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
         if (!isAdmin(authentication)) {
-            eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.CLIENT,
+            eventService.save(OrderHistory.CHANGED_SENDER_UK, OrderHistory.CLIENT_UK,
                 ubsUser.getOrders().getFirst());
         } else {
-            eventService.save(OrderHistory.CHANGED_SENDER, OrderHistory.UBS_ADMIN,
+            eventService.save(OrderHistory.CHANGED_SENDER_UK, OrderHistory.UBS_ADMIN,
                 ubsUser.getOrders().getFirst());
         }
 
@@ -1078,7 +1078,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderTimeout(VALIDITY_DURATION_TEN_DAYS)
             .productName(order.getOrderBags().stream()
                 .filter(bag -> bag.getAmount() != 0)
-                .map(orderBag -> orderBag.getName().trim())
+                .map(orderBag -> orderBag.getNameUk().trim())
                 .flatMap(name -> Arrays.stream(name.split(",")))
                 .toList())
             .productPrice(order.getOrderBags().stream()
@@ -1119,8 +1119,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
             mappedFromDtoUser.setOrderAddress(saveOrderAddressWithLocation(addressId, locationId, currentUser));
-            if (mappedFromDtoUser.getOrderAddress().getAddressComment() == null) {
-                mappedFromDtoUser.getOrderAddress().setAddressComment(dto.getAddressComment());
+            if (mappedFromDtoUser.getOrderAddress().getBaseAddress().getAddressComment() == null) {
+                mappedFromDtoUser.getOrderAddress().getBaseAddress().setAddressComment(dto.getAddressComment());
             }
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
@@ -1257,8 +1257,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .bag(bag)
             .capacity(bag.getCapacity())
             .price(bag.getFullPrice())
-            .name(bag.getName())
-            .nameEng(bag.getNameEng())
+            .nameUk(bag.getNameUk())
+            .nameEn(bag.getNameEn())
             .build();
     }
 
@@ -1329,10 +1329,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void localizeEventNames(List<Event> events, String language) {
         if (LANGUAGE_EN.equals(language)) {
             events.forEach(event -> {
-                event.setEventName(event.getEventNameEng());
-                event.setAuthorName(event.getAuthorNameEng());
+                event.setEventNameUk(event.getEventNameEn());
+                event.setAuthorNameUk(event.getAuthorNameEn());
             });
-        } else if (!LANGUAGE_UA.equals(language)) {
+        } else if (!LANGUAGE_UK.equals(language)) {
             throw new BadRequestException("Unexpected value: " + language);
         }
     }
@@ -1500,9 +1500,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             removePaymentLinkForOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
+            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + orderPayment.getPaymentId(),
+                OrderHistory.SYSTEM_UK, order);
         }
     }
 
@@ -1687,7 +1687,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             order.setOrderStatus(OrderStatus.CONFIRMED);
             orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_CONFIRMED, OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ORDER_CONFIRMED_UK, OrderHistory.SYSTEM_UK, order);
         }
     }
 
@@ -1922,15 +1922,15 @@ public class UBSClientServiceImpl implements UBSClientService {
             }
             case REVERSED -> {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
-                logOrderEvent(order, OrderHistory.PAYMENT_REVERSED);
+                logOrderEvent(order, OrderHistory.PAYMENT_REVERSED_UK);
             }
             case PROCESSING -> {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
-                logOrderEvent(order, OrderHistory.PAYMENT_PENDING);
+                logOrderEvent(order, OrderHistory.PAYMENT_PENDING_UK);
             }
             case FAILURE -> {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
-                logOrderEvent(order, OrderHistory.PAYMENT_FAILURE);
+                logOrderEvent(order, OrderHistory.PAYMENT_FAILURE_UK);
             }
             default -> updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
         }
@@ -1946,12 +1946,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void logOrderEvent(Order order, String event) {
-        eventService.save(event, OrderHistory.SYSTEM, order);
+        eventService.save(event, OrderHistory.SYSTEM_UK, order);
     }
 
     private void logPaymentEvent(Order order, String paymentId) {
-        eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + paymentId, OrderHistory.SYSTEM, order);
+        eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
+        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + paymentId, OrderHistory.SYSTEM_UK, order);
     }
 
     private void removePaymentLinkForOrder(Order order) {

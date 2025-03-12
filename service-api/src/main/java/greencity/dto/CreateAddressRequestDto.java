@@ -35,7 +35,7 @@ public class CreateAddressRequestDto {
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
-    private String district;
+    private String districtUk;
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
@@ -43,7 +43,7 @@ public class CreateAddressRequestDto {
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
-    private String region;
+    private String regionUk;
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ’—/\"\\s]" + "{1,10}", message = HOUSE_NUMBER_NOT_VALID)
     @NotBlank(message = NOT_EMPTY_VALIDATION_MESSAGE)
@@ -63,7 +63,7 @@ public class CreateAddressRequestDto {
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
-    private String city;
+    private String cityUk;
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
@@ -71,7 +71,7 @@ public class CreateAddressRequestDto {
 
     @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
-    private String street;
+    private String streetUk;
 
     @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
@@ -81,10 +81,10 @@ public class CreateAddressRequestDto {
         if (otherAddress == null) {
             return false;
         }
-        return (Objects.equals(region, otherAddress.getRegion())
+        return (Objects.equals(regionUk, otherAddress.getRegionUk())
             || Objects.equals(regionEn, otherAddress.getRegionEn()))
-            && (Objects.equals(city, otherAddress.getCity()) || Objects.equals(cityEn, otherAddress.getCityEn()))
-            && (Objects.equals(district, otherAddress.getDistrict())
+            && (Objects.equals(cityUk, otherAddress.getCityUk()) || Objects.equals(cityEn, otherAddress.getCityEn()))
+            && (Objects.equals(districtUk, otherAddress.getDistrictUk())
                 || Objects.equals(districtEn, otherAddress.getDistrictEn()))
             && Objects.equals(houseNumber, otherAddress.getHouseNumber())
             && Objects.equals(entranceNumber, otherAddress.getEntranceNumber())

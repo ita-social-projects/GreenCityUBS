@@ -112,6 +112,7 @@ import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import jakarta.persistence.EntityNotFoundException;
+
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -126,6 +127,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -148,6 +150,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
 import static greencity.ModelUtils.TEST_EMAIL;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
@@ -266,6 +269,7 @@ class UBSClientServiceImplTest {
 
     @Mock
     private UBSUserRepository ubsUserRepository;
+
     @Mock
     private ModelMapper modelMapper;
 
@@ -733,7 +737,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubsUser = getUBSuser();
         OrderAddress orderAddress = ubsUser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -810,7 +814,7 @@ class UBSClientServiceImplTest {
         dto.setLocationId(2L);
 
         Address addressWithNullCoordinates = ModelUtils.getAddress();
-        addressWithNullCoordinates.setCityEn("Poltava");
+        addressWithNullCoordinates.getBaseAddress().setCityEn("Poltava");
         Coordinates coordinates = Coordinates.builder().latitude(0.0).longitude(0.0).build();
         addressWithNullCoordinates.setCoordinates(coordinates);
         when(googleApiService.getGeocodingResultByCityAndCountryAndLocale(anyString(), anyString(), anyString()))
@@ -861,7 +865,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -914,7 +918,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -939,8 +943,10 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser.setId(null)));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser.setId(null));
+        Address address = getAddress();
+        address.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
         when(addressRepository.findById(any()))
-            .thenReturn(Optional.of(getAddress().setAddressStatus(AddressStatus.DELETED)));
+            .thenReturn(Optional.of(address));
         when(locationRepository.findById(any())).thenReturn(Optional.of(getLocation()));
         assertThrows(NotFoundException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
@@ -975,7 +981,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1036,7 +1042,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1095,7 +1101,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1151,7 +1157,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1267,7 +1273,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1309,7 +1315,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1346,7 +1352,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1397,7 +1403,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress orderAddress = ubSuser.getOrderAddress();
-        orderAddress.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1477,7 +1483,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1721,7 +1727,7 @@ class UBSClientServiceImplTest {
     void getUserAndUserUbsAndViolationsInfoByOrderIdOrderNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
+                () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
     }
 
     @Test
@@ -1729,7 +1735,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrder()));
         when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         assertThrows(AccessDeniedException.class,
-            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
+                () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
     }
 
     @Test
@@ -2034,7 +2040,7 @@ class UBSClientServiceImplTest {
     void getOrderPaymentDetailShouldThrowOrderNotFoundException() {
         when(orderRepository.findById(any())).thenReturn(Optional.empty());
         Exception thrown = assertThrows(NotFoundException.class,
-            () -> ubsService.getOrderPaymentDetail(null));
+                () -> ubsService.getOrderPaymentDetail(null));
         assertEquals(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
 
@@ -2055,7 +2061,7 @@ class UBSClientServiceImplTest {
     void getOrderCancellationReasonOrderNotFoundException() {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getOrderCancellationReason(1L, "abc"));
+                () -> ubsService.getOrderCancellationReason(1L, "abc"));
     }
 
     @Test
@@ -2063,7 +2069,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(getOrderTest()));
         when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         assertThrows(AccessDeniedException.class,
-            () -> ubsService.getOrderCancellationReason(1L, "abc"));
+                () -> ubsService.getOrderCancellationReason(1L, "abc"));
     }
 
     @Test
@@ -2134,7 +2140,7 @@ class UBSClientServiceImplTest {
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc", "en"));
+                () -> ubsService.getAllEventsForOrder(1L, "abc", "en"));
     }
 
     @Test
@@ -2142,7 +2148,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(getOrderWithEvents());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(Collections.emptyList());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc", "en"));
+                () -> ubsService.getAllEventsForOrder(1L, "abc", "en"));
     }
 
     @Test
@@ -2188,7 +2194,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -2256,8 +2262,8 @@ class UBSClientServiceImplTest {
         OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setLocation(location);
 
-        orderAddress.setAddressStatus(AddressStatus.NEW);
-        address.setAddressStatus(AddressStatus.NEW);
+        orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -2308,7 +2314,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -2354,7 +2360,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -2397,7 +2403,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -2677,7 +2683,7 @@ class UBSClientServiceImplTest {
     void getTariffInfoForLocationWhenCourierNotFoundTest() {
         when(courierRepository.existsCourierById(1L)).thenReturn(false);
         assertThrows(NotFoundException.class, () -> ubsService
-            .getTariffInfoForLocation(1L, 1L));
+                .getTariffInfoForLocation(1L, 1L));
         verify(courierRepository).existsCourierById(1L);
     }
 
@@ -2779,7 +2785,7 @@ class UBSClientServiceImplTest {
     void getAllActiveCouriersTest() {
         when(courierRepository.getAllActiveCouriers()).thenReturn(List.of(getCourier()));
         when(modelMapper.map(getCourier(), CourierDto.class))
-            .thenReturn(getCourierDto());
+                .thenReturn(getCourierDto());
 
         assertEquals(getCourierDtoList(), ubsService.getAllActiveCouriers());
 
@@ -2806,7 +2812,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.setAddressStatus(AddressStatus.DELETED);
+        address.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -2852,7 +2858,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
 
         OrderAddress address = ubSuser.getOrderAddress();
-        address.setAddressStatus(AddressStatus.NEW);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -3052,7 +3058,7 @@ class UBSClientServiceImplTest {
     void getPositionsAndRelatedAuthoritiesTest() {
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.ofNullable(getEmployee()));
         when(userRemoteClient.getPositionsAndRelatedAuthorities(TEST_EMAIL))
-            .thenReturn(ModelUtils.getPositionAuthoritiesDto());
+                .thenReturn(ModelUtils.getPositionAuthoritiesDto());
 
         PositionAuthoritiesDto actual = ubsService.getPositionsAndRelatedAuthorities(TEST_EMAIL);
         assertEquals(ModelUtils.getPositionAuthoritiesDto(), actual);
