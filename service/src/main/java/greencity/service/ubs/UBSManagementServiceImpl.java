@@ -850,6 +850,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return eventRepository.wasOrderStatusChangedFromFormedToCanceled(orderId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Order getOrderByPaymentId(String paymentId) {
         return orderRepository.findOrderByPaymentId(paymentId).orElseThrow(

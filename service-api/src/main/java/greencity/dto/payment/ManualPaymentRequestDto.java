@@ -16,8 +16,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class ManualPaymentRequestDto {
-    @NotEmpty
-    @NotNull
     @NotBlank
     private String settlementDate;
     @NotNull
