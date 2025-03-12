@@ -2371,8 +2371,9 @@ class UBSManagementServiceImplTest {
 
     @Test
     void getOrderByInvalidPaymentId() {
+        String paymentId = "1";
         when(orderRepository.findOrderByPaymentId(anyString())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderByPaymentId(anyString()));
+        assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderByPaymentId(paymentId));
         verify(orderRepository, times(1)).findOrderByPaymentId(anyString());
     }
 }

@@ -29,12 +29,13 @@ public class ManualPaymentRequestValidator
             return setValidViolationMessages(constraintValidatorContext, PAYMENT_DATE_IS_NULL_MESSAGE);
         }
         try {
-            if (LocalDate.parse(settlementDate, formatter).isAfter(LocalDate.now())) {
+            LocalDate settlementDateParsed = LocalDate.parse(settlementDate, formatter);
+            if (settlementDateParsed.isAfter(LocalDate.now())) {
                 return setValidViolationMessages(constraintValidatorContext,
                     PAYMENT_DATE_IS_AFTER_CURRENT_DATE_MESSAGE);
             }
             Order order = ubsManagementService.getOrderByPaymentId(manualPaymentRequestDto.getPaymentId());
-            if (LocalDate.parse(settlementDate, formatter).isBefore(order.getOrderDate().toLocalDate())) {
+            if (settlementDateParsed.isBefore(order.getOrderDate().toLocalDate())) {
                 return setValidViolationMessages(constraintValidatorContext,
                     PAYMENT_DATE_IS_BEFORE_ORDER_CREATION_MESSAGE);
             }
