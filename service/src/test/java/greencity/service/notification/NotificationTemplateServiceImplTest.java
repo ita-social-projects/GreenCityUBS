@@ -99,15 +99,15 @@ class NotificationTemplateServiceImplTest {
 
         notificationService.update(id, updateDto);
 
-        assertEquals(mainInfoDto.getTitleUk(), notification.getTitleUk());
-        assertEquals(mainInfoDto.getTitleEn(), notification.getTitleEn());
+        assertEquals(mainInfoDto.getTitle(), notification.getTitle());
+        assertEquals(mainInfoDto.getTitleEng(), notification.getTitleEng());
         assertEquals(mainInfoDto.getType(), notification.getNotificationType());
         assertEquals(mainInfoDto.getTrigger(), notification.getTrigger());
         assertEquals(mainInfoDto.getTime(), notification.getTime());
         assertEquals(mainInfoDto.getSchedule(), notification.getSchedule());
 
-        assertEquals(platformDto.getBodyUk(), platform.getBodyUk());
-        assertEquals(platformDto.getBodyEn(), platform.getBodyEn());
+        assertEquals(platformDto.getBody(), platform.getBody());
+        assertEquals(platformDto.getBodyEng(), platform.getBodyEng());
         assertEquals(platformDto.getStatus(), platform.getNotificationStatus());
 
         verify(templateRepository).findById(id);

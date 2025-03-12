@@ -34,16 +34,16 @@ public class GetTariffServiceDto {
     private Double fullPrice;
 
     @NotBlank
-    private String nameUk;
+    private String name;
 
     @NotBlank
-    private String nameEn;
+    private String nameEng;
 
     @NotBlank
-    private String descriptionUk;
+    private String description;
 
     @NotBlank
-    private String descriptionEn;
+    private String descriptionEng;
 
     @NotNull
     private Boolean limitIncluded;

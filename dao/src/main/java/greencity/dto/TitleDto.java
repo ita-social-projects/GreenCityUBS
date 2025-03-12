@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class TitleDto {
     private String key;
-    private String uk;
+    private String ua;
     private String en;
 }

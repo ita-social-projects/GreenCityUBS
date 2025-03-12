@@ -12,18 +12,18 @@ public class OrderAddressDtoRequestToCreateAddressRequestDto
     protected CreateAddressRequestDto convert(OrderAddressDtoRequest source) {
         return CreateAddressRequestDto.builder()
             .districtEn(source.getDistrictEn())
-            .districtUk(source.getDistrictUk())
+            .district(source.getDistrict())
             .regionEn(source.getRegionEn())
-            .regionUk(source.getRegionUk())
+            .region(source.getRegion())
             .houseNumber(source.getHouseNumber())
             .entranceNumber(source.getEntranceNumber())
             .houseCorpus(source.getHouseCorpus())
             .addressComment(source.getAddressComment())
             .placeId(source.getPlaceId())
             .coordinates(source.getCoordinates())
-            .cityUk(source.getCityUk())
+            .city(source.getCity())
             .cityEn(source.getCityEn())
-            .streetUk(source.getStreetUk())
+            .street(source.getStreet())
             .streetEn(source.getStreetEn())
             .build();
     }

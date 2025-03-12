@@ -21,7 +21,7 @@ public class ReceivingStationToTitleDtoMapper extends AbstractConverter<Receivin
     protected OptionForColumnDTO convert(ReceivingStationDto receivingStationDto) {
         return OptionForColumnDTO.builder()
             .key(receivingStationDto.getId().toString())
-            .uk(receivingStationDto.getName())
+            .ua(receivingStationDto.getName())
             .en(receivingStationDto.getName())
             .build();
     }

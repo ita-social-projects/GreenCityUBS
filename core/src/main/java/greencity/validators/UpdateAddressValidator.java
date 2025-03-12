@@ -51,7 +51,7 @@ public class UpdateAddressValidator implements ConstraintValidator<ValidUpdateAd
 
     private boolean checkRegionAndCityIsValid(AddressResponseFromGoogleAPI resultFromCoordinates,
         OrderAddressDtoRequest dto) {
-        return resultFromCoordinates.getRegion().equalsIgnoreCase(dto.getRegionUk())
-            && resultFromCoordinates.getCity().equalsIgnoreCase(dto.getCityUk());
+        return resultFromCoordinates.getRegion().equalsIgnoreCase(dto.getRegion())
+            && resultFromCoordinates.getCity().equalsIgnoreCase(dto.getCity());
     }
 }

@@ -34,7 +34,7 @@ class LocationApiServiceTest {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
     private static final String PAGE_SIZE_VALUE = "125";
     private static final String LEVEL = "level";
-    private static final String NAME_UK = "name_uk";
+    private static final String NAME = "name";
     private static final String NAME_EN = "name_en";
     private static final String CODE = "code";
     private static final String PAGE_SIZE = "page_size";
@@ -51,7 +51,7 @@ class LocationApiServiceTest {
         Map<String, Object> apiResult = new HashMap<>();
         apiResult.put(CODE, code);
         apiResult.put(PARENT_ID, parentId);
-        apiResult.put(NAME_UK, name);
+        apiResult.put(NAME, name);
         apiResult.put(NAME_EN, nameEn);
         return apiResult;
     }
@@ -88,7 +88,7 @@ class LocationApiServiceTest {
         return UriComponentsBuilder
             .fromHttpUrl(API_URL)
             .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
-            .queryParam(NAME_UK, name)
+            .queryParam(NAME, name)
             .queryParam(LEVEL, level);
     }
 
@@ -108,7 +108,7 @@ class LocationApiServiceTest {
         String expectedName, String expectedNameEn) {
         assertEquals(expectedId, locationDto.getId());
         assertEquals(expectedParentId, locationDto.getParentId());
-        assertEquals(expectedName, locationDto.getLocationNameMap().get(NAME_UK));
+        assertEquals(expectedName, locationDto.getLocationNameMap().get(NAME));
         assertEquals(expectedNameEn, locationDto.getLocationNameMap().get(NAME_EN));
     }
 

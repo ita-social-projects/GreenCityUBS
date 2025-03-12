@@ -31,7 +31,7 @@ public class AddEmployeeDtoMapper extends AbstractConverter<AddEmployeeDto, Empl
             .employeePosition(dto.getEmployeePositions().stream()
                 .map(p -> Position.builder()
                     .id(p.getId())
-                    .nameUk(p.getNameUk())
+                    .name(p.getName())
                     .nameEn(p.getNameEn())
                     .build())
                 .collect(Collectors.toSet()))

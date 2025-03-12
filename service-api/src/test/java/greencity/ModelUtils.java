@@ -54,24 +54,24 @@ public class ModelUtils {
     public static PositionDto getEmployeePosition() {
         return PositionDto.builder()
             .id(1L)
-            .nameUk("Менеджер послуги")
-            .nameUk("Service Manager")
+            .name("Менеджер послуги")
+            .name("Service Manager")
             .build();
     }
 
     public static CreateAddressRequestDto createDefaultAddress() {
         return CreateAddressRequestDto.builder()
             .districtEn("Shevchenkivskyi")
-            .districtUk("Шевченківський")
+            .district("Шевченківський")
             .regionEn("Kyiv")
-            .regionUk("Київ")
+            .region("Київ")
             .houseNumber("12A")
             .entranceNumber("1")
             .houseCorpus("B")
             .coordinates(new CoordinatesDto(50.4501, 30.5234))
-            .cityUk("Київ")
+            .city("Київ")
             .cityEn("Kyiv")
-            .streetUk("Khreshchatyk")
+            .street("Khreshchatyk")
             .streetEn("Khreshchatyk")
             .build();
     }
@@ -79,87 +79,17 @@ public class ModelUtils {
     public static CreateAddressRequestDto createDifferentAddress() {
         return CreateAddressRequestDto.builder()
             .districtEn("Holosiivskyi")
-            .districtUk("Голосіївський")
+            .district("Голосіївський")
             .regionEn("Kyiv")
-            .regionUk("Київ")
+            .region("Київ")
             .houseNumber("15")
             .entranceNumber("2")
             .houseCorpus("A")
             .coordinates(new CoordinatesDto(50.4012, 30.5184))
-            .cityUk("Київ")
+            .city("Київ")
             .cityEn("Kyiv")
-            .streetUk("Holosiivskyi")
+            .street("Holosiivskyi")
             .streetEn("Holosiivskyi")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDto1() {
-        return CreateAddressRequestDto.builder()
-            .regionUk("Region")
-            .regionEn("RegionEn")
-            .cityUk("City")
-            .cityEn("CityEn")
-            .districtUk("District")
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDto2() {
-        return CreateAddressRequestDto.builder()
-            .regionUk("Region")
-            .regionEn("RegionEn")
-            .cityUk("City")
-            .cityEn("CityEn")
-            .districtUk("District")
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDto3() {
-        return CreateAddressRequestDto.builder()
-            .regionUk("DifferentRegion")
-            .regionEn("DifferentRegionEn")
-            .cityUk("DifferentCity")
-            .cityEn("DifferentCityEn")
-            .districtUk("DifferentDistrict")
-            .districtEn("DifferentDistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDto4() {
-        return CreateAddressRequestDto.builder()
-            .regionUk("DifferentRegion")
-            .regionEn("DifferentRegionEn")
-            .cityUk("DifferentCity")
-            .cityEn("DifferentCityEn")
-            .districtUk("District")
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
-            .build();
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDto5() {
-        return CreateAddressRequestDto.builder()
-            .regionUk(null)
-            .regionEn("RegionEn")
-            .cityUk(null)
-            .cityEn("CityEn")
-            .districtUk(null)
-            .districtEn("DistrictEn")
-            .houseNumber("1")
-            .entranceNumber("2")
-            .houseCorpus("A")
             .build();
     }
 }

@@ -53,8 +53,8 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
 
     private RegionDto getDefaultRegionDto() {
         return RegionDto.builder()
-            .nameEn(AppConstant.UNKNOWN_EN)
-            .nameUk(AppConstant.UNKNOWN_UK)
+            .nameEn(AppConstant.UNKNOWN_ENG)
+            .nameUk(AppConstant.UNKNOWN_UA)
             .regionId(0L)
             .build();
     }

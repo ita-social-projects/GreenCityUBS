@@ -113,7 +113,7 @@ public class ViolationServiceImpl implements ViolationService {
             violationRepository.save(violation);
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
-            eventService.saveEvent(OrderHistory.ADD_VIOLATION_UK, email, order);
+            eventService.saveEvent(OrderHistory.ADD_VIOLATION, email, order);
             notificationService.notifyAddViolation(order.getId());
         } else {
             throw new NotFoundException(ORDER_ALREADY_HAS_VIOLATION);
@@ -194,7 +194,7 @@ public class ViolationServiceImpl implements ViolationService {
             User user = violationOptional.get().getOrder().getUser();
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
-            eventService.save(OrderHistory.DELETE_VIOLATION_UK, currentUser.getEmail(),
+            eventService.save(OrderHistory.DELETE_VIOLATION, currentUser.getEmail(),
                 violationOptional.get().getOrder());
         } else {
             throw new NotFoundException(VIOLATION_DOES_NOT_EXIST);
@@ -209,7 +209,7 @@ public class ViolationServiceImpl implements ViolationService {
             .orElseThrow(() -> new NotFoundException(ORDER_HAS_NOT_VIOLATION));
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
-        eventService.saveEvent(OrderHistory.CHANGES_VIOLATION_UK, currentUser.getEmail(), violation.getOrder());
+        eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getEmail(), violation.getOrder());
         notificationService.notifyChangedViolation(violation, add.getOrderID());
     }
 

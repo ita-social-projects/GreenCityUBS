@@ -213,7 +213,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @param eventNames - names of events which are related to the order.
      */
     @Query("select o from Order o "
-        + "inner join fetch o.events e WHERE e.eventNameUk IN (:eventNames)")
+        + "inner join fetch o.events e WHERE e.eventName IN (:eventNames)")
     List<Order> findAllWithEventsByEventNames(@Param("eventNames") String... eventNames);
 
     /**

@@ -16,8 +16,8 @@ public class BagTranslationDtoMapper extends AbstractConverter<Bag, BagTranslati
             .capacity(source.getCapacity())
             .price(BigDecimal.valueOf(source.getFullPrice())
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
-            .nameUk(source.getNameUk())
-            .nameEn(source.getNameEn())
+            .name(source.getName())
+            .nameEng(source.getNameEng())
             .limitedIncluded(source.getLimitIncluded())
             .build();
     }
