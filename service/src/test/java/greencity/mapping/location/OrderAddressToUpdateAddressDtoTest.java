@@ -20,17 +20,23 @@ class OrderAddressToUpdateAddressDtoTest {
         var result = mapper.convert(orderAddress);
 
         assertEquals(orderAddress.getId(), result.getOrderAddressExportDetails().getId());
-        assertEquals(orderAddress.getDistrict(), result.getOrderAddressExportDetails().getDistrict());
-        assertEquals(orderAddress.getDistrictEn(), result.getOrderAddressExportDetails().getDistrictEn());
-        assertEquals(orderAddress.getStreet(), result.getOrderAddressExportDetails().getStreet());
-        assertEquals(orderAddress.getStreetEn(), result.getOrderAddressExportDetails().getStreetEn());
-        assertEquals(orderAddress.getHouseCorpus(), result.getOrderAddressExportDetails().getHouseCorpus());
-        assertEquals(orderAddress.getEntranceNumber(), result.getOrderAddressExportDetails().getEntranceNumber());
-        assertEquals(orderAddress.getHouseNumber(), result.getOrderAddressExportDetails().getHouseNumber());
-        assertEquals(orderAddress.getCity(), result.getOrderAddressExportDetails().getCity());
-        assertEquals(orderAddress.getCityEn(), result.getOrderAddressExportDetails().getCityEn());
-        assertEquals(orderAddress.getRegion(), result.getOrderAddressExportDetails().getRegion());
-        assertEquals(orderAddress.getRegionEn(), result.getOrderAddressExportDetails().getRegionEn());
-        assertEquals(orderAddress.getAddressComment(), result.getOrderAddressExportDetails().getAddressComment());
+        assertEquals(orderAddress.getBaseAddress().getDistrictUk(),
+            result.getOrderAddressExportDetails().getDistrictUk());
+        assertEquals(orderAddress.getBaseAddress().getDistrictEn(),
+            result.getOrderAddressExportDetails().getDistrictEn());
+        assertEquals(orderAddress.getBaseAddress().getStreetUk(), result.getOrderAddressExportDetails().getStreetUk());
+        assertEquals(orderAddress.getBaseAddress().getStreetEn(), result.getOrderAddressExportDetails().getStreetEn());
+        assertEquals(orderAddress.getBaseAddress().getHouseCorpus(),
+            result.getOrderAddressExportDetails().getHouseCorpus());
+        assertEquals(orderAddress.getBaseAddress().getEntranceNumber(),
+            result.getOrderAddressExportDetails().getEntranceNumber());
+        assertEquals(orderAddress.getBaseAddress().getHouseNumber(),
+            result.getOrderAddressExportDetails().getHouseNumber());
+        assertEquals(orderAddress.getBaseAddress().getCityUk(), result.getOrderAddressExportDetails().getCityUk());
+        assertEquals(orderAddress.getBaseAddress().getCityEn(), result.getOrderAddressExportDetails().getCityEn());
+        assertEquals(orderAddress.getBaseAddress().getRegionUk(), result.getOrderAddressExportDetails().getRegionUk());
+        assertEquals(orderAddress.getBaseAddress().getRegionEn(), result.getOrderAddressExportDetails().getRegionEn());
+        assertEquals(orderAddress.getBaseAddress().getAddressComment(),
+            result.getOrderAddressExportDetails().getAddressComment());
     }
 }

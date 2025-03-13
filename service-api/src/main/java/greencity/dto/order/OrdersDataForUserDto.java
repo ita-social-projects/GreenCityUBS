@@ -23,10 +23,10 @@ public class OrdersDataForUserDto {
     private Long id;
     private LocalDateTime dateForm;
     private LocalDateTime datePaid;
-    private String orderStatus;
-    private String orderStatusEng;
-    private String paymentStatus;
-    private String paymentStatusEng;
+    private String orderStatusUk;
+    private String orderStatusEn;
+    private String paymentStatusUk;
+    private String paymentStatusEn;
     private Double paidAmount;
     private Double orderFullPrice;
     private Double amountBeforePayment;
