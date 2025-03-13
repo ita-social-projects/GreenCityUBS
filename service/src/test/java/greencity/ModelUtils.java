@@ -67,6 +67,7 @@ import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.*;
+import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -250,6 +251,8 @@ public class ModelUtils {
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
         List.of(TEST_NOTIFICATION_SHORT_DTO);
     public static final PageableDto<NotificationShortDto> TEST_DTO = createPageableDto();
+    public static final PageableAdvancedDto<NotificationShortDto> TEST_PAGEABLE_ADVANCED_DTO =
+        createPageableAdvancedDto();
     public static final Employee TEST_EMPLOYEE = createEmployee();
     public static final User TEST_USER = createUser();
     public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
@@ -2608,6 +2611,19 @@ public class ModelUtils {
             1,
             0,
             1);
+    }
+
+    private static PageableAdvancedDto<NotificationShortDto> createPageableAdvancedDto() {
+        return new PageableAdvancedDto<>(
+            TEST_NOTIFICATION_SHORT_DTO_LIST,
+            1,
+            0,
+            1,
+            0,
+            false,
+            false,
+            true,
+            true);
     }
 
     public static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {

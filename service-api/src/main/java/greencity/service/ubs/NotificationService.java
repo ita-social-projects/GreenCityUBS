@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
@@ -183,7 +184,7 @@ public interface NotificationService {
      *
      * @author Ann Sakhno
      */
-    PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
+    PageableAdvancedDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
         String language, Pageable pageable);
 
     /**
