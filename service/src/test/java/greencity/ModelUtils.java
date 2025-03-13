@@ -66,7 +66,37 @@ import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.*;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.order.CounterOrderDetailsDto;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.ExportDetailsDtoUpdate;
+import greencity.dto.order.GroupedOrderDto;
+import greencity.dto.order.NotTakenOrderReasonDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
+import greencity.dto.order.OrderDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderWayForPayClientDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.OtherPackages;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.order.SenderLocation;
+import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderDetailDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -250,6 +280,8 @@ public class ModelUtils {
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
         List.of(TEST_NOTIFICATION_SHORT_DTO);
     public static final PageableDto<NotificationShortDto> TEST_DTO = createPageableDto();
+    public static final PageableAdvancedDto<NotificationShortDto> TEST_PAGEABLE_ADVANCED_DTO =
+        createPageableAdvancedDto();
     public static final Employee TEST_EMPLOYEE = createEmployee();
     public static final User TEST_USER = createUser();
     public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
@@ -2608,6 +2640,19 @@ public class ModelUtils {
             1,
             0,
             1);
+    }
+
+    private static PageableAdvancedDto<NotificationShortDto> createPageableAdvancedDto() {
+        return new PageableAdvancedDto<>(
+            TEST_NOTIFICATION_SHORT_DTO_LIST,
+            1,
+            0,
+            1,
+            0,
+            false,
+            false,
+            true,
+            true);
     }
 
     public static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {

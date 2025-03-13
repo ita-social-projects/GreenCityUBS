@@ -7,7 +7,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
-import greencity.dto.pageble.PageableDto;
+import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.entity.order.Event;
 import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
@@ -62,7 +62,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import static greencity.ModelUtils.TEST_UUID;
-import static greencity.ModelUtils.TEST_DTO;
+import static greencity.ModelUtils.TEST_PAGEABLE_ADVANCED_DTO;
 import static greencity.ModelUtils.TEST_NOTIFICATION_DTO;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET2;
@@ -968,10 +968,10 @@ class NotificationServiceImplTest {
             NotificationType.UNPAID_ORDER,
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
-        PageableDto<NotificationShortDto> actual = notificationService
+        PageableAdvancedDto<NotificationShortDto> actual = notificationService
             .getAllNotificationsForUser("Test", "ua", TEST_PAGEABLE);
 
-        assertEquals(TEST_DTO, actual);
+        assertEquals(TEST_PAGEABLE_ADVANCED_DTO, actual);
     }
 
     @Test
