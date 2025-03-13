@@ -8,7 +8,6 @@ import greencity.constants.HttpStatuses;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableAdvancedDto;
-import greencity.dto.pageble.PageableDto;
 import greencity.service.ubs.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

@@ -8,7 +8,6 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
-import greencity.dto.pageble.PageableDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Order;

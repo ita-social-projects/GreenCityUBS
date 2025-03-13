@@ -4,7 +4,6 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
-import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
 import greencity.enums.UserCategory;
