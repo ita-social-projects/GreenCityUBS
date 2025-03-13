@@ -2362,7 +2362,7 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getOrderPaymentIdReturnsOrderForValidPaymentId() {
+    void getOrderPaymentIdReturnsOrderForValidPaymentIdTest() {
         Order order = getOrderExportDetails();
         when(orderRepository.findOrderByPaymentId(anyString())).thenReturn(Optional.of(order));
         ubsManagementService.getOrderByPaymentId(anyString());
@@ -2370,7 +2370,7 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getOrderPaymentIdThrowsAnExceptionForInvalidPaymentId() {
+    void getOrderPaymentIdThrowsAnExceptionForInvalidPaymentIdTest() {
         String paymentId = "1";
         when(orderRepository.findOrderByPaymentId(anyString())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderByPaymentId(paymentId));

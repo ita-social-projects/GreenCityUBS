@@ -42,7 +42,7 @@ class ManualPaymentRequestValidatorTest {
     }
 
     @Test
-    void testValidPaymentDate() {
+    void isValidTrueForValidPaymentDateTest() {
         requestDto.setSettlementDate(LocalDate.now().toString());
         requestDto.setPaymentId(ORDER_ID);
         Order order = new Order();
@@ -52,21 +52,21 @@ class ManualPaymentRequestValidatorTest {
     }
 
     @Test
-    void testNullPaymentDate() {
+    void isValidFalseForNullSettlementDateTest() {
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         requestDto.setSettlementDate(null);
         assertFalse(validator.isValid(requestDto, context));
     }
 
     @Test
-    void testFuturePaymentDate() {
+    void isValidFalseForFutureSettlementDateTest() {
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         requestDto.setSettlementDate(LocalDate.now().plusDays(1).toString());
         assertFalse(validator.isValid(requestDto, context));
     }
 
     @Test
-    void testPaymentDateBeforeOrderCreation() {
+    void isValidFalseForPastSettlementDateTest() {
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         requestDto.setSettlementDate(LocalDate.now().minusDays(10).toString());
         requestDto.setPaymentId(ORDER_ID);
@@ -77,7 +77,7 @@ class ManualPaymentRequestValidatorTest {
     }
 
     @Test
-    void testInvalidDateFormat() {
+    void isValidFalseForInvalidSettlementDateFormatsTest() {
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         requestDto.setSettlementDate("invalid-date");
         assertFalse(validator.isValid(requestDto, context));
