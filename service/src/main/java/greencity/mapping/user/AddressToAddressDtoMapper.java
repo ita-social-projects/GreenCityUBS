@@ -57,7 +57,7 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
         List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
         return locationDtos.stream()
             .map(locationDto -> DistrictDto.builder()
-                .nameUk(locationDto.getLocationNameMap().get("name"))
+                .nameUk(locationDto.getLocationNameMap().get("name_uk"))
                 .nameEn(locationDto.getLocationNameMap().get("name_en"))
                 .build())
             .collect(Collectors.toList());
