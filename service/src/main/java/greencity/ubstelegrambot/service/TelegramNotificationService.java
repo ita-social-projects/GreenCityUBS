@@ -1,12 +1,10 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.client.UserRemoteClient;
-import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
-import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notification.AbstractNotificationProvider;
 import greencity.ubstelegrambot.UBSTelegramBot;
@@ -21,6 +19,7 @@ import static greencity.enums.NotificationReceiverType.MOBILE;
 @Slf4j
 public class TelegramNotificationService extends AbstractNotificationProvider {
     private final UBSTelegramBot ubsTelegramBot;
+    private final TelegramExecutor executor;
     private static final NotificationReceiverType notificationType = MOBILE;
 
     /**
@@ -29,9 +28,11 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
     @Autowired
     public TelegramNotificationService(UBSTelegramBot ubsTelegramBot,
         UserRemoteClient userRemoteClient,
-        NotificationTemplateRepository templateRepository) {
+        NotificationTemplateRepository templateRepository,
+        TelegramExecutor executor) {
         super(userRemoteClient, templateRepository, notificationType);
         this.ubsTelegramBot = ubsTelegramBot;
+        this.executor = executor;
     }
 
     /**
@@ -48,15 +49,7 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
     }
 
     private void sendMessageToUser(SendMessage sendMessage) {
-        try {
-            ubsTelegramBot.execute(sendMessage);
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            log.error(ErrorMessage.INTERRUPTED_EXCEPTION);
-            Thread.currentThread().interrupt();
-        } catch (Exception e) {
-            throw new MessageWasNotSent(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT);
-        }
+        executor.executeCommand(ubsTelegramBot, sendMessage);
     }
 
     /**
@@ -65,7 +58,7 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
     @Override
     protected void sendNotification(UserNotification notification, NotificationDto notificationDto) {
         SendMessage sendMessage = new SendMessage(
-            notification.getUser().getTelegramBot().getChatId().toString(),
+            notification.getUser().getTelegramBot().getChatId(),
             notificationDto.getTitle() + "\n\n" + notificationDto.getBody());
         log.info("Sending message for user {}, with type {}", notification.getUser().getUuid(),
             notification.getNotificationType());

@@ -17,8 +17,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -66,11 +66,13 @@ class TelegramManagerNotificationsImplTest {
         chatId = "123";
         messageCount = 2;
         pendingMessage = new PendingMessage(chatId, messageCount);
+        ReflectionTestUtils.setField(telegramManagerNotifications, "notificationCooldownMilliseconds", 60000L);
     }
 
     @Test
     void shouldNotifyManagerTest_WhenPendingMessageIsNull_AndFindInstantByChatIdIsNull_AndMessageCountIsGreaterThanZero_AndPendingMessagesExceedCooldown() {
         Instant instantExceededCooldown = Instant.now().minusSeconds(NOTIFICATION_COOLDOWN_SECONDS);
+
         when(pendingMessageRepository.findByChatId(chatId))
             .thenReturn(null);
         when(pendingMessageRepository.save(any(PendingMessage.class)))
@@ -153,27 +155,31 @@ class TelegramManagerNotificationsImplTest {
             new PendingMessage(chatId, messageCount),
             new PendingMessage(chatId, messageCount));
         int numberOfPendingMessages = pendingMessages.size();
-        Instant instantExceededCooldown = Instant.now().minusSeconds(NOTIFICATION_COOLDOWN_SECONDS);
+        var notificationCooldownMilliseconds = 60000L;
+
+        Instant instantExceededCooldown = Instant.now().minusSeconds(notificationCooldownMilliseconds + 1);
         Optional<NotificationTimestamp> notificationTimestampOptional = Optional.of(
             new NotificationTimestamp(chatId, instantExceededCooldown));
 
         when(pendingMessageRepository.findAll()).thenReturn(pendingMessages);
-        when(notificationTimestampRepository.findByChatId(chatId))
-            .thenReturn(notificationTimestampOptional);
-        when(applicationContext.getBean(UBSTelegramBot.class))
-            .thenReturn(ubsTelegramBot);
+        when(notificationTimestampRepository.findByChatId(chatId)).thenReturn(notificationTimestampOptional);
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(ubsTelegramBot);
+
+        System.out.println("Current time: " + Instant.now());
+        System.out.println("Last notification time: " + instantExceededCooldown);
+        System.out.println("Cooldown: " + notificationCooldownMilliseconds);
+        System.out.println("Condition met: "
+            + Instant.now().isAfter(instantExceededCooldown.plusSeconds(notificationCooldownMilliseconds)));
 
         telegramManagerNotifications.checkPendingMessages();
 
         verify(pendingMessageRepository).findAll();
-        verify(notificationTimestampRepository, times(numberOfPendingMessages))
-            .findByChatId(chatId);
-        verify(notificationTimestampRepository, times(numberOfPendingMessages))
-            .save(any(NotificationTimestamp.class));
-        verify(applicationContext, times(numberOfPendingMessages))
-            .getBean(UBSTelegramBot.class);
-        verify(pendingMessageRepository, times(numberOfPendingMessages))
-            .deleteByChatId(chatId);
+        verify(notificationTimestampRepository, times(numberOfPendingMessages)).findByChatId(chatId);
+
+        verify(notificationTimestampRepository, times(numberOfPendingMessages)).save(any(NotificationTimestamp.class));
+
+        verify(applicationContext).getBean(UBSTelegramBot.class);
+        verify(pendingMessageRepository, times(numberOfPendingMessages)).deleteByChatId(chatId);
     }
 
     @Test
@@ -198,7 +204,7 @@ class TelegramManagerNotificationsImplTest {
             .findByChatId(chatId);
         verify(notificationTimestampRepository, never())
             .save(any(NotificationTimestamp.class));
-        verify(applicationContext, never())
+        verify(applicationContext)
             .getBean(UBSTelegramBot.class);
         verify(pendingMessageRepository, never())
             .deleteByChatId(chatId);
@@ -227,7 +233,7 @@ class TelegramManagerNotificationsImplTest {
             .findByChatId(chatId);
         verify(notificationTimestampRepository, never())
             .save(any(NotificationTimestamp.class));
-        verify(applicationContext, never())
+        verify(applicationContext)
             .getBean(UBSTelegramBot.class);
         verify(pendingMessageRepository, never())
             .deleteByChatId(chatId);
@@ -276,7 +282,7 @@ class TelegramManagerNotificationsImplTest {
             telegramManagerNotifications.notifyManagerAboutEndSupportModeFromUser(chatId);
 
             verify(telegramManagerRepository).findAll();
-            verify(applicationContext, times(amountOfTelegramManagers))
+            verify(applicationContext)
                 .getBean(UBSTelegramBot.class);
             verify(telegramExecutor, times(amountOfTelegramManagers))
                 .executeCommand(ubsTelegramBot, notification);

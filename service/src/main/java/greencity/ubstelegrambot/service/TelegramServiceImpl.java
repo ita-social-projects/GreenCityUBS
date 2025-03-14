@@ -37,8 +37,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import java.util.List;
 
 @Service
@@ -58,11 +61,10 @@ public class TelegramServiceImpl implements TelegramService {
     private final TextMessageMapper textMessageMapper;
     private final TelegramPhotoService telegramPhotoService;
     private final TelegramExecutor executor;
-    private final TelegramStreamingService telegramStrimingService;
+    private final TelegramStreamingService telegramStreamingService;
     private final ChatFeedbackRepository chatFeedbackRepository;
     private final NotificationTimestampRepository notificationTimestampRepository;
     private Integer messageIdForDeleting;
-    private static final String SCORE = "Score";
     @Value("${greencity.sing-in.secret-token}")
     private String secretToken;
 
@@ -73,9 +75,12 @@ public class TelegramServiceImpl implements TelegramService {
         String password = parts[2];
         managerMode(message.getChatId().toString());
         var response = userRemoteClient.signIn(new TestersSignInRequest(login, password, secretToken));
+        var responseBody = response.getBody();
+        String username = (responseBody != null && responseBody.name() != null) ? responseBody.name() : "username";
+
         return MessageFactory.createSuccessLoginMessage(
             message.getChatId().toString(),
-            response.getBody().name());
+            username);
     }
 
     @Override
@@ -99,7 +104,7 @@ public class TelegramServiceImpl implements TelegramService {
             return MessageFactory.createWelcomeMessage(tgUserId);
         }
         if (telegramAuthorizationService.handleAuthorizedUser(uuId, tgUserId) == TelegramUser.MANAGER) {
-            return MessageFactory.createSuccessLoginMessage(tgUserId, "Manager");
+            return MessageFactory.createSuccessLoginMessage(tgUserId, String.valueOf(TelegramUser.MANAGER));
         } else {
             return MessageFactory.createWelcomeMessage(tgUserId);
         }
@@ -119,7 +124,7 @@ public class TelegramServiceImpl implements TelegramService {
             false);
         telegramManagerNotification.shouldNotifyManager(chatId);
         telegramMessageRepository.save(telegramMessage);
-        telegramStrimingService.streamMessages(chatId, textMessageMapper.map(telegramMessage));
+        telegramStreamingService.streamMessages(chatId, textMessageMapper.map(telegramMessage));
     }
 
     @Override
@@ -252,7 +257,7 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public SendMessage handleUserChatScope(String data, String chatId, Integer messageId) {
-        int score = Integer.parseInt(data.replace(SCORE, ""));
+        int score = Integer.parseInt(data.replace(String.format(TelegramBotConstants.SCORE, ""), ""));
         chatFeedbackRepository.save(new ChatFeedback(chatId, score));
         return MessageFactory.createMessageAfterUserFeedback(chatId);
     }
@@ -302,7 +307,6 @@ public class TelegramServiceImpl implements TelegramService {
             default -> {
                 if (isUserInSupportMode(chatId)) {
                     saveManagerMessage(chatId, text);
-                    executor.executeCommand(ubsTelegramBot, MessageFactory.createKeyboardMessage(chatId));
                 } else {
                     executor.executeCommand(ubsTelegramBot, MessageFactory.createUnknownCommandMessage(chatId));
                 }
@@ -322,8 +326,8 @@ public class TelegramServiceImpl implements TelegramService {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
         var callBackQuery = update.getCallbackQuery();
         if (callBackQuery.getData().equals(TelegramBotConstants.CLIENT_SUPPORT_CALLBACK)) {
-            executor.executeCommand(ubsTelegramBot, MessageFactory.createClientSupportMessage(
-                callBackQuery.getFrom().getId().toString()));
+            executor.executeCommand(ubsTelegramBot,
+                processSupportCallbackData(callBackQuery.getFrom().getId().toString()));
         }
         if (callBackQuery.getData().equals(TelegramBotConstants.LOGIN_CALLBACK)) {
             executor.executeCommand(ubsTelegramBot, MessageFactory.createLoginMessage(
@@ -332,6 +336,29 @@ public class TelegramServiceImpl implements TelegramService {
         if (callBackQuery.getData().startsWith(String.format(TelegramBotConstants.SCORE, ""))) {
             executor.executeCommand(ubsTelegramBot, handleUserChatScope(callBackQuery.getData(),
                 callBackQuery.getFrom().getId().toString(), messageIdForDeleting));
+            Message message = (Message) update.getCallbackQuery().getMessage();
+            InlineKeyboardMarkup inlineKeyboardMarkup = message.getReplyMarkup();
+
+            List<List<InlineKeyboardButton>> keyboard = inlineKeyboardMarkup.getKeyboard();
+
+            for (List<InlineKeyboardButton> row : keyboard) {
+                for (InlineKeyboardButton button : row) {
+                    button.setCallbackData("disabled");
+                }
+            }
+
+            inlineKeyboardMarkup.setKeyboard(keyboard);
+            EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup();
+            editMessageReplyMarkup.setChatId(callBackQuery.getMessage().getChatId().toString());
+            editMessageReplyMarkup.setMessageId(message.getMessageId());
+            editMessageReplyMarkup.setReplyMarkup(inlineKeyboardMarkup);
+
+            executor.executeCommand(ubsTelegramBot, editMessageReplyMarkup);
         }
+    }
+
+    private SendMessage processSupportCallbackData(String chatId) {
+        startSupportMode(chatId);
+        return MessageFactory.createSupportMessageCallBackQuery(chatId);
     }
 }

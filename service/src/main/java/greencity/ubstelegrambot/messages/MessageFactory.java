@@ -132,10 +132,10 @@ public class MessageFactory {
      * Method for creating success login message.
      *
      * @param chatId   {@link String} is telegram chat id.
-     * @param userName {@link String} is user name.
+     * @param userName {@link String} is username.
      *
      * @return {@link SendMessage} configured with the success login message with
-     *         user name.
+     *         username.
      */
     public static SendMessage createSuccessLoginMessage(String chatId, String userName) {
         return buildMessage(chatId, String.format(TelegramBotConstants.SUCCESS_LOGIN, userName));
@@ -164,23 +164,6 @@ public class MessageFactory {
      */
     public static SendMessage createStopSupportModeMessage(String chatId) {
         return buildMessage(chatId, TelegramBotConstants.CLIENT_END_SUPPORT_MODE);
-    }
-
-    /**
-     * Method for creating keyboard message.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the keyboard message and user
-     *         support keyboard.
-     */
-    public static SendMessage createKeyboardMessage(String chatId) {
-        return SendMessage
-            .builder()
-            .chatId(chatId)
-            .text("text")
-            .replyMarkup(KeyboardFactory.userSupportKeyboard())
-            .build();
     }
 
     /**
@@ -236,5 +219,22 @@ public class MessageFactory {
      */
     public static SendMessage createMessageAfterUserFeedback(String chatId) {
         return buildMessage(chatId, TelegramBotConstants.CLIENT_MESSAGE_AFTER_FEEDBACK);
+    }
+
+    /**
+     * Method for creating support message with call back query.
+     *
+     * @param chatId {@link String} is telegram chat id.
+     *
+     * @return {@link SendMessage} configured with the support message with call
+     *         back query.
+     */
+    public static SendMessage createSupportMessageCallBackQuery(String chatId) {
+        return SendMessage
+            .builder()
+            .chatId(chatId)
+            .text(TelegramBotConstants.CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY)
+            .replyMarkup(KeyboardFactory.userSupportKeyboard())
+            .build();
     }
 }

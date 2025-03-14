@@ -33,8 +33,8 @@ public class TelegramManagerNotificationServiceImpl implements TelegramManagerNo
 
     @Override
     public void shouldNotifyManager(String chatId) {
-        Instant now = Instant.now();
         var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
+        Instant now = Instant.now();
         PendingMessage pendingMessage = pendingMessageRepository.findByChatId(chatId);
         if (pendingMessage == null) {
             pendingMessage = pendingMessageRepository.save(
@@ -66,6 +66,7 @@ public class TelegramManagerNotificationServiceImpl implements TelegramManagerNo
     @Transactional
     @Override
     public void checkPendingMessages() {
+        var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
         Instant now = Instant.now();
         List<PendingMessage> pendingMessages = pendingMessageRepository.findAll();
 
@@ -83,7 +84,6 @@ public class TelegramManagerNotificationServiceImpl implements TelegramManagerNo
                     .lastNotificationTime(now)
                     .build());
 
-                var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
                 sendSupportNotificationMessageToManagers(telegramBot, chatId, messageCount);
                 pendingMessageRepository.deleteByChatId(chatId);
             }
@@ -103,10 +103,10 @@ public class TelegramManagerNotificationServiceImpl implements TelegramManagerNo
 
     @Override
     public void notifyManagerAboutEndSupportModeFromUser(String chatId) {
+        var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
         List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
         for (TelegramManager manager : telegramManagers) {
             var notification = MessageFactory.createEndSupportModeNotification(chatId, manager.getChatId());
-            var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
             telegramExecutor.executeCommand(telegramBot, notification);
         }
     }

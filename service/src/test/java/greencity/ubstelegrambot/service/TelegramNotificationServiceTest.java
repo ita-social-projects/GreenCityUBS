@@ -100,7 +100,5 @@ class TelegramNotificationServiceTest {
         userEntity.setTelegramBot(new AuthorizedUser("12345", false, true, userEntity, false));
         assertTrue(telegramNotificationService.isEnabled(userEntity));
 
-        userEntity.setTelegramBot(new AuthorizedUser("12345", false, true, userEntity, false));
-        assertFalse(telegramNotificationService.isEnabled(userEntity));
     }
 }

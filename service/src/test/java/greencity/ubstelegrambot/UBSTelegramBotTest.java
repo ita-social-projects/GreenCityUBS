@@ -112,8 +112,7 @@ class UBSTelegramBotTest {
 
             ubsTelegramBot.onUpdateReceived(update);
 
-            verify(telegramService).isUserInSupportMode(chatIdStr);
-            verify(executor).executeCommand(ubsTelegramBot, sendMessage);
+            verify(telegramService).processTextCommand(update);
         }
     }
 
@@ -136,7 +135,7 @@ class UBSTelegramBotTest {
             .thenReturn(userIsInSupportMode);
 
         try (MockedStatic<MessageFactory> mockedStatic = Mockito.mockStatic(MessageFactory.class)) {
-            mockedStatic.when(() -> MessageFactory.createKeyboardMessage(chatIdStr))
+            mockedStatic.when(() -> MessageFactory.createEndSupportMessage(chatIdStr))
                 .thenReturn(sendMessage);
 
             ubsTelegramBot.onUpdateReceived(update);

@@ -37,4 +37,6 @@ public class TelegramBotConstants {
     public static final String MESSAGES_NOT_FOUND_FOR_CHAT = "There are no messages in the chat %s";
     public static final String CLIENT_MESSAGE_AFTER_FEEDBACK = "Дякуємо за ваш відгук";
     public static final String SCORE = "Score%s";
+    public static final String CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY =
+        "Вас вітає підтримка UBS! Будь ласка введіть своє повідомлення";
 }
