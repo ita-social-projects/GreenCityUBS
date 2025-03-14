@@ -22,17 +22,17 @@ import jakarta.validation.constraints.NotNull;
 public class ServiceDto {
     @NotBlank
     @Length(max = 255)
-    private String name;
+    private String nameUk;
 
     @NotBlank
     @Length(max = 255)
-    private String nameEng;
+    private String nameEn;
 
     @NotBlank
-    private String description;
+    private String descriptionUk;
 
     @NotBlank
-    private String descriptionEng;
+    private String descriptionEn;
 
     @NotNull
     @DecimalMin(value = "0.01")

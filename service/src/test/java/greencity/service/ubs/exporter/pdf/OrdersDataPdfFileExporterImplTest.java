@@ -44,11 +44,11 @@ class OrdersDataPdfFileExporterImplTest {
             orderData.getSender().getSenderName(),
             orderData.getSender().getSenderSurname())));
         assertTrue(pdfText.contains("The address of export of the ordered services"));
-        assertTrue(pdfText.contains(orderData.getOrderStatusEng()));
+        assertTrue(pdfText.contains(orderData.getOrderStatusEn()));
         assertTrue(pdfText.contains("#"));
-        assertTrue(pdfText.contains(orderData.getPaymentStatusEng()));
+        assertTrue(pdfText.contains(orderData.getPaymentStatusEn()));
         assertTrue(pdfText.contains("Order date"));
-        assertTrue(pdfText.contains(orderData.getBags().getFirst().getServiceEng()));
+        assertTrue(pdfText.contains(orderData.getBags().getFirst().getServiceEn()));
     }
 
     @Test
@@ -66,11 +66,11 @@ class OrdersDataPdfFileExporterImplTest {
             orderData.getSender().getSenderName(),
             orderData.getSender().getSenderSurname())));
         assertTrue(pdfText.contains("Адреса вивезення відходів"));
-        assertTrue(pdfText.contains(orderData.getOrderStatus()));
+        assertTrue(pdfText.contains(orderData.getOrderStatusUk()));
         assertTrue(pdfText.contains("№"));
-        assertTrue(pdfText.contains(orderData.getPaymentStatus()));
+        assertTrue(pdfText.contains(orderData.getPaymentStatusUk()));
         assertTrue(pdfText.contains("Дата оплати"));
-        assertTrue(pdfText.contains(orderData.getBags().getFirst().getService()));
+        assertTrue(pdfText.contains(orderData.getBags().getFirst().getServiceUk()));
     }
 
     @Test

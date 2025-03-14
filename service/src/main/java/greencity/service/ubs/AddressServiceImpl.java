@@ -111,14 +111,14 @@ public class AddressServiceImpl implements AddressService {
         Optional<Address> addressIfExist = checkIfAddressExist(currentUser.getId(), addressRequestDto);
         if (addressIfExist.isPresent()) {
             Address existingAddress = addressIfExist.get();
-            existingAddress.setAddressStatus(AddressStatus.NEW);
+            existingAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
             addressRepo.save(existingAddress);
         } else {
             Address address = modelMapper.map(addressRequestDto, Address.class);
             setLocations(addressRequestDto, address);
-            address.setAddressStatus(AddressStatus.NEW);
+            address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
             address.setUser(currentUser);
-            address.setActual(addresses.isEmpty());
+            address.getBaseAddress().setActual(addresses.isEmpty());
             addressRepo.save(address);
         }
         return findAllAddressesForCurrentOrder(uuid);
@@ -150,7 +150,7 @@ public class AddressServiceImpl implements AddressService {
         OrderAddress updatedOrderAddress = updateOrderAddress(dtoUpdate);
         mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress, dtoUpdate.getAddressComment());
         orderAddressRepository.save(updatedOrderAddress);
-        eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
+        eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_UK, email, order);
         return Optional.of(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class));
     }
 
@@ -167,15 +167,16 @@ public class AddressServiceImpl implements AddressService {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
 
-        if (currentAddress.getAddressStatus() == AddressStatus.DELETED) {
+        if (currentAddress.getBaseAddress().getAddressStatus() == AddressStatus.DELETED) {
             throw new BadRequestException(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS);
         }
 
-        if (Boolean.FALSE.equals(currentAddress.getActual())) {
-            Address address = addressRepo.findByUserIdAndActualTrue(currentAddress.getUser().getId()).orElseThrow(
-                () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
-            address.setActual(false);
-            currentAddress.setActual(true);
+        if (Boolean.FALSE.equals(currentAddress.getBaseAddress().getActual())) {
+            Address address =
+                addressRepo.findByUserIdAndBaseAddress_ActualTrue(currentAddress.getUser().getId()).orElseThrow(
+                    () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
+            address.getBaseAddress().setActual(false);
+            currentAddress.getBaseAddress().setActual(true);
         }
 
         return modelMapper.map(currentAddress, AddressDto.class);
@@ -205,7 +206,7 @@ public class AddressServiceImpl implements AddressService {
             .values()
             .stream()
             .map(district -> DistrictDto.builder()
-                .nameUa(district.getNameUk())
+                .nameUk(district.getNameUk())
                 .nameEn(district.getNameEn())
                 .build())
             .toList();
@@ -241,14 +242,14 @@ public class AddressServiceImpl implements AddressService {
 
             newAddress.setId(addressRequestDto.getId());
             newAddress.setUser(address.getUser());
-            newAddress.setAddressStatus(address.getAddressStatus());
-            newAddress.setActual(address.getActual());
+            newAddress.getBaseAddress().setAddressStatus(address.getBaseAddress().getAddressStatus());
+            newAddress.getBaseAddress().setActual(address.getBaseAddress().getActual());
 
             addressRepo.save(newAddress);
         } else {
-            address.setAddressStatus(AddressStatus.DELETED);
+            address.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
             Address existingAddress = addressIfExist.get();
-            existingAddress.setAddressStatus(AddressStatus.NEW);
+            existingAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
             addressRepo.save(existingAddress);
             addressRepo.save(address);
         }
@@ -266,15 +267,15 @@ public class AddressServiceImpl implements AddressService {
         if (!Objects.equals(address.getUser().getUuid(), uuid)) {
             throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
         }
-        if (address.getAddressStatus() == AddressStatus.DELETED) {
+        if (address.getBaseAddress().getAddressStatus() == AddressStatus.DELETED) {
             throw new BadRequestException(CANNOT_DELETE_ALREADY_DELETED_ADDRESS);
         }
-        address.setAddressStatus(AddressStatus.DELETED);
+        address.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
 
-        if (Boolean.TRUE.equals(address.getActual())) {
-            address.setActual(false);
+        if (Boolean.TRUE.equals(address.getBaseAddress().getActual())) {
+            address.getBaseAddress().setActual(false);
             addressRepo.findAnyByUserIdAndAddressStatusNotDeleted(address.getUser().getId())
-                .ifPresent(newActualAddress -> newActualAddress.setActual(true));
+                .ifPresent(newActualAddress -> newActualAddress.getBaseAddress().setActual(true));
         }
 
         return findAllAddressesForCurrentOrder(uuid);
@@ -282,13 +283,15 @@ public class AddressServiceImpl implements AddressService {
 
     private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
         Optional<Region> optionalRegion =
-            regionRepository.findRegionByNameEnOrNameUk(address.getRegionEn(), address.getRegion());
+            regionRepository.findRegionByNameEnOrNameUk(address.getBaseAddress().getRegionEn(),
+                address.getBaseAddress().getRegionUk());
         if (optionalRegion.isPresent()) {
             address.setRegionId(optionalRegion.get());
 
             Optional<City> optionalCity = cityRepository
-                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(), address.getCity(),
-                    address.getCityEn());
+                .findCityByRegionIdAndNameUkAndNameEn(optionalRegion.get().getId(),
+                    address.getBaseAddress().getCityUk(),
+                    address.getBaseAddress().getCityEn());
 
             City city;
             if (optionalCity.isPresent()) {
@@ -302,13 +305,14 @@ public class AddressServiceImpl implements AddressService {
             address.setCityId(city);
 
             Optional<District> optionalDistrict = districtRepository
-                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getDistrictEn(), address.getDistrict());
+                .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getBaseAddress().getDistrictEn(),
+                    address.getBaseAddress().getDistrictUk());
             if (optionalDistrict.isPresent()) {
                 address.setDistrictId(optionalDistrict.get());
             } else {
                 District district =
                     District.builder()
-                        .nameUk(addressRequestDto.getDistrict())
+                        .nameUk(addressRequestDto.getDistrictUk())
                         .nameEn(addressRequestDto.getDistrictEn())
                         .build();
                 district.setCity(city);
@@ -324,7 +328,7 @@ public class AddressServiceImpl implements AddressService {
         T addressRequestDto) {
         List<Address> addresses = addressRepo.findAllByUserId(userId);
         boolean exist = addresses.stream()
-            .filter(address -> !address.getAddressStatus().equals(AddressStatus.DELETED))
+            .filter(address -> !AddressStatus.DELETED.equals(address.getBaseAddress().getAddressStatus()))
             .map(address -> modelMapper.map(address, CreateAddressRequestDto.class))
             .anyMatch(
                 addressDto -> addressDto.equals(modelMapper.map(addressRequestDto, CreateAddressRequestDto.class)));
@@ -334,7 +338,7 @@ public class AddressServiceImpl implements AddressService {
         }
 
         return addresses.stream()
-            .filter(address -> AddressStatus.DELETED.equals(address.getAddressStatus()))
+            .filter(address -> AddressStatus.DELETED.equals(address.getBaseAddress().getAddressStatus()))
             .filter(address -> addressRequestDto
                 .areAddressesEqual((modelMapper.map(address, CreateAddressRequestDto.class))))
             .findFirst();
@@ -358,9 +362,9 @@ public class AddressServiceImpl implements AddressService {
         String comment) {
         updatedOrderAddress.setLocation(orderAddress.getLocation());
         updatedOrderAddress.setId(orderAddress.getId());
-        updatedOrderAddress.setActual(orderAddress.getActual());
-        updatedOrderAddress.setAddressComment(comment);
+        updatedOrderAddress.getBaseAddress().setActual(orderAddress.getBaseAddress().getActual());
+        updatedOrderAddress.getBaseAddress().setAddressComment(comment);
         updatedOrderAddress.setCoordinates(orderAddress.getCoordinates());
-        updatedOrderAddress.setAddressStatus(orderAddress.getAddressStatus());
+        updatedOrderAddress.getBaseAddress().setAddressStatus(orderAddress.getBaseAddress().getAddressStatus());
     }
 }

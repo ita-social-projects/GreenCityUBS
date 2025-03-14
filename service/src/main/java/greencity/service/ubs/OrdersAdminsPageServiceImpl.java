@@ -28,6 +28,7 @@ import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.enums.BonusReason;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
@@ -136,13 +137,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String ORDER_COMMENT = "commentsForOrder";
     private static final String WITHOUT_ID = "-1";
     private static final String WITHOUT_MANAGER_EN = "Without manager";
-    private static final String WITHOUT_MANAGER_UA = "Без менеджера";
+    private static final String WITHOUT_MANAGER_UK = "Без менеджера";
     private static final String WITHOUT_LOGISTICIAN_EN = "Without logistician";
-    private static final String WITHOUT_LOGISTICIAN_UA = "Без логіста";
+    private static final String WITHOUT_LOGISTICIAN_UK = "Без логіста";
     private static final String WITHOUT_NAVIGATOR_EN = "Without navigator";
-    private static final String WITHOUT_NAVIGATOR_UA = "Без штурмана";
+    private static final String WITHOUT_NAVIGATOR_UK = "Без штурмана";
     private static final String WITHOUT_DRIVER_EN = "Without driver";
-    private static final String WITHOUT_DRIVER_UA = "Без водія";
+    private static final String WITHOUT_DRIVER_UK = "Без водія";
     private static final String DISTRICT = "district";
     private static final String WITHOUT_EMPLOYEE = "-1";
     private static final String IGNORE_VALUE_FOR_EMPLOYEE = "0";
@@ -230,21 +231,22 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 false,
                 37,
                 EditType.READ_ONLY, new ArrayList<>(), orderDetails),
-            new ColumnDTO(new TitleDto("totalOrderSum", "Сума замовлення", "Total order sum"), "totalOrderSum",
+            new ColumnDTO(new TitleDto("totalOrderSum", "Сума замовлення (грн)", "Total order sum (UAH)"),
+                "totalOrderSum",
                 20, false, true, false, 18, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto("orderCertificateCode", "№ сертифікату", "Order certificate code"),
                 "orderCertificateCode",
                 20, false, true, false, 19, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
-            new ColumnDTO(new TitleDto("generalDiscount", "Загальна знижка", "General discount"),
+            new ColumnDTO(new TitleDto("generalDiscount", "Загальна знижка (грн)", "General discount (UAH)"),
                 "generalDiscount", 20, false, true, false, 20, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
-            new ColumnDTO(new TitleDto("amountDue", "Сума до оплати", "Amount due"), "amountDue", 20,
+            new ColumnDTO(new TitleDto("amountDue", "Сума до оплати (грн)", "Amount due (UAH)"), "amountDue", 20,
                 false, true, false, 21, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(
                 new TitleDto(CLIENT_COMMENT, "Коментар до замовлення",
                     "Comment to the order"),
                 CLIENT_COMMENT, 20, false, true, false, 22, EditType.INLINE, new ArrayList<>(),
                 ordersInfo),
-            new ColumnDTO(new TitleDto("totalPayment", "Оплата", "Total payment"),
+            new ColumnDTO(new TitleDto("totalPayment", "Оплата (грн)", "Total payment (UAH)"),
                 "totalPayment", 20, false, true,
                 false, 23,
                 EditType.READ_ONLY, new ArrayList<>(), orderDetails),
@@ -333,7 +335,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 validateOrder(order, employee);
                 setAddressComment(value, orderId);
 
-                eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, UBS_ADMIN, order);
                 orderLockService.unlockOrder(order);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
@@ -353,7 +355,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderAddress address = orderAddressRepository.findByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
 
-        address.setAddressComment(value);
+        address.getBaseAddress().setAddressComment(value);
         orderAddressRepository.save(address);
     }
 
@@ -382,7 +384,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
                 commentSetters.get(columnName).accept(order);
 
-                eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, UBS_ADMIN, order);
                 orderLockService.unlockOrder(order);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
@@ -542,11 +544,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderStatus[] orderStatuses = OrderStatus.values();
         for (OrderStatus o : orderStatuses) {
             String ua = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue())
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getName();
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameUk();
             String en = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue())
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameEng();
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameEn();
             optionForColumnDTOS
-                .add(OptionForColumnDTO.builder().key(o.toString()).ua(ua).en(en).filtered(false).build());
+                .add(OptionForColumnDTO.builder().key(o.toString()).uk(ua).en(en).filtered(false).build());
         }
         return optionForColumnDTOS;
     }
@@ -560,8 +562,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_PAYMENT_STATUS_NOT_FOUND));
             optionForColumnDTOS.add(OptionForColumnDTO.builder()
                 .key(p.name())
-                .ua(orderPaymentStatusTranslation.getTranslationValue())
-                .en(orderPaymentStatusTranslation.getTranslationsValueEng())
+                .uk(orderPaymentStatusTranslation.getTranslationValueUk())
+                .en(orderPaymentStatusTranslation.getTranslationsValueEn())
                 .build());
         }
         return optionForColumnDTOS;
@@ -569,9 +571,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<OptionForColumnDTO> blockingStatusListForDevelopStage() {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
-        optionForColumnDTOS.add(OptionForColumnDTO.builder().key("blocked").ua("Заблоковано").en("Blocked").build());
+        optionForColumnDTOS.add(OptionForColumnDTO.builder().key("blocked").uk("Заблоковано").en("Blocked").build());
         optionForColumnDTOS
-            .add(OptionForColumnDTO.builder().key("notBlocked").ua("Не заблоковано").en("Not blocked").build());
+            .add(OptionForColumnDTO.builder().key("notBlocked").uk("Не заблоковано").en("Not blocked").build());
         return optionForColumnDTOS;
     }
 
@@ -597,7 +599,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<OptionForColumnDTO> callerList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(2L);
         List<OptionForColumnDTO> optionForColumnDTOS =
-            includeItemsWithoutResponsiblePerson(WITHOUT_MANAGER_UA, WITHOUT_MANAGER_EN);
+            includeItemsWithoutResponsiblePerson(WITHOUT_MANAGER_UK, WITHOUT_MANAGER_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -607,7 +609,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<OptionForColumnDTO> logicManList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(3L);
         List<OptionForColumnDTO> optionForColumnDTOS =
-            includeItemsWithoutResponsiblePerson(WITHOUT_LOGISTICIAN_UA, WITHOUT_LOGISTICIAN_EN);
+            includeItemsWithoutResponsiblePerson(WITHOUT_LOGISTICIAN_UK, WITHOUT_LOGISTICIAN_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -617,7 +619,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<OptionForColumnDTO> navigatorList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(4L);
         List<OptionForColumnDTO> optionForColumnDTOS =
-            includeItemsWithoutResponsiblePerson(WITHOUT_NAVIGATOR_UA, WITHOUT_NAVIGATOR_EN);
+            includeItemsWithoutResponsiblePerson(WITHOUT_NAVIGATOR_UK, WITHOUT_NAVIGATOR_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -627,7 +629,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<OptionForColumnDTO> driverList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(5L);
         List<OptionForColumnDTO> optionForColumnDTOS =
-            includeItemsWithoutResponsiblePerson(WITHOUT_DRIVER_UA, WITHOUT_DRIVER_EN);
+            includeItemsWithoutResponsiblePerson(WITHOUT_DRIVER_UK, WITHOUT_DRIVER_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -638,7 +640,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         optionForColumnDTOS.add(OptionForColumnDTO.builder()
             .key(WITHOUT_ID)
-            .ua(nameUa)
+            .uk(nameUa)
             .en(nameEn)
             .build());
         return optionForColumnDTOS;
@@ -673,7 +675,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 orderLockService.unlockOrder(existedOrder);
 
                 if (OrderStatus.BROUGHT_IT_HIMSELF == OrderStatus.valueOf(updatedStatusValue)) {
-                    eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF,
+                    eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK,
                         employee.getFirstName() + "  " + employee.getLastName(), existedOrder);
                     notificationService.notifySelfPickupOrder(existedOrder);
                 }
@@ -697,6 +699,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
             .amount(pointsToReturn)
             .date(LocalDateTime.now())
+            .reason(BonusReason.REFUND_CANCELED_ORDER)
             .user(user)
             .order(order)
             .build();
@@ -764,8 +767,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.getEvents().add(Event.builder()
                     .order(existedOrder)
                     .eventDate(LocalDateTime.now())
-                    .authorName(employee.getFirstName() + "  " + employee.getLastName())
-                    .eventName(OrderHistory.ORDER_CANCELLED + "  " + value)
+                    .authorNameUk(employee.getFirstName() + "  " + employee.getLastName())
+                    .eventNameUk(OrderHistory.ORDER_CANCELLED_UK + "  " + value)
                     .build());
                 existedOrder.setCancellationComment(value);
                 orderLockService.unlockOrder(existedOrder);
@@ -790,8 +793,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.getEvents().add(Event.builder()
                     .order(existedOrder)
                     .eventDate(LocalDateTime.now())
-                    .authorName(employee.getFirstName() + "  " + employee.getLastName())
-                    .eventName(OrderHistory.ADD_ADMIN_COMMENT + "  " + value)
+                    .authorNameUk(employee.getFirstName() + "  " + employee.getLastName())
+                    .eventNameUk(OrderHistory.ADD_ADMIN_COMMENT_UK + "  " + value)
                     .build());
                 existedOrder.setAdminComment(value);
                 orderLockService.unlockOrder(existedOrder);

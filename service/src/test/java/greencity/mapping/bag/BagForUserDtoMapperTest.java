@@ -20,8 +20,8 @@ class BagForUserDtoMapperTest {
         OrderBag orderBag = ModelUtils.TEST_ORDER_BAG;
         BagForUserDto actual = bagForUserDtoMapper.convert(orderBag);
 
-        assertEquals(expected.getService(), actual.getService());
-        assertEquals(expected.getServiceEng(), actual.getServiceEng());
+        assertEquals(expected.getServiceUk(), actual.getServiceUk());
+        assertEquals(expected.getServiceEn(), actual.getServiceEn());
         assertEquals(expected.getCapacity(), actual.getCapacity());
         assertEquals(expected.getFullPrice(), actual.getFullPrice());
     }

@@ -56,7 +56,7 @@ class TelegramServiceTest {
     void testSendNotification() throws TelegramApiException {
         SendMessage sendMessage = new SendMessage(
             notification.getUser().getTelegramBot().getChatId().toString(),
-            template.getTitle() + "\n\n" + template.getNotificationPlatforms().getFirst().getBody());
+            template.getTitleUk() + "\n\n" + template.getNotificationPlatforms().getFirst().getBodyUk());
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))

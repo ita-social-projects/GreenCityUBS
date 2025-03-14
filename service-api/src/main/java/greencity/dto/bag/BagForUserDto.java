@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class BagForUserDto {
-    private String service;
-    private String serviceEng;
+    private String serviceUk;
+    private String serviceEn;
     private Integer capacity;
     private Double fullPrice;
     private Integer count;

@@ -42,8 +42,8 @@ class UpdateAddressValidatorTest {
     public void setUp() {
         CoordinatesDto coordinatesDto = new CoordinatesDto(50.45, 30.523);
         orderAddressDtoRequest = OrderAddressDtoRequest.builder()
-            .city("Kyiv")
-            .region("Kyiv")
+            .cityUk("Kyiv")
+            .regionUk("Kyiv")
             .coordinates(coordinatesDto)
             .build();
 
@@ -64,8 +64,8 @@ class UpdateAddressValidatorTest {
 
     @Test
     void testWithInvalidCoordinatesShouldReturnFalse() {
-        orderAddressDtoRequest.setCity("Invalid");
-        orderAddressDtoRequest.setRegion("Invalid");
+        orderAddressDtoRequest.setCityUk("Invalid");
+        orderAddressDtoRequest.setRegionUk("Invalid");
 
         when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class)))
             .thenReturn(addressResponseFromGoogleAPI);
