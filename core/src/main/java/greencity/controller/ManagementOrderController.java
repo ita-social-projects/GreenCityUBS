@@ -710,7 +710,7 @@ public class ManagementOrderController {
     @PostMapping(value = "/add-manual-payment/{id}",
         consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@PathVariable(name = "id") Long orderId,
-        @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
+        @Valid @ValidManualPaymentRequest @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(paymentService.saveNewManualPayment(orderId, manualPaymentDto, image, principal.getName()));

@@ -13,23 +13,19 @@ import java.time.format.DateTimeParseException;
 import static greencity.constant.ValidationConstant.PAYMENT_DATE_FORMAT_IS_NOT_VALID_MESSAGE;
 import static greencity.constant.ValidationConstant.PAYMENT_DATE_IS_AFTER_CURRENT_DATE_MESSAGE;
 import static greencity.constant.ValidationConstant.PAYMENT_DATE_IS_BEFORE_ORDER_CREATION_MESSAGE;
-import static greencity.constant.ValidationConstant.PAYMENT_DATE_IS_NULL_MESSAGE;
 
 @RequiredArgsConstructor
 public class ManualPaymentRequestValidator
     implements ConstraintValidator<ValidManualPaymentRequest, ManualPaymentRequestDto> {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter settlementDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final UBSManagementService ubsManagementService;
 
     @Override
     public boolean isValid(ManualPaymentRequestDto manualPaymentRequestDto,
         ConstraintValidatorContext constraintValidatorContext) {
-        String settlementDate = manualPaymentRequestDto.getSettlementDate();
-        if (settlementDate == null) {
-            return setValidViolationMessages(constraintValidatorContext, PAYMENT_DATE_IS_NULL_MESSAGE);
-        }
         try {
-            LocalDate settlementDateParsed = LocalDate.parse(settlementDate, formatter);
+            LocalDate settlementDateParsed =
+                LocalDate.parse(manualPaymentRequestDto.getSettlementDate(), settlementDateFormatter);
             if (settlementDateParsed.isAfter(LocalDate.now())) {
                 return setValidViolationMessages(constraintValidatorContext,
                     PAYMENT_DATE_IS_AFTER_CURRENT_DATE_MESSAGE);
