@@ -17,7 +17,7 @@ import static greencity.constant.ValidationConstant.PAYMENT_DATE_IS_BEFORE_ORDER
 @RequiredArgsConstructor
 public class ManualPaymentRequestValidator
     implements ConstraintValidator<ValidManualPaymentRequest, ManualPaymentRequestDto> {
-    private static final DateTimeFormatter settlementDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter SETTLEMENT_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final UBSManagementService ubsManagementService;
 
     @Override
@@ -25,7 +25,7 @@ public class ManualPaymentRequestValidator
         ConstraintValidatorContext constraintValidatorContext) {
         try {
             LocalDate settlementDateParsed =
-                LocalDate.parse(manualPaymentRequestDto.getSettlementDate(), settlementDateFormatter);
+                LocalDate.parse(manualPaymentRequestDto.getSettlementDate(), SETTLEMENT_DATE_FORMATTER);
             if (settlementDateParsed.isAfter(LocalDate.now())) {
                 return setValidViolationMessages(constraintValidatorContext,
                     PAYMENT_DATE_IS_AFTER_CURRENT_DATE_MESSAGE);
