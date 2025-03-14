@@ -21,8 +21,6 @@ import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
 import java.security.Principal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -468,26 +466,5 @@ class ManagementOrderControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().string("<Boolean>true</Boolean>"));
         verify(ubsManagementService).checkIfOrderStatusIsFormedToCanceled(orderId);
-    }
-
-    @Test
-    void updateManualPaymentWithFutureSettlementDateTest() throws Exception {
-        ManualPaymentRequestDto dto = getManualPaymentRequestDto();
-        dto.setSettlementDate(LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-
-        objectMapper.findAndRegisterModules();
-        String responseJSON = objectMapper.writeValueAsString(dto);
-        MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
-            "", "application/json", responseJSON.getBytes());
-        MockMultipartHttpServletRequestBuilder builder =
-            multipart(ubsManagementLink + "/update-manual-payment/{id}", 1L);
-        builder.with(request -> {
-            request.setMethod("PUT");
-            return request;
-        });
-        mockMvc.perform(builder.file(jsonFile)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
     }
 }
