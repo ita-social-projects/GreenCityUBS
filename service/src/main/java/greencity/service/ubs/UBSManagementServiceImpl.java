@@ -121,6 +121,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_PAYMENT_ID;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
@@ -850,6 +851,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public Boolean checkIfOrderStatusIsFormedToCanceled(Long orderId) {
         return eventRepository.wasOrderStatusChangedFromFormedToCanceled(orderId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Order getOrderByPaymentId(String paymentId) {
+        return orderRepository.findOrderByPaymentId(paymentId).orElseThrow(
+            () -> new NotFoundException(ORDER_NOT_FOUND_BY_PAYMENT_ID.formatted(paymentId)));
     }
 
     private void verifyPaidWithBonuses(Order order, String email) {

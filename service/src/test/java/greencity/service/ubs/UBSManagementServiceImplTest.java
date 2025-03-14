@@ -2360,4 +2360,20 @@ class UBSManagementServiceImplTest {
         verify(orderStatusTranslationRepository).findAllBy();
         verify(orderPaymentStatusTranslationRepository).getAllBy();
     }
+
+    @Test
+    void getOrderPaymentIdReturnsOrderForValidPaymentIdTest() {
+        Order order = getOrderExportDetails();
+        when(orderRepository.findOrderByPaymentId(anyString())).thenReturn(Optional.of(order));
+        ubsManagementService.getOrderByPaymentId(anyString());
+        verify(orderRepository, times(1)).findOrderByPaymentId(anyString());
+    }
+
+    @Test
+    void getOrderPaymentIdThrowsAnExceptionForInvalidPaymentIdTest() {
+        String paymentId = "1";
+        when(orderRepository.findOrderByPaymentId(anyString())).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderByPaymentId(paymentId));
+        verify(orderRepository, times(1)).findOrderByPaymentId(anyString());
+    }
 }

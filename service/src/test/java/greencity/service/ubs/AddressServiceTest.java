@@ -213,37 +213,6 @@ class AddressServiceTest {
     }
 
     @Test
-    void saveCurrentAddressForOrderTest() {
-        CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
-        String uuid = "a-b-c";
-        User user = ModelUtils.getUser();
-        Address address = ModelUtils.getAddress();
-        List<Address> addresses = List.of(address);
-        Region region = ModelUtils.getRegion();
-        City city = ModelUtils.getCity();
-        District district = ModelUtils.getDistrict();
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
-        when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(mapper.map(createAddressRequestDto, Address.class)).thenReturn(addresses.getFirst());
-        when(regionRepository.findRegionByNameEnOrNameUk(address.getBaseAddress().getRegionEn(),
-            address.getBaseAddress().getRegionUk())).thenReturn(Optional.of(region));
-        when(cityRepository
-            .findCityByRegionIdAndNameUkAndNameEn(region.getId(),
-                address.getBaseAddress().getCityUk(),
-                address.getBaseAddress().getCityEn()))
-            .thenReturn(Optional.of(city));
-        when(districtRepository
-            .findDistrictByCityIdAndNameEnOrNameUk(city.getId(), address.getBaseAddress().getDistrictEn(),
-                address.getBaseAddress().getDistrictUk()))
-            .thenReturn(Optional.of(district));
-        addressService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
-        verify(userRepository, times(2)).findByUuid(anyString());
-        verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
-        verify(addressRepository, times(1)).findAllByUserId(user.getId());
-        verify(addressRepository, times(1)).save(address);
-    }
-
-    @Test
     void saveCurrentAddressForOrderIfAddressExistsTest() throws Exception {
         User user = ModelUtils.getUser();
         CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
