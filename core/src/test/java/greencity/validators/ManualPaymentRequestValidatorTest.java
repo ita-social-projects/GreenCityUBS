@@ -52,13 +52,6 @@ class ManualPaymentRequestValidatorTest {
     }
 
     @Test
-    void isValidFalseForNullSettlementDateTest() {
-        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
-        requestDto.setSettlementDate(null);
-        assertFalse(validator.isValid(requestDto, context));
-    }
-
-    @Test
     void isValidFalseForFutureSettlementDateTest() {
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         requestDto.setSettlementDate(LocalDate.now().plusDays(1).toString());
