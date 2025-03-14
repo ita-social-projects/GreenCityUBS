@@ -34,6 +34,7 @@ public class LocationApiServiceImpl implements LocationApiService {
     private static final String LEVEL = "level";
     private static final String NAME_UK = "name_uk";
     private static final String NAME_EN = "name_en";
+    private static final String NAME = "name";
     private static final String CODE = "code";
     private static final String PAGE_SIZE = "page_size";
     private static final String PARENT = "parent";
@@ -61,7 +62,6 @@ public class LocationApiServiceImpl implements LocationApiService {
             || cityName.equals(KYIV.getLocationNameMap().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(KYIV.getId());
         }
-
         List<LocationDto> cities = getCitiesByName(regionName, cityName);
         LocationDto city = getCityInRegion(regionName, cities);
         String cityId = city.getId();
@@ -262,7 +262,7 @@ public class LocationApiServiceImpl implements LocationApiService {
     @Cacheable(value = "locationDataByName", key = "#level+'_'+#name")
     public List<LocationDto> getLocationDataByName(int level, String name) {
         UriComponentsBuilder builder = buildUrl()
-            .queryParam(NAME_UK, name)
+            .queryParam(NAME, name)
             .queryParam(LEVEL, level);
         return getResultFromUrl(builder.build().encode().toUri());
     }
@@ -277,11 +277,9 @@ public class LocationApiServiceImpl implements LocationApiService {
             new ParameterizedTypeReference<>() {
             };
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null, typeRef);
-
         if (response == null || response.getBody() == null) {
             throw new NotFoundException(ErrorMessage.NOT_FOUND_LOCATION_BY_URL + url);
         }
-
         return Optional.of(response)
             .map(ResponseEntity::getBody)
             .map(body -> (List<Map<String, Object>>) body.get(RESULTS))
@@ -309,7 +307,7 @@ public class LocationApiServiceImpl implements LocationApiService {
 
     private LocationDto mapToLocationDto(Map<String, Object> result) {
         Map<String, String> nameMap = new HashMap<>();
-        nameMap.put(NAME_UK, getValueFromMap(result, NAME_UK));
+        nameMap.put(NAME_UK, getValueFromMap(result, NAME));
         nameMap.put(NAME_EN, getValueFromMap(result, NAME_EN));
         return LocationDto.builder()
             .id(getValueFromMap(result, CODE))
