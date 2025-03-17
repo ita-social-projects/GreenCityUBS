@@ -1860,7 +1860,7 @@ public class ModelUtils {
 
     public static LocationDto getLocationApiDto() {
         return LocationDto.builder()
-            .locationNameMap(Map.of("name", "Вінниця", "name_en", "Vinnytsa"))
+            .locationNameMap(Map.of("name_uk", "Вінниця", "name_en", "Vinnytsa"))
             .build();
     }
 
