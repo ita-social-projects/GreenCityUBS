@@ -15,6 +15,10 @@ import static greencity.constant.ValidationConstant.PAYMENT_DATE_IS_BEFORE_ORDER
 import static greencity.constant.ValidationConstant.VALIDATION_RESPONSE_HEADER;
 import static greencity.constant.ValidationConstant.VIOLATION_CHUNK;
 
+/**
+ * Validator for manual payment requests. Ensures that settlement dates are
+ * valid and consistent with order creation dates.
+ */
 @Component
 @RequiredArgsConstructor
 public class ManualPaymentRequestValidator {
@@ -22,7 +26,7 @@ public class ManualPaymentRequestValidator {
     private final UBSManagementService ubsManagementService;
 
     public void validate(ManualPaymentRequestDto manualPaymentRequestDto,
-        long paymentId,
+        long id,
         ManualPaymentRequestActions action) {
         try {
             LocalDate settlementDateParsed = LocalDate.parse(
@@ -30,12 +34,7 @@ public class ManualPaymentRequestValidator {
             if (settlementDateParsed.isAfter(LocalDate.now())) {
                 invalidate(PAYMENT_DATE_IS_AFTER_CURRENT_DATE_MESSAGE);
             }
-            LocalDate orderDate;
-            if (ManualPaymentRequestActions.ADD.equals(action)) {
-                orderDate = ubsManagementService.findOrderById(paymentId).getOrderDate().toLocalDate();
-            } else {
-                orderDate = ubsManagementService.getOrderByPaymentId(paymentId).getOrderDate().toLocalDate();
-            }
+            LocalDate orderDate = retrieveOrderDate(id, action);
             if (settlementDateParsed.isBefore(orderDate)) {
                 invalidate(PAYMENT_DATE_IS_BEFORE_ORDER_CREATION_MESSAGE);
             }
@@ -44,6 +43,12 @@ public class ManualPaymentRequestValidator {
         } catch (NotFoundException exception) {
             invalidate(exception.getMessage());
         }
+    }
+
+    private LocalDate retrieveOrderDate(long id, ManualPaymentRequestActions action) {
+        return ManualPaymentRequestActions.ADD.equals(action)
+            ? ubsManagementService.findOrderById(id).getOrderDate().toLocalDate()
+            : ubsManagementService.getOrderByPaymentId(id).getOrderDate().toLocalDate();
     }
 
     private void invalidate(String violationMessage) {
