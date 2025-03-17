@@ -70,7 +70,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -82,7 +81,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-
 import static greencity.constant.AppConstant.*;
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
