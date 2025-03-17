@@ -10,40 +10,22 @@ import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.user.ChatLinkDto;
-import greencity.entity.order.Event;
+import greencity.entity.order.*;
 import greencity.entity.table.TableColumnWidthForEmployee;
-import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.BonusReason;
-import greencity.enums.CancellationReason;
-import greencity.enums.OrderStatus;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Certificate;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
+import greencity.entity.user.ubs.OrderAddress;
+import greencity.enums.BonusReason;
+import greencity.enums.CancellationReason;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.UserRepository;
-import greencity.repository.AddressRepository;
-import greencity.repository.RegionRepository;
-import greencity.repository.CityRepository;
-import greencity.repository.DistrictRepository;
-import greencity.repository.EmployeeOrderPositionRepository;
-import greencity.repository.TableColumnWidthForEmployeeRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.CertificateRepository;
+import greencity.repository.*;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,43 +33,18 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.ArgumentCaptor;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-import jakarta.persistence.EntityNotFoundException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.LocalDateTime;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.Clock;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersAdminsPageServiceImplTest {
@@ -97,8 +54,6 @@ class OrdersAdminsPageServiceImplTest {
     private EmployeeRepository employeeRepository;
     @Mock
     private CertificateRepository certificateRepository;
-    @Mock
-    private UBSManagementEmployeeService employeeService;
     @Mock
     private ModelMapper modelMapper;
     @Mock
@@ -114,8 +69,6 @@ class OrdersAdminsPageServiceImplTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private AddressRepository addressRepository;
-    @Mock
     EventService eventService;
     @Mock
     NotificationServiceImpl notificationService;
@@ -129,10 +82,6 @@ class OrdersAdminsPageServiceImplTest {
     private OrderLockService orderLockService;
     @Mock
     private RegionRepository regionRepository;
-    @Mock
-    private CityRepository cityRepository;
-    @Mock
-    private DistrictRepository districtRepository;
     @Mock
     private OrderAddressRepository orderAddressRepository;
     @InjectMocks
