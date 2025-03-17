@@ -36,6 +36,7 @@ class LocationApiServiceTest {
     private static final String LEVEL = "level";
     private static final String NAME_UK = "name_uk";
     private static final String NAME_EN = "name_en";
+    private static final String NAME = "name";
     private static final String CODE = "code";
     private static final String PAGE_SIZE = "page_size";
     private static final String PARENT = "parent";
@@ -51,7 +52,7 @@ class LocationApiServiceTest {
         Map<String, Object> apiResult = new HashMap<>();
         apiResult.put(CODE, code);
         apiResult.put(PARENT_ID, parentId);
-        apiResult.put(NAME_UK, name);
+        apiResult.put(NAME, name);
         apiResult.put(NAME_EN, nameEn);
         return apiResult;
     }
@@ -88,7 +89,7 @@ class LocationApiServiceTest {
         return UriComponentsBuilder
             .fromHttpUrl(API_URL)
             .queryParam(PAGE_SIZE, PAGE_SIZE_VALUE)
-            .queryParam(NAME_UK, name)
+            .queryParam(NAME, name)
             .queryParam(LEVEL, level);
     }
 

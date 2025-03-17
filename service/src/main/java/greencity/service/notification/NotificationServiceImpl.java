@@ -7,7 +7,7 @@ import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
-import greencity.dto.pageble.PageableDto;
+import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Order;
@@ -755,7 +755,7 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
+    public PageableAdvancedDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
         String language,
         Pageable pageable) {
         User user = userRepository.findByUuid(userUuid);
@@ -770,11 +770,16 @@ public class NotificationServiceImpl implements NotificationService {
             .map(n -> createNotificationShortDto(n, language, 0L))
             .collect(Collectors.toCollection(LinkedList::new));
 
-        return new PageableDto<>(
+        return new PageableAdvancedDto<>(
             notificationShortDtoList,
             notifications.getTotalElements(),
             notifications.getPageable().getPageNumber(),
-            notifications.getTotalPages());
+            notifications.getTotalPages(),
+            notifications.getNumber(),
+            notifications.hasPrevious(),
+            notifications.hasNext(),
+            notifications.isFirst(),
+            notifications.isLast());
     }
 
     /**
