@@ -210,10 +210,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex,
         WebRequest request) {
         log.error(ex.getMessage(), ex);
-
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
-        exceptionResponse.setMessage(ex.getMessage());
-
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
 
@@ -230,10 +227,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleValidationException(ValidationException ex,
         WebRequest request) {
         log.error(ex.getMessage(), ex);
-
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
-        exceptionResponse.setMessage(ex.getMessage());
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 }
