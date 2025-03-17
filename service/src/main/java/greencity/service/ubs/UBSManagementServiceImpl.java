@@ -857,7 +857,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Order getOrderByPaymentId(String paymentId) {
+    public Order getOrderByPaymentId(long paymentId) {
         return orderRepository.findOrderByPaymentId(paymentId).orElseThrow(
             () -> new NotFoundException(ORDER_NOT_FOUND_BY_PAYMENT_ID.formatted(paymentId)));
     }
@@ -1457,5 +1457,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .description(order.getReasonNotTakingBagDescription())
             .images(order.getImageReasonNotTakingBags())
             .build();
+    }
+
+    public Order findOrderById(Long id) {
+        return orderRepository.findById(id).orElseThrow(
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
     }
 }
