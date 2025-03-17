@@ -1860,7 +1860,7 @@ public class ModelUtils {
 
     public static LocationDto getLocationApiDto() {
         return LocationDto.builder()
-            .locationNameMap(Map.of("name", "Вінниця", "name_en", "Vinnytsa"))
+            .locationNameMap(Map.of("name_uk", "Вінниця", "name_en", "Vinnytsa"))
             .build();
     }
 
@@ -5927,6 +5927,26 @@ public class ModelUtils {
             .orderStatusEn("CREATING")
             .paymentStatusEn("PAID")
             .amountBeforePayment(120d)
+            .build();
+    }
+
+    public static Event getEvent3() {
+        return Event.builder()
+            .eventDate(LocalDateTime.of(2025, 3, 12, 20, 20))
+            .eventNameEn("Event 3")
+            .eventNameUk("Івент 3")
+            .authorNameEn("Author 3")
+            .authorNameUk("Автор 3")
+            .id(1L)
+            .build();
+    }
+
+    public static EventDto getEventDto() {
+        return EventDto.builder()
+            .eventDate(LocalDateTime.of(2025, 3, 12, 20, 20))
+            .eventName("Івент 3")
+            .authorName("Автор 3")
+            .id(1L)
             .build();
     }
 }
