@@ -23,6 +23,7 @@ import greencity.service.ubs.manager.BigOrderTableServiceView;
 import java.security.Principal;
 import java.util.Optional;
 
+import greencity.validators.payment.ManualPaymentRequestValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -80,6 +81,9 @@ class ManagementOrderControllerTest {
 
     @Mock
     BigOrderTableServiceView bigOrderTableServiceView;
+
+    @Mock
+    private ManualPaymentRequestValidator manualPaymentRequestValidator;
 
     @Mock
     PaymentService paymentService;
