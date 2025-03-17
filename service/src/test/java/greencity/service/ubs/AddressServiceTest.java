@@ -220,20 +220,33 @@ class AddressServiceTest {
         createAddressRequestDto1.setPlaceId("2");
         List<Address> addresses = ModelUtils.addressList();
         Region region = ModelUtils.getRegion();
+
+        BaseAddress baseAddress = new BaseAddress();
+        baseAddress.setRegionEn(region.getNameEn());
+        baseAddress.setRegionUk(region.getNameUk());
+        baseAddress.setCityEn("CityEn");
+        baseAddress.setCityUk("CityUk");
+        baseAddress.setDistrictEn("DistrictEn");
+        baseAddress.setDistrictUk("DistrictUk");
+        addresses.getFirst().setBaseAddress(baseAddress);
+
         when(userRepository.findByUuid(anyString())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
         when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString())).thenReturn(Optional.of(region));
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(ModelUtils.getCity()));
         when(cityRepository.save(any(City.class))).thenReturn(City.builder().id(1L).build());
+        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
+            .thenReturn(Optional.of(ModelUtils.getDistrict()));
         when(mapper.map(any(Address.class), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
-        when(mapper.map(createAddressRequestDto, CreateAddressRequestDto.class))
-            .thenReturn(createAddressRequestDto1);
-        addresses.getFirst().getBaseAddress().setRegionEn(region.getNameEn());
-        addresses.getFirst().getBaseAddress().setRegionUk(region.getNameUk());
+        when(mapper.map(createAddressRequestDto, CreateAddressRequestDto.class)).thenReturn(createAddressRequestDto1);
         when(mapper.map(createAddressRequestDto, Address.class)).thenReturn(addresses.getFirst());
         when(addressMapper.convert(any(CreateAddressRequestDto.class), eq(City.class)))
             .thenReturn(ModelUtils.getCity());
+
         addressService.saveCurrentAddressForOrder(createAddressRequestDto, user.getUuid());
+
         verify(userRepository, times(2)).findByUuid(anyString());
         verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
         verify(addressRepository, times(1)).findAllByUserId(user.getId());
