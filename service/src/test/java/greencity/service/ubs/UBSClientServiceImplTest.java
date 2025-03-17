@@ -45,7 +45,6 @@ import greencity.exceptions.user.UserNotFoundException;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.*;
 import greencity.service.google.GoogleApiService;
-import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
@@ -163,8 +162,6 @@ class UBSClientServiceImplTest {
     private UBSClientServiceImpl ubsClientService;
 
     @Mock
-    private LocationApiService locationApiService;
-    @Mock
     private OrderBagService orderBagService;
     @Mock
     private OrderBagRepository orderBagRepository;
@@ -179,22 +176,10 @@ class UBSClientServiceImplTest {
     private WayForPayClient wayForPayClient;
 
     @Mock
-    private NotificationService notificationService;
-
-    @Mock
     private LocationToLocationsDtoMapper locationToLocationsDtoMapper;
 
     @Value("${greencity.wayforpay.secret}")
     private String wayForPaySecret;
-
-    @Mock
-    private RegionRepository regionRepository;
-
-    @Mock
-    private CityRepository cityRepository;
-
-    @Mock
-    private DistrictRepository districtRepository;
 
     @Mock
     private MonoBankClient monoBankClient;
@@ -931,14 +916,14 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(certificateRepository.findById(anyString())).thenReturn(Optional.of(certificate));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
-                .thenReturn(getCheckoutResponseFromMonoBank());
+            .thenReturn(getCheckoutResponseFromMonoBank());
         doNothing().when(mockEntityManager).clear();
 
         PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", order.getId());
@@ -1228,14 +1213,14 @@ class UBSClientServiceImplTest {
 
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
-                .thenReturn(getCheckoutResponseFromMonoBank());
+            .thenReturn(getCheckoutResponseFromMonoBank());
         doNothing().when(mockEntityManager).clear();
 
         PaymentSystemResponse result = ubsClientService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
@@ -2084,7 +2069,7 @@ class UBSClientServiceImplTest {
 
         // Налаштування моків
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(getTariffsInfo()));
+            .thenReturn(Optional.of(getTariffsInfo()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
@@ -2094,11 +2079,12 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(address, OrderAddress.class)).thenReturn(orderAddress);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
-                .thenReturn(getCheckoutResponseFromMonoBank());
+            .thenReturn(getCheckoutResponseFromMonoBank());
         doNothing().when(mockEntityManager).clear();
 
         // Виклик методу
-        PaymentSystemResponse result = ubsClientService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", order.getId());
+        PaymentSystemResponse result =
+            ubsClientService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", order.getId());
         Assertions.assertNotNull(result);
 
         // Перевірки
@@ -3358,13 +3344,13 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(anyString())).thenReturn(user);
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(anyLong())).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
-                .thenReturn(getCheckoutResponseFromMonoBank());
+            .thenReturn(getCheckoutResponseFromMonoBank());
         doNothing().when(mockEntityManager).clear();
 
         PaymentSystemResponse result = ubsClientService.saveFullOrderToDB(dto, user.getUuid(), 1L);
@@ -3447,7 +3433,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(getAddress()));
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-                .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(tariffsInfo));
         when(ubsUserRepository.findById(anyLong())).thenReturn(Optional.of(ubSuser));
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(getBag()));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
