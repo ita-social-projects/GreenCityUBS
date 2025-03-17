@@ -2376,4 +2376,20 @@ class UBSManagementServiceImplTest {
         assertThrows(NotFoundException.class, () -> ubsManagementService.getOrderByPaymentId(paymentId));
         verify(orderRepository, times(1)).findOrderByPaymentId(paymentId);
     }
+
+    @Test
+    void getOrderByIdReturnsOrderForValidOrderIdTest() {
+        Order order = getOrderExportDetails();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        ubsManagementService.findOrderById(anyLong());
+        verify(orderRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void getOrderByIdThrowsAnExceptionForInvalidOrderIdTest() {
+        long paymentId = 1L;
+        when(orderRepository.findById(paymentId)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> ubsManagementService.findOrderById(paymentId));
+        verify(orderRepository, times(1)).findById(paymentId);
+    }
 }
