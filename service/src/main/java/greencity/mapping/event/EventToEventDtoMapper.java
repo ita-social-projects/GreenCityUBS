@@ -10,10 +10,10 @@ public class EventToEventDtoMapper extends AbstractConverter<Event, EventDto> {
     @Override
     protected EventDto convert(Event event) {
         return EventDto.builder()
-                .eventDate(event.getEventDate())
-                .id(event.getId())
-                .eventName(event.getEventNameUk())
-                .authorName(event.getAuthorNameUk())
-                .build();
+            .eventDate(event.getEventDate())
+            .id(event.getId())
+            .eventName(event.getEventNameUk())
+            .authorName(event.getAuthorNameUk())
+            .build();
     }
 }
