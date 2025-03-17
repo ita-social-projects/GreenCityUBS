@@ -30,6 +30,8 @@ public class OrderHistory {
     public static final String ORDER_NOT_TAKEN_OUT_UK = "Статус Замовлення - Не вивезли";
     public static final String ORDER_NOT_TAKEN_OUT_EN = "Order Status - Not taken out";
     public static final String ASSIGN_DRIVER_UK = "Закріплено водія";
+    public static final String ORDER_STATUS_UPDATED_ENG = "Order Status - Updated";
+    public static final String ORDER_STATUS_UPDATED = "Статус Замовлення - Оновленно";
     public static final String ASSIGN_DRIVER_EN = "Pinned driver";
     public static final String ASSIGN_LOGIEST_UK = "Закріплено логіста";
     public static final String ASSIGN_LOGIEST_EN = "Pinned logistician";

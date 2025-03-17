@@ -7,19 +7,17 @@ import greencity.entity.user.employee.Employee;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import jakarta.persistence.EntityNotFoundException;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 
@@ -62,38 +60,38 @@ public class EventServiceImpl implements EventService {
     private void getEventNameEngWithDate(String eventName, Event event) {
         if (eventName.startsWith(OrderHistory.UPDATE_DATE_EXPORT_UK)) {
             event.setEventNameEn(
-                OrderHistory.UPDATE_EXPORT_DETAILS_EN + String.format(OrderHistory.UPDATE_EXPORT_DATA_EN,
-                    eventName.substring(OrderHistory.UPDATE_DATE_EXPORT_UK.length())));
+                    OrderHistory.UPDATE_EXPORT_DETAILS_EN + String.format(OrderHistory.UPDATE_EXPORT_DATA_EN,
+                            eventName.substring(OrderHistory.UPDATE_DATE_EXPORT_UK.length())));
         } else if (eventName.startsWith(OrderHistory.SET_DATE_EXPORT_UK)) {
             event.setEventNameEn(
-                OrderHistory.SET_EXPORT_DETAILS_EN + String.format(OrderHistory.UPDATE_EXPORT_DATA_EN,
-                    eventName.substring(OrderHistory.SET_DATE_EXPORT_UK.length())));
+                    OrderHistory.SET_EXPORT_DETAILS_EN + String.format(OrderHistory.UPDATE_EXPORT_DATA_EN,
+                            eventName.substring(OrderHistory.SET_DATE_EXPORT_UK.length())));
         } else if (eventName.startsWith(OrderHistory.UPDATE_MIX_WASTE_UK)) {
             event.setEventNameEn(
-                OrderHistory.SET_EXPORT_DETAILS_EN + String.format(OrderHistory.UPDATE_ORDER_EXPORT_EN,
-                    eventName.substring(OrderHistory.UPDATE_MIX_WASTE_UK.length())));
+                    OrderHistory.SET_EXPORT_DETAILS_EN + String.format(OrderHistory.UPDATE_ORDER_EXPORT_EN,
+                            eventName.substring(OrderHistory.UPDATE_MIX_WASTE_UK.length())));
         }
     }
 
     private void getEventNameEngWithNumbers(String eventName, Event event) {
         if (eventName.startsWith(OrderHistory.ADD_PAYMENT_SYSTEM_UK)) {
             event.setEventNameEn(
-                OrderHistory.ADD_PAYMENT_SYSTEM_EN + eventName.substring(OrderHistory.ADD_PAYMENT_SYSTEM_UK.length()));
+                    OrderHistory.ADD_PAYMENT_SYSTEM_EN + eventName.substring(OrderHistory.ADD_PAYMENT_SYSTEM_UK.length()));
         } else if (eventName.startsWith(OrderHistory.DELETE_PAYMENT_MANUALLY_UK)) {
             event.setEventNameEn(OrderHistory.DELETE_PAYMENT_MANUALLY_EN
-                + eventName.substring(OrderHistory.DELETE_PAYMENT_MANUALLY_UK.length()));
+                    + eventName.substring(OrderHistory.DELETE_PAYMENT_MANUALLY_UK.length()));
         } else if (eventName.startsWith(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK)) {
             event.setEventNameEn(OrderHistory.UPDATE_PAYMENT_MANUALLY_EN
-                + eventName.substring(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK.length()));
+                    + eventName.substring(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK.length()));
         } else if (eventName.startsWith(OrderHistory.ADD_PAYMENT_MANUALLY_UK)) {
             event.setEventNameEn(OrderHistory.ADD_PAYMENT_MANUALLY_EN
-                + eventName.substring(OrderHistory.ADD_PAYMENT_MANUALLY_UK.length()));
+                    + eventName.substring(OrderHistory.ADD_PAYMENT_MANUALLY_UK.length()));
         } else if (eventName.startsWith(OrderHistory.ADD_NEW_ECO_NUMBER_UK)) {
             event.setEventNameEn(OrderHistory.ADD_NEW_ECO_NUMBER_EN
-                + eventName.substring(OrderHistory.ADD_NEW_ECO_NUMBER_UK.length()));
+                    + eventName.substring(OrderHistory.ADD_NEW_ECO_NUMBER_UK.length()));
         } else if (eventName.startsWith(OrderHistory.DELETED_ECO_NUMBER_UK)) {
             event.setEventNameEn(OrderHistory.DELETED_ECO_NUMBER_EN
-                + eventName.substring(OrderHistory.DELETED_ECO_NUMBER_UK.length()));
+                    + eventName.substring(OrderHistory.DELETED_ECO_NUMBER_UK.length()));
         }
     }
 
@@ -122,11 +120,12 @@ public class EventServiceImpl implements EventService {
         eventNameToEngMap.put(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK, OrderHistory.ORDER_BROUGHT_IT_HIMSELF_EN);
         eventNameToEngMap.put(OrderHistory.ORDER_CONFIRMED_UK, OrderHistory.ORDER_CONFIRMED_EN);
         eventNameToEngMap.put(OrderHistory.ORDER_HALF_PAID_UK, OrderHistory.ORDER_HALF_PAID_EN);
+        eventNameToEngMap.put(OrderHistory.ORDER_STATUS_UPDATED, OrderHistory.ORDER_STATUS_UPDATED_ENG);
         eventNameToEngMap.put(OrderHistory.ADD_ADMIN_COMMENT_UK, OrderHistory.ADD_ADMIN_COMMENT_EN);
         eventNameToEngMap.put(OrderHistory.DELETE_VIOLATION_UK, OrderHistory.DELETE_VIOLATION_EN);
         eventNameToEngMap.put(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK, OrderHistory.CANCELED_ORDER_MONEY_REFUND_EN);
         eventNameToEngMap.put(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_UK,
-            OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_EN);
+                OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_EN);
         eventNameToEngMap.put(OrderHistory.SET_EXPORT_DETAILS_UK, OrderHistory.SET_EXPORT_DETAILS_EN);
     }
 
@@ -168,9 +167,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public void saveEvent(String name, String email, Order order) {
         Employee employee = employeeRepository.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         save(name, employee.getFirstName()
-            + "  " + employee.getLastName(), order);
+                + "  " + employee.getLastName(), order);
     }
 
     @Data
@@ -180,24 +179,24 @@ public class EventServiceImpl implements EventService {
         private final Long position;
 
         static final EmployeePositionChanges CALLER_MANAGER =
-            new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_CALL_UK,
-                OrderHistory.ASSIGN_CALL_MANAGER_UK, 2L);
+                new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_CALL_UK,
+                        OrderHistory.ASSIGN_CALL_MANAGER_UK, 2L);
         static final EmployeePositionChanges LOGIC_MAN =
-            new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_LOGIEST_UK,
-                OrderHistory.ASSIGN_LOGIEST_UK, 3L);
+                new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_LOGIEST_UK,
+                        OrderHistory.ASSIGN_LOGIEST_UK, 3L);
         static final EmployeePositionChanges NAVIGATOR =
-            new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_CALL_PILOT_UK,
-                OrderHistory.ASSIGN_CALL_PILOT_UK, 4L);
+                new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_CALL_PILOT_UK,
+                        OrderHistory.ASSIGN_CALL_PILOT_UK, 4L);
         static final EmployeePositionChanges DRIVER = new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_DRIVER_UK,
-            OrderHistory.ASSIGN_DRIVER_UK, 5L);
+                OrderHistory.ASSIGN_DRIVER_UK, 5L);
 
         static final Map<Long, EmployeePositionChanges> ALL_VAlUES =
-            Stream.of(CALLER_MANAGER, LOGIC_MAN, NAVIGATOR, DRIVER)
-                .collect(Collectors.toMap(EmployeePositionChanges::getPosition, Function.identity()));
+                Stream.of(CALLER_MANAGER, LOGIC_MAN, NAVIGATOR, DRIVER)
+                        .collect(Collectors.toMap(EmployeePositionChanges::getPosition, Function.identity()));
 
         public static EmployeePositionChanges fromEmployeePosition(Long position) {
             return Optional.ofNullable(ALL_VAlUES.get(position))
-                .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND_BY_ID + position));
+                    .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND_BY_ID + position));
         }
     }
 }

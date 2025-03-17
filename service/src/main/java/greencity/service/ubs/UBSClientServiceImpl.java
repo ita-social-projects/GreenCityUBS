@@ -4,19 +4,9 @@ import com.google.maps.model.LatLng;
 import greencity.client.MonoBankClient;
 import greencity.client.UserRemoteClient;
 import greencity.client.WayForPayClient;
-import greencity.constant.AppConstant;
-import greencity.constant.ErrorMessage;
-import greencity.constant.KyivTariffLocation;
-import greencity.constant.OrderHistory;
+import greencity.constant.*;
 import greencity.constant.TariffLocation;
-import greencity.dto.AllActiveLocationsDto;
-import greencity.dto.LocationWithTariffInfoDto;
-import greencity.dto.LocationsDto;
-import greencity.dto.OrderCourierPopUpDto;
-import greencity.dto.RegionDto;
-import greencity.dto.TariffInfoByLocationDto;
-import greencity.dto.TariffInfoDto;
-import greencity.dto.TariffsForLocationDto;
+import greencity.dto.*;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagDto;
@@ -28,47 +18,17 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
-import greencity.dto.payment.monobank.BasketOrder;
-import greencity.dto.payment.monobank.CheckoutResponseFromMonoBank;
-import greencity.dto.payment.monobank.MerchantPaymentInfo;
-import greencity.dto.payment.monobank.MonoBankPaymentRequestDto;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
-import greencity.dto.payment.monobank.PaymentInfo;
+import greencity.dto.payment.monobank.*;
 import greencity.dto.position.PositionAuthoritiesDto;
-import greencity.dto.user.AllPointsUserDto;
-import greencity.dto.user.DeactivateUserRequestDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.PointsForUbsUserDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserPointDto;
-import greencity.dto.user.UserPointsAndAllBagsDto;
-import greencity.dto.user.UserProfileCreateDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderBag;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.*;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
@@ -77,20 +37,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
-import greencity.enums.AddressStatus;
-import greencity.enums.BagStatus;
-import greencity.enums.BonusReason;
-import greencity.enums.BotType;
-import greencity.enums.CertificateStatus;
-import greencity.enums.CourierLimit;
-import greencity.enums.LocationStatus;
-import greencity.enums.MonoBankStatuses;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
-import greencity.enums.PaymentType;
-import greencity.enums.TariffStatus;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
@@ -99,28 +46,7 @@ import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.CourierRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.NotificationParameterRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderBagRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.TariffLocationRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.TelegramBotRepository;
-import greencity.repository.UBSUserRepository;
-import greencity.repository.UserNotificationRepository;
-import greencity.repository.UserRepository;
-import greencity.repository.ViberBotRepository;
+import greencity.repository.*;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.notification.NotificationServiceImpl;
@@ -128,30 +54,12 @@ import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
@@ -162,56 +70,33 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
-import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
-import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
-import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
-import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
-import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
-import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
-import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
-import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
-import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
-import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
-import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
-import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
-import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+
+import static greencity.constant.AppConstant.*;
+import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 /**
  * Implementation of {@link UBSClientService}.
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UBSClientServiceImpl implements UBSClientService {
+    @PersistenceContext
+    private EntityManager entityManager;
     private static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
     private static final String PAY_BUTTON = "payButton";
     private final UserRepository userRepository;
@@ -282,7 +167,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String LANG_EN = "en";
     private static final String ADDRESS_NOT_FOUND_BY_ID_MESSAGE = "Address not found with id: ";
     private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected "
-        + "does not match, reselect correct data.";
+            + "does not match, reselect correct data.";
     private static final byte CURRENCY_CONVERSION_RATE = 100;
     private static final String DEFAULT_VALUE_FOR_PAYMENT = "Unknown";
 
@@ -296,13 +181,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         Payment orderPayment = mapPayment(response, decodedOrderReference);
         String[] ids = decodedOrderReference.split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
-            .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
+                .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
         checkResponseStatusFailure(response, orderPayment, order);
         checkOrderStatusApproved(response, orderPayment, order, decodedOrderReference);
         PaymentResponseWayForPay accept = PaymentResponseWayForPay.builder()
-            .orderReference(response.getOrderReference())
-            .status("accept")
-            .time(response.getCreatedDate()).build();
+                .orderReference(response.getOrderReference())
+                .status("accept")
+                .time(response.getCreatedDate()).build();
         accept.setSignature(encryptionUtil.formResponseSignature(accept, wayForPaySecret));
         return accept;
     }
@@ -312,27 +197,27 @@ public class UBSClientServiceImpl implements UBSClientService {
             response.setFee("0");
         }
         return Payment.builder()
-            .id(Long.valueOf(decodedOrderReference
-                .substring(decodedOrderReference.lastIndexOf("_") + 1)))
-            .currency(response.getCurrency())
-            .amount(Long.parseLong(response.getAmount()) * 100)
-            .orderStatus(OrderStatus.FORMED)
-            .senderCellPhone(response.getPhone())
-            .maskedCard(response.getCardPan())
-            .cardType(response.getCardType())
-            .orderTime(response.getCreatedDate())
-            .settlementDate(parseSettlementDate(""))
-            .fee(0L)
-            .paymentSystem(response.getPaymentSystem())
-            .senderEmail(response.getEmail())
-            .paymentStatus(PaymentStatus.UNPAID)
-            .build();
+                .id(Long.valueOf(decodedOrderReference
+                        .substring(decodedOrderReference.lastIndexOf("_") + 1)))
+                .currency(response.getCurrency())
+                .amount(Long.parseLong(response.getAmount()) * 100)
+                .orderStatus(OrderStatus.FORMED)
+                .senderCellPhone(response.getPhone())
+                .maskedCard(response.getCardPan())
+                .cardType(response.getCardType())
+                .orderTime(response.getCreatedDate())
+                .settlementDate(parseSettlementDate(""))
+                .fee(0L)
+                .paymentSystem(response.getPaymentSystem())
+                .senderEmail(response.getEmail())
+                .paymentStatus(PaymentStatus.UNPAID)
+                .build();
     }
 
     private String parseSettlementDate(String settlementDate) {
         return settlementDate.isEmpty()
-            ? LocalDate.now().toString()
-            : LocalDate.parse(settlementDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString();
+                ? LocalDate.now().toString()
+                : LocalDate.parse(settlementDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString();
     }
 
     /**
@@ -374,10 +259,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(Long tariffId, Long locationId) {
         var tariffsInfo = tariffsInfoRepository.findById(tariffId)
-            .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND + tariffId));
+                .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND + tariffId));
 
         var location = locationRepository.findById(locationId)
-            .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
+                .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
 
         checkIfTariffIsAvailableForCurrentLocation(tariffsInfo, location);
 
@@ -387,9 +272,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public UserPointsAndAllBagsDto getFirstPageDataByOrderId(String uuid, Long orderId) {
         var user = userRepository.findUserByUuid(uuid).orElseThrow(
-            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+                () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         var order = orderRepository.findById(orderId).orElseThrow(
-            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+                () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
         checkIsOrderOfCurrentUser(user, order);
 
@@ -400,7 +285,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         checkIfTariffIsAvailableForCurrentLocation(tariffsInfo, location);
 
         return getUserPointsAndAllBagsDtoByTariffIdAndOrderIdAndUserPoints(tariffsInfo.getId(), user.getCurrentPoints(),
-            orderId);
+                orderId);
     }
 
     private void checkIsOrderOfCurrentUser(User user, Order order) {
@@ -411,7 +296,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkIfTariffIsAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {
         if (tariffsInfo.getTariffStatus() == TariffStatus.DEACTIVATED
-            || location.getLocationStatus() == LocationStatus.DEACTIVATED) {
+                || location.getLocationStatus() == LocationStatus.DEACTIVATED) {
             throw new BadRequestException(TARIFF_OR_LOCATION_IS_DEACTIVATED);
         } else {
             var isAvailable = isTariffAvailableForCurrentLocation(tariffsInfo, location);
@@ -423,51 +308,51 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private boolean isTariffAvailableForCurrentLocation(TariffsInfo tariffsInfo, Location location) {
         return tariffLocationRepository
-            .findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location)
-            .orElseThrow(() -> new NotFoundException(TARIFF_FOR_LOCATION_NOT_EXIST + location.getId()))
-            .getLocationStatus() != LocationStatus.DEACTIVATED;
+                .findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location)
+                .orElseThrow(() -> new NotFoundException(TARIFF_FOR_LOCATION_NOT_EXIST + location.getId()))
+                .getLocationStatus() != LocationStatus.DEACTIVATED;
     }
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndOrderIdAndUserPoints(Long tariffId,
-        Integer userPoints, Long orderId) {
+                                                                                                Integer userPoints, Long orderId) {
         var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
-            .map(bag -> buildBagTranslationDto(orderId, bag))
-            .collect(toList());
+                .map(bag -> buildBagTranslationDto(orderId, bag))
+                .collect(toList());
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
     }
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,
-        Integer userPoints) {
+                                                                                      Integer userPoints) {
         var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
-            .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
-            .sorted(Comparator.comparing(BagTranslationDto::getCapacity).reversed())
-            .toList();
+                .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
+                .sorted(Comparator.comparing(BagTranslationDto::getCapacity).reversed())
+                .toList();
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
     }
 
     private BagTranslationDto buildBagTranslationDto(Long orderId, Bag source) {
         return BagTranslationDto.builder()
-            .id(source.getId())
-            .capacity(source.getCapacity())
-            .price(BigDecimal.valueOf(source.getFullPrice())
-                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
-            .nameUk(source.getNameUk())
-            .nameEn(source.getNameEn())
-            .limitedIncluded(source.getLimitIncluded())
-            .quantity(getQuantityOfBagsByBagIdAndOrderId(orderId, source.getId()))
-            .build();
+                .id(source.getId())
+                .capacity(source.getCapacity())
+                .price(BigDecimal.valueOf(source.getFullPrice())
+                        .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
+                .nameUk(source.getNameUk())
+                .nameEn(source.getNameEn())
+                .limitedIncluded(source.getLimitIncluded())
+                .quantity(getQuantityOfBagsByBagIdAndOrderId(orderId, source.getId()))
+                .build();
     }
 
     private Integer getQuantityOfBagsByBagIdAndOrderId(Long orderId, Integer bagId) {
         return orderBagRepository.getAmountOfOrderBagsByOrderIdAndBagId(orderId, bagId)
-            .orElse(0);
+                .orElse(0);
     }
 
     private Location getLocationByOrderIdThroughLazyInitialization(Order order) {
         return order
-            .getUbsUser()
-            .getOrderAddress()
-            .getLocation();
+                .getUbsUser()
+                .getOrderAddress()
+                .getLocation();
     }
 
     /**
@@ -485,7 +370,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
         dto.setUbsUserId(ubsUser.getFirst().getId());
         if (currentUser.getAlternateEmail() != null
-            && !currentUser.getAlternateEmail().isEmpty()) {
+                && !currentUser.getAlternateEmail().isEmpty()) {
             dto.setEmail(currentUser.getAlternateEmail());
         }
         return dto;
@@ -497,16 +382,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public CertificateDto checkCertificate(String code, String userUuid) {
         Certificate certificate = certificateRepository.findById(code)
-            .orElseThrow(() -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
+                .orElseThrow(() -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
 
         if (certificate.getCertificateStatus().equals(CertificateStatus.USED)
-            && !certificate.getOrder().getUser().getUuid().equals(userUuid)) {
+                && !certificate.getOrder().getUser().getUuid().equals(userUuid)) {
             return CertificateDto.builder()
-                .code(certificate.getCode())
-                .creationDate(certificate.getCreationDate())
-                .expirationDate(certificate.getExpirationDate())
-                .certificateStatus(certificate.getCertificateStatus().toString())
-                .build();
+                    .code(certificate.getCode())
+                    .creationDate(certificate.getCreationDate())
+                    .expirationDate(certificate.getExpirationDate())
+                    .certificateStatus(certificate.getCertificateStatus().toString())
+                    .build();
         }
         return modelMapper.map(certificate, CertificateDto.class);
     }
@@ -528,7 +413,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
-        final User currentUser = userRepository.findByUuid(uuid);
+        User currentUser = userRepository.findByUuid(uuid);
         if (!checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
             throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
         }
@@ -541,37 +426,72 @@ public class UBSClientServiceImpl implements UBSClientService {
             dto.setPointsToUse(0);
         }
 
-        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(bagsOrdered,
-            dto.getBags(), tariffsInfo);
+        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(bagsOrdered, dto.getBags(), tariffsInfo);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
+
         Order order = isExistOrder(dto, orderId);
         if (orderId != null) {
             checkIsOrderOfCurrentUser(currentUser, order);
+            if (order.getOrderStatus() != OrderStatus.FORMED || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
+                throw new IllegalStateException("Cannot update order: status must be FORMED and payment must be UNPAID");
+            }
+
+            entityManager.clear();
+
+            currentUser = userRepository.findByUuid(uuid);
+            order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException("Order not found after clearing context"));
+
+            orderBagRepository.deleteAllByOrderId(orderId);
+
+            order.getOrderBags().clear();
+            order.updateWithNewOrderBags(bagsOrdered);
+            order.setPointsToUse(dto.getPointsToUse())
+                    .setAdditionalOrders(dto.getAdditionalOrders())
+                    .setComment(dto.getOrderComment())
+                    .setTariffsInfo(tariffsInfo);
+        } else {
+            order.setOrderStatus(OrderStatus.FORMED);
+            order.setOrderDate(LocalDateTime.now());
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+            order.updateWithNewOrderBags(bagsOrdered);
         }
-        order.setTariffsInfo(tariffsInfo);
+
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPayInCoins = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPayInCoins);
         if (sumToPayInCoins <= 0) {
             dto.setShouldBePaid(false);
         }
-        UBSuser userData =
-            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
+
+        UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
+
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
-        eventService.save(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
+
+        String eventName = (orderId == null) ? OrderHistory.ORDER_FORMED_UK : OrderHistory.ORDER_STATUS_UPDATED;
+        String author = OrderHistory.CLIENT_UK;
+        eventService.save(eventName, author, order);
+        log.info("Saved event: eventName={}, author={}, orderId={}", eventName, author, order.getId());
+
         PaymentSystemResponse paymentSystemResponse;
         if (dto.isShouldBePaid()) {
             paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
         } else {
             paymentSystemResponse = getPaymentRequestDto(order, "");
         }
-        notificationService.notifyCreatedOrder(order);
-        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
+
+        if (orderId == null) {
+            notificationService.notifyCreatedOrder(order);
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
+            notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
+        }
+
         return paymentSystemResponse;
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,
-        User currentUser) {
+                                                 User currentUser) {
         return switch (dto.getPaymentSystem()) {
             case WAY_FOR_PAY -> processWayForPay(order, sumToPayInCoins);
             case MONOBANK -> processMonoBank(order, sumToPayInCoins, currentUser);
@@ -586,46 +506,46 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private PaymentSystemResponse processMonoBank(Order order, long sumToPayInCoins, User currentUser) {
         MonoBankPaymentRequestDto requestDto =
-            formPaymentRequestForMonoBank(order.getId(), sumToPayInCoins, currentUser);
+                formPaymentRequestForMonoBank(order.getId(), sumToPayInCoins, currentUser);
         CheckoutResponseFromMonoBank checkoutResponse = monoBankClient.getCheckoutResponse(requestDto, token);
         return getPaymentRequestDto(order, checkoutResponse.pageUrl());
     }
 
     private MonoBankPaymentRequestDto formPaymentRequestForMonoBank(Long orderId, long sumToPayInCoins, User user) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         return MonoBankPaymentRequestDto.builder()
-            .amount((int) sumToPayInCoins)
-            .merchantPaymentInfo(MerchantPaymentInfo.builder()
-                .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
-                .emails(Set.of(user.getRecipientEmail()))
-                .orderList(getBasketOrders(order))
-                .build())
-            .redirectUrl(monoBankRedirectionUrl)
-            .webHookUrl(monoBankPaymentRedirectUrl)
-            .validity(VALIDITY_DURATION_TEN_DAYS)
-            .build();
+                .amount((int) sumToPayInCoins)
+                .merchantPaymentInfo(MerchantPaymentInfo.builder()
+                        .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
+                        .emails(Set.of(user.getRecipientEmail()))
+                        .orderList(getBasketOrders(order))
+                        .build())
+                .redirectUrl(monoBankRedirectionUrl)
+                .webHookUrl(monoBankPaymentRedirectUrl)
+                .validity(VALIDITY_DURATION_TEN_DAYS)
+                .build();
     }
 
     private List<BasketOrder> getBasketOrders(Order order) {
         return order.getOrderBags().stream()
-            .filter(bag -> bag.getAmount() != 0)
-            .map(this::convert)
-            .toList();
+                .filter(bag -> bag.getAmount() != 0)
+                .map(this::convert)
+                .toList();
     }
 
     private BasketOrder convert(OrderBag bag) {
         return BasketOrder.builder()
-            .name(bag.getNameUk())
-            .quantity(bag.getAmount().floatValue())
-            .sum((int) (bag.getPrice() * bag.getAmount()))
-            .code(bag.getNameUk())
-            .build();
+                .name(bag.getNameUk())
+                .quantity(bag.getAmount().floatValue())
+                .sum((int) (bag.getPrice() * bag.getAmount()))
+                .code(bag.getNameUk())
+                .build();
     }
 
     private boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
         Address address = addressRepo.findById(addressId)
-            .orElseThrow(() -> new EntityNotFoundException(ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
+                .orElseThrow(() -> new EntityNotFoundException(ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
 
         boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getBaseAddress().getCityEn());
 
@@ -638,8 +558,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             double addressLongitude = address.getCoordinates().getLongitude();
 
             double distanceInKm =
-                DistanceCalculationUtils.calculateDistanceInKmByHaversineFormula(KYIV_LATITUDE, KYIV_LONGITUDE,
-                    addressLatitude, addressLongitude);
+                    DistanceCalculationUtils.calculateDistanceInKmByHaversineFormula(KYIV_LATITUDE, KYIV_LONGITUDE,
+                            addressLatitude, addressLongitude);
 
             return distanceInKm <= LOCATION_40_KM_ZONE_VALUE && !isKyivTariff;
         } else {
@@ -649,14 +569,14 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private boolean checkIfCityBelongsToKyivTariff(String cityName) {
         return Arrays.stream(KyivTariffLocation.values())
-            .anyMatch(kyivTariffLocation -> kyivTariffLocation.getLocationName().equalsIgnoreCase(cityName));
+                .anyMatch(kyivTariffLocation -> kyivTariffLocation.getLocationName().equalsIgnoreCase(cityName));
     }
 
     private void checkAndCalculateAddressCoordinatesIfEmpty(Address address) {
         if (address.getCoordinates().getLatitude() == 0.0 && address.getCoordinates().getLongitude() == 0.0) {
             LatLng latLng = googleApiService
-                .getGeocodingResultByCityAndCountryAndLocale(UKRAINE_EN, address.getBaseAddress().getCityEn(),
-                    LANG_EN).geometry.location;
+                    .getGeocodingResultByCityAndCountryAndLocale(UKRAINE_EN, address.getBaseAddress().getCityEn(),
+                            LANG_EN).geometry.location;
             Coordinates addressCoordinates = Coordinates.builder().latitude(latLng.lat).longitude(latLng.lng).build();
             address.setCoordinates(addressCoordinates);
             addressRepo.save(address);
@@ -665,29 +585,29 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private List<Integer> getBagIds(List<BagDto> dto) {
         return dto.stream()
-            .map(BagDto::getId)
-            .collect(toList());
+                .map(BagDto::getId)
+                .collect(toList());
     }
 
     private Bag findActiveBagById(Integer id) {
         return bagRepository.findActiveBagById(id)
-            .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
+                .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
     }
 
     private TariffsInfo tryToFindTariffsInfoByBagIds(List<Integer> bagIds, Long locationId) {
         return tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(bagIds, locationId)
-            .orElseThrow(
-                () -> new NotFoundException(String.format(TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST, bagIds, locationId)));
+                .orElseThrow(
+                        () -> new NotFoundException(String.format(TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST, bagIds, locationId)));
     }
 
     private Order isExistOrder(OrderResponseDto dto, Long orderId) {
         if (orderId != null) {
             Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+                    .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
             checkIsOrderPaid(order.getOrderPaymentStatus());
             order.setPointsToUse(dto.getPointsToUse())
-                .setAdditionalOrders(dto.getAdditionalOrders())
-                .setComment(dto.getOrderComment());
+                    .setAdditionalOrders(dto.getAdditionalOrders())
+                    .setComment(dto.getOrderComment());
             return order;
         } else {
             return modelMapper.map(dto, Order.class);
@@ -696,22 +616,22 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private PaymentSystemResponse getPaymentRequestDto(Order order, String link) {
         return PaymentSystemResponse.builder()
-            .orderId(order.getId())
-            .link(link)
-            .build();
+                .orderId(order.getId())
+                .link(link)
+                .build();
     }
 
     private void checkIfAddressHasBeenDeleted(Address address) {
         if (address.getBaseAddress().getAddressStatus().equals(AddressStatus.DELETED)) {
             throw new NotFoundException(
-                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+                    NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
     }
 
     private void checkAddressUser(Address address, User user) {
         if (!address.getUser().equals(user)) {
             throw new NotFoundException(
-                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+                    NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
     }
 
@@ -726,12 +646,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (pointsToUse != 0) {
             currentUser.setCurrentPoints(currentUser.getCurrentPoints() - pointsToUse);
             currentUser.getChangeOfPointsList().add(ChangeOfPoints.builder()
-                .amount(-pointsToUse)
-                .date(order.getOrderDate())
-                .user(currentUser)
-                .order(order)
-                .reason(BonusReason.DEBIT_PAYMENT)
-                .build());
+                    .amount(-pointsToUse)
+                    .date(order.getOrderDate())
+                    .user(currentUser)
+                    .order(order)
+                    .reason(BonusReason.DEBIT_PAYMENT)
+                    .build());
         }
         userRepository.save(currentUser);
     }
@@ -742,17 +662,17 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
         Page<Order> orderPages = nonNull(statuses)
-            ? ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(page, uuid, statuses)
-            : ordersForUserRepository.getAllByUserUuid(page, uuid);
+                ? ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(page, uuid, statuses)
+                : ordersForUserRepository.getAllByUserUuid(page, uuid);
         List<Order> orders = orderPages.getContent();
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
         orders.forEach(order -> dtos.add(getOrdersData(order)));
 
         return new PageableDto<>(
-            dtos,
-            orderPages.getTotalElements(),
-            orderPages.getPageable().getPageNumber(),
-            orderPages.getTotalPages());
+                dtos,
+                orderPages.getTotalElements(),
+                orderPages.getPageable().getPageNumber(),
+                orderPages.getTotalPages());
     }
 
     /**
@@ -772,110 +692,110 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Payment> payments = order.getPayment();
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
         OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
-            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue())
-            .orElse(orderStatusTranslationRepository.getReferenceById(1L));
+                .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue())
+                .orElse(orderStatusTranslationRepository.getReferenceById(1L));
         OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
-            .getById((long) order.getOrderPaymentStatus().getStatusValue());
+                .getById((long) order.getOrderPaymentStatus().getStatusValue());
 
         Long fullPriceInCoins = bagForUserDtos.stream()
-            .map(b -> convertBillsIntoCoins(b.getTotalPrice()))
-            .reduce(0L, Long::sum);
+                .map(b -> convertBillsIntoCoins(b.getTotalPrice()))
+                .reduce(0L, Long::sum);
 
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
-            .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .collect(toList());
+                .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
+                .collect(toList());
 
         Long amountWithDiscountInCoins = fullPriceInCoins
-            - 100L * (order.getPointsToUse() + countCertificatesBonuses(certificateDtos));
+                - 100L * (order.getPointsToUse() + countCertificatesBonuses(certificateDtos));
 
         Long paidAmountInCoins = countPaidAmount(payments);
 
         Double amountBeforePayment = convertCoinsIntoBills(amountWithDiscountInCoins - paidAmountInCoins);
 
         double refundedBonuses = order.getPayment().stream()
-            .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN.equals(payment.getReceiptLink()))
-            .map(payment -> payment.getAmount().doubleValue())
-            .reduce(0.0, Double::sum);
+                .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN.equals(payment.getReceiptLink()))
+                .map(payment -> payment.getAmount().doubleValue())
+                .reduce(0.0, Double::sum);
 
         refundedBonuses /= -CURRENCY_CONVERSION_RATE;
 
         Double refundedMoney =
-            order.getRefund() == null ? 0.0 : order.getRefund().getAmount().doubleValue() / CURRENCY_CONVERSION_RATE;
+                order.getRefund() == null ? 0.0 : order.getRefund().getAmount().doubleValue() / CURRENCY_CONVERSION_RATE;
 
         return OrdersDataForUserDto.builder()
-            .id(order.getId())
-            .dateForm(order.getOrderDate())
-            .datePaid(order.getOrderDate())
-            .orderStatusUk(orderStatusTranslation.getNameUk())
-            .orderStatusEn(orderStatusTranslation.getNameEn())
-            .orderComment(order.getComment())
-            .bags(bagForUserDtos)
-            .additionalOrders(order.getAdditionalOrders())
-            .amountBeforePayment(amountBeforePayment)
-            .refundedBonuses(refundedBonuses)
-            .refundedMoney(refundedMoney)
-            .paidAmount(convertCoinsIntoBills(paidAmountInCoins))
-            .orderFullPrice(convertCoinsIntoBills(fullPriceInCoins))
-            .certificate(certificateDtos)
-            .bonuses(order.getPointsToUse().doubleValue())
-            .sender(senderInfoDtoBuilder(order))
-            .address(addressInfoDtoBuilder(order))
-            .paymentStatusUk(paymentStatusTranslation.getTranslationValueUk())
-            .paymentStatusEn(paymentStatusTranslation.getTranslationsValueEn())
-            .build();
+                .id(order.getId())
+                .dateForm(order.getOrderDate())
+                .datePaid(order.getOrderDate())
+                .orderStatusUk(orderStatusTranslation.getNameUk())
+                .orderStatusEn(orderStatusTranslation.getNameEn())
+                .orderComment(order.getComment())
+                .bags(bagForUserDtos)
+                .additionalOrders(order.getAdditionalOrders())
+                .amountBeforePayment(amountBeforePayment)
+                .refundedBonuses(refundedBonuses)
+                .refundedMoney(refundedMoney)
+                .paidAmount(convertCoinsIntoBills(paidAmountInCoins))
+                .orderFullPrice(convertCoinsIntoBills(fullPriceInCoins))
+                .certificate(certificateDtos)
+                .bonuses(order.getPointsToUse().doubleValue())
+                .sender(senderInfoDtoBuilder(order))
+                .address(addressInfoDtoBuilder(order))
+                .paymentStatusUk(paymentStatusTranslation.getTranslationValueUk())
+                .paymentStatusEn(paymentStatusTranslation.getTranslationsValueEn())
+                .build();
     }
 
     private Integer countCertificatesBonuses(List<CertificateDto> certificateDtos) {
         return certificateDtos.stream()
-            .map(CertificateDto::getPoints)
-            .reduce(0, Integer::sum);
+                .map(CertificateDto::getPoints)
+                .reduce(0, Integer::sum);
     }
 
     private SenderInfoDto senderInfoDtoBuilder(Order order) {
         UBSuser sender = order.getUbsUser();
         if (sender.getSenderFirstName() != null && !sender.getSenderFirstName().isEmpty()
-            && sender.getSenderLastName() != null && !sender.getSenderLastName().isEmpty()
-            && sender.getSenderPhoneNumber() != null && !sender.getSenderPhoneNumber().isEmpty()) {
+                && sender.getSenderLastName() != null && !sender.getSenderLastName().isEmpty()
+                && sender.getSenderPhoneNumber() != null && !sender.getSenderPhoneNumber().isEmpty()) {
             return SenderInfoDto.builder()
-                .senderName(sender.getSenderFirstName())
-                .senderSurname(sender.getSenderLastName())
-                .senderEmail(sender.getSenderEmail())
-                .senderPhone(sender.getSenderPhoneNumber())
-                .build();
+                    .senderName(sender.getSenderFirstName())
+                    .senderSurname(sender.getSenderLastName())
+                    .senderEmail(sender.getSenderEmail())
+                    .senderPhone(sender.getSenderPhoneNumber())
+                    .build();
         } else {
             return SenderInfoDto.builder()
-                .senderName(sender.getFirstName())
-                .senderSurname(sender.getLastName())
-                .senderEmail(sender.getEmail())
-                .senderPhone(sender.getPhoneNumber())
-                .build();
+                    .senderName(sender.getFirstName())
+                    .senderSurname(sender.getLastName())
+                    .senderEmail(sender.getEmail())
+                    .senderPhone(sender.getPhoneNumber())
+                    .build();
         }
     }
 
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
         var address = order.getUbsUser().getOrderAddress();
         return AddressInfoDto.builder()
-            .addressCityUk(address.getBaseAddress().getCityUk())
-            .addressCityEn(address.getBaseAddress().getCityEn())
-            .addressComment(address.getBaseAddress().getAddressComment())
-            .addressDistinctUk(address.getBaseAddress().getDistrictUk())
-            .addressDistinctEn(address.getBaseAddress().getDistrictEn())
-            .addressRegionUk(address.getBaseAddress().getRegionUk())
-            .addressRegionEn(address.getBaseAddress().getRegionEn())
-            .addressStreetUk(address.getBaseAddress().getStreetUk())
-            .addressStreetEn(address.getBaseAddress().getStreetEn())
-            .houseCorpus(address.getBaseAddress().getHouseCorpus())
-            .houseNumber(address.getBaseAddress().getHouseNumber())
-            .entranceNumber(address.getBaseAddress().getEntranceNumber())
-            .build();
+                .addressCityUk(address.getBaseAddress().getCityUk())
+                .addressCityEn(address.getBaseAddress().getCityEn())
+                .addressComment(address.getBaseAddress().getAddressComment())
+                .addressDistinctUk(address.getBaseAddress().getDistrictUk())
+                .addressDistinctEn(address.getBaseAddress().getDistrictEn())
+                .addressRegionUk(address.getBaseAddress().getRegionUk())
+                .addressRegionEn(address.getBaseAddress().getRegionEn())
+                .addressStreetUk(address.getBaseAddress().getStreetUk())
+                .addressStreetEn(address.getBaseAddress().getStreetEn())
+                .houseCorpus(address.getBaseAddress().getHouseCorpus())
+                .houseNumber(address.getBaseAddress().getHouseNumber())
+                .entranceNumber(address.getBaseAddress().getEntranceNumber())
+                .build();
     }
 
     private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
         List<OrderBag> bagsAmountInOrder = order.getOrderBags();
         Map<Integer, Integer> actualBagsAmount = orderBagService.getActualBagsAmountForOrder(bagsAmountInOrder);
         return bagsAmountInOrder.stream()
-            .map(orderBag -> buildBagForUserDto(orderBag, actualBagsAmount.get(orderBag.getBag().getId())))
-            .collect(toList());
+                .map(orderBag -> buildBagForUserDto(orderBag, actualBagsAmount.get(orderBag.getBag().getId())))
+                .collect(toList());
     }
 
     private BagForUserDto buildBagForUserDto(OrderBag orderBag, int count) {
@@ -887,9 +807,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private Long countPaidAmount(List<Payment> payments) {
         return payments.stream()
-            .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
-            .map(Payment::getAmount)
-            .reduce(0L, Long::sum);
+                .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
+                .map(Payment::getAmount)
+                .reduce(0L, Long::sum);
     }
 
     /**
@@ -899,34 +819,34 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId, String uuid) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         User user = userRepository.findByUuid(uuid);
         if (!order.getUser().equals(user)) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
         UserInfoDto userInfoDto = UserInfoDto.builder()
-            .customerName(order.getUser().getRecipientName())
-            .customerSurName(order.getUser().getRecipientSurname())
-            .customerPhoneNumber(order.getUser().getRecipientPhone())
-            .customerEmail(order.getUser().getRecipientEmail())
-            .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
-            .recipientId(order.getUbsUser().getId())
-            .userViolationForCurrentOrder(
-                userRepository.checkIfUserHasViolationForCurrentOrder(order.getUser().getId(), order.getId()))
-            .build();
+                .customerName(order.getUser().getRecipientName())
+                .customerSurName(order.getUser().getRecipientSurname())
+                .customerPhoneNumber(order.getUser().getRecipientPhone())
+                .customerEmail(order.getUser().getRecipientEmail())
+                .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
+                .recipientId(order.getUbsUser().getId())
+                .userViolationForCurrentOrder(
+                        userRepository.checkIfUserHasViolationForCurrentOrder(order.getUser().getId(), order.getId()))
+                .build();
         if (order.getUbsUser().getSenderFirstName() != null && !order.getUbsUser().getSenderFirstName().isEmpty()
-            && order.getUbsUser().getSenderLastName() != null && !order.getUbsUser().getSenderLastName().isEmpty()
-            && order.getUbsUser().getSenderPhoneNumber() != null
-            && !order.getUbsUser().getSenderPhoneNumber().isEmpty()) {
+                && order.getUbsUser().getSenderLastName() != null && !order.getUbsUser().getSenderLastName().isEmpty()
+                && order.getUbsUser().getSenderPhoneNumber() != null
+                && !order.getUbsUser().getSenderPhoneNumber().isEmpty()) {
             return userInfoDto.setRecipientName(order.getUbsUser().getSenderFirstName())
-                .setRecipientSurName(order.getUbsUser().getSenderLastName())
-                .setRecipientEmail(order.getUbsUser().getSenderEmail())
-                .setRecipientPhoneNumber(order.getUbsUser().getSenderPhoneNumber());
+                    .setRecipientSurName(order.getUbsUser().getSenderLastName())
+                    .setRecipientEmail(order.getUbsUser().getSenderEmail())
+                    .setRecipientPhoneNumber(order.getUbsUser().getSenderPhoneNumber());
         } else {
             return userInfoDto.setRecipientName(order.getUbsUser().getFirstName())
-                .setRecipientSurName(order.getUbsUser().getLastName())
-                .setRecipientEmail(order.getUbsUser().getEmail())
-                .setRecipientPhoneNumber(order.getUbsUser().getPhoneNumber());
+                    .setRecipientSurName(order.getUbsUser().getLastName())
+                    .setRecipientEmail(order.getUbsUser().getEmail())
+                    .setRecipientPhoneNumber(order.getUbsUser().getPhoneNumber());
         }
     }
 
@@ -947,17 +867,17 @@ public class UBSClientServiceImpl implements UBSClientService {
         ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
         if (!isAdmin(authentication)) {
             eventService.save(OrderHistory.CHANGED_SENDER_UK, OrderHistory.CLIENT_UK,
-                ubsUser.getOrders().getFirst());
+                    ubsUser.getOrders().getFirst());
         } else {
             eventService.save(OrderHistory.CHANGED_SENDER_UK, OrderHistory.UBS_ADMIN,
-                ubsUser.getOrders().getFirst());
+                    ubsUser.getOrders().getFirst());
         }
 
         return UbsCustomersDto.builder()
-            .name(ubsUser.getSenderFirstName() + " " + ubsUser.getSenderLastName())
-            .email(ubsUser.getSenderEmail())
-            .phoneNumber(ubsUser.getSenderPhoneNumber())
-            .build();
+                .name(ubsUser.getSenderFirstName() + " " + ubsUser.getSenderLastName())
+                .email(ubsUser.getSenderEmail())
+                .phoneNumber(ubsUser.getSenderPhoneNumber())
+                .build();
     }
 
     /**
@@ -967,12 +887,12 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     private boolean isAdmin(Authentication authentication) {
         return authentication.getAuthorities().stream()
-            .anyMatch(authority -> authority.getAuthority().equals(UBS_EMPLOYEE_WITH_PREFIX));
+                .anyMatch(authority -> authority.getAuthority().equals(UBS_EMPLOYEE_WITH_PREFIX));
     }
 
     private UBSuser getUbsUserById(Long recipientId) {
         return ubsUserRepository.findById(recipientId)
-            .orElseThrow(() -> new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + recipientId));
+                .orElseThrow(() -> new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + recipientId));
     }
 
     private void checkUserHasAccessToUpdateData(UBSuser ubsUser, String userUuid, Authentication authentication) {
@@ -984,7 +904,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private boolean checkUserRoleIsUser(Authentication authentication) {
         return authentication.getAuthorities().stream()
-            .anyMatch(authority -> authority.getAuthority().equals(USER_WITH_PREFIX));
+                .anyMatch(authority -> authority.getAuthority().equals(USER_WITH_PREFIX));
     }
 
     @Override
@@ -995,12 +915,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         User user = userRepository.findByUuid(userProfileCreateDto.getUuid());
         if (user == null) {
             user = userRepository.save(User.builder()
-                .uuid(userProfileCreateDto.getUuid())
-                .recipientEmail(userProfileCreateDto.getEmail())
-                .recipientName(userProfileCreateDto.getName())
-                .currentPoints(0)
-                .violations(0)
-                .dateOfRegistration(LocalDate.now()).build());
+                    .uuid(userProfileCreateDto.getUuid())
+                    .recipientEmail(userProfileCreateDto.getEmail())
+                    .recipientName(userProfileCreateDto.getName())
+                    .currentPoints(0)
+                    .violations(0)
+                    .dateOfRegistration(LocalDate.now()).build());
         }
         return user.getId();
     }
@@ -1023,25 +943,23 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
-        List<OrderBag> bagsOrdered, UBSuser userData,
-        User currentUser, long sumToPayInCoins) {
-        orderBagRepository.deleteAllByOrderId(order.getId());
+                                  List<OrderBag> bagsOrdered, UBSuser userData,
+                                  User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
         order.updateWithNewOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
-        order.setSumTotalAmountWithoutDiscounts(
-            calculateOrderSumWithoutDiscounts(bagsOrdered));
+        order.setSumTotalAmountWithoutDiscounts(calculateOrderSumWithoutDiscounts(bagsOrdered));
         setOrderPaymentStatus(order, sumToPayInCoins);
 
         Payment payment = Payment.builder()
-            .amount(sumToPayInCoins)
-            .orderStatus(OrderStatus.FORMED)
-            .currency("UAH")
-            .paymentStatus(PaymentStatus.UNPAID)
-            .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
-            .order(order).build();
+                .amount(sumToPayInCoins)
+                .orderStatus(OrderStatus.FORMED)
+                .currency("UAH")
+                .paymentStatus(PaymentStatus.UNPAID)
+                .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .order(order).build();
 
         if (order.getPayment() == null) {
             order.setPayment(new ArrayList<>());
@@ -1055,67 +973,67 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         } else {
             order.setOrderPaymentStatus(
-                order.getPointsToUse() > 0 || CollectionUtils.isNotEmpty(order.getCertificates())
-                    ? OrderPaymentStatus.HALF_PAID
-                    : OrderPaymentStatus.UNPAID);
+                    order.getPointsToUse() > 0 || CollectionUtils.isNotEmpty(order.getCertificates())
+                            ? OrderPaymentStatus.HALF_PAID
+                            : OrderPaymentStatus.UNPAID);
         }
     }
 
     private PaymentWayForPayRequestDto formPaymentRequestForWayForPay(Long orderId, long sumToPayInCoins) {
         Instant instant = Instant.now();
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         PaymentWayForPayRequestDto paymentWayForPayRequestDto = PaymentWayForPayRequestDto.builder()
-            .transactionType("CREATE_INVOICE")
-            .merchantAccount(merchantAccount)
-            .merchantDomainName(merchantDomainName)
-            .apiVersion(1)
-            .serviceUrl(resultWayForPayUrl)
-            .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
-            .orderDate(instant.getEpochSecond())
-            .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
-            .currency("UAH")
-            .orderTimeout(VALIDITY_DURATION_TEN_DAYS)
-            .productName(order.getOrderBags().stream()
-                .filter(bag -> bag.getAmount() != 0)
-                .map(orderBag -> orderBag.getNameUk().trim())
-                .flatMap(name -> Arrays.stream(name.split(",")))
-                .toList())
-            .productPrice(order.getOrderBags().stream()
-                .filter(bag -> bag.getAmount() != 0)
-                .map(product -> convertCoinsIntoBills(product.getPrice()).intValue())
-                .toList())
-            .productCount(order.getOrderBags().stream()
-                .map(OrderBag::getAmount)
-                .filter(amount -> amount != 0)
-                .toList())
-            .build();
+                .transactionType("CREATE_INVOICE")
+                .merchantAccount(merchantAccount)
+                .merchantDomainName(merchantDomainName)
+                .apiVersion(1)
+                .serviceUrl(resultWayForPayUrl)
+                .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
+                .orderDate(instant.getEpochSecond())
+                .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
+                .currency("UAH")
+                .orderTimeout(VALIDITY_DURATION_TEN_DAYS)
+                .productName(order.getOrderBags().stream()
+                        .filter(bag -> bag.getAmount() != 0)
+                        .map(orderBag -> orderBag.getNameUk().trim())
+                        .flatMap(name -> Arrays.stream(name.split(",")))
+                        .toList())
+                .productPrice(order.getOrderBags().stream()
+                        .filter(bag -> bag.getAmount() != 0)
+                        .map(product -> convertCoinsIntoBills(product.getPrice()).intValue())
+                        .toList())
+                .productCount(order.getOrderBags().stream()
+                        .map(OrderBag::getAmount)
+                        .filter(amount -> amount != 0)
+                        .toList())
+                .build();
 
         paymentWayForPayRequestDto.setSignature(encryptionUtil
-            .formRequestSignature(paymentWayForPayRequestDto, wayForPaySecret));
+                .formRequestSignature(paymentWayForPayRequestDto, wayForPaySecret));
 
         return paymentWayForPayRequestDto;
     }
 
     private Double convertCoinsIntoBills(Long coins) {
         return BigDecimal.valueOf(coins)
-            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-            .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
-            .doubleValue();
+                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     private UBSuser formUserDataToBeSaved(PersonalDataDto dto, Long addressId, Long locationId, User currentUser) {
         UBSuser ubsUserFromDatabaseById = null;
         if (dto.getUbsUserId() != null) {
             ubsUserFromDatabaseById =
-                ubsUserRepository.findById(dto.getUbsUserId())
-                    .orElseThrow(() -> new BadRequestException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
-                        + dto.getUbsUserId()));
+                    ubsUserRepository.findById(dto.getUbsUserId())
+                            .orElseThrow(() -> new BadRequestException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
+                                    + dto.getUbsUserId()));
         }
         UBSuser mappedFromDtoUser = modelMapper.map(dto, UBSuser.class);
         mappedFromDtoUser.setUser(currentUser);
         mappedFromDtoUser.setPhoneNumber(
-            UAPhoneNumberUtil.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
+                UAPhoneNumberUtil.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
             mappedFromDtoUser.setOrderAddress(saveOrderAddressWithLocation(addressId, locationId, currentUser));
@@ -1142,37 +1060,37 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public OrderPaymentDetailDto getOrderPaymentDetail(Long orderId) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         return buildOrderPaymentDetailDto(order);
     }
 
     private OrderPaymentDetailDto buildOrderPaymentDetailDto(Order order) {
         int certificatePointsInCoins = order.getCertificates().stream()
-            .flatMapToInt(c -> IntStream.of(c.getPoints()))
-            .reduce(Integer::sum).orElse(0) * 100;
+                .flatMapToInt(c -> IntStream.of(c.getPoints()))
+                .reduce(Integer::sum).orElse(0) * 100;
         int pointsToUseInCoins = order.getPointsToUse() * 100;
         long amountInCoins = order.getPayment().stream()
-            .flatMapToLong(p -> LongStream.of(p.getAmount()))
-            .reduce(Long::sum).orElse(0);
+                .flatMapToLong(p -> LongStream.of(p.getAmount()))
+                .reduce(Long::sum).orElse(0);
         String currency = order.getPayment().isEmpty() ? "UAH" : order.getPayment().getFirst().getCurrency();
         return OrderPaymentDetailDto.builder()
-            .amount(amountInCoins != 0L ? amountInCoins + certificatePointsInCoins + pointsToUseInCoins : 0L)
-            .certificates(-certificatePointsInCoins)
-            .pointsToUse(-pointsToUseInCoins)
-            .amountToPay(amountInCoins)
-            .currency(currency)
-            .build();
+                .amount(amountInCoins != 0L ? amountInCoins + certificatePointsInCoins + pointsToUseInCoins : 0L)
+                .certificates(-certificatePointsInCoins)
+                .pointsToUse(-pointsToUseInCoins)
+                .amountToPay(amountInCoins)
+                .currency(currency)
+                .build();
     }
 
     private long formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
-        Order order, long sumToPayInCoins) {
+                                                               Order order, long sumToPayInCoins) {
         if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
             for (String temp : dto.getCertificates()) {
                 if (dto.getCertificates().size() > 5) {
                     throw new BadRequestException(TOO_MANY_CERTIFICATES);
                 }
                 Certificate certificate = certificateRepository.findById(temp).orElseThrow(
-                    () -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
+                        () -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
                 validateCertificate(certificate);
                 certificate.setOrder(order);
                 orderCertificates.add(certificate);
@@ -1191,7 +1109,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (sumToPayInCoins <= 0) {
             certificate.setCertificateStatus(CertificateStatus.USED);
             certificate.setPoints(certificate.getPoints()
-                + BigDecimal.valueOf(sumToPayInCoins)
+                    + BigDecimal.valueOf(sumToPayInCoins)
                     .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
                     .setScale(0, RoundingMode.UP).intValue());
             return true;
@@ -1212,12 +1130,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private long calculateOrderSumWithoutDiscounts(List<OrderBag> getOrderBagsAndQuantity) {
         return getOrderBagsAndQuantity.stream()
-            .map(orderBag -> orderBag.getPrice() * orderBag.getAmount())
-            .reduce(0L, Long::sum);
+                .map(orderBag -> orderBag.getPrice() * orderBag.getAmount())
+                .reduce(0L, Long::sum);
     }
 
     private long formBagsToBeSavedAndCalculateOrderSum(List<OrderBag> orderBagList, List<BagDto> bags,
-        TariffsInfo tariffsInfo) {
+                                                       TariffsInfo tariffsInfo) {
         long totalSumToPayInCoins = 0L;
         long limitedSumToPayInCoins = 0L;
         int limitedBags = 0;
@@ -1238,12 +1156,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, limitedBags);
         totalSumToPayInCoins += limitedSumToPayInCoins;
         List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
-            .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
-            .map(this::createOrderBag)
-            .toList();
+                .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
+                .map(this::createOrderBag)
+                .toList();
         orderBagList.addAll(notOrderedBags.stream()
-            .map(this::setAmountToOrderBag)
-            .toList());
+                .map(this::setAmountToOrderBag)
+                .toList());
         return totalSumToPayInCoins;
     }
 
@@ -1254,12 +1172,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private OrderBag createOrderBag(Bag bag) {
         return OrderBag.builder()
-            .bag(bag)
-            .capacity(bag.getCapacity())
-            .price(bag.getFullPrice())
-            .nameUk(bag.getNameUk())
-            .nameEn(bag.getNameEn())
-            .build();
+                .bag(bag)
+                .capacity(bag.getCapacity())
+                .price(bag.getFullPrice())
+                .nameUk(bag.getNameUk())
+                .nameEn(bag.getNameEn())
+                .build();
     }
 
     private void validateCertificate(Certificate certificate) {
@@ -1277,7 +1195,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public AllPointsUserDto findAllCurrentPointsForUser(String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Integer userBonuses = currentUser.getCurrentPoints();
         if (userBonuses == null) {
             userBonuses = 0;
@@ -1286,9 +1204,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<PointsForUbsUserDto> bonusForUbsUser = new ArrayList<>();
         if (nonNull(changeOfPointsList)) {
             bonusForUbsUser = changeOfPointsList.stream()
-                .sorted(Comparator.comparing(ChangeOfPoints::getDate).reversed())
-                .map(m -> modelMapper.map(m, PointsForUbsUserDto.class))
-                .collect(toList());
+                    .sorted(Comparator.comparing(ChangeOfPoints::getDate).reversed())
+                    .map(m -> modelMapper.map(m, PointsForUbsUserDto.class))
+                    .collect(toList());
         }
         AllPointsUserDto allBonusesForUserDto = new AllPointsUserDto();
         allBonusesForUserDto.setUserBonuses(userBonuses);
@@ -1314,9 +1232,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         localizeEventNames(orderEvents, language);
         return orderEvents.stream()
-            .map(event -> modelMapper.map(event, EventDto.class))
-            .sorted(Comparator.comparing(EventDto::getEventDate).reversed())
-            .toList();
+                .map(event -> modelMapper.map(event, EventDto.class))
+                .sorted(Comparator.comparing(EventDto::getEventDate).reversed())
+                .toList();
     }
 
     /**
@@ -1344,13 +1262,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public UserProfileUpdateDto updateProfileData(String uuid, UserProfileUpdateDto userProfileUpdateDto) {
         User user = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         setUserData(user, userProfileUpdateDto);
         setTelegramAndViberBots(user, userProfileUpdateDto.getTelegramIsNotify(),
-            userProfileUpdateDto.getViberIsNotify());
+                userProfileUpdateDto.getViberIsNotify());
         userProfileUpdateDto.getAddressDto().stream()
-            .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
-            .forEach(addressRequestDto -> addressService.updateCurrentAddressForOrder(addressRequestDto, uuid));
+                .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
+                .forEach(addressRequestDto -> addressService.updateCurrentAddressForOrder(addressRequestDto, uuid));
         User savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserProfileUpdateDto.class);
     }
@@ -1358,14 +1276,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public UserProfileDto getProfileData(String uuid) {
         User user = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         List<Address> allAddress = addressRepo.findAllNonDeletedAddressesByUserId(user.getId());
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         List<Bot> botList = getListOfBots(user.getUuid());
         List<AddressDto> addressDto =
-            allAddress.stream()
-                .map(a -> modelMapper.map(a, AddressDto.class))
-                .collect(toList());
+                allAddress.stream()
+                        .map(a -> modelMapper.map(a, AddressDto.class))
+                        .collect(toList());
         userProfileDto.setAddressDto(addressDto);
         userProfileDto.setBotList(botList);
         userProfileDto.setHasPassword(userRemoteClient.getPasswordStatus().isHasPassword());
@@ -1377,7 +1295,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         user.setRecipientSurname(userProfileUpdateDto.getRecipientSurname());
         user.setAlternateEmail(userProfileUpdateDto.getAlternateEmail());
         user.setRecipientPhone(
-            UAPhoneNumberUtil.getE164PhoneNumberFormat(userProfileUpdateDto.getRecipientPhone()));
+                UAPhoneNumberUtil.getE164PhoneNumberFormat(userProfileUpdateDto.getRecipientPhone()));
     }
 
     private void setTelegramAndViberBots(User user, Boolean telegramIsNotify, Boolean viberIsNotify) {
@@ -1405,14 +1323,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public OrderCancellationReasonDto getOrderCancellationReason(final Long orderId, String uuid) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
         }
         return OrderCancellationReasonDto.builder()
-            .cancellationReason(order.getCancellationReason())
-            .cancellationComment(order.getCancellationComment())
-            .build();
+                .cancellationReason(order.getCancellationReason())
+                .cancellationComment(order.getCancellationComment())
+                .build();
     }
 
     private long reduceOrderSumDueToUsedPoints(long sumToPayInCoins, int pointsToUse) {
@@ -1423,7 +1341,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void getOrder(OrderResponseDto dto, User currentUser, List<OrderBag> amountOfBagsOrdered,
-        long sumToPayInCoins, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
+                          long sumToPayInCoins, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
         formAndSaveOrder(order, orderCertificates, amountOfBagsOrdered, userData, currentUser, sumToPayInCoins);
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
@@ -1431,10 +1349,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private OrderAddress saveOrderAddressWithLocation(Long addressId, Long locationId, User currentUser) {
         var address = addressRepo.findById(addressId)
-            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
 
         var location = locationRepository.findById(locationId)
-            .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
+                .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
 
         checkIfAddressHasBeenDeleted(address);
 
@@ -1463,9 +1381,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private Long convertBillsIntoCoins(Double bills) {
         return BigDecimal.valueOf(bills)
-            .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-            .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
-            .longValue();
+                .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
+                .longValue();
     }
 
     private void checkIsOrderPaid(OrderPaymentStatus orderPaymentStatus) {
@@ -1489,9 +1407,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     protected void checkOrderStatusApproved(PaymentResponseDto dto,
-        Payment orderPayment,
-        Order order,
-        String decodedOrderReference) {
+                                            Payment orderPayment,
+                                            Order order,
+                                            String decodedOrderReference) {
         if (dto.getTransactionStatus().equals(APPROVED_STATUS)) {
             orderPayment.setPaymentId(decodedOrderReference.split("_")[1]);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
@@ -1502,7 +1420,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderRepository.save(order);
             eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM_UK, order);
+                    OrderHistory.SYSTEM_UK, order);
         }
     }
 
@@ -1516,20 +1434,20 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private List<Bot> getListOfBots(String uuid) {
         return EnumSet.allOf(BotType.class)
-            .stream()
-            .map(type -> new Bot(type.name(), createLink(type, uuid)))
-            .collect(toList());
+                .stream()
+                .map(type -> new Bot(type.name(), createLink(type, uuid)))
+                .collect(toList());
     }
 
     private String createLink(BotType type, String uuid) {
         String linkTemplate = null;
         if ("TELEGRAM".equals(type.name())) {
             linkTemplate = String.format("%s%s%s%s",
-                TELEGRAM_PART_1_OF_LINK, telegramBotName, TELEGRAM_PART_3_OF_LINK, uuid);
+                    TELEGRAM_PART_1_OF_LINK, telegramBotName, TELEGRAM_PART_3_OF_LINK, uuid);
         }
         if ("VIBER".equals(type.name())) {
             linkTemplate = String.format("%s%s%s%s",
-                VIBER_PART_1_OF_LINK, viberBotUri, VIBER_PART_3_OF_LINK, uuid);
+                    VIBER_PART_1_OF_LINK, viberBotUri, VIBER_PART_3_OF_LINK, uuid);
         }
         return linkTemplate;
     }
@@ -1541,35 +1459,35 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private List<AllActiveLocationsDto> getAllActiveLocationsDtos(List<Location> locations, Long courierId) {
         Map<RegionDto, List<LocationWithTariffInfoDto>> map = locations.stream()
-            .collect(toMap(x -> modelMapper.map(x, RegionDto.class),
-                x -> new ArrayList<>(List.of(LocationWithTariffInfoDto.builder()
-                    .locationId(x.getId())
-                    .nameUk(x.getNameUk())
-                    .nameEn(x.getNameEn())
-                    .tariffInfoDto(modelMapper.map(
-                        tariffsInfoRepository
-                            .findTariffInfoByLocationIdAndCourierId(x.getId(), courierId)
-                            .orElse(null),
-                        TariffInfoDto.class))
-                    .build())),
-                (x, y) -> {
-                    x.addAll(y);
-                    return new ArrayList<>(x).stream().distinct().collect(toList());
-                }));
+                .collect(toMap(x -> modelMapper.map(x, RegionDto.class),
+                        x -> new ArrayList<>(List.of(LocationWithTariffInfoDto.builder()
+                                .locationId(x.getId())
+                                .nameUk(x.getNameUk())
+                                .nameEn(x.getNameEn())
+                                .tariffInfoDto(modelMapper.map(
+                                        tariffsInfoRepository
+                                                .findTariffInfoByLocationIdAndCourierId(x.getId(), courierId)
+                                                .orElse(null),
+                                        TariffInfoDto.class))
+                                .build())),
+                        (x, y) -> {
+                            x.addAll(y);
+                            return new ArrayList<>(x).stream().distinct().collect(toList());
+                        }));
 
         return map.entrySet().stream()
-            .map(x -> AllActiveLocationsDto.builder()
-                .regionId(x.getKey().getRegionId())
-                .nameEn(x.getKey().getNameEn())
-                .nameUk(x.getKey().getNameUk())
-                .locations(x.getValue())
-                .build())
-            .collect(toList());
+                .map(x -> AllActiveLocationsDto.builder()
+                        .regionId(x.getKey().getRegionId())
+                        .nameEn(x.getKey().getNameEn())
+                        .nameUk(x.getKey().getNameUk())
+                        .locations(x.getValue())
+                        .build())
+                .collect(toList());
     }
 
     @Override
     public OrderCourierPopUpDto getInfoForCourierOrderingByCourierId(String uuid, Optional<String> changeLoc,
-        Long courierId) {
+                                                                     Long courierId) {
         if (!courierRepository.existsCourierById(courierId)) {
             throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
         }
@@ -1589,15 +1507,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public List<CourierDto> getAllActiveCouriers() {
         return courierRepository.getAllActiveCouriers().stream()
-            .map(courier -> modelMapper.map(courier, CourierDto.class))
-            .toList();
+                .map(courier -> modelMapper.map(courier, CourierDto.class))
+                .toList();
     }
 
     private TariffsInfo findTariffsInfoByCourierAndLocationId(Long courierId, Long locationId) {
         return tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(courierId, locationId)
-            .orElseThrow(
-                () -> new NotFoundException(
-                    String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, courierId, locationId)));
+                .orElseThrow(
+                        () -> new NotFoundException(
+                                String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, courierId, locationId)));
     }
 
     @Override
@@ -1607,10 +1525,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         return TariffInfoByLocationDto.builder()
-            .orderIsPresent(true)
-            .tariffsForLocationDto(modelMapper.map(
-                findTariffsInfoByCourierAndLocationId(courierId, locationId), TariffsForLocationDto.class))
-            .build();
+                .orderIsPresent(true)
+                .tariffsForLocationDto(modelMapper.map(
+                        findTariffsInfoByCourierAndLocationId(courierId, locationId), TariffsForLocationDto.class))
+                .build();
     }
 
     @Override
@@ -1627,14 +1545,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Cacheable(value = "positionsAndAuthorities", key = "#email")
     public PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email) {
         Employee employee = employeeRepository.findByEmail(email)
-            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST + email));
+                .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST + email));
         return userRemoteClient.getPositionsAndRelatedAuthorities(employee.getEmail());
     }
 
     @Override
     public Set<String> getAllAuthorities(String email) {
         Employee employee = employeeRepository.findByEmail(email)
-            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST + email));
+                .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST + email));
         return userRemoteClient.getAllAuthorities(employee.getEmail());
     }
 
@@ -1649,10 +1567,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public PaymentSystemResponse processOrder(String userUuid, OrderWayForPayClientDto dto) {
         Order order = orderRepository.findById(dto.getOrderId())
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
         checkOrderIsPaid(order.getOrderPaymentStatus());
         User currentUser = userRepository.findUserByUuid(userUuid)
-            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST + userUuid));
+                .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST + userUuid));
         checkForNullCounter(order);
         long sumToPayInCoins = calculateSumToPay(dto, order, currentUser);
 
@@ -1670,9 +1588,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String formedLink(Order order, long sumToPayInCoins) {
         Order increment = incrementCounter(order);
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
-            formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
+                formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
         paymentWayForPayRequestDto
-            .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
+                .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
         return getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
     }
 
@@ -1707,24 +1625,24 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setPointsToUse(order.getPointsToUse() + pointsToUse);
         user.setCurrentPoints(user.getCurrentPoints() - pointsToUse);
         user.getChangeOfPointsList()
-            .add(ChangeOfPoints.builder()
-                .user(user)
-                .amount(-pointsToUse)
-                .date(LocalDateTime.now())
-                .order(order)
-                .build());
+                .add(ChangeOfPoints.builder()
+                        .user(user)
+                        .amount(-pointsToUse)
+                        .date(LocalDateTime.now())
+                        .order(order)
+                        .build());
 
         orderRepository.save(order);
     }
 
     private int countAmountToPayForOrder(Order order) {
         int certificatesAmount = nonNull(order.getCertificates())
-            ? order.getCertificates().stream()
+                ? order.getCertificates().stream()
                 .map(Certificate::getPoints)
                 .reduce(0, Integer::sum)
-            : 0;
+                : 0;
         return -order.getPointsToUse() - certificatesAmount
-            + BigDecimal.valueOf(order.getSumTotalAmountWithoutDiscounts())
+                + BigDecimal.valueOf(order.getSumTotalAmountWithoutDiscounts())
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
                 .setScale(0, RoundingMode.UP).intValue();
     }
@@ -1732,12 +1650,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private long calculateSumToPay(OrderWayForPayClientDto dto, Order order, User currentUser) {
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
         long sumToPayInCoins = bagForUserDtos.stream()
-            .map(b -> convertBillsIntoCoins(b.getTotalPrice()))
-            .reduce(0L, Long::sum);
+                .map(b -> convertBillsIntoCoins(b.getTotalPrice()))
+                .reduce(0L, Long::sum);
 
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
-            .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .collect(toList());
+                .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
+                .collect(toList());
 
         sumToPayInCoins = sumToPayInCoins - 100L * (order.getPointsToUse() + countCertificatesBonuses(certificateDtos));
 
@@ -1749,11 +1667,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private long formCertificatesToBeSavedAndCalculateOrderSumClient(OrderWayForPayClientDto dto, Order order,
-        long sumToPayInCoins) {
+                                                                     long sumToPayInCoins) {
         if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
             Set<Certificate> certificates =
-                certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
-                    CertificateStatus.ACTIVE);
+                    certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+                            CertificateStatus.ACTIVE);
             if (certificates.isEmpty()) {
                 throw new NotFoundException(CERTIFICATE_NOT_FOUND);
             }
@@ -1765,7 +1683,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 if (dontSendLinkToWFPIfClient(sumToPayInCoins)) {
                     certificate.setCertificateStatus(CertificateStatus.USED);
                     certificate.setPoints(certificate.getPoints()
-                        + BigDecimal.valueOf(sumToPayInCoins)
+                            + BigDecimal.valueOf(sumToPayInCoins)
                             .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
                             .setScale(0, RoundingMode.UP).intValue());
                     sumToPayInCoins = 0L;
@@ -1838,20 +1756,20 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public List<Long> getTariffIdByLocationId(Long locationId) {
         return tariffsInfoRepository.findTariffIdByLocationId(locationId)
-            .filter(list -> !list.isEmpty())
-            .orElseThrow(() -> new NotFoundException(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationId)));
+                .filter(list -> !list.isEmpty())
+                .orElseThrow(() -> new NotFoundException(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationId)));
     }
 
     @Override
     public List<LocationsDto> getAllLocationsByCourierId(Long courierId) {
         List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
         return locations.stream()
-            .map(locationToLocationsDtoMapper::convert)
-            .map(locationsDto -> locationsDto.setTariffsId(
-                tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
-                    .orElseThrow(() -> new NotFoundException(
-                        String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationsDto.getId())))))
-            .collect(toList());
+                .map(locationToLocationsDtoMapper::convert)
+                .map(locationsDto -> locationsDto.setTariffsId(
+                        tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
+                                .orElseThrow(() -> new NotFoundException(
+                                        String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationsDto.getId())))))
+                .collect(toList());
     }
 
     /**
@@ -1863,40 +1781,40 @@ public class UBSClientServiceImpl implements UBSClientService {
         String decodedOrderReference = OrderUtils.decodeOrderReference(response.getOrderReference());
         String[] ids = decodedOrderReference.split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
-            .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
+                .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
         Payment payment = createPayment(response, order, decodedOrderReference);
         checkPaymentResponseStatus(response, payment, order);
     }
 
     private Payment createPayment(MonoBankPaymentResponseDto response, Order order, String decodedOrderReference) {
         PaymentInfo paymentInfo = Optional.ofNullable(response.getPaymentInfo()).orElseGet(() -> PaymentInfo.builder()
-            .cardNumber(DEFAULT_VALUE_FOR_PAYMENT)
-            .paymentSystem(DEFAULT_VALUE_FOR_PAYMENT)
-            .paymentMethod(DEFAULT_VALUE_FOR_PAYMENT)
-            .fee(0)
-            .terminal(DEFAULT_VALUE_FOR_PAYMENT)
-            .build());
+                .cardNumber(DEFAULT_VALUE_FOR_PAYMENT)
+                .paymentSystem(DEFAULT_VALUE_FOR_PAYMENT)
+                .paymentMethod(DEFAULT_VALUE_FOR_PAYMENT)
+                .fee(0)
+                .terminal(DEFAULT_VALUE_FOR_PAYMENT)
+                .build());
         return Payment.builder()
-            .id(extractIdFromReference(decodedOrderReference))
-            .currency("UAH")
-            .amount((long) response.getAmount())
-            .orderStatus(OrderStatus.FORMED)
-            .responseStatus(response.getStatus())
-            .senderCellPhone(order.getUser().getRecipientPhone())
-            .maskedCard(paymentInfo.cardNumber())
-            .cardType(paymentInfo.paymentSystem())
-            .responseCode(parseErrorCode(response.getErrorCode()))
-            .responseDescription(Optional.ofNullable(response.getFailureReason()).orElse("0"))
-            .orderTime(formatDate(response.getCreatedDate()))
-            .settlementDate(formatDate(response.getModifiedDate()))
-            .fee(paymentInfo.fee().longValue())
-            .paymentSystem(paymentInfo.paymentSystem())
-            .senderEmail(order.getUser().getRecipientEmail())
-            .paymentId(response.getInvoiceId())
-            .order(order)
-            .paymentType(PaymentType.AUTO)
-            .paymentStatus(PaymentStatus.UNPAID)
-            .build();
+                .id(extractIdFromReference(decodedOrderReference))
+                .currency("UAH")
+                .amount((long) response.getAmount())
+                .orderStatus(OrderStatus.FORMED)
+                .responseStatus(response.getStatus())
+                .senderCellPhone(order.getUser().getRecipientPhone())
+                .maskedCard(paymentInfo.cardNumber())
+                .cardType(paymentInfo.paymentSystem())
+                .responseCode(parseErrorCode(response.getErrorCode()))
+                .responseDescription(Optional.ofNullable(response.getFailureReason()).orElse("0"))
+                .orderTime(formatDate(response.getCreatedDate()))
+                .settlementDate(formatDate(response.getModifiedDate()))
+                .fee(paymentInfo.fee().longValue())
+                .paymentSystem(paymentInfo.paymentSystem())
+                .senderEmail(order.getUser().getRecipientEmail())
+                .paymentId(response.getInvoiceId())
+                .order(order)
+                .paymentType(PaymentType.AUTO)
+                .paymentStatus(PaymentStatus.UNPAID)
+                .build();
     }
 
     private Long extractIdFromReference(String decodedOrderReference) {
@@ -1940,7 +1858,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void updatePaymentAndOrderStatus(Payment payment, Order order, PaymentStatus paymentStatus,
-        OrderPaymentStatus orderStatus) {
+                                             OrderPaymentStatus orderStatus) {
         payment.setPaymentStatus(paymentStatus);
         order.setOrderPaymentStatus(orderStatus);
     }
@@ -1956,12 +1874,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void removePaymentLinkForOrder(Order order) {
         List<UserNotification> userNotification = userNotificationRepository
-            .findAllUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
+                .findAllUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
         if (!userNotification.isEmpty()) {
             userNotification.stream()
-                .map(notification -> notificationParameterRepository
-                    .findNotificationParameterByUserNotificationAndKey(notification, PAY_BUTTON))
-                .forEach(parameter -> parameter.ifPresent(notificationParameterRepository::delete));
+                    .map(notification -> notificationParameterRepository
+                            .findNotificationParameterByUserNotificationAndKey(notification, PAY_BUTTON))
+                    .forEach(parameter -> parameter.ifPresent(notificationParameterRepository::delete));
         }
     }
 }
