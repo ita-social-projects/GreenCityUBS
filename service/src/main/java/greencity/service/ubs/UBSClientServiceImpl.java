@@ -4,9 +4,19 @@ import com.google.maps.model.LatLng;
 import greencity.client.MonoBankClient;
 import greencity.client.UserRemoteClient;
 import greencity.client.WayForPayClient;
-import greencity.constant.*;
+import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
+import greencity.constant.KyivTariffLocation;
+import greencity.constant.OrderHistory;
 import greencity.constant.TariffLocation;
-import greencity.dto.*;
+import greencity.dto.AllActiveLocationsDto;
+import greencity.dto.LocationWithTariffInfoDto;
+import greencity.dto.LocationsDto;
+import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.RegionDto;
+import greencity.dto.TariffInfoByLocationDto;
+import greencity.dto.TariffInfoDto;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagDto;
@@ -18,17 +28,47 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.*;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWayForPayClientDto;
+import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
-import greencity.dto.payment.monobank.*;
+import greencity.dto.payment.monobank.BasketOrder;
+import greencity.dto.payment.monobank.CheckoutResponseFromMonoBank;
+import greencity.dto.payment.monobank.MerchantPaymentInfo;
+import greencity.dto.payment.monobank.MonoBankPaymentRequestDto;
+import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
+import greencity.dto.payment.monobank.PaymentInfo;
 import greencity.dto.position.PositionAuthoritiesDto;
-import greencity.dto.user.*;
+import greencity.dto.user.AllPointsUserDto;
+import greencity.dto.user.DeactivateUserRequestDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.PointsForUbsUserDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserPointDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserProfileCreateDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderBag;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
@@ -37,7 +77,20 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
-import greencity.enums.*;
+import greencity.enums.AddressStatus;
+import greencity.enums.BagStatus;
+import greencity.enums.BonusReason;
+import greencity.enums.BotType;
+import greencity.enums.CertificateStatus;
+import greencity.enums.CourierLimit;
+import greencity.enums.LocationStatus;
+import greencity.enums.MonoBankStatuses;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.PaymentType;
+import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
@@ -46,7 +99,28 @@ import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
-import greencity.repository.*;
+import greencity.repository.AddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.CourierRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.EventRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.NotificationParameterRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderBagRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.TariffLocationRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.TelegramBotRepository;
+import greencity.repository.UBSUserRepository;
+import greencity.repository.UserNotificationRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.ViberBotRepository;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.notification.NotificationServiceImpl;
@@ -78,13 +152,65 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import static greencity.constant.AppConstant.*;
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
+import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
+import static greencity.constant.AppConstant.USER_WITH_PREFIX;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
+import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
+import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
+import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
+import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
+import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
+import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
+import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
+import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
+import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
+import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
+import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
+import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
+import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -417,15 +543,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
-        List<OrderBag> bagsOrdered = new ArrayList<>();
+        List<OrderBag> bagsOrdered = initializeOrderBags();
 
-        if (!dto.isShouldBePaid()) {
-            dto.setCertificates(Collections.emptySet());
-            dto.setPointsToUse(0);
-        }
+        adjustPaymentDetails(dto);
 
-        long sumToPayWithoutDiscountInCoins =
-            formBagsToBeSavedAndCalculateOrderSum(bagsOrdered, dto.getBags(), tariffsInfo);
+        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(bagsOrdered, dto.getBags(), tariffsInfo);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
 
@@ -433,25 +555,24 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (orderId != null) {
             checkIsOrderOfCurrentUser(currentUser, order);
             if (order.getOrderStatus() != OrderStatus.FORMED
-                || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
-                throw new IllegalStateException(
-                    "Cannot update order: status must be FORMED and payment must be UNPAID");
+                    || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
+                throw new IllegalStateException(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED);
             }
 
             entityManager.clear();
 
             currentUser = userRepository.findByUuid(uuid);
             order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException("Order not found after clearing context"));
+                    .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
 
             orderBagRepository.deleteAllByOrderId(orderId);
 
             order.getOrderBags().clear();
             order.updateWithNewOrderBags(bagsOrdered);
             order.setPointsToUse(dto.getPointsToUse())
-                .setAdditionalOrders(dto.getAdditionalOrders())
-                .setComment(dto.getOrderComment())
-                .setTariffsInfo(tariffsInfo);
+                    .setAdditionalOrders(dto.getAdditionalOrders())
+                    .setComment(dto.getOrderComment())
+                    .setTariffsInfo(tariffsInfo);
         } else {
             order.setOrderStatus(OrderStatus.FORMED);
             order.setOrderDate(LocalDateTime.now());
@@ -465,31 +586,55 @@ public class UBSClientServiceImpl implements UBSClientService {
             dto.setShouldBePaid(false);
         }
 
-        UBSuser userData =
-            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
+        UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
 
-        String eventName = (orderId == null) ? OrderHistory.ORDER_FORMED_UK : OrderHistory.ORDER_STATUS_UPDATED;
-        String author = OrderHistory.CLIENT_UK;
+        String eventName = determineEventName(orderId);
+        saveOrderEvent(eventName, OrderHistory.CLIENT_UK, order);
+
+        PaymentSystemResponse paymentSystemResponse = processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
+
+        handleOrderNotifications(order, orderId, sumToPayInCoins, paymentSystemResponse);
+
+        return paymentSystemResponse;
+    }
+
+    private List<OrderBag> initializeOrderBags() {
+        return new ArrayList<>();
+    }
+
+    private void adjustPaymentDetails(OrderResponseDto dto) {
+        if (!dto.isShouldBePaid()) {
+            dto.setCertificates(Collections.emptySet());
+            dto.setPointsToUse(0);
+        }
+    }
+
+    private String determineEventName(Long orderId) {
+        return (orderId == null) ? OrderHistory.ORDER_FORMED_UK : OrderHistory.ORDER_STATUS_UPDATED_UK;
+    }
+
+    private void saveOrderEvent(String eventName, String author, Order order) {
         eventService.save(eventName, author, order);
         log.info("Saved event: eventName={}, author={}, orderId={}", eventName, author, order.getId());
+    }
 
-        PaymentSystemResponse paymentSystemResponse;
+    private PaymentSystemResponse processPaymentResponse(OrderResponseDto dto, Order order, long sumToPayInCoins, User currentUser) {
         if (dto.isShouldBePaid()) {
-            paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
+            return processPayment(dto, order, sumToPayInCoins, currentUser);
         } else {
-            paymentSystemResponse = getPaymentRequestDto(order, "");
+            return getPaymentRequestDto(order, "");
         }
+    }
 
+    private void handleOrderNotifications(Order order, Long orderId, long sumToPayInCoins, PaymentSystemResponse paymentSystemResponse) {
         if (orderId == null) {
             notificationService.notifyCreatedOrder(order);
         }
         if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
             notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
         }
-
-        return paymentSystemResponse;
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,
