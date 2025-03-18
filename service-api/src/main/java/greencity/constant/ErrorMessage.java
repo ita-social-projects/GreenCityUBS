@@ -195,6 +195,6 @@ public class ErrorMessage {
     public static final String CANNOT_EXPORT_DATA_TO_PDF = "An error occurred while exporting to PDF.";
     public static final String ORDER_NOT_FOUND_BY_PAYMENT_ID = "Order not found for payment id: %s";
     public static final String ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED =
-            "Cannot update order: status must be FORMED and payment must be UNPAID";
+        "Cannot update order: status must be FORMED and payment must be UNPAID";
     public static final String ORDER_NOT_FOUND_BY_ID = "Order not found with id: ";
 }
