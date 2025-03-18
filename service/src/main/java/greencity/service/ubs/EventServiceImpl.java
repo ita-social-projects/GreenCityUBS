@@ -118,7 +118,7 @@ public class EventServiceImpl implements EventService {
         eventNameToEngMap.put(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK, OrderHistory.ORDER_BROUGHT_IT_HIMSELF_EN);
         eventNameToEngMap.put(OrderHistory.ORDER_CONFIRMED_UK, OrderHistory.ORDER_CONFIRMED_EN);
         eventNameToEngMap.put(OrderHistory.ORDER_HALF_PAID_UK, OrderHistory.ORDER_HALF_PAID_EN);
-        eventNameToEngMap.put(OrderHistory.ORDER_STATUS_UPDATED, OrderHistory.ORDER_STATUS_UPDATED_ENG);
+        eventNameToEngMap.put(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.ORDER_STATUS_UPDATED_EN);
         eventNameToEngMap.put(OrderHistory.ADD_ADMIN_COMMENT_UK, OrderHistory.ADD_ADMIN_COMMENT_EN);
         eventNameToEngMap.put(OrderHistory.DELETE_VIOLATION_UK, OrderHistory.DELETE_VIOLATION_EN);
         eventNameToEngMap.put(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK, OrderHistory.CANCELED_ORDER_MONEY_REFUND_EN);
