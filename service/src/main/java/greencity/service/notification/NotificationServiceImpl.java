@@ -470,7 +470,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyDeleteViolation(Long orderId) {
         Set<NotificationParameter> parameters = new HashSet<>();
-        Violation violation = violationRepository.findActiveViolationByOrderId(orderId)
+        Violation violation = violationRepository.findCanceledViolationByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
         parameters.add(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)

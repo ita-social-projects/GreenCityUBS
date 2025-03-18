@@ -44,6 +44,7 @@ import static greencity.constant.ErrorMessage.ORDER_ALREADY_HAS_VIOLATION;
 import static greencity.constant.ErrorMessage.ORDER_HAS_NOT_VIOLATION;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.VIOLATION_DOES_NOT_EXIST;
 
 @Service
@@ -182,7 +183,7 @@ public class ViolationServiceImpl implements ViolationService {
     @Transactional
     public void deleteViolation(Long id, String uuid) {
         Employee currentUser = employeeRepository.findByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
 
         Optional<Violation> violationOptional = violationRepository.findActiveViolationByOrderId(id);
         if (violationOptional.isPresent()) {
