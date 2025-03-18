@@ -543,7 +543,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
-        List<OrderBag> bagsOrdered = initializeOrderBags();
+        List<OrderBag> bagsOrdered = new ArrayList<>();
 
         adjustPaymentDetails(dto);
 
@@ -600,10 +600,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         handleOrderNotifications(order, orderId, sumToPayInCoins, paymentSystemResponse);
 
         return paymentSystemResponse;
-    }
-
-    private List<OrderBag> initializeOrderBags() {
-        return new ArrayList<>();
     }
 
     private void adjustPaymentDetails(OrderResponseDto dto) {
