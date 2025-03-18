@@ -697,8 +697,12 @@ public class ModelUtils {
     /**
      * Returns a preconfigured CertificateDtoForAdding instance.
      *
-     * <p>This method builds a CertificateDtoForAdding object using default values:
-     * 10 points, a month count of 1, an initial points value of 2000, and the certificate code "4444-4444".</p>
+     * <p>
+     *
+     * This method builds a CertificateDtoForAdding object using default values: 10
+     * points, a month count of 1, an initial points value of 2000, and the
+     * certificate code "4444-4444".
+     * </p>
      *
      * @return a CertificateDtoForAdding instance with preset certificate values
      */
@@ -715,9 +719,13 @@ public class ModelUtils {
     /**
      * Constructs an AddingViolationsToUserDto with default violation details.
      *
-     * <p>This method creates an AddingViolationsToUserDto using its builder pattern, 
-     * setting the order ID to 1, the violation description to "Violation description", 
-     * and the violation level to "LOW".</p>
+     * <p>
+     *
+     * This method creates an AddingViolationsToUserDto using its builder pattern,
+     * setting the order ID to 1, the violation description to "Violation
+     * description", and the violation level to "LOW".
+     *
+     * </p>
      *
      * @return an AddingViolationsToUserDto instance populated with preset values
      */

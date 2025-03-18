@@ -182,16 +182,19 @@ public class ViolationServiceImpl implements ViolationService {
     /**
      * Deletes an active violation associated with the specified order.
      * <p>
-     * This method retrieves the employee corresponding to the provided uuid and locates the active violation 
-     * for the given order id. If found, it marks the violation as deleted by updating its status and deletion timestamp,
-     * notifies relevant systems, refreshes the user's violation count, and logs the deletion event. If either the 
-     * employee or the active violation is not found, the method throws an appropriate exception.
+     * This method retrieves the employee corresponding to the provided uuid and
+     * locates the active violation for the given order id. If found, it marks the
+     * violation as deleted by updating its status and deletion timestamp, notifies
+     * relevant systems, refreshes the user's violation count, and logs the deletion
+     * event. If either the employee or the active violation is not found, the
+     * method throws an appropriate exception.
      * </p>
      *
      * @param id   the order id whose active violation is to be deleted
      * @param uuid the unique identifier of the employee performing the deletion
      * @throws UserNotFoundException if no employee is found with the provided uuid
-     * @throws NotFoundException     if no active violation exists for the given order id
+     * @throws NotFoundException     if no active violation exists for the given
+     *                               order id
      */
     @Override
     @Transactional
