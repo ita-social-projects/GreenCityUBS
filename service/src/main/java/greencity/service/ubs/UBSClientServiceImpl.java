@@ -547,7 +547,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         adjustPaymentDetails(dto);
 
-        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(bagsOrdered, dto.getBags(), tariffsInfo);
+        long sumToPayWithoutDiscountInCoins =
+            formBagsToBeSavedAndCalculateOrderSum(bagsOrdered, dto.getBags(), tariffsInfo);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
 
@@ -555,7 +556,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (orderId != null) {
             checkIsOrderOfCurrentUser(currentUser, order);
             if (order.getOrderStatus() != OrderStatus.FORMED
-                    || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
+                || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
                 throw new IllegalStateException(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED);
             }
 
@@ -563,16 +564,16 @@ public class UBSClientServiceImpl implements UBSClientService {
 
             currentUser = userRepository.findByUuid(uuid);
             order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
+                .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
 
             orderBagRepository.deleteAllByOrderId(orderId);
 
             order.getOrderBags().clear();
             order.updateWithNewOrderBags(bagsOrdered);
             order.setPointsToUse(dto.getPointsToUse())
-                    .setAdditionalOrders(dto.getAdditionalOrders())
-                    .setComment(dto.getOrderComment())
-                    .setTariffsInfo(tariffsInfo);
+                .setAdditionalOrders(dto.getAdditionalOrders())
+                .setComment(dto.getOrderComment())
+                .setTariffsInfo(tariffsInfo);
         } else {
             order.setOrderStatus(OrderStatus.FORMED);
             order.setOrderDate(LocalDateTime.now());
@@ -586,7 +587,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             dto.setShouldBePaid(false);
         }
 
-        UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
+        UBSuser userData =
+            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
 
@@ -620,7 +622,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         log.info("Saved event: eventName={}, author={}, orderId={}", eventName, author, order.getId());
     }
 
-    private PaymentSystemResponse processPaymentResponse(OrderResponseDto dto, Order order, long sumToPayInCoins, User currentUser) {
+    private PaymentSystemResponse processPaymentResponse(OrderResponseDto dto, Order order, long sumToPayInCoins,
+        User currentUser) {
         if (dto.isShouldBePaid()) {
             return processPayment(dto, order, sumToPayInCoins, currentUser);
         } else {
@@ -628,7 +631,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void handleOrderNotifications(Order order, Long orderId, long sumToPayInCoins, PaymentSystemResponse paymentSystemResponse) {
+    private void handleOrderNotifications(Order order, Long orderId, long sumToPayInCoins,
+        PaymentSystemResponse paymentSystemResponse) {
         if (orderId == null) {
             notificationService.notifyCreatedOrder(order);
         }
