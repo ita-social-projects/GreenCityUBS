@@ -60,6 +60,7 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.useragreement.UserAgreementDetailDto;
 import greencity.dto.useragreement.UserAgreementDto;
+import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.enums.CancellationReason;
@@ -700,6 +701,14 @@ public class ModelUtils {
             .monthCount(1)
             .initialPointsValue(2000)
             .code("4444-4444")
+            .build();
+    }
+
+    public static AddingViolationsToUserDto getAddingViolationsToUserDto() {
+        return AddingViolationsToUserDto.builder()
+            .orderID(1L)
+            .violationDescription("Violation description")
+            .violationLevel("LOW")
             .build();
     }
 }

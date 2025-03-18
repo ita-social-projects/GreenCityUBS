@@ -46,7 +46,7 @@ public interface ViolationRepository extends CrudRepository<Violation, Long> {
      * @return optional of {@link Violation} .
      */
     @Query(value = "SELECT v FROM Violation v WHERE v.order.id = ?1 AND v.violationStatus = 'ACTIVE'")
-    Optional<Violation> findActiveViolationByOrderId(@Param(value = "orderId") Long orderId);
+    Optional<Violation> findActiveViolationByOrderId(Long orderId);
 
     /**
      * Method returns deleted violation by order id.
@@ -55,5 +55,5 @@ public interface ViolationRepository extends CrudRepository<Violation, Long> {
      * @return optional of {@link Violation} .
      */
     @Query(value = "SELECT v FROM Violation v WHERE v.order.id = ?1 AND v.violationStatus = 'DELETED'")
-    Optional<Violation> findCanceledViolationByOrderId(@Param(value = "orderId") Long orderId);
+    Optional<Violation> findCanceledViolationByOrderId(Long orderId);
 }

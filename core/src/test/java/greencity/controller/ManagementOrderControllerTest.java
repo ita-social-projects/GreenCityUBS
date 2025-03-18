@@ -11,6 +11,7 @@ import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.user.AddingPointsToUserDto;
+import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
@@ -37,6 +38,8 @@ import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequ
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import static greencity.ModelUtils.getAddingViolationsToUserDto;
 import static greencity.ModelUtils.getEcoNumberDto;
 import static greencity.ModelUtils.getManualPaymentRequestDto;
 import static greencity.ModelUtils.getUpdateOrderPageAdminDto;
@@ -466,5 +469,26 @@ class ManagementOrderControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().string("<Boolean>true</Boolean>"));
         verify(ubsManagementService).checkIfOrderStatusIsFormedToCanceled(orderId);
+    }
+
+    @Test
+    void addViolationToUserReturnsCreatedForValidDataTest() throws Exception {
+        AddingViolationsToUserDto dto = getAddingViolationsToUserDto();
+        String jsonDto = objectMapper.writeValueAsString(dto);
+        MockMultipartFile file = new MockMultipartFile(
+            "add",
+            "",
+            "application/json",
+            jsonDto.getBytes());
+        MockMultipartHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart(ubsManagementLink + "/addViolationToUser");
+        builder.with(request -> {
+            request.setMethod("POST");
+            return request;
+        });
+        mockMvc.perform(builder.file(file)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
     }
 }
