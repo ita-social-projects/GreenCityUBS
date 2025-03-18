@@ -269,11 +269,16 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for adding User violation.
+     * Adds a violation record to a user.
      *
-     * @return {@link AddingViolationsToUserDto} count of Users violations with
-     *         order id descriptions.
-     * @author Bohdan Melnyk
+     * <p>This endpoint processes a violation addition request by accepting a violation DTO and optional supporting files.
+     * The user is identified from the authenticated principal, and upon successful processing, the method returns an
+     * HTTP 201 (Created) status.
+     *
+     * @param add the violation details, including order reference and description, to be added to the user record
+     * @param files optional attachments supporting the violation
+     * @param principal the authenticated user's security principal
+     * @return a ResponseEntity with HTTP 201 (Created) status indicating the violation was successfully recorded
      */
     @Operation(summary = "Add Violation to User")
     @ApiResponses(value = {
