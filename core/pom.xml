@@ -219,6 +219,11 @@
             <version>${json-path.version}</version> <!-- Use the latest stable version -->
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.ivan.softserve</groupId>
+            <artifactId>ldm-spring-boot-starter</artifactId>
+            <version>0.21.7</version>
+        </dependency>
     </dependencies>
 
     <build>
