@@ -1579,7 +1579,7 @@ public class ModelUtils {
     }
 
     public static AuthorizedUser getTelegramBotNotifyTrue() {
-        return new AuthorizedUser("111111", false, false, null, false);
+        return new AuthorizedUser("111111", false, true, null, false);
     }
 
     public static AuthorizedUser getTelegramBotNotifyFalse() {
