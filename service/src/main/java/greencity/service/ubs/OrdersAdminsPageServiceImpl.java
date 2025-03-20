@@ -806,11 +806,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     public synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
         LocalDate dateNow = LocalDate.now();
-
-        if(date.isBefore(dateNow)) {
+        if (date.isBefore(dateNow)) {
             throw new BadRequestException("Export date cannot be in the past: " + date);
         }
-
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             try {
