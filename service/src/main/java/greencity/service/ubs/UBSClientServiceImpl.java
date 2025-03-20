@@ -168,6 +168,7 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
@@ -231,6 +232,7 @@ import static java.util.stream.Collectors.toMap;
 /**
  * Implementation of {@link UBSClientService}.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UBSClientServiceImpl implements UBSClientService {
@@ -832,6 +834,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             newAddress.setAddressStatus(address.getAddressStatus());
             newAddress.setActual(address.getActual());
 
+            log.info("ADDRESS TO SAVE{}", newAddress);
             addressRepo.save(newAddress);
         } else {
             address.setAddressStatus(AddressStatus.DELETED);
