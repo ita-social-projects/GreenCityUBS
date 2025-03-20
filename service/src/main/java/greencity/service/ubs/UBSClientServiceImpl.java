@@ -63,7 +63,6 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
@@ -168,7 +167,6 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
@@ -232,7 +230,6 @@ import static java.util.stream.Collectors.toMap;
 /**
  * Implementation of {@link UBSClientService}.
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UBSClientServiceImpl implements UBSClientService {
@@ -834,7 +831,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             newAddress.setAddressStatus(address.getAddressStatus());
             newAddress.setActual(address.getActual());
 
-            log.info("ADDRESS TO SAVE{}", newAddress);
             addressRepo.save(newAddress);
         } else {
             address.setAddressStatus(AddressStatus.DELETED);
