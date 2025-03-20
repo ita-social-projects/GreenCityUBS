@@ -119,7 +119,6 @@ public class TelegramServiceImpl implements TelegramService {
     public void saveManagerMessage(String chatId, String message) {
         var telegramMessage = new TextMessage(
             chatId,
-            false,
             message,
             false);
         telegramManagerNotification.shouldNotifyManager(chatId);
@@ -131,7 +130,6 @@ public class TelegramServiceImpl implements TelegramService {
     public void saveManagerMessage(String chatId, String message, boolean isManager) {
         var telegramMessage = new TextMessage(
             chatId,
-            false,
             message,
             isManager);
         telegramMessageRepository.save(telegramMessage);
@@ -214,7 +212,6 @@ public class TelegramServiceImpl implements TelegramService {
             .map(message -> new TelegramTextMessageDto(
                 message.getMessageId(),
                 message.getChatId(),
-                message.isRead(),
                 message.getSendAt(),
                 message.getText(),
                 message.isManagerMessage()))

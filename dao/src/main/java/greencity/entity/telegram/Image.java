@@ -14,8 +14,8 @@ public class Image extends TelegramMessage {
 
     private String caption;
 
-    public Image(String chatId, Boolean isRead, String fileUrl, String caption) {
-        super(chatId, isRead);
+    public Image(String chatId, String fileUrl, String caption) {
+        super(chatId);
         this.fileUrl = fileUrl;
         this.caption = caption;
     }

@@ -86,7 +86,6 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
         for (String url : photoUrl) {
             Image telegramUserPhotos = new Image(
                 chatId,
-                false,
                 url,
                 caption);
             telegramImageRepository.save(telegramUserPhotos);

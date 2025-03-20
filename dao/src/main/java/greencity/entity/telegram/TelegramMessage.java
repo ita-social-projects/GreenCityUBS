@@ -21,17 +21,11 @@ public abstract class TelegramMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long messageId;
     private String chatId;
-    private boolean isRead;
     @Column(updatable = false)
     @CreatedDate
     private LocalDateTime sendAt;
 
-    public void read() {
-        this.isRead = true;
-    }
-
-    protected TelegramMessage(String chatId, Boolean isRead) {
+    protected TelegramMessage(String chatId) {
         this.chatId = chatId;
-        this.isRead = isRead;
     }
 }

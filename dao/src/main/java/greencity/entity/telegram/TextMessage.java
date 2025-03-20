@@ -14,8 +14,8 @@ public class TextMessage extends TelegramMessage {
 
     private boolean isManagerMessage;
 
-    public TextMessage(String chatId, Boolean isRead, String text, boolean isManagerMessage) {
-        super(chatId, isRead);
+    public TextMessage(String chatId, String text, boolean isManagerMessage) {
+        super(chatId);
         this.text = text;
         this.isManagerMessage = isManagerMessage;
     }

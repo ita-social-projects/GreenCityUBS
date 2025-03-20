@@ -12,7 +12,6 @@
             <column name="chat_id" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_read" type="BOOLEAN" defaultValueBoolean="false"/>
             <column name="send_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>

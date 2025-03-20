@@ -12,7 +12,6 @@ public class TextMessageMapper extends AbstractConverter<TextMessage, TelegramTe
         return new TelegramTextMessageDto(
             source.getMessageId(),
             source.getChatId(),
-            source.isRead(),
             source.getSendAt(),
             source.getText(),
             source.isManagerMessage());
