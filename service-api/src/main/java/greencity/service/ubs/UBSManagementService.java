@@ -281,9 +281,18 @@ public interface UBSManagementService {
     /**
      * Method returns an order by provided payment ID.
      *
-     * @param paymentId {@link String} the ID of the order.
+     * @param paymentId the ID of the order.
      * @return {@link Order}
      *
      */
-    Order getOrderByPaymentId(String paymentId);
+    Order getOrderByPaymentId(long paymentId);
+
+    /**
+     * Method returns an order by provided order ID.
+     *
+     * @param orderId {@link Long} the ID of the order.
+     * @return {@link Order}
+     *
+     */
+    Order findOrderById(Long orderId);
 }
