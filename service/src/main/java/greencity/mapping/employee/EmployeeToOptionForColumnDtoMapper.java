@@ -21,7 +21,7 @@ public class EmployeeToOptionForColumnDtoMapper extends AbstractConverter<Employ
     protected OptionForColumnDTO convert(Employee employee) {
         return OptionForColumnDTO.builder()
             .key(employee.getId().toString())
-            .uk(String.format("%s %s", employee.getFirstName(), employee.getLastName()))
+            .ua(String.format("%s %s", employee.getFirstName(), employee.getLastName()))
             .en(String.format("%s %s", employee.getFirstName(), employee.getLastName()))
             .build();
     }

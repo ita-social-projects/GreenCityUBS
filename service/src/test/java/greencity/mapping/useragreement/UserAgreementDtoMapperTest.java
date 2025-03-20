@@ -21,7 +21,7 @@ class UserAgreementDtoMapperTest {
 
         UserAgreementDto actual = mapper.convert(agreement);
 
-        Assertions.assertEquals(expected.getTextUk(), actual.getTextUk());
+        Assertions.assertEquals(expected.getTextUa(), actual.getTextUa());
         Assertions.assertEquals(expected.getTextEn(), actual.getTextEn());
     }
 }

@@ -17,11 +17,11 @@ import lombok.NoArgsConstructor;
 public class AddNotificationPlatformDto {
     @NotNull
     @NotBlank
-    private String bodyUk;
+    private String body;
 
     @NotNull
     @NotBlank
-    private String bodyEn;
+    private String bodyEng;
 
     @NotNull
     private NotificationReceiverType notificationReceiverType;

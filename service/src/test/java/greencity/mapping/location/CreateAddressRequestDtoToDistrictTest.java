@@ -14,7 +14,7 @@ class CreateAddressRequestDtoToDistrictTest {
     @Test
     void convertShouldMapDtoToDistrict() {
         CreateAddressRequestDto dto = CreateAddressRequestDto.builder()
-            .districtUk("Шевченківський")
+            .district("Шевченківський")
             .districtEn("Shevchenkivskyi")
             .build();
 
@@ -28,7 +28,7 @@ class CreateAddressRequestDtoToDistrictTest {
     @Test
     void convert_ShouldHandleNullValues() {
         CreateAddressRequestDto dto = CreateAddressRequestDto.builder()
-            .districtUk(null)
+            .district(null)
             .districtEn(null)
             .build();
 

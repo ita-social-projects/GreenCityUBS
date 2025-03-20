@@ -22,8 +22,8 @@ class BagInfoDtoMapperTest {
         BagInfoDto actualBagInfoDto = bagInfoDtoMapper.convert(bag);
 
         assertEquals(expectedBagInfoDto.getId(), actualBagInfoDto.getId());
-        assertEquals(expectedBagInfoDto.getNameUk(), actualBagInfoDto.getNameUk());
-        assertEquals(expectedBagInfoDto.getNameEn(), actualBagInfoDto.getNameEn());
+        assertEquals(expectedBagInfoDto.getName(), actualBagInfoDto.getName());
+        assertEquals(expectedBagInfoDto.getNameEng(), actualBagInfoDto.getNameEng());
         assertEquals(expectedBagInfoDto.getCapacity(), actualBagInfoDto.getCapacity());
         assertEquals(expectedBagInfoDto.getPrice(), actualBagInfoDto.getPrice());
     }

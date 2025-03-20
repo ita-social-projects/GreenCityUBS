@@ -43,17 +43,17 @@ public class TariffServiceDto {
 
     @NotBlank
     @Length(min = 1, max = 255)
-    private String nameUk;
+    private String name;
 
     @NotBlank
     @Length(min = 1, max = 255)
-    private String nameEn;
+    private String nameEng;
 
     @NotBlank
     @Length(min = 1, max = 255)
-    private String descriptionUk;
+    private String description;
 
     @NotBlank
     @Length(min = 1, max = 255)
-    private String descriptionEn;
+    private String descriptionEng;
 }

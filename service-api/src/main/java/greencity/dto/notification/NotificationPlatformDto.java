@@ -18,11 +18,11 @@ public class NotificationPlatformDto {
     @NotNull
     private NotificationReceiverType receiverType;
     @NotNull
-    private String nameEn;
+    private String nameEng;
     @NotNull
-    private String bodyUk;
+    private String body;
     @NotNull
-    private String bodyEn;
+    private String bodyEng;
     @NotNull
     private NotificationStatus status;
 }

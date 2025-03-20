@@ -21,35 +21,35 @@ class CreateAddressRequestDtoToAddressTest {
         CoordinatesDto coordinatesDto = new CoordinatesDto(50.4501, 30.5234);
         CreateAddressRequestDto dto = CreateAddressRequestDto.builder()
             .districtEn("Shevchenkivskyi")
-            .districtUk("Шевченківський")
+            .district("Шевченківський")
             .regionEn("Kyiv Oblast")
-            .regionUk("Київська область")
+            .region("Київська область")
             .houseNumber("25B")
             .entranceNumber("3")
             .houseCorpus("2A")
             .addressComment("Next to the park")
             .placeId("ChIJp0lN2HIRkEARuJ1pl_yMcc0")
             .coordinates(coordinatesDto)
-            .cityUk("Київ")
+            .city("Київ")
             .cityEn("Kyiv")
-            .streetUk("Хрещатик")
+            .street("Хрещатик")
             .streetEn("Khreshchatyk")
             .build();
 
         Address address = converter.convert(dto);
 
-        assertEquals(dto.getRegionUk(), address.getBaseAddress().getRegionUk());
-        assertEquals(dto.getRegionEn(), address.getBaseAddress().getRegionEn());
-        assertEquals(dto.getCityUk(), address.getBaseAddress().getCityUk());
-        assertEquals(dto.getCityEn(), address.getBaseAddress().getCityEn());
-        assertEquals(dto.getDistrictUk(), address.getBaseAddress().getDistrictUk());
-        assertEquals(dto.getDistrictEn(), address.getBaseAddress().getDistrictEn());
-        assertEquals(dto.getAddressComment(), address.getBaseAddress().getAddressComment());
-        assertEquals(dto.getHouseNumber(), address.getBaseAddress().getHouseNumber());
-        assertEquals(dto.getEntranceNumber(), address.getBaseAddress().getEntranceNumber());
-        assertEquals(dto.getHouseCorpus(), address.getBaseAddress().getHouseCorpus());
-        assertEquals(dto.getStreetUk(), address.getBaseAddress().getStreetUk());
-        assertEquals(dto.getStreetEn(), address.getBaseAddress().getStreetEn());
+        assertEquals(dto.getRegion(), address.getRegion());
+        assertEquals(dto.getRegionEn(), address.getRegionEn());
+        assertEquals(dto.getCity(), address.getCity());
+        assertEquals(dto.getCityEn(), address.getCityEn());
+        assertEquals(dto.getDistrict(), address.getDistrict());
+        assertEquals(dto.getDistrictEn(), address.getDistrictEn());
+        assertEquals(dto.getAddressComment(), address.getAddressComment());
+        assertEquals(dto.getHouseNumber(), address.getHouseNumber());
+        assertEquals(dto.getEntranceNumber(), address.getEntranceNumber());
+        assertEquals(dto.getHouseCorpus(), address.getHouseCorpus());
+        assertEquals(dto.getStreet(), address.getStreet());
+        assertEquals(dto.getStreetEn(), address.getStreetEn());
         assertEquals(dto.getCoordinates().getLongitude(), address.getCoordinates().getLongitude());
         assertEquals(dto.getCoordinates().getLatitude(), address.getCoordinates().getLatitude());
     }

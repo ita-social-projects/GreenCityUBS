@@ -10,7 +10,7 @@ public class CreateAddressRequestDtoToCity extends AbstractConverter<CreateAddre
     @Override
     protected City convert(CreateAddressRequestDto source) {
         return City.builder()
-            .nameUk(source.getCityUk())
+            .nameUk(source.getCity())
             .nameEn(source.getCityEn())
             .build();
     }

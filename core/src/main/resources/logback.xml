@@ -5,7 +5,6 @@
     <property name="LOG_PATH" value="./logs" />
     <property name="LOG_MAX_SIZE" value="5MB" />
 
-
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <!-- Use the log pattern with the custom date format -->
