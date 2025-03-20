@@ -10,13 +10,13 @@ public class OrderAddressDtoUpdateMapper extends AbstractConverter<OrderAddress,
     @Override
     protected OrderAddressDtoResponse convert(OrderAddress dtoUpdate) {
         return OrderAddressDtoResponse.builder()
-            .district(dtoUpdate.getDistrict())
-            .districtEng(dtoUpdate.getDistrictEn())
-            .street(dtoUpdate.getStreet())
-            .streetEng(dtoUpdate.getStreetEn())
-            .houseCorpus(dtoUpdate.getHouseCorpus())
-            .entranceNumber(dtoUpdate.getEntranceNumber())
-            .houseNumber(dtoUpdate.getHouseNumber())
+            .districtUk(dtoUpdate.getBaseAddress().getDistrictUk())
+            .districtEn(dtoUpdate.getBaseAddress().getDistrictEn())
+            .streetUk(dtoUpdate.getBaseAddress().getStreetUk())
+            .streetEn(dtoUpdate.getBaseAddress().getStreetEn())
+            .houseCorpus(dtoUpdate.getBaseAddress().getHouseCorpus())
+            .entranceNumber(dtoUpdate.getBaseAddress().getEntranceNumber())
+            .houseNumber(dtoUpdate.getBaseAddress().getHouseNumber())
             .build();
     }
 }

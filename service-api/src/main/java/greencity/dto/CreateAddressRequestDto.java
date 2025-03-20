@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.experimental.SuperBuilder;
+import java.util.Objects;
 import static greencity.constant.ValidationConstant.STREET_REGEXP;
 import static greencity.constant.ValidationConstant.STREET_VALIDATION_MESSAGE;
 
@@ -24,35 +25,35 @@ import static greencity.constant.ValidationConstant.STREET_VALIDATION_MESSAGE;
 @EqualsAndHashCode
 public class CreateAddressRequestDto {
     // CHECKSTYLE:OFF
-    private static final String validationMessage = "Use only English, or Ukrainian letter";
-    private static final String notEmptyValidationMessage = "Name must not be empty";
-    private static final String houseNumberNotValid = "House number is invalid";
+    private static final String VALIDATION_MESSAGE = "Use only English, or Ukrainian letter";
+    private static final String NOT_EMPTY_VALIDATION_MESSAGE = "Name must not be empty";
+    private static final String HOUSE_NUMBER_NOT_VALID = "House number is invalid";
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = validationMessage)
-    @NotEmpty(message = notEmptyValidationMessage)
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
+    @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
     private String districtEn;
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = validationMessage)
-    @NotEmpty(message = notEmptyValidationMessage)
-    private String district;
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
+    @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
+    private String districtUk;
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ’]*", message = validationMessage)
-    @NotEmpty(message = notEmptyValidationMessage)
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
+    @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
     private String regionEn;
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ’]*", message = validationMessage)
-    @NotEmpty(message = notEmptyValidationMessage)
-    private String region;
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
+    @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
+    private String regionUk;
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ’—/\"\\s]" + "{1,10}", message = houseNumberNotValid)
-    @NotBlank(message = notEmptyValidationMessage)
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ’—/\"\\s]" + "{1,10}", message = HOUSE_NUMBER_NOT_VALID)
+    @NotBlank(message = NOT_EMPTY_VALIDATION_MESSAGE)
     private String houseNumber;
 
     private String entranceNumber;
 
     private String houseCorpus;
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ!?’]*", message = validationMessage)
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ!?’]*", message = VALIDATION_MESSAGE)
     private String addressComment;
 
     private String placeId;
@@ -60,19 +61,33 @@ public class CreateAddressRequestDto {
     @NotNull
     private CoordinatesDto coordinates;
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = validationMessage)
-    @NotEmpty(message = notEmptyValidationMessage)
-    private String city;
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
+    @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
+    private String cityUk;
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = validationMessage)
-    @NotEmpty(message = notEmptyValidationMessage)
+    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
+    @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
     private String cityEn;
 
     @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
-    @NotEmpty(message = notEmptyValidationMessage)
-    private String street;
+    @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
+    private String streetUk;
 
     @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
-    @NotEmpty(message = notEmptyValidationMessage)
+    @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
     private String streetEn;
+
+    public boolean areAddressesEqual(CreateAddressRequestDto otherAddress) {
+        if (otherAddress == null) {
+            return false;
+        }
+        return (Objects.equals(regionUk, otherAddress.getRegionUk())
+            || Objects.equals(regionEn, otherAddress.getRegionEn()))
+            && (Objects.equals(cityUk, otherAddress.getCityUk()) || Objects.equals(cityEn, otherAddress.getCityEn()))
+            && (Objects.equals(districtUk, otherAddress.getDistrictUk())
+                || Objects.equals(districtEn, otherAddress.getDistrictEn()))
+            && Objects.equals(houseNumber, otherAddress.getHouseNumber())
+            && Objects.equals(entranceNumber, otherAddress.getEntranceNumber())
+            && Objects.equals(houseCorpus, otherAddress.getHouseCorpus());
+    }
 }

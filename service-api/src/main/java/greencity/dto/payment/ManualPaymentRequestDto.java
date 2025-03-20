@@ -1,5 +1,6 @@
 package greencity.dto.payment;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -15,8 +16,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class ManualPaymentRequestDto {
-    @NotEmpty
-    private String settlementdate;
+    @NotBlank
+    private String settlementDate;
     @NotNull
     @Positive
     private Long amount;
