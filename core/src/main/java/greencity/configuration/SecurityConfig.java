@@ -29,6 +29,7 @@ import java.util.List;
 import static greencity.constant.AppConstant.ADMIN;
 import static greencity.constant.AppConstant.ADMIN_EMPL_LINK;
 import static greencity.constant.AppConstant.ADMIN_LINK;
+import static greencity.constant.AppConstant.LOGS_LINKS;
 import static greencity.constant.AppConstant.SUPER_ADMIN_LINK;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE;
 import static greencity.constant.AppConstant.UBS_LINK;
@@ -76,7 +77,7 @@ public class SecurityConfig {
                 Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH", "HEAD"));
             config.setAllowedHeaders(
                 Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Headers",
-                    "X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
+                    "X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization", "secretKey"));
             config.setAllowCredentials(true);
             config.setMaxAge(3600L);
             return config;
@@ -281,6 +282,8 @@ public class SecurityConfig {
                     "/notifications/quantityUnreadenNotifications",
                     UBS_LINK + "/check-if-tariff-exists/{id}",
                     UBS_LINK + "/locations")
+                .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
+                .requestMatchers(LOGS_LINKS)
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     "/notifications/{notificationId}/viewNotification",
