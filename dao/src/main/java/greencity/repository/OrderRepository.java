@@ -259,6 +259,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @param paymentId - an id of payment
      * @return {@link Order}
      */
-    @Query("SELECT p.order FROM Payment p WHERE p.paymentId = ?1")
-    Optional<Order> findOrderByPaymentId(String paymentId);
+    @Query("SELECT p.order FROM Payment p WHERE p.id = ?1")
+    Optional<Order> findOrderByPaymentId(long paymentId);
 }
