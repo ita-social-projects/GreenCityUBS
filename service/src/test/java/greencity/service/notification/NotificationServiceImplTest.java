@@ -455,12 +455,11 @@ class NotificationServiceImplTest {
                 .value("46")
                 .build());
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
-            when(violationRepository.findActiveViolationByOrderId(TEST_ORDER_4.getId()))
+            when(violationRepository.findCanceledViolationByOrderId(TEST_ORDER_4.getId()))
                 .thenReturn(Optional.of(violation));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_7)).thenReturn(TEST_USER_NOTIFICATION_7);
             parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_7));
             when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
-
             notificationService.notifyDeleteViolation(TEST_ORDER_4.getId());
 
             verify(userNotificationRepository).save(any());
