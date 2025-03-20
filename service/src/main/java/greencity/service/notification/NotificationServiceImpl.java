@@ -465,12 +465,24 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
-     * {@inheritDoc}
+     * Notifies the user about a canceled violation associated with a specific
+     * order.
+     * <p>
+     *
+     * Retrieves the canceled violation for the given order identifier. If the
+     * violation does not exist, a NotFoundException is thrown. Otherwise,
+     * constructs notification parameters (including the order number) and sends a
+     * notification using the cancellation violation notification type.
+     * </p>
+     *
+     * @param orderId the identifier of the order linked to the canceled violation
+     * @throws NotFoundException if no canceled violation is found for the provided
+     *                           order identifier
      */
     @Override
     public void notifyDeleteViolation(Long orderId) {
         Set<NotificationParameter> parameters = new HashSet<>();
-        Violation violation = violationRepository.findActiveViolationByOrderId(orderId)
+        Violation violation = violationRepository.findCanceledViolationByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
         parameters.add(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
