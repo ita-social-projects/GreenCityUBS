@@ -1397,9 +1397,8 @@ class OrdersAdminsPageServiceImplTest {
         List<Long> ordersId = List.of(orderId);
 
         BadRequestException exception = assertThrows(
-                BadRequestException.class,
-                () -> ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, pastDate, employeeId)
-        );
+            BadRequestException.class,
+            () -> ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, pastDate, employeeId));
 
         assertEquals("Export date cannot be in the past: 2022-12-12", exception.getMessage());
     }
