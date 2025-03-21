@@ -24,7 +24,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.Locale;
 
 @RestController
@@ -71,10 +73,10 @@ public class NotificationController {
     @GetMapping
     @ApiPageableWithLocale
     public ResponseEntity<PageableAdvancedDto<NotificationShortDto>> getNotificationsForCurrentUser(
-        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
+        @RequestParam String email,
         @Parameter(hidden = true) @ValidLanguage Locale locale, @Parameter(hidden = true) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(notificationService.getAllNotificationsForUser(userUuid, locale.getLanguage(), pageable));
+            .body(notificationService.getAllNotificationsForUser(email, locale.getLanguage(), pageable));
     }
 
     /**

@@ -2,6 +2,7 @@ package greencity.service.notification;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
@@ -132,6 +133,9 @@ class NotificationServiceImplTest {
 
     @Mock
     private OrderRepository orderRepository;
+
+    @Mock
+    private UserRemoteClient userRemoteClient;
 
     @Mock
     private UserNotificationRepository userNotificationRepository;
@@ -835,6 +839,7 @@ class NotificationServiceImplTest {
                 orderRepository,
                 violationRepository,
                 notificationParameterRepository,
+                userRemoteClient,
                 clock,
                 List.of(abstractNotificationProvider),
                 templateRepository,
@@ -960,7 +965,11 @@ class NotificationServiceImplTest {
 
     @Test
     void testGetAllNotificationForUser() {
-        when(userRepository.findByUuid("Test")).thenReturn(TEST_USER);
+        String email = "email";
+        String uuid = "uuid";
+
+        when(userRemoteClient.findUuidByEmail(email)).thenReturn(uuid);
+        when(userRepository.findByUuid(uuid)).thenReturn(TEST_USER);
         when(userNotificationRepository.findAllByUserAndIsDeletedFalse(TEST_USER, TEST_PAGEABLE))
             .thenReturn(TEST_PAGE);
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
@@ -968,7 +977,7 @@ class NotificationServiceImplTest {
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
         PageableAdvancedDto<NotificationShortDto> actual = notificationService
-            .getAllNotificationsForUser("Test", "ua", TEST_PAGEABLE);
+            .getAllNotificationsForUser(email, "ua", TEST_PAGEABLE);
 
         assertEquals(TEST_PAGEABLE_ADVANCED_DTO, actual);
     }

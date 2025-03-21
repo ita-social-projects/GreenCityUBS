@@ -1,5 +1,6 @@
 package greencity.service.notification;
 
+import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
@@ -91,6 +92,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final OrderRepository orderRepository;
     private final ViolationRepository violationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
+    private final UserRemoteClient userRemoteClient;
     @Autowired
     @Qualifier("kyivZonedClock")
     private Clock clock;
@@ -767,9 +769,10 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public PageableAdvancedDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
+    public PageableAdvancedDto<NotificationShortDto> getAllNotificationsForUser(String email,
         String language,
         Pageable pageable) {
+        String userUuid = userRemoteClient.findUuidByEmail(email);
         User user = userRepository.findByUuid(userUuid);
 
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
