@@ -370,7 +370,7 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void dateOfExportForDevelopStageUpdateDeliveringTimeTest() {
         var ordersId = List.of(1L);
-        var newValue = "2023-06-30T00:00:00.000Z";
+        var newValue = "2053-06-30T00:00:00.000Z";
         LocalTime timeFrom = LocalTime.parse("10:30", DateTimeFormatter.ISO_TIME);
         LocalTime timeTo = LocalTime.parse("15:00", DateTimeFormatter.ISO_TIME);
         var employeeId = 3L;
@@ -399,7 +399,7 @@ class OrdersAdminsPageServiceImplTest {
     void dateOfExportForDevelopStageBlockedByAnotherEmployeeThrowExceptionTest() {
         var orderId = 1L;
         var ordersId = List.of(orderId);
-        var newValue = "2023-06-30T00:00:00.000Z";
+        var newValue = "2053-06-30T00:00:00.000Z";
         var employeeId = 3L;
         var anotherEmployeeId = 4L;
         LocalDate exportDate = LocalDate.of(2023, 5, 23);
@@ -791,7 +791,7 @@ class OrdersAdminsPageServiceImplTest {
 
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("dateOfExport");
-        dto.setNewValue("2022-12-12");
+        dto.setNewValue("2052-12-12");
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("timeOfExport");
         dto.setNewValue("00:00-00:30");
