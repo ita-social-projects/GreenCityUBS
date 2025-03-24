@@ -51,4 +51,13 @@ class PhoneNumberValidationTest {
         assertEquals(thrown.getMessage(), ErrorMessage.PHONE_NUMBER_PARSING_FAIL + incorrectStr);
     }
 
+    @Test
+    void isValidShouldReturnTrueWhenValueIsNull() {
+        assertTrue(validation.isValid(null, context));
+    }
+
+    @Test
+    void isValidShouldReturnTrueWhenValueIsEmpty() {
+        assertTrue(validation.isValid("", context));
+    }
 }
