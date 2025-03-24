@@ -25,12 +25,15 @@ public class PhoneNumberValidation implements ConstraintValidator<ValidPhoneNumb
      */
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null || value.trim().isEmpty()) {
+            return true;
+        }
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         try {
             Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(value, "UA");
             return phoneUtil.isValidNumber(phoneNumber);
         } catch (NumberParseException e) {
-            throw new NotFoundException(ErrorMessage.PHONE_NUMBER_PARSING_FAIL + value);
+            return false;
         }
     }
 }
