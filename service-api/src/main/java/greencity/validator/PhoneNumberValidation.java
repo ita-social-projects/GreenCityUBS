@@ -33,7 +33,7 @@ public class PhoneNumberValidation implements ConstraintValidator<ValidPhoneNumb
             Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(value, "UA");
             return phoneUtil.isValidNumber(phoneNumber);
         } catch (NumberParseException e) {
-            return false;
+            throw new NotFoundException(ErrorMessage.PHONE_NUMBER_PARSING_FAIL + value);
         }
     }
 }
