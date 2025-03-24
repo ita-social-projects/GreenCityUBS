@@ -1376,8 +1376,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         user.setRecipientName(userProfileUpdateDto.getRecipientName());
         user.setRecipientSurname(userProfileUpdateDto.getRecipientSurname());
         user.setAlternateEmail(userProfileUpdateDto.getAlternateEmail());
+        String phone = userProfileUpdateDto.getRecipientPhone();
         user.setRecipientPhone(
-            UAPhoneNumberUtil.getE164PhoneNumberFormat(userProfileUpdateDto.getRecipientPhone()));
+            (phone == null || phone.trim().isEmpty()) ? null : UAPhoneNumberUtil.getE164PhoneNumberFormat(phone));
     }
 
     private void setTelegramAndViberBots(User user, Boolean telegramIsNotify, Boolean viberIsNotify) {
