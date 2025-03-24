@@ -87,9 +87,11 @@ public class TelegramAuthorizationServiceImpl implements TelegramAuthorizationSe
             message.getFrom().getId().toString(),
             false,
             message.getFrom().getFirstName(),
-            message.getFrom().getLastName(),
-            message.getFrom().getUserName(),
-            message.getContact().getPhoneNumber());
+            message.getFrom().getLastName() == null ? "" : message.getFrom().getLastName(),
+            message.getFrom().getUserName() == null ? "" : message.getFrom().getUserName(),
+            message.getContact() != null && message.getContact().getPhoneNumber() != null
+                ? message.getContact().getPhoneNumber()
+                : "");
     }
 
     private AuthorizedUser createTelegramBotEntity(User user, String chatId, boolean isManager) {

@@ -4,6 +4,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
 import greencity.dto.telegram.TelegramImageDto;
 import greencity.dto.telegram.TelegramTextMessageDto;
+import greencity.dto.telegram.UnknownTelegramUserDto;
 import org.springframework.data.domain.Pageable;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -137,6 +138,15 @@ public interface TelegramService {
      * @return a list of TelegramBotDto associated with the specified pageable
      */
     PageableDto<AuthorizedUserDto> getAllUsers(Pageable pageable);
+
+    /**
+     * Retrieves all unauthorized users.
+     *
+     * @param pageable the page to retrieve
+     *
+     * @return a list of TelegramBotDto associated with the specified pageable
+     */
+    PageableDto<UnknownTelegramUserDto> getAllUnauthorizedUsers(Pageable pageable);
 
     /**
      * Generates the start link for a manager based on the user's UUID.

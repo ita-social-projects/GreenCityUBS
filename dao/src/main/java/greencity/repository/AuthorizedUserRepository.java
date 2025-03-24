@@ -48,6 +48,6 @@ public interface AuthorizedUserRepository extends JpaRepository<AuthorizedUser, 
      * @return {@link Page} of {@link AuthorizedUser}.
      *
      */
-    @Query("select t from AuthorizedUser t ")
+    @Query("select a from AuthorizedUser a ")
     Page<AuthorizedUser> findAllUsers(Pageable pageable);
 }

@@ -6,6 +6,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
 import greencity.dto.telegram.TelegramImageDto;
 import greencity.dto.telegram.TelegramTextMessageDto;
+import greencity.dto.telegram.UnknownTelegramUserDto;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramStreamingService;
@@ -86,8 +87,13 @@ public class TelegramController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-authorized-users")
-    public ResponseEntity<PageableDto<AuthorizedUserDto>> getAllUsers(Pageable pageable) {
+    public ResponseEntity<PageableDto<AuthorizedUserDto>> getAllAuthoredUsers(Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllUsers(pageable));
+    }
+
+    @GetMapping("/get-all-unauthorized-users")
+    public ResponseEntity<PageableDto<UnknownTelegramUserDto>> getAllUnauthorizedUsers(Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllUnauthorizedUsers(pageable));
     }
 
     /**

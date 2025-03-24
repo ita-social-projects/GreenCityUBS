@@ -7,6 +7,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
 import greencity.dto.telegram.TelegramImageDto;
 import greencity.dto.telegram.TelegramTextMessageDto;
+import greencity.dto.telegram.UnknownTelegramUserDto;
 import greencity.entity.telegram.AuthorizedUser;
 import greencity.entity.telegram.ChatFeedback;
 import greencity.entity.telegram.Image;
@@ -243,6 +244,29 @@ public class TelegramServiceImpl implements TelegramService {
             authorizedUsers.getTotalElements(),
             authorizedUsers.getNumber(),
             authorizedUsers.getTotalPages());
+    }
+
+    @Override
+    public PageableDto<UnknownTelegramUserDto> getAllUnauthorizedUsers(Pageable pageable) {
+        Page<UnknownTelegramUser> unknownTelegramUsers = unknownTelegramUserRepository.findAllUsers(pageable);
+        List<UnknownTelegramUserDto> unknownTelegramUserDtos = unknownTelegramUsers
+            .getContent()
+            .stream()
+            .map(user -> new UnknownTelegramUserDto(
+                user.getId(),
+                user.getChatId(),
+                user.getIsSupportStatusActive(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getUserName(),
+                user.getMobileNumber()))
+            .toList();
+
+        return new PageableDto<>(
+            unknownTelegramUserDtos,
+            unknownTelegramUsers.getTotalElements(),
+            unknownTelegramUsers.getNumber(),
+            unknownTelegramUsers.getTotalPages());
     }
 
     @Override

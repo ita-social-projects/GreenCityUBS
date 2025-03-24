@@ -85,11 +85,19 @@ class TelegramControllerTest {
     }
 
     @Test
-    void getAllUsersTest() throws Exception {
+    void getAllAuthoredUsersTest() throws Exception {
         mockMvc.perform(get(baseUrl + "/get-all-authorized-users"))
             .andExpect(status().isOk());
 
         verify(telegramService).getAllUsers(any(PageRequest.class));
+    }
+
+    @Test
+    void getAllUnknownUsersTest() throws Exception {
+        mockMvc.perform(get(baseUrl + "/get-all-unauthorized-users"))
+            .andExpect(status().isOk());
+
+        verify(telegramService).getAllUnauthorizedUsers(any(PageRequest.class));
     }
 
     @Test
