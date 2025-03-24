@@ -114,6 +114,7 @@ import greencity.util.OrderUtils;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -250,6 +251,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -1879,6 +1881,32 @@ class UBSClientServiceImplTest {
             () -> ubsService.updateProfileData(uuid, userProfileUpdateDto));
         verify(userRepository).findUserByUuid(uuid);
 
+    }
+
+    @Test
+    void shouldSetNullRecipientPhoneWhenEmptyTest() throws Exception {
+        User user = mock(User.class);
+        UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
+        userProfileUpdateDto.setRecipientPhone("");
+        Method setUserDataMethod =
+            UBSClientServiceImpl.class.getDeclaredMethod("setUserData", User.class, UserProfileUpdateDto.class);
+        setUserDataMethod.setAccessible(true);
+        UBSClientServiceImpl service = mock(UBSClientServiceImpl.class);
+        setUserDataMethod.invoke(service, user, userProfileUpdateDto);
+        verify(user, times(1)).setRecipientPhone(null);
+    }
+
+    @Test
+    void shouldSetNullRecipientPhoneWhenNullTest() throws Exception {
+        User user = mock(User.class);
+        UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
+        userProfileUpdateDto.setRecipientPhone(null);
+        Method setUserDataMethod =
+            UBSClientServiceImpl.class.getDeclaredMethod("setUserData", User.class, UserProfileUpdateDto.class);
+        setUserDataMethod.setAccessible(true);
+        UBSClientServiceImpl service = mock(UBSClientServiceImpl.class);
+        setUserDataMethod.invoke(service, user, userProfileUpdateDto);
+        verify(user, times(1)).setRecipientPhone(null);
     }
 
     @Test
