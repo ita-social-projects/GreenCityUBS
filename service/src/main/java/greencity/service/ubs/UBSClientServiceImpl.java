@@ -128,8 +128,22 @@ import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.json.JSONObject;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -149,19 +163,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.json.JSONObject;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
@@ -201,6 +205,8 @@ import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -211,7 +217,10 @@ import static java.util.stream.Collectors.toMap;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UBSClientServiceImpl implements UBSClientService {
+    @PersistenceContext
+    private EntityManager entityManager;
     private static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
     private static final String PAY_BUTTON = "payButton";
     private final UserRepository userRepository;
@@ -528,7 +537,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
-        final User currentUser = userRepository.findByUuid(uuid);
+        User currentUser = userRepository.findByUuid(uuid);
         if (!checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
             throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
         }
@@ -536,38 +545,96 @@ public class UBSClientServiceImpl implements UBSClientService {
         TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
         List<OrderBag> bagsOrdered = new ArrayList<>();
 
-        if (!dto.isShouldBePaid()) {
-            dto.setCertificates(Collections.emptySet());
-            dto.setPointsToUse(0);
-        }
+        adjustPaymentDetails(dto);
 
-        long sumToPayWithoutDiscountInCoins = formBagsToBeSavedAndCalculateOrderSum(bagsOrdered,
-            dto.getBags(), tariffsInfo);
+        long sumToPayWithoutDiscountInCoins =
+            formBagsToBeSavedAndCalculateOrderSum(bagsOrdered, dto.getBags(), tariffsInfo);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
+
         Order order = isExistOrder(dto, orderId);
         if (orderId != null) {
             checkIsOrderOfCurrentUser(currentUser, order);
+            if (order.getOrderStatus() != OrderStatus.FORMED
+                || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
+                throw new IllegalStateException(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED);
+            }
+
+            entityManager.clear();
+
+            currentUser = userRepository.findByUuid(uuid);
+            order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
+
+            orderBagRepository.deleteAllByOrderId(orderId);
+
+            order.getOrderBags().clear();
+            order.updateWithNewOrderBags(bagsOrdered);
+            order.setPointsToUse(dto.getPointsToUse())
+                .setAdditionalOrders(dto.getAdditionalOrders())
+                .setComment(dto.getOrderComment())
+                .setTariffsInfo(tariffsInfo);
+        } else {
+            order.setOrderStatus(OrderStatus.FORMED);
+            order.setOrderDate(LocalDateTime.now());
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+            order.updateWithNewOrderBags(bagsOrdered);
         }
-        order.setTariffsInfo(tariffsInfo);
+
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPayInCoins = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPayInCoins);
         if (sumToPayInCoins <= 0) {
             dto.setShouldBePaid(false);
         }
+
         UBSuser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
+
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
-        eventService.save(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
-        PaymentSystemResponse paymentSystemResponse;
-        if (dto.isShouldBePaid()) {
-            paymentSystemResponse = processPayment(dto, order, sumToPayInCoins, currentUser);
-        } else {
-            paymentSystemResponse = getPaymentRequestDto(order, "");
-        }
-        notificationService.notifyCreatedOrder(order);
-        notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
+
+        String eventName = determineEventName(orderId);
+        saveOrderEvent(eventName, OrderHistory.CLIENT_UK, order);
+
+        PaymentSystemResponse paymentSystemResponse = processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
+
+        handleOrderNotifications(order, orderId, sumToPayInCoins, paymentSystemResponse);
+
         return paymentSystemResponse;
+    }
+
+    private void adjustPaymentDetails(OrderResponseDto dto) {
+        if (!dto.isShouldBePaid()) {
+            dto.setCertificates(Collections.emptySet());
+            dto.setPointsToUse(0);
+        }
+    }
+
+    private String determineEventName(Long orderId) {
+        return (orderId == null) ? OrderHistory.ORDER_FORMED_UK : OrderHistory.ORDER_STATUS_UPDATED_UK;
+    }
+
+    private void saveOrderEvent(String eventName, String author, Order order) {
+        eventService.save(eventName, author, order);
+        log.info("Saved event: eventName={}, author={}, orderId={}", eventName, author, order.getId());
+    }
+
+    private PaymentSystemResponse processPaymentResponse(OrderResponseDto dto, Order order, long sumToPayInCoins,
+        User currentUser) {
+        if (dto.isShouldBePaid()) {
+            return processPayment(dto, order, sumToPayInCoins, currentUser);
+        } else {
+            return getPaymentRequestDto(order, "");
+        }
+    }
+
+    private void handleOrderNotifications(Order order, Long orderId, long sumToPayInCoins,
+        PaymentSystemResponse paymentSystemResponse) {
+        if (orderId == null) {
+            notificationService.notifyCreatedOrder(order);
+        }
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
+            notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
+        }
     }
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,
@@ -1025,14 +1092,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
         List<OrderBag> bagsOrdered, UBSuser userData,
         User currentUser, long sumToPayInCoins) {
-        orderBagRepository.deleteAllByOrderId(order.getId());
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
         order.updateWithNewOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
-        order.setSumTotalAmountWithoutDiscounts(
-            calculateOrderSumWithoutDiscounts(bagsOrdered));
+        order.setSumTotalAmountWithoutDiscounts(calculateOrderSumWithoutDiscounts(bagsOrdered));
         setOrderPaymentStatus(order, sumToPayInCoins);
 
         Payment payment = Payment.builder()
