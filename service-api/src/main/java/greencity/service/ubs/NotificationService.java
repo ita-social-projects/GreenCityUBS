@@ -183,7 +183,7 @@ public interface NotificationService {
      *
      * @author Ann Sakhno
      */
-    PageableAdvancedDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
+    PageableAdvancedDto<NotificationShortDto> getAllNotificationsForUser(String email,
         String language, Pageable pageable);
 
     /**

@@ -109,7 +109,6 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
-
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -124,7 +123,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -147,7 +145,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
 import static greencity.ModelUtils.TEST_EMAIL;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;

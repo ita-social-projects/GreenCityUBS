@@ -50,10 +50,11 @@ public class ValidationConstant {
             dot in the middle of the name, dash and whitespaces.\
             """;
     public static final String PAYMENT_DATE_IS_BEFORE_ORDER_CREATION_MESSAGE =
-        "Payment date should be after the order creation.";
+        "Payment date should be set after the order creation.";
     public static final String PAYMENT_DATE_IS_AFTER_CURRENT_DATE_MESSAGE =
-        "Payment date cannot be after the today's date.";
-    public static final String PAYMENT_DATE_IS_NULL_MESSAGE = "Payment date cannot be null!";
+        "Payment date cannot be set after in the future.";
     public static final String PAYMENT_DATE_FORMAT_IS_NOT_VALID_MESSAGE =
         "Provided payment date format is not a valid.";
+    public static final String VALIDATION_RESPONSE_HEADER = "Following violation occurred during validation: ";
+    public static final String VIOLATION_CHUNK = "{%s}";
 }
