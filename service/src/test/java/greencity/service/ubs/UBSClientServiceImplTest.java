@@ -51,6 +51,20 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,16 +83,41 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.*;
-
 import static greencity.ModelUtils.*;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-import static greencity.constant.ErrorMessage.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
+import static greencity.constant.ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
+import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -1677,6 +1716,32 @@ class UBSClientServiceImplTest {
             () -> ubsService.updateProfileData(uuid, userProfileUpdateDto));
         verify(userRepository).findUserByUuid(uuid);
 
+    }
+
+    @Test
+    void shouldSetNullRecipientPhoneWhenEmptyTest() throws Exception {
+        User user = mock(User.class);
+        UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
+        userProfileUpdateDto.setRecipientPhone("");
+        Method setUserDataMethod =
+            UBSClientServiceImpl.class.getDeclaredMethod("setUserData", User.class, UserProfileUpdateDto.class);
+        setUserDataMethod.setAccessible(true);
+        UBSClientServiceImpl service = mock(UBSClientServiceImpl.class);
+        setUserDataMethod.invoke(service, user, userProfileUpdateDto);
+        verify(user, times(1)).setRecipientPhone(null);
+    }
+
+    @Test
+    void shouldSetNullRecipientPhoneWhenNullTest() throws Exception {
+        User user = mock(User.class);
+        UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
+        userProfileUpdateDto.setRecipientPhone(null);
+        Method setUserDataMethod =
+            UBSClientServiceImpl.class.getDeclaredMethod("setUserData", User.class, UserProfileUpdateDto.class);
+        setUserDataMethod.setAccessible(true);
+        UBSClientServiceImpl service = mock(UBSClientServiceImpl.class);
+        setUserDataMethod.invoke(service, user, userProfileUpdateDto);
+        verify(user, times(1)).setRecipientPhone(null);
     }
 
     @Test
