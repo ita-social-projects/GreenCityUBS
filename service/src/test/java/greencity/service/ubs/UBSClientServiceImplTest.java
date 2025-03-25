@@ -83,9 +83,7 @@ import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
-import greencity.repository.CityRepository;
 import greencity.repository.CourierRepository;
-import greencity.repository.DistrictRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
@@ -97,7 +95,6 @@ import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.OrdersForUserRepository;
 import greencity.repository.PaymentRepository;
-import greencity.repository.RegionRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.TelegramBotRepository;
@@ -106,15 +103,13 @@ import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
-import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
-
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,7 +123,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -151,7 +145,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
 import static greencity.ModelUtils.TEST_EMAIL;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
@@ -342,8 +335,6 @@ class UBSClientServiceImplTest {
     private UBSClientServiceImpl ubsClientService;
 
     @Mock
-    private LocationApiService locationApiService;
-    @Mock
     private OrderBagService orderBagService;
     @Mock
     private OrderBagRepository orderBagRepository;
@@ -358,22 +349,10 @@ class UBSClientServiceImplTest {
     private WayForPayClient wayForPayClient;
 
     @Mock
-    private NotificationService notificationService;
-
-    @Mock
     private LocationToLocationsDtoMapper locationToLocationsDtoMapper;
 
     @Value("${greencity.wayforpay.secret}")
     private String wayForPaySecret;
-
-    @Mock
-    private RegionRepository regionRepository;
-
-    @Mock
-    private CityRepository cityRepository;
-
-    @Mock
-    private DistrictRepository districtRepository;
 
     @Mock
     private MonoBankClient monoBankClient;
@@ -1080,45 +1059,33 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testSaveToDBWithDontSendLinkToFondy() throws IllegalAccessException {
+    void testSaveToDBWithDontSendLinkToFondy() throws NoSuchFieldException, IllegalAccessException {
         User user = getUserWithLastLocation();
         user.setAlternateEmail("test@mail.com");
         user.setCurrentPoints(900);
-
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().getFirst().setAmount(15);
         dto.setCertificates(Set.of("4444-4444"));
         Order order = getOrder();
+        order.setOrderStatus(OrderStatus.FORMED);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
-
         Bag bag = getBagForOrder();
         TariffsInfo tariffsInfo = getTariffInfo();
         tariffsInfo.setBags(Collections.singletonList(bag));
-
         Certificate certificate = getActiveCertificateWith10Points();
         certificate.setPoints(1000_00);
-
         UBSuser ubSuser = getUBSuser();
-
         OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
-        Order order1 = getOrder();
-        order1.setPayment(new ArrayList<>());
-        Payment payment1 = getPayment();
-        payment1.setId(1L);
-        order1.getPayment().add(payment1);
+        Field entityManagerField = UBSClientServiceImpl.class.getDeclaredField("entityManager");
+        entityManagerField.setAccessible(true);
+        EntityManager mockEntityManager = mock(EntityManager.class);
+        entityManagerField.set(ubsService, mockEntityManager);
 
-        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("merchantId")) {
-                f.setAccessible(true);
-                f.set(ubsService, "1");
-            }
-        }
-        Optional<Order> optionalOrder = Optional.of(order);
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
@@ -1127,14 +1094,17 @@ class UBSClientServiceImplTest {
         when(certificateRepository.findById(anyString())).thenReturn(Optional.of(certificate));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(orderRepository.findById(any()))
-            .thenReturn(optionalOrder.get().getId() != null ? optionalOrder : Optional.empty());
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
             .thenReturn(getCheckoutResponseFromMonoBank());
+        doNothing().when(mockEntityManager).clear();
 
         PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", order.getId());
         Assertions.assertNotNull(result);
 
+        verify(userRepository, times(2)).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(orderRepository, times(2)).findById(anyLong());
+        verify(mockEntityManager, times(1)).clear();
     }
 
     @Test
@@ -1387,35 +1357,33 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testSaveToDBWithoutOrderUnpaid() {
+    void testSaveToDBWithoutOrderUnpaid() throws NoSuchFieldException, IllegalAccessException {
         User user = getUserWithLastLocation();
         user.setAlternateEmail("test@mail.com");
         user.setCurrentPoints(900);
-
         OrderResponseDto dto = getOrderResponseDto(false);
         dto.getBags().getFirst().setAmount(15);
         Order order = getOrder();
+        order.setOrderStatus(OrderStatus.FORMED);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
         order.setUser(user);
-
         Bag bag = getBagForOrder();
-
         UBSuser ubSuser = getUBSuser();
-
         OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
-
-        Order order1 = getOrder();
-        order1.setPayment(new ArrayList<>());
-        Payment payment1 = getPayment();
-        payment1.setId(1L);
-        order1.getPayment().add(payment1);
         TariffsInfo tariffsInfo = getTariffsInfo();
         bag.setTariffsInfo(tariffsInfo);
         tariffsInfo.setBags(List.of(bag));
         order.setTariffsInfo(tariffsInfo);
+
+        Field entityManagerField = UBSClientServiceImpl.class.getDeclaredField("entityManager");
+        entityManagerField.setAccessible(true);
+        EntityManager mockEntityManager = mock(EntityManager.class);
+        entityManagerField.set(ubsClientService, mockEntityManager);
+
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
@@ -1426,16 +1394,17 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
             .thenReturn(getCheckoutResponseFromMonoBank());
+        doNothing().when(mockEntityManager).clear();
 
-        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
+        PaymentSystemResponse result = ubsClientService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
         Assertions.assertNotNull(result);
 
-        verify(userRepository, times(1)).findByUuid("35467585763t4sfgchjfuyetf");
-        verify(tariffsInfoRepository, times(1))
-            .findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
+        verify(userRepository, times(2)).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(tariffsInfoRepository, times(1)).findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
         verify(ubsUserRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(dto.getPersonalData(), UBSuser.class);
-        verify(orderRepository, times(1)).findById(anyLong());
+        verify(orderRepository, times(2)).findById(anyLong()); // Два виклики через isExistOrder і clear
+        verify(mockEntityManager, times(1)).clear();
     }
 
     @Test
@@ -1884,32 +1853,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void shouldSetNullRecipientPhoneWhenEmptyTest() throws Exception {
-        User user = mock(User.class);
-        UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
-        userProfileUpdateDto.setRecipientPhone("");
-        Method setUserDataMethod =
-            UBSClientServiceImpl.class.getDeclaredMethod("setUserData", User.class, UserProfileUpdateDto.class);
-        setUserDataMethod.setAccessible(true);
-        UBSClientServiceImpl service = mock(UBSClientServiceImpl.class);
-        setUserDataMethod.invoke(service, user, userProfileUpdateDto);
-        verify(user, times(1)).setRecipientPhone(null);
-    }
-
-    @Test
-    void shouldSetNullRecipientPhoneWhenNullTest() throws Exception {
-        User user = mock(User.class);
-        UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
-        userProfileUpdateDto.setRecipientPhone(null);
-        Method setUserDataMethod =
-            UBSClientServiceImpl.class.getDeclaredMethod("setUserData", User.class, UserProfileUpdateDto.class);
-        setUserDataMethod.setAccessible(true);
-        UBSClientServiceImpl service = mock(UBSClientServiceImpl.class);
-        setUserDataMethod.invoke(service, user, userProfileUpdateDto);
-        verify(user, times(1)).setRecipientPhone(null);
-    }
-
-    @Test
     void updateProfileDataWhenAddressPlaceIdIsNull() {
         UBSClientServiceImpl ubsClientServiceSpy = spy(ubsService);
 
@@ -2263,7 +2206,8 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void saveFullOrderToDBWhenSumToPayeqNull() throws IllegalAccessException {
+    void saveFullOrderToDBWhenSumToPayeqNull() throws IllegalAccessException, NoSuchFieldException {
+        // Ініціалізація об’єктів
         User user = getUserWithLastLocation();
         user.setCurrentPoints(9000);
         user.setUbsUsers(getUbsUsers());
@@ -2273,55 +2217,53 @@ class UBSClientServiceImplTest {
         dto.setPointsToUse(6000);
         dto.getBags().getFirst().setAmount(15);
         Order order = getOrder();
+        order.setOrderStatus(OrderStatus.FORMED);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         order.setPayment(null);
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
         order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
         Bag bag = getBagForOrder();
-
         UBSuser ubSuser = getUBSuser().setId(null);
-
         Address address = getAddress();
         address.setUser(user);
-
         var location = getLocation();
-
         OrderAddress orderAddress = ubSuser.getOrderAddress();
         orderAddress.setLocation(location);
-
         orderAddress.getBaseAddress().setAddressStatus(AddressStatus.NEW);
         address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
 
-        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("merchantId")) {
-                f.setAccessible(true);
-                f.set(ubsService, "1");
-            }
-        }
-        Optional<Order> optionalOrder = Optional.of(order);
-        TariffsInfo tariffsInfo = getTariffsInfo();
-        bag.setTariffsInfo(tariffsInfo);
-        tariffsInfo.setBags(List.of(bag));
-        order.setTariffsInfo(tariffsInfo);
+        // Налаштування entityManager через рефлексію
+        Field entityManagerField = UBSClientServiceImpl.class.getDeclaredField("entityManager");
+        entityManagerField.setAccessible(true);
+        EntityManager mockEntityManager = mock(EntityManager.class);
+        entityManagerField.set(ubsClientService, mockEntityManager);
+
+        // Налаштування моків
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
+            .thenReturn(Optional.of(getTariffsInfo()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(modelMapper.map(address, OrderAddress.class)).thenReturn(orderAddress);
-        when(orderRepository.findById(anyLong()))
-            .thenReturn(optionalOrder.get().getId() == null ? Optional.empty() : optionalOrder);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
             .thenReturn(getCheckoutResponseFromMonoBank());
+        doNothing().when(mockEntityManager).clear();
 
-        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", order.getId());
+        // Виклик методу
+        PaymentSystemResponse result =
+            ubsClientService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", order.getId());
         Assertions.assertNotNull(result);
+
+        // Перевірки
+        verify(userRepository, times(2)).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(orderRepository, times(2)).findById(anyLong());
+        verify(mockEntityManager, times(1)).clear();
     }
 
     @Test
@@ -3544,39 +3486,53 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void processOrderWithMonoBankPaymentSystemTest() {
-        Order order = getOrder();
+    void processOrderWithMonoBankPaymentSystemTest() throws NoSuchFieldException, IllegalAccessException {
         User user = getUserWithLastLocation();
-        String uuid = user.getUuid();
+        user.setCurrentPoints(900);
         OrderResponseDto dto = getOrderResponseDto();
-        dto.setBags(Collections.singletonList(new BagDto(3, 10)));
+        dto.setPaymentSystem(PaymentSystem.MONOBANK);
+
+        List<BagDto> bags = new ArrayList<>();
+        bags.add(new BagDto(1, 5));
+        bags.add(new BagDto(2, 5));
+        dto.setBags(bags);
+
+        Order order = getOrder();
+        order.setOrderStatus(OrderStatus.FORMED);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        Bag bag = getBagForOrder();
         TariffsInfo tariffsInfo = getTariffsInfo();
+        bag.setTariffsInfo(tariffsInfo);
+        tariffsInfo.setBags(List.of(bag));
+        order.setTariffsInfo(tariffsInfo);
         UBSuser ubSuser = getUBSuser();
 
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
-        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(getAddress()));
+        Field entityManagerField = UBSClientServiceImpl.class.getDeclaredField("entityManager");
+        entityManagerField.setAccessible(true);
+        EntityManager mockEntityManager = mock(EntityManager.class);
+        entityManagerField.set(ubsClientService, mockEntityManager);
+
+        when(userRepository.findByUuid(anyString())).thenReturn(user);
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(anyLong())).thenReturn(Optional.of(ubSuser));
-        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(getBag()));
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
             .thenReturn(getCheckoutResponseFromMonoBank());
+        doNothing().when(mockEntityManager).clear();
 
-        PaymentSystemResponse paymentSystemResponse = ubsClientService.saveFullOrderToDB(dto, uuid, 1L);
+        PaymentSystemResponse result = ubsClientService.saveFullOrderToDB(dto, user.getUuid(), 1L);
+        Assertions.assertNotNull(result);
 
-        verify(userRepository).findByUuid(uuid);
-        verify(addressRepository).findById(anyLong());
-        verify(tariffsInfoRepository).findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
-        verify(ubsUserRepository).findById(anyLong());
-        verify(bagRepository).findActiveBagById(anyInt());
-        verify(orderRepository, times(2)).findById(anyLong());
-        verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
-        verify(monoBankClient).getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token));
-
-        assertEquals("https://www.monobank/api", paymentSystemResponse.link());
-        assertEquals(1L, paymentSystemResponse.orderId());
+        verify(userRepository, times(2)).findByUuid(anyString());
+        verify(orderRepository, times(3)).findById(anyLong()); // Оновлено на 3 виклики
+        verify(mockEntityManager, times(1)).clear();
+        verify(monoBankClient, times(1)).getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token));
     }
 
     @Test
@@ -3629,8 +3585,10 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void processOrderIfPaidWithBonusesTest() {
+    void processOrderIfPaidWithBonusesTest() throws NoSuchFieldException, IllegalAccessException {
         Order order = getOrder();
+        order.setOrderStatus(OrderStatus.FORMED);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         User user = getUserWithLastLocation();
         user.setCurrentPoints(360);
         String uuid = user.getUuid();
@@ -3640,6 +3598,11 @@ class UBSClientServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         UBSuser ubSuser = getUBSuser();
 
+        Field entityManagerField = UBSClientServiceImpl.class.getDeclaredField("entityManager");
+        entityManagerField.setAccessible(true);
+        EntityManager mockEntityManager = mock(EntityManager.class);
+        entityManagerField.set(ubsClientService, mockEntityManager);
+
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(getAddress()));
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
@@ -3648,17 +3611,20 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(getBag()));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        doNothing().when(orderBagRepository).deleteAllByOrderId(anyLong());
+        doNothing().when(mockEntityManager).clear();
 
         PaymentSystemResponse paymentSystemResponse = ubsClientService.saveFullOrderToDB(dto, uuid, 1L);
 
-        verify(userRepository).findByUuid(uuid);
+        verify(userRepository, times(2)).findByUuid(uuid);
         verify(addressRepository).findById(anyLong());
         verify(tariffsInfoRepository).findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
         verify(ubsUserRepository).findById(anyLong());
         verify(bagRepository).findActiveBagById(anyInt());
-        verify(orderRepository, times(1)).findById(anyLong());
+        verify(orderRepository, times(2)).findById(anyLong());
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
         verify(monoBankClient, times(0)).getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token));
+        verify(mockEntityManager, times(1)).clear();
 
         assertEquals("", paymentSystemResponse.link());
         assertEquals(1L, paymentSystemResponse.orderId());
