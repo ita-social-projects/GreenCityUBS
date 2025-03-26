@@ -5,10 +5,10 @@ trigger:
   paths:
     exclude:
     - README.md
-    
+
 pr: none
-    
-    
+
+
 variables:
   agentOS: ubuntu-latest
   
@@ -27,7 +27,7 @@ variables:
 
 stages:
 - stage: Build
-  jobs: 
+  jobs:
   - job: Build
     pool:
       vmImage: $(agentOS)
@@ -37,7 +37,19 @@ stages:
       inputs:
         azureSubscription: '$(azureSub)'
         KeyVaultName: '$(azKeyVault)'
-        SecretsFilter: 'ftpHost, ftpUser, ftpPass'
+        SecretsFilter: 'ftpHost, ftpUser, ftpPass, LOGGING-ITA-TOKEN'
+
+    - script: |
+        echo "<settings>
+        <servers>
+          <server>
+            <id>github</id>
+            <username>ita-social-projects</username>
+            <password>$(LOGGING-ITA-TOKEN)</password>
+          </server>
+        </servers>
+        </settings>" > $(Build.SourcesDirectory)/settings.xml
+      displayName: "Create temporary settings.xml"
 
     - task: Maven@3
       displayName: Maven package
@@ -46,8 +58,8 @@ stages:
         javaHomeOption: 'JDKVersion'
         jdkVersionOption: '1.21'
         mavenVersionOption: 'Default'
-        options: '-Dmaven.test.skip=true'
-        
+        options: '-Dmaven.test.skip=true -s $(Build.SourcesDirectory)/settings.xml'
+
     - script: mv $(userRepoName)/target/*.jar $(userRepoName)/target/$(onbootJarName)
       displayName: Rename user jar to app
 
@@ -57,7 +69,7 @@ stages:
         SourceFolder: '$(system.defaultworkingdirectory)'
         Contents: '**/target/*.jar'
         TargetFolder: '$(build.artifactstagingdirectory)'
-    
+
     - task: CopyFiles@2
       displayName: Copy Files
       inputs:
@@ -70,7 +82,7 @@ stages:
       inputs:
         PathtoPublish: '$(build.artifactstagingdirectory)'
         artifactName: '$(artifactName)'
-    
+
     - task: Docker@2
       displayName: Build image
       inputs:
@@ -93,7 +105,7 @@ stages:
           deploy:
             steps:
             - download: none
-            
+
             - task: DownloadBuildArtifacts@0
               inputs:
                 buildType: 'current'
@@ -105,7 +117,7 @@ stages:
               inputs:
                 helmVersion: '3.9.0'
                 installKubectl: true
-                
+
             - task: HelmDeploy@0
               inputs:
                 connectionType: 'Kubernetes Service Connection'
