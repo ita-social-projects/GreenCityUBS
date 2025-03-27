@@ -1,6 +1,5 @@
 package greencity.service.notification;
 
-import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
@@ -8,7 +7,7 @@ import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
-import greencity.dto.pageble.PageableAdvancedDto;
+import greencity.dto.pageble.PageableDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Order;
@@ -78,9 +77,9 @@ import static greencity.constant.ErrorMessage.VIOLATION_DOES_NOT_EXIST;
 import static greencity.enums.NotificationReceiverType.SITE;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
-import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
-import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
-import static greencity.constant.OrderHistory.DELETE_VIOLATION_UK;
+import static greencity.constant.OrderHistory.ADD_VIOLATION;
+import static greencity.constant.OrderHistory.CHANGES_VIOLATION;
+import static greencity.constant.OrderHistory.DELETE_VIOLATION;
 
 @Service
 @Transactional
@@ -92,7 +91,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final OrderRepository orderRepository;
     private final ViolationRepository violationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
-    private final UserRemoteClient userRemoteClient;
     @Autowired
     @Qualifier("kyivZonedClock")
     private Clock clock;
@@ -262,9 +260,9 @@ public class NotificationServiceImpl implements NotificationService {
             fillAndSendNotification(parameters, order, NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF);
         } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
             && order.getEvents().stream()
-                .map(Event::getEventNameUk)
-                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK)
-                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE_UK) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT_UK))
+                .map(Event::getEventName)
+                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
+                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
                 .count() == 3) {
             fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
         } else {
@@ -293,15 +291,14 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             && order.getEvents().stream()
-                .map(Event::getEventNameUk)
-                .noneMatch(
-                    e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK))) {
+                .map(Event::getEventName)
+                .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED))) {
             fillAndSendNotification(parameters, order, NotificationType.ORDER_STATUS_CHANGED);
         } else if ((order.getOrderStatus() == OrderStatus.DONE || order.getOrderStatus() == OrderStatus.CANCELED)
             && order.getEvents().stream()
-                .map(Event::getEventNameUk)
-                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK)
-                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE_UK) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT_UK))
+                .map(Event::getEventName)
+                .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
+                    || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
                 .count() == 3) {
             fillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
         }
@@ -467,24 +464,12 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
-     * Notifies the user about a canceled violation associated with a specific
-     * order.
-     * <p>
-     *
-     * Retrieves the canceled violation for the given order identifier. If the
-     * violation does not exist, a NotFoundException is thrown. Otherwise,
-     * constructs notification parameters (including the order number) and sends a
-     * notification using the cancellation violation notification type.
-     * </p>
-     *
-     * @param orderId the identifier of the order linked to the canceled violation
-     * @throws NotFoundException if no canceled violation is found for the provided
-     *                           order identifier
+     * {@inheritDoc}
      */
     @Override
     public void notifyDeleteViolation(Long orderId) {
         Set<NotificationParameter> parameters = new HashSet<>();
-        Violation violation = violationRepository.findCanceledViolationByOrderId(orderId)
+        Violation violation = violationRepository.findActiveViolationByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
         parameters.add(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
@@ -504,8 +489,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private List<Order> getOrdersWithNewViolations() {
-        return orderRepository
-            .findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK)
+        return orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION, CHANGES_VIOLATION, DELETE_VIOLATION)
             .stream()
             .filter(order -> orderHasJustNewViolations(order.getEvents()))
             .toList();
@@ -513,11 +497,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     private boolean orderHasJustNewViolations(List<Event> events) {
         var names = events.stream()
-            .map(Event::getEventNameUk)
+            .map(Event::getEventName)
             .toList();
 
-        return names.contains(ADD_VIOLATION_UK)
-            && !names.contains(CHANGES_VIOLATION_UK) && !names.contains(DELETE_VIOLATION_UK);
+        return names.contains(ADD_VIOLATION)
+            && !names.contains(CHANGES_VIOLATION) && !names.contains(DELETE_VIOLATION);
     }
 
     private void notifyNewViolations(List<Order> orders) {
@@ -543,7 +527,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyAllCanceledViolations() {
-        var orders = orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION_UK);
+        var orders = orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION);
         notifyViolations(orders, NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
     }
 
@@ -554,7 +538,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private List<Order> getOrdersWithChangedViolations() {
-        return orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK)
+        return orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION, DELETE_VIOLATION)
             .stream()
             .filter(o -> orderHasChangedViolations(o.getEvents()))
             .toList();
@@ -562,10 +546,10 @@ public class NotificationServiceImpl implements NotificationService {
 
     private boolean orderHasChangedViolations(List<Event> events) {
         var names = events.stream()
-            .map(Event::getEventNameUk)
+            .map(Event::getEventName)
             .toList();
 
-        return names.contains(CHANGES_VIOLATION_UK) && !names.contains(DELETE_VIOLATION_UK);
+        return names.contains(CHANGES_VIOLATION) && !names.contains(DELETE_VIOLATION);
     }
 
     private void notifyViolations(List<Order> orders, NotificationType notificationType) {
@@ -596,9 +580,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     private boolean checkByEventsOrderDoneOrCanceled(Order order) {
         return order.getEvents().stream()
-            .map(Event::getEventNameUk)
-            .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK)
-                || e.equals(OrderHistory.ORDER_ON_THE_ROUTE_UK) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT_UK))
+            .map(Event::getEventName)
+            .filter(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED)
+                || e.equals(OrderHistory.ORDER_ON_THE_ROUTE) || e.equals(OrderHistory.ORDER_NOT_TAKEN_OUT))
             .count() == 3;
     }
 
@@ -623,8 +607,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     private boolean checkByEventsOrderStatusIsChanged(Order order) {
         return order.getEvents().stream()
-            .map(Event::getEventNameUk)
-            .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT_UK) || e.equals(OrderHistory.ORDER_CONFIRMED_UK));
+            .map(Event::getEventName)
+            .noneMatch(e -> e.equals(OrderHistory.ORDER_ADJUSTMENT) || e.equals(OrderHistory.ORDER_CONFIRMED));
     }
 
     @Override
@@ -769,10 +753,9 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public PageableAdvancedDto<NotificationShortDto> getAllNotificationsForUser(String email,
+    public PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
         String language,
         Pageable pageable) {
-        String userUuid = userRemoteClient.findUuidByEmail(email);
         User user = userRepository.findByUuid(userUuid);
 
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
@@ -785,16 +768,11 @@ public class NotificationServiceImpl implements NotificationService {
             .map(n -> createNotificationShortDto(n, language, 0L))
             .collect(Collectors.toCollection(LinkedList::new));
 
-        return new PageableAdvancedDto<>(
+        return new PageableDto<>(
             notificationShortDtoList,
             notifications.getTotalElements(),
             notifications.getPageable().getPageNumber(),
-            notifications.getTotalPages(),
-            notifications.getNumber(),
-            notifications.hasPrevious(),
-            notifications.hasNext(),
-            notifications.isFirst(),
-            notifications.isLast());
+            notifications.getTotalPages());
     }
 
     /**
@@ -934,8 +912,8 @@ public class NotificationServiceImpl implements NotificationService {
         return NotificationShortDto.builder()
             .id(notification.getId())
             .title(language.equals("ua")
-                ? template.getTitleUk()
-                : template.getTitleEn())
+                ? template.getTitle()
+                : template.getTitleEng())
             .notificationTime(notification.getNotificationTime())
             .read(notification.isRead())
             .orderId(orderId)
@@ -966,7 +944,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         StringSubstitutor sub = new StringSubstitutor(valuesMap);
         String resultBody = sub.replace(String.format(templateBody, monthsOfAccountInactivity));
-        String title = language.equals("ua") ? template.getTitleUk() : template.getTitleEn();
+        String title = language.equals("ua") ? template.getTitle() : template.getTitleEng();
 
         return NotificationDto.builder().title(title)
             .body(resultBody).build();
@@ -988,8 +966,8 @@ public class NotificationServiceImpl implements NotificationService {
     private static String resolveTemplateBody(String language, NotificationReceiverType receiverType,
         NotificationTemplate notification) {
         return language.equals("ua")
-            ? getNotificationPlatformByReceiverType(notification, receiverType).getBodyUk()
-            : getNotificationPlatformByReceiverType(notification, receiverType).getBodyEn();
+            ? getNotificationPlatformByReceiverType(notification, receiverType).getBody()
+            : getNotificationPlatformByReceiverType(notification, receiverType).getBodyEng();
     }
 
     private static NotificationPlatform getNotificationPlatformByReceiverType(

@@ -63,13 +63,9 @@ class NotificationControllerTest {
 
     @Test
     void getNotificationsForCurrentUser() throws Exception {
-        String emailQueryParam = "email";
-        String emailQueryParamValue = "email@email.com";
-
         mockMvc.perform(get(notificationLink)
             .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON)
-            .queryParam(emailQueryParam, emailQueryParamValue))
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 

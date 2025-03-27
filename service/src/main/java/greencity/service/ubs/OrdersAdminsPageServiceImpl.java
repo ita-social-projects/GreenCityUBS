@@ -15,12 +15,8 @@ import greencity.dto.table.ColumnDTO;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.dto.user.ChatLinkDto;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.Region;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
@@ -28,48 +24,37 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.locations.City;
 import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.entity.order.Event;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.enums.BonusReason;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
+import greencity.entity.order.Order;
+import greencity.entity.order.Event;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.user.User;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import greencity.repository.CityRepository;
-import greencity.repository.DistrictRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.RegionRepository;
-import greencity.repository.UserRepository;
 import greencity.repository.AddressRepository;
-import greencity.repository.TableColumnWidthForEmployeeRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.CertificateRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderAddressRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
-import greencity.repository.EmployeeRepository;
+import greencity.repository.TableColumnWidthForEmployeeRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.CityRepository;
+import greencity.repository.DistrictRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.EnumUtils;
-import org.modelmapper.ModelMapper;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -79,6 +64,20 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.EnumUtils;
+import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import org.springframework.transaction.annotation.Transactional;
 import static greencity.constant.ErrorMessage.DATE_OF_EXPORT_NOT_SPECIFIED_FOR_ORDER;
 import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
@@ -137,13 +136,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String ORDER_COMMENT = "commentsForOrder";
     private static final String WITHOUT_ID = "-1";
     private static final String WITHOUT_MANAGER_EN = "Without manager";
-    private static final String WITHOUT_MANAGER_UK = "Без менеджера";
+    private static final String WITHOUT_MANAGER_UA = "Без менеджера";
     private static final String WITHOUT_LOGISTICIAN_EN = "Without logistician";
-    private static final String WITHOUT_LOGISTICIAN_UK = "Без логіста";
+    private static final String WITHOUT_LOGISTICIAN_UA = "Без логіста";
     private static final String WITHOUT_NAVIGATOR_EN = "Without navigator";
-    private static final String WITHOUT_NAVIGATOR_UK = "Без штурмана";
+    private static final String WITHOUT_NAVIGATOR_UA = "Без штурмана";
     private static final String WITHOUT_DRIVER_EN = "Without driver";
-    private static final String WITHOUT_DRIVER_UK = "Без водія";
+    private static final String WITHOUT_DRIVER_UA = "Без водія";
     private static final String DISTRICT = "district";
     private static final String WITHOUT_EMPLOYEE = "-1";
     private static final String IGNORE_VALUE_FOR_EMPLOYEE = "0";
@@ -335,7 +334,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 validateOrder(order, employee);
                 setAddressComment(value, orderId);
 
-                eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, UBS_ADMIN, order);
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
                 orderLockService.unlockOrder(order);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
@@ -355,7 +354,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderAddress address = orderAddressRepository.findByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
 
-        address.getBaseAddress().setAddressComment(value);
+        address.setAddressComment(value);
         orderAddressRepository.save(address);
     }
 
@@ -384,7 +383,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
                 commentSetters.get(columnName).accept(order);
 
-                eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, UBS_ADMIN, order);
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT, UBS_ADMIN, order);
                 orderLockService.unlockOrder(order);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
@@ -544,11 +543,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderStatus[] orderStatuses = OrderStatus.values();
         for (OrderStatus o : orderStatuses) {
             String ua = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue())
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameUk();
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getName();
             String en = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue())
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameEn();
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameEng();
             optionForColumnDTOS
-                .add(OptionForColumnDTO.builder().key(o.toString()).uk(ua).en(en).filtered(false).build());
+                .add(OptionForColumnDTO.builder().key(o.toString()).ua(ua).en(en).filtered(false).build());
         }
         return optionForColumnDTOS;
     }
@@ -562,8 +561,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_PAYMENT_STATUS_NOT_FOUND));
             optionForColumnDTOS.add(OptionForColumnDTO.builder()
                 .key(p.name())
-                .uk(orderPaymentStatusTranslation.getTranslationValueUk())
-                .en(orderPaymentStatusTranslation.getTranslationsValueEn())
+                .ua(orderPaymentStatusTranslation.getTranslationValue())
+                .en(orderPaymentStatusTranslation.getTranslationsValueEng())
                 .build());
         }
         return optionForColumnDTOS;
@@ -571,9 +570,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<OptionForColumnDTO> blockingStatusListForDevelopStage() {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
-        optionForColumnDTOS.add(OptionForColumnDTO.builder().key("blocked").uk("Заблоковано").en("Blocked").build());
+        optionForColumnDTOS.add(OptionForColumnDTO.builder().key("blocked").ua("Заблоковано").en("Blocked").build());
         optionForColumnDTOS
-            .add(OptionForColumnDTO.builder().key("notBlocked").uk("Не заблоковано").en("Not blocked").build());
+            .add(OptionForColumnDTO.builder().key("notBlocked").ua("Не заблоковано").en("Not blocked").build());
         return optionForColumnDTOS;
     }
 
@@ -599,7 +598,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<OptionForColumnDTO> callerList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(2L);
         List<OptionForColumnDTO> optionForColumnDTOS =
-            includeItemsWithoutResponsiblePerson(WITHOUT_MANAGER_UK, WITHOUT_MANAGER_EN);
+            includeItemsWithoutResponsiblePerson(WITHOUT_MANAGER_UA, WITHOUT_MANAGER_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -609,7 +608,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<OptionForColumnDTO> logicManList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(3L);
         List<OptionForColumnDTO> optionForColumnDTOS =
-            includeItemsWithoutResponsiblePerson(WITHOUT_LOGISTICIAN_UK, WITHOUT_LOGISTICIAN_EN);
+            includeItemsWithoutResponsiblePerson(WITHOUT_LOGISTICIAN_UA, WITHOUT_LOGISTICIAN_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -619,7 +618,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<OptionForColumnDTO> navigatorList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(4L);
         List<OptionForColumnDTO> optionForColumnDTOS =
-            includeItemsWithoutResponsiblePerson(WITHOUT_NAVIGATOR_UK, WITHOUT_NAVIGATOR_EN);
+            includeItemsWithoutResponsiblePerson(WITHOUT_NAVIGATOR_UA, WITHOUT_NAVIGATOR_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -629,7 +628,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<OptionForColumnDTO> driverList() {
         List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(5L);
         List<OptionForColumnDTO> optionForColumnDTOS =
-            includeItemsWithoutResponsiblePerson(WITHOUT_DRIVER_UK, WITHOUT_DRIVER_EN);
+            includeItemsWithoutResponsiblePerson(WITHOUT_DRIVER_UA, WITHOUT_DRIVER_EN);
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
@@ -640,7 +639,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         optionForColumnDTOS.add(OptionForColumnDTO.builder()
             .key(WITHOUT_ID)
-            .uk(nameUa)
+            .ua(nameUa)
             .en(nameEn)
             .build());
         return optionForColumnDTOS;
@@ -675,7 +674,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 orderLockService.unlockOrder(existedOrder);
 
                 if (OrderStatus.BROUGHT_IT_HIMSELF == OrderStatus.valueOf(updatedStatusValue)) {
-                    eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK,
+                    eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF,
                         employee.getFirstName() + "  " + employee.getLastName(), existedOrder);
                     notificationService.notifySelfPickupOrder(existedOrder);
                 }
@@ -699,7 +698,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
             .amount(pointsToReturn)
             .date(LocalDateTime.now())
-            .reason(BonusReason.REFUND_CANCELED_ORDER)
             .user(user)
             .order(order)
             .build();
@@ -767,8 +765,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.getEvents().add(Event.builder()
                     .order(existedOrder)
                     .eventDate(LocalDateTime.now())
-                    .authorNameUk(employee.getFirstName() + "  " + employee.getLastName())
-                    .eventNameUk(OrderHistory.ORDER_CANCELLED_UK + "  " + value)
+                    .authorName(employee.getFirstName() + "  " + employee.getLastName())
+                    .eventName(OrderHistory.ORDER_CANCELLED + "  " + value)
                     .build());
                 existedOrder.setCancellationComment(value);
                 orderLockService.unlockOrder(existedOrder);
@@ -793,8 +791,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.getEvents().add(Event.builder()
                     .order(existedOrder)
                     .eventDate(LocalDateTime.now())
-                    .authorNameUk(employee.getFirstName() + "  " + employee.getLastName())
-                    .eventNameUk(OrderHistory.ADD_ADMIN_COMMENT_UK + "  " + value)
+                    .authorName(employee.getFirstName() + "  " + employee.getLastName())
+                    .eventName(OrderHistory.ADD_ADMIN_COMMENT + "  " + value)
                     .build());
                 existedOrder.setAdminComment(value);
                 orderLockService.unlockOrder(existedOrder);
@@ -808,10 +806,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     @Override
     public synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
-        LocalDate dateNow = LocalDate.now();
-        if (date.isBefore(dateNow)) {
-            throw new BadRequestException("Export date cannot be in the past: " + date);
-        }
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             try {

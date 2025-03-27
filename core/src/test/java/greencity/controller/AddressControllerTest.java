@@ -9,6 +9,7 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.service.ubs.AddressService;
+import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,9 @@ class AddressControllerTest {
     private MockMvc mockMvc;
 
     @Mock
+    private UBSClientService ubsClientService;
+
+    @Mock
     private UserRemoteClient userRemoteClient;
 
     @Mock
@@ -76,7 +80,7 @@ class AddressControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(addressService).findAllAddressesForCurrentOrder(anyString());
+        verify(ubsClientService).findAllAddressesForCurrentOrder(anyString());
     }
 
     @Test
@@ -93,7 +97,7 @@ class AddressControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
-        verify(addressService).saveCurrentAddressForOrder(any(), eq("35467585763t4sfgchjfuyetf"));
+        verify(ubsClientService).saveCurrentAddressForOrder(any(), eq("35467585763t4sfgchjfuyetf"));
     }
 
     @Test
@@ -110,7 +114,7 @@ class AddressControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-        verify(addressService).updateCurrentAddressForOrder(any(), eq("35467585763t4sfgchjfuyetf"));
+        verify(ubsClientService).updateCurrentAddressForOrder(any(), eq("35467585763t4sfgchjfuyetf"));
     }
 
     @Test
@@ -131,7 +135,7 @@ class AddressControllerTest {
             .principal(principal))
             .andExpect(status().isOk());
 
-        verify(addressService).makeAddressActual(addressId, uuid);
+        verify(ubsClientService).makeAddressActual(addressId, uuid);
     }
 
     @Test
@@ -139,7 +143,7 @@ class AddressControllerTest {
         String region = "Львівська";
         String city = "Львів";
         List<DistrictDto> mockLocationDtoList = new ArrayList<>();
-        when(addressService.getAllDistricts(region, city)).thenReturn(mockLocationDtoList);
+        when(ubsClientService.getAllDistricts(region, city)).thenReturn(mockLocationDtoList);
         mockMvc.perform(get(ubsLink + "/get-all-districts")
             .param("region", region)
             .param("city", city)
@@ -147,7 +151,7 @@ class AddressControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(addressService).getAllDistricts(region, city);
+        verify(ubsClientService).getAllDistricts(region, city);
     }
 
     @Test
@@ -168,7 +172,7 @@ class AddressControllerTest {
             .principal(principal))
             .andExpect(status().isOk());
 
-        verify(addressService).addressUpdate(any(), eq(principal.getName()));
+        verify(managementService).addressUpdate(any(), eq(principal.getName()));
     }
 
     @Test
@@ -178,11 +182,5 @@ class AddressControllerTest {
             .andExpect(status().isOk());
 
         verify(addressService).getAddressForOrder(1L);
-    }
-
-    @Test
-    void getAddressByOrder() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/read-address-order/{id}", 1L))
-            .andExpect(status().isOk());
     }
 }

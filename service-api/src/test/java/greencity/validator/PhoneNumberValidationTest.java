@@ -7,11 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import jakarta.validation.ConstraintValidatorContext;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class PhoneNumberValidationTest {
@@ -52,12 +51,12 @@ class PhoneNumberValidationTest {
     }
 
     @Test
-    void isValidShouldReturnTrueWhenValueIsNull() {
+    void isValidShouldReturnTrueWhenValueIsNullTest() {
         assertTrue(validation.isValid(null, context));
     }
 
     @Test
-    void isValidShouldReturnTrueWhenValueIsEmpty() {
+    void isValidShouldReturnTrueWhenValueIsEmptyTest() {
         assertTrue(validation.isValid("", context));
     }
 }

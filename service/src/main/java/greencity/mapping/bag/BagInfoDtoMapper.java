@@ -13,8 +13,8 @@ public class BagInfoDtoMapper extends AbstractConverter<Bag, BagInfoDto> {
     protected BagInfoDto convert(Bag bag) {
         return BagInfoDto.builder()
             .id(bag.getId())
-            .nameUk(bag.getNameUk())
-            .nameEn(bag.getNameEn())
+            .name(bag.getName())
+            .nameEng(bag.getNameEng())
             .capacity(bag.getCapacity())
             .price(BigDecimal.valueOf(bag.getFullPrice())
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())

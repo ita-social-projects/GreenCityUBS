@@ -31,21 +31,21 @@ public class AddressRequestDtoToBaseEntityMapper extends BaseEntityAbstractConve
         try {
             if (District.class.isAssignableFrom(targetClass)) {
                 return targetClass.cast(District.builder()
-                    .nameUk(source.getDistrictUk())
+                    .nameUk(source.getDistrict())
                     .nameEn(source.getDistrictEn())
                     .build());
             }
 
             if (City.class.isAssignableFrom(targetClass)) {
                 return targetClass.cast(City.builder()
-                    .nameUk(source.getCityUk())
+                    .nameUk(source.getCity())
                     .nameEn(source.getCityEn())
                     .build());
             }
 
             if (Region.class.isAssignableFrom(targetClass)) {
                 return targetClass.cast(Region.builder()
-                    .nameUk(source.getRegionUk())
+                    .nameUk(source.getRegion())
                     .nameEn(source.getRegionEn())
                     .build());
             }

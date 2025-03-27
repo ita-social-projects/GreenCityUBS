@@ -22,7 +22,7 @@ public class PositionDtoWithTranslateMapper extends AbstractConverter<Position, 
     @Override
     protected PositionWithTranslateDto convert(Position position) {
         Map<String, String> nameTranslations = new HashMap<>();
-        nameTranslations.put("ua", position.getNameUk());
+        nameTranslations.put("ua", position.getName());
         nameTranslations.put("en", position.getNameEn());
 
         return PositionWithTranslateDto.builder()

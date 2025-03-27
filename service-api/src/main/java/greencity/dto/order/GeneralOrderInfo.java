@@ -25,11 +25,11 @@ public class GeneralOrderInfo {
     private List<OrderStatusesTranslationDto> orderStatusesDtos;
     private List<OrderPaymentStatusesTranslationDto> orderPaymentStatusesDto;
     private OrderStatus orderStatus;
-    private String orderStatusNameUk;
-    private String orderStatusNameEn;
+    private String orderStatusName;
+    private String orderStatusNameEng;
     private OrderPaymentStatus orderPaymentStatus;
-    private String orderPaymentStatusNameUk;
-    private String orderPaymentStatusNameEn;
+    private String orderPaymentStatusName;
+    private String orderPaymentStatusNameEng;
     private String adminComment;
     private boolean blocked;
 }

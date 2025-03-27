@@ -56,20 +56,20 @@ class EventServiceImplTest {
             ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
 
-        eventService.save(OrderHistory.ORDER_FORMED_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.ORDER_PAID_UK, eventAuthorClient, order);
-        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.ORDER_ADJUSTMENT_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.ORDER_CONFIRMED_UK, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_FORMED, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_PAID, eventAuthorClient, order);
+        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_ADJUSTMENT, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_CONFIRMED, eventAuthorSystem, order);
 
-        assertEquals("Order Status - Formed", OrderHistory.ORDER_FORMED_EN);
-        assertEquals("System", OrderHistory.SYSTEM_EN);
-        assertEquals("Client", OrderHistory.CLIENT_EN);
-        assertEquals("Order Paid", OrderHistory.ORDER_PAID_EN);
-        assertEquals("Added payment  №", OrderHistory.ADD_PAYMENT_SYSTEM_EN);
-        assertEquals("Added payment  №", OrderHistory.ADD_PAYMENT_SYSTEM_EN);
-        assertEquals("Order Status - Approval", OrderHistory.ORDER_ADJUSTMENT_EN);
-        assertEquals("Order Status - Confirmed", OrderHistory.ORDER_CONFIRMED_EN);
+        assertEquals("Order Status - Formed", OrderHistory.ORDER_FORMED_ENG);
+        assertEquals("System", OrderHistory.SYSTEM_ENG);
+        assertEquals("Client", OrderHistory.CLIENT_ENG);
+        assertEquals("Order Paid", OrderHistory.ORDER_PAID_ENG);
+        assertEquals("Added payment  №", OrderHistory.ADD_PAYMENT_SYSTEM_ENG);
+        assertEquals("Added payment  №", OrderHistory.ADD_PAYMENT_SYSTEM_ENG);
+        assertEquals("Order Status - Approval", OrderHistory.ORDER_ADJUSTMENT_ENG);
+        assertEquals("Order Status - Confirmed", OrderHistory.ORDER_CONFIRMED_ENG);
         verify(eventRepository, times(5)).save(any());
     }
 
@@ -81,17 +81,17 @@ class EventServiceImplTest {
             ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
 
-        eventService.save(OrderHistory.UPDATE_DATE_EXPORT_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.SET_DATE_EXPORT_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.UPDATE_MIX_WASTE_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.ADD_NEW_ECO_NUMBER_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.DELETED_ECO_NUMBER_UK, eventAuthorSystem, order);
+        eventService.save(OrderHistory.UPDATE_DATE_EXPORT, eventAuthorSystem, order);
+        eventService.save(OrderHistory.SET_DATE_EXPORT, eventAuthorSystem, order);
+        eventService.save(OrderHistory.UPDATE_MIX_WASTE, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ADD_NEW_ECO_NUMBER, eventAuthorSystem, order);
+        eventService.save(OrderHistory.DELETED_ECO_NUMBER, eventAuthorSystem, order);
 
-        assertEquals("Змінено деталі вивезення. Дата вивезення:", OrderHistory.UPDATE_DATE_EXPORT_UK);
-        assertEquals("Встановлено деталі вивезення. Дата вивезення:", OrderHistory.SET_DATE_EXPORT_UK);
-        assertEquals("Змінено деталі замовлення. Мікс відходів ", OrderHistory.UPDATE_MIX_WASTE_UK);
-        assertEquals("Додано номер замовлення з магазину", OrderHistory.ADD_NEW_ECO_NUMBER_UK);
-        assertEquals("Видалено номер замовлення з магазину", OrderHistory.DELETED_ECO_NUMBER_UK);
+        assertEquals("Змінено деталі вивезення. Дата вивезення:", OrderHistory.UPDATE_DATE_EXPORT);
+        assertEquals("Встановлено деталі вивезення. Дата вивезення:", OrderHistory.SET_DATE_EXPORT);
+        assertEquals("Змінено деталі замовлення. Мікс відходів ", OrderHistory.UPDATE_MIX_WASTE);
+        assertEquals("Додано номер замовлення з магазину", OrderHistory.ADD_NEW_ECO_NUMBER);
+        assertEquals("Видалено номер замовлення з магазину", OrderHistory.DELETED_ECO_NUMBER);
 
         verify(eventRepository, times(5)).save(any());
     }
@@ -104,21 +104,21 @@ class EventServiceImplTest {
             ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
 
-        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK, userName, order);
-        eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK, userName, order);
-        eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK, userName, order);
-        eventService.save(OrderHistory.ORDER_HALF_PAID_UK, userName, order);
-        eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY_UK, userName, order);
-        eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, userName, order);
-        eventService.save(OrderHistory.DELETE_VIOLATION_UK, userName, order);
+        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY, userName, order);
+        eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, userName, order);
+        eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY, userName, order);
+        eventService.save(OrderHistory.ORDER_HALF_PAID, userName, order);
+        eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY, userName, order);
+        eventService.save(OrderHistory.ADD_ADMIN_COMMENT, userName, order);
+        eventService.save(OrderHistory.DELETE_VIOLATION, userName, order);
 
-        assertEquals("Payment removed №", OrderHistory.DELETE_PAYMENT_MANUALLY_EN);
-        assertEquals("Order status - Will bring it myself", OrderHistory.ORDER_BROUGHT_IT_HIMSELF_EN);
-        assertEquals("Payment details changed № ", OrderHistory.UPDATE_PAYMENT_MANUALLY_EN);
-        assertEquals("Order partially paid", OrderHistory.ORDER_HALF_PAID_EN);
-        assertEquals("Added payment №", OrderHistory.ADD_PAYMENT_MANUALLY_EN);
-        assertEquals("Comment added", OrderHistory.ADD_ADMIN_COMMENT_EN);
-        assertEquals("Violation removed", OrderHistory.DELETE_VIOLATION_EN);
+        assertEquals("Payment removed №", OrderHistory.DELETE_PAYMENT_MANUALLY_ENG);
+        assertEquals("Order status - Will bring it myself", OrderHistory.ORDER_BROUGHT_IT_HIMSELF_ENG);
+        assertEquals("Payment details changed № ", OrderHistory.UPDATE_PAYMENT_MANUALLY_ENG);
+        assertEquals("Order partially paid", OrderHistory.ORDER_HALF_PAID_ENG);
+        assertEquals("Added payment №", OrderHistory.ADD_PAYMENT_MANUALLY_ENG);
+        assertEquals("Comment added", OrderHistory.ADD_ADMIN_COMMENT_ENG);
+        assertEquals("Violation removed", OrderHistory.DELETE_VIOLATION_ENG);
 
         verify(eventRepository, times(7)).save(any());
     }
@@ -128,8 +128,8 @@ class EventServiceImplTest {
         String existedCallManager = eventService.changesWithResponsibleEmployee(2L, Boolean.TRUE);
         String unExistedCallManager = eventService.changesWithResponsibleEmployee(2L, Boolean.FALSE);
 
-        assertEquals(OrderHistory.UPDATE_MANAGER_CALL_UK, existedCallManager);
-        assertEquals(OrderHistory.ASSIGN_CALL_MANAGER_UK, unExistedCallManager);
+        assertEquals(OrderHistory.UPDATE_MANAGER_CALL, existedCallManager);
+        assertEquals(OrderHistory.ASSIGN_CALL_MANAGER, unExistedCallManager);
     }
 
     @Test
@@ -151,10 +151,10 @@ class EventServiceImplTest {
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0), ModelUtils.getListOfEvents().get(1)));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
 
-        eventService.save(OrderHistory.SET_EXPORT_DETAILS_EN, eventAuthor, order);
+        eventService.save(OrderHistory.SET_EXPORT_DETAILS_ENG, eventAuthor, order);
 
-        assertEquals("Installed export details.", OrderHistory.SET_EXPORT_DETAILS_EN);
-        assertEquals("Встановлено деталі вивезення.", OrderHistory.SET_EXPORT_DETAILS_UK);
+        assertEquals("Installed export details.", OrderHistory.SET_EXPORT_DETAILS_ENG);
+        assertEquals("Встановлено деталі вивезення.", OrderHistory.SET_EXPORT_DETAILS);
 
         verify(eventRepository, times(1)).save(any());
     }

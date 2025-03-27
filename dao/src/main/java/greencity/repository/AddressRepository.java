@@ -73,7 +73,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      *         associated with the user, or an empty {@link Optional} if no such
      *         address is found
      */
-    Optional<Address> findByUserIdAndBaseAddress_ActualTrue(Long userId);
+    Optional<Address> findByUserIdAndActualTrue(Long userId);
 
     /**
      * Finds first non-deleted {@link Address} associated with the given user ID.

@@ -19,6 +19,6 @@ public enum UserCategory {
                          "Users without orders."),
     ALL_USERS("Всі користувачі.", "All users.");
 
-    private final String descriptionUk;
-    private final String descriptionEn;
+    private final String description;
+    private final String descriptionEng;
 }

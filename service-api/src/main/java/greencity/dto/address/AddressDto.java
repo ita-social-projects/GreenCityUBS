@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.List;
 import static greencity.constant.ValidationConstant.CH_EN;
 import static greencity.constant.ValidationConstant.CH_NUM;
-import static greencity.constant.ValidationConstant.CH_UK;
+import static greencity.constant.ValidationConstant.CH_UA;
 import static greencity.constant.ValidationConstant.CITY_EN_REGEXP;
 import static greencity.constant.ValidationConstant.CITY_UK_REGEXP;
 import static greencity.constant.ValidationConstant.STREET_REGEXP;
@@ -31,15 +31,15 @@ public class AddressDto implements Serializable {
 
     @Length(max = 30)
     @Pattern(regexp = CITY_UK_REGEXP)
-    private String cityUk;
+    private String city;
 
     @Length(max = 30)
-    @Pattern(regexp = CH_UK + "{1,30}")
-    private String districtUk;
+    @Pattern(regexp = CH_UA + "{1,30}")
+    private String district;
 
     @Length(max = 30)
-    @Pattern(regexp = CH_UK + "{1,30}")
-    private String regionUk;
+    @Pattern(regexp = CH_UA + "{1,30}")
+    private String region;
 
     @Length(max = 4)
     @Pattern(regexp = CH_NUM + "{1,4}")
@@ -54,7 +54,7 @@ public class AddressDto implements Serializable {
 
     @Length(max = 50)
     @Pattern(regexp = STREET_REGEXP, message = STREET_VALIDATION_MESSAGE)
-    private String streetUk;
+    private String street;
 
     @Length(max = 255)
     private String addressComment;

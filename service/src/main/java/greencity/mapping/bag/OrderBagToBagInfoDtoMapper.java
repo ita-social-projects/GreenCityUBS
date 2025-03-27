@@ -21,8 +21,8 @@ public class OrderBagToBagInfoDtoMapper extends AbstractConverter<OrderBag, BagI
             .price(BigDecimal.valueOf(source.getPrice())
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY).doubleValue())
             .capacity(source.getCapacity())
-            .nameUk(source.getNameUk())
-            .nameEn(source.getNameEn())
+            .name(source.getName())
+            .nameEng(source.getNameEng())
             .build();
     }
 

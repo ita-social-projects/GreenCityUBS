@@ -25,6 +25,7 @@ import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderStatusPageDto;
+import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
@@ -48,7 +49,6 @@ import greencity.service.ubs.PaymentService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
-import greencity.validators.payment.ManualPaymentRequestValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -69,7 +69,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -84,13 +83,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import static greencity.validators.payment.ManualPaymentRequestActions.ADD;
-import static greencity.validators.payment.ManualPaymentRequestActions.UPDATE;
 
 @RestController
 @RequestMapping("/ubs/management")
 @RequiredArgsConstructor
-@Validated
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
     private final CertificateService certificateService;
@@ -98,7 +94,6 @@ public class ManagementOrderController {
     private final ViolationService violationService;
     private final BigOrderTableServiceView bigOrderTableService;
     private final PaymentService paymentService;
-    private final ManualPaymentRequestValidator manualPaymentRequestValidator;
 
     /**
      * Controller getting all certificates with sorting possibility.
@@ -272,22 +267,11 @@ public class ManagementOrderController {
     }
 
     /**
-     * Adds a violation record to a user.
+     * Controller for adding User violation.
      *
-     * <p>
-     *
-     * This endpoint processes a violation addition request by accepting a violation
-     * DTO and optional supporting files. The user is identified from the
-     * authenticated principal, and upon successful processing, the method returns
-     * an HTTP 201 (Created) status.
-     * </p>
-     *
-     * @param add       the violation details, including order reference and
-     *                  description, to be added to the user record
-     * @param files     optional attachments supporting the violation
-     * @param principal the authenticated user's security principal
-     * @return a ResponseEntity with HTTP 201 (Created) status indicating the
-     *         violation was successfully recorded
+     * @return {@link AddingViolationsToUserDto} count of Users violations with
+     *         order id descriptions.
+     * @author Bohdan Melnyk
      */
     @Operation(summary = "Add Violation to User")
     @ApiResponses(value = {
@@ -303,7 +287,7 @@ public class ManagementOrderController {
         @RequestPart(required = false) @Nullable MultipartFile[] files,
         Principal principal) {
         violationService.addUserViolation(add, files, principal.getName());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -369,6 +353,28 @@ public class ManagementOrderController {
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(bigOrderTableService.getCustomTableParameters(uuid));
+    }
+
+    /**
+     * Controller read address by order id.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     * @author Orest Mahdziak
+     */
+    @Operation(summary = "Get address by order id")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = ReadAddressByOrderDto.class))),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @GetMapping("/read-address-order/{id}")
+    public ResponseEntity<ReadAddressByOrderDto> getAddressByOrderId(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAddressByOrderId(id));
     }
 
     /**
@@ -726,7 +732,6 @@ public class ManagementOrderController {
     public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@PathVariable(name = "id") Long orderId,
         @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image, Principal principal) {
-        manualPaymentRequestValidator.validate(manualPaymentDto, orderId, ADD);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(paymentService.saveNewManualPayment(orderId, manualPaymentDto, image, principal.getName()));
     }
@@ -775,7 +780,6 @@ public class ManagementOrderController {
     public ResponseEntity<ManualPaymentResponseDto> updateManualPayment(@PathVariable(name = "id") Long paymentId,
         @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image, @Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        manualPaymentRequestValidator.validate(manualPaymentDto, paymentId, UPDATE);
         return ResponseEntity.status(HttpStatus.OK)
             .body(paymentService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));
     }
