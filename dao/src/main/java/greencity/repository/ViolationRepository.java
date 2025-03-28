@@ -40,13 +40,30 @@ public interface ViolationRepository extends CrudRepository<Violation, Long> {
     Long getNumberOfViolationsByUser(@Param(value = "userId") Long userId);
 
     /**
-     * Method returns active violation by order id.
+     * Retrieves the active violation for the specified order ID.
      *
-     * @param orderId {@link Long} .
-     * @return optional of {@link Violation} .
+     * @param orderId the unique identifier of the order to find the active
+     *                violation for
+     * @return an Optional containing the active Violation if found, or an empty
+     *         Optional if none exists
      */
-    @Query(value = "select * from violations_description_mapping v"
-        + " where v.order_id = :orderId"
-        + " and v.violation_status = 'ACTIVE'", nativeQuery = true)
-    Optional<Violation> findActiveViolationByOrderId(@Param(value = "orderId") Long orderId);
+    @Query(value = "SELECT v FROM Violation v WHERE v.order.id = ?1 AND v.violationStatus = 'ACTIVE'")
+    Optional<Violation> findActiveViolationByOrderId(Long orderId);
+
+    /**
+     * Retrieves an optional canceled violation for the specified order ID.
+     *
+     * <p>
+     * This method uses a JPQL query to fetch the Violation associated with the
+     * given order ID where the violation status is marked as 'DELETED', indicating
+     * a canceled violation.
+     * </p>
+     *
+     * @param orderId the identifier of the order to search for its canceled
+     *                violation
+     * @return an Optional containing the Violation if a matching canceled violation
+     *         is found, or an empty Optional otherwise
+     */
+    @Query(value = "SELECT v FROM Violation v WHERE v.order.id = ?1 AND v.violationStatus = 'DELETED'")
+    Optional<Violation> findCanceledViolationByOrderId(Long orderId);
 }

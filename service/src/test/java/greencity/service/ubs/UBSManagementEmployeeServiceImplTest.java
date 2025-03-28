@@ -93,12 +93,12 @@ class UBSManagementEmployeeServiceImplTest {
         when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(repository.save(any())).thenReturn(employee);
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
-        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
+        when(positionRepository.existsPositionByIdAndNameUk(any(), any())).thenReturn(true);
         employeeService.save(dto, file);
 
         verify(repository, times(1)).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(repository, times(1)).save(any());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(any(), any());
     }
 
     @Test
@@ -135,7 +135,7 @@ class UBSManagementEmployeeServiceImplTest {
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(repository.save(any())).thenReturn(employee);
-        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
+        when(positionRepository.existsPositionByIdAndNameUk(any(), any())).thenReturn(true);
         employeeService.save(dto, file);
 
         verify(repository, times(1))
@@ -144,7 +144,7 @@ class UBSManagementEmployeeServiceImplTest {
             .existsByEmailAndInactiveStatus(getAddEmployeeDto().getEmail());
         verify(modelMapper, times(2)).map(any(), any());
         verify(repository, times(2)).save(any());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(any(), any());
     }
 
     @Test
@@ -166,13 +166,13 @@ class UBSManagementEmployeeServiceImplTest {
 
         when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(repository.save(any())).thenReturn(employee);
-        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
+        when(positionRepository.existsPositionByIdAndNameUk(any(), any())).thenReturn(true);
         employeeService.save(dto, null);
 
         verify(repository, times(1))
             .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(repository, times(1)).save(any());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(any(), any());
     }
 
     @Test
@@ -234,7 +234,7 @@ class UBSManagementEmployeeServiceImplTest {
             "", "application/json", "random Bytes".getBytes());
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
-        when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
+        when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(true);
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
         when(repository.save(any())).thenReturn(employee);
         doNothing().when(fileService).delete(retrievedEmployee.getImagePath());
@@ -244,7 +244,7 @@ class UBSManagementEmployeeServiceImplTest {
         verify(modelMapper, times(2)).map(any(), any());
         verify(repository).save(any());
         verify(fileService).delete(retrievedEmployee.getImagePath());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(position.getId(), position.getNameUk());
         verify(repository, times(2)).findById(anyLong());
     }
 
@@ -257,10 +257,10 @@ class UBSManagementEmployeeServiceImplTest {
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
 
-        when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(false);
+        when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(false);
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
         assertThrows(NotFoundException.class, () -> employeeService.update(dto, file));
-        verify(positionRepository).existsPositionByIdAndName(position.getId(), position.getName());
+        verify(positionRepository).existsPositionByIdAndNameUk(position.getId(), position.getNameUk());
         verify(repository).findById(anyLong());
     }
 
@@ -271,12 +271,12 @@ class UBSManagementEmployeeServiceImplTest {
         Position position = getPosition();
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
-        when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
+        when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(true);
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
         employeeService.update(dto, null);
 
         verify(modelMapper, times(2)).map(any(), any());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(position.getId(), position.getNameUk());
         verify(repository, times(2)).findById(anyLong());
     }
 
@@ -308,13 +308,13 @@ class UBSManagementEmployeeServiceImplTest {
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
 
-        when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
+        when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(true);
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
         doThrow(HystrixRuntimeException.class).when(userRemoteClient)
             .updateEmployeeEmail(dto.getEmployeeDto().getEmail(), null);
 
         assertThrows(BadRequestException.class, () -> employeeService.update(dto, file));
-        verify(positionRepository).existsPositionByIdAndName(position.getId(), position.getName());
+        verify(positionRepository).existsPositionByIdAndNameUk(position.getId(), position.getNameUk());
         verify(repository, times(2)).findById(anyLong());
         verify(userRemoteClient).updateEmployeeEmail(dto.getEmployeeDto().getEmail(), null);
     }
@@ -403,34 +403,34 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void createPositionTest() {
-        AddingPositionDto addingPositionDto = AddingPositionDto.builder().name("Водій").build();
-        when(positionRepository.existsPositionByName(any())).thenReturn(false, true);
+        AddingPositionDto addingPositionDto = AddingPositionDto.builder().nameUk("Водій").build();
+        when(positionRepository.existsPositionByNameUk(any())).thenReturn(false, true);
         lenient().when(modelMapper.map(any(Position.class), eq(PositionDto.class))).thenReturn(getPositionDto(1L));
         when(positionRepository.save(any())).thenReturn(getPosition(), getPosition());
 
         employeeService.create(addingPositionDto);
 
-        verify(positionRepository, times(1)).existsPositionByName(any());
+        verify(positionRepository, times(1)).existsPositionByNameUk(any());
         verify(positionRepository, times(1)).save(any());
         verify(modelMapper, times(1)).map(any(Position.class), eq(PositionDto.class));
 
         Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.create(addingPositionDto));
         assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
-            + addingPositionDto.getName());
+            + addingPositionDto.getNameUk());
     }
 
     @Test
     void updatePositionTest() {
         PositionDto dto = getPositionDto(1L);
         when(positionRepository.existsById(dto.getId())).thenReturn(true, true, false);
-        when(positionRepository.existsPositionByName(dto.getName())).thenReturn(false, true);
+        when(positionRepository.existsPositionByNameUk(dto.getNameUk())).thenReturn(false, true);
         when(modelMapper.map(any(), any())).thenReturn(getPosition(), dto);
 
         employeeService.update(dto);
 
         verify(positionRepository, times(1)).existsById(dto.getId());
-        verify(positionRepository, times(1)).existsPositionByName(dto.getName());
+        verify(positionRepository, times(1)).existsPositionByNameUk(dto.getNameUk());
         verify(modelMapper, times(2)).map(any(), any());
 
         Exception thrown = assertThrows(UnprocessableEntityException.class,
@@ -440,7 +440,7 @@ class UBSManagementEmployeeServiceImplTest {
 
         assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND_BY_ID + dto.getId());
         assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
-            + dto.getName());
+            + dto.getNameUk());
     }
 
     @Test

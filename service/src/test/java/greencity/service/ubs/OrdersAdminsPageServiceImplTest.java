@@ -10,18 +10,22 @@ import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.user.ChatLinkDto;
-import greencity.entity.order.Event;
-import greencity.entity.table.TableColumnWidthForEmployee;
-import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.CancellationReason;
-import greencity.enums.OrderStatus;
+
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Event;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
+import greencity.entity.user.ubs.OrderAddress;
+import greencity.enums.BonusReason;
+import greencity.enums.CancellationReason;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.EmployeeRepository;
@@ -31,15 +35,14 @@ import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.UserRepository;
-import greencity.repository.AddressRepository;
 import greencity.repository.RegionRepository;
-import greencity.repository.CityRepository;
-import greencity.repository.DistrictRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.CertificateRepository;
 import greencity.service.SuperAdminService;
 import greencity.service.notification.NotificationServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,10 +54,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-import jakarta.persistence.EntityNotFoundException;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
@@ -82,6 +86,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersAdminsPageServiceImplTest {
@@ -90,7 +95,7 @@ class OrdersAdminsPageServiceImplTest {
     @Mock
     private EmployeeRepository employeeRepository;
     @Mock
-    private UBSManagementEmployeeService employeeService;
+    private CertificateRepository certificateRepository;
     @Mock
     private ModelMapper modelMapper;
     @Mock
@@ -106,8 +111,6 @@ class OrdersAdminsPageServiceImplTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private AddressRepository addressRepository;
-    @Mock
     EventService eventService;
     @Mock
     NotificationServiceImpl notificationService;
@@ -121,10 +124,6 @@ class OrdersAdminsPageServiceImplTest {
     private OrderLockService orderLockService;
     @Mock
     private RegionRepository regionRepository;
-    @Mock
-    private CityRepository cityRepository;
-    @Mock
-    private DistrictRepository districtRepository;
     @Mock
     private OrderAddressRepository orderAddressRepository;
     @InjectMocks
@@ -214,7 +213,7 @@ class OrdersAdminsPageServiceImplTest {
     void getParametersForOrdersTest() {
 
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
-        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEng("en");
+        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEn("en");
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
 
         List<ReceivingStationDto> receivingStations = new ArrayList<>();
@@ -370,7 +369,7 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void dateOfExportForDevelopStageUpdateDeliveringTimeTest() {
         var ordersId = List.of(1L);
-        var newValue = "2023-06-30T00:00:00.000Z";
+        var newValue = "2053-06-30T00:00:00.000Z";
         LocalTime timeFrom = LocalTime.parse("10:30", DateTimeFormatter.ISO_TIME);
         LocalTime timeTo = LocalTime.parse("15:00", DateTimeFormatter.ISO_TIME);
         var employeeId = 3L;
@@ -399,7 +398,7 @@ class OrdersAdminsPageServiceImplTest {
     void dateOfExportForDevelopStageBlockedByAnotherEmployeeThrowExceptionTest() {
         var orderId = 1L;
         var ordersId = List.of(orderId);
-        var newValue = "2023-06-30T00:00:00.000Z";
+        var newValue = "2053-06-30T00:00:00.000Z";
         var employeeId = 3L;
         var anotherEmployeeId = 4L;
         LocalDate exportDate = LocalDate.of(2023, 5, 23);
@@ -582,9 +581,56 @@ class OrdersAdminsPageServiceImplTest {
 
         ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
 
-        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF), anyString(), any(Order.class));
+        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK), anyString(), any(Order.class));
         verify(notificationService).notifySelfPickupOrder(expected);
         verify(orderLockService).unlockOrder(expected);
+    }
+
+    @Test
+    void orderStatusForDevelopStageTest_ChangeOrderStatusFromFormedToCanceled() {
+        long orderId = 1;
+        List<Long> orderIdsList = List.of(orderId);
+        String newStatus = "CANCELED";
+        Order order = spy(ModelUtils.getOrder());
+        order.setOrderStatus(OrderStatus.FORMED);
+        int pointsToUse = 100;
+        int currentUserPoints = 200;
+        Set<Certificate> certificates = Set.of(
+            new Certificate());
+        User user = Mockito.mock(User.class);
+        List<ChangeOfPoints> changeOfPointsList = spy(new ArrayList<>());
+        ArgumentCaptor<ChangeOfPoints> argumentCaptor = ArgumentCaptor.forClass(ChangeOfPoints.class);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(order.getPointsToUse())
+            .thenReturn(pointsToUse);
+        when(order.getUser())
+            .thenReturn(user);
+        when(user.getCurrentPoints())
+            .thenReturn(currentUserPoints);
+        when(user.getChangeOfPointsList())
+            .thenReturn(changeOfPointsList);
+        when(order.getCertificates())
+            .thenReturn(certificates);
+
+        ordersAdminsPageService.orderStatusForDevelopStage(orderIdsList, newStatus, ModelUtils.getEmployee());
+
+        verify(orderRepository).findById(orderId);
+        verify(notificationService).notifyBonusesFromCanceledOrder(order);
+        verify(user).setCurrentPoints(currentUserPoints + pointsToUse);
+        verify(changeOfPointsList).add(argumentCaptor.capture());
+
+        ChangeOfPoints changeOfPoints = argumentCaptor.getValue();
+        assertEquals(pointsToUse, changeOfPoints.getAmount());
+        assertEquals(LocalDateTime.now().toLocalDate(), changeOfPoints.getDate().toLocalDate());
+        assertEquals(BonusReason.REFUND_CANCELED_ORDER, changeOfPoints.getReason());
+        assertEquals(user, changeOfPoints.getUser());
+        assertEquals(order, changeOfPoints.getOrder());
+
+        verify(userRepository).save(user);
+        verify(certificateRepository, times(certificates.size()))
+            .save(any(Certificate.class));
+        verify(orderLockService).unlockOrder(order);
     }
 
     @ParameterizedTest
@@ -791,7 +837,7 @@ class OrdersAdminsPageServiceImplTest {
 
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("dateOfExport");
-        dto.setNewValue("2022-12-12");
+        dto.setNewValue("2052-12-12");
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("timeOfExport");
         dto.setNewValue("00:00-00:30");
@@ -1000,8 +1046,8 @@ class OrdersAdminsPageServiceImplTest {
         Event event = Event.builder()
             .order(expectedSavedOrder)
             .eventDate(dateTime)
-            .authorName(employee.getFirstName() + "  " + employee.getLastName())
-            .eventName(OrderHistory.ORDER_CANCELLED + "  " + newComment)
+            .authorNameUk(employee.getFirstName() + "  " + employee.getLastName())
+            .eventNameUk(OrderHistory.ORDER_CANCELLED_UK + "  " + newComment)
             .build();
 
         expectedSavedOrder.getEvents().add(event);
@@ -1387,4 +1433,53 @@ class OrdersAdminsPageServiceImplTest {
         verify(userRepository).findById(anyLong());
         verify(userRepository).save(any(User.class));
     }
+
+    @Test
+    void dateOfExportForDevelopStage_ShouldThrowException_WhenDateIsInThePast() {
+        Long employeeId = 1L;
+        Long orderId = 100L;
+
+        String pastDate = "2022-12-12";
+        List<Long> ordersId = List.of(orderId);
+
+        BadRequestException exception = assertThrows(
+            BadRequestException.class,
+            () -> ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, pastDate, employeeId));
+
+        assertEquals("Export date cannot be in the past: 2022-12-12", exception.getMessage());
+    }
+
+    @Test
+    void dateOfExportForDevelopStage_ShouldProcessSuccessfully_WhenDateIsInFuture() {
+        Long employeeId = 1L;
+        Long orderId = 100L;
+
+        String futureDate = LocalDate.now().plusDays(1).toString();
+        List<Long> ordersId = List.of(orderId);
+        Order mockOrder = new Order();
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(mockOrder));
+
+        List<Long> result = ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, futureDate, employeeId);
+
+        assertTrue(result.isEmpty());
+        assertEquals(LocalDate.parse(futureDate), mockOrder.getDateOfExport());
+        verify(orderRepository, times(1)).findById(orderId);
+    }
+
+    @Test
+    void dateOfExportForDevelopStage_ShouldAddToUnresolvedGoals_WhenOrderDoesNotExist() {
+        Long employeeId = 1L;
+        Long orderId = 100L;
+
+        String futureDate = LocalDate.now().plusDays(1).toString();
+        List<Long> ordersId = List.of(orderId);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        List<Long> result = ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, futureDate, employeeId);
+
+        assertEquals(1, result.size());
+        assertEquals(orderId, result.get(0));
+        verify(orderRepository, times(1)).findById(orderId);
+    }
+
 }

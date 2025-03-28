@@ -30,7 +30,7 @@ public class EmployeeWithTariffsDtoMapper extends AbstractConverter<Employee, Em
                 .employeePositions(employee.getEmployeePosition().stream()
                     .map(position -> PositionDto.builder()
                         .id(position.getId())
-                        .name(position.getName())
+                        .nameUk(position.getNameUk())
                         .nameEn(position.getNameEn())
                         .build())
                     .collect(Collectors.toList()))
