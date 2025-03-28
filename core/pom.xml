@@ -27,7 +27,7 @@
         <thymeleaf-extras-java8time.version>3.0.4.RELEASE</thymeleaf-extras-java8time.version>
         <google-guava.version>33.0.0-jre</google-guava.version>
         <json-path.version>2.9.0</json-path.version>
-        <ldm.version>0.21.7</ldm.version>
+        <ldm.version>0.21.8-SNAPSHOT</ldm.version>
     </properties>
 
     <repositories>
