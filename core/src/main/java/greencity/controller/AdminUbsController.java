@@ -9,14 +9,12 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.dto.user.ChatLinkDto;
+import greencity.dto.user.UserResponseDto;
 import greencity.dto.violation.UserViolationsWithUserName;
 import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
-import greencity.service.ubs.OrdersAdminsPageService;
-import greencity.service.ubs.OrdersForUserService;
-import greencity.service.ubs.ValuesForUserTableService;
-import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.*;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,6 +25,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -45,6 +45,7 @@ public class AdminUbsController {
     private final OrdersForUserService ordersForUserService;
     private final ViolationService violationService;
     private final BigOrderTableServiceView bigOrderTableServiceView;
+    private final UserService userService;
 
     /**
      * Controller for obtaining all users that made at least one order.
@@ -69,6 +70,32 @@ public class AdminUbsController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(valuesForUserTable.getAllFields(page, columnName, sortingOrder, userFilterCriteria,
                 principal.getName()));
+    }
+
+    /**
+     * Controller for retrieving all users who have made at least one order.
+     *
+     * @param page         {@link int} The page number (0-based index).
+     * @param size         {@link int} The number of users per page.
+     * @param sort         {@link String} Sorting criteria (e.g., 'name,asc' or 'name,desc').
+     * @return List of {@link UserResponseDto} A list of users.
+     * @author Stepan Tehlivets.
+     */
+    @Operation(summary = "Get all registered users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful retrieval of users", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Bad request, invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content)
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/users")
+    public List<UserResponseDto> getAllUsers(
+            @RequestParam @Min(0) int page,
+            @RequestParam @Min(1) @Max(100) int size,
+            @RequestParam String sort) {
+
+        return userService.getAllUsers(page, size, sort);
     }
 
     /**
