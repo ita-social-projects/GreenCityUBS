@@ -21,10 +21,10 @@ class OrderAddressDtoUpdateMapperTest {
         OrderAddress address = ModelUtils.getOrderAddress();
 
         OrderAddressDtoResponse expected = OrderAddressDtoResponse.builder()
-            .district("Distinct")
-            .districtEng("DistinctEng")
-            .street("Street")
-            .streetEng("StreetEng")
+            .districtUk("Distinct")
+            .districtEn("DistinctEng")
+            .streetUk("Street")
+            .streetEn("StreetEng")
             .houseCorpus("2")
             .entranceNumber("7a")
             .houseNumber("25")

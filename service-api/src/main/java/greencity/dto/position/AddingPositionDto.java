@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Pattern;
 public class AddingPositionDto {
     @NotNull
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
-    private String name;
+    private String nameUk;
     @Pattern(regexp = "[A-Za-z-'\\s.]{1,30}")
     private String nameEn;
 }

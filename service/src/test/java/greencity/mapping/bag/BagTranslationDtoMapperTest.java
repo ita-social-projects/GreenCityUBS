@@ -23,8 +23,8 @@ class BagTranslationDtoMapperTest {
         Assertions.assertEquals(dto.getId(), convertDto.getId());
         Assertions.assertEquals(dto.getCapacity(), convertDto.getCapacity());
         Assertions.assertEquals(dto.getPrice(), convertDto.getPrice());
-        Assertions.assertEquals(dto.getName(), convertDto.getName());
-        Assertions.assertEquals(dto.getNameEng(), convertDto.getNameEng());
+        Assertions.assertEquals(dto.getNameUk(), convertDto.getNameUk());
+        Assertions.assertEquals(dto.getNameEn(), convertDto.getNameEn());
         Assertions.assertEquals(dto.getLimitedIncluded(), convertDto.getLimitedIncluded());
     }
 }

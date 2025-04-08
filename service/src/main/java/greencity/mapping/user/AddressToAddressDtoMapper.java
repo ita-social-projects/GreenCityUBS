@@ -31,24 +31,25 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
     public AddressDto convert(Address address) {
         return AddressDto.builder()
             .id(address.getId())
-            .region(address.getRegion())
-            .regionEn(address.getRegionEn())
-            .city(address.getCity())
-            .cityEn(address.getCityEn())
-            .street(address.getStreet())
-            .streetEn(address.getStreetEn())
-            .district(address.getDistrict())
-            .districtEn(address.getDistrictEn())
-            .entranceNumber(address.getEntranceNumber())
-            .houseCorpus(address.getHouseCorpus())
-            .houseNumber(address.getHouseNumber())
-            .addressComment(address.getAddressComment())
+            .regionUk(address.getBaseAddress().getRegionUk())
+            .regionEn(address.getBaseAddress().getRegionEn())
+            .cityUk(address.getBaseAddress().getCityUk())
+            .cityEn(address.getBaseAddress().getCityEn())
+            .streetUk(address.getBaseAddress().getStreetUk())
+            .streetEn(address.getBaseAddress().getStreetEn())
+            .districtUk(address.getBaseAddress().getDistrictUk())
+            .districtEn(address.getBaseAddress().getDistrictEn())
+            .entranceNumber(address.getBaseAddress().getEntranceNumber())
+            .houseCorpus(address.getBaseAddress().getHouseCorpus())
+            .houseNumber(address.getBaseAddress().getHouseNumber())
+            .addressComment(address.getBaseAddress().getAddressComment())
             .coordinates(Coordinates.builder()
                 .latitude(address.getCoordinates().getLatitude())
                 .longitude(address.getCoordinates().getLongitude())
                 .build())
-            .addressRegionDistrictList(getAllDistricts((address.getRegion()), address.getCity()))
-            .actual(address.getActual())
+            .addressRegionDistrictList(
+                getAllDistricts((address.getBaseAddress().getRegionUk()), address.getBaseAddress().getCityUk()))
+            .actual(address.getBaseAddress().getActual())
             .build();
     }
 
@@ -56,7 +57,7 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
         List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
         return locationDtos.stream()
             .map(locationDto -> DistrictDto.builder()
-                .nameUa(locationDto.getLocationNameMap().get("name"))
+                .nameUk(locationDto.getLocationNameMap().get("name_uk"))
                 .nameEn(locationDto.getLocationNameMap().get("name_en"))
                 .build())
             .collect(Collectors.toList());

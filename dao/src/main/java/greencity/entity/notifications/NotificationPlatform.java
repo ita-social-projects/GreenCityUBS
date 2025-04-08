@@ -39,11 +39,11 @@ public class NotificationPlatform {
     @JoinColumn(name = "notification_id")
     private NotificationTemplate notificationTemplate;
 
-    @Column(name = "body")
-    private String body;
+    @Column(name = "body_uk")
+    private String bodyUk;
 
-    @Column(name = "body_eng")
-    private String bodyEng;
+    @Column(name = "body_en")
+    private String bodyEn;
 
     @Column(nullable = false, name = "notification_receiver_type")
     @Enumerated(EnumType.STRING)

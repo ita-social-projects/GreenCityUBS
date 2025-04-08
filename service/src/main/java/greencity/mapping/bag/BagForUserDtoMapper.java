@@ -12,8 +12,8 @@ public class BagForUserDtoMapper extends AbstractConverter<OrderBag, BagForUserD
     @Override
     protected BagForUserDto convert(OrderBag source) {
         return BagForUserDto.builder()
-            .service(source.getName())
-            .serviceEng(source.getNameEng())
+            .serviceUk(source.getNameUk())
+            .serviceEn(source.getNameEn())
             .capacity(source.getCapacity())
             .fullPrice(BigDecimal.valueOf(source.getPrice())
                 .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)

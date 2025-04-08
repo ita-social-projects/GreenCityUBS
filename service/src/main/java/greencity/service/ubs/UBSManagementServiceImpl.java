@@ -6,7 +6,6 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.address.AddressExportDetailsDto;
-import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagMappingDto;
@@ -27,10 +26,7 @@ import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.GeneralOrderInfo;
 import greencity.dto.order.NotTakenOrderReasonDto;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderCountDto;
 import greencity.dto.order.OrderDetailDto;
 import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
@@ -39,7 +35,6 @@ import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderPaymentStatusesTranslationDto;
 import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrderStatusesTranslationDto;
-import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
@@ -126,8 +121,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ID;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_PAYMENT_ID;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
@@ -179,6 +173,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderBagRepository orderBagRepository;
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
+    private final AddressService addressService;
     private static final String PAY_BUTTON = "payButton";
 
     /**
@@ -241,36 +236,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * {@inheritDoc}
      */
-
-    @Override
-    public ReadAddressByOrderDto getAddressByOrderId(Long orderId) {
-        if (orderRepository.findById(orderId).isEmpty()) {
-            throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
-        }
-        OrderAddress orderAddress = orderAddressRepository.findByOrderId(orderId)
-            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
-        return modelMapper.map(orderAddress, ReadAddressByOrderDto.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
-        String email) {
-        OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
-            .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ADDRESS_BY_ID, dtoUpdate.getId())));
-        OrderAddress updatedOrderAddress = ubsClientService.updateOrderAddress(dtoUpdate);
-        mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress, dtoUpdate.getAddressComment());
-        orderAddressRepository.save(updatedOrderAddress);
-        eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
-        return Optional.of(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<OrderInfoDto> getOrdersForUser(String uuid) {
         List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
@@ -318,7 +283,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
             .userInfoDto(userInfoDto)
             .addressExportDetailsDto(addressDtoForAdminPage)
-            .addressComment(orderAddress.getAddressComment())
+            .addressComment(orderAddress.getBaseAddress().getAddressComment())
             .bags(bagInfoDtoList)
             .orderFullPrice(setTotalPrice(prices))
             .orderDiscountedPrice(paymentService.getPaymentInfo(orderId, prices.getSumAmount()).getUnPaidAmount())
@@ -396,19 +361,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private AddressExportDetailsDto getAddressDtoForAdminPage(OrderAddress address) {
         return AddressExportDetailsDto.builder()
             .id(address.getId())
-            .city(address.getCity())
-            .cityEn(address.getCityEn())
-            .street(address.getStreet())
-            .streetEn(address.getStreetEn())
-            .district(address.getDistrict())
-            .districtEn(address.getDistrictEn())
-            .entranceNumber(address.getEntranceNumber())
-            .houseCorpus(address.getHouseCorpus())
-            .houseNumber(address.getHouseNumber())
-            .region(address.getRegion())
-            .regionEn(address.getRegionEn())
+            .cityUk(address.getBaseAddress().getCityUk())
+            .cityEn(address.getBaseAddress().getCityEn())
+            .streetUk(address.getBaseAddress().getStreetUk())
+            .streetEn(address.getBaseAddress().getStreetEn())
+            .districtUk(address.getBaseAddress().getDistrictUk())
+            .districtEn(address.getBaseAddress().getDistrictEn())
+            .entranceNumber(address.getBaseAddress().getEntranceNumber())
+            .houseCorpus(address.getBaseAddress().getHouseCorpus())
+            .houseNumber(address.getBaseAddress().getHouseNumber())
+            .regionUk(address.getBaseAddress().getRegionUk())
+            .regionEn(address.getBaseAddress().getRegionEn())
             .addressRegionDistrictList(
-                locationApiService.getAllDistrictsInCityByNames(address.getRegion(), address.getCity()).stream()
+                locationApiService
+                    .getAllDistrictsInCityByNames(address.getBaseAddress().getRegionUk(),
+                        address.getBaseAddress().getCityUk())
+                    .stream()
                     .map(p -> modelMapper.map(p, DistrictDto.class))
                     .collect(Collectors.toList()))
             .build();
@@ -429,9 +397,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
         String currentOrderStatusTranslation =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameUk() : orderStatus.name();
         String currentOrderStatusTranslationEng =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEn()
                 : orderStatus.name();
 
         OrderPaymentStatus orderStatusPayment =
@@ -448,10 +416,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation())
             .orderStatus(order.map(Order::getOrderStatus).orElse(null))
             .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
-            .orderPaymentStatusName(currentOrderStatusPaymentTranslation.getTranslationValue())
-            .orderPaymentStatusNameEng(currentOrderStatusPaymentTranslation.getTranslationsValueEng())
-            .orderStatusName(currentOrderStatusTranslation)
-            .orderStatusNameEng(currentOrderStatusTranslationEng)
+            .orderPaymentStatusNameUk(currentOrderStatusPaymentTranslation.getTranslationValueUk())
+            .orderPaymentStatusNameEn(currentOrderStatusPaymentTranslation.getTranslationsValueEn())
+            .orderStatusNameUk(currentOrderStatusTranslation)
+            .orderStatusNameEn(currentOrderStatusTranslationEng)
             .adminComment(currentOrder.getAdminComment())
             .blocked(currentOrder.isBlocked())
             .build();
@@ -473,8 +441,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
                 setValueForOrderStatusIsNotTakenOutOrDoneOrCancelledAsTrue(orderStatusTranslation,
                     orderStatusesTranslationDto);
-                orderStatusesTranslationDto.setUa(orderStatusTranslation.getName());
-                orderStatusesTranslationDto.setEng(orderStatusTranslation.getNameEng());
+                orderStatusesTranslationDto.setUk(orderStatusTranslation.getNameUk());
+                orderStatusesTranslationDto.setEn(orderStatusTranslation.getNameEn());
                 if (!Objects.equals(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()),
                     "")) {
                     OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId());
@@ -516,8 +484,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (!orderStatusPaymentTranslations.isEmpty()) {
             for (OrderPaymentStatusTranslation orderStatusPaymentTranslation : orderStatusPaymentTranslations) {
                 OrderPaymentStatusesTranslationDto translationDto = new OrderPaymentStatusesTranslationDto();
-                translationDto.setUa(orderStatusPaymentTranslation.getTranslationValue());
-                translationDto.setEng(orderStatusPaymentTranslation.getTranslationsValueEng());
+                translationDto.setUk(orderStatusPaymentTranslation.getTranslationValueUk());
+                translationDto.setEn(orderStatusPaymentTranslation.getTranslationsValueEn());
                 if (!Objects.equals(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
                     orderStatusPaymentTranslation.getOrderPaymentStatusId()), "")) {
                     translationDto.setKey(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
@@ -606,20 +574,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
             recalculateCertificates(totalPriceInCoins - wasPaidInCoins, order);
-            eventService.saveEvent(OrderHistory.ORDER_PAID, email, order);
+            eventService.saveEvent(OrderHistory.ORDER_PAID_UK, email, order);
             return;
         }
         if (totalPriceInCoins < wasPaidInCoins) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
-            eventService.saveEvent(OrderHistory.ORDER_PAID, email, order);
+            eventService.saveEvent(OrderHistory.ORDER_PAID_UK, email, order);
             recalculateCertificates(0L, order);
             return;
         }
         if (needToPayInCoins > 0 && wasPaidInCoins + discountInCoins != 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.HALF_PAID.name());
-            eventService.saveEvent(OrderHistory.ORDER_HALF_PAID, email, order);
+            eventService.saveEvent(OrderHistory.ORDER_HALF_PAID_UK, email, order);
             notificationService.notifyHalfPaidPackage(order);
             return;
         }
@@ -685,9 +653,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 }
                 if (entry.getValue().longValue() != confirmWasteWas.orElse(0L)) {
                     if (countOfChanges == 0) {
-                        values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
+                        values.append(OrderHistory.CHANGE_ORDER_DETAILS_UK + " ");
                     }
-                    values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
+                    values.append(bag.getNameUk()).append(" ").append(capacity).append(" л: ")
                         .append(confirmWasteWas.orElse(initialAmount.orElse(0L)))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
@@ -713,10 +681,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 }
                 if (entry.getValue().longValue() != exporterWasteWas.orElse(0L)) {
                     if (countOfChanges == 0) {
-                        values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
+                        values.append(OrderHistory.CHANGE_ORDER_DETAILS_UK + " ");
                         countOfChanges++;
                     }
-                    values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
+                    values.append(bag.getNameUk()).append(" ").append(capacity).append(" л: ")
                         .append(exporterWasteWas.orElse(confirmWasteWas.orElse(0L)))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
@@ -825,14 +793,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public OrderCountDto getTotalNumberOfOrders() {
-        return new OrderCountDto(orderRepository.count());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public OrderDetailStatusDto updateOrderDetailStatusById(Long id, OrderDetailStatusRequestDto dto, String email) {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
@@ -850,7 +810,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         if (nonNull(dto.getAdminComment())) {
             order.setAdminComment(dto.getAdminComment());
-            eventService.saveEvent(OrderHistory.ADD_ADMIN_COMMENT, email, order);
+            eventService.saveEvent(OrderHistory.ADD_ADMIN_COMMENT_UK, email, order);
             orderRepository.save(order);
         }
         if (nonNull(dto.getOrderStatus())
@@ -859,24 +819,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
                 notificationService.notifyCourierItineraryFormed(order);
-                eventService.saveEvent(OrderHistory.ORDER_ADJUSTMENT, email, order);
+                eventService.saveEvent(OrderHistory.ORDER_ADJUSTMENT_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
-                eventService.saveEvent(OrderHistory.ORDER_CONFIRMED, email, order);
+                eventService.saveEvent(OrderHistory.ORDER_CONFIRMED_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.FORMED) {
-                eventService.saveEvent(OrderHistory.ORDER_FORMED, email, order);
+                eventService.saveEvent(OrderHistory.ORDER_FORMED_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT, email, order);
+                eventService.saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
                 verifyPaidWithBonuses(order, email);
                 setOrderCancellation(order, dto.getCancellationReason(), dto.getCancellationComment());
-                eventService.saveEvent(OrderHistory.ORDER_CANCELLED, email, order);
+                eventService.saveEvent(OrderHistory.ORDER_CANCELLED_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
-                eventService.saveEvent(OrderHistory.ORDER_DONE, email, order);
+                eventService.saveEvent(OrderHistory.ORDER_DONE_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
-                eventService.saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF, email, order);
+                eventService.saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK, email, order);
                 notificationService.notifySelfPickupOrder(order);
             } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE) {
-                eventService.saveEvent(OrderHistory.ORDER_ON_THE_ROUTE, email, order);
+                eventService.saveEvent(OrderHistory.ORDER_ON_THE_ROUTE_UK, email, order);
             }
             orderRepository.save(order);
         }
@@ -893,17 +853,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return eventRepository.wasOrderStatusChangedFromFormedToCanceled(orderId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    @Transactional
-    public void addressUpdate(UpdateAddressDto addressDto, String email) {
-        Order order = orderRepository.findById(addressDto.getOrderId())
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + addressDto.getOrderId()));
-        updateAddress(addressDto.getOrderAddressExportDetails(), order, email);
+    public Order getOrderByPaymentId(long paymentId) {
+        return orderRepository.findOrderByPaymentId(paymentId).orElseThrow(
+            () -> new NotFoundException(ORDER_NOT_FOUND_BY_PAYMENT_ID.formatted(paymentId)));
     }
 
     private void verifyPaidWithBonuses(Order order, String email) {
         if (order.getPointsToUse() > 0) {
-            eventService.saveEvent(OrderHistory.RETURN_BONUSES_TO_CLIENT + ". Всього " + order.getPointsToUse(), email,
+            eventService.saveEvent(OrderHistory.RETURN_BONUSES_TO_CLIENT_UK + ". Всього " + order.getPointsToUse(),
+                email,
                 order);
         }
     }
@@ -1030,9 +992,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String action;
         if (order.getReceivingStation() == null && order.getDateOfExport() == null
             && order.getDeliverFrom() == null && order.getDeliverTo() == null) {
-            action = OrderHistory.SET_EXPORT_DETAILS;
+            action = OrderHistory.SET_EXPORT_DETAILS_UK;
         } else {
-            action = OrderHistory.UPDATE_EXPORT_DETAILS;
+            action = OrderHistory.UPDATE_EXPORT_DETAILS_UK;
         }
         order.setReceivingStation(getUpdatedReceivingStation(dto.getReceivingStationId(), order));
         order.setDateOfExport(getUpdatedDateExport(dto.getDateExport(), order));
@@ -1050,15 +1012,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private String getEventOnUpdateExportDetails(Order order) {
         String action = "";
         if (order.getDateOfExport() != null) {
-            action = String.format(OrderHistory.UPDATE_EXPORT_DATA, order.getDateOfExport());
+            action = String.format(OrderHistory.UPDATE_EXPORT_DATA_UK, order.getDateOfExport());
         }
         if (order.getDeliverFrom() != null && order.getDeliverTo() != null) {
-            action = action + String.format(OrderHistory.UPDATE_DELIVERY_TIME, order.getDeliverFrom().toLocalTime(),
+            action = action + String.format(OrderHistory.UPDATE_DELIVERY_TIME_UK, order.getDeliverFrom().toLocalTime(),
                 order.getDeliverTo().toLocalTime());
         }
         if (order.getReceivingStation() != null) {
             action =
-                action + String.format(OrderHistory.UPDATE_RECEIVING_STATION, order.getReceivingStation().getName());
+                action + String.format(OrderHistory.UPDATE_RECEIVING_STATION_UK, order.getReceivingStation().getName());
         }
         return action;
     }
@@ -1153,7 +1115,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             newList.forEach(x -> currentPositionEmployee.put(
                 PositionDto.builder()
                     .id(x.getPosition().getId())
-                    .name(x.getPosition().getName())
+                    .nameUk(x.getPosition().getNameUk())
                     .nameEn(x.getPosition().getNameEn())
                     .build(),
                 x.getEmployee().getFirstName().concat(" ").concat(x.getEmployee().getLastName())));
@@ -1164,7 +1126,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         for (Position position : positions) {
             PositionDto positionDto = PositionDto.builder()
                 .id(position.getId())
-                .name(position.getName())
+                .nameUk(position.getNameUk())
                 .nameEn(position.getNameEn())
                 .build();
             allPositionEmployee.put(positionDto, listAvailableEmployeeWithPosition(order, position)
@@ -1213,7 +1175,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         checkAvailableOrderForEmployee(order, email);
         order.setAdminComment(adminCommentDto.getAdminComment());
         orderRepository.save(order);
-        eventService.save(OrderHistory.ADD_ADMIN_COMMENT, email
+        eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, email
             + "  " + email, order);
     }
 
@@ -1250,12 +1212,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         StringBuilder historyChanges = new StringBuilder();
 
         if (!removed.isEmpty()) {
-            historyChanges.append(collectInfoAboutChangesOfEcoNumber(removed, OrderHistory.DELETED_ECO_NUMBER));
+            historyChanges.append(collectInfoAboutChangesOfEcoNumber(removed, OrderHistory.DELETED_ECO_NUMBER_UK));
             removed.forEach(oldNumber -> order.getAdditionalOrders().remove(oldNumber));
         }
         if (!added.isEmpty()
             && !added.contains("")) {
-            historyChanges.append(collectInfoAboutChangesOfEcoNumber(added, OrderHistory.ADD_NEW_ECO_NUMBER));
+            historyChanges.append(collectInfoAboutChangesOfEcoNumber(added, OrderHistory.ADD_NEW_ECO_NUMBER_UK));
             added.forEach(newNumber -> {
                 if (!newNumber.matches("\\d{4,10}")) {
                     throw new BadRequestException(INCORRECT_ECO_NUMBER);
@@ -1277,7 +1239,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
         }
         if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
-            updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), order, email);
+            addressService.updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), order, email);
         }
         setUbsCourierSumAndWriteOffStationSum(order, updateOrderPageDto.getWriteOffStationSum(),
             updateOrderPageDto.getUbsCourierSum());
@@ -1497,13 +1459,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private void mapUpdatedOrderAddressFields(OrderAddress orderAddress, OrderAddress updatedOrderAddress,
-        String comment) {
-        updatedOrderAddress.setLocation(orderAddress.getLocation());
-        updatedOrderAddress.setId(orderAddress.getId());
-        updatedOrderAddress.setActual(orderAddress.getActual());
-        updatedOrderAddress.setAddressComment(comment);
-        updatedOrderAddress.setCoordinates(orderAddress.getCoordinates());
-        updatedOrderAddress.setAddressStatus(orderAddress.getAddressStatus());
+    public Order findOrderById(Long id) {
+        return orderRepository.findById(id).orElseThrow(
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
     }
 }
