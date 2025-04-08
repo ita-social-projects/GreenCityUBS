@@ -9,15 +9,19 @@ import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.user.ChatLinkDto;
+import greencity.dto.user.UserResponseDto;
 import greencity.service.ubs.OrdersAdminsPageService;
+import greencity.service.ubs.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
@@ -28,16 +32,21 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 @ExtendWith(MockitoExtension.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class})
 class AdminUbsControllerTest {
     private MockMvc mockMvc;
 
     @Mock
     private OrdersAdminsPageService ordersAdminsPageService;
+
+    @Mock
+    private UserService userService;
 
     private static final String management = "/ubs/management";
     @InjectMocks
@@ -166,5 +175,49 @@ class AdminUbsControllerTest {
             .content(objectMapper
                 .writeValueAsString(new ChatLinkDto(1L, "https://my.binotel.ua/f/chat/#/visitor/21269249.12893974"))))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void getAllUsers_ShouldReturnListOfUsers() throws Exception {
+
+        List<UserResponseDto> mockUsers = List.of(
+                createUser(1L, "Stepan", "stepan@example.com"),
+                createUser(2L, "Olena", "olena@example.com")
+        );
+
+        Mockito.when(userService.getAllUsers(0, 2, "name,asc"))
+                .thenReturn(mockUsers);
+
+        mockMvc.perform(get("/ubs/management/users")
+                        .param("page", "0")
+                        .param("size", "2")
+                        .param("sort", "name,asc"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].name").value("Stepan"))
+                .andExpect(jsonPath("$[1].name").value("Olena"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void getAllUsers_ShouldReturnBadRequest_WhenInvalidParameters() throws Exception {
+        mockMvc.perform(get("/ubs/management/users")
+                        .param("page", "-1")
+                        .param("size", "0")
+                        .param("sort", "invalidSort"))
+                .andExpect(status().isBadRequest());
+    }
+
+    private UserResponseDto createUser(Long id, String name, String email) {
+        UserResponseDto dto = new UserResponseDto();
+        dto.setId(id);
+        dto.setName(name);
+        dto.setEmail(email);
+        dto.setUserCredo("Make the world better");
+        dto.setRole("ROLE_USER");
+        dto.setUserStatus("ACTIVE");
+        return dto;
     }
 }

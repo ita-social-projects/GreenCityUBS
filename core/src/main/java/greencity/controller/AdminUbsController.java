@@ -30,6 +30,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -83,19 +84,22 @@ public class AdminUbsController {
      */
     @Operation(summary = "Get all registered users")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful retrieval of users", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Successful retrieval of users", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content),
             @ApiResponse(responseCode = "400", description = "Bad request, invalid parameters", content = @Content),
             @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content)
     })
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @GetMapping("/users")
-    public List<UserResponseDto> getAllUsers(
+    public ResponseEntity<List<UserResponseDto>> getAllUsers(
             @RequestParam @Min(0) int page,
             @RequestParam @Min(1) @Max(100) int size,
             @RequestParam String sort) {
 
-        return userService.getAllUsers(page, size, sort);
+        List<UserResponseDto> users = userService.getAllUsers(page, size, sort);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(users);
     }
 
     /**
