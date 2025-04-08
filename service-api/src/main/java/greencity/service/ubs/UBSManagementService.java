@@ -1,27 +1,22 @@
 package greencity.service.ubs;
 
-import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
-import greencity.dto.order.OrderCountDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.NotTakenOrderReasonDto;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderStatusPageDto;
-import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
@@ -31,7 +26,6 @@ import greencity.entity.order.Order;
 import greencity.enums.SortingOrder;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,27 +54,6 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     ViolationsInfoDto getAllUserViolations(String email);
-
-    /**
-     * Method that read user address by order id.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link ReadAddressByOrderDto} that contains one address;
-     * @author Mahdziak Orest
-     */
-    ReadAddressByOrderDto getAddressByOrderId(Long orderId);
-
-    /**
-     * Method that update address.
-     *
-     * @param dtoUpdate of {@link OrderAddressExportDetailsDtoUpdate} order id.
-     * @param order     {@link Order}.
-     * @param email     {@link String}.
-     * @return {@link OrderAddressDtoResponse} that contains address.
-     * @author Mahdziak Orest
-     */
-    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
-        String email);
 
     /**
      * Method for getting order detail by language and order id.
@@ -132,15 +105,6 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     OrderDetailStatusDto getOrderDetailStatus(Long id);
-
-    /**
-     * Method that returns total number of orders.
-     *
-     * @return {@link Long}.
-     *
-     * @author Chernenko Vitaliy
-     */
-    OrderCountDto getTotalNumberOfOrders();
 
     /**
      * Method that update order and payment status by id.
@@ -315,15 +279,20 @@ public interface UBSManagementService {
     Boolean checkIfOrderStatusIsFormedToCanceled(Long orderId);
 
     /**
-     * Method updates order address. This method updates order address. It takes
-     * {@link UpdateAddressDto} as an argument and updates the order address in the
-     * database. It also checks if the address exists and if the user is authorized
-     * to update the address.
+     * Method returns an order by provided payment ID.
      *
-     * @param addressDto {@link UpdateAddressDto}
-     * @param email      {@link String} the user's email
+     * @param paymentId the ID of the order.
+     * @return {@link Order}
      *
-     * @author Kizerov Dmytro
      */
-    void addressUpdate(UpdateAddressDto addressDto, String email);
+    Order getOrderByPaymentId(long paymentId);
+
+    /**
+     * Method returns an order by provided order ID.
+     *
+     * @param orderId {@link Long} the ID of the order.
+     * @return {@link Order}
+     *
+     */
+    Order findOrderById(Long orderId);
 }

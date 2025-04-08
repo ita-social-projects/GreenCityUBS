@@ -23,6 +23,9 @@ public class UAPhoneNumberUtil {
      */
 
     public static String getE164PhoneNumberFormat(String phoneNumberStr) {
+        if (phoneNumberStr == null || phoneNumberStr.trim().isEmpty()) {
+            return null;
+        }
         try {
             Phonenumber.PhoneNumber phoneNumber = phoneNumberUtil.parse(phoneNumberStr, "UA");
             return phoneNumberUtil.format(phoneNumber, PhoneNumberUtil.PhoneNumberFormat.E164);
