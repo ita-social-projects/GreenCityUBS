@@ -76,30 +76,33 @@ public class AdminUbsController {
     /**
      * Controller for retrieving all users who have made at least one order.
      *
-     * @param page         {@link int} The page number (0-based index).
-     * @param size         {@link int} The number of users per page.
-     * @param sort         {@link String} Sorting criteria (e.g., 'name,asc' or 'name,desc').
+     * @param page {@link int} The page number (0-based index).
+     * @param size {@link int} The number of users per page.
+     * @param sort {@link String} Sorting criteria (e.g., 'name,asc' or
+     *             'name,desc').
      * @return List of {@link UserResponseDto} A list of users.
      * @author Stepan Tehlivets.
      */
     @Operation(summary = "Get all registered users")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful retrieval of users", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content),
-            @ApiResponse(responseCode = "400", description = "Bad request, invalid parameters", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content)
+        @ApiResponse(responseCode = "200", description = "Successful retrieval of users",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = UserResponseDto.class))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content),
+        @ApiResponse(responseCode = "400", description = "Bad request, invalid parameters", content = @Content),
+        @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @GetMapping("/users")
     public ResponseEntity<List<UserResponseDto>> getAllUsers(
-            @RequestParam @Min(0) int page,
-            @RequestParam @Min(1) @Max(100) int size,
-            @RequestParam String sort) {
+        @RequestParam @Min(0) int page,
+        @RequestParam @Min(1) @Max(100) int size,
+        @RequestParam String sort) {
 
         List<UserResponseDto> users = userService.getAllUsers(page, size, sort);
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(users);
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(users);
     }
 
     /**

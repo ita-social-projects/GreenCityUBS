@@ -182,32 +182,31 @@ class AdminUbsControllerTest {
     void getAllUsers_ShouldReturnListOfUsers() throws Exception {
 
         List<UserResponseDto> mockUsers = List.of(
-                createUser(1L, "Stepan", "stepan@example.com"),
-                createUser(2L, "Olena", "olena@example.com")
-        );
+            createUser(1L, "Stepan", "stepan@example.com"),
+            createUser(2L, "Olena", "olena@example.com"));
 
         Mockito.when(userService.getAllUsers(0, 2, "name,asc"))
-                .thenReturn(mockUsers);
+            .thenReturn(mockUsers);
 
         mockMvc.perform(get("/ubs/management/users")
-                        .param("page", "0")
-                        .param("size", "2")
-                        .param("sort", "name,asc"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].name").value("Stepan"))
-                .andExpect(jsonPath("$[1].name").value("Olena"));
+            .param("page", "0")
+            .param("size", "2")
+            .param("sort", "name,asc"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].name").value("Stepan"))
+            .andExpect(jsonPath("$[1].name").value("Olena"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void getAllUsers_ShouldReturnBadRequest_WhenInvalidParameters() throws Exception {
         mockMvc.perform(get("/ubs/management/users")
-                        .param("page", "-1")
-                        .param("size", "0")
-                        .param("sort", "invalidSort"))
-                .andExpect(status().isBadRequest());
+            .param("page", "-1")
+            .param("size", "0")
+            .param("sort", "invalidSort"))
+            .andExpect(status().isBadRequest());
     }
 
     private UserResponseDto createUser(Long id, String name, String email) {
