@@ -45,6 +45,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
@@ -964,7 +965,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testGetAllNotificationForUser() {
+    void testGetAllShortNotificationForUser() {
         String email = "email";
         String uuid = "uuid";
 
@@ -980,6 +981,100 @@ class NotificationServiceImplTest {
             .getAllShortNotificationsForUser(email, "ua", TEST_PAGEABLE);
 
         assertEquals(TEST_PAGEABLE_ADVANCED_DTO, actual);
+    }
+
+    @Test
+    void testGetAllNotificationForUser() {
+        String uuid = "uuid";
+        Long notificationId = 1L;
+        UserNotification userNotification = Mockito.mock(UserNotification.class);
+        NotificationType notificationType = NotificationType.VIOLATION_THE_RULES;
+        User notificationOwner = Mockito.mock(User.class);
+        Set<NotificationParameter> notificationParameters = Set.of(
+                NotificationParameter.builder().key(VIOLATION_DESCRIPTION).value("aboba").build()
+        );
+        Order order = Mockito.mock(Order.class);
+        Long orderId = 1L;
+        Violation violation = Mockito.mock(Violation.class);
+
+        when(userRepository.findByUuid(uuid)).thenReturn(TEST_USER);
+        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(TEST_USER, TEST_PAGEABLE))
+                .thenReturn(TEST_PAGE);
+        when(userNotificationRepository.findById(notificationId))
+                .thenReturn(Optional.of(userNotification));
+        when(userNotification.getUser())
+                .thenReturn(notificationOwner);
+        when(notificationOwner.getUuid())
+                .thenReturn(uuid);
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+                notificationType,
+                SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(userNotification.getNotificationType())
+                .thenReturn(notificationType);
+        when(userNotification.getParameters())
+                .thenReturn(notificationParameters);
+        when(userNotification.getOrder())
+                .thenReturn(order);
+        when(order.getId())
+                .thenReturn(orderId);
+        when(violationRepository.findByOrderIdAndDescription(orderId, "aboba"))
+                .thenReturn(Optional.of(violation));
+
+        PageableAdvancedDto<NotificationDto> actual = notificationService
+                .getAllNotificationsForUser(uuid, "ua", TEST_PAGEABLE);
+
+        assertEquals(ModelUtils.TEST_NOTIFICATION_DTO_PAGEABLE, actual);
+    }
+
+    @Test
+    void testGetAllNotificationForUserWhenNotificationDoesNotBelongToUser() {
+        String uuid = "uuid";
+        String otherUserUuid = "other uuid";
+        Long notificationId = 1L;
+        String languageCode = "ua";
+        UserNotification userNotification = Mockito.mock(UserNotification.class);
+        User notificationOwner = Mockito.mock(User.class);
+
+        when(userRepository.findByUuid(uuid)).thenReturn(TEST_USER);
+        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(TEST_USER, TEST_PAGEABLE))
+                .thenReturn(TEST_PAGE);
+        when(userNotificationRepository.findById(notificationId))
+                .thenReturn(Optional.of(userNotification));
+        when(userNotification.getUser())
+                .thenReturn(notificationOwner);
+        when(notificationOwner.getUuid())
+                .thenReturn(otherUserUuid);
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> notificationService.getAllNotificationsForUser(
+                        uuid,
+                        languageCode,
+                        TEST_PAGEABLE
+                )
+        );
+    }
+
+    @Test
+    void testGetAllNotificationForUserWhenNotificationIsNotFound() {
+        String uuid = "uuid";
+        Long notificationId = 1L;
+        String languageCode = "ua";
+
+        when(userRepository.findByUuid(uuid)).thenReturn(TEST_USER);
+        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(TEST_USER, TEST_PAGEABLE))
+                .thenReturn(TEST_PAGE);
+        when(userNotificationRepository.findById(notificationId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                NotFoundException.class,
+                () -> notificationService.getAllNotificationsForUser(
+                        uuid,
+                        languageCode,
+                        TEST_PAGEABLE
+                )
+        );
     }
 
     @Test

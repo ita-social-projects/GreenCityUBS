@@ -296,6 +296,8 @@ public class ModelUtils {
     public static final List<Map<String, Object>> TEST_MAP_ADDITIONAL_BAG_LIST =
         Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
+    public static final List<NotificationDto> TEST_NOTIFICATION_DTO_LIST = List.of(createNotificationDto());
+    public static final PageableAdvancedDto<NotificationDto> TEST_NOTIFICATION_DTO_PAGEABLE = createPageableAdvancedDtoForNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
     public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(createBag(1), createBag(2), createBag(3));
@@ -2655,6 +2657,19 @@ public class ModelUtils {
             true);
     }
 
+    private static PageableAdvancedDto<NotificationDto> createPageableAdvancedDtoForNotificationDto() {
+        return new PageableAdvancedDto<>(
+                TEST_NOTIFICATION_DTO_LIST,
+                1,
+                0,
+                1,
+                0,
+                false,
+                false,
+                true,
+                true);
+    }
+
     public static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
             .notificationTemplateUpdateInfo(createNotificationTemplateUpdateInfoDto())
@@ -2978,6 +2993,7 @@ public class ModelUtils {
         return NotificationDto.builder()
             .title("Title")
             .body("Body")
+            .images(Collections.emptyList())
             .build();
     }
 
