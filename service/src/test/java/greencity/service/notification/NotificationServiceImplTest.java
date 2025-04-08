@@ -977,7 +977,7 @@ class NotificationServiceImplTest {
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
         PageableAdvancedDto<NotificationShortDto> actual = notificationService
-            .getAllNotificationsForUser(email, "ua", TEST_PAGEABLE);
+            .getAllShortNotificationsForUser(email, "ua", TEST_PAGEABLE);
 
         assertEquals(TEST_PAGEABLE_ADVANCED_DTO, actual);
     }

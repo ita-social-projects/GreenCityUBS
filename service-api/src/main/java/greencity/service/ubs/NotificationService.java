@@ -179,12 +179,20 @@ public interface NotificationService {
     void notifySelfPickupOrder(Order order);
 
     /**
-     * Method that returns page with notifications for user by UUID.
+     * Method that returns page with notifications for user by email.
      *
      * @author Ann Sakhno
      */
-    PageableAdvancedDto<NotificationShortDto> getAllNotificationsForUser(String email,
+    PageableAdvancedDto<NotificationShortDto> getAllShortNotificationsForUser(String email,
         String language, Pageable pageable);
+
+    /**
+     * Method that returns page with notifications for user by email.
+     *
+     * @author Maksym Kozak
+     */
+    PageableAdvancedDto<NotificationDto> getAllNotificationsForUser(String uuid,
+                                                                    String language, Pageable pageable);
 
     /**
      * Method that return notification and set status - is read.
