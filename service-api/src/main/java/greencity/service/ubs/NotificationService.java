@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
@@ -187,12 +188,12 @@ public interface NotificationService {
         String language, Pageable pageable);
 
     /**
-     * Method that returns page with notifications for user by email.
+     * Method that returns page with notifications for current user.
      *
      * @author Maksym Kozak
      */
-    PageableAdvancedDto<NotificationDto> getAllNotificationsForUser(String uuid,
-                                                                    String language, Pageable pageable);
+    PageableAdvancedDto<NotificationFullDto> getAllNotificationsForUser(String uuid,
+        String language, Pageable pageable);
 
     /**
      * Method that return notification and set status - is read.

@@ -78,11 +78,11 @@ class NotificationControllerTest {
         String emailQueryParam = "email";
         String emailQueryParamValue = "email@email.com";
 
-        mockMvc.perform(get(notificationLink)
-                        .principal(principal)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .queryParam(emailQueryParam, emailQueryParamValue))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+        mockMvc.perform(get(notificationLink + "/images")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .queryParam(emailQueryParam, emailQueryParamValue))
+            .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test

@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
@@ -48,6 +49,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -63,6 +68,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+
+import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE;
 import static greencity.ModelUtils.TEST_UUID;
 import static greencity.ModelUtils.TEST_PAGEABLE_ADVANCED_DTO;
 import static greencity.ModelUtils.TEST_NOTIFICATION_DTO;
@@ -984,97 +991,132 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testGetAllNotificationForUser() {
-        String uuid = "uuid";
-        Long notificationId = 1L;
-        UserNotification userNotification = Mockito.mock(UserNotification.class);
+    void testGetAllNotificationsForUser() {
+        String userUuid = "user uuid";
+        String language = "ua";
+        Long orderId = 5L;
+        Long notificationId = 0L;
         NotificationType notificationType = NotificationType.VIOLATION_THE_RULES;
-        User notificationOwner = Mockito.mock(User.class);
-        Set<NotificationParameter> notificationParameters = Set.of(
-                NotificationParameter.builder().key(VIOLATION_DESCRIPTION).value("aboba").build()
-        );
+        UserNotification userNotification = Mockito.mock(UserNotification.class);
+        User user = Mockito.mock(User.class);
         Order order = Mockito.mock(Order.class);
-        Long orderId = 1L;
+        Page<UserNotification> page = new PageImpl<>(
+            List.of(userNotification),
+            Mockito.mock(Pageable.class),
+            1L);
         Violation violation = Mockito.mock(Violation.class);
+        List<String> images = List.of("image1", "image2", "image3");
+        String notificationParameterValue = "value";
+        Set<NotificationParameter> notificationParameters = Set.of(
+            NotificationParameter.builder().key(VIOLATION_DESCRIPTION).value(notificationParameterValue).build());
 
-        when(userRepository.findByUuid(uuid)).thenReturn(TEST_USER);
-        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(TEST_USER, TEST_PAGEABLE))
-                .thenReturn(TEST_PAGE);
+        when(user.getUuid())
+            .thenReturn(userUuid);
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
+        when(userNotification.getId())
+            .thenReturn(notificationId);
+        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(user, TEST_PAGEABLE))
+            .thenReturn(page);
         when(userNotificationRepository.findById(notificationId))
-                .thenReturn(Optional.of(userNotification));
+            .thenReturn(Optional.of(userNotification));
         when(userNotification.getUser())
-                .thenReturn(notificationOwner);
-        when(notificationOwner.getUuid())
-                .thenReturn(uuid);
-        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
-                notificationType,
-                SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+            .thenReturn(user);
         when(userNotification.getNotificationType())
-                .thenReturn(notificationType);
+            .thenReturn(notificationType);
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            notificationType,
+            SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
         when(userNotification.getParameters())
-                .thenReturn(notificationParameters);
+            .thenReturn(notificationParameters);
         when(userNotification.getOrder())
-                .thenReturn(order);
+            .thenReturn(order);
         when(order.getId())
-                .thenReturn(orderId);
-        when(violationRepository.findByOrderIdAndDescription(orderId, "aboba"))
-                .thenReturn(Optional.of(violation));
+            .thenReturn(orderId);
+        when(violationRepository.findByOrderIdAndDescription(orderId, notificationParameterValue))
+            .thenReturn(Optional.of(violation));
+        when(violation.getImages())
+            .thenReturn(images);
 
-        PageableAdvancedDto<NotificationDto> actual = notificationService
-                .getAllNotificationsForUser(uuid, "ua", TEST_PAGEABLE);
+        PageableAdvancedDto<NotificationFullDto> actual = notificationService
+            .getAllNotificationsForUser(userUuid, language, TEST_PAGEABLE);
 
-        assertEquals(ModelUtils.TEST_NOTIFICATION_DTO_PAGEABLE, actual);
+        assertEquals(TEST_NOTIFICATION_FULL_DTO_PAGEABLE, actual);
     }
 
     @Test
     void testGetAllNotificationForUserWhenNotificationDoesNotBelongToUser() {
-        String uuid = "uuid";
-        String otherUserUuid = "other uuid";
-        Long notificationId = 1L;
-        String languageCode = "ua";
+        String userUuid = "user uuid";
+        String anotherUserUuid = "another uuid";
+        String language = "ua";
+        Long notificationId = 0L;
+        NotificationType notificationType = NotificationType.VIOLATION_THE_RULES;
         UserNotification userNotification = Mockito.mock(UserNotification.class);
-        User notificationOwner = Mockito.mock(User.class);
+        User user = Mockito.mock(User.class);
+        User anotherUser = Mockito.mock(User.class);
+        Page<UserNotification> page = new PageImpl<>(
+            List.of(userNotification),
+            Mockito.mock(Pageable.class),
+            1L);
 
-        when(userRepository.findByUuid(uuid)).thenReturn(TEST_USER);
-        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(TEST_USER, TEST_PAGEABLE))
-                .thenReturn(TEST_PAGE);
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
+        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(user, TEST_PAGEABLE))
+            .thenReturn(page);
         when(userNotificationRepository.findById(notificationId))
-                .thenReturn(Optional.of(userNotification));
+            .thenReturn(Optional.of(userNotification));
+        when(userNotification.getNotificationType())
+            .thenReturn(notificationType);
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            notificationType,
+            SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
         when(userNotification.getUser())
-                .thenReturn(notificationOwner);
-        when(notificationOwner.getUuid())
-                .thenReturn(otherUserUuid);
+            .thenReturn(anotherUser);
+        when(anotherUser.getUuid())
+            .thenReturn(anotherUserUuid);
 
         assertThrows(
-                AccessDeniedException.class,
-                () -> notificationService.getAllNotificationsForUser(
-                        uuid,
-                        languageCode,
-                        TEST_PAGEABLE
-                )
-        );
+            AccessDeniedException.class,
+            () -> notificationService.getAllNotificationsForUser(
+                userUuid,
+                language,
+                TEST_PAGEABLE));
     }
 
     @Test
     void testGetAllNotificationForUserWhenNotificationIsNotFound() {
-        String uuid = "uuid";
+        String userUuid = "user uuid";
+        String language = "ua";
         Long notificationId = 1L;
-        String languageCode = "ua";
+        UserNotification userNotification = Mockito.mock(UserNotification.class);
+        NotificationType notificationType = NotificationType.UNPAID_ORDER;
+        User user = Mockito.mock(User.class);
+        Page<UserNotification> page = new PageImpl<>(
+            List.of(userNotification),
+            Mockito.mock(Pageable.class),
+            1L);
+        Optional<UserNotification> notFoundNotification = Optional.empty();
 
-        when(userRepository.findByUuid(uuid)).thenReturn(TEST_USER);
-        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(TEST_USER, TEST_PAGEABLE))
-                .thenReturn(TEST_PAGE);
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
+        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(user, TEST_PAGEABLE))
+            .thenReturn(page);
+        when(userNotification.getNotificationType())
+            .thenReturn(notificationType);
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            notificationType,
+            SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(userNotification.getId())
+            .thenReturn(notificationId);
         when(userNotificationRepository.findById(notificationId))
-                .thenReturn(Optional.empty());
+            .thenReturn(notFoundNotification);
 
         assertThrows(
-                NotFoundException.class,
-                () -> notificationService.getAllNotificationsForUser(
-                        uuid,
-                        languageCode,
-                        TEST_PAGEABLE
-                )
-        );
+            NotFoundException.class,
+            () -> notificationService.getAllNotificationsForUser(
+                userUuid,
+                language,
+                TEST_PAGEABLE));
     }
 
     @Test

@@ -6,6 +6,7 @@ import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
@@ -773,59 +774,56 @@ public class NotificationServiceImpl implements NotificationService {
     public PageableAdvancedDto<NotificationShortDto> getAllShortNotificationsForUser(String email,
         String language,
         Pageable pageable) {
-        Function<UserNotification, NotificationShortDto> mapUserNotificationToNotificationShortDtoFunction
-                = notification -> createNotificationShortDto(notification, language, 0L);
+        Function<UserNotification, NotificationShortDto> mapUserNotificationToNotificationShortDtoFunction =
+            notification -> createNotificationShortDto(notification, language, 0L);
         String userUuid = userRemoteClient.findUuidByEmail(email);
         return getAllNotificationsForUser(
-                userUuid,
-                pageable,
-                mapUserNotificationToNotificationShortDtoFunction
-        );
+            userUuid,
+            pageable,
+            mapUserNotificationToNotificationShortDtoFunction);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public PageableAdvancedDto<NotificationDto> getAllNotificationsForUser(String userUuid,
-                                                                                String language,
-                                                                                Pageable pageable) {
-        Function<UserNotification, NotificationDto> mapUserNotificationToNotificationDtoFunction =
-                notification -> getNotification(userUuid, notification.getId(), language);
+    public PageableAdvancedDto<NotificationFullDto> getAllNotificationsForUser(String userUuid,
+        String language,
+        Pageable pageable) {
+        Function<UserNotification, NotificationFullDto> mapUserNotificationToNotificationFullDtoFunction =
+            notification -> createNotificationFullDto(userUuid, notification, language, 0L);
         return getAllNotificationsForUser(
-                userUuid,
-                pageable,
-                mapUserNotificationToNotificationDtoFunction
-        );
+            userUuid,
+            pageable,
+            mapUserNotificationToNotificationFullDtoFunction);
     }
 
     private <T> PageableAdvancedDto<T> getAllNotificationsForUser(
-            String userUuid,
-            Pageable pageable,
-            Function<UserNotification, T> function
-    ) {
+        String userUuid,
+        Pageable pageable,
+        Function<UserNotification, T> function) {
         User user = userRepository.findByUuid(userUuid);
 
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                Sort.by("notificationTime").descending());
+            Sort.by("notificationTime").descending());
 
         Page<UserNotification> notifications =
-                userNotificationRepository.findAllByUserAndIsDeletedFalse(user, pageRequest);
+            userNotificationRepository.findAllByUserAndIsDeletedFalse(user, pageRequest);
 
         List<T> notificationShortDtoList = notifications.stream()
-                .map(function)
-                .collect(Collectors.toCollection(LinkedList::new));
+            .map(function)
+            .collect(Collectors.toCollection(LinkedList::new));
 
         return new PageableAdvancedDto<>(
-                notificationShortDtoList,
-                notifications.getTotalElements(),
-                notifications.getPageable().getPageNumber(),
-                notifications.getTotalPages(),
-                notifications.getNumber(),
-                notifications.hasPrevious(),
-                notifications.hasNext(),
-                notifications.isFirst(),
-                notifications.isLast());
+            notificationShortDtoList,
+            notifications.getTotalElements(),
+            notifications.getPageable().getPageNumber(),
+            notifications.getTotalPages(),
+            notifications.getNumber(),
+            notifications.hasPrevious(),
+            notifications.hasNext(),
+            notifications.isFirst(),
+            notifications.isLast());
     }
 
     /**
@@ -929,7 +927,6 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         NotificationDto notificationDto = createNotificationDto(notification, language, SITE, templateRepository, 0L);
-
         if (NotificationType.VIOLATION_THE_RULES.equals(notification.getNotificationType())) {
             NotificationParameter notificationParameter = notification.getParameters().stream()
                 .filter(parameter -> parameter.getKey().equals(VIOLATION_DESCRIPTION))
@@ -974,6 +971,24 @@ public class NotificationServiceImpl implements NotificationService {
             .build();
     }
 
+    private NotificationFullDto createNotificationFullDto(String userUuid, UserNotification notification,
+        String language,
+        Long monthsOfAccountInactivity) {
+        NotificationShortDto notificationShortDto =
+            createNotificationShortDto(notification, language, monthsOfAccountInactivity);
+        NotificationDto notificationDto = getNotification(userUuid, notificationShortDto.getId(), language);
+
+        return NotificationFullDto.builder()
+            .id(notificationShortDto.getId())
+            .orderId(notificationShortDto.getOrderId())
+            .read(notificationShortDto.isRead())
+            .title(notificationShortDto.getTitle())
+            .body(notificationShortDto.getBody())
+            .notificationTime(notificationShortDto.getNotificationTime())
+            .images(notificationDto.getImages())
+            .build();
+    }
+
     private void sendNotificationsForBotsAndEmail(UserNotification notification, long monthsOfAccountInactivity) {
         executor.execute(() -> notificationProviders
             .forEach(provider -> provider.sendNotification(notification, provider.getNotificationType(),
@@ -1000,10 +1015,10 @@ public class NotificationServiceImpl implements NotificationService {
         String title = language.equals("ua") ? template.getTitleUk() : template.getTitleEn();
 
         return NotificationDto.builder()
-                .title(title)
-                .body(resultBody)
-                .images(Collections.emptyList())
-                .build();
+            .title(title)
+            .body(resultBody)
+            .images(Collections.emptyList())
+            .build();
     }
 
     private static NotificationTemplate getNotificationTemplate(
