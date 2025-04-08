@@ -18,11 +18,8 @@ import greencity.enums.SortingOrder;
 import greencity.dto.order.UserWithOrdersDto;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
-import greencity.service.ubs.OrdersForUserService;
-import greencity.service.ubs.ValuesForUserTableService;
-import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.*;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
-import greencity.service.ubs.OrdersAdminsPageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -40,10 +37,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/ubs/management")
 @RequiredArgsConstructor
@@ -81,14 +80,14 @@ public class AdminUbsController {
     }
 
     /**
-     * Controller for retrieving all users who have made at least one order.
+     * Controller for retrieving all users.
      *
      * @param page {@link int} The page number (0-based index).
      * @param size {@link int} The number of users per page.
      * @param sort {@link String} Sorting criteria (e.g., 'name,asc' or
      *             'name,desc').
      * @return List of {@link UserResponseDto} A list of users.
-     * @author Stepan Tehlivets.
+     * @author Yurii Feduniak.
      */
     @Operation(summary = "Get all registered users")
     @ApiResponses(value = {
@@ -99,7 +98,6 @@ public class AdminUbsController {
         @ApiResponse(responseCode = "400", description = "Bad request, invalid parameters", content = @Content),
         @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @GetMapping("/users")
     public ResponseEntity<List<UserResponseDto>> getAllUsers(
         @RequestParam @Min(0) int page,
