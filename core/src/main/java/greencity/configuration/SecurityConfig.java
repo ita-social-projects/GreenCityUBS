@@ -29,16 +29,18 @@ import java.util.List;
 import static greencity.constant.AppConstant.ADMIN;
 import static greencity.constant.AppConstant.ADMIN_EMPL_LINK;
 import static greencity.constant.AppConstant.ADMIN_LINK;
+import static greencity.constant.AppConstant.COMMIT_INFO;
 import static greencity.constant.AppConstant.SUPER_ADMIN_LINK;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE;
+import static greencity.constant.AppConstant.UBS_EXPORT;
 import static greencity.constant.AppConstant.UBS_LINK;
 import static greencity.constant.AppConstant.UBS_MANAG_LINK;
+import static greencity.constant.AppConstant.LOGS_LINKS;
 import static greencity.constant.AppConstant.USER;
 import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-import static greencity.constant.AppConstant.COMMIT_INFO;
 
 @Configuration
 @EnableWebSecurity
@@ -76,7 +78,7 @@ public class SecurityConfig {
                 Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH", "HEAD"));
             config.setAllowedHeaders(
                 Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Headers",
-                    "X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
+                    "X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization", "secretKey"));
             config.setAllowCredentials(true);
             config.setMaxAge(3600L);
             return config;
@@ -282,6 +284,8 @@ public class SecurityConfig {
                     UBS_LINK + "/check-if-tariff-exists/{id}",
                     UBS_LINK + "/locations")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
+                .requestMatchers(LOGS_LINKS)
+                .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     "/notifications/{notificationId}/viewNotification",
                     "/notifications/{notificationId}/unreadNotification")
@@ -295,7 +299,8 @@ public class SecurityConfig {
                 .hasAnyRole(USER)
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK + "/userProfile/**",
-                    UBS_LINK + "/get-all-districts")
+                    UBS_LINK + "/get-all-districts",
+                    UBS_EXPORT)
                 .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.PATCH,
                     UBS_LINK + "/userProfile/**",

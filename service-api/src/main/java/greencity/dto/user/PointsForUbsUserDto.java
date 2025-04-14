@@ -20,6 +20,6 @@ public class PointsForUbsUserDto {
     private LocalDateTime dateOfEnrollment;
     private Long numberOfOrder;
     private Integer amount;
-    private String reasonUa;
+    private String reasonUk;
     private String reasonEn;
 }

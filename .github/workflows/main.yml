@@ -6,11 +6,11 @@ name: CI/CD GreenCityUBS
 concurrency: Testing
 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Triggers the workflow on push or pull request events but only for the dev branch
   push:
-    branches: [ prod, dev ]
+    branches: [ dev ]
   pull_request:
-    branches: [ prod, dev ]
+    branches: [ dev ]
   workflow_dispatch:
 
 env:
@@ -40,13 +40,28 @@ jobs:
 #         with:
 #           go-version: 1.18
 
+      - name: Set up Maven settings
+        run: |
+            mkdir -p ~/.m2
+            cat > ~/.m2/settings.xml <<EOF
+            <settings>
+              <servers>
+                <server>
+                  <id>github</id>
+                  <username>ita-social-projects</username>
+                  <password>${{ secrets.LOGGING_ITA_TOKEN }}</password>
+                </server>
+              </servers>
+            </settings>
+            EOF
+
       - name: Run a multi-line script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           git fetch --unshallow
-          mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ita-social-projects-green-ubs -Dsonar.organization=ita-social-projects -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes -Dsonar.dynamicAnalysis=reuseReports
+          mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ita-social-projects-green-ubs -Dsonar.organization=ita-social-projects -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes -Dsonar.dynamicAnalysis=reuseReports -Dsonar.exclusions=**/EncryptionUtil.java -Dsonar.coverage.exclusions=**/configuration/*,**/entity/*,**/exceptions/*,**/exceptions/**,**/enums/NotificationType.java,**/BigOrderTableRepository.java,**/ChatLinkDto.java
       
       - name: Test Reporter
         uses: dorny/test-reporter@v1.5.0

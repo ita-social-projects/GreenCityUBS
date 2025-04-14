@@ -10,6 +10,6 @@ public enum BonusReason {
     REFUND_CANCELED_ORDER("Зарахування оплати скасованого замовлення", "Enrollment of payment for canceled order"),
     DEBIT_PAYMENT("Списання у рахунок оплати замовлення", "Write-off of the payment of the order");
 
-    private final String descriptionUa;
+    private final String descriptionUk;
     private final String descriptionEn;
 }

@@ -148,9 +148,9 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
 
     @Test
     void get_All_Orders_Filter_By_City_DESC() {
-        var filter = new OrderSearchCriteria().setCities(new String[] {"Київ"});
+        var filter = new OrderSearchCriteria().setCitiesUk(new String[] {"Київ"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
-            .filter(a -> a.getCity().equals("Київ"))
+            .filter(a -> a.getCityUk().equals("Київ"))
             .collect(Collectors.toList());
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -160,9 +160,9 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
 
     @Test
     void get_All_Orders_Filter_By_Region_DESC() {
-        var filter = new OrderSearchCriteria().setRegion(new String[] {"Київська область"});
+        var filter = new OrderSearchCriteria().setRegionUk(new String[] {"Київська область"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
-            .filter(a -> a.getRegion().equals("Київська область"))
+            .filter(a -> a.getRegionUk().equals("Київська область"))
             .collect(Collectors.toList());
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -172,13 +172,13 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
 
     @Test
     void get_All_Orders_Filter_By_Districts_DESC() {
-        var filter = new OrderSearchCriteria().setDistricts(new String[] {"Подільський"});
+        var filter = new OrderSearchCriteria().setDistrictsUk(new String[] {"Подільський"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
-            .map(BigOrderTableViews::getDistrict)
+            .map(BigOrderTableViews::getDistrictUk)
             .filter(district -> district.equals("Подільський")).toList();
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
-            .getContent().stream().map(BigOrderTableViews::getDistrict).toList();
+            .getContent().stream().map(BigOrderTableViews::getDistrictUk).toList();
         Assertions.assertEquals(
             expectedValue, actualValue);
     }
