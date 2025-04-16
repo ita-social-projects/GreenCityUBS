@@ -55,6 +55,7 @@ import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
+import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationShortDto;
@@ -296,6 +297,9 @@ public class ModelUtils {
     public static final List<Map<String, Object>> TEST_MAP_ADDITIONAL_BAG_LIST =
         Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
+    public static final List<NotificationFullDto> TEST_NOTIFICATION_DTO_LIST = List.of(createNotificationFullDto());
+    public static final PageableAdvancedDto<NotificationFullDto> TEST_NOTIFICATION_FULL_DTO_PAGEABLE =
+        createPageableAdvancedDtoForNotificationFullDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
     public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(createBag(1), createBag(2), createBag(3));
@@ -2655,6 +2659,19 @@ public class ModelUtils {
             true);
     }
 
+    private static PageableAdvancedDto<NotificationFullDto> createPageableAdvancedDtoForNotificationFullDto() {
+        return new PageableAdvancedDto<>(
+            TEST_NOTIFICATION_DTO_LIST,
+            1,
+            0,
+            1,
+            0,
+            false,
+            false,
+            true,
+            true);
+    }
+
     public static NotificationTemplateWithPlatformsUpdateDto createNotificationTemplateWithPlatformsUpdateDto() {
         return NotificationTemplateWithPlatformsUpdateDto.builder()
             .notificationTemplateUpdateInfo(createNotificationTemplateUpdateInfoDto())
@@ -2978,6 +2995,18 @@ public class ModelUtils {
         return NotificationDto.builder()
             .title("Title")
             .body("Body")
+            .images(Collections.emptyList())
+            .build();
+    }
+
+    private static NotificationFullDto createNotificationFullDto() {
+        return NotificationFullDto.builder()
+            .id(0L)
+            .orderId(5L)
+            .read(false)
+            .title("Title")
+            .body("Body")
+            .images(List.of("image1", "image2", "image3"))
             .build();
     }
 

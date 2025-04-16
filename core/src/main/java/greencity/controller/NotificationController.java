@@ -6,6 +6,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.service.ubs.NotificationService;
@@ -71,11 +72,32 @@ public class NotificationController {
     })
     @GetMapping
     @ApiPageableWithLocale
-    public ResponseEntity<PageableAdvancedDto<NotificationShortDto>> getNotificationsForCurrentUser(
+    public ResponseEntity<PageableAdvancedDto<NotificationShortDto>> getShortNotificationsForCurrentUser(
         @RequestParam String email,
         @Parameter(hidden = true) @ValidLanguage Locale locale, @Parameter(hidden = true) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(notificationService.getAllNotificationsForUser(email, locale.getLanguage(), pageable));
+            .body(notificationService.getAllShortNotificationsForUser(email, locale.getLanguage(), pageable));
+    }
+
+    /**
+     * Controller return page with notifications for current user.
+     *
+     * @return Page with notifications.
+     * @author Ihor Volianskyi
+     */
+    @Operation(summary = "Get page with notifications for current user including images")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content)
+    })
+    @GetMapping("/images")
+    @ApiPageableWithLocale
+    public ResponseEntity<PageableAdvancedDto<NotificationFullDto>> getNotificationsForCurrentUser(
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
+        @Parameter(hidden = true) @ValidLanguage Locale locale, @Parameter(hidden = true) Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(notificationService.getAllNotificationsForUser(userUuid, locale.getLanguage(), pageable));
     }
 
     /**
