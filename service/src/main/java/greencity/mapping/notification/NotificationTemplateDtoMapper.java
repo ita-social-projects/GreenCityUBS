@@ -18,19 +18,19 @@ public class NotificationTemplateDtoMapper
                 NotificationTemplateMainInfoDto.builder()
                     .type(notificationTemplate.getNotificationType())
                     .trigger(notificationTemplate.getTrigger())
-                    .triggerDescriptionUk(notificationTemplate.getTrigger().getDescriptionUk())
-                    .triggerDescriptionEn(notificationTemplate.getTrigger().getDescriptionEn())
+                    .triggerDescription(notificationTemplate.getTrigger().getDescription())
+                    .triggerDescriptionEng(notificationTemplate.getTrigger().getDescriptionEng())
                     .time(notificationTemplate.getTime())
-                    .timeDescriptionUk(notificationTemplate.getTime().getDescriptionUk())
-                    .timeDescriptionEn(notificationTemplate.getTime().getDescriptionEn())
+                    .timeDescription(notificationTemplate.getTime().getDescription())
+                    .timeDescriptionEng(notificationTemplate.getTime().getDescriptionEng())
                     .schedule(notificationTemplate.getSchedule())
-                    .titleUk(notificationTemplate.getTitleUk())
-                    .titleEn(notificationTemplate.getTitleEn())
+                    .title(notificationTemplate.getTitle())
+                    .titleEng(notificationTemplate.getTitleEng())
                     .notificationStatus(notificationTemplate.getNotificationStatus())
-                    .userCategoryDescriptionUk(Objects.isNull(notificationTemplate.getUserCategory()) ? null
-                        : notificationTemplate.getUserCategory().getDescriptionUk())
-                    .userCategoryDescriptionEn(Objects.isNull(notificationTemplate.getUserCategory()) ? null
-                        : notificationTemplate.getUserCategory().getDescriptionEn())
+                    .userCategoryDescription(Objects.isNull(notificationTemplate.getUserCategory()) ? null
+                        : notificationTemplate.getUserCategory().getDescription())
+                    .userCategoryDescriptionEng(Objects.isNull(notificationTemplate.getUserCategory()) ? null
+                        : notificationTemplate.getUserCategory().getDescriptionEng())
                     .build())
             .build();
     }

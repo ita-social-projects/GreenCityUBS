@@ -18,20 +18,20 @@ class OrderAddressDtoRequestToCreateAddressRequestDtoTest {
     @Test
     void testConvert() {
         OrderAddressDtoRequest source = new OrderAddressDtoRequest();
-        source.setRegionUk("Lviv");
+        source.setRegion("Lviv");
         source.setRegionEn("Lviv Region");
-        source.setCityUk("Lviv");
+        source.setCity("Lviv");
         source.setCityEn("Lviv City");
-        source.setDistrictUk("Sykhiv");
+        source.setDistrict("Sykhiv");
         source.setDistrictEn("Sykhiv District");
 
         CreateAddressRequestDto result = converter.convert(source);
 
-        assertEquals("Lviv", result.getRegionUk());
+        assertEquals("Lviv", result.getRegion());
         assertEquals("Lviv Region", result.getRegionEn());
-        assertEquals("Lviv", result.getCityUk());
+        assertEquals("Lviv", result.getCity());
         assertEquals("Lviv City", result.getCityEn());
-        assertEquals("Sykhiv", result.getDistrictUk());
+        assertEquals("Sykhiv", result.getDistrict());
         assertEquals("Sykhiv District", result.getDistrictEn());
     }
 }

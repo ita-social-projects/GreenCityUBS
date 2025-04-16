@@ -24,10 +24,10 @@ class TariffServiceDtoToBagMapperTest {
         assertEquals(expectedBag.getPrice(), actualBag.getPrice());
         assertEquals(expectedBag.getCommission(), actualBag.getCommission());
         assertEquals(expectedBag.getFullPrice(), actualBag.getFullPrice());
-        assertEquals(expectedBag.getNameUk(), actualBag.getNameUk());
-        assertEquals(expectedBag.getDescriptionUk(), actualBag.getDescriptionUk());
-        assertEquals(expectedBag.getNameEn(), actualBag.getNameEn());
-        assertEquals(expectedBag.getDescriptionEn(), actualBag.getDescriptionEn());
+        assertEquals(expectedBag.getName(), actualBag.getName());
+        assertEquals(expectedBag.getDescription(), actualBag.getDescription());
+        assertEquals(expectedBag.getNameEng(), actualBag.getNameEng());
+        assertEquals(expectedBag.getDescriptionEng(), actualBag.getDescriptionEng());
         assertEquals(expectedBag.getLimitIncluded(), actualBag.getLimitIncluded());
         assertEquals(expectedBag.getCreatedAt(), actualBag.getCreatedAt());
     }

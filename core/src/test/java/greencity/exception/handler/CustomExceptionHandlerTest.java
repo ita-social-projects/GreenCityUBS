@@ -1,9 +1,7 @@
 package greencity.exception.handler;
 
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
-import greencity.exceptions.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +21,6 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -51,12 +48,6 @@ class CustomExceptionHandlerTest {
 
     @Mock
     HttpMessageNotReadableException notReadableException;
-
-    @Mock
-    ResourceNotFoundException resourceNotFoundException;
-
-    @Mock
-    ValidationException validationException;
 
     @Mock
     NotFoundException notFoundException;
@@ -181,28 +172,6 @@ class CustomExceptionHandlerTest {
             .thenReturn(objectMap);
         assertEquals(customExceptionHandler.handleEntityNotFoundException(webRequest),
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse));
-        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
-    }
-
-    @Test
-    void handleResourceNotFoundExceptionTest() {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
-        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
-            .thenReturn(objectMap);
-        assertEquals(
-            customExceptionHandler.handleResourceNotFoundException(resourceNotFoundException, webRequest),
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse));
-        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
-    }
-
-    @Test
-    void handleValidationExceptionTest() {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
-        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
-            .thenReturn(objectMap);
-        assertEquals(
-            customExceptionHandler.handleValidationException(validationException, webRequest),
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="update-colum_width_for_employee" author="Kizerov Dmytro">
+        <addColumn tableName="column_width_for_employee">
+            <column name="mixed_waste_120l" type="INT"/>
+            <column name="textile_waste_60l" type="INT"/>
+            <column name="textile_waste_20l" type="INT"/>
+        </addColumn>
+
+        <dropColumn tableName="column_width_for_employee" columnName="bags_amount"/>
+    </changeSet>
+</databaseChangeLog>

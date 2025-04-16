@@ -57,7 +57,7 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
     @Transactional
     @Modifying
     @Query(value = "update order_bag_mapping obm "
-        + "set capacity = :capacity, price = :price, name_uk = :name, name_en = :nameEng "
+        + "set capacity = :capacity, price = :price, name = :name, name_eng = :nameEng "
         + "from orders o "
         + "where o.id = obm.order_id and obm.bag_id = :bagId and o.order_payment_status = 'UNPAID'", nativeQuery = true)
     void updateAllByBagIdForUnpaidOrders(Integer bagId, Integer capacity, Long price, String name, String nameEng);

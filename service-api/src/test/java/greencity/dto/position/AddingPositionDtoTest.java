@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AddingPositionDtoTest {
     void nameRegex(String name, boolean validates) throws NoSuchFieldException {
-        Field field = AddingPositionDto.class.getDeclaredField("nameUk");
+        Field field = AddingPositionDto.class.getDeclaredField("name");
         jakarta.validation.constraints.Pattern[] annotations =
             field.getAnnotationsByType(jakarta.validation.constraints.Pattern.class);
         assertEquals(name.matches(annotations[0].regexp()), validates);

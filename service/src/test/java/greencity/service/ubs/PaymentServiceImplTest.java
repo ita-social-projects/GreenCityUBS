@@ -265,7 +265,7 @@ class PaymentServiceImplTest {
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         doNothing().when(paymentRepository).deletePaymentById(1L);
         doNothing().when(fileService).delete("");
-        doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + getManualPayment().getPaymentId(),
+        doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + getManualPayment().getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(),
             getOrder());
         paymentServiceImpl.deleteManualPayment(1L, "abc");
@@ -289,7 +289,7 @@ class PaymentServiceImplTest {
         verify(paymentRepository).findById(1L);
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService).delete(payment.getImagePath());
-        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
+        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
 
     }
@@ -311,7 +311,7 @@ class PaymentServiceImplTest {
         verify(paymentRepository).findById(1L);
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService, times(0)).delete(payment.getImagePath());
-        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
+        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
     }
 
@@ -339,7 +339,7 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
-        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK + 1,
+        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1,
             employee.getFirstName() + "  " + employee.getLastName(),
             getOrder());
         paymentServiceImpl.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
@@ -362,7 +362,7 @@ class PaymentServiceImplTest {
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         when(fileService.upload(file)).thenReturn("path");
-        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK + 1, "Yuriy" + "  " + "Gerasum",
+        doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum",
             getOrder());
         paymentServiceImpl.updateManualPayment(1L, getManualPaymentRequestDto(), file, "abc");
         verify(paymentRepository, times(1)).findById(1L);
@@ -440,7 +440,7 @@ class PaymentServiceImplTest {
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, image, TEST_EMAIL);
 
         verify(eventService, times(1))
-            .save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
+            .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -448,9 +448,9 @@ class PaymentServiceImplTest {
 
     private static Stream<Arguments> provideManualPaymentRequestDto() {
         return Stream.of(Arguments.of(ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
             Arguments.of(ManualPaymentRequestDto.builder()
-                .settlementDate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
+                .settlementdate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
                 Mockito.mock(MultipartFile.class)));
     }
 
@@ -468,7 +468,7 @@ class PaymentServiceImplTest {
         payment.setAmount(0L);
         order.setPayment(singletonList(payment));
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(0L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(0L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -480,7 +480,7 @@ class PaymentServiceImplTest {
         doNothing().when(eventService).save(any(), any(), any());
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(employeeRepository, times(2)).findByEmail(anyString());
-        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1,
+        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
             "Петро  Петренко", order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
@@ -501,7 +501,7 @@ class PaymentServiceImplTest {
         payment.setAmount(50_00L);
         order.setPayment(singletonList(payment));
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(50_00L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(50_00L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -516,10 +516,10 @@ class PaymentServiceImplTest {
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
 
         verify(employeeRepository, times(2)).findByEmail(anyString());
-        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1,
+        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
             "Петро  Петренко", order);
         verify(eventService, times(1))
-            .save(OrderHistory.ORDER_HALF_PAID_UK, OrderHistory.SYSTEM_UK, order);
+            .save(OrderHistory.ORDER_HALF_PAID, OrderHistory.SYSTEM, order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -538,7 +538,7 @@ class PaymentServiceImplTest {
         payment.setAmount(500_00L);
         order.setPayment(singletonList(payment));
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500_00L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500_00L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -550,10 +550,10 @@ class PaymentServiceImplTest {
         doNothing().when(eventService).save(any(), any(), any());
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(employeeRepository, times(2)).findByEmail(anyString());
-        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1,
+        verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1,
             "Петро  Петренко", order);
         verify(eventService, times(1))
-            .save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
+            .save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -570,7 +570,7 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -579,8 +579,7 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
-            order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
@@ -600,7 +599,7 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(200L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(200L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -609,8 +608,7 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
-            order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
@@ -630,7 +628,7 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -639,8 +637,7 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
-            order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
@@ -660,7 +657,7 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -669,8 +666,7 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
-            order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
             .save("Додано оплату №1", "Петро  Петренко", order);
@@ -690,7 +686,7 @@ class PaymentServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
@@ -699,8 +695,7 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
-            order);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Петро" + "  " + "Петренко", order);
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, Mockito.mock(MultipartFile.class),
             TEST_EMAIL);
 
@@ -714,7 +709,7 @@ class PaymentServiceImplTest {
     @Test
     void saveNewManualPaymentWithoutLinkAndImageTest() {
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .settlementDate("02-08-2021").amount(500L).paymentId("1").build();
+            .settlementdate("02-08-2021").amount(500L).paymentId("1").build();
         assertThrows(BadRequestException.class,
             () -> paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL));
     }
@@ -728,7 +723,7 @@ class PaymentServiceImplTest {
         paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL);
         verify(refundRepository).save(any(Refund.class));
         verify(orderRepository).save(any(Order.class));
-        verify(eventService).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
+        verify(eventService).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq(TEST_EMAIL),
             any(Order.class));
         assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
     }
@@ -741,7 +736,7 @@ class PaymentServiceImplTest {
         assertTrue(paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL));
         verify(refundRepository).save(any(Refund.class));
         verify(orderRepository).save(any(Order.class));
-        verify(eventService).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
+        verify(eventService).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq(TEST_EMAIL),
             any(Order.class));
         assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
     }
@@ -778,7 +773,7 @@ class PaymentServiceImplTest {
             TEST_EMAIL));
         verify(orderRepository).save(any(Order.class));
         verify(userRepository).save(any(User.class));
-        verify(eventService).saveEvent(eq(OrderHistory.ADDED_BONUSES_UK), eq(TEST_EMAIL), any(Order.class));
+        verify(eventService).saveEvent(eq(OrderHistory.ADDED_BONUSES), eq(TEST_EMAIL), any(Order.class));
         assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
     }
 
@@ -839,7 +834,7 @@ class PaymentServiceImplTest {
             TEST_EMAIL));
         verify(userRepository).save(any(User.class));
         verify(orderRepository).save(any(Order.class));
-        verify(eventService).saveEvent(eq(OrderHistory.ADDED_BONUSES_UK), eq(TEST_EMAIL),
+        verify(eventService).saveEvent(eq(OrderHistory.ADDED_BONUSES), eq(TEST_EMAIL),
             any(Order.class));
         assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
     }
@@ -855,7 +850,7 @@ class PaymentServiceImplTest {
                 TEST_EMAIL));
         assertEquals(CANNOT_REFUND_MONEY, exception.getMessage());
         verify(orderRepository, never()).save(any(Order.class));
-        verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
+        verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq(TEST_EMAIL),
             any(Order.class));
     }
 
@@ -866,7 +861,7 @@ class PaymentServiceImplTest {
         assertFalse(paymentServiceImpl.processRefundForOrder(order, null,
             TEST_EMAIL));
         verify(orderRepository, never()).save(any(Order.class));
-        verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
+        verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq(TEST_EMAIL),
             any(Order.class));
         verify(userRepository, never()).save(any());
         verify(refundRepository, never()).save(any());
@@ -880,7 +875,7 @@ class PaymentServiceImplTest {
         assertFalse(paymentServiceImpl.processRefundForOrder(order, refundDto,
             TEST_EMAIL));
         verify(orderRepository, never()).save(any(Order.class));
-        verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
+        verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND), eq(TEST_EMAIL),
             any(Order.class));
         verify(userRepository, never()).save(any());
         verify(refundRepository, never()).save(any());
