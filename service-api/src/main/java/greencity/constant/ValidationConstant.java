@@ -30,14 +30,13 @@ public class ValidationConstant {
             + "for cases, when user inputs street address by yourself instead of using Google Api, "
             + "in that cases sets the same value for both localizations.";
     public static final String ADDRESS_VALIDATION_ERROR_MESSAGE = "Invalid data for address";
-    public static final String USERNAME_REGEXP =
-        """
-            ^(?!.*\\.\\.)(?!.*\\.$)(?!.*\\-\\-)\
-            (?=[ЄІЇҐЁА-ЯA-Z])\
-            [ЄІЇҐЁєіїґёА-Яа-яA-Za-z0-9\\s-'’.\\"]\
-            {1,30}\
-            (?<![ЭэЁёъЪЫы])$\
-            """;
+    public static final String USERNAME_REGEXP = """
+        ^(?!.*\\.\\.)(?!.*\\.$)(?!.*\\-\\-)\
+        (?=[ЄІЇҐЁА-ЯA-Z])\
+        [ЄІЇҐЁєіїґёА-Яа-яA-Za-z0-9\\s\\-'\\"’.ʼ]\
+        {1,30}\
+        (?<![ЭэЁёъЪЫы])$\
+        """;
     public static final String USERNAME_MESSAGE = """
         Name must start with a capital letter, \
         cannot end with dot \
