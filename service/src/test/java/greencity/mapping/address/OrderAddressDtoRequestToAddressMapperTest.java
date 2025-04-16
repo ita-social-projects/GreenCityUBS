@@ -28,5 +28,6 @@ class OrderAddressDtoRequestToAddressMapperTest {
         assertEquals(orderAddressDtoRequest.getHouseNumber(), address.getBaseAddress().getHouseNumber());
         assertEquals(orderAddressDtoRequest.getHouseCorpus(), address.getBaseAddress().getHouseCorpus());
         assertEquals(orderAddressDtoRequest.getEntranceNumber(), address.getBaseAddress().getEntranceNumber());
+        assertEquals(orderAddressDtoRequest.getAddressComment(), address.getBaseAddress().getAddressComment());
     }
 }
