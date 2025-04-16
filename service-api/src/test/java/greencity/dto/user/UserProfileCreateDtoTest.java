@@ -16,87 +16,70 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class UserProfileCreateDtoTest {
 
-    private final String name = "Maksym";
-    private final String uuid = "test uuid";
-    private final String email = "test@gmail.com";
+    private final String mockName = "Maksym";
+    private final String mockUuid = "test uuid";
+    private final String mockEmail = "test@gmail.com";
 
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("provideValidEmails")
     void validEmailInUserProfileCreateDtoTest(String email) {
-        var dto = UserProfileCreateDto.builder()
-            .uuid(uuid)
-            .name(name)
+        UserProfileCreateDto userProfileCreateDto = UserProfileCreateDto.builder()
+            .uuid(mockUuid)
+            .name(mockName)
             .email(email)
             .build();
 
-        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
-            final Validator validator = factory.getValidator();
-
-            Set<ConstraintViolation<UserProfileCreateDto>> constraintViolations =
-                validator.validate(dto);
-
-            assertThat(constraintViolations).isEmpty();
-        }
+        validate(userProfileCreateDto, 0);
     }
 
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("provideInvalidEmails")
     void invalidEmailInUserProfileCreateDtoTest(String email) {
-        var dto = UserProfileCreateDto.builder()
-            .uuid(uuid)
-            .name(name)
+        UserProfileCreateDto userProfileCreateDto = UserProfileCreateDto.builder()
+            .uuid(mockUuid)
+            .name(mockName)
             .email(email)
             .build();
 
-        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
-            final Validator validator = factory.getValidator();
-
-            Set<ConstraintViolation<UserProfileCreateDto>> constraintViolations =
-                validator.validate(dto);
-
-            assertThat(constraintViolations).hasSize(1);
-        }
+        validate(userProfileCreateDto, 1);
     }
 
     @SneakyThrows
     @ParameterizedTest
-    @MethodSource("provideFieldsAndValidValues")
+    @MethodSource("provideValidUsernames")
     void validNameInUserProfileCreateDtoTest(String name) {
-        var dto = UserProfileCreateDto.builder()
-            .uuid(uuid)
+        UserProfileCreateDto userProfileCreateDto = UserProfileCreateDto.builder()
+            .uuid(mockUuid)
             .name(name)
-            .email(email)
+            .email(mockEmail)
             .build();
 
-        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
-            final Validator validator = factory.getValidator();
-
-            Set<ConstraintViolation<UserProfileCreateDto>> constraintViolations =
-                validator.validate(dto);
-
-            assertThat(constraintViolations).isEmpty();
-        }
+        validate(userProfileCreateDto, 0);
     }
 
     @SneakyThrows
     @ParameterizedTest
-    @MethodSource("provideFieldsAndInvalidValues")
+    @MethodSource("provideInvalidUsernames")
     void invalidNameInUserProfileCreateDtoTest(String name) {
-        var dto = UserProfileCreateDto.builder()
-            .uuid(uuid)
+        UserProfileCreateDto userProfileCreateDto = UserProfileCreateDto.builder()
+            .uuid(mockUuid)
             .name(name)
-            .email(email)
+            .email(mockEmail)
             .build();
 
+        validate(userProfileCreateDto, 1);
+    }
+
+    private void validate(UserProfileCreateDto userProfileCreateDto, int constraintViolationsSize) {
         try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
             final Validator validator = factory.getValidator();
 
             Set<ConstraintViolation<UserProfileCreateDto>> constraintViolations =
-                validator.validate(dto);
+                validator.validate(userProfileCreateDto);
 
-            assertThat(constraintViolations).hasSize(1);
+            assertThat(constraintViolations).hasSize(constraintViolationsSize);
         }
     }
 
@@ -123,7 +106,7 @@ class UserProfileCreateDtoTest {
         );
     }
 
-    private static Stream<Arguments> provideFieldsAndValidValues() {
+    private static Stream<Arguments> provideValidUsernames() {
         return Stream.of(
             Arguments.of("T"),
             Arguments.of("Tt"),
@@ -157,7 +140,7 @@ class UserProfileCreateDtoTest {
             Arguments.of("Євген.Тест"));
     }
 
-    private static Stream<Arguments> provideFieldsAndInvalidValues() {
+    private static Stream<Arguments> provideInvalidUsernames() {
         return Stream.of(
             Arguments.of("."),
             Arguments.of(".."),
