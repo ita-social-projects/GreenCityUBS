@@ -29,6 +29,7 @@ public class OrderAddressDtoRequestToAddressMapper extends AbstractConverter<Ord
                 .houseNumber(orderAddressDtoRequest.getHouseNumber())
                 .houseCorpus(orderAddressDtoRequest.getHouseCorpus())
                 .entranceNumber(orderAddressDtoRequest.getEntranceNumber())
+                .addressComment(orderAddressDtoRequest.getAddressComment())
                 .build())
             .build();
     }
