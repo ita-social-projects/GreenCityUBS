@@ -23,7 +23,7 @@ public class UAPhoneNumberUtil {
      */
 
     public static String getE164PhoneNumberFormat(String phoneNumberStr) {
-        if (phoneNumberStr == null || phoneNumberStr.isBlank()) {
+        if (phoneNumberStr == null || phoneNumberStr.trim().isEmpty()) {
             return null;
         }
         try {

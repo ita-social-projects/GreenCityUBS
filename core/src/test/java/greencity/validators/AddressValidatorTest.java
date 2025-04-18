@@ -49,8 +49,8 @@ class AddressValidatorTest {
     public void setUp() {
         CoordinatesDto coordinatesDto = new CoordinatesDto(50.45, 30.523);
         addressRequestDto = CreateAddressRequestDto.builder()
-            .city("Kyiv")
-            .region("Kyiv")
+            .cityUk("Kyiv")
+            .regionUk("Kyiv")
             .coordinates(coordinatesDto)
             .placeId("place-id")
             .build();

@@ -25,9 +25,9 @@ class CreateAddressRequestDtoTest {
     @MethodSource("provideFieldsAndValidValues")
     void validFieldsInAddressDtoTest(String street) {
         var dto = CreateAddressRequestDto.builder()
-            .region("region")
+            .regionUk("region")
             .regionEn("regionEn")
-            .district("district")
+            .districtUk("district")
             .districtEn("districtEn")
             .houseNumber("1")
             .placeId("test")
@@ -35,9 +35,9 @@ class CreateAddressRequestDtoTest {
                 .latitude(1D)
                 .longitude(1D)
                 .build())
-            .city("city")
+            .cityUk("city")
             .cityEn("cityEn")
-            .street(street)
+            .streetUk(street)
             .streetEn(street)
             .build();
 
@@ -55,9 +55,9 @@ class CreateAddressRequestDtoTest {
     @MethodSource("provideFieldsAndInvalidValues")
     void invalidFieldsInAddressDtoTest(String street) {
         var dto = CreateAddressRequestDto.builder()
-            .region("region")
+            .regionUk("region")
             .regionEn("regionEn")
-            .district("district")
+            .districtUk("district")
             .districtEn("districtEn")
             .houseNumber("1")
             .placeId("test")
@@ -65,9 +65,9 @@ class CreateAddressRequestDtoTest {
                 .latitude(1D)
                 .longitude(1D)
                 .build())
-            .city("city")
+            .cityUk("city")
             .cityEn("cityEn")
-            .street(street)
+            .streetUk(street)
             .streetEn(street)
             .build();
 
@@ -137,17 +137,17 @@ class CreateAddressRequestDtoTest {
         assertThat(dto1).isNotEqualTo(dto2);
         dto2.setDistrictEn(dto1.getDistrictEn());
 
-        dto2.setDistrict("Different District");
+        dto2.setDistrictUk("Different District");
         assertThat(dto1).isNotEqualTo(dto2);
-        dto2.setDistrict(dto1.getDistrict());
+        dto2.setDistrictUk(dto1.getDistrictUk());
 
         dto2.setRegionEn("Different Region En");
         assertThat(dto1).isNotEqualTo(dto2);
         dto2.setRegionEn(dto1.getRegionEn());
 
-        dto2.setRegion("Different Region");
+        dto2.setRegionUk("Different Region");
         assertThat(dto1).isNotEqualTo(dto2);
-        dto2.setRegion(dto1.getRegion());
+        dto2.setRegionUk(dto1.getRegionUk());
 
         dto2.setHouseNumber("999");
         assertThat(dto1).isNotEqualTo(dto2);
@@ -165,17 +165,17 @@ class CreateAddressRequestDtoTest {
         assertThat(dto1).isNotEqualTo(dto2);
         dto2.setCoordinates(dto1.getCoordinates());
 
-        dto2.setCity("Different City");
+        dto2.setCityUk("Different City");
         assertThat(dto1).isNotEqualTo(dto2);
-        dto2.setCity(dto1.getCity());
+        dto2.setCityUk(dto1.getCityUk());
 
         dto2.setCityEn("Different City En");
         assertThat(dto1).isNotEqualTo(dto2);
         dto2.setCityEn(dto1.getCityEn());
 
-        dto2.setStreet("Different Street");
+        dto2.setStreetUk("Different Street");
         assertThat(dto1).isNotEqualTo(dto2);
-        dto2.setStreet(dto1.getStreet());
+        dto2.setStreetUk(dto1.getStreetUk());
 
         dto2.setStreetEn("Different Street En");
         assertThat(dto1).isNotEqualTo(dto2);

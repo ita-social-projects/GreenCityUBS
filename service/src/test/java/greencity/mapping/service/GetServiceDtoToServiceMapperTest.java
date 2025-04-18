@@ -21,10 +21,10 @@ class GetServiceDtoToServiceMapperTest {
         Service actualService = mapper.convert(getServiceDto);
 
         Assertions.assertEquals(expectedService.getId(), actualService.getId());
-        Assertions.assertEquals(expectedService.getName(), actualService.getName());
-        Assertions.assertEquals(expectedService.getNameEng(), actualService.getNameEng());
-        Assertions.assertEquals(expectedService.getDescription(), actualService.getDescription());
-        Assertions.assertEquals(expectedService.getDescriptionEng(), actualService.getDescriptionEng());
+        Assertions.assertEquals(expectedService.getNameUk(), actualService.getNameUk());
+        Assertions.assertEquals(expectedService.getNameEn(), actualService.getNameEn());
+        Assertions.assertEquals(expectedService.getDescriptionUk(), actualService.getDescriptionUk());
+        Assertions.assertEquals(expectedService.getDescriptionEn(), actualService.getDescriptionEn());
         Assertions.assertEquals(expectedService.getPrice(), actualService.getPrice());
     }
 }

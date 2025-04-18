@@ -1,9 +1,10 @@
 package greencity.service.ubs;
 
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
-import greencity.dto.pageble.PageableDto;
+import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
 import greencity.enums.UserCategory;
@@ -179,11 +180,19 @@ public interface NotificationService {
     void notifySelfPickupOrder(Order order);
 
     /**
-     * Method that returns page with notifications for user by UUID.
+     * Method that returns page with notifications for user by email.
      *
      * @author Ann Sakhno
      */
-    PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
+    PageableAdvancedDto<NotificationShortDto> getAllShortNotificationsForUser(String email,
+        String language, Pageable pageable);
+
+    /**
+     * Method that returns page with notifications for current user.
+     *
+     * @author Maksym Kozak
+     */
+    PageableAdvancedDto<NotificationFullDto> getAllNotificationsForUser(String uuid,
         String language, Pageable pageable);
 
     /**

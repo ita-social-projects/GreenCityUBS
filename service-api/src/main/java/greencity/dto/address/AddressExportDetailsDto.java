@@ -9,16 +9,16 @@ import java.util.List;
 @Data
 public class AddressExportDetailsDto {
     private Long id;
-    private String city;
+    private String cityUk;
     private String cityEn;
-    private String district;
+    private String districtUk;
     private String districtEn;
-    private String region;
+    private String regionUk;
     private String regionEn;
     private String entranceNumber;
     private String houseCorpus;
     private String houseNumber;
-    private String street;
+    private String streetUk;
     private String streetEn;
     private List<DistrictDto> addressRegionDistrictList;
 }
