@@ -111,7 +111,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         table.addCell(createCell(orderInfo.getDateForm().format(
             Objects.equals(LOCALE_UK_NAME, locale.getLanguage()) ? DATE_FORMATTER_UK : DATE_FORMATTER_EN),
             DEFAULT_FONT_NAME, fontSize, DEFAULT_CELL_BACKGROUND_COLOR, false));
-        if (locale.getLanguage().equals(LOCALE_EN_NAME)) {
+        if (Objects.equals(LOCALE_EN_NAME, locale.getLanguage())) {
             table.addCell(createCell(orderInfo.getOrderStatusEn(), DEFAULT_FONT_NAME, fontSize,
                 DEFAULT_CELL_BACKGROUND_COLOR, false));
             table.addCell(createCell(orderInfo.getPaymentStatusEn(), DEFAULT_FONT_NAME, fontSize,
@@ -212,14 +212,18 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
             addParagraph(document, orderDetails.getAddress().getAddressDistinctUk(),
                 DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
         }
-        addParagraph(document, String.join(" ",
-            PdfAddressConstants.getByLocale(PdfAddressConstants.HOUSE_CORPUS_NUMBER, locale),
-            orderDetails.getAddress().getHouseCorpus()), DEFAULT_FONT_NAME,
-            DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
-        addParagraph(document, String.join(" ",
-            PdfAddressConstants.getByLocale(PdfAddressConstants.ENTRANCE_NUMBER, locale),
-            orderDetails.getAddress().getEntranceNumber()), DEFAULT_FONT_NAME,
-            DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+        if (Objects.nonNull(orderDetails.getAddress().getHouseCorpus())) {
+            addParagraph(document, String.join(" ",
+                PdfAddressConstants.getByLocale(PdfAddressConstants.HOUSE_CORPUS_NUMBER, locale),
+                orderDetails.getAddress().getHouseCorpus()), DEFAULT_FONT_NAME,
+                DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+            if (Objects.nonNull(orderDetails.getAddress().getEntranceNumber())) {
+                addParagraph(document, String.join(" ",
+                    PdfAddressConstants.getByLocale(PdfAddressConstants.ENTRANCE_NUMBER, locale),
+                    orderDetails.getAddress().getEntranceNumber()), DEFAULT_FONT_NAME,
+                    DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+            }
+        }
     }
 
     private void addHeader(String text, Document document) {
