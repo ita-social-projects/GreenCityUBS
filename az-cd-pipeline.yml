@@ -42,7 +42,7 @@ stages:
           - task: AzureKeyVault@1
             inputs:
               azureSubscription: '$(azureSub)'
-              KeyVaultName: '$(azKeyVault)'
+              KeyVaultName: 'greencity-app'
               SecretsFilter: 'LOGGING-ITA-TOKEN'
               RunAsPreJob: false
 
