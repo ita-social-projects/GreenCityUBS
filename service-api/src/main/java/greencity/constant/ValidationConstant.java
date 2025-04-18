@@ -30,25 +30,20 @@ public class ValidationConstant {
             + "for cases, when user inputs street address by yourself instead of using Google Api, "
             + "in that cases sets the same value for both localizations.";
     public static final String ADDRESS_VALIDATION_ERROR_MESSAGE = "Invalid data for address";
-    public static final String USERNAME_REGEXP =
-        """
-            ^(?!.*\\.\\.)(?!.*\\.$)(?!.*\\-\\-)\
-            (?=[ЄІЇҐЁА-ЯA-Z])\
-            [ЄІЇҐЁєіїґёА-Яа-яA-Za-z0-9\\s-'’.\\"]\
-            {1,30}\
-            (?<![ЭэЁёъЪЫы])$\
-            """;
-    public static final String USERNAME_MESSAGE =
-        """
-            The name ${validatedValue} cannot be empty, \
-            starts with a number or not a capital letter, \
-            ends with dot, \
-            contain 2 consecutive dots or dashes and symbols like @#$. \
-            Use English or Ukrainian letters, \
-            no longer than 30 symbols, \
-            the name ${validatedValue} could contain numbers, symbols '’, \
-            dot in the middle of the name, dash and whitespaces.\
-            """;
+    public static final String USERNAME_REGEXP = """
+        ^(?!.*\\.\\.)(?!.*\\.$)(?!.*\\-\\-)\
+        (?=[ЄІЇҐЁА-ЯA-Z])\
+        [ЄІЇҐЁєіїґёА-Яа-яA-Za-z0-9\\s\\-'\\"’.ʼ]\
+        {1,30}\
+        (?<![ЭэЁёъЪЫы])$\
+        """;
+    public static final String USERNAME_MESSAGE = """
+        Name must start with a capital letter, \
+        cannot end with dot \
+        or contain 2 consecutive dots, dashes and special symbols. \
+        Use English or Ukrainian letters, \
+        no longer than 30 symbols.\
+        """;
     public static final String PAYMENT_DATE_IS_BEFORE_ORDER_CREATION_MESSAGE =
         "Payment date should be set after the order creation.";
     public static final String PAYMENT_DATE_IS_AFTER_CURRENT_DATE_MESSAGE =
