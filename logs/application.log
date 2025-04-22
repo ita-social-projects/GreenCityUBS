@@ -1,0 +1,109 @@
+[2025-04-21 11:46:34] [34mINFO[0;39m [36mo.h.validator.internal.util.Version     [0;39m [35m:21  [0;39m HV000001: Hibernate Validator 8.0.1.Final
+[2025-04-21 11:46:34] [34mINFO[0;39m [36mgreencity.UbsApplication                [0;39m [35m:50  [0;39m Starting UbsApplication using Java 21.0.5 with PID 16940 (C:\Users\o.bulhakova\IdeaProjects\project\GreenCityUBS\core\target\classes started by o.bulhakova in C:\Users\o.bulhakova\IdeaProjects\project\GreenCityUBS)
+[2025-04-21 11:46:34] [34mINFO[0;39m [36mgreencity.UbsApplication                [0;39m [35m:660 [0;39m The following 1 profile is active: "dev"
+[2025-04-21 11:46:34] [34mINFO[0;39m [36m.e.DevToolsPropertyDefaultsPostProcessor[0;39m [35m:252 [0;39m Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+[2025-04-21 11:46:34] [34mINFO[0;39m [36m.e.DevToolsPropertyDefaultsPostProcessor[0;39m [35m:252 [0;39m For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+[2025-04-21 11:46:36] [34mINFO[0;39m [36m.s.d.r.c.RepositoryConfigurationDelegate[0;39m [35m:139 [0;39m Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2025-04-21 11:46:36] [34mINFO[0;39m [36m.s.d.r.c.RepositoryConfigurationDelegate[0;39m [35m:208 [0;39m Finished Spring Data repository scanning in 303 ms. Found 37 JPA repository interfaces.
+[2025-04-21 11:46:37] [34mINFO[0;39m [36mo.s.cloud.context.scope.GenericScope    [0;39m [35m:282 [0;39m BeanFactory id=c3961279-ee01-31bf-ad19-bacd65c3a8b2
+[2025-04-21 11:46:37] [34mINFO[0;39m [36mo.s.b.w.embedded.tomcat.TomcatWebServer [0;39m [35m:109 [0;39m Tomcat initialized with port 8050 (http)
+[2025-04-21 11:46:37] [34mINFO[0;39m [36mo.apache.coyote.http11.Http11NioProtocol[0;39m [35m:173 [0;39m Initializing ProtocolHandler ["http-nio-8050"]
+[2025-04-21 11:46:37] [34mINFO[0;39m [36mo.apache.catalina.core.StandardService  [0;39m [35m:173 [0;39m Starting service [Tomcat]
+[2025-04-21 11:46:37] [34mINFO[0;39m [36morg.apache.catalina.core.StandardEngine [0;39m [35m:173 [0;39m Starting Servlet engine: [Apache Tomcat/10.1.18]
+[2025-04-21 11:46:37] [34mINFO[0;39m [36mo.a.c.c.C.[Tomcat].[localhost].[/]      [0;39m [35m:173 [0;39m Initializing Spring embedded WebApplicationContext
+[2025-04-21 11:46:37] [34mINFO[0;39m [36mw.s.c.ServletWebServerApplicationContext[0;39m [35m:296 [0;39m Root WebApplicationContext: initialization completed in 3154 ms
+[2025-04-21 11:46:38] [34mINFO[0;39m [36mliquibase.database                      [0;39m [35m:37  [0;39m Set default schema name to public
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.changelog                     [0;39m [35m:37  [0;39m Reading from public.databasechangelog
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.ui                            [0;39m [35m:37  [0;39m Database is up to date, no changesets to execute
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.changelog                     [0;39m [35m:37  [0;39m Reading from public.databasechangelog
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.util                          [0;39m [35m:37  [0;39m UPDATE SUMMARY
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.util                          [0;39m [35m:37  [0;39m Run:                          0
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.util                          [0;39m [35m:37  [0;39m Previously run:             362
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.util                          [0;39m [35m:37  [0;39m Filtered out:                 0
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.util                          [0;39m [35m:37  [0;39m -------------------------------
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.util                          [0;39m [35m:37  [0;39m Total change sets:          362
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.util                          [0;39m [35m:37  [0;39m Update summary generated
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.lockservice                   [0;39m [35m:37  [0;39m Successfully released change log lock
+[2025-04-21 11:46:40] [34mINFO[0;39m [36mliquibase.command                       [0;39m [35m:37  [0;39m Command execution complete
+[2025-04-21 11:46:41] [34mINFO[0;39m [36mo.hibernate.jpa.internal.util.LogHelper [0;39m [35m:31  [0;39m HHH000204: Processing PersistenceUnitInfo [name: default]
+[2025-04-21 11:46:41] [34mINFO[0;39m [36morg.hibernate.Version                   [0;39m [35m:44  [0;39m HHH000412: Hibernate ORM core version 6.4.1.Final
+[2025-04-21 11:46:41] [34mINFO[0;39m [36mo.h.c.internal.RegionFactoryInitiator   [0;39m [35m:50  [0;39m HHH000026: Second-level cache disabled
+[2025-04-21 11:46:41] [34mINFO[0;39m [36mo.s.o.j.p.SpringPersistenceUnitInfo     [0;39m [35m:87  [0;39m No LoadTimeWeaver setup: ignoring JPA class transformer
+[2025-04-21 11:46:41] [34mINFO[0;39m [36mcom.zaxxer.hikari.HikariDataSource      [0;39m [35m:110 [0;39m HikariPool-1 - Starting...
+[2025-04-21 11:46:41] [34mINFO[0;39m [36mcom.zaxxer.hikari.pool.HikariPool       [0;39m [35m:565 [0;39m HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@ecbe9ab
+[2025-04-21 11:46:41] [34mINFO[0;39m [36mcom.zaxxer.hikari.HikariDataSource      [0;39m [35m:123 [0;39m HikariPool-1 - Start completed.
+[2025-04-21 11:46:42] [31mWARN[0;39m [36morg.hibernate.mapping.RootClass         [0;39m [35m:341 [0;39m HHH000038: Composite-id class does not override equals(): greencity.entity.user.employee.EmployeeFilterViewId
+[2025-04-21 11:46:42] [31mWARN[0;39m [36morg.hibernate.mapping.RootClass         [0;39m [35m:344 [0;39m HHH000039: Composite-id class does not override hashCode(): greencity.entity.user.employee.EmployeeFilterViewId
+[2025-04-21 11:46:43] [31mWARN[0;39m [36mo.h.metamodel.internal.MetadataContext  [0;39m [35m:727 [0;39m HHH015011: Unable to locate static metamodel field : greencity.entity.user.employee.EmployeeFilterViewId_#employeeId; this may or may not indicate a problem with the static metamodel
+[2025-04-21 11:46:43] [31mWARN[0;39m [36mo.h.metamodel.internal.MetadataContext  [0;39m [35m:727 [0;39m HHH015011: Unable to locate static metamodel field : greencity.entity.user.employee.EmployeeFilterViewId_#positionId; this may or may not indicate a problem with the static metamodel
+[2025-04-21 11:46:43] [34mINFO[0;39m [36mo.h.e.t.j.p.i.JtaPlatformInitiator      [0;39m [35m:58  [0;39m HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2025-04-21 11:46:43] [34mINFO[0;39m [36mj.LocalContainerEntityManagerFactoryBean[0;39m [35m:437 [0;39m Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2025-04-21 11:46:43] [31mWARN[0;39m [36mJpaBaseConfiguration$JpaWebConfiguration[0;39m [35m:232 [0;39m spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+[2025-04-21 11:46:43] [34mINFO[0;39m [36mo.s.b.d.a.OptionalLiveReloadServer      [0;39m [35m:59  [0;39m LiveReload server is running on port 35729
+[2025-04-21 11:46:44] [34mINFO[0;39m [36mo.s.d.j.r.query.QueryEnhancerFactory    [0;39m [35m:49  [0;39m Hibernate is in classpath; If applicable, HQL parser will be used.
+[2025-04-21 11:46:51] [34mINFO[0;39m [36mo.s.s.web.DefaultSecurityFilterChain    [0;39m [35m:54  [0;39m Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@43ac4342, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@48db631c, org.springframework.security.web.context.SecurityContextHolderFilter@302e0f3c, org.springframework.security.web.header.HeaderWriterFilter@33d62c58, org.springframework.web.filter.CorsFilter@16880920, org.springframework.security.web.authentication.logout.LogoutFilter@2a535a53, greencity.security.filters.AccessTokenAuthenticationFilter@5d314997, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@4ce7da43, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@7d96f821, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7c26b720, org.springframework.security.web.session.SessionManagementFilter@7be3cf8e, org.springframework.security.web.access.ExceptionTranslationFilter@4c615c2e, org.springframework.security.web.access.intercept.AuthorizationFilter@23bfb659]
+[2025-04-21 11:46:51] [31mWARN[0;39m [36mo.s.s.c.a.web.builders.WebSecurity      [0;39m [35m:289 [0;39m You are asking Spring Security to ignore Mvc [pattern='/ubs/receivePayment']. This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.
+[2025-04-21 11:46:51] [34mINFO[0;39m [36mo.s.s.web.DefaultSecurityFilterChain    [0;39m [35m:51  [0;39m Will not secure Mvc [pattern='/ubs/receivePayment']
+[2025-04-21 11:46:51] [31mWARN[0;39m [36mo.s.s.c.a.web.builders.WebSecurity      [0;39m [35m:289 [0;39m You are asking Spring Security to ignore Mvc [pattern='/ubs/monobank/payments']. This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.
+[2025-04-21 11:46:51] [34mINFO[0;39m [36mo.s.s.web.DefaultSecurityFilterChain    [0;39m [35m:51  [0;39m Will not secure Mvc [pattern='/ubs/monobank/payments']
+[2025-04-21 11:46:51] [31mWARN[0;39m [36mion$DefaultTemplateResolverConfiguration[0;39m [35m:101 [0;39m Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mo.apache.coyote.http11.Http11NioProtocol[0;39m [35m:173 [0;39m Starting ProtocolHandler ["http-nio-8050"]
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mo.s.b.w.embedded.tomcat.TomcatWebServer [0;39m [35m:241 [0;39m Tomcat started on port 8050 (http) with context path ''
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mgreencity.UbsApplication                [0;39m [35m:56  [0;39m Started UbsApplication in 18.509 seconds (process running for 19.733)
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:41:52.697072100
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.n.scheduler.NotificationTaskScheduler [0;39m [35m:39  [0;39m Failed to start scheduled notificator with type VIOLATION_THE_RULES because cron is incorrect or template is inactive.
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.n.scheduler.NotificationTaskScheduler [0;39m [35m:39  [0;39m Failed to start scheduled notificator with type CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER because cron is incorrect or template is inactive.
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.n.scheduler.NotificationTaskScheduler [0;39m [35m:39  [0;39m Failed to start scheduled notificator with type ORDER_STATUS_CHANGED because cron is incorrect or template is inactive.
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.n.scheduler.NotificationTaskScheduler [0;39m [35m:39  [0;39m Failed to start scheduled notificator with type CHANGED_IN_RULE_VIOLATION_STATUS because cron is incorrect or template is inactive.
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.n.scheduler.NotificationTaskScheduler [0;39m [35m:39  [0;39m Failed to start scheduled notificator with type COURIER_ITINERARY_FORMED because cron is incorrect or template is inactive.
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.n.scheduler.NotificationTaskScheduler [0;39m [35m:39  [0;39m Failed to start scheduled notificator with type DONE_OR_CANCELED_UNPAID_ORDER because cron is incorrect or template is inactive.
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.n.scheduler.NotificationTaskScheduler [0;39m [35m:39  [0;39m Failed to start scheduled notificator with type HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF because cron is incorrect or template is inactive.
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.n.scheduler.NotificationTaskScheduler [0;39m [35m:29  [0;39m Scheduled notificator for LETS_STAY_CONNECTED notification template by 0 0 18 * * ? cron
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.n.scheduler.NotificationTaskScheduler [0;39m [35m:29  [0;39m Scheduled notificator for UNPAID_ORDER notification template by 0 0 18 * * ? cron
+[2025-04-21 11:46:52] [34mINFO[0;39m [36mg.n.scheduler.NotificationTaskScheduler [0;39m [35m:39  [0;39m Failed to start scheduled notificator with type UNPAID_PACKAGE because cron is incorrect or template is inactive.
+[2025-04-21 11:47:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:42:52.686616
+[2025-04-21 11:47:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:48:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:43:52.694901500
+[2025-04-21 11:48:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:49:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:44:52.682805700
+[2025-04-21 11:49:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:50:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:45:52.680072900
+[2025-04-21 11:50:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:51:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:46:52.682096200
+[2025-04-21 11:51:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:52:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:47:52.681259800
+[2025-04-21 11:52:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mo.a.c.c.C.[Tomcat].[localhost].[/]      [0;39m [35m:173 [0;39m Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mo.s.web.servlet.DispatcherServlet       [0;39m [35m:532 [0;39m Initializing Servlet 'dispatcherServlet'
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mo.s.web.servlet.DispatcherServlet       [0;39m [35m:554 [0;39m Completed initialization in 2 ms
+[2025-04-21 11:53:30] [31mWARN[0;39m [36mo.s.w.s.h.HandlerMappingIntrospector    [0;39m [35m:458 [0;39m Cache miss for REQUEST dispatch to '/swagger-ui/index.html' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mg.s.f.AccessTokenAuthenticationFilter   [0;39m [35m:54  [0;39m token: null
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mg.s.f.AccessTokenAuthenticationFilter   [0;39m [35m:54  [0;39m token: null
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mg.s.f.AccessTokenAuthenticationFilter   [0;39m [35m:54  [0;39m token: null
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mg.s.f.AccessTokenAuthenticationFilter   [0;39m [35m:54  [0;39m token: null
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mg.s.f.AccessTokenAuthenticationFilter   [0;39m [35m:54  [0;39m token: null
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mg.s.f.AccessTokenAuthenticationFilter   [0;39m [35m:54  [0;39m token: null
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mg.s.f.AccessTokenAuthenticationFilter   [0;39m [35m:54  [0;39m token: null
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mg.s.f.AccessTokenAuthenticationFilter   [0;39m [35m:54  [0;39m token: null
+[2025-04-21 11:53:30] [34mINFO[0;39m [36mg.s.f.AccessTokenAuthenticationFilter   [0;39m [35m:54  [0;39m token: null
+[2025-04-21 11:53:32] [34mINFO[0;39m [36mo.springdoc.api.AbstractOpenApiResource [0;39m [35m:390 [0;39m Init duration for springdoc-openapi is: 1681 ms
+[2025-04-21 11:53:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:48:52.680697900
+[2025-04-21 11:53:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:54:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:49:52.692066700
+[2025-04-21 11:54:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:55:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:50:52.687413100
+[2025-04-21 11:55:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:56:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:51:52.690644600
+[2025-04-21 11:56:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:57:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:52:52.690690200
+[2025-04-21 11:57:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:58:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:53:52.691569900
+[2025-04-21 11:58:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 11:59:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:54:52.691975400
+[2025-04-21 11:59:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 12:00:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:60  [0;39m Time: 2025-04-21T11:55:52.688569700
+[2025-04-21 12:00:52] [34mINFO[0;39m [36mg.service.ubs.OrderLockServiceImpl      [0;39m [35m:62  [0;39m Unlock orders
+[2025-04-21 12:01:31] [34mINFO[0;39m [36mj.LocalContainerEntityManagerFactoryBean[0;39m [35m:650 [0;39m Closing JPA EntityManagerFactory for persistence unit 'default'
+[2025-04-21 12:01:31] [34mINFO[0;39m [36mcom.zaxxer.hikari.HikariDataSource      [0;39m [35m:350 [0;39m HikariPool-1 - Shutdown initiated...
+[2025-04-21 12:01:31] [34mINFO[0;39m [36mcom.zaxxer.hikari.HikariDataSource      [0;39m [35m:352 [0;39m HikariPool-1 - Shutdown completed.
