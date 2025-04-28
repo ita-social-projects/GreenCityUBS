@@ -136,7 +136,8 @@ class UserProfileCreateDtoTest {
             Arguments.of("User123"),
             Arguments.of("Імʼя2Тест"),
             Arguments.of("ТестʼІмʼя"),
-            Arguments.of("Євген.Тест"));
+            Arguments.of("Євген.Тест"),
+            Arguments.of("lowercase-name"));
     }
 
     private static Stream<Arguments> provideInvalidUsernames() {
@@ -150,6 +151,7 @@ class UserProfileCreateDtoTest {
             Arguments.of("--"),
             Arguments.of("..Тест"),
             Arguments.of("Тест.."),
+            Arguments.of("тест.."),
             Arguments.of("Тест..Імʼя"),
             Arguments.of("Тест--Імʼя"),
             Arguments.of("Тест.."),
