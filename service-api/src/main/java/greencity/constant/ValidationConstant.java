@@ -32,7 +32,7 @@ public class ValidationConstant {
     public static final String ADDRESS_VALIDATION_ERROR_MESSAGE = "Invalid data for address";
     public static final String USERNAME_REGEXP = """
         ^(?!.*\\.\\.)(?!.*\\.$)(?!.*\\-\\-)\
-        (?=[ЄІЇҐЁА-ЯA-Z])\
+        (?=[ЄІЇҐЁєіїґёА-Яа-яA-Za-z])\
         [ЄІЇҐЁєіїґёА-Яа-яA-Za-z0-9\\s\\-'\\"’.ʼ]\
         {1,30}\
         (?<![ЭэЁёъЪЫы])$\
