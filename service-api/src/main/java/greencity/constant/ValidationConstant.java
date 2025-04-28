@@ -38,7 +38,7 @@ public class ValidationConstant {
         (?<![ЭэЁёъЪЫы])$\
         """;
     public static final String USERNAME_MESSAGE = """
-        Name must start with a capital letter, \
+        Name must start with a letter, \
         cannot end with dot \
         or contain 2 consecutive dots, dashes and special symbols. \
         Use English or Ukrainian letters, \
