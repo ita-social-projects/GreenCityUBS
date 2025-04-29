@@ -589,7 +589,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         UBSuser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
-
+        order.setTariffsInfo(tariffsInfo);
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
 
         String eventName = determineEventName(orderId);
