@@ -163,9 +163,9 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
@@ -968,18 +968,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId, String uuid) {
-        BigOrderTableViews order = bigOrderTableRepository.findSingleOrderById(orderId);
-        if (order == null) {
-            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
-        }
+        BigOrderTableViews order = Optional.ofNullable(bigOrderTableRepository.findSingleOrderById(orderId))
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         User user = userRepository.findByUuid(uuid);
-        if (!order.getClientEmail().equals(user.getRecipientEmail())) {
+        if (!Objects.equals(order.getClientEmail(), user.getRecipientEmail())) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
-        String[] userNameSurname = order.getClientName().split(" ");
+        String[] userNameSurname = order.getClientName().trim().split(" ", 2);
+        String firstName = userNameSurname.length > 0 ? userNameSurname[0] : "";
+        String lastName = userNameSurname.length > 1 ? userNameSurname[1] : "";
         UserInfoDto userInfoDto = UserInfoDto.builder()
-            .customerName(userNameSurname[0])
-            .customerSurName(userNameSurname.length == 2 ? userNameSurname[1] : "")
+            .customerName(firstName)
+            .customerSurName(lastName)
             .customerPhoneNumber(order.getClientPhoneNumber())
             .customerEmail(order.getClientEmail())
             .totalUserViolations(userRepository.countTotalUsersViolations(user.getId()))
@@ -987,18 +987,20 @@ public class UBSClientServiceImpl implements UBSClientService {
             .userViolationForCurrentOrder(
                 userRepository.checkIfUserHasViolationForCurrentOrder(user.getId(), order.getId()))
             .build();
-        String[] senderNameSurname = order.getSenderName().split(" ");
-        if (senderNameSurname.length >= 2 && senderNameSurname[0] != null && !senderNameSurname[0].isEmpty()
-            && senderNameSurname[1] != null && !senderNameSurname[1].isEmpty()
+        String[] senderNameSurname = order.getSenderName().split(" ", 2);
+        firstName = senderNameSurname.length > 0 ? senderNameSurname[0] : "";
+        lastName = senderNameSurname.length > 1 ? senderNameSurname[1] : "";
+        if (firstName.isEmpty()
+            && lastName.isEmpty()
             && order.getClientPhoneNumber() != null
             && !order.getClientPhoneNumber().isEmpty()) {
-            return userInfoDto.setRecipientName(senderNameSurname[0])
-                .setRecipientSurName(senderNameSurname[1])
+            return userInfoDto.setRecipientName(firstName)
+                .setRecipientSurName(lastName)
                 .setRecipientEmail(order.getSenderEmail())
                 .setRecipientPhoneNumber(order.getSenderPhone());
         } else {
-            return userInfoDto.setRecipientName(senderNameSurname[0])
-                .setRecipientSurName(senderNameSurname.length == 2 ? senderNameSurname[1] : "")
+            return userInfoDto.setRecipientName(firstName)
+                .setRecipientSurName(lastName)
                 .setRecipientEmail(order.getSenderEmail())
                 .setRecipientPhoneNumber(order.getSenderPhone());
         }
