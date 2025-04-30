@@ -983,27 +983,19 @@ public class UBSClientServiceImpl implements UBSClientService {
             .customerPhoneNumber(order.getClientPhoneNumber())
             .customerEmail(order.getClientEmail())
             .totalUserViolations(userRepository.countTotalUsersViolations(user.getId()))
-            .recipientId(orderRepository.findById(orderId).get().getUbsUser().getId())
+            .recipientId(orderRepository.findById(orderId).orElseThrow(
+                    () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)
+            ).getUbsUser().getId())
             .userViolationForCurrentOrder(
                 userRepository.checkIfUserHasViolationForCurrentOrder(user.getId(), order.getId()))
             .build();
         String[] senderNameSurname = order.getSenderName().split(" ", 2);
         firstName = senderNameSurname.length > 0 ? senderNameSurname[0] : "";
         lastName = senderNameSurname.length > 1 ? senderNameSurname[1] : "";
-        if (firstName.isEmpty()
-            && lastName.isEmpty()
-            && order.getClientPhoneNumber() != null
-            && !order.getClientPhoneNumber().isEmpty()) {
-            return userInfoDto.setRecipientName(firstName)
-                .setRecipientSurName(lastName)
-                .setRecipientEmail(order.getSenderEmail())
-                .setRecipientPhoneNumber(order.getSenderPhone());
-        } else {
-            return userInfoDto.setRecipientName(firstName)
-                .setRecipientSurName(lastName)
-                .setRecipientEmail(order.getSenderEmail())
-                .setRecipientPhoneNumber(order.getSenderPhone());
-        }
+        return userInfoDto.setRecipientName(firstName)
+            .setRecipientSurName(lastName)
+            .setRecipientEmail(order.getSenderEmail())
+            .setRecipientPhoneNumber(order.getSenderPhone());
     }
 
     /**
