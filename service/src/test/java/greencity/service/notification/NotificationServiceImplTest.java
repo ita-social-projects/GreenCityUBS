@@ -2,14 +2,12 @@ package greencity.service.notification;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
-import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
-import greencity.dto.pageble.PageableAdvancedDto;
+import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Event;
 import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
@@ -46,13 +44,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -68,10 +61,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-
-import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE;
 import static greencity.ModelUtils.TEST_UUID;
-import static greencity.ModelUtils.TEST_PAGEABLE_ADVANCED_DTO;
+import static greencity.ModelUtils.TEST_DTO;
 import static greencity.ModelUtils.TEST_NOTIFICATION_DTO;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET2;
@@ -115,14 +106,14 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.anyLong;
-import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
-import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
-import static greencity.constant.OrderHistory.DELETE_VIOLATION_UK;
-import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT_UK;
-import static greencity.constant.OrderHistory.ORDER_CONFIRMED_UK;
-import static greencity.constant.OrderHistory.ORDER_FORMED_UK;
-import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT_UK;
-import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE_UK;
+import static greencity.constant.OrderHistory.ADD_VIOLATION;
+import static greencity.constant.OrderHistory.CHANGES_VIOLATION;
+import static greencity.constant.OrderHistory.DELETE_VIOLATION;
+import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT;
+import static greencity.constant.OrderHistory.ORDER_CONFIRMED;
+import static greencity.constant.OrderHistory.ORDER_FORMED;
+import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT;
+import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE;
 import static java.util.Arrays.asList;
 
 @ExtendWith(MockitoExtension.class)
@@ -141,9 +132,6 @@ class NotificationServiceImplTest {
 
     @Mock
     private OrderRepository orderRepository;
-
-    @Mock
-    private UserRemoteClient userRemoteClient;
 
     @Mock
     private UserNotificationRepository userNotificationRepository;
@@ -467,11 +455,12 @@ class NotificationServiceImplTest {
                 .value("46")
                 .build());
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
-            when(violationRepository.findCanceledViolationByOrderId(TEST_ORDER_4.getId()))
+            when(violationRepository.findActiveViolationByOrderId(TEST_ORDER_4.getId()))
                 .thenReturn(Optional.of(violation));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_7)).thenReturn(TEST_USER_NOTIFICATION_7);
             parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_7));
             when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
+
             notificationService.notifyDeleteViolation(TEST_ORDER_4.getId());
 
             verify(userNotificationRepository).save(any());
@@ -482,13 +471,12 @@ class NotificationServiceImplTest {
         void testNotifyAllAddedViolations() {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, ADD_VIOLATION_UK);
+            setEventsToOrder(order, ADD_VIOLATION);
             Violation violation = getOrdersViolations(order);
             Set<NotificationParameter> parameters = getNewViolationParameter(violation);
 
             mockUserNeedNotificationCheck(order, NotificationType.VIOLATION_THE_RULES);
-            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK,
-                DELETE_VIOLATION_UK))
+            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION, CHANGES_VIOLATION, DELETE_VIOLATION))
                 .thenReturn(orders);
             when(violationRepository.findActiveViolationByOrderId(anyLong())).thenReturn(Optional.of(violation));
             mockFillAndSendNotification(parameters, order, NotificationType.VIOLATION_THE_RULES);
@@ -522,10 +510,9 @@ class NotificationServiceImplTest {
         void testNotifyAllAddedViolationsWhenThereAreNotJustNewViolations() {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, ADD_VIOLATION_UK, CHANGES_VIOLATION_UK);
+            setEventsToOrder(order, ADD_VIOLATION, CHANGES_VIOLATION);
 
-            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION_UK, CHANGES_VIOLATION_UK,
-                DELETE_VIOLATION_UK))
+            when(orderRepository.findAllWithEventsByEventNames(ADD_VIOLATION, CHANGES_VIOLATION, DELETE_VIOLATION))
                 .thenReturn(orders);
 
             notificationService.notifyAllAddedViolations();
@@ -537,11 +524,11 @@ class NotificationServiceImplTest {
         void testNotifyAllChangedViolations() {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, CHANGES_VIOLATION_UK);
+            setEventsToOrder(order, CHANGES_VIOLATION);
             Set<NotificationParameter> parameters = getViolationParameter(order);
 
             mockUserNeedNotificationCheck(order, NotificationType.CHANGED_IN_RULE_VIOLATION_STATUS);
-            when(orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK))
+            when(orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION, DELETE_VIOLATION))
                 .thenReturn(orders);
             mockFillAndSendNotification(parameters, order, NotificationType.CHANGED_IN_RULE_VIOLATION_STATUS);
 
@@ -556,9 +543,9 @@ class NotificationServiceImplTest {
         void testNotifyAllChangedViolationsWithDeletedEvents() {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK);
+            setEventsToOrder(order, CHANGES_VIOLATION, DELETE_VIOLATION);
 
-            when(orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK))
+            when(orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION, DELETE_VIOLATION))
                 .thenReturn(orders);
 
             notificationService.notifyAllChangedViolations();
@@ -570,11 +557,11 @@ class NotificationServiceImplTest {
         void testNotifyAllCanceledViolations() {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, DELETE_VIOLATION_UK);
+            setEventsToOrder(order, DELETE_VIOLATION);
             Set<NotificationParameter> parameters = getViolationParameter(order);
 
             mockUserNeedNotificationCheck(order, NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
-            when(orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION_UK)).thenReturn(orders);
+            when(orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION)).thenReturn(orders);
             mockFillAndSendNotification(parameters, order,
                 NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
 
@@ -598,7 +585,7 @@ class NotificationServiceImplTest {
         void testNotifyAllDoneOrCanceledUnpaidOrders() {
             Order order = getOrderWithAmountToPay();
             List<Order> orders = Collections.singletonList(order);
-            setEventsToOrder(order, ORDER_ADJUSTMENT_UK, ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK);
+            setEventsToOrder(order, ORDER_ADJUSTMENT, ORDER_CONFIRMED, ORDER_ON_THE_ROUTE);
             Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order);
 
             mockUserNeedNotificationCheck(order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
@@ -653,7 +640,7 @@ class NotificationServiceImplTest {
         @Test
         void testNotifyAllChangedOrderStatuses() {
             Order order = getOrderWithAmountToPay();
-            setEventsToOrder(order, ORDER_NOT_TAKEN_OUT_UK, ADD_VIOLATION_UK);
+            setEventsToOrder(order, ORDER_NOT_TAKEN_OUT, ADD_VIOLATION);
             List<Order> orders = Collections.singletonList(order);
             Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order);
 
@@ -672,7 +659,7 @@ class NotificationServiceImplTest {
         @Test
         void testNotifyAllChangedOrderStatusesWithUnacceptableEvents() {
             Order order = getOrderWithAmountToPay();
-            setEventsToOrder(order, ORDER_ADJUSTMENT_UK, ORDER_CONFIRMED_UK);
+            setEventsToOrder(order, ORDER_ADJUSTMENT, ORDER_CONFIRMED);
             List<Order> orders = Collections.singletonList(order);
 
             when(orderRepository.findAllByOrderStatusWithEvents(OrderStatus.BROUGHT_IT_HIMSELF)).thenReturn(orders);
@@ -706,10 +693,9 @@ class NotificationServiceImplTest {
 
         private static Stream<Arguments> correctArguments() {
             return Stream.of(
-                Arguments.of(OrderStatus.CONFIRMED,
-                    asList(ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK, ORDER_NOT_TAKEN_OUT_UK)),
-                Arguments.of(OrderStatus.DONE, Collections.singletonList(ORDER_CONFIRMED_UK)),
-                Arguments.of(OrderStatus.CANCELED, asList(ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK)));
+                Arguments.of(OrderStatus.CONFIRMED, asList(ORDER_CONFIRMED, ORDER_ON_THE_ROUTE, ORDER_NOT_TAKEN_OUT)),
+                Arguments.of(OrderStatus.DONE, Collections.singletonList(ORDER_CONFIRMED)),
+                Arguments.of(OrderStatus.CANCELED, asList(ORDER_CONFIRMED, ORDER_ON_THE_ROUTE)));
         }
 
         @ParameterizedTest
@@ -717,7 +703,7 @@ class NotificationServiceImplTest {
         void testNotifyUnpaidPackagesWhenOrderHasUnacceptableStatusesAndEvents(OrderStatus status) {
             Order order = getOrderWithAmountToPay();
             order.setOrderStatus(status);
-            setEventsToOrder(order, ORDER_CONFIRMED_UK, ORDER_ON_THE_ROUTE_UK, ORDER_NOT_TAKEN_OUT_UK);
+            setEventsToOrder(order, ORDER_CONFIRMED, ORDER_ON_THE_ROUTE, ORDER_NOT_TAKEN_OUT);
             List<Order> orders = Collections.singletonList(order);
 
             when(orderRepository.findAllByOrderPaymentStatusWithEvents(OrderPaymentStatus.HALF_PAID))
@@ -749,14 +735,14 @@ class NotificationServiceImplTest {
 
         private void setEventsToOrder(Order order, String... eventNames) {
             List<Event> events = Stream.of(eventNames)
-                .map(e -> Event.builder().eventNameUk(e).build())
+                .map(e -> Event.builder().eventName(e).build())
                 .toList();
             order.setEvents(events);
         }
 
         private void setEventsToOrder(Order order, List<String> eventNames) {
             List<Event> events = eventNames.stream()
-                .map(e -> Event.builder().eventNameUk(e).build())
+                .map(e -> Event.builder().eventName(e).build())
                 .toList();
             order.setEvents(events);
         }
@@ -847,7 +833,6 @@ class NotificationServiceImplTest {
                 orderRepository,
                 violationRepository,
                 notificationParameterRepository,
-                userRemoteClient,
                 clock,
                 List.of(abstractNotificationProvider),
                 templateRepository,
@@ -972,151 +957,18 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testGetAllShortNotificationForUser() {
-        String email = "email";
-        String uuid = "uuid";
-
-        when(userRemoteClient.findUuidByEmail(email)).thenReturn(uuid);
-        when(userRepository.findByUuid(uuid)).thenReturn(TEST_USER);
+    void testGetAllNotificationForUser() {
+        when(userRepository.findByUuid("Test")).thenReturn(TEST_USER);
         when(userNotificationRepository.findAllByUserAndIsDeletedFalse(TEST_USER, TEST_PAGEABLE))
             .thenReturn(TEST_PAGE);
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             NotificationType.UNPAID_ORDER,
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
-        PageableAdvancedDto<NotificationShortDto> actual = notificationService
-            .getAllShortNotificationsForUser(email, "ua", TEST_PAGEABLE);
+        PageableDto<NotificationShortDto> actual = notificationService
+            .getAllNotificationsForUser("Test", "ua", TEST_PAGEABLE);
 
-        assertEquals(TEST_PAGEABLE_ADVANCED_DTO, actual);
-    }
-
-    @Test
-    void testGetAllNotificationsForUser() {
-        String userUuid = "user uuid";
-        String language = "ua";
-        Long orderId = 5L;
-        Long notificationId = 0L;
-        NotificationType notificationType = NotificationType.VIOLATION_THE_RULES;
-        UserNotification userNotification = Mockito.mock(UserNotification.class);
-        User user = Mockito.mock(User.class);
-        Order order = Mockito.mock(Order.class);
-        Page<UserNotification> page = new PageImpl<>(
-            List.of(userNotification),
-            Mockito.mock(Pageable.class),
-            1L);
-        Violation violation = Mockito.mock(Violation.class);
-        List<String> images = List.of("image1", "image2", "image3");
-        String notificationParameterValue = "value";
-        Set<NotificationParameter> notificationParameters = Set.of(
-            NotificationParameter.builder().key(VIOLATION_DESCRIPTION).value(notificationParameterValue).build());
-
-        when(user.getUuid())
-            .thenReturn(userUuid);
-        when(userRepository.findByUuid(userUuid))
-            .thenReturn(user);
-        when(userNotification.getId())
-            .thenReturn(notificationId);
-        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(user, TEST_PAGEABLE))
-            .thenReturn(page);
-        when(userNotificationRepository.findById(notificationId))
-            .thenReturn(Optional.of(userNotification));
-        when(userNotification.getUser())
-            .thenReturn(user);
-        when(userNotification.getNotificationType())
-            .thenReturn(notificationType);
-        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
-            notificationType,
-            SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
-        when(userNotification.getParameters())
-            .thenReturn(notificationParameters);
-        when(userNotification.getOrder())
-            .thenReturn(order);
-        when(order.getId())
-            .thenReturn(orderId);
-        when(violationRepository.findByOrderIdAndDescription(orderId, notificationParameterValue))
-            .thenReturn(Optional.of(violation));
-        when(violation.getImages())
-            .thenReturn(images);
-
-        PageableAdvancedDto<NotificationFullDto> actual = notificationService
-            .getAllNotificationsForUser(userUuid, language, TEST_PAGEABLE);
-
-        assertEquals(TEST_NOTIFICATION_FULL_DTO_PAGEABLE, actual);
-    }
-
-    @Test
-    void testGetAllNotificationForUserWhenNotificationDoesNotBelongToUser() {
-        String userUuid = "user uuid";
-        String anotherUserUuid = "another uuid";
-        String language = "ua";
-        Long notificationId = 0L;
-        NotificationType notificationType = NotificationType.VIOLATION_THE_RULES;
-        UserNotification userNotification = Mockito.mock(UserNotification.class);
-        User user = Mockito.mock(User.class);
-        User anotherUser = Mockito.mock(User.class);
-        Page<UserNotification> page = new PageImpl<>(
-            List.of(userNotification),
-            Mockito.mock(Pageable.class),
-            1L);
-
-        when(userRepository.findByUuid(userUuid))
-            .thenReturn(user);
-        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(user, TEST_PAGEABLE))
-            .thenReturn(page);
-        when(userNotificationRepository.findById(notificationId))
-            .thenReturn(Optional.of(userNotification));
-        when(userNotification.getNotificationType())
-            .thenReturn(notificationType);
-        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
-            notificationType,
-            SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
-        when(userNotification.getUser())
-            .thenReturn(anotherUser);
-        when(anotherUser.getUuid())
-            .thenReturn(anotherUserUuid);
-
-        assertThrows(
-            AccessDeniedException.class,
-            () -> notificationService.getAllNotificationsForUser(
-                userUuid,
-                language,
-                TEST_PAGEABLE));
-    }
-
-    @Test
-    void testGetAllNotificationForUserWhenNotificationIsNotFound() {
-        String userUuid = "user uuid";
-        String language = "ua";
-        Long notificationId = 1L;
-        UserNotification userNotification = Mockito.mock(UserNotification.class);
-        NotificationType notificationType = NotificationType.UNPAID_ORDER;
-        User user = Mockito.mock(User.class);
-        Page<UserNotification> page = new PageImpl<>(
-            List.of(userNotification),
-            Mockito.mock(Pageable.class),
-            1L);
-        Optional<UserNotification> notFoundNotification = Optional.empty();
-
-        when(userRepository.findByUuid(userUuid))
-            .thenReturn(user);
-        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(user, TEST_PAGEABLE))
-            .thenReturn(page);
-        when(userNotification.getNotificationType())
-            .thenReturn(notificationType);
-        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
-            notificationType,
-            SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
-        when(userNotification.getId())
-            .thenReturn(notificationId);
-        when(userNotificationRepository.findById(notificationId))
-            .thenReturn(notFoundNotification);
-
-        assertThrows(
-            NotFoundException.class,
-            () -> notificationService.getAllNotificationsForUser(
-                userUuid,
-                language,
-                TEST_PAGEABLE));
+        assertEquals(TEST_DTO, actual);
     }
 
     @Test
@@ -1283,7 +1135,7 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.emptyMap());
-        order.setEvents(List.of(Event.builder().eventNameUk(ORDER_FORMED_UK).build()));
+        order.setEvents(List.of(Event.builder().eventName(ORDER_FORMED).build()));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
@@ -1308,10 +1160,10 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusDoneDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.singletonMap(1, 1));
-        Event formed = Event.builder().eventNameUk(ORDER_FORMED_UK).build();
-        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT_UK).build();
-        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED_UK).build();
-        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE_UK).build();
+        Event formed = Event.builder().eventName(ORDER_FORMED).build();
+        Event adjustment = Event.builder().eventName(ORDER_ADJUSTMENT).build();
+        Event confirmed = Event.builder().eventName(ORDER_CONFIRMED).build();
+        Event onTheRoad = Event.builder().eventName(ORDER_ON_THE_ROUTE).build();
         order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
@@ -1339,10 +1191,10 @@ class NotificationServiceImplTest {
         order.setConfirmedQuantity(Collections.emptyMap());
         order.setExportedQuantity(Collections.emptyMap());
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
-        Event formed = Event.builder().eventNameUk(ORDER_FORMED_UK).build();
-        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT_UK).build();
-        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED_UK).build();
-        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE_UK).build();
+        Event formed = Event.builder().eventName(ORDER_FORMED).build();
+        Event adjustment = Event.builder().eventName(ORDER_ADJUSTMENT).build();
+        Event confirmed = Event.builder().eventName(ORDER_CONFIRMED).build();
+        Event onTheRoad = Event.builder().eventName(ORDER_ON_THE_ROUTE).build();
         order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
@@ -1370,10 +1222,10 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusDoneDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.singletonMap(1, 1));
-        Event formed = Event.builder().eventNameUk(ORDER_FORMED_UK).build();
-        Event adjustment = Event.builder().eventNameUk(ORDER_ADJUSTMENT_UK).build();
-        Event confirmed = Event.builder().eventNameUk(ORDER_CONFIRMED_UK).build();
-        Event onTheRoad = Event.builder().eventNameUk(ORDER_ON_THE_ROUTE_UK).build();
+        Event formed = Event.builder().eventName(ORDER_FORMED).build();
+        Event adjustment = Event.builder().eventName(ORDER_ADJUSTMENT).build();
+        Event confirmed = Event.builder().eventName(ORDER_CONFIRMED).build();
+        Event onTheRoad = Event.builder().eventName(ORDER_ON_THE_ROUTE).build();
         order.setEvents(List.of(formed, adjustment, confirmed, onTheRoad));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
@@ -1401,7 +1253,7 @@ class NotificationServiceImplTest {
         Order order = ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto();
         order.setConfirmedQuantity(Collections.singletonMap(1, 1));
         order.setExportedQuantity(Collections.emptyMap());
-        order.setEvents(List.of(Event.builder().eventNameUk(ORDER_FORMED_UK).build()));
+        order.setEvents(List.of(Event.builder().eventName(ORDER_FORMED).build()));
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
@@ -1432,7 +1284,7 @@ class NotificationServiceImplTest {
         NotificationDto result = NotificationServiceImpl.createNotificationDto(TEST_USER_NOTIFICATION, language,
             NotificationReceiverType.MOBILE, templateRepository, 5L);
 
-        assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitleUk(), result.getTitle());
+        assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitle(), result.getTitle());
     }
 
     @Test
@@ -1445,7 +1297,7 @@ class NotificationServiceImplTest {
         NotificationDto result = NotificationServiceImpl.createNotificationDto(TEST_USER_NOTIFICATION, language,
             NotificationReceiverType.MOBILE, templateRepository, 5L);
 
-        assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitleEn(), result.getTitle());
+        assertEquals(TEST_NOTIFICATION_TEMPLATE.getTitleEng(), result.getTitle());
     }
 
     @Test
@@ -1466,7 +1318,7 @@ class NotificationServiceImplTest {
         NotificationDto result = NotificationServiceImpl.createNotificationDto(testUserNotification, language,
             NotificationReceiverType.MOBILE, templateRepository, 5L);
 
-        assertEquals(testNotificationTemplate.getTitleEn(), result.getTitle());
+        assertEquals(testNotificationTemplate.getTitleEng(), result.getTitle());
         verify(templateRepository).findNotificationTemplateByIdAndNotificationReceiverType(any(), any());
     }
 

@@ -22,7 +22,7 @@ class AddressDtoTest {
             .id(1L)
             .houseNumber(houseNumber)
             .cityEn(cityEn)
-            .streetUk(street)
+            .street(street)
             .streetEn(street)
             .build();
 
@@ -43,7 +43,7 @@ class AddressDtoTest {
             .id(1L)
             .houseNumber(houseNumber)
             .cityEn(cityEn)
-            .streetUk(street)
+            .street(street)
             .streetEn(street)
             .build();
 

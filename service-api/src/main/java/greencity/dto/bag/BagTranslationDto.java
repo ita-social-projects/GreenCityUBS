@@ -20,13 +20,13 @@ public class BagTranslationDto implements Serializable {
     @Min(1)
     private Integer id;
     @NonNull
-    private String nameUk;
+    private String name;
     @NonNull
     private Integer capacity;
     @NonNull
     private Double price;
     @NonNull
-    private String nameEn;
+    private String nameEng;
     @NonNull
     private Boolean limitedIncluded;
     private Integer quantity;

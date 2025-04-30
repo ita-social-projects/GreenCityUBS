@@ -33,8 +33,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
         + "FROM Event e1 "
         + "JOIN Event e2 ON e1.order.id = e2.order.id "
         + "WHERE e1.order.id = :orderId "
-        + "AND e1.eventNameUk = 'Статус Замовлення - Сформовано' "
-        + "AND e2.eventNameUk = 'Статус Замовлення - Скасовано' "
+        + "AND e1.eventName = 'Статус Замовлення - Сформовано' "
+        + "AND e2.eventName = 'Статус Замовлення - Скасовано' "
         + "AND e1.eventDate < e2.eventDate)")
     Boolean wasOrderStatusChangedFromFormedToCanceled(@Param("orderId") Long orderId);
 }

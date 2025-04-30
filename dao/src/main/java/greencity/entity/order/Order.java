@@ -186,7 +186,7 @@ public class Order {
 
     @OneToMany(
         mappedBy = "order",
-        cascade = CascadeType.ALL, orphanRemoval = true)
+        cascade = CascadeType.ALL)
     @Setter(AccessLevel.PRIVATE)
     @Builder.Default
     private List<OrderBag> orderBags = new ArrayList<>();

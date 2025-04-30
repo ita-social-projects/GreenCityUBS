@@ -19,9 +19,9 @@ import lombok.experimental.Accessors;
 @Builder
 public class NotificationTemplateUpdateInfoDto {
     @NotNull
-    private String titleUk;
+    private String title;
     @NotNull
-    private String titleEn;
+    private String titleEng;
     @NotNull
     private NotificationTrigger trigger;
     @NotEmpty

@@ -20,7 +20,7 @@ public class PointsForUbsUserDtoMapper extends AbstractConverter<ChangeOfPoints,
             .dateOfEnrollment(changeOfPoints.getDate())
             .amount(changeOfPoints.getAmount())
             .numberOfOrder(changeOfPoints.getOrder().getId())
-            .reasonUk(changeOfPoints.getReason().getDescriptionUk())
+            .reasonUa(changeOfPoints.getReason().getDescriptionUa())
             .reasonEn(changeOfPoints.getReason().getDescriptionEn())
             .build();
     }

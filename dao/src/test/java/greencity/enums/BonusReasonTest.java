@@ -9,7 +9,7 @@ class BonusReasonTest {
     void returnOverpayConstantValidTest() {
         BonusReason reason = BonusReason.RETURN_OVERPAY;
 
-        assertEquals("Повернення переплати за замовлення", reason.getDescriptionUk());
+        assertEquals("Повернення переплати за замовлення", reason.getDescriptionUa());
         assertEquals("Refund of overpayment for the order", reason.getDescriptionEn());
     }
 
@@ -17,7 +17,7 @@ class BonusReasonTest {
     void refundCanceledOrderConstantValidTest() {
         BonusReason reason = BonusReason.REFUND_CANCELED_ORDER;
 
-        assertEquals("Зарахування оплати скасованого замовлення", reason.getDescriptionUk());
+        assertEquals("Зарахування оплати скасованого замовлення", reason.getDescriptionUa());
         assertEquals("Enrollment of payment for canceled order", reason.getDescriptionEn());
     }
 
@@ -25,7 +25,7 @@ class BonusReasonTest {
     void debitPaymentConstantValidTest() {
         BonusReason reason = BonusReason.DEBIT_PAYMENT;
 
-        assertEquals("Списання у рахунок оплати замовлення", reason.getDescriptionUk());
+        assertEquals("Списання у рахунок оплати замовлення", reason.getDescriptionUa());
         assertEquals("Write-off of the payment of the order", reason.getDescriptionEn());
     }
 }

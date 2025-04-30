@@ -15,7 +15,7 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
      * @param name {@link String} position's name.
      * @return {@link Boolean}
      */
-    boolean existsPositionByNameUk(String name);
+    boolean existsPositionByName(String name);
 
     /**
      * Method checks if position already exists.
@@ -24,7 +24,7 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
      * @param id   {@link Long} position's id.
      * @return {@link Boolean}
      */
-    boolean existsPositionByIdAndNameUk(Long id, String name);
+    boolean existsPositionByIdAndName(Long id, String name);
 
     /**
      * Finds all position IDs that match the given list of English names.

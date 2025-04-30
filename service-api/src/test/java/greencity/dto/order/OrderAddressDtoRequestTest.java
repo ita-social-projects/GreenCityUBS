@@ -20,9 +20,9 @@ class OrderAddressDtoRequestTest {
     @MethodSource("provideFieldsAndValidValues")
     void validFieldsInAddressDtoTest(String street) {
         var dto = OrderAddressDtoRequest.builder()
-            .regionUk("region")
+            .region("region")
             .regionEn("regionEn")
-            .districtUk("district")
+            .district("district")
             .districtEn("districtEn")
             .houseNumber("1")
             .placeId("test")
@@ -30,9 +30,9 @@ class OrderAddressDtoRequestTest {
                 .latitude(1D)
                 .longitude(1D)
                 .build())
-            .cityUk("city")
+            .city("city")
             .cityEn("cityEn")
-            .streetUk(street)
+            .street(street)
             .streetEn(street)
             .build();
 
@@ -50,9 +50,9 @@ class OrderAddressDtoRequestTest {
     @MethodSource("provideFieldsAndInvalidValues")
     void invalidFieldsInAddressDtoTest(String street) {
         var dto = OrderAddressDtoRequest.builder()
-            .regionUk("region")
+            .region("region")
             .regionEn("regionEn")
-            .districtUk("district")
+            .district("district")
             .districtEn("districtEn")
             .houseNumber("1")
             .placeId("test")
@@ -60,9 +60,9 @@ class OrderAddressDtoRequestTest {
                 .latitude(1D)
                 .longitude(1D)
                 .build())
-            .cityUk("city")
+            .city("city")
             .cityEn("cityEn")
-            .streetUk(street)
+            .street(street)
             .streetEn(street)
             .build();
 
