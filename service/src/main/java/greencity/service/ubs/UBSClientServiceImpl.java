@@ -60,6 +60,7 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
+import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Event;
@@ -101,6 +102,7 @@ import greencity.exceptions.user.UserNotFoundException;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
+import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.CourierRepository;
 import greencity.repository.EmployeeRepository;
@@ -219,6 +221,7 @@ import static java.util.stream.Collectors.toMap;
 @RequiredArgsConstructor
 @Slf4j
 public class UBSClientServiceImpl implements UBSClientService {
+    private final BigOrderTableRepository bigOrderTableRepository;
     @PersistenceContext
     private EntityManager entityManager;
     private static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
@@ -965,35 +968,39 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId, String uuid) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        BigOrderTableViews order = bigOrderTableRepository.findSingleOrderById(orderId);
+        if (order == null) {
+            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
         User user = userRepository.findByUuid(uuid);
-        if (!order.getUser().equals(user)) {
+        if (!order.getClientEmail().equals(user.getRecipientEmail())) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
+        String[] userNameSurname = order.getClientName().split(" ");
         UserInfoDto userInfoDto = UserInfoDto.builder()
-            .customerName(order.getUser().getRecipientName())
-            .customerSurName(order.getUser().getRecipientSurname())
-            .customerPhoneNumber(order.getUser().getRecipientPhone())
-            .customerEmail(order.getUser().getRecipientEmail())
-            .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
-            .recipientId(order.getUbsUser().getId())
+            .customerName(userNameSurname[0])
+            .customerSurName(userNameSurname.length == 2 ? userNameSurname[1] : "")
+            .customerPhoneNumber(order.getClientPhoneNumber())
+            .customerEmail(order.getClientEmail())
+            .totalUserViolations(userRepository.countTotalUsersViolations(user.getId()))
+            .recipientId(orderRepository.findById(orderId).get().getUbsUser().getId())
             .userViolationForCurrentOrder(
-                userRepository.checkIfUserHasViolationForCurrentOrder(order.getUser().getId(), order.getId()))
+                userRepository.checkIfUserHasViolationForCurrentOrder(user.getId(), order.getId()))
             .build();
-        if (order.getUbsUser().getSenderFirstName() != null && !order.getUbsUser().getSenderFirstName().isEmpty()
-            && order.getUbsUser().getSenderLastName() != null && !order.getUbsUser().getSenderLastName().isEmpty()
-            && order.getUbsUser().getSenderPhoneNumber() != null
-            && !order.getUbsUser().getSenderPhoneNumber().isEmpty()) {
-            return userInfoDto.setRecipientName(order.getUbsUser().getSenderFirstName())
-                .setRecipientSurName(order.getUbsUser().getSenderLastName())
-                .setRecipientEmail(order.getUbsUser().getSenderEmail())
-                .setRecipientPhoneNumber(order.getUbsUser().getSenderPhoneNumber());
+        String[] senderNameSurname = order.getSenderName().split(" ");
+        if (senderNameSurname.length >= 2 && senderNameSurname[0] != null && !senderNameSurname[0].isEmpty()
+            && senderNameSurname[1] != null && !senderNameSurname[1].isEmpty()
+            && order.getClientPhoneNumber() != null
+            && !order.getClientPhoneNumber().isEmpty()) {
+            return userInfoDto.setRecipientName(senderNameSurname[0])
+                .setRecipientSurName(senderNameSurname[1])
+                .setRecipientEmail(order.getSenderEmail())
+                .setRecipientPhoneNumber(order.getSenderPhone());
         } else {
-            return userInfoDto.setRecipientName(order.getUbsUser().getFirstName())
-                .setRecipientSurName(order.getUbsUser().getLastName())
-                .setRecipientEmail(order.getUbsUser().getEmail())
-                .setRecipientPhoneNumber(order.getUbsUser().getPhoneNumber());
+            return userInfoDto.setRecipientName(senderNameSurname[0])
+                .setRecipientSurName(senderNameSurname.length == 2 ? senderNameSurname[1] : "")
+                .setRecipientEmail(order.getSenderEmail())
+                .setRecipientPhoneNumber(order.getSenderPhone());
         }
     }
 

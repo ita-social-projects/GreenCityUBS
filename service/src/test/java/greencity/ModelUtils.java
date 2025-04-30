@@ -572,6 +572,7 @@ public class ModelUtils {
             .id(1L)
             .orders(Lists.newArrayList(getOrder()))
             .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
+            .recipientEmail("example@mail.org")
             .currentPoints(getChangeOfPoints().getAmount())
             .orders(Lists.newArrayList(getOrder()))
             .recipientName("Alan")
@@ -2086,6 +2087,19 @@ public class ModelUtils {
             .uuid("uuid")
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
+            .build();
+    }
+
+    public static BigOrderTableViews getBigTableViews() {
+        UserInfoDto userInfoDto = getUserInfoDto();
+        return BigOrderTableViews.builder()
+            .id(1L)
+            .clientName(String.join(" ", userInfoDto.getCustomerName(), userInfoDto.getCustomerSurName()))
+            .clientPhoneNumber(userInfoDto.getCustomerPhoneNumber())
+            .clientEmail(userInfoDto.getCustomerEmail())
+            .senderName(String.join(" ", userInfoDto.getRecipientName(), userInfoDto.getRecipientSurName()))
+            .senderPhone(userInfoDto.getRecipientPhoneNumber())
+            .senderEmail(userInfoDto.getRecipientEmail())
             .build();
     }
 

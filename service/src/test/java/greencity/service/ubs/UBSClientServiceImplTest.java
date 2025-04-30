@@ -47,6 +47,7 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
+import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
@@ -82,6 +83,7 @@ import greencity.exceptions.user.UserNotFoundException;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
+import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.CourierRepository;
 import greencity.repository.EmployeeRepository;
@@ -161,6 +163,7 @@ import static greencity.ModelUtils.getBag;
 import static greencity.ModelUtils.getBag1list;
 import static greencity.ModelUtils.getBagForOrder;
 import static greencity.ModelUtils.getBagTranslationDto;
+import static greencity.ModelUtils.getBigTableViews;
 import static greencity.ModelUtils.getCancellationDto;
 import static greencity.ModelUtils.getCheckoutResponseFromMonoBank;
 import static greencity.ModelUtils.getCourier;
@@ -258,6 +261,9 @@ import static org.mockito.Mockito.when;
 class UBSClientServiceImplTest {
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private BigOrderTableRepository bigOrderTableRepository;
 
     @Mock
     private BagRepository bagRepository;
@@ -1662,9 +1668,12 @@ class UBSClientServiceImplTest {
     void getsUserAndUserUbsAndViolationsInfoByOrderId() {
         UserInfoDto expectedResult = getUserInfoDto();
         expectedResult.setRecipientId(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDetails()));
-        when(userRepository.findByUuid(anyString())).thenReturn(getOrderDetails().getUser());
+        User user = getUser();
+        user.setRecipientEmail(expectedResult.getCustomerEmail());
+        when(bigOrderTableRepository.findSingleOrderById(1L)).thenReturn(getBigTableViews());
+        when(userRepository.findByUuid(anyString())).thenReturn(user);
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrder()));
         when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
             .thenReturn(expectedResult.getUserViolationForCurrentOrder());
         UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString());
@@ -1680,6 +1689,7 @@ class UBSClientServiceImplTest {
     void getsUserAndUserUbsAndViolationsInfoByOrderIdWithoutSender() {
         UserInfoDto expectedResult = getUserInfoDto();
         expectedResult.setRecipientId(1L);
+        when(bigOrderTableRepository.findSingleOrderById(1L)).thenReturn(getBigTableViews());
         when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDetailsWithoutSender()));
         when(userRepository.findByUuid(anyString())).thenReturn(getOrderDetailsWithoutSender().getUser());
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
@@ -1696,17 +1706,20 @@ class UBSClientServiceImplTest {
 
     @Test
     void getUserAndUserUbsAndViolationsInfoByOrderIdOrderNotFoundException() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        when(bigOrderTableRepository.findSingleOrderById(1L)).thenReturn(null);
         assertThrows(NotFoundException.class,
                 () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
     }
 
     @Test
     void getUserAndUserUbsAndViolationsInfoByOrderIdAccessDeniedException() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrder()));
+        BigOrderTableViews order = BigOrderTableViews.builder()
+            .clientEmail("differentMail@gmail.com")
+            .build();
+        when(bigOrderTableRepository.findSingleOrderById(1L)).thenReturn(order);
         when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         assertThrows(AccessDeniedException.class,
-                () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
+            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
     }
 
     @Test
