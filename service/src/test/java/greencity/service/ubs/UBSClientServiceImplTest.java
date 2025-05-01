@@ -1695,7 +1695,7 @@ class UBSClientServiceImplTest {
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrder()));
         when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
-                .thenReturn(expectedResult.getUserViolationForCurrentOrder());
+            .thenReturn(expectedResult.getUserViolationForCurrentOrder());
         UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString());
 
         verify(orderRepository, times(1)).findById(1L);

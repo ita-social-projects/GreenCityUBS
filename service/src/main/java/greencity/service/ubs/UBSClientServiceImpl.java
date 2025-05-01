@@ -984,8 +984,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .customerEmail(order.getClientEmail())
             .totalUserViolations(userRepository.countTotalUsersViolations(user.getId()))
             .recipientId(orderRepository.findById(orderId).orElseThrow(
-                    () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)
-            ).getUbsUser().getId())
+                () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getUbsUser().getId())
             .userViolationForCurrentOrder(
                 userRepository.checkIfUserHasViolationForCurrentOrder(user.getId(), order.getId()))
             .build();
