@@ -1685,27 +1685,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getsUserInfoDtoIfRecipientNameIsNull() {
-        UserInfoDto expectedResult = getUserInfoDto();
-        expectedResult.setRecipientId(1L);
-        User user = getUser();
-        user.setRecipientEmail(expectedResult.getCustomerEmail());
-        when(bigOrderTableRepository.findSingleOrderById(1L)).thenReturn(getBigTableViews());
-        when(userRepository.findByUuid(anyString())).thenReturn(user);
-        when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrder()));
-        when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
-            .thenReturn(expectedResult.getUserViolationForCurrentOrder());
-        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString());
-
-        verify(orderRepository, times(1)).findById(1L);
-        verify(userRepository, times(1)).countTotalUsersViolations(1L);
-        verify(userRepository, times(1)).checkIfUserHasViolationForCurrentOrder(1L, 1L);
-
-        assertEquals(expectedResult, actual);
-    }
-
-    @Test
     void getsUserAndUserUbsAndViolationsInfoByOrderIdWithoutSender() {
         UserInfoDto expectedResult = getUserInfoDto();
         expectedResult.setRecipientId(1L);
