@@ -1046,8 +1046,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<BlockedOrderDto> requestToBlockOrder(String userUuid, List<Long> orders) {
-        String email = userRemoteClient.findByUuid(userUuid)
-            .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
+        User user = userRepository.findByUuid(userUuid);
+        String email = user.getRecipientEmail();
+
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         List<BlockedOrderDto> blockedOrderDTOS = new ArrayList<>();
@@ -1071,8 +1072,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<Long> unblockOrder(String userUuid, List<Long> orders) {
-        String email = userRemoteClient.findByUuid(userUuid)
-            .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
+        User user = userRepository.findByUuid(userUuid);
+        String email = user.getRecipientEmail();
+
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         if (orders.isEmpty()) {

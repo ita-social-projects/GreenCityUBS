@@ -3,7 +3,6 @@ package greencity.client.config;
 import feign.hystrix.FallbackFactory;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
-import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -33,12 +32,6 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             @Override
             public Optional<UserVO> findNotDeactivatedByEmail(String email) {
                 log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + "{}", email, throwable);
-                return Optional.empty();
-            }
-
-            @Override
-            public Optional<UbsCustomersDto> findByUuid(String uuid) {
-                log.error(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, throwable);
                 return Optional.empty();
             }
 
