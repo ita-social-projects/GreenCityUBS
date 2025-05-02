@@ -1163,7 +1163,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testGetNotificationWithMarkAsReadTrueMarksAsRead() {
+    void getNotificationMarksAsReadWhenMarkAsReadTrueTest() {
         UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         notification.setRead(false);
@@ -1183,7 +1183,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testGetNotificationWithMarkAsReadFalseDoesNotMarkAsRead() {
+    void getNotificationDoesNotMarkAsReadWhenMarkAsReadFalseTest() {
         UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         notification.setRead(false);
@@ -1202,7 +1202,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testGetNotificationThroughEndpointMarksAsRead() {
+    void getNotificationMarksAsReadThroughEndpointTest() {
         UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         notification.setRead(false);
@@ -1223,7 +1223,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testGetNotificationWithMarkAsReadTrueDoesNotSaveIfAlreadyRead() {
+    void getNotificationDoesNotSaveWhenAlreadyReadAndMarkAsReadTrueTest() {
         UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         notification.setRead(true);

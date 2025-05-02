@@ -203,9 +203,12 @@ public interface NotificationService {
     NotificationDto getNotification(String uuid, Long id, String language);
 
     /**
-     * Retrieves a notification by its ID for a specific user with an option to mark
-     * it as read.
-     *
+     * Retrieves a notification by its ID for a specific user with an option to mark it as read.
+     * @param uuid The UUID of the user requesting the notification
+     * @param id The ID of the notification to retrieve.
+     * @param language The language code for localization.
+     * @param markAsRead If true, marks the notification as read; if false, the status remains unchanged.
+     * @return A {@link NotificationDto} with notification details (title, body, and images if present).
      * @author Nazar Vavrushchak
      */
     NotificationDto getNotification(String uuid, Long id, String language, boolean markAsRead);

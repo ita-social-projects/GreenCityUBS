@@ -922,8 +922,8 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public NotificationDto getNotification(String uuid, Long id, String language, boolean markAsRead) {
-        UserNotification notification = userNotificationRepository.findById(id)
+    public NotificationDto getNotification(String uuid, Long notificationId, String language, boolean markAsRead) {
+        UserNotification notification = userNotificationRepository.findById(notificationId)
             .orElseThrow(() -> new NotFoundException(NOTIFICATION_DOES_NOT_EXIST));
 
         if (!notification.getUser().getUuid().equals(uuid)) {
