@@ -1121,12 +1121,13 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void requestToBlockOrderTest() {
         User user = ModelUtils.getUser().setUuid("uuid");
+        String email = user.getRecipientEmail();
         List<Long> orders = new ArrayList<>();
         orders.add(1L);
 
-        when(userRemoteClient.findByUuid(user.getUuid()))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(userRepository.findByUuid(user.getUuid()))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
         assertNotNull(ordersAdminsPageService.requestToBlockOrder(user.getUuid(), orders));
@@ -1135,12 +1136,13 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void unblockOrderTest() {
         User user = ModelUtils.getUser().setUuid("uuid");
+        String email = user.getRecipientEmail();
         List<Long> orders = new ArrayList<>();
         orders.add(1L);
 
-        when(userRemoteClient.findByUuid(user.getUuid()))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(userRepository.findByUuid(user.getUuid()))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
         assertNotNull(ordersAdminsPageService.unblockOrder(user.getUuid(), orders));

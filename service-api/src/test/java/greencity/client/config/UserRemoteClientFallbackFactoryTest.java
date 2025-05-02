@@ -43,11 +43,6 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
-    void findByUuid() {
-        assertEquals(Optional.empty(), client.findByUuid(USER_EMAIL));
-    }
-
-    @Test
     void checkIfUserExistsByUuid() {
         assertThrows(RemoteServerUnavailableException.class, () -> client.checkIfUserExistsByUuid(USER_UUID));
     }
