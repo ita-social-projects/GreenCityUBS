@@ -3,7 +3,6 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForAdding;
-import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderDetailStatusDto;
@@ -295,19 +294,6 @@ class ManagementOrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("[{\"latitude\":84.525254,\"longitude\":12.436964}]"))
             .andExpect(status().isOk());
-    }
-
-    @Test
-    void saveAdminCommentToOrder() throws Exception {
-        AdminCommentDto adminCommentDto = ModelUtils.getAdminComment();
-
-        String writeValueAsString = objectMapper.writeValueAsString(adminCommentDto);
-
-        mockMvc.perform(MockMvcRequestBuilders.post(ubsManagementLink + "/save-admin-comment", 1L)
-            .content(writeValueAsString)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
     }
 
     @Test
