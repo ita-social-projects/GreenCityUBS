@@ -1465,13 +1465,13 @@ public class ModelUtils {
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()
             .customerName("Alan")
-            .customerSurName("Maym")
+            .customerSurname("Maym")
             .customerPhoneNumber("091546745")
             .customerEmail("wayn@email.com")
-            .recipientName("Anatolii")
-            .recipientSurName("Petyrov")
-            .recipientPhoneNumber("095123456")
-            .recipientEmail("anatolii.andr@gmail.com")
+            .senderName("Anatolii")
+            .senderSurname("Petyrov")
+            .senderPhoneNumber("095123456")
+            .senderEmail("anatolii.andr@gmail.com")
             .totalUserViolations(4)
             .userViolationForCurrentOrder(1)
             .build();

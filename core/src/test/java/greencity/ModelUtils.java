@@ -209,7 +209,7 @@ public class ModelUtils {
             .customerName("customer name")
             .customerPhoneNumber("1234")
             .customerEmail("test@gmail.com")
-            .recipientName("recipient name")
+            .senderName("recipient name")
             .customerPhoneNumber("321")
             .customerEmail("customer@gmail.com")
             .totalUserViolations(2)
