@@ -104,6 +104,8 @@ import static greencity.enums.NotificationReceiverType.SITE;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1158,6 +1160,85 @@ class NotificationServiceImplTest {
         NotificationDto actual = notificationService.getNotification("abc", 1L, "ua");
 
         assertEquals(createViolationNotificationDto(), actual);
+    }
+
+    @Test
+    void testGetNotificationWithMarkAsReadTrueMarksAsRead() {
+        UserNotification notification = createUserNotificationForViolationWithParameters();
+        notification.getUser().setUuid("abc");
+        notification.setRead(false);
+
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            NotificationType.VIOLATION_THE_RULES, SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
+            .thenReturn(Optional.of(getViolation()));
+        when(userNotificationRepository.save(notification)).thenReturn(notification);
+
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua", true);
+
+        assertEquals(createViolationNotificationDto(), actual);
+        assertTrue(notification.isRead(), "Notification should be marked as read");
+        verify(userNotificationRepository).save(notification);
+    }
+
+    @Test
+    void testGetNotificationWithMarkAsReadFalseDoesNotMarkAsRead() {
+        UserNotification notification = createUserNotificationForViolationWithParameters();
+        notification.getUser().setUuid("abc");
+        notification.setRead(false);
+
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            NotificationType.VIOLATION_THE_RULES, SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
+            .thenReturn(Optional.of(getViolation()));
+
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua", false);
+
+        assertEquals(createViolationNotificationDto(), actual);
+        assertFalse(notification.isRead(), "Notification should not be marked as read");
+        verify(userNotificationRepository, never()).save(any());
+    }
+
+    @Test
+    void testGetNotificationThroughEndpointMarksAsRead() {
+        UserNotification notification = createUserNotificationForViolationWithParameters();
+        notification.getUser().setUuid("abc");
+        notification.setRead(false);
+
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            NotificationType.VIOLATION_THE_RULES, SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
+            .thenReturn(Optional.of(getViolation()));
+        when(userNotificationRepository.save(notification)).thenReturn(notification);
+
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua");
+
+        assertEquals(createViolationNotificationDto(), actual);
+        assertTrue(notification.isRead(),
+            "Notification should be marked as read when accessed through /notifications/{id}");
+        verify(userNotificationRepository).save(notification);
+    }
+
+    @Test
+    void testGetNotificationWithMarkAsReadTrueDoesNotSaveIfAlreadyRead() {
+        UserNotification notification = createUserNotificationForViolationWithParameters();
+        notification.getUser().setUuid("abc");
+        notification.setRead(true);
+
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            NotificationType.VIOLATION_THE_RULES, SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
+            .thenReturn(Optional.of(getViolation()));
+
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua", true);
+
+        assertEquals(createViolationNotificationDto(), actual);
+        assertTrue(notification.isRead(), "Notification should remain read");
+        verify(userNotificationRepository, never()).save(any());
     }
 
     @Test

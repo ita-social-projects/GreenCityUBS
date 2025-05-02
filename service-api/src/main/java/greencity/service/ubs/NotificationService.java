@@ -203,6 +203,14 @@ public interface NotificationService {
     NotificationDto getNotification(String uuid, Long id, String language);
 
     /**
+     * Retrieves a notification by its ID for a specific user with an option to mark
+     * it as read.
+     *
+     * @author Nazar Vavrushchak
+     */
+    NotificationDto getNotification(String uuid, Long id, String language, boolean markAsRead);
+
+    /**
      * Method that return all quantity of unreaden notification.
      *
      * @author Igor Boykov

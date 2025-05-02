@@ -915,6 +915,14 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public NotificationDto getNotification(String uuid, Long id, String language) {
+        return getNotification(uuid, id, language, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NotificationDto getNotification(String uuid, Long id, String language, boolean markAsRead) {
         UserNotification notification = userNotificationRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(NOTIFICATION_DOES_NOT_EXIST));
 
@@ -922,8 +930,9 @@ public class NotificationServiceImpl implements NotificationService {
             throw new AccessDeniedException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
         }
 
-        if (!notification.isRead()) {
+        if (markAsRead && !notification.isRead()) {
             notification.setRead(true);
+            userNotificationRepository.save(notification);
         }
 
         NotificationDto notificationDto = createNotificationDto(notification, language, SITE, templateRepository, 0L);
@@ -972,11 +981,10 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private NotificationFullDto createNotificationFullDto(String userUuid, UserNotification notification,
-        String language,
-        Long monthsOfAccountInactivity) {
+        String language, Long monthsOfAccountInactivity) {
         NotificationShortDto notificationShortDto =
             createNotificationShortDto(notification, language, monthsOfAccountInactivity);
-        NotificationDto notificationDto = getNotification(userUuid, notificationShortDto.getId(), language);
+        NotificationDto notificationDto = getNotification(userUuid, notificationShortDto.getId(), language, false);
 
         return NotificationFullDto.builder()
             .id(notificationShortDto.getId())
