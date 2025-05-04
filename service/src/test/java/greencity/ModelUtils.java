@@ -2084,6 +2084,7 @@ public class ModelUtils {
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
             .uuid("uuid")
+            .violations(10)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .build();

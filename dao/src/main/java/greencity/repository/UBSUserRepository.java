@@ -18,7 +18,12 @@ public interface UBSUserRepository extends CrudRepository<UBSuser, Long> {
      */
     List<UBSuser> findUBSuserByUser(User user);
 
-    @Query(value = "SELECT * FROM ubs_user JOIN orders on ubs_user.id = orders.ubs_user_id WHERE orders.id = :orderId",
-        nativeQuery = true)
+    /**
+     * Find UbsUser by order id.
+     *
+     * @param orderId {@link User} - id of an order.
+     * @return {@link UBSuser}
+     */
+    @Query(value = "SELECT o.ubsUser FROM Order o WHERE o.id = :orderId")
     Optional<UBSuser> findUbsUserByOrderId(Long orderId);
 }

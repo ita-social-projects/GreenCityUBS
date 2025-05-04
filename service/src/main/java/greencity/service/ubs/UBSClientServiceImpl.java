@@ -971,24 +971,20 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!Objects.equals(user.getUuid(), uuid)) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
-        UserInfoDto userInfoDto = UserInfoDto.builder()
+        return UserInfoDto.builder()
             .customerName(ubsUser.getFirstName())
             .customerSurname(ubsUser.getLastName())
             .customerPhoneNumber(ubsUser.getPhoneNumber())
             .customerEmail(ubsUser.getEmail())
-            .totalUserViolations(userRepository.countTotalUsersViolations(orderId))
+            .totalUserViolations(user.getViolations())
             .customerId(user.getId())
-            .userViolationForCurrentOrder(
-                userRepository.checkIfUserHasViolationForCurrentOrder(user.getId(), orderId))
+            .senderName(ubsUser.getSenderFirstName() == null ? ubsUser.getFirstName() : ubsUser.getSenderFirstName())
+            .senderSurname(ubsUser.getSenderLastName() == null ? ubsUser.getLastName() : ubsUser.getSenderLastName())
+            .senderEmail(ubsUser.getSenderEmail() == null ? ubsUser.getEmail() : ubsUser.getSenderEmail())
+            .senderPhoneNumber(
+                ubsUser.getSenderPhoneNumber() == null ? ubsUser.getPhoneNumber() : ubsUser.getSenderPhoneNumber())
+            .userViolationForCurrentOrder(userRepository.checkIfUserHasViolationForCurrentOrder(user.getId(), orderId))
             .build();
-        return userInfoDto
-            .setSenderName(
-                ubsUser.getSenderFirstName() == null ? ubsUser.getFirstName() : ubsUser.getSenderFirstName())
-            .setSenderSurname(
-                ubsUser.getSenderLastName() == null ? ubsUser.getLastName() : ubsUser.getSenderLastName())
-            .setSenderEmail(ubsUser.getSenderEmail() == null ? ubsUser.getEmail() : ubsUser.getSenderEmail())
-            .setSenderPhoneNumber(
-                ubsUser.getSenderPhoneNumber() == null ? ubsUser.getPhoneNumber() : ubsUser.getSenderPhoneNumber());
     }
 
     /**
