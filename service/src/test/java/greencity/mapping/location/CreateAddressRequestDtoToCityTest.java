@@ -14,7 +14,7 @@ class CreateAddressRequestDtoToCityTest {
     @Test
     void convertShouldMapDtoToCity() {
         CreateAddressRequestDto dto = CreateAddressRequestDto.builder()
-            .city("Київ")
+            .cityUk("Київ")
             .cityEn("Kyiv")
             .build();
 
@@ -28,7 +28,7 @@ class CreateAddressRequestDtoToCityTest {
     @Test
     void convertShouldHandleNullValues() {
         CreateAddressRequestDto dto = CreateAddressRequestDto.builder()
-            .city(null)
+            .cityUk(null)
             .cityEn(null)
             .build();
 

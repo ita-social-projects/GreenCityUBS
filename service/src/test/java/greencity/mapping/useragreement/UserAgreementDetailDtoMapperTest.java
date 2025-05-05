@@ -22,7 +22,7 @@ class UserAgreementDetailDtoMapperTest {
         UserAgreementDetailDto actual = mapper.convert(agreement);
 
         Assertions.assertEquals(expected.getId(), actual.getId());
-        Assertions.assertEquals(expected.getTextUa(), actual.getTextUa());
+        Assertions.assertEquals(expected.getTextUk(), actual.getTextUk());
         Assertions.assertEquals(expected.getTextEn(), actual.getTextEn());
         Assertions.assertEquals(expected.getAuthorEmail(), actual.getAuthorEmail());
         Assertions.assertNotNull(expected.getCreatedAt());

@@ -213,7 +213,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @param eventNames - names of events which are related to the order.
      */
     @Query("select o from Order o "
-        + "inner join fetch o.events e WHERE e.eventName IN (:eventNames)")
+        + "inner join fetch o.events e WHERE e.eventNameUk IN (:eventNames)")
     List<Order> findAllWithEventsByEventNames(@Param("eventNames") String... eventNames);
 
     /**
@@ -252,4 +252,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findAllByOrderStatusNotAndOrderPaymentStatus(OrderStatus orderStatus,
         OrderPaymentStatus orderPaymentStatus);
+
+    /**
+     * Method retrieves orders by order payment id.
+     *
+     * @param paymentId - an id of payment
+     * @return {@link Order}
+     */
+    @Query("SELECT p.order FROM Payment p WHERE p.id = ?1")
+    Optional<Order> findOrderByPaymentId(long paymentId);
 }
