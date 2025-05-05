@@ -1725,7 +1725,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getUserAndUserUbsAndViolationsInfoByOrderIdAccessDeniedException() {
+    void getUserAndUserUbsAndViolationsInfoByOrderIdThrowsAnAccessDeniedExceptionForNonEqualUserUuidTest() {
         UBSuser ubSuser = getUBSuser();
         ubSuser.setUser(getUser());
         when(ubsUserRepository.findUbsUserByOrderId(1L)).thenReturn(Optional.of(ubSuser));
