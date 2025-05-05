@@ -178,8 +178,6 @@ import static greencity.ModelUtils.getOrder;
 import static greencity.ModelUtils.getOrder2;
 import static greencity.ModelUtils.getOrderCount;
 import static greencity.ModelUtils.getOrderCountWithPaymentStatusPaid;
-import static greencity.ModelUtils.getOrderDetails;
-import static greencity.ModelUtils.getOrderDetailsWithoutSender;
 import static greencity.ModelUtils.getOrderPaymentDetailDto;
 import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
 import static greencity.ModelUtils.getOrderResponseDto;
@@ -209,7 +207,6 @@ import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
 import static greencity.ModelUtils.getUbsUsers;
 import static greencity.ModelUtils.getUsedCertificateWith600Points;
 import static greencity.ModelUtils.getUser;
-import static greencity.ModelUtils.getUserInfoDto;
 import static greencity.ModelUtils.getUserNotificationForUnpaidOrder;
 import static greencity.ModelUtils.getUserPointsAndAllBagsDto;
 import static greencity.ModelUtils.getUserProfileCreateDto;
@@ -1659,36 +1656,62 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getsUserAndUserUbsAndViolationsInfoByOrderId() {
-        UserInfoDto expectedResult = getUserInfoDto();
-        expectedResult.setRecipientId(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDetails()));
-        when(userRepository.findByUuid(anyString())).thenReturn(getOrderDetails().getUser());
+    void getsUserAndUserUbsAndViolationsInfoByValidOrderIdTest() {
+        User user = getUser();
+        UBSuser ubsUser = getUBSuser();
+        ubsUser.setUser(user);
+        UserInfoDto expectedResult = UserInfoDto.builder()
+            .customerName(ubsUser.getFirstName())
+            .customerSurname(ubsUser.getLastName())
+            .customerEmail(ubsUser.getEmail())
+            .customerPhoneNumber(ubsUser.getPhoneNumber())
+            .customerId(1L)
+            .senderName(ubsUser.getSenderFirstName())
+            .senderSurname(ubsUser.getSenderLastName())
+            .senderEmail(ubsUser.getSenderEmail())
+            .senderPhoneNumber(ubsUser.getSenderPhoneNumber())
+            .totalUserViolations(user.getViolations())
+            .build();
+        when(ubsUserRepository.findUbsUserByOrderId(1L)).thenReturn(Optional.of(ubsUser));
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
         when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
             .thenReturn(expectedResult.getUserViolationForCurrentOrder());
-        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString());
+        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, user.getUuid());
 
-        verify(orderRepository, times(1)).findById(1L);
-        verify(userRepository, times(1)).countTotalUsersViolations(1L);
+        verify(ubsUserRepository, times(1)).findUbsUserByOrderId(1L);
         verify(userRepository, times(1)).checkIfUserHasViolationForCurrentOrder(1L, 1L);
 
         assertEquals(expectedResult, actual);
     }
 
     @Test
-    void getsUserAndUserUbsAndViolationsInfoByOrderIdWithoutSender() {
-        UserInfoDto expectedResult = getUserInfoDto();
-        expectedResult.setRecipientId(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDetailsWithoutSender()));
-        when(userRepository.findByUuid(anyString())).thenReturn(getOrderDetailsWithoutSender().getUser());
+    void getsUserAndUserUbsAndViolationsInfoByOrderIdWithoutSenderTest() {
+        User user = getUser();
+        UBSuser ubsUser = getUBSuser();
+        ubsUser.setUser(user);
+        ubsUser.setSenderFirstName(null);
+        ubsUser.setSenderLastName(null);
+        ubsUser.setSenderPhoneNumber(null);
+        ubsUser.setSenderEmail(null);
+        UserInfoDto expectedResult = UserInfoDto.builder()
+            .customerName(ubsUser.getFirstName())
+            .customerSurname(ubsUser.getLastName())
+            .customerEmail(ubsUser.getEmail())
+            .customerPhoneNumber(ubsUser.getPhoneNumber())
+            .customerId(1L)
+            .senderName(ubsUser.getFirstName())
+            .senderSurname(ubsUser.getLastName())
+            .senderEmail(ubsUser.getEmail())
+            .senderPhoneNumber(ubsUser.getPhoneNumber())
+            .totalUserViolations(user.getViolations())
+            .build();
+        when(ubsUserRepository.findUbsUserByOrderId(1L)).thenReturn(Optional.of(ubsUser));
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
         when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
             .thenReturn(expectedResult.getUserViolationForCurrentOrder());
-        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString());
+        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, user.getUuid());
 
-        verify(orderRepository, times(1)).findById(1L);
-        verify(userRepository, times(1)).countTotalUsersViolations(1L);
+        verify(ubsUserRepository, times(1)).findUbsUserByOrderId(1L);
         verify(userRepository, times(1)).checkIfUserHasViolationForCurrentOrder(1L, 1L);
 
         assertEquals(expectedResult, actual);
@@ -1702,11 +1725,14 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getUserAndUserUbsAndViolationsInfoByOrderIdAccessDeniedException() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrder()));
-        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
+    void getUserAndUserUbsAndViolationsInfoByOrderIdThrowsAnAccessDeniedExceptionForNonEqualUserUuidTest() {
+        UBSuser ubSuser = getUBSuser();
+        ubSuser.setUser(getUser());
+        when(ubsUserRepository.findUbsUserByOrderId(1L)).thenReturn(Optional.of(ubSuser));
+
         assertThrows(AccessDeniedException.class,
-                () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
+            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
+        verify(ubsUserRepository, times(1)).findUbsUserByOrderId(1L);
     }
 
     @Test
@@ -1744,7 +1770,7 @@ class UBSClientServiceImplTest {
             .phoneNumber("095123456")
             .build();
 
-        UbsCustomersDto actual = ubsService.updateUbsUserInfoInOrder(request, "abc");
+        UbsCustomersDto actual = ubsService.updateUbsUserInfoInOrder(request, user.getUuid());
         assertEquals(expected, actual);
 
         verify(ubsUserRepository).findById(1L);
