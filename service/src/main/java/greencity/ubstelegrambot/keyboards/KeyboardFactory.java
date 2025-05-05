@@ -24,10 +24,13 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup createHelpKeyboard() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
-        keyboard.add(createRow("Стартова команда", TelegramBotConstants.START_CALLBACK));
-        keyboard.add(createRow("Допомога", TelegramBotConstants.HELP_CALLBACK));
+        keyboard.add(createRow("Чат з людиною", TelegramBotConstants.CLIENT_SUPPORT_CALLBACK));
+        keyboard.add(createRow("Досортування", TelegramBotConstants.SORTING_CALLBACK));
+        keyboard.add(createRow("Графік роботи станції", TelegramBotConstants.WORK_SCHEDULE_CALLBACK));
+        keyboard.add(createRow("Правила прийому сировини", TelegramBotConstants.ADMISSION_RULES_CALLBACK));
+        keyboard.add(createRow("Зелений офіс", TelegramBotConstants.GREEN_OFFICE_CALLBACK));
+        keyboard.add(createRow("Залишити відгук", TelegramBotConstants.FEEDBACK_CALLBACK));
         keyboard.add(createRow("Увійти як менеджер", TelegramBotConstants.LOGIN_CALLBACK));
-        keyboard.add(createRow("Звернутися в підтримку", TelegramBotConstants.CLIENT_SUPPORT_CALLBACK));
 
         return InlineKeyboardMarkup
             .builder()
@@ -91,5 +94,37 @@ public class KeyboardFactory {
             .keyboard(keyboardRows)
             .resizeKeyboard(true)
             .build();
+    }
+
+    public static InlineKeyboardMarkup createBackToMainManuButton() {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        keyboard.add(createRow("⏪\uFE0F В головне меню", TelegramBotConstants.MAIN_MENU_CALLBACK));
+        return InlineKeyboardMarkup
+            .builder()
+            .keyboard(keyboard)
+            .build();
+    }
+
+    public static InlineKeyboardMarkup createProcessOrBackToMainMenuKeyboard(String callBackData) {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        keyboard.add(createRow("Так", callBackData));
+        keyboard.add(createRow("⏪\uFE0F В головне меню", TelegramBotConstants.MAIN_MENU_CALLBACK));
+
+        return InlineKeyboardMarkup
+            .builder()
+            .keyboard(keyboard)
+            .build();
+    }
+
+    public static InlineKeyboardMarkup createFeedbackOrBackToMainMenuKeyboard() {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        keyboard.add(createRow("\uD83D\uDC4D Все було супер!", TelegramBotConstants.GREAT_FEEDBACK_CALLBACK));
+        keyboard.add(createRow("\uD83D\uDC4E Були нюанси...\n", TelegramBotConstants.BAD_FEEDBACK_CALLBACK));
+        keyboard.add(createRow("⏪\uFE0F В головне меню", TelegramBotConstants.MAIN_MENU_CALLBACK));
+
+        return InlineKeyboardMarkup
+                .builder()
+                .keyboard(keyboard)
+                .build();
     }
 }

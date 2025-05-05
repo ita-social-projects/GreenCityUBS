@@ -4,7 +4,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="1-create-chat-feedback" author="Vladyslav Haliara">
+    <changeSet id="create-chat-feedback" author="Vladyslav Haliara">
         <createTable tableName="chat_feedback">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -14,6 +14,8 @@
             </column>
             <column name="rating" type="int">
                 <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="varchar(255)">
             </column>
         </createTable>
     </changeSet>

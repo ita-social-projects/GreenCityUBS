@@ -3,6 +3,7 @@ package greencity.ubstelegrambot.service;
 import greencity.entity.telegram.NotificationTimestamp;
 import greencity.entity.telegram.PendingMessage;
 import greencity.entity.telegram.TelegramManager;
+import greencity.repository.AuthorizedUserRepository;
 import greencity.repository.NotificationTimestampRepository;
 import greencity.repository.PendingMessageRepository;
 import greencity.repository.TelegramManagerRepository;
@@ -25,6 +26,7 @@ import java.util.Optional;
 public class TelegramManagerNotificationServiceImpl implements TelegramManagerNotificationService {
     private final ApplicationContext applicationContext;
     private final TelegramExecutor telegramExecutor;
+    private final AuthorizedUserRepository authorizedUserRepository;
     private final TelegramManagerRepository telegramManagerRepository;
     private final NotificationTimestampRepository notificationTimestampRepository;
     private final PendingMessageRepository pendingMessageRepository;

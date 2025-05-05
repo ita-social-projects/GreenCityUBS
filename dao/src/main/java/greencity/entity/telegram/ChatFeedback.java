@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ChatFeedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,8 +23,11 @@ public class ChatFeedback {
 
     private int rating;
 
-    public ChatFeedback(String chatId, int score) {
+    private String comment;
+
+    public ChatFeedback(String chatId, int score, String comment) {
         this.chatId = chatId;
         this.rating = score;
+        this.comment = comment;
     }
 }

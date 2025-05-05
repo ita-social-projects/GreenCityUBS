@@ -275,5 +275,5 @@
     <include file="db/changelog/logs/ch-add-table-telegram-manager-Haliara.xml"/>
     <include file="db/changelog/logs/ch-add-table-telegram-text-message-Haliara.xml"/>
     <include file="db/changelog/logs/ch-create-table-unknown-telegram-user-Haliara.xml"/>
-    <include file="db/changelog/logs/ch-add-table-chat-feedback-Haliara.xml"/>
+    <include file="/db/changelog/logs/ch-add-table-chat-feedback-Haliara.xml"/>
 </databaseChangeLog>

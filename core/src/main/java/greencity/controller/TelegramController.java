@@ -4,6 +4,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
+import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.TelegramImageDto;
 import greencity.dto.telegram.TelegramTextMessageDto;
 import greencity.dto.telegram.UnknownTelegramUserDto;
@@ -110,7 +111,7 @@ public class TelegramController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGETMENT', authentication)")
     @PostMapping("/send-message/{chatId}")
     public ResponseEntity<String> sendMessage(@PathVariable(name = "chatId") String chatId,
         @RequestParam String message) {
@@ -179,7 +180,7 @@ public class TelegramController {
      * @param employeeUUID the UUID of the user to communicate with
      * @return a link to communicate with the user
      */
-    @Operation(summary = "Upload photo to user chat")
+    @Operation(summary = "Generate manager authorization link")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
@@ -209,5 +210,29 @@ public class TelegramController {
         emitter.onTimeout(() -> telegramStrimingService.removeEmitter(emitter));
 
         return emitter;
+    }
+    /**
+     * Retrieves a list of {@link FeedbackDto} for all users.
+     *
+     * @param pageable the page to retrieve
+     *
+     * @return a list of {@link FeedbackDto} associated with the specified pageable
+     */
+    @Operation(summary = "Get all feedbacks")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    @GetMapping(value = "/feedbacks", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacks(Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllFeedbacks(pageable));
+    }
+
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    @GetMapping(value = "/feedbacks/{chatId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacksByChatId(@PathVariable(name = "chatId") String chatId, Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAlFeedbacksByChatId(chatId, pageable));
     }
 }

@@ -31,7 +31,6 @@ public class TelegramAuthorizationServiceImpl implements TelegramAuthorizationSe
     private final UnknownTelegramUserRepository unknownTelegramUserRepository;
     private final AuthorizedUserRepository telegramBotRepository;
     private static final String POSITION_NOT_FOUND = "Position with id %s not found";
-    private static final String USER_NOT_FOUND = "User with uuid %s not found";
 
     @Override
     public TelegramUser handleAuthorizedUser(String uuId, String tgUserId) {

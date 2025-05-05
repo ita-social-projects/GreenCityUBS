@@ -4,6 +4,7 @@ import greencity.constant.TelegramBotConstants;
 import greencity.ubstelegrambot.keyboards.KeyboardFactory;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -20,6 +21,16 @@ public class MessageFactory {
      */
     public static SendMessage createWelcomeMessage(String chatId) {
         return buildMessage(chatId, TelegramBotConstants.GREETING_MESSAGE);
+    }
+
+    public static SendMessage createAvailableCommandOption(String chatId) {
+        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SUPPORTED_COMMANDS,
+            KeyboardFactory.createHelpKeyboard());
+    }
+
+    public static SendMessage createSortingMessage(String chatId) {
+        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SORTING_MESSAGE,
+            KeyboardFactory.createProcessOrBackToMainMenuKeyboard(TelegramBotConstants.SORTING_PROCESS_CALLBACK));
     }
 
     /**
@@ -236,5 +247,108 @@ public class MessageFactory {
             .text(TelegramBotConstants.CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY)
             .replyMarkup(KeyboardFactory.userSupportKeyboard())
             .build();
+    }
+
+    /**
+     * Method for creating work schedule message.
+     *
+     * @param chatId {@link String} is telegram chat id.
+     * @return {@link SendMessage} configured with the work schedule message.
+     */
+    public static SendMessage createWorkScheduleMessage(String chatId) {
+        var message = buildReplyMarkUpMessage(chatId, TelegramBotConstants.WORK_SCHEDULE_MESSAGE,
+            KeyboardFactory.createBackToMainManuButton());
+        message.setParseMode(ParseMode.HTML);
+        return message;
+    }
+
+    /**
+     * Method for creating sorting prices message.
+     *
+     * @param chatId {@link String} is telegram chat id.
+     * @return {@link SendMessage} configured with the sorting prices message.
+     */
+    public static SendMessage createSortingPricesMessage(String chatId) {
+        var message = buildReplyMarkUpMessage(chatId, TelegramBotConstants.SORTING_RULES_PRICING_MESSAGE,
+            KeyboardFactory.createProcessOrBackToMainMenuKeyboard(TelegramBotConstants.SORTING_PRICES_CALLBACK));
+        message.setParseMode(ParseMode.HTML);
+        return message;
+    }
+
+    /**
+     * Method for creating admission rules message.
+     *
+     * @param chatId {@link String} is telegram chat id.
+     * @return {@link SendMessage} configured with the admission rules message.
+     */
+    public static SendMessage createAdmissionRulesMessage(String chatId) {
+        var message = buildReplyMarkUpMessage(chatId, TelegramBotConstants.ADMISSION_RULES_TEXT,
+            KeyboardFactory.createBackToMainManuButton());
+        message.setParseMode(ParseMode.HTML);
+        return message;
+    }
+
+    /**
+     * Method for creating green office message.
+     *
+     * @param chatId {@link String} is telegram chat id.
+     * @return {@link SendMessage} configured with the green office message.
+     */
+    public static SendMessage createGreenOfficeMessage(String chatId) {
+        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.GREEN_OFFICE_TEXT,
+            KeyboardFactory.createProcessOrBackToMainMenuKeyboard(TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK));
+    }
+
+    /**
+     * Method for creating entering email message.
+     *
+     * @param chatId {@link String} is telegram chat id.
+     * @return {@link SendMessage} configured with the entering email message.
+     */
+    public static SendMessage createEnteringEmailMessage(String chatId) {
+        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.ENTERING_EMAIL_MESSAGE,
+            KeyboardFactory.createBackToMainManuButton());
+    }
+
+    /**
+     * Method for creating invalid email message.
+     *
+     * @param chatId {@link String} is telegram chat id.
+     * @return {@link SendMessage} configured with the invalid email message.
+     */
+    public static SendMessage createInvalidEmailMessage(String chatId) {
+        return buildMessage(chatId, TelegramBotConstants.INVALID_EMAIL_MESSAGE);
+    }
+
+    /**
+     * Method for creating green office thanks message.
+     *
+     * @param chatId {@link String} is telegram chat id.
+     * @return {@link SendMessage} configured with the green office thanks message.
+     */
+    public static SendMessage createGreenOfficeThanksMessage(String chatId) {
+        return buildMessage(chatId, TelegramBotConstants.GREEN_OFFICE_THANK_YOU_MESSAGE);
+    }
+
+    /**
+     * Method for creating feedback message.
+     *
+     * @param chatId {@link String} is telegram chat id.
+     *
+     * @return {@link SendMessage} configured with the feedback message.
+     */
+    public static SendMessage createFeedbackMessage(String chatId) {
+        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.FEEDBACK_MESSAGE, KeyboardFactory.createFeedbackOrBackToMainMenuKeyboard());
+    }
+
+    public static SendMessage createEnteringFeedbackMessage(String chatId, String feedback){
+        if (feedback != null && !feedback.isEmpty() && feedback.equals(TelegramBotConstants.GREAT_FEEDBACK_CALLBACK)) {
+            return buildMessage(chatId,TelegramBotConstants.GREAT_FEEDBACK_MESSAGE);
+        } else {
+            return buildMessage(chatId,TelegramBotConstants.BAD_FEEDBACK_MESSAGE);
+        }
+    }
+    public static SendMessage createFeedbackThanksMessage(String chatId){
+        return buildMessage(chatId,TelegramBotConstants.FEEDBACK_THANK_YOU_MESSAGE);
     }
 }

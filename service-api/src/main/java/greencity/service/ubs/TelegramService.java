@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
+import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.TelegramImageDto;
 import greencity.dto.telegram.TelegramTextMessageDto;
 import greencity.dto.telegram.UnknownTelegramUserDto;
@@ -35,16 +36,8 @@ public interface TelegramService {
      *
      * @param message {@link Message}
      *
-     * @return {@link SendMessage}
      */
-    /**
-     * Method processes start command.
-     *
-     * @param message {@link Message}
-     *
-     * @return {@link SendMessage}
-     */
-    SendMessage processStartCommand(Message message);
+    void processStartCommand(Message message);
 
     /**
      * Method processes failed login attempt.
@@ -175,6 +168,10 @@ public interface TelegramService {
      * @return a list of TelegramUserPhotos associated with the specified chatId
      */
     PageableDto<TelegramImageDto> findUserPhotosByChatId(String chatId, Pageable page);
+
+    PageableDto<FeedbackDto> getAllFeedbacks(Pageable pageable);
+
+    PageableDto<FeedbackDto> getAlFeedbacksByChatId(String chatId, Pageable pageable);
 
     void processTextCommand(Update update);
 
