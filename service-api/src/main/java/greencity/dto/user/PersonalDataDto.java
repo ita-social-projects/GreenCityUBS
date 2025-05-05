@@ -44,12 +44,16 @@ public class PersonalDataDto implements Serializable {
     @ValidPhoneNumber
     private String phoneNumber;
 
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String senderFirstName;
 
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String senderLastName;
 
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String senderEmail;
 
+    @ValidPhoneNumber
     private String senderPhoneNumber;
 
     @Length(max = 255)
