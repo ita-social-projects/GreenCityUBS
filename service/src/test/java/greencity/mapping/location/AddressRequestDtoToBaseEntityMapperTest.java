@@ -27,7 +27,7 @@ class AddressRequestDtoToBaseEntityMapperTest {
     void cityMapperTest() {
         City result = mapper.convert(createdAddressRequestDto, City.class);
 
-        assertEquals(createdAddressRequestDto.getCity(), result.getNameUk());
+        assertEquals(createdAddressRequestDto.getCityUk(), result.getNameUk());
         assertEquals(createdAddressRequestDto.getCityEn(), result.getNameEn());
     }
 
@@ -35,7 +35,7 @@ class AddressRequestDtoToBaseEntityMapperTest {
     void regionMapperTest() {
         Region result = mapper.convert(createdAddressRequestDto, Region.class);
 
-        assertEquals(createdAddressRequestDto.getRegion(), result.getNameUk());
+        assertEquals(createdAddressRequestDto.getRegionUk(), result.getNameUk());
         assertEquals(createdAddressRequestDto.getRegionEn(), result.getNameEn());
     }
 
@@ -43,7 +43,7 @@ class AddressRequestDtoToBaseEntityMapperTest {
     void districtMapperTest() {
         District result = mapper.convert(createdAddressRequestDto, District.class);
 
-        assertEquals(createdAddressRequestDto.getDistrict(), result.getNameUk());
+        assertEquals(createdAddressRequestDto.getDistrictUk(), result.getNameUk());
         assertEquals(createdAddressRequestDto.getDistrictEn(), result.getNameEn());
     }
 

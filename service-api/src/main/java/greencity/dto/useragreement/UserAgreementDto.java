@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class UserAgreementDto {
     @NotEmpty
-    private String textUa;
+    private String textUk;
     @NotEmpty
     private String textEn;
 }
