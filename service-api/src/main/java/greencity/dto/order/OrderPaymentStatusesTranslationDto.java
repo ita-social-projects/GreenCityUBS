@@ -15,6 +15,6 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class OrderPaymentStatusesTranslationDto {
     private String key;
-    private String ua;
-    private String eng;
+    private String uk;
+    private String en;
 }

@@ -224,17 +224,17 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setPrice(convertBillsIntoCoins(dto.getPrice()));
         bag.setCommission(convertBillsIntoCoins(dto.getCommission()));
         bag.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
-        bag.setName(dto.getName());
-        bag.setNameEng(dto.getNameEng());
-        bag.setDescription(dto.getDescription());
-        bag.setDescriptionEng(dto.getDescriptionEng());
+        bag.setNameUk(dto.getNameUk());
+        bag.setNameEn(dto.getNameEn());
+        bag.setDescriptionUk(dto.getDescriptionUk());
+        bag.setDescriptionEn(dto.getDescriptionEn());
         bag.setEditedAt(LocalDate.now());
         bag.setEditedBy(tryToFindEmployeeByUuid(employeeUuid));
     }
 
     private void updateOrdersBags(Integer bagId, Bag bag) {
         orderBagRepository.updateAllByBagIdForUnpaidOrders(
-            bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
+            bagId, bag.getCapacity(), bag.getFullPrice(), bag.getNameUk(), bag.getNameEn());
     }
 
     private void updateAmountToPay(Integer bagId, Bag bag) {
@@ -324,10 +324,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Service service = tryToFindServiceById(id);
         Employee employee = tryToFindEmployeeByUuid(employeeUuid);
         service.setPrice(convertBillsIntoCoins(dto.getPrice()));
-        service.setName(dto.getName());
-        service.setNameEng(dto.getNameEng());
-        service.setDescription(dto.getDescription());
-        service.setDescriptionEng(dto.getDescriptionEng());
+        service.setNameUk(dto.getNameUk());
+        service.setNameEn(dto.getNameEn());
+        service.setDescriptionUk(dto.getDescriptionUk());
+        service.setDescriptionEn(dto.getDescriptionEn());
         service.setEditedAt(LocalDate.now());
         service.setEditedBy(employee);
         return modelMapper.map(serviceRepository.save(service), GetServiceDto.class);

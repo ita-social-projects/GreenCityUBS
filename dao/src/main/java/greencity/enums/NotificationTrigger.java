@@ -59,6 +59,6 @@ public enum NotificationTrigger {
                       "Створення нового замовлення",
                       "Create a new order");
 
-    private final String description;
-    private final String descriptionEng;
+    private final String descriptionUk;
+    private final String descriptionEn;
 }

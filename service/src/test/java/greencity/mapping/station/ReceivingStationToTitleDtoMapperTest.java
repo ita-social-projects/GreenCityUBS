@@ -22,6 +22,6 @@ class ReceivingStationToTitleDtoMapperTest {
 
         assertEquals(expected.getEn(), mapper.convert(receivingStationDto).getEn());
         assertEquals(expected.getKey(), mapper.convert(receivingStationDto).getKey());
-        assertEquals(expected.getUa(), mapper.convert(receivingStationDto).getUa());
+        assertEquals(expected.getUk(), mapper.convert(receivingStationDto).getUk());
     }
 }

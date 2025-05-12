@@ -25,10 +25,10 @@ class GetTariffServiceDtoMapperTest {
         Assertions.assertEquals(dto.getPrice(), convertDto.getPrice());
         Assertions.assertEquals(dto.getCommission(), convertDto.getCommission());
         Assertions.assertEquals(dto.getFullPrice(), convertDto.getFullPrice());
-        Assertions.assertEquals(dto.getName(), convertDto.getName());
-        Assertions.assertEquals(dto.getDescription(), convertDto.getDescription());
-        Assertions.assertEquals(dto.getNameEng(), convertDto.getNameEng());
-        Assertions.assertEquals(dto.getDescriptionEng(), convertDto.getDescriptionEng());
+        Assertions.assertEquals(dto.getNameUk(), convertDto.getNameUk());
+        Assertions.assertEquals(dto.getDescriptionUk(), convertDto.getDescriptionUk());
+        Assertions.assertEquals(dto.getNameEn(), convertDto.getNameEn());
+        Assertions.assertEquals(dto.getDescriptionEn(), convertDto.getDescriptionEn());
         Assertions.assertEquals(dto.getLimitIncluded(), convertDto.getLimitIncluded());
     }
 }

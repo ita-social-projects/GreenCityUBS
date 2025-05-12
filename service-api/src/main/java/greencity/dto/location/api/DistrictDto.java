@@ -11,6 +11,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DistrictDto implements Serializable {
-    private String nameUa;
+    private String nameUk;
     private String nameEn;
 }

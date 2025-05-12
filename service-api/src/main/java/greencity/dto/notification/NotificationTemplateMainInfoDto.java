@@ -23,26 +23,26 @@ public class NotificationTemplateMainInfoDto {
     @NotNull
     private NotificationTrigger trigger;
     @NotNull
-    private String triggerDescription;
+    private String triggerDescriptionUk;
     @NotNull
-    private String triggerDescriptionEng;
+    private String triggerDescriptionEn;
     @NotNull
     private NotificationTime time;
     @NotNull
-    private String timeDescription;
+    private String timeDescriptionUk;
     @NotNull
-    private String timeDescriptionEng;
+    private String timeDescriptionEn;
     private String schedule;
     @NotNull
-    private String title;
+    private String titleUk;
     @NotNull
-    private String titleEng;
+    private String titleEn;
     @NotNull
     private NotificationStatus notificationStatus;
     @NotNull
-    private String userCategoryDescription;
+    private String userCategoryDescriptionUk;
     @NotNull
-    private String userCategoryDescriptionEng;
+    private String userCategoryDescriptionEn;
     @NotNull
     private boolean scheduleUpdateForbidden;
 }

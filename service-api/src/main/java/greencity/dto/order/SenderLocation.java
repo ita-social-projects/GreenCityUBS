@@ -8,6 +8,6 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SenderLocation {
-    String ua;
+    String uk;
     String en;
 }

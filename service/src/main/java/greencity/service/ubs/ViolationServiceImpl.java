@@ -44,6 +44,7 @@ import static greencity.constant.ErrorMessage.ORDER_ALREADY_HAS_VIOLATION;
 import static greencity.constant.ErrorMessage.ORDER_HAS_NOT_VIOLATION;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.VIOLATION_DOES_NOT_EXIST;
 
 @Service
@@ -113,7 +114,7 @@ public class ViolationServiceImpl implements ViolationService {
             violationRepository.save(violation);
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
-            eventService.saveEvent(OrderHistory.ADD_VIOLATION, email, order);
+            eventService.saveEvent(OrderHistory.ADD_VIOLATION_UK, email, order);
             notificationService.notifyAddViolation(order.getId());
         } else {
             throw new NotFoundException(ORDER_ALREADY_HAS_VIOLATION);
@@ -178,11 +179,28 @@ public class ViolationServiceImpl implements ViolationService {
             .build());
     }
 
+    /**
+     * Deletes an active violation associated with the specified order.
+     * <p>
+     * This method retrieves the employee corresponding to the provided uuid and
+     * locates the active violation for the given order id. If found, it marks the
+     * violation as deleted by updating its status and deletion timestamp, notifies
+     * relevant systems, refreshes the user's violation count, and logs the deletion
+     * event. If either the employee or the active violation is not found, the
+     * method throws an appropriate exception.
+     * </p>
+     *
+     * @param id   the order id whose active violation is to be deleted
+     * @param uuid the unique identifier of the employee performing the deletion
+     * @throws UserNotFoundException if no employee is found with the provided uuid
+     * @throws NotFoundException     if no active violation exists for the given
+     *                               order id
+     */
     @Override
     @Transactional
     public void deleteViolation(Long id, String uuid) {
         Employee currentUser = employeeRepository.findByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
 
         Optional<Violation> violationOptional = violationRepository.findActiveViolationByOrderId(id);
         if (violationOptional.isPresent()) {
@@ -194,7 +212,7 @@ public class ViolationServiceImpl implements ViolationService {
             User user = violationOptional.get().getOrder().getUser();
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
-            eventService.save(OrderHistory.DELETE_VIOLATION, currentUser.getEmail(),
+            eventService.save(OrderHistory.DELETE_VIOLATION_UK, currentUser.getEmail(),
                 violationOptional.get().getOrder());
         } else {
             throw new NotFoundException(VIOLATION_DOES_NOT_EXIST);
@@ -209,7 +227,7 @@ public class ViolationServiceImpl implements ViolationService {
             .orElseThrow(() -> new NotFoundException(ORDER_HAS_NOT_VIOLATION));
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
-        eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getEmail(), violation.getOrder());
+        eventService.saveEvent(OrderHistory.CHANGES_VIOLATION_UK, currentUser.getEmail(), violation.getOrder());
         notificationService.notifyChangedViolation(violation, add.getOrderID());
     }
 

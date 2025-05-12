@@ -15,7 +15,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class OrderStatusesTranslationDto {
     private String key;
-    private String ua;
-    private String eng;
+    private String uk;
+    private String en;
     private Boolean ableActualChange;
 }

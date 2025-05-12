@@ -75,11 +75,11 @@ public class NotificationTemplate {
     @Enumerated(EnumType.STRING)
     private NotificationStatus notificationStatus;
 
-    @Column(name = "title")
-    private String title;
+    @Column(name = "title_uk")
+    private String titleUk;
 
-    @Column(name = "title_eng")
-    private String titleEng;
+    @Column(name = "title_en")
+    private String titleEn;
 
     @Builder.Default
     @Column(name = "is_schedule_update_forbidden", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")

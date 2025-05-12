@@ -15,10 +15,10 @@ import java.io.Serializable;
 @ToString
 @Builder
 public class OrderAddressDtoResponse implements Serializable {
-    private String district;
-    private String districtEng;
-    private String street;
-    private String streetEng;
+    private String districtUk;
+    private String districtEn;
+    private String streetUk;
+    private String streetEn;
     private String houseCorpus;
     private String entranceNumber;
     private String houseNumber;
