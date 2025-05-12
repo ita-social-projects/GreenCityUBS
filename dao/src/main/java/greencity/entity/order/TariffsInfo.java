@@ -47,19 +47,19 @@ public class TariffsInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(mappedBy = "tariffsInfo")
+    @OneToOne(mappedBy = "tariffsInfo", cascade = CascadeType.REMOVE)
     private Service service;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Bag> bags;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.REFRESH)
     @JoinTable(name = "tariffs_info_receiving_stations_mapping",
         joinColumns = @JoinColumn(name = "tariffs_info_id"),
         inverseJoinColumns = @JoinColumn(name = "receiving_station_id"))
     private Set<ReceivingStation> receivingStationList;
 
-    @OneToMany(mappedBy = "tariffsInfo")
+    @OneToMany(mappedBy = "tariffsInfo", cascade = CascadeType.ALL)
     private List<TariffsInfoRecievingEmployee> employeeAssoc;
 
     @Column
