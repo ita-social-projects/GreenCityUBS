@@ -66,6 +66,11 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
+            public void sendGreenOfficeRequestNotification(ScheduledEmailMessage notification) {
+                log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
+            }
+
+            @Override
             public String findUserLanguageByUuid(String uuid) {
                 log.error(ErrorMessage.COULD_NOT_RETRIEVE_USER_LANGUAGE, throwable);
                 return "en";
