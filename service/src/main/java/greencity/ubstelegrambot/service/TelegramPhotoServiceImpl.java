@@ -24,7 +24,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -57,19 +57,27 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
     @Override
     public List<String> savePhotoToAzureBlob(List<String> photoUrls) {
         List<String> savedPhotoUrls = new ArrayList<>();
-        for (String url : photoUrls) {
-            try (InputStream inputStream = new URL(url).openStream()) {
-                byte[] content = inputStream.readAllBytes();
+        for (String urlString : photoUrls) {
+            try {
+                URI uri = URI.create(urlString);
+                try (InputStream inputStream = uri.toURL().openStream()) {
+                    byte[] content = inputStream.readAllBytes();
 
-                MultipartFile file = BASE64DecodedMultipartFile.builder().name(getFileNameFromUrl(url))
-                    .content(content).contentType(IMAGE_CONTENT_TYPE).build();
-                savedPhotoUrls.add(azureCloudStorageService.upload(file));
-            } catch (IOException e) {
+                    MultipartFile file = BASE64DecodedMultipartFile.builder()
+                            .name(getFileNameFromUrl(urlString))
+                            .content(content)
+                            .contentType(IMAGE_CONTENT_TYPE)
+                            .build();
+
+                    savedPhotoUrls.add(azureCloudStorageService.upload(file));
+                }
+            } catch (IOException | IllegalArgumentException e) {
                 throw new FileNotSavedException(FAILED_TO_SAVE_PHOTO_TO_AZURE);
             }
         }
         return savedPhotoUrls;
     }
+
 
     @Override
     public String savePhotoToAzureBlob(MultipartFile file) {

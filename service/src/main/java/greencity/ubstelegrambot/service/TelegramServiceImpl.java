@@ -77,6 +77,9 @@ public class TelegramServiceImpl implements TelegramService {
     private Integer messageIdForDeleting;
     @Value("${greencity.sing-in.secret-token}")
     private String secretToken;
+    private static final String USERNAME = "username";
+    private static final String ENTERING_FEEDBACK_COMMENT = "entering_feedback_comment";
+    private static final String ENTERING_EMAIL = "entering_email";
 
     @Override
     public SendMessage processLoginCommand(Message message) {
@@ -86,7 +89,7 @@ public class TelegramServiceImpl implements TelegramService {
         managerMode(message.getChatId().toString());
         var response = userRemoteClient.signIn(new TestersSignInRequest(login, password, secretToken));
         var responseBody = response.getBody();
-        String username = (responseBody != null && responseBody.name() != null) ? responseBody.name() : "username";
+        String username = (responseBody != null && responseBody.name() != null) ? responseBody.name() : USERNAME;
 
         return MessageFactory.createSuccessLoginMessage(
             message.getChatId().toString(),
@@ -148,20 +151,18 @@ public class TelegramServiceImpl implements TelegramService {
             message,
             isManager);
         telegramMessageRepository.save(telegramMessage);
-        // TODO: discover if this is needed
-        // streamMessages(chatId, modelMapper.map(telegramMessage,
-        // TelegramTextMessageDto.class));
     }
 
     @Override
     public boolean isUserInSupportMode(String chatId) {
-        if (authorizedUserRepository.findByChatId(chatId).isPresent()) {
-            return authorizedUserRepository.findByChatId(chatId).get().getIsSupportStatusActive();
-        } else if (unknownTelegramUserRepository.findByChatId(chatId).isPresent()) {
-            return unknownTelegramUserRepository.findByChatId(chatId).get().getIsSupportStatusActive();
-        }
-        return false;
+        return authorizedUserRepository.findByChatId(chatId)
+                .map(AuthorizedUser::getIsSupportStatusActive)
+                .orElseGet(() -> unknownTelegramUserRepository.findByChatId(chatId)
+                        .map(UnknownTelegramUser::getIsSupportStatusActive)
+                        .orElse(false));
     }
+
+
 
     @Override
     public void startSupportMode(String chatId) {
@@ -204,8 +205,6 @@ public class TelegramServiceImpl implements TelegramService {
     public boolean isManager(String chatId) {
         return telegramMessageRepository.existsByChatId(chatId);
     }
-
-    // TODO: think about adding employee, how to implement this logic
     @Override
     public void managerMode(String chatId) {
         telegramManagerRepository.save(new TelegramManager(
@@ -337,8 +336,20 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     public SendMessage handleUserChatScope(String data, String chatId, Integer messageId) {
         int score = Integer.parseInt(data.replace(String.format(TelegramBotConstants.SCORE, ""), ""));
-        chatFeedbackRepository.save(new ChatFeedback(chatId, score,""));
-        return MessageFactory.createMessageAfterUserFeedback(chatId);
+        if (userState.get(chatId).equals("entering_feedback")) {
+            chatFeedbackRepository.save(new ChatFeedback(chatId, score,null));
+            userState.put(chatId, ENTERING_FEEDBACK_COMMENT);
+            if (score >= 4){
+                return MessageFactory.createEnteringFeedbackMessage(chatId,
+                        TelegramBotConstants.GREAT_FEEDBACK_CALLBACK);
+            } else {
+                return MessageFactory.createEnteringFeedbackMessage(chatId,
+                        TelegramBotConstants.BAD_FEEDBACK_CALLBACK);
+            }
+        } else {
+            chatFeedbackRepository.save(new ChatFeedback(chatId, score,""));
+            return MessageFactory.createMessageAfterUserFeedback(chatId);
+        }
     }
 
     @Override
@@ -408,83 +419,85 @@ public class TelegramServiceImpl implements TelegramService {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
         var callBackQuery = update.getCallbackQuery();
         var chatId = callBackQuery.getFrom().getId().toString();
-        if (callBackQuery.getData().equals(TelegramBotConstants.CLIENT_SUPPORT_CALLBACK)) {
-            executor.executeCommand(ubsTelegramBot,
-                processSupportCallbackData(callBackQuery.getFrom().getId().toString()));
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.LOGIN_CALLBACK)) {
-            executor.executeCommand(ubsTelegramBot, MessageFactory.createLoginMessage(
-                callBackQuery.getFrom().getId().toString()));
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.MAIN_MENU_CALLBACK)) {
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createAvailableCommandOption(callBackQuery.getFrom().getId().toString()));
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.WORK_SCHEDULE_CALLBACK)) {
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createWorkScheduleMessage(callBackQuery.getFrom().getId().toString()));
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.SORTING_CALLBACK)) {
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createSortingMessage(callBackQuery.getFrom().getId().toString()));
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.SORTING_PROCESS_CALLBACK)) {
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createSortingPricesMessage(callBackQuery.getFrom().getId().toString()));
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.ADMISSION_RULES_CALLBACK)) {
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createAdmissionRulesMessage(callBackQuery.getFrom().getId().toString()));
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.GREEN_OFFICE_CALLBACK)) {
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createGreenOfficeMessage(callBackQuery.getFrom().getId().toString()));
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK)) {
-            userState.put(chatId, "entering_email");
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createEnteringEmailMessage(callBackQuery.getFrom().getId().toString()));
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.FEEDBACK_CALLBACK)) {
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createFeedbackMessage(callBackQuery.getFrom().getId().toString()));
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.GREAT_FEEDBACK_CALLBACK)){
-            ChatFeedback chatFeedback = ChatFeedback.builder().chatId(chatId).rating(5).build();
-            chatFeedbackRepository.save(chatFeedback);
-            userState.put(chatId, "entering_feedback_comment");
-            telegramExecutor.executeCommand(ubsTelegramBot,MessageFactory.createEnteringFeedbackMessage(callBackQuery.getFrom().getId().toString(),
-                    TelegramBotConstants.GREAT_FEEDBACK_CALLBACK));
+        String userId = callBackQuery.getFrom().getId().toString();
 
-        }
-        if (callBackQuery.getData().equals(TelegramBotConstants.BAD_FEEDBACK_CALLBACK)){
-            ChatFeedback chatFeedback = ChatFeedback.builder().chatId(chatId).rating(1).build();
-            chatFeedbackRepository.save(chatFeedback);
-            userState.put(chatId, "entering_feedback_comment");
-            telegramExecutor.executeCommand(ubsTelegramBot,MessageFactory.createEnteringFeedbackMessage(callBackQuery.getFrom().getId().toString(),
-                    TelegramBotConstants.BAD_FEEDBACK_CALLBACK));
-        }
-        if (callBackQuery.getData().startsWith(String.format(TelegramBotConstants.SCORE, ""))) {
-            executor.executeCommand(ubsTelegramBot, handleUserChatScope(callBackQuery.getData(),
-                callBackQuery.getFrom().getId().toString(), messageIdForDeleting));
-            Message message = (Message) update.getCallbackQuery().getMessage();
-            InlineKeyboardMarkup inlineKeyboardMarkup = message.getReplyMarkup();
+        switch (callBackQuery.getData()) {
+            case TelegramBotConstants.CLIENT_SUPPORT_CALLBACK ->
+                    executor.executeCommand(ubsTelegramBot, processSupportCallbackData(userId));
 
-            List<List<InlineKeyboardButton>> keyboard = inlineKeyboardMarkup.getKeyboard();
+            case TelegramBotConstants.LOGIN_CALLBACK ->
+                    executor.executeCommand(ubsTelegramBot, MessageFactory.createLoginMessage(userId));
 
-            for (List<InlineKeyboardButton> row : keyboard) {
-                for (InlineKeyboardButton button : row) {
-                    button.setCallbackData("disabled");
-                }
+            case TelegramBotConstants.MAIN_MENU_CALLBACK ->
+                    executor.executeCommand(ubsTelegramBot, MessageFactory.createAvailableCommandOption(userId));
+
+            case TelegramBotConstants.WORK_SCHEDULE_CALLBACK ->
+                    executor.executeCommand(ubsTelegramBot, MessageFactory.createWorkScheduleMessage(userId));
+
+            case TelegramBotConstants.SORTING_CALLBACK ->
+                    executor.executeCommand(ubsTelegramBot, MessageFactory.createSortingMessage(userId));
+
+            case TelegramBotConstants.SORTING_PROCESS_CALLBACK ->
+                    executor.executeCommand(ubsTelegramBot, MessageFactory.createSortingPricesMessage(userId));
+
+            case TelegramBotConstants.ADMISSION_RULES_CALLBACK ->
+                    executor.executeCommand(ubsTelegramBot, MessageFactory.createAdmissionRulesMessage(userId));
+
+            case TelegramBotConstants.GREEN_OFFICE_CALLBACK ->
+                    executor.executeCommand(ubsTelegramBot, MessageFactory.createGreenOfficeMessage(userId));
+
+            case TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK -> {
+                userState.put(chatId, ENTERING_EMAIL);
+                executor.executeCommand(ubsTelegramBot, MessageFactory.createEnteringEmailMessage(userId));
             }
 
-            inlineKeyboardMarkup.setKeyboard(keyboard);
-            EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup();
-            editMessageReplyMarkup.setChatId(callBackQuery.getMessage().getChatId().toString());
-            editMessageReplyMarkup.setMessageId(message.getMessageId());
-            editMessageReplyMarkup.setReplyMarkup(inlineKeyboardMarkup);
+            case TelegramBotConstants.FEEDBACK_CALLBACK -> {
+                userState.put(chatId, "entering_feedback");
+                executor.executeCommand(ubsTelegramBot, MessageFactory.createFeedbackMessage(userId));
+            }
 
-            executor.executeCommand(ubsTelegramBot, editMessageReplyMarkup);
+            case TelegramBotConstants.GREAT_FEEDBACK_CALLBACK -> {
+                ChatFeedback chatFeedback = ChatFeedback.builder().chatId(chatId).rating(5).build();
+                chatFeedbackRepository.save(chatFeedback);
+                userState.put(chatId, ENTERING_FEEDBACK_COMMENT);
+                telegramExecutor.executeCommand(ubsTelegramBot,
+                        MessageFactory.createEnteringFeedbackMessage(userId, TelegramBotConstants.GREAT_FEEDBACK_CALLBACK));
+            }
+
+            case TelegramBotConstants.BAD_FEEDBACK_CALLBACK -> {
+                ChatFeedback chatFeedback = ChatFeedback.builder().chatId(chatId).rating(1).build();
+                chatFeedbackRepository.save(chatFeedback);
+                userState.put(chatId, ENTERING_FEEDBACK_COMMENT);
+                telegramExecutor.executeCommand(ubsTelegramBot,
+                        MessageFactory.createEnteringFeedbackMessage(userId, TelegramBotConstants.BAD_FEEDBACK_CALLBACK));
+            }
+
+            default -> {
+                if (callBackQuery.getData().startsWith(String.format(TelegramBotConstants.SCORE, ""))) {
+                    executor.executeCommand(ubsTelegramBot, handleUserChatScope(callBackQuery.getData(), userId, messageIdForDeleting));
+
+                    Message message = (Message) update.getCallbackQuery().getMessage();
+                    InlineKeyboardMarkup inlineKeyboardMarkup = message.getReplyMarkup();
+
+                    List<List<InlineKeyboardButton>> keyboard = inlineKeyboardMarkup.getKeyboard();
+                    for (List<InlineKeyboardButton> row : keyboard) {
+                        for (InlineKeyboardButton button : row) {
+                            if (!TelegramBotConstants.MAIN_MENU_CALLBACK.equals(button.getCallbackData())) {
+                                button.setCallbackData("disabled");
+                            }
+                        }
+                    }
+
+                    inlineKeyboardMarkup.setKeyboard(keyboard);
+
+                    EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup();
+                    editMessageReplyMarkup.setChatId(callBackQuery.getMessage().getChatId().toString());
+                    editMessageReplyMarkup.setMessageId(message.getMessageId());
+                    editMessageReplyMarkup.setReplyMarkup(inlineKeyboardMarkup);
+
+                    executor.executeCommand(ubsTelegramBot, editMessageReplyMarkup);
+                }
+            }
         }
     }
 
@@ -497,13 +510,12 @@ public class TelegramServiceImpl implements TelegramService {
         var ubsBot = applicationContext.getBean(UBSTelegramBot.class);
         var currentState = userState.get(message.getChatId().toString());
 
-        if ("entering_email".equals(currentState)) {
+        if (ENTERING_EMAIL.equals(currentState)) {
             var email = message.getText();
             if (isValidEmail(email)) {
-                //todo bring to notification service
                 var notification = ScheduledEmailMessage
                     .builder()
-                    .username("username")
+                    .username(USERNAME)
                     .email("vlad.galyara@gmail.com")
                     .subject("Цікавить Зелений офіс")
                     .body("client email " + email)
@@ -518,10 +530,10 @@ public class TelegramServiceImpl implements TelegramService {
                 telegramExecutor.executeCommand(ubsBot,
                     MessageFactory.createInvalidEmailMessage(message.getChatId().toString()));
             }
-        } else if ("entering_feedback_comment".equals(currentState)) {
+        } else if (ENTERING_FEEDBACK_COMMENT.equals(currentState)) {
             var chatFeedback = chatFeedbackRepository.findByChatId(message.getChatId().toString());
-            chatFeedback.ifPresent(feedback -> feedback.setComment(message.getText()));
-            chatFeedbackRepository.save(chatFeedback.get());
+            chatFeedback.ifPresent(feedback ->
+                chatFeedbackRepository.save(feedback.setComment(message.getText())));
             userState.remove(message.getChatId().toString());
             telegramExecutor.executeCommand(ubsBot, MessageFactory.createFeedbackThanksMessage(message.getChatId().toString()));
         }

@@ -126,6 +126,7 @@ public class TelegramBotConstants {
             Дуже рада це чути! ❤️
             
             Ваші відгуки допомагають нам розвиватися! Будемо й надалі вдосконалювати нашу роботу 💪
+            Залиште, будь ляска, кілька слів, що саме вам вподобалося в нашому сервісі 👇
             """;
     public static final String BAD_FEEDBACK_MESSAGE =
             """
@@ -137,11 +138,10 @@ public class TelegramBotConstants {
             """
             Щиро дякую за ваш відгук! 🙏
             
-            Передаю його нашій менеджерці в роботу. Все виправимо! 👩‍💼
+            Передаю його нашій менеджерці в роботу. Все виправимо! 👩\u200D💼
             """;
-    public static final String INVALID_COMMAND_FORMAT = "Команда має бути у форматі: /login:логін:пароль";
-    public static final String BAD_REQUEST_DEFAULT_MESSAGE = "Запит відхилено. Перевірте ваші дані.";
-    public static final String REMOTE_SERVER_UNAVAILABLE = "Сервер недоступний. Спробуйте пізніше.";
+
+    public static final String BACK_TO_MAIN_MENU = "⏪\uFE0F В головне меню";
     public static final String NEW_SUPPORT_MESSAGE_NOTIFICATION = "%s нових повідомлень від клієнта %s";
     public static final String CLIENT_END_SUPPORT_MODE = "Закінчити розмову з менеджером";
     public static final String CLIENT_STOP_SUPPORT_MODE =
@@ -152,6 +152,7 @@ public class TelegramBotConstants {
     public static final String SCORE = "Score%s";
     public static final String CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY =
         """
-            Поставте, будь ласка, своє запитання — і я покличу когось із моїх колег-людей ✍️👇\nЯкщо після спілкування з людиною ви захочете повернутися до моїх функцій, просто відправте в чат слово БОТ або одну з команд — /options, /courier чи /post 🤖
-            """;
+            Поставте, будь ласка, своє запитання — і я покличу когось із моїх колег-людей ✍️👇
+            Якщо після спілкування з людиною ви захочете повернутися до моїх функцій, просто відправте в чат слово БОТ або одну з команд — /options, /courier чи /post 🤖
+        """;
 }
